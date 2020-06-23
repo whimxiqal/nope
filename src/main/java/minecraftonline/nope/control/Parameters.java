@@ -61,26 +61,29 @@ public final class Parameters {
           ENABLE_PLUGIN,
           DEOP_ON_ENTER,
           LEAF_DECAY
-          // TODO: add the rest
+          // TODO: add more
       );
     }
   };
 
-  public static final Parameter<Boolean> ENABLE_PLUGIN = Parameter.of("general.enable", true, Boolean.class)
-      .withDescription("Set to false will disable all plugin functionality");
+  public static final Parameter<Boolean> ENABLE_PLUGIN = Parameter.of("enable-plugin", true, Boolean.class)
+      .withDescription("Set to false will disable all plugin functionality")
+      .withConfigurationPath("general.enable-plugin");
 
-  public static final Parameter<Boolean> DEOP_ON_ENTER = Parameter.of("security.deop-on-enter", false, Boolean.class)
+  public static final Parameter<Boolean> DEOP_ON_ENTER = Parameter.of("deop-on-enter", false, Boolean.class)
       .withComment("Set to true will deop any player when they enter.")
       .withDescription("If this setting is applied globally, then anytime and op-ed player joins the server, their op status is removed. "
           + "If this setting is applied to just a world, then only when they join that specific world do they get de-opped.")
-      .withApplicability(Parameter.Applicability.GLOBAL, Parameter.Applicability.WORLD);
+      .withApplicability(Parameter.Applicability.GLOBAL, Parameter.Applicability.WORLD)
+      .withConfigurationPath("security.deop-on-enter");
 
-  public static final Parameter<Boolean> LEAF_DECAY = Parameter.of("dynamics.leaf-decay", true, Boolean.class)
+  public static final Parameter<Boolean> LEAF_DECAY = Parameter.of("leaf-decay", true, Boolean.class)
       .withDescription("Set to false will disable all natural leaf decay")
       .withApplicability(Parameter.Applicability.GLOBAL,
           Parameter.Applicability.WORLD,
-          Parameter.Applicability.REGION);
+          Parameter.Applicability.REGION)
+      .withConfigurationPath("dynamics.leaf-decay");
 
-  // TODO: add the rest
+  // TODO: add more
 
 }

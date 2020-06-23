@@ -28,6 +28,7 @@ package minecraftonline.nope.control;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import minecraftonline.nope.Nope;
 import org.spongepowered.api.CatalogType;
 import org.spongepowered.api.util.annotation.CatalogedBy;
 
@@ -35,6 +36,7 @@ import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.Set;
+import java.util.regex.Pattern;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
@@ -47,7 +49,8 @@ public class Parameter<T extends Serializable> implements CatalogType, Serializa
     GLOBAL
   }
 
-  private final String path;
+  private final String id;
+  private String path;
   private T value;
   private final T defaultValue;
   private final Class<T> clazz;
@@ -55,13 +58,14 @@ public class Parameter<T extends Serializable> implements CatalogType, Serializa
   private String comment;
   private Set<Applicability> applicability = Sets.newEnumSet(Lists.newArrayList(), Applicability.class);
 
-  protected Parameter(@Nonnull String path,
+  protected Parameter(@Nonnull String id,
                       @Nonnull T defaultValue,
                       @Nonnull Class<T> clazz) {
-    Preconditions.checkNotNull(path);
+    Preconditions.checkNotNull(id);
+    checkValidId(id);
     Preconditions.checkNotNull(defaultValue);
     Preconditions.checkNotNull(clazz);
-    this.path = path;
+    this.id = id;
     this.value = defaultValue;
     this.defaultValue = defaultValue;
     this.clazz = clazz;
@@ -70,26 +74,17 @@ public class Parameter<T extends Serializable> implements CatalogType, Serializa
   /**
    * Factory generator instead of a class.
    *
-   * @param path         The String version of the configuration location for this Parameter
+   * @param id           The readable String id
    * @param defaultValue The default value
    * @param clazz        The class object representing the type of value this setting stores.
    *                     This is used so {@link com.google.common.reflect.TypeToken}s can be made
    * @param <S>          The type of value stored
    * @return The generated Parameter object
    */
-  public static <S extends Serializable> Parameter<S> of(@Nonnull String path,
+  public static <S extends Serializable> Parameter<S> of(@Nonnull String id,
                                                          @Nonnull S defaultValue,
                                                          @Nonnull Class<S> clazz) {
-    return new Parameter<>(path, defaultValue, clazz);
-  }
-
-  /**
-   * Generic getter.
-   *
-   * @return The path
-   */
-  public String getPath() {
-    return path;
+    return new Parameter<>(id, defaultValue, clazz);
   }
 
   /**
@@ -187,6 +182,20 @@ public class Parameter<T extends Serializable> implements CatalogType, Serializa
     return this;
   }
 
+  public boolean isConfigurable() {
+    return getConfigurationPath().isPresent();
+  }
+
+  public Optional<String> getConfigurationPath() {
+    return Optional.ofNullable(this.path);
+  }
+
+  public Parameter<T> withConfigurationPath(String path) {
+    checkValidPath(path);
+    this.path = path;
+    return this;
+  }
+
   /**
    * Generic getter.
    *
@@ -199,11 +208,26 @@ public class Parameter<T extends Serializable> implements CatalogType, Serializa
 
   @Override
   public String getId() {
-    return path;
+    return id;
   }
 
   @Override
   public String getName() {
-    return path;
+    return id;
   }
+
+  private void checkValidId(String id) {
+    Pattern pattern = Pattern.compile(".*[^a-z\\-].*");
+    if (pattern.matcher(id).find()) {
+      throw new RuntimeException("Invalid Parameter id: " + id + ". Valid ids only contain characters 'a-z' and '-'.");
+    }
+  }
+
+  private void checkValidPath(String path) {
+    Pattern pattern = Pattern.compile(".*[^a-z\\-\\.].*");
+    if (pattern.matcher(path).find()) {
+      throw new RuntimeException("Invalid configuration path for Parameter: " + path + ". Valid ids only contain characters 'a-z', '-', and '.'.");
+    }
+  }
+
 }
