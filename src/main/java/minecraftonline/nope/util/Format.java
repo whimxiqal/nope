@@ -23,52 +23,33 @@
  *
  */
 
-package minecraftonline.nope.control;
+package minecraftonline.nope.util;
 
-import com.google.common.base.Preconditions;
+import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.format.TextColor;
+import org.spongepowered.api.text.format.TextColors;
 
-import java.io.Serializable;
-import java.util.Map;
-import javax.annotation.Nonnull;
+public final class Format {
 
-public class Setting<T extends Serializable> implements Map.Entry<Parameter<T>, T> {
-
-  private Parameter<T> parameter;
-  private T value;
-
-  /**
-   * Generic constructor.
-   *
-   * @param parameter The parameter holding information about this setting
-   * @param value     The value set for this instance of Setting
-   */
-  public Setting(@Nonnull Parameter<T> parameter,
-                 @Nonnull T value) {
-    Preconditions.checkNotNull(parameter);
-    Preconditions.checkNotNull(value);
-    this.parameter = parameter;
-    this.value = value;
+  private Format() {
   }
 
-  @Override
-  public Parameter<T> getKey() {
-    return parameter;
+  public static final TextColor THEME = TextColors.GRAY;
+
+  public static Text prefix() {
+    return Text.of(THEME, "Nope ", TextColors.DARK_GRAY, "-=- ");
   }
 
-  @Override
-  public T getValue() {
-    return value;
+  public static Text error(Text message) {
+    return Text.of(prefix(), TextColors.RED, message);
   }
 
-  @Override
-  public T setValue(T value) {
-    T old = this.value;
-    this.value = value;
-    return old;
+  public static Text warn(Text message) {
+    return Text.of(prefix(), TextColors.YELLOW, message);
   }
 
-  public Class<T> getTypeClass() {
-    return parameter.getTypeClass();
+  public static Text info(Text message) {
+    return Text.of(prefix(), TextColors.WHITE, message);
   }
 
 }

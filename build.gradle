@@ -8,8 +8,14 @@ version = '0.0.0'
 sourceCompatibility = '1.8'
 targetCompatibility = '1.8'
 
+repositories {
+    maven { url "http://maven.sk89q.com/repo/" }
+}
+
 dependencies {
-    compileOnly 'org.spongepowered:spongeapi:7.2.0'
+    implementation 'org.spongepowered:spongeapi:7.2.0'
+    implementation 'com.sk89q.worldedit:worldedit-core:6.1.4-SNAPSHOT'
+    implementation 'com.sk89q.worldedit:worldedit-sponge:6.1.7-SNAPSHOT'
     annotationProcessor 'org.spongepowered:spongeapi:7.2.0'
 }
 
