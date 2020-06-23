@@ -28,7 +28,7 @@ package minecraftonline.nope.control;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import minecraftonline.nope.Nope;
+import minecraftonline.nope.util.Validate;
 import org.spongepowered.api.CatalogType;
 import org.spongepowered.api.util.annotation.CatalogedBy;
 
@@ -36,7 +36,6 @@ import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.Set;
-import java.util.regex.Pattern;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
@@ -62,7 +61,9 @@ public class Parameter<T extends Serializable> implements CatalogType, Serializa
                       @Nonnull T defaultValue,
                       @Nonnull Class<T> clazz) {
     Preconditions.checkNotNull(id);
-    checkValidId(id);
+    Validate.checkKebabCase(
+        id,
+        "Invalid Parameter id: " + id + ". Valid ids only contain characters 'a-z' and '-'.");
     Preconditions.checkNotNull(defaultValue);
     Preconditions.checkNotNull(clazz);
     this.id = id;
@@ -191,7 +192,10 @@ public class Parameter<T extends Serializable> implements CatalogType, Serializa
   }
 
   public Parameter<T> withConfigurationPath(String path) {
-    checkValidPath(path);
+    Validate.checkConfigFormat(path,
+        "Invalid configuration path for Parameter: "
+            + path
+            + ". Valid ids only contain characters 'a-z', '-', and '.'.");
     this.path = path;
     return this;
   }
@@ -214,20 +218,6 @@ public class Parameter<T extends Serializable> implements CatalogType, Serializa
   @Override
   public String getName() {
     return id;
-  }
-
-  private void checkValidId(String id) {
-    Pattern pattern = Pattern.compile(".*[^a-z\\-].*");
-    if (pattern.matcher(id).find()) {
-      throw new RuntimeException("Invalid Parameter id: " + id + ". Valid ids only contain characters 'a-z' and '-'.");
-    }
-  }
-
-  private void checkValidPath(String path) {
-    Pattern pattern = Pattern.compile(".*[^a-z\\-\\.].*");
-    if (pattern.matcher(path).find()) {
-      throw new RuntimeException("Invalid configuration path for Parameter: " + path + ". Valid ids only contain characters 'a-z', '-', and '.'.");
-    }
   }
 
 }
