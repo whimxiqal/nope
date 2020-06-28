@@ -25,10 +25,14 @@
 
 package minecraftonline.nope.control;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import org.spongepowered.api.registry.CatalogRegistryModule;
 
+import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import javax.annotation.Nonnull;
 
@@ -43,6 +47,23 @@ public final class Parameters {
   private Parameters() {
   }
 
+  private static final ImmutableList<Parameter<?>> parameters;
+
+  static {
+    List<Parameter<?>> mutableParams = new ArrayList<>();
+    for (Field field : Parameters.class.getFields()) {
+      // Check if its a parameter. It is already only public classes, but just incase
+      if (field.getType().isAssignableFrom(Parameter.class)) {
+        try {
+          mutableParams.add((Parameter<?>) field.get(null));
+        } catch (IllegalAccessException e) {
+          e.printStackTrace();
+        }
+      }
+    }
+    parameters = ImmutableList.copyOf(mutableParams);
+  }
+
   public static final CatalogRegistryModule<Parameter<?>> REGISTRY_MODULE = new CatalogRegistryModule<Parameter<?>>() {
     @Nonnull
     @Override
@@ -55,14 +76,10 @@ public final class Parameters {
       return Optional.empty();
     }
 
+    @Nonnull
     @Override
     public Collection<Parameter<?>> getAll() {
-      return Lists.newArrayList(
-          ENABLE_PLUGIN,
-          DEOP_ON_ENTER,
-          LEAF_DECAY
-          // TODO: add more
-      );
+      return parameters;
     }
   };
 
