@@ -33,21 +33,21 @@ import java.util.Optional;
 import javax.annotation.Nonnull;
 
 /**
- * A library of methods to generate {@link Parameter}s for use in configuration.
+ * A library of methods to generate {@link Setting}s for use in configuration.
  */
-public final class Parameters {
+public final class Settings {
 
   /**
    * Disable constructor.
    */
-  private Parameters() {
+  private Settings() {
   }
 
-  public static final CatalogRegistryModule<Parameter<?>> REGISTRY_MODULE = new CatalogRegistryModule<Parameter<?>>() {
+  public static final CatalogRegistryModule<Setting<?>> REGISTRY_MODULE = new CatalogRegistryModule<Setting<?>>() {
     @Nonnull
     @Override
-    public Optional<Parameter<?>> getById(@Nonnull String id) {
-      for (Parameter<?> griefEvent : getAll()) {
+    public Optional<Setting<?>> getById(@Nonnull String id) {
+      for (Setting<?> griefEvent : getAll()) {
         if (griefEvent.getId().equalsIgnoreCase(id)) {
           return Optional.of(griefEvent);
         }
@@ -56,7 +56,7 @@ public final class Parameters {
     }
 
     @Override
-    public Collection<Parameter<?>> getAll() {
+    public Collection<Setting<?>> getAll() {
       return Lists.newArrayList(
           ENABLE_PLUGIN,
           DEOP_ON_ENTER,
@@ -66,22 +66,22 @@ public final class Parameters {
     }
   };
 
-  public static final Parameter<Boolean> ENABLE_PLUGIN = Parameter.of("enable-plugin", true, Boolean.class)
+  public static final Setting<Boolean> ENABLE_PLUGIN = Setting.of("enable-plugin", true, Boolean.class)
       .withDescription("Set to false will disable all plugin functionality")
       .withConfigurationPath("general.enable-plugin");
 
-  public static final Parameter<Boolean> DEOP_ON_ENTER = Parameter.of("deop-on-enter", false, Boolean.class)
+  public static final Setting<Boolean> DEOP_ON_ENTER = Setting.of("deop-on-enter", false, Boolean.class)
       .withComment("Set to true will deop any player when they enter.")
       .withDescription("If this setting is applied globally, then anytime and op-ed player joins the server, their op status is removed. "
           + "If this setting is applied to just a world, then only when they join that specific world do they get de-opped.")
-      .withApplicability(Parameter.Applicability.GLOBAL, Parameter.Applicability.WORLD)
+      .withApplicability(Setting.Applicability.GLOBAL, Setting.Applicability.WORLD)
       .withConfigurationPath("security.deop-on-enter");
 
-  public static final Parameter<Boolean> LEAF_DECAY = Parameter.of("leaf-decay", true, Boolean.class)
+  public static final Setting<Boolean> LEAF_DECAY = Setting.of("leaf-decay", true, Boolean.class)
       .withDescription("Set to false will disable all natural leaf decay")
-      .withApplicability(Parameter.Applicability.GLOBAL,
-          Parameter.Applicability.WORLD,
-          Parameter.Applicability.REGION)
+      .withApplicability(Setting.Applicability.GLOBAL,
+          Setting.Applicability.WORLD,
+          Setting.Applicability.REGION)
       .withConfigurationPath("dynamics.leaf-decay");
 
   // TODO: add more
