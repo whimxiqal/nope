@@ -26,6 +26,7 @@
 package minecraftonline.nope;
 
 import com.google.inject.Inject;
+import minecraftonline.nope.command.common.NopeCommandTree;
 import minecraftonline.nope.util.Reference;
 import org.slf4j.Logger;
 import org.spongepowered.api.event.Listener;
@@ -33,6 +34,7 @@ import org.spongepowered.api.event.game.state.GamePreInitializationEvent;
 import org.spongepowered.api.event.game.state.GameStartedServerEvent;
 import org.spongepowered.api.plugin.Dependency;
 import org.spongepowered.api.plugin.Plugin;
+import org.spongepowered.api.plugin.PluginContainer;
 
 @Plugin(
     id = Reference.ID,
@@ -47,8 +49,17 @@ public class Nope {
 
   private static Nope instance;
 
+  // Injections
+
   @Inject
   private Logger logger;
+
+  @Inject
+  private PluginContainer pluginContainer;
+
+  // Custom fields
+
+  NopeCommandTree commandTree;
 
   @Listener
   public void onPreInitialize(GamePreInitializationEvent event) {
@@ -57,6 +68,9 @@ public class Nope {
 
   @Listener
   public void onServerStart(GameStartedServerEvent event) {
+    // Register entire Nope command tree
+    commandTree = new NopeCommandTree();
+    commandTree.register();
   }
 
   public static Nope getInstance() {
@@ -65,5 +79,9 @@ public class Nope {
 
   public Logger getLogger() {
     return logger;
+  }
+
+  public PluginContainer getPluginContainer() {
+    return pluginContainer;
   }
 }

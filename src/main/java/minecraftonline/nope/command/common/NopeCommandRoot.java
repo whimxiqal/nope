@@ -23,21 +23,37 @@
  *
  */
 
-package minecraftonline.nope.permission;
+package minecraftonline.nope.command.common;
 
-/**
- * Enumeration of all {@link Permission}s.
- */
-public final class Permissions {
+import javax.annotation.Nonnull;
 
-  private Permissions() {
+import minecraftonline.nope.Nope;
+import minecraftonline.nope.permission.Permissions;
+import minecraftonline.nope.util.Format;
+import org.spongepowered.api.command.CommandException;
+import org.spongepowered.api.command.CommandResult;
+import org.spongepowered.api.command.CommandSource;
+import org.spongepowered.api.command.args.CommandContext;
+import org.spongepowered.api.text.Text;
+
+public class NopeCommandRoot extends CommandTree.CommandNode {
+
+  // TODO: write description
+  private static final Text description = Text.of("NopeCommandRoot command description");
+
+  public NopeCommandRoot() {
+    super(null, Permissions.COMMAND_ROOT, description, "nope");
   }
 
-  // Command permissions
-  public static final Permission COMMAND_ROOT = Permission.of("nope.command");
+  @Nonnull
+  @Override
+  public CommandResult execute(CommandSource src, CommandContext args) throws CommandException {
+    src.sendMessage(this.splashScreen());
+    return CommandResult.success();
+  }
 
-
-  // Override permissions
-  public static final Permission OVERRIDE_ALL = Permission.of("nope.override-all");
-
+  private Text splashScreen() {
+    return Format.info(Text.of("version " + Nope.getInstance().getPluginContainer().getVersion().orElse("unknown")));
+    // TODO: format plugin splash screen
+  }
 }

@@ -23,21 +23,12 @@
  *
  */
 
-package minecraftonline.nope.permission;
+package minecraftonline.nope.command.common;
 
-/**
- * Enumeration of all {@link Permission}s.
- */
-public final class Permissions {
+public class NopeCommandTree extends CommandTree {
 
-  private Permissions() {
+  public NopeCommandTree() {
+    super(new NopeCommandRoot());
   }
-
-  // Command permissions
-  public static final Permission COMMAND_ROOT = Permission.of("nope.command");
-
-
-  // Override permissions
-  public static final Permission OVERRIDE_ALL = Permission.of("nope.override-all");
 
 }
