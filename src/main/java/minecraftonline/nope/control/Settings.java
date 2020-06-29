@@ -25,14 +25,24 @@
 
 package minecraftonline.nope.control;
 
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Multimap;
 import org.spongepowered.api.registry.CatalogRegistryModule;
 
 import java.lang.reflect.Field;
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import javax.annotation.Nonnull;
 
@@ -48,23 +58,34 @@ public final class Settings {
   }
 
   private static final ImmutableList<Setting<?>> settings;
+  // This is so we can avoid having to get which settings with certain applicability by filtering repeatedly.
+  // This way it can be filtered only once.
+  private static final ImmutableMultimap<Setting.Applicability, Setting<?>> settingApplicability;
 
   static {
-    List<Setting<?>> mutableParams = new ArrayList<>();
+    List<Setting<?>> mutableSettings = new ArrayList<>();
+    Multimap<Setting.Applicability, Setting<?>> mutableSettingApplicability = HashMultimap.create();
     for (Field field : Settings.class.getFields()) {
       // Check if its a parameter. It is already only public classes, but just incase
       if (field.getType().isAssignableFrom(Setting.class)) {
         try {
-          mutableParams.add((Setting<?>) field.get(null));
+          Setting<?> setting = (Setting<?>) field.get(null);
+          mutableSettings.add(setting);
+          for (Setting.Applicability applicability : Setting.Applicability.values()) {
+            if (setting.isApplicable(applicability)) {
+              mutableSettingApplicability.put(applicability, setting);
+            }
+          }
         } catch (IllegalAccessException e) {
           e.printStackTrace();
         }
       }
     }
-    settings = ImmutableList.copyOf(mutableParams);
+    settings = ImmutableList.copyOf(mutableSettings);
+    settingApplicability = ImmutableMultimap.copyOf(mutableSettingApplicability);
   }
 
-  public static final CatalogRegistryModule<Setting<?>> REGISTRY_MODULE = new CatalogRegistryModule<Setting<?>>() {
+  public static final SettingRegistryModule REGISTRY_MODULE = new SettingRegistryModule() {
     @Nonnull
     @Override
     public Optional<Setting<?>> getById(@Nonnull String id) {
@@ -80,6 +101,16 @@ public final class Settings {
     @Override
     public Collection<Setting<?>> getAll() {
         return settings;
+    }
+
+    @Nonnull
+    @Override
+    public Collection<Setting<?>> getByApplicability(Setting.Applicability applicability) {
+      Collection<Setting<?>> collection = settingApplicability.get(applicability);
+      if (collection == null) {
+        return ImmutableList.of();
+      }
+      return collection;
     }
   };
 
