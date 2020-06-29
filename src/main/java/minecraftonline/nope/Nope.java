@@ -26,15 +26,22 @@
 package minecraftonline.nope;
 
 import com.google.inject.Inject;
+import com.sun.org.apache.xpath.internal.XPathVisitor;
 import minecraftonline.nope.command.common.NopeCommandTree;
+import minecraftonline.nope.config.ConfigManager;
+import minecraftonline.nope.config.hocon.HoconConfigManager;
 import minecraftonline.nope.util.Reference;
 import org.slf4j.Logger;
+import org.spongepowered.api.config.ConfigDir;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.game.state.GamePreInitializationEvent;
 import org.spongepowered.api.event.game.state.GameStartedServerEvent;
+import org.spongepowered.api.event.game.state.GameStoppingServerEvent;
 import org.spongepowered.api.plugin.Dependency;
 import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.plugin.PluginContainer;
+
+import java.nio.file.Path;
 
 @Plugin(
     id = Reference.ID,
@@ -57,9 +64,15 @@ public class Nope {
   @Inject
   private PluginContainer pluginContainer;
 
+  @Inject
+  @ConfigDir(sharedRoot = false)
+  private Path configDir;
+
   // Custom fields
 
   NopeCommandTree commandTree;
+
+  private ConfigManager configManager;
 
   @Listener
   public void onPreInitialize(GamePreInitializationEvent event) {
@@ -71,6 +84,15 @@ public class Nope {
     // Register entire Nope command tree
     commandTree = new NopeCommandTree();
     commandTree.register();
+
+    // Load config
+    configManager = new HoconConfigManager(configDir);
+    configManager.loadAll();
+  }
+
+  @Listener
+  public void onServerStopping(GameStoppingServerEvent event) {
+    configManager.saveAll();
   }
 
   public static Nope getInstance() {
@@ -80,6 +102,8 @@ public class Nope {
   public Logger getLogger() {
     return logger;
   }
+
+  public ConfigManager getConfigManager() {return configManager;}
 
   public PluginContainer getPluginContainer() {
     return pluginContainer;
