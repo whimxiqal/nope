@@ -26,10 +26,10 @@
 package minecraftonline.nope;
 
 import com.google.inject.Inject;
-import com.sun.org.apache.xpath.internal.XPathVisitor;
 import minecraftonline.nope.command.common.NopeCommandTree;
-import minecraftonline.nope.config.ConfigManager;
-import minecraftonline.nope.config.hocon.HoconConfigManager;
+import minecraftonline.nope.config.GlobalConfigManager;
+import minecraftonline.nope.config.hocon.HoconGlobalConfigManager;
+import minecraftonline.nope.control.GlobalHost;
 import minecraftonline.nope.util.Reference;
 import org.slf4j.Logger;
 import org.spongepowered.api.config.ConfigDir;
@@ -37,6 +37,7 @@ import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.game.state.GamePreInitializationEvent;
 import org.spongepowered.api.event.game.state.GameStartedServerEvent;
 import org.spongepowered.api.event.game.state.GameStoppingServerEvent;
+import org.spongepowered.api.event.world.LoadWorldEvent;
 import org.spongepowered.api.plugin.Dependency;
 import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.plugin.PluginContainer;
@@ -72,7 +73,9 @@ public class Nope {
 
   NopeCommandTree commandTree;
 
-  private ConfigManager configManager;
+  private GlobalConfigManager globalConfigManager;
+
+  private GlobalHost globalHost;
 
   @Listener
   public void onPreInitialize(GamePreInitializationEvent event) {
@@ -86,13 +89,19 @@ public class Nope {
     commandTree.register();
 
     // Load config
-    configManager = new HoconConfigManager(configDir);
-    configManager.loadAll();
+    globalConfigManager = new HoconGlobalConfigManager(configDir);
+    globalConfigManager.loadAll();
   }
 
   @Listener
   public void onServerStopping(GameStoppingServerEvent event) {
-    configManager.saveAll();
+    globalConfigManager.saveAll();
+  }
+
+  @Listener
+  public void onLoadWorld(LoadWorldEvent event) {
+    // Possible that a new world has been created, however at the start we already load all known worlds
+    globalHost.addWorldIfNotPresent(event.getTargetWorld());
   }
 
   public static Nope getInstance() {
@@ -103,7 +112,7 @@ public class Nope {
     return logger;
   }
 
-  public ConfigManager getConfigManager() {return configManager;}
+  public GlobalConfigManager getGlobalConfigManager() {return globalConfigManager;}
 
   public PluginContainer getPluginContainer() {
     return pluginContainer;

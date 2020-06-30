@@ -1,9 +1,11 @@
 package minecraftonline.nope.config;
 
+import com.google.common.reflect.TypeToken;
 import jdk.internal.jline.internal.Nullable;
 import minecraftonline.nope.Nope;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
+import ninja.leaping.configurate.objectmapping.ObjectMappingException;
 
 import java.io.IOException;
 
@@ -63,5 +65,22 @@ public class ConfigContainer<T extends ConfigurationNode> {
      */
     public T getConfigNode() {
         return checkNotNull(configNode, "Attempt to get config node before it was loaded!");
+    }
+
+    /**
+     * Gets a node value, with a path, split by the '.' delimiter
+     * @param path Path to value
+     * @param typeToken TypeToken of what type is expected
+     * @param <V> Value expected
+     * @return V Value, or null if none is present or if value could not be mapped.
+     */
+    @Nullable
+    public <V> V getNodeValue(String path, TypeToken<V> typeToken) {
+        try {
+            return configNode.getNode((Object[]) path.split("[.]")).getValue(typeToken);
+        } catch (ObjectMappingException e) {
+            Nope.getInstance().getLogger().error("Invalid config value", e);
+        }
+        return null;
     }
 }

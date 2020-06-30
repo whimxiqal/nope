@@ -26,12 +26,16 @@
 package minecraftonline.nope.control;
 
 import com.google.common.base.Preconditions;
-import java.util.UUID;
+
 import javax.annotation.Nonnull;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 
 public class WorldHost extends Host {
 
   private UUID worldUuid;
+  private Map<String, Region> regions = new HashMap<>();
 
   public WorldHost(@Nonnull UUID worldUuid) {
     Preconditions.checkNotNull(worldUuid);
@@ -42,4 +46,21 @@ public class WorldHost extends Host {
     return this.worldUuid;
   }
 
+  public Map<String, Region> getRegions() {
+    return regions;
+  }
+
+  public void addRegion(String regionId, Region region) {
+    this.regions.put(regionId, region);
+  }
+
+  public void removeRegion(String regionId) {
+    this.regions.remove(regionId);
+  }
+
+  @Nonnull
+  @Override
+  public Setting.Applicability getApplicability() {
+    return Setting.Applicability.WORLD;
+  }
 }

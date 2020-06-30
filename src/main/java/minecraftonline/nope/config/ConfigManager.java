@@ -1,55 +1,58 @@
 package minecraftonline.nope.config;
 
 import minecraftonline.nope.config.supplier.ConfigLoaderSupplier;
-import ninja.leaping.configurate.ConfigurationOptions;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
-import org.spongepowered.api.Sponge;
-import org.spongepowered.api.world.World;
 
 import java.nio.file.Path;
-import java.util.Map;
-import java.util.Optional;
 
 public abstract class ConfigManager {
-    private Map<World, WorldConfigManager> worldConfigs;
+
+    public static final String CONFIG_FILE_EXTENSION = ".conf";
+
     protected Path configDir;
-    private ConfigContainer<CommentedConfigurationNode> globalConfig;
-
+    protected String configFileName;
     protected ConfigLoaderSupplier configLoaderSupplier;
-    private ConfigurationOptions configurationOptions;
+    private ConfigContainer<CommentedConfigurationNode> config = null;
 
-    public ConfigManager(Path configDir, ConfigLoaderSupplier configLoaderSupplier) {
+    /**
+     * Create a ConfigManager
+     * @param configDir Path Directory to create config in
+     * @param configName Filename excluding extension
+     * @param configLoaderSupplier ConfigLoaderSupplier A supplier for ConfigLoaders
+     */
+    public ConfigManager(Path configDir, String configName, ConfigLoaderSupplier configLoaderSupplier) {
         this.configDir = configDir;
+        this.configFileName = configName + CONFIG_FILE_EXTENSION;
         this.configLoaderSupplier = configLoaderSupplier;
     }
 
     public void loadAll() {
-        this.globalConfig
-                = new ConfigContainer<>(configLoaderSupplier.createConfigLoader(configDir.resolve("global.conf")));
+        this.config
+                = new ConfigContainer<>(configLoaderSupplier.createConfigLoader(configDir.resolve(configFileName)));
 
-        this.globalConfig.load();
+        this.config.load();
 
-        for (World world : Sponge.getServer().getWorlds()) {
-            WorldConfigManager worldConfigManager = new WorldConfigManager(configDir, world, configLoaderSupplier);
-            worldConfigManager.loadAll();
-            worldConfigs.put(world, worldConfigManager);
-        }
+        loadExtra();
     }
 
     public void saveAll() {
-        this.globalConfig.save();
-        worldConfigs.values().forEach(WorldConfigManager::saveAll);
+        this.config.save();
+
+        saveExtra();
     }
 
-    public WorldConfigManager getWorldManager(World world) {
-        return this.worldConfigs.get(world);
-    }
+    /**
+     * Load extra config or other things wanted to be loaded
+     * in {@link ConfigManager#loadAll()}
+     */
+    protected void loadExtra() {}
+    /**
+     * Save extra config or other things wanted to be saved
+     * in {@link ConfigManager#saveAll()}
+     */
+    protected void saveExtra() {}
 
-    public ConfigContainer<CommentedConfigurationNode> getWorldConfig(World world) {
-        return this.worldConfigs.get(world).getWorldConfig();
-    }
-
-    public Optional<ConfigContainer<CommentedConfigurationNode>> getRegionConfig(World world, String id) {
-        return getWorldManager(world).getRegion(id);
+    public ConfigContainer<CommentedConfigurationNode> getConfig() {
+        return this.config;
     }
 }

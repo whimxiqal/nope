@@ -25,10 +25,15 @@
 
 package minecraftonline.nope.control;
 
-import java.util.Set;
+import javax.annotation.Nonnull;
 
 public class Region extends Host {
+    @Nonnull
+    @Override
+    public Setting.Applicability getApplicability() {
+        return Setting.Applicability.REGION;
+    }
 
-  // TODO: implement
+    // TODO: implement
 
 }

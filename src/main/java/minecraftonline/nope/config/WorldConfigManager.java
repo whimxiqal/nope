@@ -7,52 +7,39 @@ import org.spongepowered.api.world.World;
 import java.io.File;
 import java.nio.file.Path;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-public class WorldConfigManager {
+public class WorldConfigManager extends ConfigManager {
     private World world;
-    private Path configDir;
-    private ConfigContainer<CommentedConfigurationNode> worldConfig;
-    private Map<String, ConfigContainer<CommentedConfigurationNode>> regionConfig;
-    private ConfigLoaderSupplier configLoaderSupplier;
+    private Map<String, ConfigContainer<CommentedConfigurationNode>> regionConfig = new HashMap<>();
 
     public WorldConfigManager(Path configDir, World world, ConfigLoaderSupplier configLoaderSupplier) {
-        this.configDir = configDir;
+        super(configDir.resolve(world.getName()), world.getName(), configLoaderSupplier);
         this.world = world;
-        this.configLoaderSupplier = configLoaderSupplier;
     }
 
-    public void loadAll() {
-        File worldDir = this.configDir.resolve(world.getName()).toFile();
-        String worldConfName = this.world.getName() + ".conf";
-        Path worldConf = worldDir.toPath().resolve(worldConfName);
-        this.worldConfig = new ConfigContainer<>(configLoaderSupplier.createConfigLoader(worldConf));
-
-        this.worldConfig.load();
-
-        File[] regions = worldDir.listFiles((f, name) -> !name.equals(worldConfName));
+    @Override
+    public void loadExtra() {
+        File[] regions = this.configDir.toFile().listFiles((f, name) -> !name.equals(this.configFileName));
         if (regions == null) {
             return;
         }
 
         for (File file : regions) {
-            String regionId = file.getName().replace(".conf", "");
+            String regionId = file.getName().replace(ConfigManager.CONFIG_FILE_EXTENSION, "");
             loadRegion(regionId, file.toPath());
         }
     }
 
-    public void saveAll() {
-        worldConfig.save();
+    @Override
+    public void saveExtra() {
         regionConfig.values().forEach(ConfigContainer::save);
     }
 
     public Collection<ConfigContainer<CommentedConfigurationNode>> getAllRegions() {
         return this.regionConfig.values();
-    }
-
-    public ConfigContainer<CommentedConfigurationNode> getWorldConfig() {
-        return this.worldConfig;
     }
 
     public Optional<ConfigContainer<CommentedConfigurationNode>> getRegion(String id) {

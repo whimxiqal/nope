@@ -27,6 +27,7 @@ package minecraftonline.nope.control;
 
 import com.google.common.collect.Maps;
 
+import javax.annotation.Nonnull;
 import java.io.Serializable;
 import java.util.Map;
 import java.util.Optional;
@@ -61,4 +62,11 @@ public abstract class Host {
     return Optional.ofNullable((T) settings.get(setting));
   }
 
+  /**
+   * Get the Applicability that a setting needs to
+   * be applicable to this Host.
+   * @return
+   */
+  @Nonnull
+  public abstract Setting.Applicability getApplicability();
 }

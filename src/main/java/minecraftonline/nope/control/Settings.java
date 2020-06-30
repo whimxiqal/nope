@@ -89,9 +89,9 @@ public final class Settings {
     @Nonnull
     @Override
     public Optional<Setting<?>> getById(@Nonnull String id) {
-      for (Setting<?> griefEvent : getAll()) {
-        if (griefEvent.getId().equalsIgnoreCase(id)) {
-          return Optional.of(griefEvent);
+      for (Setting<?> setting : getAll()) {
+        if (setting.getId().equalsIgnoreCase(id)) {
+          return Optional.of(setting);
         }
       }
       return Optional.empty();
