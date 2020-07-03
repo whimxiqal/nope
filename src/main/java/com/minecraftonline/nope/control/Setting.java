@@ -202,6 +202,20 @@ public class Setting<T extends Serializable> implements CatalogType, Serializabl
   }
 
   @Override
+  public boolean equals(Object obj) {
+    if (this == obj) {
+      return true;
+    }
+
+    if (obj == null || obj.getClass() != this.getClass()) {
+      return false;
+    }
+
+    Setting setting = (Setting)obj;
+    return this.id.equals(setting.id);
+  }
+
+  @Override
   public int hashCode() {
     return id.hashCode();
   }

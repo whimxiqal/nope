@@ -1,6 +1,15 @@
+buildscript {
+    dependencies {
+        classpath 'gradle.plugin.org.spongepowered:spongegradle:0.8.1'
+    }
+}
+
 plugins {
     id 'org.spongepowered.plugin' version '0.9.0'
 }
+
+// For sortClassFields
+apply plugin: 'org.spongepowered.gradle'
 
 group = 'minecraftonline'
 version = '0.0.0'
@@ -24,3 +33,6 @@ sponge.plugin.id = 'nope'
 sortClassFields {
     add 'main', 'com.minecraftonline.nope.control.Settings'
 }
+
+// Sort class fields on build.
+build.dependsOn(sortClassFields)

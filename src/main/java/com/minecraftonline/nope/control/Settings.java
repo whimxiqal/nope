@@ -28,13 +28,16 @@ package com.minecraftonline.nope.control;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMultimap;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import javax.annotation.Nonnull;
 
 /**
@@ -48,19 +51,23 @@ public final class Settings {
   private Settings() {
   }
 
-  private static final ImmutableList<Setting<?>> settings;
+  private static final ImmutableSet<Setting<?>> settings;
   // This is so we can avoid having to get which settings with certain applicability by filtering repeatedly.
   // This way it can be filtered only once.
   private static final ImmutableMultimap<Setting.Applicability, Setting<?>> settingApplicability;
 
   static {
-    List<Setting<?>> mutableSettings = new ArrayList<>();
+    Set<Setting<?>> mutableSettings = new HashSet<>();
     Multimap<Setting.Applicability, Setting<?>> mutableSettingApplicability = HashMultimap.create();
     for (Field field : Settings.class.getFields()) {
       // Check if its a parameter. It is already only public classes, but just incase
       if (field.getType().isAssignableFrom(Setting.class)) {
         try {
           Setting<?> setting = (Setting<?>) field.get(null);
+          if (mutableSettings.contains(setting)) {
+            // Already have a setting with this id!
+            throw new IllegalArgumentException("More than one setting, with the id: " + setting.getId() + " was registered!");
+          }
           mutableSettings.add(setting);
           for (Setting.Applicability applicability : Setting.Applicability.values()) {
             if (setting.isApplicable(applicability)) {
@@ -72,7 +79,7 @@ public final class Settings {
         }
       }
     }
-    settings = ImmutableList.copyOf(mutableSettings);
+    settings = ImmutableSet.copyOf(mutableSettings);
     settingApplicability = ImmutableMultimap.copyOf(mutableSettingApplicability);
   }
 
@@ -104,10 +111,9 @@ public final class Settings {
       return collection;
     }
   };
-  
-  public static final Setting<Boolean> ENABLE_PLUGIN = Setting.of("enable-plugin", true, Boolean.class)
-      .withDescription("Set to false will disable all plugin functionality")
-      .withConfigurationPath("enable-plugin");
+
+  // Sorts fields alphabetically
+  // SORTFIELDS:ON
 
   public static final Setting<Boolean> DEOP_ON_ENTER = Setting.of("deop-on-enter", false, Boolean.class)
       .withComment("Set to true will deop any player when they enter.")
@@ -116,6 +122,9 @@ public final class Settings {
       .withApplicability(Setting.Applicability.GLOBAL, Setting.Applicability.WORLD)
       .withConfigurationPath("security.deop-on-enter");
 
+  public static final Setting<Boolean> ENABLE_PLUGIN = Setting.of("enable-plugin", true, Boolean.class)
+      .withDescription("Set to false will disable all plugin functionality")
+      .withConfigurationPath("enable-plugin");
 
   public static final Setting<Boolean> LEAF_DECAY = Setting.of("leaf-decay", true, Boolean.class)
       .withDescription("Set to false will disable all natural leaf decay")
@@ -124,7 +133,6 @@ public final class Settings {
           Setting.Applicability.REGION)
       .withConfigurationPath("dynamics.leaf-decay");
 
-
-  // TODO: add more
-
+  // SORTFIELDS:OFF
 }
+  // TODO: add more
