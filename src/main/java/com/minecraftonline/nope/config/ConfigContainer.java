@@ -1,12 +1,12 @@
 package com.minecraftonline.nope.config;
 
 import com.google.common.reflect.TypeToken;
-import jdk.internal.jline.internal.Nullable;
 import com.minecraftonline.nope.Nope;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
 import ninja.leaping.configurate.objectmapping.ObjectMappingException;
 
+import javax.annotation.Nullable;
 import java.io.IOException;
 
 import static com.google.common.base.Preconditions.checkNotNull;

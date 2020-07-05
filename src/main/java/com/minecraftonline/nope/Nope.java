@@ -76,7 +76,7 @@ public class Nope {
 
   private GlobalConfigManager globalConfigManager;
 
-  private GlobalHost globalHost;
+  private GlobalHost globalHost = new GlobalHost();
 
   @Listener
   public void onPreInitialize(GamePreInitializationEvent event) {
@@ -92,18 +92,18 @@ public class Nope {
 
     // Load config
     globalConfigManager = new HoconGlobalConfigManager(configDir);
-    globalConfigManager.loadAll();
+//    globalConfigManager.loadAll();
   }
 
   @Listener
   public void onServerStopping(GameStoppingServerEvent event) {
-    globalConfigManager.saveAll();
+//    globalConfigManager.saveAll();
   }
 
   @Listener
   public void onLoadWorld(LoadWorldEvent event) {
     // Possible that a new world has been created, however at the start we already load all known worlds
-    globalHost.addWorldIfNotPresent(event.getTargetWorld());
+//    globalHost.addWorldIfNotPresent(event.getTargetWorld());
   }
 
   public static Nope getInstance() {
@@ -114,7 +114,9 @@ public class Nope {
     return logger;
   }
 
-  public GlobalConfigManager getGlobalConfigManager() {return globalConfigManager;}
+  public GlobalConfigManager getGlobalConfigManager() {
+    return globalConfigManager;
+  }
 
   public PluginContainer getPluginContainer() {
     return pluginContainer;
