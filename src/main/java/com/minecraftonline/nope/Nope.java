@@ -30,6 +30,7 @@ import com.minecraftonline.nope.command.common.NopeCommandTree;
 import com.minecraftonline.nope.config.GlobalConfigManager;
 import com.minecraftonline.nope.config.hocon.HoconGlobalConfigManager;
 import com.minecraftonline.nope.control.GlobalHost;
+import com.minecraftonline.nope.util.Extra;
 import com.minecraftonline.nope.util.Reference;
 import org.slf4j.Logger;
 import org.spongepowered.api.config.ConfigDir;
@@ -80,6 +81,7 @@ public class Nope {
   @Listener
   public void onPreInitialize(GamePreInitializationEvent event) {
     instance = this;
+    Extra.printSplashscreen();
   }
 
   @Listener
