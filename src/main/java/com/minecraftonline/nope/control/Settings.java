@@ -51,12 +51,16 @@ public final class Settings {
   private Settings() {
   }
 
-  private static final ImmutableSet<Setting<?>> settings;
+  private static ImmutableSet<Setting<?>> settings;
   // This is so we can avoid having to get which settings with certain applicability by filtering repeatedly.
   // This way it can be filtered only once.
-  private static final ImmutableMultimap<Setting.Applicability, Setting<?>> settingApplicability;
+  private static ImmutableMultimap<Setting.Applicability, Setting<?>> settingApplicability;
 
-  static {
+  /**
+   * Loads this class.
+   * MUST be called before REGISTRY_MODULE is used
+   */
+  public static void load() {
     Set<Setting<?>> mutableSettings = new HashSet<>();
     Multimap<Setting.Applicability, Setting<?>> mutableSettingApplicability = HashMultimap.create();
     for (Field field : Settings.class.getFields()) {
@@ -64,9 +68,13 @@ public final class Settings {
       if (field.getType().isAssignableFrom(Setting.class)) {
         try {
           Setting<?> setting = (Setting<?>) field.get(null);
+          if (setting == null) {
+            System.out.println(field.getName() + " was null");
+            continue;
+          }
           if (mutableSettings.contains(setting)) {
             // Already have a setting with this id!
-            throw new IllegalArgumentException("More than one setting, with the id: " + setting.getId() + " was registered!");
+            throw new SettingNotUniqueException(setting);
           }
           mutableSettings.add(setting);
           for (Setting.Applicability applicability : Setting.Applicability.values()) {
@@ -112,8 +120,16 @@ public final class Settings {
     }
   };
 
+  public static final class SettingNotUniqueException extends IllegalArgumentException {
+    public SettingNotUniqueException(Setting setting) {
+      super("Multiple settings with id '" + setting.getId() + "'");
+    }
+  }
+
   // Sorts fields alphabetically
   // SORTFIELDS:ON
+
+  public static final Setting<Boolean> BUILD_PERMISSIONS = Setting.of("build-permission-nodes-enable", false, Boolean.class);
 
   public static final Setting<Boolean> DEOP_ON_ENTER = Setting.of("deop-on-enter", false, Boolean.class)
       .withComment("Set to true will deop any player when they enter.")
@@ -132,6 +148,10 @@ public final class Settings {
           Setting.Applicability.WORLD,
           Setting.Applicability.REGION)
       .withConfigurationPath("dynamics.leaf-decay");
+
+  public static final Setting<Boolean> OP_PERMISSIONS = Setting.of("op-permissions", true, Boolean.class)
+          .withApplicability(Setting.Applicability.WORLD)
+          .withConfigurationPath("op-permissions");
 
   // SORTFIELDS:OFF
 }

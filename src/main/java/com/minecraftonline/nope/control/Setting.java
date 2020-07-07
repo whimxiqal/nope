@@ -53,8 +53,8 @@ public class Setting<T extends Serializable> implements CatalogType, Serializabl
   private String path;
   private final T defaultValue;
   private final Class<T> clazz;
-  private String description;
-  private String comment;
+  @Nullable private String description;
+  @Nullable private String comment;
   private Set<Applicability> applicability = Sets.newEnumSet(Lists.newArrayList(), Applicability.class);
 
   protected Setting(@Nonnull String id,
