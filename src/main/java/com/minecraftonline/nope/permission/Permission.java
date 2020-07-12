@@ -34,36 +34,36 @@ import javax.annotation.Nonnull;
  */
 public class Permission {
 
-	private final String perm;
+  private final String perm;
 
-	private Permission(@Nonnull final String perm) {
-		this.perm = perm;
-	}
+  private Permission(@Nonnull final String perm) {
+    this.perm = perm;
+  }
 
-	/**
-	 * Factory method of a {@link Permission}.
-	 *
-	 * @param perm the string representation
-	 * @return generated {@link Permission}
-	 * @throws IllegalArgumentException if permission is not in config format
-	 *                                  (kebab case with periods)
-	 */
-	public static Permission of(@Nonnull final String perm) throws IllegalArgumentException {
-		Validate.checkConfigFormat(perm,
-				"Invalid permission id: "
-						+ perm
-						+ ". Valid ids only contain characters 'a-z', '-', and '.'.");
-		return new Permission(perm);
-	}
+  /**
+   * Factory method of a {@link Permission}.
+   *
+   * @param perm the string representation
+   * @return generated {@link Permission}
+   * @throws IllegalArgumentException if permission is not in config format
+   *                                  (kebab case with periods)
+   */
+  public static Permission of(@Nonnull final String perm) throws IllegalArgumentException {
+    Validate.checkConfigFormat(perm,
+        "Invalid permission id: "
+            + perm
+            + ". Valid ids only contain characters 'a-z', '-', and '.'.");
+    return new Permission(perm);
+  }
 
-	@Nonnull
-	public String get() {
-		return perm;
-	}
+  @Nonnull
+  public String get() {
+    return perm;
+  }
 
-	@Override
-	public String toString() {
-		return perm;
-	}
+  @Override
+  public String toString() {
+    return perm;
+  }
 
 }
