@@ -28,12 +28,12 @@ package com.minecraftonline.nope.control;
 import javax.annotation.Nonnull;
 
 public class Region extends Host {
-    @Nonnull
-    @Override
-    public Setting.Applicability getApplicability() {
-        return Setting.Applicability.REGION;
-    }
+	@Nonnull
+	@Override
+	public Setting.Applicability getApplicability() {
+		return Setting.Applicability.REGION;
+	}
 
-    // TODO: implement
+	// TODO: implement
 
 }
