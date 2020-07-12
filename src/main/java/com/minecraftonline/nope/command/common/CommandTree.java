@@ -27,14 +27,6 @@ package com.minecraftonline.nope.command.common;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
-
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
 import com.minecraftonline.nope.Nope;
 import com.minecraftonline.nope.permission.Permission;
 import com.minecraftonline.nope.util.Format;
@@ -48,6 +40,13 @@ import org.spongepowered.api.command.args.GenericArguments;
 import org.spongepowered.api.command.spec.CommandExecutor;
 import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.text.Text;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 public abstract class CommandTree {
 

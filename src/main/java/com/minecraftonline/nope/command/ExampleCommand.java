@@ -28,14 +28,13 @@ package com.minecraftonline.nope.command;
 import com.minecraftonline.nope.command.common.CommandTree;
 import com.minecraftonline.nope.permission.Permission;
 import com.minecraftonline.nope.util.Format;
-
-import javax.annotation.Nonnull;
-
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.args.CommandContext;
 import org.spongepowered.api.text.Text;
+
+import javax.annotation.Nonnull;
 
 /**
  * A simple example class to show how the current Nope command system works.
