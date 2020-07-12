@@ -31,25 +31,25 @@ import org.spongepowered.api.text.format.TextColors;
 
 public final class Format {
 
-    private Format() {
-    }
+	private Format() {
+	}
 
-    public static final TextColor THEME = TextColors.GRAY;
+	public static final TextColor THEME = TextColors.GRAY;
 
-    public static Text prefix() {
-        return Text.of(THEME, "Nope ", TextColors.DARK_GRAY, "-=- ");
-    }
+	public static Text prefix() {
+		return Text.of(THEME, "Nope ", TextColors.DARK_GRAY, "-=- ");
+	}
 
-    public static Text error(Text message) {
-        return Text.of(prefix(), TextColors.RED, message);
-    }
+	public static Text error(Text message) {
+		return Text.of(prefix(), TextColors.RED, message);
+	}
 
-    public static Text warn(Text message) {
-        return Text.of(prefix(), TextColors.YELLOW, message);
-    }
+	public static Text warn(Text message) {
+		return Text.of(prefix(), TextColors.YELLOW, message);
+	}
 
-    public static Text info(Text message) {
-        return Text.of(prefix(), TextColors.WHITE, message);
-    }
+	public static Text info(Text message) {
+		return Text.of(prefix(), TextColors.WHITE, message);
+	}
 
 }
