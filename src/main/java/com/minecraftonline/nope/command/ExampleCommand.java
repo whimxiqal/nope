@@ -44,18 +44,18 @@ import org.spongepowered.api.text.Text;
  */
 public class ExampleCommand extends CommandTree.CommandNode {
 
-	public ExampleCommand(@Nonnull CommandTree.CommandNode parent) {
-		super(parent,
-				Permission.of("node.command.example"),
-				Text.of("This is a description of the command we're about to do"),
-				"example",
-				"ex", "placeholder");
-	}
+    public ExampleCommand(@Nonnull CommandTree.CommandNode parent) {
+        super(parent,
+                Permission.of("node.command.example"),
+                Text.of("This is a description of the command we're about to do"),
+                "example",
+                "ex", "placeholder");
+    }
 
-	@Nonnull
-	@Override
-	public CommandResult execute(CommandSource src, CommandContext args) throws CommandException {
-		src.sendMessage(Format.info(Text.of("By golly, you executed this command!")));
-		return CommandResult.success();
-	}
+    @Nonnull
+    @Override
+    public CommandResult execute(CommandSource src, CommandContext args) throws CommandException {
+        src.sendMessage(Format.info(Text.of("By golly, you executed this command!")));
+        return CommandResult.success();
+    }
 }

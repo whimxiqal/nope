@@ -38,22 +38,22 @@ import org.spongepowered.api.text.Text;
 
 public class NopeCommandRoot extends CommandTree.CommandNode {
 
-	// TODO: write description
-	private static final Text description = Text.of("NopeCommandRoot command description");
+    // TODO: write description
+    private static final Text description = Text.of("NopeCommandRoot command description");
 
-	public NopeCommandRoot() {
-		super(null, Permissions.COMMAND_ROOT, description, "nope");
-	}
+    public NopeCommandRoot() {
+        super(null, Permissions.COMMAND_ROOT, description, "nope");
+    }
 
-	@Nonnull
-	@Override
-	public CommandResult execute(CommandSource src, CommandContext args) throws CommandException {
-		src.sendMessage(this.splashScreen());
-		return CommandResult.success();
-	}
+    @Nonnull
+    @Override
+    public CommandResult execute(CommandSource src, CommandContext args) throws CommandException {
+        src.sendMessage(this.splashScreen());
+        return CommandResult.success();
+    }
 
-	private Text splashScreen() {
-		return Format.info(Text.of("version " + Nope.getInstance().getPluginContainer().getVersion().orElse("unknown")));
-		// TODO: format plugin splash screen
-	}
+    private Text splashScreen() {
+        return Format.info(Text.of("version " + Nope.getInstance().getPluginContainer().getVersion().orElse("unknown")));
+        // TODO: format plugin splash screen
+    }
 }
