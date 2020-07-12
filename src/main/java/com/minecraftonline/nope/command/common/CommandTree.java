@@ -51,144 +51,144 @@ import org.spongepowered.api.text.Text;
 
 public abstract class CommandTree {
 
-    private CommandNode root;
+	private CommandNode root;
 
-    public CommandTree(@Nonnull CommandNode root) {
-        Preconditions.checkNotNull(root);
-        this.root = root;
-    }
+	public CommandTree(@Nonnull CommandNode root) {
+		Preconditions.checkNotNull(root);
+		this.root = root;
+	}
 
-    public CommandNode root() {
-        return root;
-    }
+	public CommandNode root() {
+		return root;
+	}
 
-    public void register() {
-        Sponge.getCommandManager().register(Nope.getInstance(), root().build(), root().getAliases());
-    }
+	public void register() {
+		Sponge.getCommandManager().register(Nope.getInstance(), root().build(), root().getAliases());
+	}
 
-    public abstract static class CommandNode implements CommandExecutor {
-        private final CommandNode parent;
-        private final Permission permission;
-        private final Text description;
-        private final List<String> aliases;
-        private final List<CommandNode> children;
-        private CommandElement commandElement = GenericArguments.none();
+	public abstract static class CommandNode implements CommandExecutor {
+		private final CommandNode parent;
+		private final Permission permission;
+		private final Text description;
+		private final List<String> aliases;
+		private final List<CommandNode> children;
+		private CommandElement commandElement = GenericArguments.none();
 
-        public CommandNode(CommandNode parent,
-                           Permission permission,
-                           @Nonnull Text description,
-                           @Nonnull String primaryAlias,
-                           @Nonnull String... otherAliases) {
-            this(parent, permission, description, primaryAlias, true);
-            Preconditions.checkNotNull(otherAliases);
-            this.aliases.addAll(Arrays.asList(otherAliases));
-        }
+		public CommandNode(CommandNode parent,
+						   Permission permission,
+						   @Nonnull Text description,
+						   @Nonnull String primaryAlias,
+						   @Nonnull String... otherAliases) {
+			this(parent, permission, description, primaryAlias, true);
+			Preconditions.checkNotNull(otherAliases);
+			this.aliases.addAll(Arrays.asList(otherAliases));
+		}
 
-        public CommandNode(CommandNode parent,
-                           Permission permission,
-                           @Nonnull Text description,
-                           @Nonnull String primaryAlias,
-                           boolean addHelp) {
-            Preconditions.checkNotNull(description);
-            Preconditions.checkNotNull(primaryAlias);
-            this.parent = parent;
-            this.permission = permission;
-            this.description = description;
-            this.aliases = Lists.newArrayList();
-            this.aliases.add(primaryAlias);
-            this.children = Lists.newArrayList();
-            if (addHelp) {
-                this.children.add(new HelpCommandNode(this));
-            }
-        }
+		public CommandNode(CommandNode parent,
+						   Permission permission,
+						   @Nonnull Text description,
+						   @Nonnull String primaryAlias,
+						   boolean addHelp) {
+			Preconditions.checkNotNull(description);
+			Preconditions.checkNotNull(primaryAlias);
+			this.parent = parent;
+			this.permission = permission;
+			this.description = description;
+			this.aliases = Lists.newArrayList();
+			this.aliases.add(primaryAlias);
+			this.children = Lists.newArrayList();
+			if (addHelp) {
+				this.children.add(new HelpCommandNode(this));
+			}
+		}
 
-        @Nonnull
-        public CommandSpec build() {
-            CommandSpec.Builder builder = CommandSpec.builder();
-            builder.arguments(this.commandElement)
-                    .children(this.children
-                            .stream()
-                            .collect(Collectors.toMap(CommandNode::getAliases, CommandNode::build)))
-                    .description(this.description)
-                    .executor(this);
-            if (permission != null) {
-                builder.permission(permission.get());
-            }
-            return builder.build();
-        }
+		@Nonnull
+		public CommandSpec build() {
+			CommandSpec.Builder builder = CommandSpec.builder();
+			builder.arguments(this.commandElement)
+					.children(this.children
+							.stream()
+							.collect(Collectors.toMap(CommandNode::getAliases, CommandNode::build)))
+					.description(this.description)
+					.executor(this);
+			if (permission != null) {
+				builder.permission(permission.get());
+			}
+			return builder.build();
+		}
 
-        // Getters and Setters
+		// Getters and Setters
 
-        @Nullable
-        public CommandNode getParent() {
-            return parent;
-        }
+		@Nullable
+		public CommandNode getParent() {
+			return parent;
+		}
 
-        @Nonnull
-        public Optional<Permission> getPermission() {
-            return Optional.ofNullable(permission);
-        }
+		@Nonnull
+		public Optional<Permission> getPermission() {
+			return Optional.ofNullable(permission);
+		}
 
-        @Nonnull
-        public Text getDescription() {
-            return description;
-        }
+		@Nonnull
+		public Text getDescription() {
+			return description;
+		}
 
-        @Nonnull
-        public String getPrimaryAlias() {
-            return aliases.get(0);
-        }
+		@Nonnull
+		public String getPrimaryAlias() {
+			return aliases.get(0);
+		}
 
-        @Nonnull
-        public List<String> getAliases() {
-            return aliases;
-        }
+		@Nonnull
+		public List<String> getAliases() {
+			return aliases;
+		}
 
-        public void addAliases(String... aliases) {
-            this.aliases.addAll(Arrays.asList(aliases));
-        }
+		public void addAliases(String... aliases) {
+			this.aliases.addAll(Arrays.asList(aliases));
+		}
 
-        @Nonnull
-        public String getFullCommand() {
-            StringBuilder command = new StringBuilder(getPrimaryAlias());
-            while (!isRoot()) {
-                command.insert(0, parent + " ");
-            }
-            return command.toString();
-        }
+		@Nonnull
+		public String getFullCommand() {
+			StringBuilder command = new StringBuilder(getPrimaryAlias());
+			while (!isRoot()) {
+				command.insert(0, parent + " ");
+			}
+			return command.toString();
+		}
 
-        @Nonnull
-        public List<CommandNode> getChildren() {
-            return children;
-        }
+		@Nonnull
+		public List<CommandNode> getChildren() {
+			return children;
+		}
 
-        public boolean isRoot() {
-            return parent == null;
-        }
+		public boolean isRoot() {
+			return parent == null;
+		}
 
-    }
+	}
 
-    private static class HelpCommandNode extends CommandNode implements CommandExecutor {
+	private static class HelpCommandNode extends CommandNode implements CommandExecutor {
 
-        public HelpCommandNode(@Nonnull CommandNode parent) {
-            super(parent,
-                    null,
-                    Text.of("Command help for " + parent.getFullCommand()),
-                    "help",
-                    false);
-            addAliases("?");
-            Preconditions.checkNotNull(parent);
-        }
+		public HelpCommandNode(@Nonnull CommandNode parent) {
+			super(parent,
+					null,
+					Text.of("Command help for " + parent.getFullCommand()),
+					"help",
+					false);
+			addAliases("?");
+			Preconditions.checkNotNull(parent);
+		}
 
-        @Nonnull
-        @Override
-        public CommandResult execute(CommandSource src, CommandContext args) throws CommandException {
-            src.sendMessage(Format.info(getDescription()));
-            // TODO: format help response
-            return CommandResult.success();
-        }
+		@Nonnull
+		@Override
+		public CommandResult execute(CommandSource src, CommandContext args) throws CommandException {
+			src.sendMessage(Format.info(getDescription()));
+			// TODO: format help response
+			return CommandResult.success();
+		}
 
-    }
+	}
 
 }
 
