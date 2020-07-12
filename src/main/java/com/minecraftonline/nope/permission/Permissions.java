@@ -30,14 +30,14 @@ package com.minecraftonline.nope.permission;
  */
 public final class Permissions {
 
-    private Permissions() {
-    }
+  private Permissions() {
+  }
 
-    // Command permissions
-    public static final Permission COMMAND_ROOT = Permission.of("nope.command");
+  // Command permissions
+  public static final Permission COMMAND_ROOT = Permission.of("nope.command");
 
 
-    // Override permissions
-    public static final Permission OVERRIDE_ALL = Permission.of("nope.override-all");
+  // Override permissions
+  public static final Permission OVERRIDE_ALL = Permission.of("nope.override-all");
 
 }

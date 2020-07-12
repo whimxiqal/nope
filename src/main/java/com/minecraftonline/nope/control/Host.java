@@ -34,40 +34,40 @@ import java.util.Optional;
 
 public abstract class Host {
 
-    /**
-     * Final and private holder for all settings.
-     * This should only be changed when adding and removing elements
-     * through control methods here in Host.
-     */
-    private final Map<Setting<?>, Object> settings = Maps.newHashMap();
+  /**
+   * Final and private holder for all settings.
+   * This should only be changed when adding and removing elements
+   * through control methods here in Host.
+   */
+  private final Map<Setting<?>, Object> settings = Maps.newHashMap();
 
-    public <T extends Serializable> void set(Setting<T> setting, T value) {
-        settings.put(setting, value);
-    }
+  public <T extends Serializable> void set(Setting<T> setting, T value) {
+    settings.put(setting, value);
+  }
 
-    public <T extends Serializable> Optional<T> unset(Setting<T> setting) {
-        Optional<T> out = getSettingValue(setting);
-        out.ifPresent(unused -> settings.remove(setting));
-        return out;
-    }
+  public <T extends Serializable> Optional<T> unset(Setting<T> setting) {
+    Optional<T> out = getSettingValue(setting);
+    out.ifPresent(unused -> settings.remove(setting));
+    return out;
+  }
 
-    public Map<Setting<?>, ?> getSettingMap() {
-        Map<Setting<?>, Object> copy = Maps.newHashMap();
-        copy.putAll(settings);
-        return copy;
-    }
+  public Map<Setting<?>, ?> getSettingMap() {
+    Map<Setting<?>, Object> copy = Maps.newHashMap();
+    copy.putAll(settings);
+    return copy;
+  }
 
-    public <T extends Serializable> Optional<T> getSettingValue(Setting<T> setting) {
-        // TODO: make cast less sketchy
-        return Optional.ofNullable((T) settings.get(setting));
-    }
+  public <T extends Serializable> Optional<T> getSettingValue(Setting<T> setting) {
+    // TODO: make cast less sketchy
+    return Optional.ofNullable((T) settings.get(setting));
+  }
 
-    /**
-     * Get the Applicability that a setting needs to
-     * be applicable to this Host.
-     *
-     * @return
-     */
-    @Nonnull
-    public abstract Setting.Applicability getApplicability();
+  /**
+   * Get the Applicability that a setting needs to
+   * be applicable to this Host.
+   *
+   * @return
+   */
+  @Nonnull
+  public abstract Setting.Applicability getApplicability();
 }
