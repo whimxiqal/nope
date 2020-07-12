@@ -10,30 +10,30 @@ import ninja.leaping.configurate.objectmapping.serialize.TypeSerializerCollectio
 import java.nio.file.Path;
 
 public class HoconLoaderSupplier extends ConfigLoaderSupplier {
-	public HoconLoaderSupplier(TypeSerializerCollection typeSerializerCollection) {
-		super(typeSerializerCollection);
-	}
+    public HoconLoaderSupplier(TypeSerializerCollection typeSerializerCollection) {
+        super(typeSerializerCollection);
+    }
 
-	private HoconConfigurationLoader.Builder createConfigBuilder(Path path) {
-		return HoconConfigurationLoader.builder()
-				.setPath(path);
-	}
+    private HoconConfigurationLoader.Builder createConfigBuilder(Path path) {
+        return HoconConfigurationLoader.builder()
+                .setPath(path);
+    }
 
-	@Override
-	public ConfigurationLoader<CommentedConfigurationNode> createConfigLoader(Path path) {
-		return createConfigBuilder(path)
-				.setDefaultOptions(ConfigurationOptions.defaults().setSerializers(typeSerializerCollection))
-				.build();
-	}
+    @Override
+    public ConfigurationLoader<CommentedConfigurationNode> createConfigLoader(Path path) {
+        return createConfigBuilder(path)
+                .setDefaultOptions(ConfigurationOptions.defaults().setSerializers(typeSerializerCollection))
+                .build();
+    }
 
-	@Override
-	public ConfigurationLoader<CommentedConfigurationNode> createConfigLoader(Path path, String header) {
-		ConfigurationOptions options = ConfigurationOptions.defaults()
-				.setSerializers(typeSerializerCollection)
-				.setHeader(header);
-		return createConfigBuilder(path)
-				.setDefaultOptions(options)
-				.setHeaderMode(HeaderMode.PRESET)
-				.build();
-	}
+    @Override
+    public ConfigurationLoader<CommentedConfigurationNode> createConfigLoader(Path path, String header) {
+        ConfigurationOptions options = ConfigurationOptions.defaults()
+                .setSerializers(typeSerializerCollection)
+                .setHeader(header);
+        return createConfigBuilder(path)
+                .setDefaultOptions(options)
+                .setHeaderMode(HeaderMode.PRESET)
+                .build();
+    }
 }

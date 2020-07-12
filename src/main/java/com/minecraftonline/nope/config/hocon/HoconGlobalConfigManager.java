@@ -9,11 +9,11 @@ import java.nio.file.Path;
 
 public class HoconGlobalConfigManager extends GlobalConfigManager {
 
-	public HoconGlobalConfigManager(Path configDir) {
-		super(configDir, new HoconLoaderSupplier(getTypeSerializers()));
-	}
+    public HoconGlobalConfigManager(Path configDir) {
+        super(configDir, new HoconLoaderSupplier(getTypeSerializers()));
+    }
 
-	private static TypeSerializerCollection getTypeSerializers() {
-		return ConfigurationOptions.defaults().getSerializers();
-	}
+    private static TypeSerializerCollection getTypeSerializers() {
+        return ConfigurationOptions.defaults().getSerializers();
+    }
 }
