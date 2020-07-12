@@ -31,83 +31,83 @@ import org.spongepowered.api.text.format.TextColors;
 
 public final class Extra {
 
-    private Extra() {
-    }
+	private Extra() {
+	}
 
-    /**
-     * Sends a series of messages to the Sponge
-     * {@link org.spongepowered.api.command.source.ConsoleSource},
-     * notifying the user pleasantly that Nope is loaded.
-     */
-    public static void printSplashscreen() {
-        Text.Builder builder = Text.builder();
+	/**
+	 * Sends a series of messages to the Sponge
+	 * {@link org.spongepowered.api.command.source.ConsoleSource},
+	 * notifying the user pleasantly that Nope is loaded.
+	 */
+	public static void printSplashscreen() {
+		Text.Builder builder = Text.builder();
 
-        // Line 1
-        builder.append(Text.of(Format.THEME, "           "));
-        builder.append(Text.of(TextColors.RED, "   ______    "));
-        builder.append(Text.of(Format.THEME, " ____    "));
-        builder.append(Text.of(Format.THEME, " ______"));
-        Sponge.getServer().getConsole().sendMessage(builder.build());
+		// Line 1
+		builder.append(Text.of(Format.THEME, "           "));
+		builder.append(Text.of(TextColors.RED, "   ______    "));
+		builder.append(Text.of(Format.THEME, " ____    "));
+		builder.append(Text.of(Format.THEME, " ______"));
+		Sponge.getServer().getConsole().sendMessage(builder.build());
 
-        // Line 2
-        builder.removeAll();
-        builder.append(Text.of(Format.THEME, " |\\      | "));
-        builder.append(Text.of(TextColors.RED, "  / ____ \\   "));
-        builder.append(Text.of(Format.THEME, "|    \\   "));
-        builder.append(Text.of(Format.THEME, "|"));
-        Sponge.getServer().getConsole().sendMessage(builder.build());
+		// Line 2
+		builder.removeAll();
+		builder.append(Text.of(Format.THEME, " |\\      | "));
+		builder.append(Text.of(TextColors.RED, "  / ____ \\   "));
+		builder.append(Text.of(Format.THEME, "|    \\   "));
+		builder.append(Text.of(Format.THEME, "|"));
+		Sponge.getServer().getConsole().sendMessage(builder.build());
 
-        // Line 3
-        builder.removeAll();
-        builder.append(Text.of(Format.THEME, " | \\     | "));
-        builder.append(Text.of(TextColors.RED, " //\\\\    \\\\  "));
-        builder.append(Text.of(Format.THEME, "|     \\  "));
-        builder.append(Text.of(Format.THEME, "|"));
-        Sponge.getServer().getConsole().sendMessage(builder.build());
+		// Line 3
+		builder.removeAll();
+		builder.append(Text.of(Format.THEME, " | \\     | "));
+		builder.append(Text.of(TextColors.RED, " //\\\\    \\\\  "));
+		builder.append(Text.of(Format.THEME, "|     \\  "));
+		builder.append(Text.of(Format.THEME, "|"));
+		Sponge.getServer().getConsole().sendMessage(builder.build());
 
-        // Line 4
-        builder.removeAll();
-        builder.append(Text.of(Format.THEME, " |  \\    | "));
-        builder.append(Text.of(TextColors.RED, "||  \\\\    || "));
-        builder.append(Text.of(Format.THEME, "|     /  "));
-        builder.append(Text.of(Format.THEME, "|____  "));
-        builder.append(Text.of(TextColors.DARK_GRAY, "   by ", TextColors.LIGHT_PURPLE, "MinecraftOnline"));
-        Sponge.getServer().getConsole().sendMessage(builder.build());
+		// Line 4
+		builder.removeAll();
+		builder.append(Text.of(Format.THEME, " |  \\    | "));
+		builder.append(Text.of(TextColors.RED, "||  \\\\    || "));
+		builder.append(Text.of(Format.THEME, "|     /  "));
+		builder.append(Text.of(Format.THEME, "|____  "));
+		builder.append(Text.of(TextColors.DARK_GRAY, "   by ", TextColors.LIGHT_PURPLE, "MinecraftOnline"));
+		Sponge.getServer().getConsole().sendMessage(builder.build());
 
-        // Line 5
-        builder.removeAll();
-        builder.append(Text.of(Format.THEME, " |   \\   | "));
-        builder.append(Text.of(TextColors.RED, "||   \\\\   || "));
-        builder.append(Text.of(Format.THEME, "|____/   "));
-        builder.append(Text.of(Format.THEME, "|      "));
-        builder.append(Text.of(TextColors.AQUA, "      v", Reference.VERSION));
-        Sponge.getServer().getConsole().sendMessage(builder.build());
+		// Line 5
+		builder.removeAll();
+		builder.append(Text.of(Format.THEME, " |   \\   | "));
+		builder.append(Text.of(TextColors.RED, "||   \\\\   || "));
+		builder.append(Text.of(Format.THEME, "|____/   "));
+		builder.append(Text.of(Format.THEME, "|      "));
+		builder.append(Text.of(TextColors.AQUA, "      v", Reference.VERSION));
+		Sponge.getServer().getConsole().sendMessage(builder.build());
 
-        // Line 6
-        builder.removeAll();
-        builder.append(Text.of(Format.THEME, " |    \\  | "));
-        builder.append(Text.of(TextColors.RED, "||    \\\\  || "));
-        builder.append(Text.of(Format.THEME, "|        "));
-        builder.append(Text.of(Format.THEME, "|"));
-        Sponge.getServer().getConsole().sendMessage(builder.build());
+		// Line 6
+		builder.removeAll();
+		builder.append(Text.of(Format.THEME, " |    \\  | "));
+		builder.append(Text.of(TextColors.RED, "||    \\\\  || "));
+		builder.append(Text.of(Format.THEME, "|        "));
+		builder.append(Text.of(Format.THEME, "|"));
+		Sponge.getServer().getConsole().sendMessage(builder.build());
 
-        // Line 7
-        builder.removeAll();
-        builder.append(Text.of(Format.THEME, " |     \\ | "));
-        builder.append(Text.of(TextColors.RED, " \\\\____\\\\//  "));
-        builder.append(Text.of(Format.THEME, "|        "));
-        builder.append(Text.of(Format.THEME, "|"));
-        Sponge.getServer().getConsole().sendMessage(builder.build());
+		// Line 7
+		builder.removeAll();
+		builder.append(Text.of(Format.THEME, " |     \\ | "));
+		builder.append(Text.of(TextColors.RED, " \\\\____\\\\//  "));
+		builder.append(Text.of(Format.THEME, "|        "));
+		builder.append(Text.of(Format.THEME, "|"));
+		Sponge.getServer().getConsole().sendMessage(builder.build());
 
-        // Line 8
-        builder.removeAll();
-        builder.append(Text.of(Format.THEME, " |      \\| "));
-        builder.append(Text.of(TextColors.RED, "  \\______/   "));
-        builder.append(Text.of(Format.THEME, "|        "));
-        builder.append(Text.of(Format.THEME, "|______"));
-        Sponge.getServer().getConsole().sendMessage(builder.build());
-        Sponge.getServer().getConsole().sendMessage(Text.of());
+		// Line 8
+		builder.removeAll();
+		builder.append(Text.of(Format.THEME, " |      \\| "));
+		builder.append(Text.of(TextColors.RED, "  \\______/   "));
+		builder.append(Text.of(Format.THEME, "|        "));
+		builder.append(Text.of(Format.THEME, "|______"));
+		Sponge.getServer().getConsole().sendMessage(builder.build());
+		Sponge.getServer().getConsole().sendMessage(Text.of());
 
-    }
+	}
 
 }
