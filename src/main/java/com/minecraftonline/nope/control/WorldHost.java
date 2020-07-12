@@ -34,33 +34,33 @@ import java.util.UUID;
 
 public class WorldHost extends Host {
 
-	private UUID worldUuid;
-	private Map<String, Region> regions = new HashMap<>();
+    private UUID worldUuid;
+    private Map<String, Region> regions = new HashMap<>();
 
-	public WorldHost(@Nonnull UUID worldUuid) {
-		Preconditions.checkNotNull(worldUuid);
-		this.worldUuid = worldUuid;
-	}
+    public WorldHost(@Nonnull UUID worldUuid) {
+        Preconditions.checkNotNull(worldUuid);
+        this.worldUuid = worldUuid;
+    }
 
-	public UUID getWorldUuid() {
-		return this.worldUuid;
-	}
+    public UUID getWorldUuid() {
+        return this.worldUuid;
+    }
 
-	public Map<String, Region> getRegions() {
-		return regions;
-	}
+    public Map<String, Region> getRegions() {
+        return regions;
+    }
 
-	public void addRegion(String regionId, Region region) {
-		this.regions.put(regionId, region);
-	}
+    public void addRegion(String regionId, Region region) {
+        this.regions.put(regionId, region);
+    }
 
-	public void removeRegion(String regionId) {
-		this.regions.remove(regionId);
-	}
+    public void removeRegion(String regionId) {
+        this.regions.remove(regionId);
+    }
 
-	@Nonnull
-	@Override
-	public Setting.Applicability getApplicability() {
-		return Setting.Applicability.WORLD;
-	}
+    @Nonnull
+    @Override
+    public Setting.Applicability getApplicability() {
+        return Setting.Applicability.WORLD;
+    }
 }
