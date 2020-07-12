@@ -12,7 +12,7 @@ public class SettingsTest {
 	public void checkUnique() {
 		try {
 			Settings.load();
-			// BEEP BOOP
+			// BEEP BOOP BEEP
 		} catch (Settings.SettingNotUniqueException e) {
 			fail(e.getMessage());
 		}
