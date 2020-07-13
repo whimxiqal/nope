@@ -12,6 +12,9 @@ public class Vector3dSerializer implements TypeSerializer<Vector3d> {
   @Nullable
   @Override
   public Vector3d deserialize(@NonNull TypeToken<?> type, @NonNull ConfigurationNode value) throws ObjectMappingException {
+    if (value.isVirtual()) {
+      return null;
+    }
     return new Vector3d(
         value.getNode("x").getDouble(),
         value.getNode("y").getDouble(),

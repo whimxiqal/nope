@@ -1,4 +1,4 @@
-package com.minecraftonline.nope.config.serializer;
+package com.minecraftonline.nope.config.serializer.flag;
 
 import com.minecraftonline.nope.control.flags.FlagState;
 import com.minecraftonline.nope.control.flags.FlagUtil;

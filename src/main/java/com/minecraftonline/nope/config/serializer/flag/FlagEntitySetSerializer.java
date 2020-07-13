@@ -1,4 +1,4 @@
-package com.minecraftonline.nope.config.serializer;
+package com.minecraftonline.nope.config.serializer.flag;
 
 import com.google.common.reflect.TypeToken;
 import com.minecraftonline.nope.control.flags.FlagEntitySet;
@@ -19,6 +19,9 @@ public class FlagEntitySetSerializer implements TypeSerializer<FlagEntitySet> {
   @Override
   public FlagEntitySet deserialize(@NonNull TypeToken<?> type, @NonNull ConfigurationNode value) throws ObjectMappingException {
     Set<EntityType> set = new HashSet<>(value.getList(TypeTokens.ENTITY_TYPE_TOKEN));
+    if (set.size() == 0) {
+      return null;
+    }
     FlagEntitySet flagEntitySet = new FlagEntitySet(set);
     FlagUtil.deserializeGroup(flagEntitySet, value);
     return flagEntitySet;

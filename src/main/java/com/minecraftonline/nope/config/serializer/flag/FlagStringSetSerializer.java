@@ -1,4 +1,4 @@
-package com.minecraftonline.nope.config.serializer;
+package com.minecraftonline.nope.config.serializer.flag;
 
 import com.google.common.reflect.TypeToken;
 import com.minecraftonline.nope.control.flags.FlagStringSet;
@@ -20,6 +20,9 @@ public class FlagStringSetSerializer implements TypeSerializer<FlagStringSet> {
   @Override
   public FlagStringSet deserialize(@NonNull TypeToken<?> type, @NonNull ConfigurationNode value) throws ObjectMappingException {
     Set<String> stringSet = new HashSet<>(value.getList(TypeTokens.STRING_TOKEN));
+    if (stringSet.size() == 0) {
+      return null;
+    }
     FlagStringSet flagStringSet = new FlagStringSet(stringSet);
     FlagUtil.deserializeGroup(flagStringSet, value);
     return flagStringSet;

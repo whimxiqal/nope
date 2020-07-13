@@ -1,4 +1,4 @@
-package com.minecraftonline.nope.config.serializer;
+package com.minecraftonline.nope.config.serializer.flag;
 
 import com.google.common.reflect.TypeToken;
 import com.minecraftonline.nope.control.flags.FlagInteger;
@@ -13,6 +13,9 @@ public class FlagIntegerSerializer implements TypeSerializer<FlagInteger> {
   @Nullable
   @Override
   public FlagInteger deserialize(@NonNull TypeToken<?> type, @NonNull ConfigurationNode value) throws ObjectMappingException {
+    if (value.isVirtual()) {
+      return null;
+    }
     int i = value.getInt();
     FlagInteger flagInteger = new FlagInteger(i);
     FlagUtil.deserializeGroup(flagInteger, value);
