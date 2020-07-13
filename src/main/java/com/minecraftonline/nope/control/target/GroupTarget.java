@@ -1,4 +1,4 @@
-package com.minecraftonline.nope.config.target;
+package com.minecraftonline.nope.control.target;
 
 import org.spongepowered.api.entity.living.player.Player;
 
@@ -16,6 +16,15 @@ public class GroupTarget implements Target {
 
   @Override
   public String serialize() {
-    return "g:" + groupName;
+    return groupName;
+  }
+
+  @Override
+  public TargetType getTargetType() {
+    return TargetType.GROUP;
+  }
+
+  public static GroupTarget deserialize(String string) {
+    return new GroupTarget(string);
   }
 }

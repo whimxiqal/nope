@@ -10,6 +10,7 @@ import com.minecraftonline.nope.control.Settings;
 import com.minecraftonline.nope.control.WorldHost;
 import ninja.leaping.configurate.ConfigurationOptions;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
+import ninja.leaping.configurate.objectmapping.serialize.TypeSerializerCollection;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.world.World;
 
@@ -70,9 +71,7 @@ public class GlobalConfigManager extends ConfigManager {
     for (Map.Entry<World, WorldConfigManager> entry : this.worldConfigs.entrySet()) {
       WorldHost worldHost = globalHost.getWorld(entry.getKey());
       fillSettings(worldHost, entry.getValue().getConfig());
-      for (Map.Entry<String, Region> region : worldHost.getRegions().entrySet()) {
-        fillSettings(region.getValue(), entry.getValue().getRegion(region.getKey()).get());
-      }
+      // Regions already filled, and they use a different system as well.
     }
   }
 
@@ -84,6 +83,9 @@ public class GlobalConfigManager extends ConfigManager {
    * @param source ConfigContainer to get config from
    */
   public void fillSettings(Host host, ConfigContainer<CommentedConfigurationNode> source) {
+    if (host instanceof Region) {
+      return;
+    }
     for (Setting<?> setting : Settings.REGISTRY_MODULE.getByApplicability(host.getApplicability())) {
       setting.getConfigurationPath().ifPresent(path -> setValue(host, path, source, setting));
     }
@@ -97,16 +99,7 @@ public class GlobalConfigManager extends ConfigManager {
     host.set(setting, configContainer.getNodeValue(path, TypeToken.of(setting.getTypeClass())));
   }
 
-  // Unused, and probably unneeded
-    /*public WorldConfigManager getWorldManager(World world) {
-        return this.worldConfigs.get(world);
-    }
-
-    public ConfigContainer<CommentedConfigurationNode> getWorldConfig(World world) {
-        return this.worldConfigs.get(world).getConfig();
-    }
-
-    public Optional<ConfigContainer<CommentedConfigurationNode>> getRegionConfig(World world, String id) {
-        return getWorldManager(world).getRegion(id);
-    }*/
+  public static TypeSerializerCollection getTypeSerializers() {
+    return ConfigurationOptions.defaults().getSerializers();
+  }
 }

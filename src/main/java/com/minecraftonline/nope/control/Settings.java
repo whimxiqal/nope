@@ -124,6 +124,8 @@ public final class Settings {
     }
   }
 
+  // https://worldguard.enginehub.org/en/latest/config/
+
   // Sorts fields alphabetically
   // SORTFIELDS:ON
 
@@ -150,6 +152,9 @@ public final class Settings {
   public static final Setting<Boolean> OP_PERMISSIONS = Setting.of("op-permissions", true, Boolean.class)
       .withApplicability(Setting.Applicability.WORLD)
       .withConfigurationPath("op-permissions");
+
+  // test flag,
+  public static final Setting<Flag> Z_FLAG = Setting.of("z-flag", new Flag<>(false, Boolean.class), Flag.class);
 
   // SORTFIELDS:OFF
 }

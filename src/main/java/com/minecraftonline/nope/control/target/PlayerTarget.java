@@ -1,4 +1,4 @@
-package com.minecraftonline.nope.config.target;
+package com.minecraftonline.nope.control.target;
 
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.Player;
@@ -13,6 +13,10 @@ public class PlayerTarget implements Target {
         .orElseThrow(PlayerTarget.PlayerNotFoundException::new);
   }
 
+  public PlayerTarget(UUID uuid) {
+    this.uuid = uuid;
+  }
+
   @Override
   public boolean isTargeted(Player player) {
     return player.getUniqueId().equals(this.uuid);
@@ -21,6 +25,15 @@ public class PlayerTarget implements Target {
   @Override
   public String serialize() {
     return uuid.toString();
+  }
+
+  @Override
+  public TargetType getTargetType() {
+    return TargetType.PLAYER;
+  }
+
+  public static PlayerTarget deserialize(String s) {
+    return new PlayerTarget(UUID.fromString(s));
   }
 
   static class PlayerNotFoundException extends Exception {
