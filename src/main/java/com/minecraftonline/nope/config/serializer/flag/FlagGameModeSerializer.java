@@ -1,4 +1,4 @@
-package com.minecraftonline.nope.config.serializer;
+package com.minecraftonline.nope.config.serializer.flag;
 
 import com.google.common.reflect.TypeToken;
 import com.minecraftonline.nope.control.flags.FlagGameMode;
@@ -17,7 +17,7 @@ public class FlagGameModeSerializer implements TypeSerializer<FlagGameMode> {
   public FlagGameMode deserialize(@NonNull TypeToken<?> type, @NonNull ConfigurationNode value) throws ObjectMappingException {
     GameMode gameMode = value.getValue(TypeTokens.GAME_MODE_TOKEN);
     if (gameMode == null) {
-      throw new ObjectMappingException("Cannot deserialize a null GameMode");
+      return null;
     }
     FlagGameMode flagGameMode = new FlagGameMode(gameMode);
     FlagUtil.deserializeGroup(flagGameMode, value);

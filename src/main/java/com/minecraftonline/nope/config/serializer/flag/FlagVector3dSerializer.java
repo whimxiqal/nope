@@ -1,4 +1,4 @@
-package com.minecraftonline.nope.config.serializer;
+package com.minecraftonline.nope.config.serializer.flag;
 
 import com.flowpowered.math.vector.Vector3d;
 import com.google.common.reflect.TypeToken;
@@ -16,7 +16,7 @@ public class FlagVector3dSerializer implements TypeSerializer<FlagVector3d> {
   public FlagVector3d deserialize(@NonNull TypeToken<?> type, @NonNull ConfigurationNode value) throws ObjectMappingException {
     Vector3d vector3d = value.getValue(TypeToken.of(Vector3d.class));
     if (vector3d == null) {
-      throw new ObjectMappingException("Cannot deserialize null Vector3d");
+      return null;
     }
     FlagVector3d flagVector3d = new FlagVector3d(vector3d);
     FlagUtil.deserializeGroup(flagVector3d, value);

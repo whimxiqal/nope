@@ -1,4 +1,4 @@
-package com.minecraftonline.nope.config.serializer;
+package com.minecraftonline.nope.config.serializer.flag;
 
 import com.google.common.reflect.TypeToken;
 import com.minecraftonline.nope.control.flags.FlagBoolean;
@@ -23,6 +23,6 @@ public class FlagBooleanSerializer implements TypeSerializer<FlagBoolean> {
 
   @Override
   public void serialize(@NonNull TypeToken<?> type, @Nullable FlagBoolean obj, @NonNull ConfigurationNode value) throws ObjectMappingException {
-
+    FlagUtil.serialize(obj, value);
   }
 }

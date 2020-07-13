@@ -1,4 +1,4 @@
-package com.minecraftonline.nope.config.serializer;
+package com.minecraftonline.nope.config.serializer.flag;
 
 import com.google.common.reflect.TypeToken;
 import com.minecraftonline.nope.control.flags.FlagString;
@@ -16,7 +16,7 @@ public class FlagStringSerializer implements TypeSerializer<FlagString> {
   public FlagString deserialize(@NonNull TypeToken<?> type, @NonNull ConfigurationNode value) throws ObjectMappingException {
     String string = value.getString();
     if (string == null) {
-      throw new ObjectMappingException("Cannot deserialize a null string for a flag");
+      return null;
     }
     FlagString flagString = new FlagString(string);
     FlagUtil.deserializeGroup(flagString, value);

@@ -1,4 +1,4 @@
-package com.minecraftonline.nope.config.serializer;
+package com.minecraftonline.nope.config.serializer.flag;
 
 import com.google.common.reflect.TypeToken;
 import com.minecraftonline.nope.control.flags.FlagDouble;
@@ -13,6 +13,9 @@ public class FlagDoubleSerializer implements TypeSerializer<FlagDouble> {
   @Nullable
   @Override
   public FlagDouble deserialize(@NonNull TypeToken<?> type, @NonNull ConfigurationNode value) throws ObjectMappingException {
+    if (value.isVirtual()) {
+      return null;
+    }
     double d = value.getDouble();
     FlagDouble flagDouble = new FlagDouble(d);
     FlagUtil.deserializeGroup(flagDouble, value);

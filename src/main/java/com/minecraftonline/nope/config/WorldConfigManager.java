@@ -49,7 +49,8 @@ public class WorldConfigManager extends ConfigManager {
 
   @Override
   public void saveExtra() {
-    regions.save();
+    saveRegions();
+    this.regions.save();
   }
 
   public WorldHost getWorldHost() {
@@ -88,7 +89,11 @@ public class WorldConfigManager extends ConfigManager {
 
   private static <T extends Serializable> void setValue(Region region, Setting<T> setting, CommentedConfigurationNode node, String path) {
     try {
-      region.set(setting, node.getNode((Object[]) path.split(".")).getValue(TypeToken.of(setting.getTypeClass())));
+      T value = node.getNode((Object[]) path.split(".")).getValue(TypeToken.of(setting.getTypeClass()));
+      if (value == null) {
+        return;
+      }
+      region.set(setting, value);
     } catch (ObjectMappingException e) {
       Nope.getInstance().getLogger().error("Error loading region setting", e);
     }
@@ -102,38 +107,6 @@ public class WorldConfigManager extends ConfigManager {
           ConfigurationNode node = regionNode.getNode((Object[])confPath.split("."));
           node.setValue(settingEntry.getValue());
         });
-      }
-    }
-  }
-
-  private void loadFlags(Region region, CommentedConfigurationNode flagsNode) {
-    for (Map.Entry<Object, ? extends CommentedConfigurationNode> flagEntry : flagsNode.getChildrenMap().entrySet()) {
-      String flagId = flagEntry.getKey().toString();
-      if (flagId.contains("-group")) {
-        continue; // look for the not -group then get -group if its there
-      }
-      Optional<Setting<?>> setting = Settings.REGISTRY_MODULE.getById(flagId);
-
-      try {
-        if (setting.isPresent() && setting.get().getDefaultValue() instanceof Flag<?>) {
-          Setting<Flag<?>> flag = (Setting<Flag<?>>) setting.get(); // But it is checked tho
-          setValue(region, flag, flag.getDefaultValue(), flagEntry.getValue(), flagsNode);
-        }
-      } catch (ObjectMappingException e) {
-        Nope.getInstance().getLogger().error("Error reading region flag: " + flagId, e);
-      }
-    }
-  }
-
-  private void saveFlags(Region region, CommentedConfigurationNode flagsNode) {
-    for (Map.Entry<Setting<?>, ?> setting : region.getSettingMap().entrySet()) {
-      if (setting.getValue() instanceof Flag<?>) {
-        Flag<?> flag = (Flag<?>) setting.getValue();
-        String id = setting.getKey().getId();
-        flagsNode.getNode(id).setValue(flag.getValue());
-        if (flag.getGroup() != Flag.TargetGroup.ALL) {
-          flagsNode.getNode(id + "-group").setValue(flag.getGroup().toString());
-        }
       }
     }
   }
