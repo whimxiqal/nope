@@ -25,11 +25,24 @@
 
 package com.minecraftonline.nope.control;
 
+import com.flowpowered.math.vector.Vector3d;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
+import com.google.common.collect.Sets;
+import com.minecraftonline.nope.control.flags.FlagBoolean;
+import com.minecraftonline.nope.control.flags.FlagDouble;
+import com.minecraftonline.nope.control.flags.FlagEntitySet;
+import com.minecraftonline.nope.control.flags.FlagGameMode;
+import com.minecraftonline.nope.control.flags.FlagInteger;
+import com.minecraftonline.nope.control.flags.FlagState;
+import com.minecraftonline.nope.control.flags.FlagString;
+import com.minecraftonline.nope.control.flags.FlagStringSet;
+import com.minecraftonline.nope.control.flags.FlagVector3d;
+import com.minecraftonline.nope.control.target.TargetSet;
+import org.spongepowered.api.entity.living.player.gamemode.GameModes;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -129,34 +142,5 @@ public final class Settings {
 
   // Sorts fields alphabetically
   // SORTFIELDS:ON
-
-  public static final Setting<Boolean> BUILD_PERMISSIONS = Setting.of("build-permission-nodes-enable", false, Boolean.class);
-
-  public static final Setting<Boolean> DEOP_ON_ENTER = Setting.of("deop-on-enter", false, Boolean.class)
-      .withComment("Set to true will deop any player when they enter.")
-      .withDescription("If this setting is applied globally, then anytime and op-ed player joins the server, their op status is removed. "
-          + "If this setting is applied to just a world, then only when they join that specific world do they get de-opped.")
-      .withApplicability(Setting.Applicability.GLOBAL, Setting.Applicability.WORLD)
-      .withConfigurationPath("security.deop-on-enter");
-
-  public static final Setting<Boolean> ENABLE_PLUGIN = Setting.of("enable-plugin", true, Boolean.class)
-      .withDescription("Set to false will disable all plugin functionality")
-      .withConfigurationPath("enable-plugin");
-
-  public static final Setting<Boolean> LEAF_DECAY = Setting.of("leaf-decay", true, Boolean.class)
-      .withDescription("Set to false will disable all natural leaf decay")
-      .withApplicability(Setting.Applicability.GLOBAL,
-          Setting.Applicability.WORLD,
-          Setting.Applicability.REGION)
-      .withConfigurationPath("dynamics.leaf-decay");
-
-  public static final Setting<Boolean> OP_PERMISSIONS = Setting.of("op-permissions", true, Boolean.class)
-      .withApplicability(Setting.Applicability.WORLD)
-      .withConfigurationPath("op-permissions");
-
-  // test flag,
-  public static final Setting<Flag> Z_FLAG = Setting.of("z-flag", new Flag<>(false, Boolean.class), Flag.class);
-
-  // SORTFIELDS:OFF
+  // SORTFIELDS:ON
 }
-// TODO: add more

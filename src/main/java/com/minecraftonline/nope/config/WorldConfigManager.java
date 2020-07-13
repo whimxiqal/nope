@@ -3,7 +3,7 @@ package com.minecraftonline.nope.config;
 import com.google.common.reflect.TypeToken;
 import com.minecraftonline.nope.Nope;
 import com.minecraftonline.nope.config.supplier.ConfigLoaderSupplier;
-import com.minecraftonline.nope.control.Flag;
+import com.minecraftonline.nope.control.flags.Flag;
 import com.minecraftonline.nope.control.GlobalRegion;
 import com.minecraftonline.nope.control.Host;
 import com.minecraftonline.nope.control.Region;
@@ -11,14 +11,13 @@ import com.minecraftonline.nope.control.RegularRegion;
 import com.minecraftonline.nope.control.Setting;
 import com.minecraftonline.nope.control.Settings;
 import com.minecraftonline.nope.control.WorldHost;
-import com.minecraftonline.nope.control.target.TargetSet;
+import javafx.util.Pair;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.objectmapping.ObjectMappingException;
 import org.spongepowered.api.util.TypeTokens;
 import org.spongepowered.api.world.World;
 
-import java.io.File;
 import java.io.Serializable;
 import java.nio.file.Path;
 import java.util.Collection;
@@ -41,7 +40,11 @@ public class WorldConfigManager extends ConfigManager {
   public void loadExtra() {
     this.worldHost = new WorldHost(world.getUniqueId());
     Path regions = this.configDir.resolve("regions" + CONFIG_FILE_EXTENSION);
-    loadRegions(regions);
+    try {
+      loadRegions(regions);
+    } catch (ObjectMappingException e) {
+      Nope.getInstance().getLogger().error("Error loading regions", e);
+    }
   }
 
   @Override
@@ -61,39 +64,46 @@ public class WorldConfigManager extends ConfigManager {
     return Optional.ofNullable(this.regionConfig.get(id));
   }
 
-  private void loadRegions(Path path) {
+  public void loadRegions(Path path) throws ObjectMappingException {
     regions = new ConfigContainer<>(configLoaderSupplier.createConfigLoader(path));
     regions.load();
     for (Map.Entry<Object, ? extends CommentedConfigurationNode> entry : regions.getConfigNode().getChildrenMap().entrySet()) {
-      CommentedConfigurationNode regionNode = entry.getValue();
-      try {
-        Region region;
-        if (entry.getKey().toString().equals("__global__")) {
-          region = new GlobalRegion(world.getUniqueId());
-        }
-        else {
-          regionNode.getNode("min");
-          region = new RegularRegion(world,
-              regionNode.getNode("min").getValue(TypeTokens.VECTOR_3D_TOKEN),
-              regionNode.getNode("max").getValue(TypeTokens.VECTOR_3D_TOKEN)
-          );
-        }
-        region.setOwners(regionNode.getNode("owners").getValue(TypeToken.of(TargetSet.class)));
-        region.setMembers(regionNode.getNode("members").getValue(TypeToken.of(TargetSet.class)));
-
-        region.setPriority(regionNode.getNode("priority").getInt());
-
-        // TODO: add type https://worldguard.enginehub.org/en/latest/regions/storage/#yaml
-
-        loadFlags(region, entry.getValue().getNode("flags"));
-
-        this.regionConfig.put(entry.getKey().toString(), region);
-      } catch (ObjectMappingException e) {
-        Nope.getInstance().getLogger().error("Error loading region: '" + entry.getKey().toString() + "'", e);
+      boolean isGlobalRegion = entry.getKey().toString().equals("__global__");
+      Region region;
+      if (isGlobalRegion) {
+        region = new GlobalRegion(world.getUniqueId());
+      }
+      else {
+        region = new RegularRegion(world);
       }
 
+      for (Setting<?> setting : Settings.REGISTRY_MODULE.getByApplicability(Setting.Applicability.REGION)) {
+        if (isGlobalRegion && (setting == Settings.REGION_MIN || setting == Settings.REGION_MAX)) {
+          continue; // Not applicable to global regions
+        }
+        setting.getConfigurationPath().ifPresent(confPath -> setValue(region, setting, entry.getValue(), confPath));
+      }
     }
+  }
 
+  private static <T extends Serializable> void setValue(Region region, Setting<T> setting, CommentedConfigurationNode node, String path) {
+    try {
+      region.set(setting, node.getNode((Object[]) path.split(".")).getValue(TypeToken.of(setting.getTypeClass())));
+    } catch (ObjectMappingException e) {
+      Nope.getInstance().getLogger().error("Error loading region setting", e);
+    }
+  }
+
+  public void saveRegions() {
+    for (Map.Entry<String, Region> entry : this.regionConfig.entrySet()) {
+      CommentedConfigurationNode regionNode = this.regions.getConfigNode().getNode(entry.getKey());
+      for (Map.Entry<Setting<?>, ?> settingEntry : entry.getValue().getSettingMap().entrySet()) {
+        settingEntry.getKey().getConfigurationPath().ifPresent(confPath -> {
+          ConfigurationNode node = regionNode.getNode((Object[])confPath.split("."));
+          node.setValue(settingEntry.getValue());
+        });
+      }
+    }
   }
 
   private void loadFlags(Region region, CommentedConfigurationNode flagsNode) {
@@ -111,6 +121,19 @@ public class WorldConfigManager extends ConfigManager {
         }
       } catch (ObjectMappingException e) {
         Nope.getInstance().getLogger().error("Error reading region flag: " + flagId, e);
+      }
+    }
+  }
+
+  private void saveFlags(Region region, CommentedConfigurationNode flagsNode) {
+    for (Map.Entry<Setting<?>, ?> setting : region.getSettingMap().entrySet()) {
+      if (setting.getValue() instanceof Flag<?>) {
+        Flag<?> flag = (Flag<?>) setting.getValue();
+        String id = setting.getKey().getId();
+        flagsNode.getNode(id).setValue(flag.getValue());
+        if (flag.getGroup() != Flag.TargetGroup.ALL) {
+          flagsNode.getNode(id + "-group").setValue(flag.getGroup().toString());
+        }
       }
     }
   }
