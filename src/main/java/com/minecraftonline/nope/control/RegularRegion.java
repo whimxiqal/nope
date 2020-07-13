@@ -5,11 +5,17 @@ import org.spongepowered.api.util.AABB;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 
+import javax.annotation.Nullable;
 import java.util.UUID;
 
 public class RegularRegion extends Region {
+  @Nullable
   private AABB aabb;
   private UUID worldUUID;
+
+  public RegularRegion(World world) {
+    this.worldUUID = world.getUniqueId();
+  }
 
   public RegularRegion(Location<World> corner1, Location<World> corner2) {
     if (!corner1.getExtent().equals(corner2.getExtent())) {
@@ -24,9 +30,17 @@ public class RegularRegion extends Region {
     this.aabb = new AABB(corner1, corner2);
   }
 
+  public void setAabb(AABB aabb) {
+    this.aabb = aabb;
+  }
+
   @Override
   public boolean isLocationInRegion(Location<World> location) {
     return location.getExtent().getUniqueId().equals(worldUUID)
         && aabb.contains(location.getPosition());
+  }
+
+  public AABB getAabb() {
+    return aabb;
   }
 }

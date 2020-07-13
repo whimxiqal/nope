@@ -42,7 +42,7 @@ import java.util.Set;
 @CatalogedBy(Settings.class)
 public class Setting<T extends Serializable> implements CatalogType, Serializable {
 
-  enum Applicability {
+  public enum Applicability {
     REGION,
     WORLD,
     GLOBAL

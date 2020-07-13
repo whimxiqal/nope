@@ -42,6 +42,13 @@ sortClassFields {
     add 'main', 'com.minecraftonline.nope.control.Settings'
 }
 
+test {
+    testLogging {
+        events "failed"
+        exceptionFormat "full"
+    }
+}
+
 // Sort class fields on build.
 build.dependsOn(sortClassFields)
 build.dependsOn(test)

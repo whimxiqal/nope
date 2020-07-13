@@ -34,9 +34,6 @@ import javax.annotation.Nullable;
 
 public abstract class Region extends Host {
 
-  private TargetSet owners = new TargetSet();
-  private TargetSet members = new TargetSet();
-  private int priority;
   // TODO: add type (https://worldguard.enginehub.org/en/latest/regions/storage/#yaml)
   @Nonnull
   @Override
@@ -45,20 +42,4 @@ public abstract class Region extends Host {
   }
 
   public abstract boolean isLocationInRegion(Location<World> location);
-
-  public void setOwners(TargetSet owners) {
-    this.owners = owners;
-  }
-
-  public void setMembers(TargetSet members) {
-    this.members = members;
-  }
-
-  public int getPriority() {
-    return priority;
-  }
-
-  public void setPriority(int priority) {
-    this.priority = priority;
-  }
 }

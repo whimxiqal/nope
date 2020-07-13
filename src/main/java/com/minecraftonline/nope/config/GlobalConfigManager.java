@@ -71,7 +71,7 @@ public class GlobalConfigManager extends ConfigManager {
     for (Map.Entry<World, WorldConfigManager> entry : this.worldConfigs.entrySet()) {
       WorldHost worldHost = globalHost.getWorld(entry.getKey());
       fillSettings(worldHost, entry.getValue().getConfig());
-      // Regions already filled, and they use a different system as well.
+      // Region uses different method of filling
     }
   }
 
@@ -91,11 +91,15 @@ public class GlobalConfigManager extends ConfigManager {
     }
   }
 
+  public WorldConfigManager getWorldConfig(World world) {
+    return this.worldConfigs.get(world);
+  }
+
   /**
    * Just used so that generics can be used correctly
    */
   @SuppressWarnings("UnstableApiUsage")
-  private static <T extends Serializable> void setValue(Host host, String path, ConfigContainer<CommentedConfigurationNode> configContainer, Setting<T> setting) {
+  static <T extends Serializable> void setValue(Host host, String path, ConfigContainer<CommentedConfigurationNode> configContainer, Setting<T> setting) {
     host.set(setting, configContainer.getNodeValue(path, TypeToken.of(setting.getTypeClass())));
   }
 

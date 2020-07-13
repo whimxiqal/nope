@@ -4,7 +4,9 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import org.spongepowered.api.entity.living.player.Player;
 
-public class TargetSet {
+import java.io.Serializable;
+
+public class TargetSet implements Serializable {
   private Multimap<Target.TargetType, Target> targets = HashMultimap.create();
 
   public TargetSet() {}

@@ -1,4 +1,4 @@
-package com.minecraftonline.nope.control;
+package com.minecraftonline.nope.control.flags;
 
 import com.minecraftonline.nope.config.GlobalConfigManager;
 import javafx.util.Pair;
