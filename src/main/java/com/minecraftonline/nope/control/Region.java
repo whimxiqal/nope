@@ -25,15 +25,39 @@
 
 package com.minecraftonline.nope.control;
 
+import com.minecraftonline.nope.control.target.TargetSet;
+import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.World;
+
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
-public class Region extends Host {
-	@Nonnull
-	@Override
-	public Setting.Applicability getApplicability() {
-		return Setting.Applicability.REGION;
-	}
+public abstract class Region extends Host {
+  private TargetSet owners = new TargetSet();
+  private TargetSet members = new TargetSet();
+  private int priority;
+  // TODO: add type (https://worldguard.enginehub.org/en/latest/regions/storage/#yaml)
+  @Nonnull
+  @Override
+  public Setting.Applicability getApplicability() {
+    return Setting.Applicability.REGION;
+  }
 
-	// TODO: implement
+  public abstract boolean isLocationInRegion(Location<World> location);
 
+  public void setOwners(TargetSet owners) {
+    this.owners = owners;
+  }
+
+  public void setMembers(TargetSet members) {
+    this.members = members;
+  }
+
+  public int getPriority() {
+    return priority;
+  }
+
+  public void setPriority(int priority) {
+    this.priority = priority;
+  }
 }
