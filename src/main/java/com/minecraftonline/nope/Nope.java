@@ -26,6 +26,7 @@
 package com.minecraftonline.nope;
 
 import com.google.inject.Inject;
+import com.minecraftonline.nope.command.ExampleCommand;
 import com.minecraftonline.nope.command.common.NopeCommandTree;
 import com.minecraftonline.nope.config.GlobalConfigManager;
 import com.minecraftonline.nope.config.hocon.HoconGlobalConfigManager;
@@ -82,28 +83,29 @@ public class Nope {
   public void onPreInitialize(GamePreInitializationEvent event) {
     instance = this;
     Extra.printSplashscreen();
+
+    // Load config
+    globalConfigManager = new HoconGlobalConfigManager(configDir);
+    globalConfigManager.loadAll();
   }
 
   @Listener
   public void onServerStart(GameStartedServerEvent event) {
     // Register entire Nope command tree
     commandTree = new NopeCommandTree();
+    //new ExampleCommand(commandTree.root());
     commandTree.register();
-
-    // Load config
-    globalConfigManager = new HoconGlobalConfigManager(configDir);
-//    globalConfigManager.loadAll();
   }
 
   @Listener
   public void onServerStopping(GameStoppingServerEvent event) {
-//    globalConfigManager.saveAll();
+    globalConfigManager.saveAll();
   }
 
   @Listener
   public void onLoadWorld(LoadWorldEvent event) {
     // Possible that a new world has been created, however at the start we already load all known worlds
-//    globalHost.addWorldIfNotPresent(event.getTargetWorld());
+    globalHost.addWorldIfNotPresent(event.getTargetWorld());
   }
 
   public static Nope getInstance() {

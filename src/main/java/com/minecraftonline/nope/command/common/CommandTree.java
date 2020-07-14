@@ -54,7 +54,6 @@ public abstract class CommandTree {
 
   public CommandTree(@Nonnull CommandNode root) {
     Preconditions.checkNotNull(root);
-    this.root = root;
   }
 
   public CommandNode root() {

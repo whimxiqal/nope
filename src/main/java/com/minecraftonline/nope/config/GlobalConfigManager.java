@@ -42,6 +42,8 @@ import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.gradle.internal.impldep.com.google.api.client.repackaged.com.google.common.base.Preconditions.checkNotNull;
+
 /**
  * Global config manager, contains world configs, who contain regions
  * Not abstract as it has no methods that need to be implemented, but
@@ -50,9 +52,7 @@ import java.util.Map;
  */
 public class GlobalConfigManager extends ConfigManager {
   private Map<World, WorldConfigManager> worldConfigs = new HashMap<>();
-  protected Path configDir;
 
-  protected ConfigLoaderSupplier configLoaderSupplier;
   private ConfigurationOptions configurationOptions;
 
   public GlobalConfigManager(Path configDir, ConfigLoaderSupplier configLoaderSupplier) {
@@ -79,6 +79,9 @@ public class GlobalConfigManager extends ConfigManager {
    */
   public void loadAdditionalWorld(World world) {
     worldConfigs.computeIfAbsent(world, k -> {
+      if (configDir == null) throw new NullPointerException("configDir");
+      if (world == null) throw new NullPointerException("world");
+      if (configLoaderSupplier == null) throw new NullPointerException("configLoaderSupplier");
       WorldConfigManager worldConfigManager = new WorldConfigManager(configDir, world, configLoaderSupplier);
       worldConfigManager.loadAll();
       return worldConfigManager;
