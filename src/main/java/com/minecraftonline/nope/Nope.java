@@ -26,6 +26,7 @@
 package com.minecraftonline.nope;
 
 import com.google.inject.Inject;
+import com.minecraftonline.nope.command.ExampleCommand;
 import com.minecraftonline.nope.command.common.NopeCommandTree;
 import com.minecraftonline.nope.config.GlobalConfigManager;
 import com.minecraftonline.nope.config.hocon.HoconGlobalConfigManager;
@@ -46,79 +47,80 @@ import org.spongepowered.api.plugin.PluginContainer;
 import java.nio.file.Path;
 
 @Plugin(
-		id = Reference.ID,
-		name = Reference.NAME,
-		description = Reference.DESCRIPTION,
-		url = Reference.URL,
-		authors = {"PietElite", "tyhdefu", "14mRh4X0r"},
-		version = Reference.VERSION,
-		dependencies = {@Dependency(id = "worldedit")}
+    id = Reference.ID,
+    name = Reference.NAME,
+    description = Reference.DESCRIPTION,
+    url = Reference.URL,
+    authors = {"PietElite", "tyhdefu", "14mRh4X0r"},
+    version = Reference.VERSION,
+    dependencies = {@Dependency(id = "worldedit")}
 )
 public class Nope {
 
-	private static Nope instance;
+  private static Nope instance;
 
-	// Injections
+  // Injections
 
-	@Inject
-	private Logger logger;
+  @Inject
+  private Logger logger;
 
-	@Inject
-	private PluginContainer pluginContainer;
+  @Inject
+  private PluginContainer pluginContainer;
 
-	@Inject
-	@ConfigDir(sharedRoot = false)
-	private Path configDir;
+  @Inject
+  @ConfigDir(sharedRoot = false)
+  private Path configDir;
 
-	// Custom fields
+  // Custom fields
 
-	NopeCommandTree commandTree;
+  NopeCommandTree commandTree;
 
-	private GlobalConfigManager globalConfigManager;
+  private GlobalConfigManager globalConfigManager;
 
-	private GlobalHost globalHost = new GlobalHost();
+  private GlobalHost globalHost = new GlobalHost();
 
-	@Listener
-	public void onPreInitialize(GamePreInitializationEvent event) {
-		instance = this;
-		Extra.printSplashscreen();
-	}
+  @Listener
+  public void onPreInitialize(GamePreInitializationEvent event) {
+    instance = this;
+    Extra.printSplashscreen();
 
-	@Listener
-	public void onServerStart(GameStartedServerEvent event) {
-		// Register entire Nope command tree
-		commandTree = new NopeCommandTree();
-		commandTree.register();
+    // Load config
+    globalConfigManager = new HoconGlobalConfigManager(configDir);
+    globalConfigManager.loadAll();
+  }
 
-		// Load config
-		globalConfigManager = new HoconGlobalConfigManager(configDir);
-//    globalConfigManager.loadAll();
-	}
+  @Listener
+  public void onServerStart(GameStartedServerEvent event) {
+    // Register entire Nope command tree
+    commandTree = new NopeCommandTree();
+    //new ExampleCommand(commandTree.root());
+    commandTree.register();
+  }
 
-	@Listener
-	public void onServerStopping(GameStoppingServerEvent event) {
-//    globalConfigManager.saveAll();
-	}
+  @Listener
+  public void onServerStopping(GameStoppingServerEvent event) {
+    globalConfigManager.saveAll();
+  }
 
-	@Listener
-	public void onLoadWorld(LoadWorldEvent event) {
-		// Possible that a new world has been created, however at the start we already load all known worlds
-//    globalHost.addWorldIfNotPresent(event.getTargetWorld());
-	}
+  @Listener
+  public void onLoadWorld(LoadWorldEvent event) {
+    // Possible that a new world has been created, however at the start we already load all known worlds
+    globalHost.addWorldIfNotPresent(event.getTargetWorld());
+  }
 
-	public static Nope getInstance() {
-		return instance;
-	}
+  public static Nope getInstance() {
+    return instance;
+  }
 
-	public Logger getLogger() {
-		return logger;
-	}
+  public Logger getLogger() {
+    return logger;
+  }
 
-	public GlobalConfigManager getGlobalConfigManager() {
-		return globalConfigManager;
-	}
+  public GlobalConfigManager getGlobalConfigManager() {
+    return globalConfigManager;
+  }
 
-	public PluginContainer getPluginContainer() {
-		return pluginContainer;
-	}
+  public PluginContainer getPluginContainer() {
+    return pluginContainer;
+  }
 }

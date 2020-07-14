@@ -110,21 +110,4 @@ public class WorldConfigManager extends ConfigManager {
       }
     }
   }
-
-  /**
-   * Nothing to see here. Don't ask questions.
-   * Setting is raw, because when its not raw, compiler goes roar
-   * Java generics great fun 10/10
-   */
-  @SuppressWarnings("unchecked")
-  private static <T> void setValue(Host host, Setting setting, Flag<T> defaultFlag, ConfigurationNode flags, ConfigurationNode node) throws ObjectMappingException {
-    T value = node.getValue(TypeToken.of(defaultFlag.getFlagType()));
-    Flag<T> flag = new Flag<>(value, defaultFlag.getFlagType());
-    host.set(setting, flag);
-
-    String group = flags.getNode(setting.getId() + "-group").getValue(TypeTokens.STRING_TOKEN);
-    if (group != null) {
-      flag.setGroup(Flag.TargetGroup.valueOf(group.toUpperCase()));
-    }
-  }
 }

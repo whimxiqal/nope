@@ -9,17 +9,7 @@ import java.nio.file.Path;
 
 public class HoconGlobalConfigManager extends GlobalConfigManager {
 
-<<<<<<< HEAD
   public HoconGlobalConfigManager(Path configDir) {
     super(configDir, new HoconLoaderSupplier(getTypeSerializers()));
   }
-
-  private static TypeSerializerCollection getTypeSerializers() {
-    return ConfigurationOptions.defaults().getSerializers();
-  }
-=======
-  public HoconGlobalConfigManager(Path configDir) {
-    super(configDir, new HoconLoaderSupplier(GlobalConfigManager.getTypeSerializers()));
-  }
->>>>>>> 9e0f8e2... Reworked region config
 }

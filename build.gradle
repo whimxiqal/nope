@@ -1,7 +1,9 @@
 buildscript {
+    repositories {
+        jcenter()
+    }
     dependencies {
         classpath 'gradle.plugin.org.spongepowered:spongegradle:0.8.1'
-
     }
 }
 
@@ -52,5 +54,4 @@ test {
 // Sort class fields on build.
 build.dependsOn(sortClassFields)
 build.dependsOn(test)
-
 
