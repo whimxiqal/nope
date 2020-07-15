@@ -25,9 +25,7 @@
 
 package com.minecraftonline.nope.command.common;
 
-import com.minecraftonline.nope.Nope;
-import com.minecraftonline.nope.command.ExampleCommand;
-import com.minecraftonline.nope.permission.Permissions;
+import com.minecraftonline.nope.permission.Permission;
 import com.minecraftonline.nope.util.Format;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
@@ -37,25 +35,28 @@ import org.spongepowered.api.text.Text;
 
 import javax.annotation.Nonnull;
 
-public class NopeCommandRoot extends CommandNode {
+public abstract class FunctionlessCommandNode extends CommandNode {
 
-  // TODO: write description
-  private static final Text description = Text.of("NopeCommandRoot command description");
+  public FunctionlessCommandNode(CommandNode parent,
+                                 Permission permission,
+                                 @Nonnull Text description,
+                                 @Nonnull String primaryAlias,
+                                 @Nonnull String... otherAliases) {
+    super(parent, permission, description, primaryAlias, otherAliases);
+  }
 
-  public NopeCommandRoot() {
-    super(null, Permissions.COMMAND_ROOT, description, "nope");
-    addChildren(new ExampleCommand(this));
+  public FunctionlessCommandNode(CommandNode parent,
+                                 Permission permission,
+                                 @Nonnull Text description,
+                                 @Nonnull String primaryAlias,
+                                 boolean addHelp) {
+    super(parent, permission, description, primaryAlias, addHelp);
   }
 
   @Nonnull
   @Override
-  public CommandResult execute(CommandSource src, CommandContext args) throws CommandException {
-    src.sendMessage(this.splashScreen());
-    return CommandResult.success();
-  }
-
-  private Text splashScreen() {
-    return Format.info(Text.of("version " + Nope.getInstance().getPluginContainer().getVersion().orElse("unknown")));
-    // TODO: format plugin splash screen
+  public final CommandResult execute(CommandSource src, @Nonnull CommandContext args) throws CommandException {
+    src.sendMessage(Format.error("Too few arguments!"));
+    return CommandResult.empty();
   }
 }
