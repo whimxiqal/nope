@@ -33,34 +33,34 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class GlobalHost extends Host {
-	private final Map<World, WorldHost> worlds = new HashMap<>();
+  private final Map<World, WorldHost> worlds = new HashMap<>();
 
-	/**
-	 * Adds a world if it is not present.
-	 * Does nothing if world is already added
-	 *
-	 * @param world World to add
-	 *              =
-	 */
-	public void addWorldIfNotPresent(World world) {
-		worlds.computeIfAbsent(world, k -> {
-			WorldHost host = new WorldHost(world.getUniqueId());
-			Nope.getInstance().getGlobalConfigManager().loadAdditionalWorld(world);
-			return host;
-		});
-	}
+  /**
+   * Adds a world if it is not present.
+   * Does nothing if world is already added
+   *
+   * @param world World to add
+   *              =
+   */
+  public void addWorldIfNotPresent(World world) {
+    worlds.computeIfAbsent(world, k -> {
+      WorldHost host = new WorldHost(world.getUniqueId());
+      Nope.getInstance().getGlobalConfigManager().loadAdditionalWorld(world);
+      return host;
+    });
+  }
 
-	public WorldHost getWorld(World world) {
-		return this.worlds.get(world);
-	}
+  public WorldHost getWorld(World world) {
+    return this.worlds.get(world);
+  }
 
-	public Map<World, WorldHost> getWorlds() {
-		return this.worlds;
-	}
+  public Map<World, WorldHost> getWorlds() {
+    return this.worlds;
+  }
 
-	@Nonnull
-	@Override
-	public Setting.Applicability getApplicability() {
-		return Setting.Applicability.GLOBAL;
-	}
+  @Nonnull
+  @Override
+  public Setting.Applicability getApplicability() {
+    return Setting.Applicability.GLOBAL;
+  }
 }

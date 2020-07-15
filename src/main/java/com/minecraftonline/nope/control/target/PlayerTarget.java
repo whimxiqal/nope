@@ -13,12 +13,6 @@ public class PlayerTarget implements Target {
         .orElseThrow(PlayerTarget.PlayerNotFoundException::new);
   }
 
-<<<<<<< HEAD:src/main/java/com/minecraftonline/nope/config/target/PlayerTarget.java
-  @Override
-  public boolean isTargeted(Player player) {
-    return player.getUniqueId().equals(this.uuid);
-  }
-=======
   public PlayerTarget(UUID uuid) {
     this.uuid = uuid;
   }
@@ -27,19 +21,12 @@ public class PlayerTarget implements Target {
   public boolean isTargeted(Player player) {
     return player.getUniqueId().equals(this.uuid);
   }
->>>>>>> 9e0f8e2... Reworked region config:src/main/java/com/minecraftonline/nope/control/target/PlayerTarget.java
 
   @Override
   public String serialize() {
     return uuid.toString();
   }
 
-<<<<<<< HEAD:src/main/java/com/minecraftonline/nope/config/target/PlayerTarget.java
-  static class PlayerNotFoundException extends Exception {
-    public PlayerNotFoundException() {
-    }
-  }
-=======
   @Override
   public TargetType getTargetType() {
     return TargetType.PLAYER;
@@ -53,5 +40,4 @@ public class PlayerTarget implements Target {
     public PlayerNotFoundException() {
     }
   }
->>>>>>> 9e0f8e2... Reworked region config:src/main/java/com/minecraftonline/nope/control/target/PlayerTarget.java
 }

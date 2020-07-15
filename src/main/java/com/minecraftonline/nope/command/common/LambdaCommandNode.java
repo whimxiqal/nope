@@ -25,37 +25,46 @@
 
 package com.minecraftonline.nope.command.common;
 
-import com.minecraftonline.nope.Nope;
-import com.minecraftonline.nope.command.ExampleCommand;
-import com.minecraftonline.nope.permission.Permissions;
-import com.minecraftonline.nope.util.Format;
-import org.spongepowered.api.command.CommandException;
+import com.minecraftonline.nope.permission.Permission;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.args.CommandContext;
 import org.spongepowered.api.text.Text;
 
 import javax.annotation.Nonnull;
+import java.util.Objects;
+import java.util.function.BiFunction;
 
-public class NopeCommandRoot extends CommandNode {
+/**
+ * A function with a tighter implementation because the executor can be added
+ * as a lambda function.
+ */
+public class LambdaCommandNode extends CommandNode {
 
-  // TODO: write description
-  private static final Text description = Text.of("NopeCommandRoot command description");
+  private BiFunction<CommandSource, CommandContext, CommandResult> executor = (src, args) -> CommandResult.empty();
 
-  public NopeCommandRoot() {
-    super(null, Permissions.COMMAND_ROOT, description, "nope");
-    addChildren(new ExampleCommand(this));
+  public LambdaCommandNode(CommandNode parent,
+                           Permission permission,
+                           @Nonnull Text description,
+                           @Nonnull String primaryAlias,
+                           @Nonnull String... otherAliases) {
+    super(parent, permission, description, primaryAlias, otherAliases);
   }
 
-  @Nonnull
+  public LambdaCommandNode(CommandNode parent,
+                           Permission permission,
+                           @Nonnull Text description,
+                           @Nonnull String primaryAlias,
+                           boolean addHelp) {
+    super(parent, permission, description, primaryAlias, addHelp);
+  }
+
+  protected final void setExecutor(@Nonnull BiFunction<CommandSource, CommandContext, CommandResult> executor) {
+    this.executor = Objects.requireNonNull(executor);
+  }
+
   @Override
-  public CommandResult execute(CommandSource src, CommandContext args) throws CommandException {
-    src.sendMessage(this.splashScreen());
-    return CommandResult.success();
-  }
-
-  private Text splashScreen() {
-    return Format.info(Text.of("version " + Nope.getInstance().getPluginContainer().getVersion().orElse("unknown")));
-    // TODO: format plugin splash screen
+  public final CommandResult execute(@Nonnull CommandSource src, @Nonnull CommandContext args) {
+    return executor.apply(src, args);
   }
 }

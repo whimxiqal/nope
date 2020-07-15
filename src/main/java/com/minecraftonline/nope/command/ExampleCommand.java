@@ -25,37 +25,63 @@
 
 package com.minecraftonline.nope.command;
 
-import com.minecraftonline.nope.command.common.CommandTree;
+import com.minecraftonline.nope.command.common.CommandNode;
+import com.minecraftonline.nope.command.common.FunctionlessCommandNode;
+import com.minecraftonline.nope.command.common.LambdaCommandNode;
 import com.minecraftonline.nope.permission.Permission;
 import com.minecraftonline.nope.util.Format;
-
-import javax.annotation.Nonnull;
-
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.args.CommandContext;
+import org.spongepowered.api.command.args.GenericArguments;
 import org.spongepowered.api.text.Text;
+
+import javax.annotation.Nonnull;
 
 /**
  * A simple example class to show how the current Nope command system works.
  * Make sure to put the correct parent (something in the Nope command Tree).
- * The registration will happen automatically.
+ * The registration will happen automatically following the registration of
+ * the root command in the command tree.
  */
-public class ExampleCommand extends CommandTree.CommandNode {
+public final class ExampleCommand extends FunctionlessCommandNode {
 
-	public ExampleCommand(@Nonnull CommandTree.CommandNode parent) {
-		super(parent,
-				Permission.of("node.command.example"),
-				Text.of("This is a description of the command we're about to do"),
-				"example",
-				"ex", "placeholder");
-	}
+  public ExampleCommand(@Nonnull CommandNode parent) {
+    super(parent,
+        Permission.of("node.command.example"),
+        Text.of("This is a description of the command we're about to do"),
+        "example",
+        "ex", "placeholder");
+    // Add all children
+    addChildren(new ExampleSubCommand(this));
+  }
 
-	@Nonnull
-	@Override
-	public CommandResult execute(CommandSource src, CommandContext args) throws CommandException {
-		src.sendMessage(Format.info(Text.of("By golly, you executed this command!")));
-		return CommandResult.success();
-	}
+  // There is no "execute" method here because we are extending the FunctionlessCommandNode here
+
+  /**
+   * A sub command for the {@link ExampleCommand} that's given as a nested class
+   * for ease of use.
+   */
+  public static final class ExampleSubCommand extends LambdaCommandNode {
+
+    public ExampleSubCommand(CommandNode parent) {
+      super(parent, Permission.of("node.command.example.sub"),
+          Text.of("This is another description"),
+          "nextexample", "ex2");
+      // Add an element to describe the arguments of this command node
+      setCommandElement(GenericArguments.onlyOne(GenericArguments.integer(Text.of("int"))));
+      setExecutor((src, args) -> {
+        // Use the elements down here
+        if (!args.getOne(Text.of("int")).isPresent()) {
+          src.sendMessage(Format.error("Boo! You forgot the argument!"));
+          return CommandResult.empty();
+        }
+        src.sendMessage(Format.info("Look at that! The sub command was used! "
+            + "And, no less, you gave us the number " + args.getOne(Text.of("int")).get() + " !"));
+        return CommandResult.success();
+      });
+    }
+  }
+
 }

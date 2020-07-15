@@ -40,15 +40,15 @@ public final class Format {
     return Text.of(THEME, "Nope ", TextColors.DARK_GRAY, "-=- ");
   }
 
-  public static Text error(Text message) {
+  public static Text error(Object... message) {
     return Text.of(prefix(), TextColors.RED, message);
   }
 
-  public static Text warn(Text message) {
+  public static Text warn(Object... message) {
     return Text.of(prefix(), TextColors.YELLOW, message);
   }
 
-  public static Text info(Text message) {
+  public static Text info(Object... message) {
     return Text.of(prefix(), TextColors.WHITE, message);
   }
 

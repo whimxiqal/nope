@@ -44,14 +44,12 @@ import com.minecraftonline.nope.control.flags.FlagVector3d;
 import com.minecraftonline.nope.control.target.TargetSet;
 import org.spongepowered.api.entity.living.player.gamemode.GameModes;
 
+import javax.annotation.Nonnull;
 import java.lang.reflect.Field;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import javax.annotation.Nonnull;
 
 /**
  * A library of methods to generate {@link Setting}s for use in configuration.

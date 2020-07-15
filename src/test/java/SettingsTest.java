@@ -1,4 +1,3 @@
-import com.minecraftonline.nope.control.Setting;
 import com.minecraftonline.nope.control.Settings;
 import org.junit.Test;
 

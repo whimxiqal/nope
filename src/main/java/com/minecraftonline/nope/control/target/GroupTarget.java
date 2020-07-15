@@ -14,12 +14,6 @@ public class GroupTarget implements Target {
     return player.hasPermission("group." + groupName);
   }
 
-<<<<<<< HEAD:src/main/java/com/minecraftonline/nope/config/target/GroupTarget.java
-  @Override
-  public String serialize() {
-    return "g:" + groupName;
-  }
-=======
   @Override
   public String serialize() {
     return groupName;
@@ -33,5 +27,4 @@ public class GroupTarget implements Target {
   public static GroupTarget deserialize(String string) {
     return new GroupTarget(string);
   }
->>>>>>> 9e0f8e2... Reworked region config:src/main/java/com/minecraftonline/nope/control/target/GroupTarget.java
 }

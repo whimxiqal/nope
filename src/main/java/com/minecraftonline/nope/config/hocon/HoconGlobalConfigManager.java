@@ -10,6 +10,6 @@ import java.nio.file.Path;
 public class HoconGlobalConfigManager extends GlobalConfigManager {
 
   public HoconGlobalConfigManager(Path configDir) {
-    super(configDir, new HoconLoaderSupplier(getTypeSerializers()));
+    super(configDir, new HoconLoaderSupplier(GlobalConfigManager.getTypeSerializers()));
   }
 }

@@ -33,6 +33,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 public abstract class Region extends Host {
+
   // TODO: add type (https://worldguard.enginehub.org/en/latest/regions/storage/#yaml)
   @Nonnull
   @Override

@@ -32,15 +32,16 @@ import com.minecraftonline.nope.util.Validate;
 import org.spongepowered.api.CatalogType;
 import org.spongepowered.api.util.annotation.CatalogedBy;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.Set;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 @CatalogedBy(Settings.class)
 public class Setting<T extends Serializable> implements CatalogType, Serializable {
+
   public enum Applicability {
     REGION,
     WORLD,

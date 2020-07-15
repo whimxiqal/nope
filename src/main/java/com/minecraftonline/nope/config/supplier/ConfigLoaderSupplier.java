@@ -10,13 +10,13 @@ import java.nio.file.Path;
  * Supplies a config loader. This should be extended for formats such as HOCON and YAML if needed.
  */
 public abstract class ConfigLoaderSupplier {
-	protected TypeSerializerCollection typeSerializerCollection;
+  protected TypeSerializerCollection typeSerializerCollection;
 
-	protected ConfigLoaderSupplier(TypeSerializerCollection typeSerializerCollection) {
-		this.typeSerializerCollection = typeSerializerCollection;
-	}
+  protected ConfigLoaderSupplier(TypeSerializerCollection typeSerializerCollection) {
+    this.typeSerializerCollection = typeSerializerCollection;
+  }
 
-	public abstract ConfigurationLoader<CommentedConfigurationNode> createConfigLoader(Path path);
+  public abstract ConfigurationLoader<CommentedConfigurationNode> createConfigLoader(Path path);
 
-	public abstract ConfigurationLoader<CommentedConfigurationNode> createConfigLoader(Path path, String header);
+  public abstract ConfigurationLoader<CommentedConfigurationNode> createConfigLoader(Path path, String header);
 }
