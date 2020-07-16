@@ -55,7 +55,7 @@ public class NopeCommandRoot extends CommandNode {
   }
 
   private Text splashScreen() {
-    return Format.info(Text.of("version " + Nope.getInstance().getPluginContainer().getVersion().orElse("unknown")));
+    return Format.info("version ", Nope.getInstance().getPluginContainer().getVersion().orElse("unknown"));
     // TODO: format plugin splash screen
   }
 }

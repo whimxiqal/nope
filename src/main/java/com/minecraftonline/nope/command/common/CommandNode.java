@@ -177,8 +177,10 @@ public abstract class CommandNode implements CommandExecutor {
   @Nonnull
   public final String getFullCommand() {
     StringBuilder command = new StringBuilder(getPrimaryAlias());
-    while (!isRoot()) {
-      command.insert(0, parent + " ");
+    CommandNode cur = this;
+    while (!cur.isRoot()) {
+      command.insert(0, cur.parent.getPrimaryAlias() + " ");
+      cur = cur.parent;
     }
     return command.toString();
   }

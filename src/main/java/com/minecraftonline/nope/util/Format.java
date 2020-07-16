@@ -41,15 +41,15 @@ public final class Format {
   }
 
   public static Text error(Object... message) {
-    return Text.of(prefix(), TextColors.RED, message);
+    return Text.of(prefix(), TextColors.RED, Text.of(message));
   }
 
   public static Text warn(Object... message) {
-    return Text.of(prefix(), TextColors.YELLOW, message);
+    return Text.of(prefix(), TextColors.YELLOW, Text.of(message));
   }
 
   public static Text info(Object... message) {
-    return Text.of(prefix(), TextColors.WHITE, message);
+    return Text.of(prefix(), TextColors.WHITE, Text.of(message));
   }
 
 }
