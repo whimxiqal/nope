@@ -28,6 +28,7 @@ public abstract class ConfigManager {
   }
 
   public void loadAll() {
+    this.configDir.toFile().mkdirs();
     this.config
         = new ConfigContainer<>(configLoaderSupplier.createConfigLoader(configDir.resolve(configFileName)));
 

@@ -70,7 +70,7 @@ public final class ExampleCommand extends FunctionlessCommandNode {
           Text.of("This is another description"),
           "nextexample", "ex2");
       // Add an element to describe the arguments of this command node
-      setCommandElement(GenericArguments.onlyOne(GenericArguments.integer(Text.of("int"))));
+      setCommandElement(GenericArguments.optional(GenericArguments.integer(Text.of("int"))));
       setExecutor((src, args) -> {
         // Use the elements down here
         if (!args.getOne(Text.of("int")).isPresent()) {
