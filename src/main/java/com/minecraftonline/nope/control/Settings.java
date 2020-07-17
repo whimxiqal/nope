@@ -42,6 +42,8 @@ import com.minecraftonline.nope.control.flags.FlagString;
 import com.minecraftonline.nope.control.flags.FlagStringSet;
 import com.minecraftonline.nope.control.flags.FlagVector3d;
 import com.minecraftonline.nope.control.target.TargetSet;
+import com.sk89q.worldedit.blocks.BaseItemStack;
+import com.sk89q.worldedit.blocks.ItemType;
 import org.spongepowered.api.entity.living.player.gamemode.GameModes;
 
 import javax.annotation.Nonnull;
@@ -141,6 +143,17 @@ public final class Settings {
   // Sorts fields alphabetically
   // SORTFIELDS:ON
 
+  /**
+   * TODO: add more config options, add ability for damage values, etc.
+   */
+  public static final Setting<ItemType> WAND_ITEM = Setting.of("wand-item", ItemType.STICK, ItemType.class)
+      .withComment("Item given when /nope region wand is used")
+      .withApplicability(Setting.Applicability.GLOBAL)
+      .withConfigurationPath("wand-item");
+
+  /**
+   * TODO: complete
+   */
   public static final Setting<Boolean> BUILD_PERMISSIONS = Setting.of("build-permission-nodes-enable", false, Boolean.class);
 
   public static final Setting<Boolean> DEOP_ON_ENTER = Setting.of("deop-on-enter", false, Boolean.class)

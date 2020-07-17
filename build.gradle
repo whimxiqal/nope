@@ -34,8 +34,17 @@ dependencies {
     annotationProcessor 'org.spongepowered:spongeapi:7.2.0'
 
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.6.0'
-    //testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
+}
 
+sourceSets {
+    settingDescription {
+        java {
+            srcDir( file("src/settingdescription/java"))
+            //resources.srcDir file("src/settingdescription/resources")
+            compileClasspath += main.compileClasspath + main.output
+            runtimeClasspath += main.runtimeClasspath + main.output
+        }
+    }
 }
 
 sponge.plugin.id = 'nope'
@@ -51,7 +60,16 @@ test {
     }
 }
 
+task genSettingDescriptions(type: Test) {
+    testClassesDirs = sourceSets.settingDescription.output.classesDirs
+
+    classpath = sourceSets.settingDescription.runtimeClasspath
+
+    useJUnit()
+}
+
 // Sort class fields on build.
 build.dependsOn(sortClassFields)
 build.dependsOn(test)
+build.finalizedBy(genSettingDescriptions)
 
