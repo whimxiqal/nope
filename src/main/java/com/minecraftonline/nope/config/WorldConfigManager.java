@@ -75,7 +75,7 @@ public class WorldConfigManager extends ConfigManager {
   }
 
   private <T extends Serializable> void setValue(Region region, Setting<T> setting, String path) {
-    T value = this.regions.getNodeValue(path, TypeToken.of((Class<T>)setting.getClass()));
+    T value = this.regions.getNodeValue(path, TypeToken.of(setting.getTypeClass()));
     if (value == null) {
       return;
     }
@@ -86,9 +86,7 @@ public class WorldConfigManager extends ConfigManager {
     for (Map.Entry<String, Region> entry : this.worldHost.getRegions().entrySet()) {
       CommentedConfigurationNode regionNode = this.regions.getConfigNode().getNode(entry.getKey());
       for (Map.Entry<Setting<?>, ?> settingEntry : entry.getValue().getSettingMap().entrySet()) {
-        settingEntry.getKey().getConfigurationPath().ifPresent(confPath -> {
-          ConfigContainer.setNodeValue(confPath, settingEntry.getValue(), regionNode);
-        });
+        settingEntry.getKey().getConfigurationPath().ifPresent(confPath -> ConfigContainer.setNodeValue(confPath, settingEntry.getValue(), regionNode));
       }
     }
   }
