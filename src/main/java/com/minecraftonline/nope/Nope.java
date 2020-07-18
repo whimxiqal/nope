@@ -26,17 +26,26 @@
 package com.minecraftonline.nope;
 
 import com.google.inject.Inject;
-import com.minecraftonline.nope.command.ExampleCommand;
 import com.minecraftonline.nope.command.common.NopeCommandTree;
 import com.minecraftonline.nope.config.GlobalConfigManager;
 import com.minecraftonline.nope.config.hocon.HoconGlobalConfigManager;
 import com.minecraftonline.nope.control.GlobalHost;
+import com.minecraftonline.nope.control.Settings;
+import com.minecraftonline.nope.control.WorldHost;
+import com.minecraftonline.nope.key.NopeKeys;
+import com.minecraftonline.nope.key.regionwand.ImmutableRegionWandManipulator;
+import com.minecraftonline.nope.key.regionwand.RegionWandManipulator;
 import com.minecraftonline.nope.util.Extra;
 import com.minecraftonline.nope.util.Reference;
+import ninja.leaping.configurate.ConfigurationNode;
 import org.slf4j.Logger;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.config.ConfigDir;
+import org.spongepowered.api.data.DataQuery;
+import org.spongepowered.api.data.DataRegistration;
+import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.event.Listener;
-import org.spongepowered.api.event.game.state.GamePostInitializationEvent;
+import org.spongepowered.api.event.game.state.GameInitializationEvent;
 import org.spongepowered.api.event.game.state.GamePreInitializationEvent;
 import org.spongepowered.api.event.game.state.GameStartedServerEvent;
 import org.spongepowered.api.event.game.state.GameStoppingServerEvent;
@@ -44,8 +53,10 @@ import org.spongepowered.api.event.world.LoadWorldEvent;
 import org.spongepowered.api.plugin.Dependency;
 import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.plugin.PluginContainer;
+import org.spongepowered.api.util.TypeTokens;
 
 import java.nio.file.Path;
+import java.util.Arrays;
 
 @Plugin(
     id = Reference.ID,
@@ -80,21 +91,47 @@ public class Nope {
 
   private GlobalHost globalHost = new GlobalHost();
 
+  private RegionWandHandler regionWandHandler;
+
   @Listener
   public void onPreInitialize(GamePreInitializationEvent event) {
     instance = this;
+    Settings.load();
     Extra.printSplashscreen();
 
     // Load config
     globalConfigManager = new HoconGlobalConfigManager(configDir);
+  }
+
+  @Listener
+  public void onInit(GameInitializationEvent event) {
     globalConfigManager.loadAll();
+    globalConfigManager.fillSettings(globalHost);
+
+    NopeKeys.REGION_WAND = Key.builder()
+        .type(TypeTokens.BOOLEAN_VALUE_TOKEN)
+        .id("noperegionwand")
+        .name("Nope region wand")
+        .query(DataQuery.of("noperegionwand"))
+        .build();
+
+    DataRegistration.builder()
+        .dataClass(RegionWandManipulator.class)
+        .immutableClass(ImmutableRegionWandManipulator.class)
+        .builder(new RegionWandManipulator.Builder())
+        .id("nope-region-wand")
+        .name("Nope region wand")
+        .build();
+
+    regionWandHandler = new RegionWandHandler();
+    Sponge.getEventManager().registerListeners(this, regionWandHandler);
   }
 
   @Listener
   public void onServerStart(GameStartedServerEvent event) {
+
     // Register entire Nope command tree
     commandTree = new NopeCommandTree();
-    //new ExampleCommand(commandTree.root());
     commandTree.register();
   }
 
@@ -105,7 +142,6 @@ public class Nope {
 
   @Listener
   public void onLoadWorld(LoadWorldEvent event) {
-    // Possible that a new world has been created, however at the start we already load all known worlds
     globalHost.addWorldIfNotPresent(event.getTargetWorld());
   }
 
@@ -123,5 +159,13 @@ public class Nope {
 
   public PluginContainer getPluginContainer() {
     return pluginContainer;
+  }
+
+  public GlobalHost getGlobalHost() {
+    return globalHost;
+  }
+
+  public RegionWandHandler getRegionWandHandler() {
+    return regionWandHandler;
   }
 }

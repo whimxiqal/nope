@@ -26,6 +26,7 @@
 package com.minecraftonline.nope.control;
 
 import com.flowpowered.math.vector.Vector3d;
+import com.flowpowered.math.vector.Vector3i;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMultimap;
@@ -142,14 +143,6 @@ public final class Settings {
 
   // Sorts fields alphabetically
   // SORTFIELDS:ON
-
-  /**
-   * TODO: add more config options, add ability for damage values, etc.
-   */
-  public static final Setting<ItemType> WAND_ITEM = Setting.of("wand-item", ItemType.STICK, ItemType.class)
-      .withComment("Item given when /nope region wand is used")
-      .withApplicability(Setting.Applicability.GLOBAL)
-      .withConfigurationPath("wand-item");
 
   /**
    * TODO: complete
@@ -513,7 +506,7 @@ public final class Settings {
       .withApplicability(Setting.Applicability.WORLD)
       .withConfigurationPath("op-permissions");
 
-  public static final Setting<Vector3d> REGION_MAX = Setting.of("region-max", Vector3d.ZERO, Vector3d.class)
+  public static final Setting<Vector3i> REGION_MAX = Setting.of("region-max", Vector3i.ZERO, Vector3i.class)
       .withApplicability(Setting.Applicability.REGION)
       .withConfigurationPath("max");
 
@@ -521,7 +514,7 @@ public final class Settings {
       .withApplicability(Setting.Applicability.REGION)
       .withConfigurationPath("members");
 
-  public static final Setting<Vector3d> REGION_MIN = Setting.of("region-min", Vector3d.ZERO, Vector3d.class)
+  public static final Setting<Vector3i> REGION_MIN = Setting.of("region-min", Vector3i.ZERO, Vector3i.class)
       .withApplicability(Setting.Applicability.REGION)
       .withConfigurationPath("min");
 
@@ -532,6 +525,14 @@ public final class Settings {
   public static final Setting<Integer> REGION_PRIORITY = Setting.of("region-priority", 0, Integer.class)
       .withApplicability(Setting.Applicability.REGION)
       .withConfigurationPath("priority");
+
+  /**
+   * TODO: add more config options, add ability for damage values, etc.
+   */
+  public static final Setting<ItemType> WAND_ITEM = Setting.of("wand-item", ItemType.STICK, ItemType.class)
+      .withComment("Item given when /nope region wand is used")
+      .withApplicability(Setting.Applicability.GLOBAL)
+      .withConfigurationPath("wand-item");
 
   // SORTFIELDS:OFF
 }

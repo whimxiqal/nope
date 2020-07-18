@@ -1,9 +1,11 @@
 package com.minecraftonline.nope.config;
 
 import com.flowpowered.math.vector.Vector3d;
+import com.flowpowered.math.vector.Vector3i;
 import com.google.common.reflect.TypeToken;
 import com.minecraftonline.nope.config.serializer.TargetSetSerializer;
 import com.minecraftonline.nope.config.serializer.Vector3dSerializer;
+import com.minecraftonline.nope.config.serializer.Vector3iSerializer;
 import com.minecraftonline.nope.config.serializer.flag.FlagBooleanSerializer;
 import com.minecraftonline.nope.config.serializer.flag.FlagDoubleSerializer;
 import com.minecraftonline.nope.config.serializer.flag.FlagEntitySetSerializer;
@@ -41,6 +43,7 @@ import java.io.Serializable;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 import static org.gradle.internal.impldep.com.google.api.client.repackaged.com.google.common.base.Preconditions.checkNotNull;
 
@@ -52,8 +55,6 @@ import static org.gradle.internal.impldep.com.google.api.client.repackaged.com.g
  */
 public class GlobalConfigManager extends ConfigManager {
   private Map<World, WorldConfigManager> worldConfigs = new HashMap<>();
-
-  private ConfigurationOptions configurationOptions;
 
   public GlobalConfigManager(Path configDir, ConfigLoaderSupplier configLoaderSupplier) {
     super(configDir, "global", configLoaderSupplier);
@@ -73,19 +74,17 @@ public class GlobalConfigManager extends ConfigManager {
   }
 
   /**
-   * Add an additional world, one that did not exist when
-   * the server started.
+   * Load a world.
    * Does nothing if the given world is already loaded
    */
-  public void loadAdditionalWorld(World world) {
-    worldConfigs.computeIfAbsent(world, k -> {
-      if (configDir == null) throw new NullPointerException("configDir");
-      if (world == null) throw new NullPointerException("world");
-      if (configLoaderSupplier == null) throw new NullPointerException("configLoaderSupplier");
+  @Nullable
+  public WorldHost loadWorld(World world) {
+    return worldConfigs.computeIfAbsent(world, k -> {
       WorldConfigManager worldConfigManager = new WorldConfigManager(configDir, world, configLoaderSupplier);
       worldConfigManager.loadAll();
+      this.worldConfigs.put(world, worldConfigManager);
       return worldConfigManager;
-    });
+    }).getWorldHost();
   }
 
   /**
@@ -95,8 +94,9 @@ public class GlobalConfigManager extends ConfigManager {
    */
   public void fillSettings(GlobalHost globalHost) {
     for (Map.Entry<World, WorldConfigManager> entry : this.worldConfigs.entrySet()) {
-      WorldHost worldHost = globalHost.getWorld(entry.getKey());
+      WorldHost worldHost = entry.getValue().getWorldHost();
       fillSettings(worldHost, entry.getValue().getConfig());
+      globalHost.addWorld(entry.getKey(), worldHost);
       // Region uses different method of filling
     }
   }
@@ -138,6 +138,7 @@ public class GlobalConfigManager extends ConfigManager {
     typeSerializerCollection = ConfigurationOptions.defaults().getSerializers().newChild()
         .registerType(TypeToken.of(TargetSet.class), new TargetSetSerializer())
         .registerType(TypeToken.of(Vector3d.class), new Vector3dSerializer())
+        .registerType(TypeToken.of(Vector3i.class), new Vector3iSerializer())
         .registerType(TypeToken.of(FlagBoolean.class), new FlagBooleanSerializer())
         .registerType(TypeToken.of(FlagDouble.class), new FlagDoubleSerializer())
         .registerType(TypeToken.of(FlagEntitySet.class), new FlagEntitySetSerializer())

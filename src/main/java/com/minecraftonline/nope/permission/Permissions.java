@@ -36,6 +36,9 @@ public final class Permissions {
   // Command permissions
   public static final Permission COMMAND_ROOT = Permission.of("nope.command");
 
+  public static final Permission REGION = Permission.of("nope.region");
+
+  public static final Permission CREATE_REGION = Permission.of("nope.region.create");
 
   // Override permissions
   public static final Permission OVERRIDE_ALL = Permission.of("nope.override-all");

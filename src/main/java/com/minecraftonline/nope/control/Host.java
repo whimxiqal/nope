@@ -62,6 +62,10 @@ public abstract class Host {
     return Optional.ofNullable((T) settings.get(setting));
   }
 
+  public <T extends Serializable> T getSettingValueOrDefault(Setting<T> setting) {
+    return getSettingValue(setting).orElse(setting.getDefaultValue());
+  }
+
   /**
    * Get the Applicability that a setting needs to
    * be applicable to this Host.

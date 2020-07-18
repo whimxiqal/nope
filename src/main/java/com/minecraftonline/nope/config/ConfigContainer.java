@@ -82,10 +82,27 @@ public class ConfigContainer<T extends ConfigurationNode> {
   @Nullable
   public <V> V getNodeValue(String path, TypeToken<V> typeToken) {
     try {
-      return configNode.getNode((Object[]) path.split("[.]")).getValue(typeToken);
+      return getConfigNode().getNode((Object[]) path.split("[.]")).getValue(typeToken);
     } catch (ObjectMappingException e) {
       Nope.getInstance().getLogger().error("Invalid config value", e);
     }
     return null;
+  }
+
+  public <V> void setNodeValue(String path, V value) {
+    setNodeValue(path, value, this.getConfigNode());
+  }
+
+  @SuppressWarnings({"unchecked", "UnstableApiUsage"})
+  public static <V> void setNodeValue(String path, V value, ConfigurationNode node) {
+    try {
+      resolvePath(path, node).setValue(TypeToken.of((Class<V>)value.getClass()), value);
+    } catch (ObjectMappingException e) {
+      Nope.getInstance().getLogger().error("Error setting node value", e);
+    }
+  }
+
+  private static ConfigurationNode resolvePath(String path, ConfigurationNode node) {
+    return node.getNode((Object[]) path.split("[.]"));
   }
 }
