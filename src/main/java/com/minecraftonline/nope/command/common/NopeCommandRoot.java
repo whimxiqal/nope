@@ -27,7 +27,7 @@ package com.minecraftonline.nope.command.common;
 
 import com.minecraftonline.nope.Nope;
 import com.minecraftonline.nope.command.ExampleCommand;
-import com.minecraftonline.nope.command.RegionCommand;
+import com.minecraftonline.nope.command.region.RegionCommand;
 import com.minecraftonline.nope.permission.Permissions;
 import com.minecraftonline.nope.util.Format;
 import org.spongepowered.api.command.CommandException;

@@ -82,7 +82,7 @@ public class ConfigContainer<T extends ConfigurationNode> {
   @Nullable
   public <V> V getNodeValue(String path, TypeToken<V> typeToken) {
     try {
-      return getConfigNode().getNode((Object[]) path.split("[.]")).getValue(typeToken);
+      return resolvePath(path, this.getConfigNode()).getValue(typeToken);
     } catch (ObjectMappingException e) {
       Nope.getInstance().getLogger().error("Invalid config value", e);
     }

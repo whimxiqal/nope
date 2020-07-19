@@ -90,4 +90,8 @@ public class WorldConfigManager extends ConfigManager {
       }
     }
   }
+
+  public void removeRegion(String region) {
+    this.regions.getConfigNode().removeChild(region);
+  }
 }

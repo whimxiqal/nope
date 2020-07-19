@@ -1,4 +1,4 @@
-package com.minecraftonline.nope.command;
+package com.minecraftonline.nope.command.region;
 
 import com.minecraftonline.nope.Nope;
 import com.minecraftonline.nope.command.common.CommandNode;

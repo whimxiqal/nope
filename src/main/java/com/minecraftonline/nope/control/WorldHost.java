@@ -26,6 +26,8 @@
 package com.minecraftonline.nope.control;
 
 import com.google.common.base.Preconditions;
+import com.minecraftonline.nope.Nope;
+import org.spongepowered.api.Sponge;
 
 import javax.annotation.Nonnull;
 import java.util.HashMap;
@@ -56,6 +58,7 @@ public class WorldHost extends Host {
 
   public void removeRegion(String regionId) {
     this.regions.remove(regionId);
+    Nope.getInstance().getGlobalConfigManager().getWorldConfig(Sponge.getServer().getWorld(worldUuid).get()).removeRegion(regionId);
   }
 
   @Nonnull

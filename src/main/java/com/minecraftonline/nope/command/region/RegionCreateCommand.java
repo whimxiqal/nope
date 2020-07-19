@@ -1,4 +1,4 @@
-package com.minecraftonline.nope.command;
+package com.minecraftonline.nope.command.region;
 
 import com.minecraftonline.nope.Nope;
 import com.minecraftonline.nope.RegionWandHandler;
@@ -36,9 +36,6 @@ public class RegionCreateCommand extends LambdaCommandNode {
         return CommandResult.empty();
       }
       WorldHost worldHost = Nope.getInstance().getGlobalHost().getWorld(selection.getWorld());
-      worldHost.getRegions().entrySet().stream()
-          .map(Map.Entry::getKey)
-          .forEach(regionName -> Nope.getInstance().getLogger().info("currently there is region with name: " + regionName));
       if (worldHost.getRegions().get(name) != null) {
         player.sendMessage(Format.error("There is already a region with the name '" + name + "'"));
         return CommandResult.empty();

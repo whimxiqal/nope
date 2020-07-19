@@ -1,4 +1,4 @@
-package com.minecraftonline.nope.command;
+package com.minecraftonline.nope.command.region;
 
 import com.minecraftonline.nope.command.common.CommandNode;
 import com.minecraftonline.nope.command.common.FunctionlessCommandNode;
@@ -14,5 +14,7 @@ public class RegionCommand extends FunctionlessCommandNode {
         "rg");
     addChildren(new RegionWandCommand(this));
     addChildren(new RegionCreateCommand(this));
+    addChildren(new ListRegionsCommand(this));
+    addChildren(new DeleteRegionCommand(this));
   }
 }
