@@ -1,6 +1,8 @@
 package com.minecraftonline.nope.command.region;
 
 import com.minecraftonline.nope.Nope;
+import com.minecraftonline.nope.arguments.NopeArguments;
+import com.minecraftonline.nope.arguments.RegionWrapper;
 import com.minecraftonline.nope.command.common.CommandNode;
 import com.minecraftonline.nope.command.common.LambdaCommandNode;
 import com.minecraftonline.nope.control.GlobalRegion;
@@ -19,26 +21,18 @@ public class DeleteRegionCommand extends LambdaCommandNode {
         Text.of("Delete a given region"),
         "delete",
         "remove");
-    setCommandElement(GenericArguments.onlyOne(GenericArguments.string(Text.of("region"))));
+    setCommandElement(GenericArguments.onlyOne(NopeArguments.regionCommandElement(Text.of("region"))));
     setExecutor((src, args) -> {
-      if (!(src instanceof Player)) {
-        src.sendMessage(Format.error("You must be a player to use this command"));
-        return CommandResult.empty();
-      }
-      String region = args.<String>getOne(Text.of("region")).get();
-      WorldHost worldHost = Nope.getInstance().getGlobalHost().getWorld(((Player)src).getWorld());
-      if (!worldHost.getRegions().containsKey(region)) {
-        src.sendMessage(Format.error("No region with the name: '" + region + "'"));
-        return CommandResult.empty();
-      }
-      boolean isGlobal = region.equals("__global__");
+      RegionWrapper region = args.<RegionWrapper>getOne(Text.of("region")).get();
+      WorldHost worldHost = region.getWorldHost();
+      boolean isGlobal = region.getRegion() instanceof GlobalRegion;
       if (isGlobal) {
-        worldHost.removeRegion(region);
-        worldHost.addRegion(region, new GlobalRegion(worldHost.getWorldUuid()));
+        worldHost.removeRegion(region.getRegionName());
+        worldHost.addRegion(region.getRegionName(), new GlobalRegion(worldHost.getWorldUuid()));
         src.sendMessage(Format.info("Global region successfully cleared - it cannot be deleted"));
       }
       else {
-        worldHost.removeRegion(region);
+        worldHost.removeRegion(region.getRegionName());
         src.sendMessage(Format.info("Region: '" + region + "' has been deleted"));
       }
       return CommandResult.success();
