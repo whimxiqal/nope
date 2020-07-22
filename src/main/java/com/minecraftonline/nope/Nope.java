@@ -35,6 +35,7 @@ import com.minecraftonline.nope.control.WorldHost;
 import com.minecraftonline.nope.key.NopeKeys;
 import com.minecraftonline.nope.key.regionwand.ImmutableRegionWandManipulator;
 import com.minecraftonline.nope.key.regionwand.RegionWandManipulator;
+import com.minecraftonline.nope.listener.flag.FlagListeners;
 import com.minecraftonline.nope.util.Extra;
 import com.minecraftonline.nope.util.Reference;
 import ninja.leaping.configurate.ConfigurationNode;
@@ -45,6 +46,7 @@ import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.DataRegistration;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.event.Listener;
+import org.spongepowered.api.event.entity.DamageEntityEvent;
 import org.spongepowered.api.event.game.state.GameInitializationEvent;
 import org.spongepowered.api.event.game.state.GamePreInitializationEvent;
 import org.spongepowered.api.event.game.state.GameStartedServerEvent;
@@ -125,6 +127,7 @@ public class Nope {
 
     regionWandHandler = new RegionWandHandler();
     Sponge.getEventManager().registerListeners(this, regionWandHandler);
+    FlagListeners.registerAll();
   }
 
   @Listener

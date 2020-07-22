@@ -492,7 +492,7 @@ public final class Settings {
       .withApplicability(Setting.Applicability.REGION)
       .withConfigurationPath("flags.wither-damage");
 
-  public static final Setting<FlagDouble> FLAG_feed_MIN_HUNGER = Setting.of("flag-feed-min-hunger", new FlagDouble(0D), FlagDouble.class)
+  public static final Setting<FlagDouble> FLAG_FEED_MIN_HUNGER = Setting.of("flag-feed-min-hunger", new FlagDouble(0D), FlagDouble.class)
       .withApplicability(Setting.Applicability.REGION)
       .withConfigurationPath("flags.feed-min-hunger");
 

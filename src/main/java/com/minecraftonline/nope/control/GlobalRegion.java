@@ -1,7 +1,6 @@
 package com.minecraftonline.nope.control;
 
-import org.spongepowered.api.world.Location;
-import org.spongepowered.api.world.World;
+import com.flowpowered.math.vector.Vector3i;
 
 import java.util.UUID;
 
@@ -17,7 +16,7 @@ public class GlobalRegion extends Region {
   }
 
   @Override
-  public boolean isLocationInRegion(Location<World> location) {
+  public boolean isLocationInRegion(Vector3i location) {
     return location.getExtent().getUniqueId().equals(worldUUID);
   }
 }

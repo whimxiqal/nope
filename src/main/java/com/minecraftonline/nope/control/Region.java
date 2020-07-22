@@ -25,12 +25,9 @@
 
 package com.minecraftonline.nope.control;
 
-import com.minecraftonline.nope.control.target.TargetSet;
-import org.spongepowered.api.world.Location;
-import org.spongepowered.api.world.World;
+import com.flowpowered.math.vector.Vector3i;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 public abstract class Region extends Host {
 
@@ -41,5 +38,5 @@ public abstract class Region extends Host {
     return Setting.Applicability.REGION;
   }
 
-  public abstract boolean isLocationInRegion(Location<World> location);
+  public abstract boolean isLocationInRegion(Vector3i location);
 }

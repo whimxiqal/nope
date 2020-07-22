@@ -25,12 +25,15 @@
 
 package com.minecraftonline.nope.control;
 
+import com.flowpowered.math.vector.Vector3i;
 import com.google.common.base.Preconditions;
 import com.minecraftonline.nope.Nope;
 import org.spongepowered.api.Sponge;
 
 import javax.annotation.Nonnull;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -59,6 +62,16 @@ public class WorldHost extends Host {
   public void removeRegion(String regionId) {
     this.regions.remove(regionId);
     Nope.getInstance().getGlobalConfigManager().getWorldConfig(Sponge.getServer().getWorld(worldUuid).get()).removeRegion(regionId);
+  }
+
+  public RegionSet getRegions(Vector3i position) {
+    List<Region> validRegions = new ArrayList<>();
+    for (Region region : this.regions.values()) {
+      if (region.isLocationInRegion(position)) {
+        validRegions.add(region);
+      }
+    }
+    return new RegionSet(validRegions);
   }
 
   @Nonnull

@@ -26,10 +26,12 @@
 package com.minecraftonline.nope.control;
 
 import com.minecraftonline.nope.Nope;
+import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 
 import javax.annotation.Nonnull;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class GlobalHost extends Host {
@@ -61,6 +63,15 @@ public class GlobalHost extends Host {
 
   public Map<World, WorldHost> getWorlds() {
     return this.worlds;
+  }
+
+  /**
+   * Gets a RegionSet for the given location, allow access to find which
+   * flags have which values
+   * @return RegionSet for getting values
+   */
+  public RegionSet getRegions(Location<World> location) {
+    return getWorld(location.getExtent()).getRegions(location.getBlockPosition());
   }
 
   @Nonnull

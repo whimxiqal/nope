@@ -1,6 +1,5 @@
 package com.minecraftonline.nope.control;
 
-import com.flowpowered.math.vector.Vector3d;
 import com.flowpowered.math.vector.Vector3i;
 import org.spongepowered.api.util.AABB;
 import org.spongepowered.api.world.Location;
@@ -38,9 +37,8 @@ public class RegularRegion extends Region {
   }
 
   @Override
-  public boolean isLocationInRegion(Location<World> location) {
-    return location.getExtent().getUniqueId().equals(worldUUID)
-        && aabb.contains(location.getPosition());
+  public boolean isLocationInRegion(Vector3i location) {
+    return aabb.contains(location);
   }
 
   public AABB getAabb() {
