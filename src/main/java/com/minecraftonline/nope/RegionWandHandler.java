@@ -64,6 +64,9 @@ public class RegionWandHandler {
   }
 
   private boolean handleEvent(Event event, BlockSnapshot block) {
+    if (!block.getLocation().isPresent()) {
+      return false; // click in the air
+    }
     MutableBoolean mutableBoolean = new MutableBoolean(false);
     event.getCause().first(Player.class).ifPresent(player -> player.getItemInHand(HandTypes.MAIN_HAND).filter(this::isWand).ifPresent(wand -> {
       mutableBoolean.setTrue();
