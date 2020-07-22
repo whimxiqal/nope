@@ -16,5 +16,6 @@ public class RegionCommand extends FunctionlessCommandNode {
     addChildren(new RegionCreateCommand(this));
     addChildren(new ListRegionsCommand(this));
     addChildren(new DeleteRegionCommand(this));
+    addChildren(new RegionInfoCommand(this));
   }
 }

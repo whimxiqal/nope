@@ -42,6 +42,8 @@ public final class Permissions {
 
   public static final Permission LIST_REGIONS = Permission.of("nope.region.list");
 
+  public static final Permission INFO_REGION = Permission.of("nope.region.info");
+
   public static final Permission DELETE_REGIONS = Permission.of("nope.region.delete");
 
   // Override permissions

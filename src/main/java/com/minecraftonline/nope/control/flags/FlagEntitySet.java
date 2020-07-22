@@ -12,4 +12,13 @@ public class FlagEntitySet extends Flag<Set<EntityType>> {
   public FlagEntitySet(Set<EntityType> value, TargetGroup group) {
     super(value, (Class<Set<EntityType>>) value.getClass(), group);
   }
+
+  @Override
+  public String serialize(Flag<Set<EntityType>> flag) {
+    StringBuilder builder = new StringBuilder("{");
+    flag.getValue().stream()
+        .map(EntityType::getName)
+        .forEach(name -> builder.append(" ").append(name).append(","));
+    return builder.deleteCharAt(builder.length() - 1).append(" }").toString();
+  }
 }

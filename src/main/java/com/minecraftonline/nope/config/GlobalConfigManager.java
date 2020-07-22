@@ -6,15 +6,7 @@ import com.google.common.reflect.TypeToken;
 import com.minecraftonline.nope.config.serializer.TargetSetSerializer;
 import com.minecraftonline.nope.config.serializer.Vector3dSerializer;
 import com.minecraftonline.nope.config.serializer.Vector3iSerializer;
-import com.minecraftonline.nope.config.serializer.flag.FlagBooleanSerializer;
-import com.minecraftonline.nope.config.serializer.flag.FlagDoubleSerializer;
-import com.minecraftonline.nope.config.serializer.flag.FlagEntitySetSerializer;
-import com.minecraftonline.nope.config.serializer.flag.FlagGameModeSerializer;
-import com.minecraftonline.nope.config.serializer.flag.FlagIntegerSerializer;
-import com.minecraftonline.nope.config.serializer.flag.FlagStateSerializer;
-import com.minecraftonline.nope.config.serializer.flag.FlagStringSerializer;
-import com.minecraftonline.nope.config.serializer.flag.FlagStringSetSerializer;
-import com.minecraftonline.nope.config.serializer.flag.FlagVector3dSerializer;
+import com.minecraftonline.nope.config.serializer.flag.FlagSerializer;
 import com.minecraftonline.nope.config.supplier.ConfigLoaderSupplier;
 import com.minecraftonline.nope.control.GlobalHost;
 import com.minecraftonline.nope.control.Host;
@@ -22,16 +14,8 @@ import com.minecraftonline.nope.control.Region;
 import com.minecraftonline.nope.control.Setting;
 import com.minecraftonline.nope.control.Settings;
 import com.minecraftonline.nope.control.WorldHost;
-import com.minecraftonline.nope.control.flags.FlagBoolean;
-import com.minecraftonline.nope.control.flags.FlagDouble;
-import com.minecraftonline.nope.control.flags.FlagEntitySet;
-import com.minecraftonline.nope.control.flags.FlagGameMode;
-import com.minecraftonline.nope.control.flags.FlagInteger;
-import com.minecraftonline.nope.control.flags.FlagState;
-import com.minecraftonline.nope.control.flags.FlagString;
-import com.minecraftonline.nope.control.flags.FlagStringSet;
-import com.minecraftonline.nope.control.flags.FlagVector3d;
 import com.minecraftonline.nope.control.target.TargetSet;
+import com.minecraftonline.nope.util.NopeTypeTokens;
 import ninja.leaping.configurate.ConfigurationOptions;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.objectmapping.serialize.TypeSerializerCollection;
@@ -43,7 +27,6 @@ import java.io.Serializable;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 
 import static org.gradle.internal.impldep.com.google.api.client.repackaged.com.google.common.base.Preconditions.checkNotNull;
 
@@ -139,7 +122,8 @@ public class GlobalConfigManager extends ConfigManager {
         .registerType(TypeToken.of(TargetSet.class), new TargetSetSerializer())
         .registerType(TypeToken.of(Vector3d.class), new Vector3dSerializer())
         .registerType(TypeToken.of(Vector3i.class), new Vector3iSerializer())
-        .registerType(TypeToken.of(FlagBoolean.class), new FlagBooleanSerializer())
+        .registerType(NopeTypeTokens.FLAG_RAW_TOKEN, new FlagSerializer());
+        /*.registerType(TypeToken.of(FlagBoolean.class), new FlagBooleanSerializer())
         .registerType(TypeToken.of(FlagDouble.class), new FlagDoubleSerializer())
         .registerType(TypeToken.of(FlagEntitySet.class), new FlagEntitySetSerializer())
         .registerType(TypeToken.of(FlagGameMode.class), new FlagGameModeSerializer())
@@ -147,7 +131,7 @@ public class GlobalConfigManager extends ConfigManager {
         .registerType(TypeToken.of(FlagState.class), new FlagStateSerializer())
         .registerType(TypeToken.of(FlagString.class), new FlagStringSerializer())
         .registerType(TypeToken.of(FlagStringSet.class), new FlagStringSetSerializer())
-        .registerType(TypeToken.of(FlagVector3d.class), new FlagVector3dSerializer());
+        .registerType(TypeToken.of(FlagVector3d.class), new FlagVector3dSerializer());*/
     return typeSerializerCollection;
   }
 }

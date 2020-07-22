@@ -4,6 +4,7 @@ import com.minecraftonline.nope.config.GlobalConfigManager;
 import javafx.util.Pair;
 
 import java.io.Serializable;
+import java.util.Optional;
 
 /**
  * Represents a WG Flag
@@ -51,5 +52,37 @@ public class Flag<T> implements Serializable {
 
   public void setGroup(TargetGroup group) {
     this.group = group;
+  }
+
+  /**
+   * Whether {@link #serialize(Flag)} should be used for serializing
+   * into configurate, or if not - use typeserializers
+   * @return If {@link #serialize(Flag)} should be used for configurate
+   */
+  public boolean shouldUseSerializeForConfigurate() {
+    return false;
+  }
+
+  /**
+   * Serializes value into a human readable format for display, and
+   * possibly also configurate depending on {@link #shouldUseSerializeForConfigurate()}
+   * <b>IMPORTANT</b>: always use the default setting value to access this function.
+   * This is because the value will not have the function overriden since it will be just
+   * a flag with the correct generic.
+   * @return Value serialized as a string
+   */
+  public String serialize(Flag<T> flag) {
+    return flag.value.toString();
+  }
+
+  /**
+   * Deserializes value. Only to be ever used if {@link #shouldUseSerializeForConfigurate()}
+   * returns true.
+   * <b>IMPORTANT</b>: always use the default setting value to access this function.
+   * @throws UnsupportedOperationException if deserialize is not overriden. Check {@link #shouldUseSerializeForConfigurate()} first.
+   * @return T value to be used to construct a new flag
+   */
+  public T deserialize(String s) {
+    throw new UnsupportedOperationException("This flag should not be deserialized this way!");
   }
 }

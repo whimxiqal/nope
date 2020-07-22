@@ -10,4 +10,9 @@ public class FlagGameMode extends Flag<GameMode> {
   public FlagGameMode(GameMode value, TargetGroup group) {
     super(value, GameMode.class, group);
   }
+
+  @Override
+  public String serialize(Flag<GameMode> flag) {
+    return flag.getValue().getName();
+  }
 }

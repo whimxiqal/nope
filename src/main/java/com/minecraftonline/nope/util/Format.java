@@ -52,4 +52,6 @@ public final class Format {
     return Text.of(prefix(), TextColors.WHITE, Text.of(message));
   }
 
+  public static Text regionInfo(String key, String value) { return Text.of(TextColors.GREEN, key, TextColors.GRAY, value);}
+
 }
