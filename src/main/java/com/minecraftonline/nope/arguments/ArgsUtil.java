@@ -24,6 +24,11 @@
 
 package com.minecraftonline.nope.arguments;
 
+import com.google.common.collect.ImmutableSet;
+import com.minecraftonline.nope.control.Setting;
+import com.minecraftonline.nope.control.Settings;
+import com.minecraftonline.nope.control.flags.Flag;
+
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -31,6 +36,22 @@ import java.util.Collections;
 import java.util.List;
 
 public class ArgsUtil {
+  private static ImmutableSet<Setting<Flag<?>>> flagSettings = null;
+
+  @SuppressWarnings("unchecked")
+  public static ImmutableSet<Setting<Flag<?>>> getFlagSettings() {
+    if (flagSettings != null) {
+      return flagSettings;
+    }
+    ImmutableSet.Builder<Setting<Flag<?>>> builder = ImmutableSet.builder();
+    Settings.REGISTRY_MODULE.getByApplicability(Setting.Applicability.REGION).stream()
+        .filter(setting -> setting.getDefaultValue() instanceof Flag<?>)
+        .map(setting -> (Setting<Flag<?>>)setting)
+        .forEach(builder::add);
+    flagSettings = builder.build();
+    return flagSettings;
+  }
+
   /**
    * Filters possibilities by beginning match
    * @param typed String that was typed

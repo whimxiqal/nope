@@ -32,4 +32,15 @@ public class FlagBoolean extends Flag<Boolean> {
   public FlagBoolean(Boolean value, TargetGroup group) {
     super(value, Boolean.class, group);
   }
+
+  @Override
+  public Boolean deserializeIngame(String s) {
+    if ("true".equals(s)) {
+      return true;
+    }
+    if ("false".equals(s)) {
+      return false;
+    }
+    return null;
+  }
 }

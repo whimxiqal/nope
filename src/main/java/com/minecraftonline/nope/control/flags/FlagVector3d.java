@@ -34,4 +34,21 @@ public class FlagVector3d extends Flag<Vector3d> {
   public FlagVector3d(Vector3d value, TargetGroup group) {
     super(value, Vector3d.class, group);
   }
+
+  @Override
+  public Vector3d deserializeIngame(String s) {
+    String[] strings = s.split(",");
+    if (strings.length != 3) {
+      return null;
+    }
+    try {
+      return new Vector3d(
+          Double.parseDouble(strings[0]),
+          Double.parseDouble(strings[1]),
+          Double.parseDouble(strings[2])
+      );
+    } catch (NumberFormatException e) {
+      return null;
+    }
+  }
 }

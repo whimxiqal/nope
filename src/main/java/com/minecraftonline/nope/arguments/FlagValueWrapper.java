@@ -22,27 +22,30 @@
  * SOFTWARE.
  */
 
-package com.minecraftonline.nope.control.flags;
+package com.minecraftonline.nope.arguments;
 
-import org.spongepowered.api.Sponge;
-import org.spongepowered.api.entity.living.player.gamemode.GameMode;
+import com.minecraftonline.nope.control.Setting;
+import com.minecraftonline.nope.control.flags.Flag;
 
-public class FlagGameMode extends Flag<GameMode> {
-  public FlagGameMode(GameMode value) {
-    super(value, GameMode.class);
+public class FlagValueWrapper<T> {
+  private final Setting<Flag<T>> setting;
+  private final Flag<T> value;
+
+  public FlagValueWrapper(Setting<Flag<T>> setting, Flag<T> value) {
+    this.setting = setting;
+    this.value = value;
   }
 
-  public FlagGameMode(GameMode value, TargetGroup group) {
-    super(value, GameMode.class, group);
+  @SuppressWarnings("unchecked")
+  public static <V> FlagValueWrapper<V> makeFlagValueWrapper(Setting<? extends Flag<?>> setting, Flag<V> flag) {
+    return new FlagValueWrapper<>((Setting<Flag<V>>)setting, flag);
   }
 
-  @Override
-  public String serialize(Flag<GameMode> flag) {
-    return flag.getValue().getName();
+  public Setting<Flag<T>> getSetting() {
+    return setting;
   }
 
-  @Override
-  public GameMode deserializeIngame(String s) {
-    return Sponge.getRegistry().getType(GameMode.class, s).orElse(null);
+  public Flag<T> getValue() {
+    return value;
   }
 }

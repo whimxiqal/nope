@@ -32,4 +32,9 @@ public class FlagString extends Flag<String> {
   public FlagString(String value, TargetGroup group) {
     super(value, String.class, group);
   }
+
+  @Override
+  public String deserializeIngame(String s) {
+    return s;
+  }
 }

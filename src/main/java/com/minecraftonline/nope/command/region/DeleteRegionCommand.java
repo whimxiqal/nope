@@ -24,7 +24,6 @@
 
 package com.minecraftonline.nope.command.region;
 
-import com.minecraftonline.nope.Nope;
 import com.minecraftonline.nope.arguments.NopeArguments;
 import com.minecraftonline.nope.arguments.RegionWrapper;
 import com.minecraftonline.nope.command.common.CommandNode;
@@ -35,7 +34,6 @@ import com.minecraftonline.nope.permission.Permissions;
 import com.minecraftonline.nope.util.Format;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.args.GenericArguments;
-import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
 
 public class DeleteRegionCommand extends LambdaCommandNode {
@@ -45,7 +43,7 @@ public class DeleteRegionCommand extends LambdaCommandNode {
         Text.of("Delete a given region"),
         "delete",
         "remove");
-    setCommandElement(GenericArguments.onlyOne(NopeArguments.regionCommandElement(Text.of("region"))));
+    setCommandElement(GenericArguments.onlyOne(NopeArguments.regionWrapper(Text.of("region"))));
     setExecutor((src, args) -> {
       RegionWrapper region = args.<RegionWrapper>getOne(Text.of("region")).get();
       WorldHost worldHost = region.getWorldHost();

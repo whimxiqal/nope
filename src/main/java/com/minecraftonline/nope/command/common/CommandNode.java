@@ -48,7 +48,7 @@ public abstract class CommandNode implements CommandExecutor {
   private final Text description;
   private final List<String> aliases;
   private final List<CommandNode> children;
-  private CommandElement commandElement = GenericArguments.none();
+  private CommandElement[] commandElement = new CommandElement[] {GenericArguments.none()};
 
   /**
    * A helpful constructor which easily allows for addition of
@@ -161,12 +161,15 @@ public abstract class CommandNode implements CommandExecutor {
   }
 
   @Nonnull
-  public final CommandElement getCommandElement() {
+  public final CommandElement[] getCommandElements() {
     return commandElement;
   }
 
-  protected final void setCommandElement(@Nonnull CommandElement commandElement) {
+  protected final void setCommandElement(@Nonnull CommandElement... commandElement) {
     this.commandElement = Objects.requireNonNull(commandElement);
+    for (int i = 0; i < commandElement.length; i++) {
+      Objects.requireNonNull(commandElement[i]);
+    }
   }
 
   public final boolean isRoot() {

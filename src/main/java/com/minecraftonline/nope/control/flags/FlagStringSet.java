@@ -24,6 +24,8 @@
 
 package com.minecraftonline.nope.control.flags;
 
+import com.google.common.collect.Sets;
+
 import java.util.Set;
 
 public class FlagStringSet extends Flag<Set<String>> {
@@ -40,5 +42,10 @@ public class FlagStringSet extends Flag<Set<String>> {
     StringBuilder builder = new StringBuilder("{");
     flag.getValue().forEach(name -> builder.append(" ").append(name).append(","));
     return builder.deleteCharAt(builder.length() - 1).append(" }").toString();
+  }
+
+  @Override
+  public Set<String> deserializeIngame(String s) {
+    return Sets.newHashSet(s.split(","));
   }
 }

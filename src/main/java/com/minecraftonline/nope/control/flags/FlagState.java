@@ -56,4 +56,13 @@ public class FlagState extends Flag<Boolean> {
     }
     throw new IllegalStateException("Tried to deserialize invalid Flag string!");
   }
+
+  @Override
+  public Boolean deserializeIngame(String s) {
+    try {
+      return deserialize(s);
+    } catch (IllegalStateException e) {
+      return null;
+    }
+  }
 }

@@ -52,14 +52,14 @@ public class FlagSerializer implements TypeSerializer<Flag> {
       if (s == null) {
         return null;
       }
-      newFlag = makeFlag(defaultFlag.getFlagType(), defaultFlag.deserialize(s));
+      newFlag = FlagUtil.makeFlag(defaultFlag, defaultFlag.deserialize(s));
     }
     else {
       Object val = value.getValue(TypeToken.of(defaultFlag.getFlagType()));
       if (val == null) {
         return null;
       }
-      newFlag = makeFlag(defaultFlag.getFlagType(), val);
+      newFlag = FlagUtil.makeFlag(defaultFlag, val);
     }
     FlagUtil.deserializeGroup(newFlag, value);
     return newFlag;
@@ -79,10 +79,6 @@ public class FlagSerializer implements TypeSerializer<Flag> {
       throw new IllegalArgumentException("Setting was not for a flag!");
     }
     return (Flag<?>)obj;
-  }
-
-  private static <T> Flag<T> makeFlag(Class<T> clazz, Object val) {
-    return new Flag<>(clazz.cast(val), clazz);
   }
 
   @Override

@@ -24,8 +24,11 @@
 
 package com.minecraftonline.nope.control.flags;
 
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.EntityType;
 
+import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 
 public class FlagEntitySet extends Flag<Set<EntityType>> {
@@ -44,5 +47,18 @@ public class FlagEntitySet extends Flag<Set<EntityType>> {
         .map(EntityType::getName)
         .forEach(name -> builder.append(" ").append(name).append(","));
     return builder.deleteCharAt(builder.length() - 1).append(" }").toString();
+  }
+
+  @Override
+  public Set<EntityType> deserializeIngame(String s) {
+    Set<EntityType> set = new HashSet<>();
+    for (String strEntityType : s.split(",")) {
+      Optional<EntityType> entityType = Sponge.getRegistry().getType(EntityType.class, strEntityType);
+      if (!entityType.isPresent()) {
+        return null;
+      }
+      set.add(entityType.get());
+    }
+    return set.size() == 0 ? null : set;
   }
 }

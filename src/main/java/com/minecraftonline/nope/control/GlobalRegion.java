@@ -41,6 +41,6 @@ public class GlobalRegion extends Region {
 
   @Override
   public boolean isLocationInRegion(Vector3i location) {
-    return location.getExtent().getUniqueId().equals(worldUUID);
+    return true;
   }
 }

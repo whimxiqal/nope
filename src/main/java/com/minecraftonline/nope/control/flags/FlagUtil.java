@@ -35,6 +35,7 @@ import ninja.leaping.configurate.objectmapping.ObjectMappingException;
 import org.spongepowered.api.entity.living.player.Player;
 
 import javax.annotation.Nullable;
+import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Map;
 
@@ -90,5 +91,24 @@ public class FlagUtil {
 
   private static boolean isTargeted(Object obj, Region region, Setting<TargetSet> targetSetSetting) {
     return obj instanceof Player && region.getSettingValueOrDefault(targetSetSetting).isPlayerTargeted((Player)obj);
+  }
+
+  /**
+   * Make a flag using reflection
+   * @param defaultFlag flag to grab constructor from
+   * @param value That is compatible, i.e instanceof T
+   * @param <V> Underlying flag value
+   * @return Created flag with given value
+   */
+  @SuppressWarnings("unchecked")
+  public static <V> Flag<V> makeFlag(Flag<V> defaultFlag, Object value) {
+    try {
+      return defaultFlag.getClass().getConstructor(value.getClass()).newInstance((V)value);
+    } catch (NoSuchMethodException e) {
+      Nope.getInstance().getLogger().error("Could not find flag constructor, did you not include a constructor with only the value in the sub-class?", e);
+    } catch (IllegalAccessException | InvocationTargetException | InstantiationException e) {
+      Nope.getInstance().getLogger().error("Error making flag, did you make the constructor weirdly, use an abstract class or similar?", e);
+    }
+    throw new IllegalStateException("Error while making flag - no value to return");
   }
 }

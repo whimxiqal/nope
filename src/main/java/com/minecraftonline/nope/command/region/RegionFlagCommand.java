@@ -24,23 +24,37 @@
 
 package com.minecraftonline.nope.command.region;
 
+import com.minecraftonline.nope.arguments.FlagValueWrapper;
+import com.minecraftonline.nope.arguments.NopeArguments;
+import com.minecraftonline.nope.arguments.RegionWrapper;
 import com.minecraftonline.nope.command.common.CommandNode;
-import com.minecraftonline.nope.command.common.FunctionlessCommandNode;
+import com.minecraftonline.nope.command.common.LambdaCommandNode;
+import com.minecraftonline.nope.control.Region;
 import com.minecraftonline.nope.permission.Permissions;
+import org.spongepowered.api.command.CommandResult;
+import org.spongepowered.api.command.args.GenericArguments;
 import org.spongepowered.api.text.Text;
 
-public class RegionCommand extends FunctionlessCommandNode {
-  public RegionCommand(CommandNode parent) {
+import java.io.Serializable;
+
+public class RegionFlagCommand extends LambdaCommandNode {
+  public RegionFlagCommand(CommandNode parent) {
     super(parent,
-        Permissions.REGION,
-        Text.of("Region sub command for all things regions"),
-        "region",
-        "rg");
-    addChildren(new RegionWandCommand(this));
-    addChildren(new RegionCreateCommand(this));
-    addChildren(new ListRegionsCommand(this));
-    addChildren(new DeleteRegionCommand(this));
-    addChildren(new RegionInfoCommand(this));
-    addChildren(new RegionFlagCommand(this));
+        Permissions.EDIT_REGION,
+        Text.of("Set region flag"),
+        "flag",
+        "fg");
+    setCommandElement(NopeArguments.regionWrapper(Text.of("region")),
+        NopeArguments.flagValueWrapper(Text.of("flag")));
+    setExecutor((src, args) -> {
+      RegionWrapper regionWrapper = args.<RegionWrapper>getOne("region").get();
+      FlagValueWrapper<?> flagValueWrapper = args.<FlagValueWrapper<?>>getOne("flag").get();
+      setValue(regionWrapper.getRegion(), flagValueWrapper);
+      return CommandResult.success();
+    });
+  }
+
+  private static <T> void setValue(Region region, FlagValueWrapper<T> flagValueWrapper) {
+    region.set(flagValueWrapper.getSetting(), flagValueWrapper.getValue());
   }
 }

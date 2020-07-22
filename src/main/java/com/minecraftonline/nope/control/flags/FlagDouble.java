@@ -34,4 +34,13 @@ public class FlagDouble extends Flag<Double> {
   public FlagDouble(Double value, TargetGroup group) {
     super(value, Double.class, group);
   }
+
+  @Override
+  public Double deserializeIngame(String s) {
+    try {
+      return Double.parseDouble(s);
+    } catch (NumberFormatException e) {
+      return null;
+    }
+  }
 }

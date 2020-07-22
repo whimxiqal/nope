@@ -283,6 +283,10 @@ public final class Settings {
       .withApplicability(Setting.Applicability.REGION)
       .withConfigurationPath("flags.feed-delay");
 
+  public static final Setting<FlagDouble> FLAG_FEED_MIN_HUNGER = Setting.of("flag-feed-min-hunger", new FlagDouble(0D), FlagDouble.class)
+      .withApplicability(Setting.Applicability.REGION)
+      .withConfigurationPath("flags.feed-min-hunger");
+
   public static final Setting<FlagState> FLAG_FIREWORK_DAMAGE = Setting.of("flag-firework-damage", new FlagState(true), FlagState.class)
       .withApplicability(Setting.Applicability.REGION)
       .withConfigurationPath("flags.firework-damage");
@@ -490,10 +494,6 @@ public final class Settings {
   public static final Setting<FlagState> FLAG_WITHER_DAMAGE = Setting.of("flag-wither-damage", new FlagState(true), FlagState.class)
       .withApplicability(Setting.Applicability.REGION)
       .withConfigurationPath("flags.wither-damage");
-
-  public static final Setting<FlagDouble> FLAG_FEED_MIN_HUNGER = Setting.of("flag-feed-min-hunger", new FlagDouble(0D), FlagDouble.class)
-      .withApplicability(Setting.Applicability.REGION)
-      .withConfigurationPath("flags.feed-min-hunger");
 
   public static final Setting<Boolean> LEAF_DECAY = Setting.of("leaf-decay", true, Boolean.class)
       .withDescription("Set to false will disable all natural leaf decay")

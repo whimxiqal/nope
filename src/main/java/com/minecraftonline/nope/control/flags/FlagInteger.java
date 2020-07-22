@@ -32,4 +32,13 @@ public class FlagInteger extends Flag<Integer> {
   public FlagInteger(Integer value, TargetGroup group) {
     super(value, Integer.class, group);
   }
+
+  @Override
+  public Integer deserializeIngame(String s) {
+    try {
+      return Integer.parseInt(s);
+    } catch (NumberFormatException e) {
+      return null;
+    }
+  }
 }

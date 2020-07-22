@@ -26,6 +26,7 @@ package com.minecraftonline.nope.control.flags;
 
 import com.minecraftonline.nope.config.GlobalConfigManager;
 import javafx.util.Pair;
+import jdk.internal.jline.internal.Nullable;
 
 import java.io.Serializable;
 import java.util.Optional;
@@ -35,7 +36,7 @@ import java.util.Optional;
  * @param <T> Value of the flag, that must, if not default-ly serializable
  *           by configurate, have a serializer added to {@link GlobalConfigManager#getTypeSerializers()}
  */
-public class Flag<T> implements Serializable {
+public abstract class Flag<T> implements Serializable {
   public enum TargetGroup {
     ALL,
     OWNERS,
@@ -109,4 +110,14 @@ public class Flag<T> implements Serializable {
   public T deserialize(String s) {
     throw new UnsupportedOperationException("This flag should not be deserialized this way!");
   }
+
+  /**
+   * Deserialize value from ingame input. This must be implemented
+   * but is free to just call {@link #deserialize(String s)}, provided
+   * that is also implemented.
+   * @param s String to deserialize
+   * @return T value to be used to construct a new flag, or null if input is invalid
+   */
+  @Nullable
+  public abstract T deserializeIngame(String s);
 }

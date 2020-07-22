@@ -35,15 +35,12 @@ import com.minecraftonline.nope.control.Settings;
 import com.minecraftonline.nope.control.flags.Flag;
 import com.minecraftonline.nope.control.target.Target;
 import com.minecraftonline.nope.control.target.TargetSet;
-import com.minecraftonline.nope.permission.Permission;
 import com.minecraftonline.nope.permission.Permissions;
 import com.minecraftonline.nope.util.Format;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.args.GenericArguments;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
 
-import javax.annotation.Nonnull;
 import java.util.Map;
 
 public class RegionInfoCommand extends LambdaCommandNode {
@@ -54,7 +51,7 @@ public class RegionInfoCommand extends LambdaCommandNode {
         "info",
         "i");
 
-    setCommandElement(GenericArguments.onlyOne(NopeArguments.regionCommandElement(Text.of("region"))));
+    setCommandElement(GenericArguments.onlyOne(NopeArguments.regionWrapper(Text.of("region"))));
     setExecutor((src, args) -> {
       RegionWrapper regionWrapper = args.<RegionWrapper>getOne(Text.of("region")).get();
       Region region = regionWrapper.getRegion();
