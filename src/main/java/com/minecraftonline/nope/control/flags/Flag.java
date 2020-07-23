@@ -24,17 +24,15 @@
 
 package com.minecraftonline.nope.control.flags;
 
-import com.minecraftonline.nope.config.GlobalConfigManager;
-import javafx.util.Pair;
+import com.minecraftonline.nope.config.configurate.GlobalConfigurateConfigManager;
 import jdk.internal.jline.internal.Nullable;
 
 import java.io.Serializable;
-import java.util.Optional;
 
 /**
  * Represents a WG Flag
  * @param <T> Value of the flag, that must, if not default-ly serializable
- *           by configurate, have a serializer added to {@link GlobalConfigManager#getTypeSerializers()}
+ *           by configurate, have a serializer added to {@link GlobalConfigurateConfigManager#getTypeSerializers()}
  */
 public abstract class Flag<T> implements Serializable {
   public enum TargetGroup {

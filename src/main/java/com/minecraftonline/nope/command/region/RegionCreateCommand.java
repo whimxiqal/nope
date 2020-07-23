@@ -28,6 +28,7 @@ import com.minecraftonline.nope.Nope;
 import com.minecraftonline.nope.RegionWandHandler;
 import com.minecraftonline.nope.command.common.CommandNode;
 import com.minecraftonline.nope.command.common.LambdaCommandNode;
+import com.minecraftonline.nope.control.Region;
 import com.minecraftonline.nope.control.RegularRegion;
 import com.minecraftonline.nope.control.WorldHost;
 import com.minecraftonline.nope.permission.Permissions;
@@ -64,7 +65,9 @@ public class RegionCreateCommand extends LambdaCommandNode {
         player.sendMessage(Format.error("There is already a region with the name '" + name + "'"));
         return CommandResult.empty();
       }
-      worldHost.addRegion(name, new RegularRegion(selection.getWorld(), selection.getPos1(), selection.getPos2()));
+      Region region = new RegularRegion(selection.getWorld(), selection.getPos1(), selection.getPos2());
+      worldHost.addRegion(name, region);
+      Nope.getInstance().getRegionConfigManager().onRegionCreate(worldHost, name, region);
       player.sendMessage(Format.info("Region '" + name + "' successfully created"));
       return CommandResult.success();
     });

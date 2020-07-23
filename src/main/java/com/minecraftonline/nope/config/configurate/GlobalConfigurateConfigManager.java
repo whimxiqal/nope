@@ -22,16 +22,18 @@
  * SOFTWARE.
  */
 
-package com.minecraftonline.nope.config;
+package com.minecraftonline.nope.config.configurate;
 
 import com.flowpowered.math.vector.Vector3d;
 import com.flowpowered.math.vector.Vector3i;
 import com.google.common.reflect.TypeToken;
-import com.minecraftonline.nope.config.serializer.TargetSetSerializer;
-import com.minecraftonline.nope.config.serializer.Vector3dSerializer;
-import com.minecraftonline.nope.config.serializer.Vector3iSerializer;
-import com.minecraftonline.nope.config.serializer.flag.FlagSerializer;
-import com.minecraftonline.nope.config.supplier.ConfigLoaderSupplier;
+import com.minecraftonline.nope.config.ConfigManager;
+import com.minecraftonline.nope.config.configurate.hocon.HoconGlobalConfigurateConfigManager;
+import com.minecraftonline.nope.config.configurate.serializer.TargetSetSerializer;
+import com.minecraftonline.nope.config.configurate.serializer.Vector3dSerializer;
+import com.minecraftonline.nope.config.configurate.serializer.Vector3iSerializer;
+import com.minecraftonline.nope.config.configurate.serializer.flag.FlagSerializer;
+import com.minecraftonline.nope.config.configurate.supplier.ConfigLoaderSupplier;
 import com.minecraftonline.nope.control.GlobalHost;
 import com.minecraftonline.nope.control.Host;
 import com.minecraftonline.nope.control.Region;
@@ -57,27 +59,30 @@ import static org.gradle.internal.impldep.com.google.api.client.repackaged.com.g
 /**
  * Global config manager, contains world configs, who contain regions
  * Not abstract as it has no methods that need to be implemented, but
- * an implementation like {@link com.minecraftonline.nope.config.hocon.HoconGlobalConfigManager}
+ * an implementation like {@link HoconGlobalConfigurateConfigManager}
  * is suggested
  */
-public class GlobalConfigManager extends ConfigManager {
-  private Map<World, WorldConfigManager> worldConfigs = new HashMap<>();
+public class GlobalConfigurateConfigManager extends ConfigurateConfigManager implements ConfigManager {
+  private boolean sqlEnabled;
+  private Map<World, WorldConfigurateConfigManager> worldConfigs = new HashMap<>();
 
-  public GlobalConfigManager(Path configDir, ConfigLoaderSupplier configLoaderSupplier) {
+  public GlobalConfigurateConfigManager(Path configDir, ConfigLoaderSupplier configLoaderSupplier) {
     super(configDir, "global", configLoaderSupplier);
   }
 
   @Override
   public void loadExtra() {
+    Boolean sqlEnabled = getConfig().getNodeValue(Settings.SQL_ENABLE.getConfigurationPath().get(), TypeToken.of(Settings.SQL_ENABLE.getTypeClass()));
+    this.sqlEnabled = sqlEnabled == null ? Settings.SQL_ENABLE.getDefaultValue() : sqlEnabled;
     for (World world : Sponge.getServer().getWorlds()) {
-      WorldConfigManager worldConfigManager = new WorldConfigManager(configDir, world, configLoaderSupplier);
+      WorldConfigurateConfigManager worldConfigManager = new WorldConfigurateConfigManager(configDir, world, configLoaderSupplier, this.sqlEnabled);
       worldConfigManager.loadAll();
       worldConfigs.put(world, worldConfigManager);
     }
   }
 
   public void saveExtra() {
-    worldConfigs.values().forEach(WorldConfigManager::saveAll);
+    worldConfigs.values().forEach(WorldConfigurateConfigManager::saveAll);
   }
 
   /**
@@ -87,7 +92,7 @@ public class GlobalConfigManager extends ConfigManager {
   @Nullable
   public WorldHost loadWorld(World world) {
     return worldConfigs.computeIfAbsent(world, k -> {
-      WorldConfigManager worldConfigManager = new WorldConfigManager(configDir, world, configLoaderSupplier);
+      WorldConfigurateConfigManager worldConfigManager = new WorldConfigurateConfigManager(configDir, world, configLoaderSupplier, this.sqlEnabled);
       worldConfigManager.loadAll();
       this.worldConfigs.put(world, worldConfigManager);
       return worldConfigManager;
@@ -100,12 +105,16 @@ public class GlobalConfigManager extends ConfigManager {
    * @param globalHost Host to fill
    */
   public void fillSettings(GlobalHost globalHost) {
-    for (Map.Entry<World, WorldConfigManager> entry : this.worldConfigs.entrySet()) {
+    for (Map.Entry<World, WorldConfigurateConfigManager> entry : this.worldConfigs.entrySet()) {
       WorldHost worldHost = entry.getValue().getWorldHost();
       fillSettings(worldHost, entry.getValue().getConfig());
       globalHost.addWorld(entry.getKey(), worldHost);
       // Region uses different method of filling
     }
+  }
+
+  public boolean isSqlEnabled() {
+    return this.sqlEnabled;
   }
 
   /**
@@ -115,7 +124,7 @@ public class GlobalConfigManager extends ConfigManager {
    * @param host   Host to shallow fill
    * @param source ConfigContainer to get config from
    */
-  public void fillSettings(Host host, ConfigContainer<CommentedConfigurationNode> source) {
+  private void fillSettings(Host host, ConfigContainer<CommentedConfigurationNode> source) {
     if (host instanceof Region) {
       return;
     }
@@ -124,7 +133,7 @@ public class GlobalConfigManager extends ConfigManager {
     }
   }
 
-  public WorldConfigManager getWorldConfig(World world) {
+  public WorldConfigurateConfigManager getWorldConfig(World world) {
     return this.worldConfigs.get(world);
   }
 

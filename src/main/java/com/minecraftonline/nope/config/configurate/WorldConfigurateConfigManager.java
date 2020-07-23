@@ -22,41 +22,42 @@
  * SOFTWARE.
  */
 
-package com.minecraftonline.nope.config;
+package com.minecraftonline.nope.config.configurate;
 
-import com.flowpowered.math.vector.Vector3i;
 import com.google.common.reflect.TypeToken;
-import com.minecraftonline.nope.Nope;
-import com.minecraftonline.nope.config.supplier.ConfigLoaderSupplier;
+import com.minecraftonline.nope.config.configurate.supplier.ConfigLoaderSupplier;
 import com.minecraftonline.nope.control.GlobalRegion;
 import com.minecraftonline.nope.control.Region;
 import com.minecraftonline.nope.control.RegularRegion;
 import com.minecraftonline.nope.control.Setting;
 import com.minecraftonline.nope.control.Settings;
 import com.minecraftonline.nope.control.WorldHost;
-import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
-import ninja.leaping.configurate.objectmapping.ObjectMappingException;
 import org.spongepowered.api.world.World;
 
 import java.io.Serializable;
 import java.nio.file.Path;
 import java.util.Map;
 
-public class WorldConfigManager extends ConfigManager {
+public class WorldConfigurateConfigManager extends ConfigurateConfigManager {
+  private boolean sqlEnabled;
   private World world;
   private WorldHost worldHost;
   //private Map<String, Region> regionConfig = new HashMap<>();
   private ConfigContainer<CommentedConfigurationNode> regions;
 
-  public WorldConfigManager(Path configDir, World world, ConfigLoaderSupplier configLoaderSupplier) {
+  public WorldConfigurateConfigManager(Path configDir, World world, ConfigLoaderSupplier configLoaderSupplier, boolean sqlEnabled) {
     super(configDir.resolve(world.getName()), "config", configLoaderSupplier);
     this.world = world;
+    this.sqlEnabled = sqlEnabled;
   }
 
   @Override
   public void loadExtra() {
     this.worldHost = new WorldHost(world.getUniqueId());
+    if (sqlEnabled) {
+      return;
+    }
     Path regions = this.configDir.resolve("regions" + CONFIG_FILE_EXTENSION);
     loadRegions(regions);
   }
@@ -64,6 +65,9 @@ public class WorldConfigManager extends ConfigManager {
   @Override
   public void saveExtra() {
     saveRegions();
+    if (sqlEnabled) {
+      return;
+    }
     this.regions.save();
   }
 

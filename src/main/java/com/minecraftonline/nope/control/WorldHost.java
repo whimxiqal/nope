@@ -60,7 +60,6 @@ public class WorldHost extends Host {
 
   public void removeRegion(String regionId) {
     this.regions.remove(regionId);
-    Nope.getInstance().getGlobalConfigManager().getWorldConfig(Sponge.getServer().getWorld(worldUuid).get()).removeRegion(regionId);
   }
 
   public RegionSet getRegions(Vector3i position) {

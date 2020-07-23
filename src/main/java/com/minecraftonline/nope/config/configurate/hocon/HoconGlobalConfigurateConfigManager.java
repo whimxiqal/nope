@@ -22,18 +22,16 @@
  * SOFTWARE.
  */
 
-package com.minecraftonline.nope.config.hocon;
+package com.minecraftonline.nope.config.configurate.hocon;
 
-import com.minecraftonline.nope.config.GlobalConfigManager;
-import com.minecraftonline.nope.config.supplier.HoconLoaderSupplier;
-import ninja.leaping.configurate.ConfigurationOptions;
-import ninja.leaping.configurate.objectmapping.serialize.TypeSerializerCollection;
+import com.minecraftonline.nope.config.configurate.GlobalConfigurateConfigManager;
+import com.minecraftonline.nope.config.configurate.supplier.HoconLoaderSupplier;
 
 import java.nio.file.Path;
 
-public class HoconGlobalConfigManager extends GlobalConfigManager {
+public class HoconGlobalConfigurateConfigManager extends GlobalConfigurateConfigManager {
 
-  public HoconGlobalConfigManager(Path configDir) {
-    super(configDir, new HoconLoaderSupplier(GlobalConfigManager.getTypeSerializers()));
+  public HoconGlobalConfigurateConfigManager(Path configDir) {
+    super(configDir, new HoconLoaderSupplier(GlobalConfigurateConfigManager.getTypeSerializers()));
   }
 }

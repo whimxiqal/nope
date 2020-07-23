@@ -22,39 +22,37 @@
  * SOFTWARE.
  */
 
-package com.minecraftonline.nope.config.serializer;
+package com.minecraftonline.nope.config.configurate.serializer;
 
+import com.flowpowered.math.vector.Vector3d;
 import com.google.common.reflect.TypeToken;
-import com.minecraftonline.nope.control.target.Target;
-import com.minecraftonline.nope.control.target.TargetSet;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.objectmapping.ObjectMappingException;
 import ninja.leaping.configurate.objectmapping.serialize.TypeSerializer;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.util.TypeTokens;
 
-public class TargetSetSerializer implements TypeSerializer<TargetSet> {
+public class Vector3dSerializer implements TypeSerializer<Vector3d> {
   @Nullable
   @Override
-  public TargetSet deserialize(@NonNull TypeToken<?> type, @NonNull ConfigurationNode value) throws ObjectMappingException {
-    TargetSet targetSet = new TargetSet();
-    for (Target.TargetType targetType : Target.TargetType.values()) {
-      ConfigurationNode node = value.getNode(targetType.getKey());
-      node.getList(TypeTokens.STRING_TOKEN).stream()
-          .map(targetType::deserialize)
-          .forEach(targetSet::add);
+  public Vector3d deserialize(@NonNull TypeToken<?> type, @NonNull ConfigurationNode value) throws ObjectMappingException {
+    if (value.isVirtual()) {
+      return null;
     }
-    return targetSet;
+    return new Vector3d(
+        value.getNode("x").getDouble(),
+        value.getNode("y").getDouble(),
+        value.getNode("z").getDouble()
+    );
   }
 
   @Override
-  public void serialize(@NonNull TypeToken<?> type, @Nullable TargetSet obj, @NonNull ConfigurationNode value) throws ObjectMappingException {
+  public void serialize(@NonNull TypeToken<?> type, @Nullable Vector3d obj, @NonNull ConfigurationNode value) throws ObjectMappingException {
     if (obj == null) {
-      throw new ObjectMappingException("Cannot serialize a null TargetSet");
+      throw new ObjectMappingException("Cannot serialize a null Vector3d");
     }
-    for (Target.TargetType targetType : obj.getTargets().keySet()) {
-      value.getNode(targetType.getKey()).setValue(obj.getTargets().get(targetType));
-    }
+    value.getNode("x").setValue(obj.getX());
+    value.getNode("y").setValue(obj.getY());
+    value.getNode("z").setValue(obj.getZ());
   }
 }

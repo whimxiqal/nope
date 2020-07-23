@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-package com.minecraftonline.nope.config.serializer.flag;
+package com.minecraftonline.nope.config.configurate.serializer.flag;
 
 import com.google.common.reflect.TypeToken;
 import com.minecraftonline.nope.control.Setting;

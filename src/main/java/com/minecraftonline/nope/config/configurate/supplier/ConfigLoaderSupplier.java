@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-package com.minecraftonline.nope.config.supplier;
+package com.minecraftonline.nope.config.configurate.supplier;
 
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.loader.ConfigurationLoader;

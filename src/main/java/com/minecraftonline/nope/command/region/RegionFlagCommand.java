@@ -24,6 +24,7 @@
 
 package com.minecraftonline.nope.command.region;
 
+import com.minecraftonline.nope.Nope;
 import com.minecraftonline.nope.arguments.FlagValueWrapper;
 import com.minecraftonline.nope.arguments.NopeArguments;
 import com.minecraftonline.nope.arguments.RegionWrapper;
@@ -50,6 +51,7 @@ public class RegionFlagCommand extends LambdaCommandNode {
       RegionWrapper regionWrapper = args.<RegionWrapper>getOne("region").get();
       FlagValueWrapper<?> flagValueWrapper = args.<FlagValueWrapper<?>>getOne("flag").get();
       setValue(regionWrapper.getRegion(), flagValueWrapper);
+      Nope.getInstance().getRegionConfigManager().onRegionModify(regionWrapper.getWorldHost(), regionWrapper.getRegionName(), regionWrapper.getRegion(), flagValueWrapper.getSetting());
       return CommandResult.success();
     });
   }

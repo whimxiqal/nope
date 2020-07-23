@@ -92,6 +92,7 @@ public class Setting<T extends Serializable> implements CatalogType, Serializabl
    *
    * @return The default value
    */
+  @Nonnull
   public T getDefaultValue() {
     return this.defaultValue;
   }

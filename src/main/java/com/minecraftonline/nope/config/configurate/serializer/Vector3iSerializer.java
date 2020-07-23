@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-package com.minecraftonline.nope.config.serializer;
+package com.minecraftonline.nope.config.configurate.serializer;
 
 import com.flowpowered.math.vector.Vector3i;
 import com.google.common.reflect.TypeToken;

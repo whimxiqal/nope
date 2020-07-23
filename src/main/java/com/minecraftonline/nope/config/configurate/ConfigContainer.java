@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-package com.minecraftonline.nope.config;
+package com.minecraftonline.nope.config.configurate;
 
 import com.google.common.reflect.TypeToken;
 import com.minecraftonline.nope.Nope;
