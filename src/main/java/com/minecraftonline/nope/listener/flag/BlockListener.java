@@ -24,7 +24,6 @@
 
 package com.minecraftonline.nope.listener.flag;
 
-import com.flowpowered.math.vector.Vector3i;
 import com.minecraftonline.nope.Nope;
 import com.minecraftonline.nope.control.Region;
 import com.minecraftonline.nope.control.RegionSet;
@@ -34,24 +33,19 @@ import com.minecraftonline.nope.control.flags.Flag;
 import com.minecraftonline.nope.control.flags.FlagState;
 import com.minecraftonline.nope.control.flags.FlagUtil;
 import com.minecraftonline.nope.control.flags.Membership;
-import com.minecraftonline.nope.control.target.TargetSet;
-import org.spongepowered.api.Sponge;
+import org.spongepowered.api.Game;
 import org.spongepowered.api.block.BlockSnapshot;
-import org.spongepowered.api.block.BlockState;
-import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.block.tileentity.Piston;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.event.Cancellable;
 import org.spongepowered.api.event.Listener;
-import org.spongepowered.api.event.Order;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
+import org.spongepowered.api.event.block.InteractBlockEvent;
 import org.spongepowered.api.event.block.NotifyNeighborBlockEvent;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.filter.type.Exclude;
-import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.serializer.TextSerializers;
 import org.spongepowered.api.util.Direction;
@@ -74,9 +68,9 @@ public class BlockListener extends FlagListener {
       return; // Caused by a plugin, don't block.
     }
     Object root = e.getCause().root();
-    //if (cancelledSources.contains(root)) {
-    //	return; // stop infinite loop
-    //}
+    if (e instanceof ChangeBlockEvent.Modify) {
+      return;
+    }
     Set<Region> checkedRegions = new HashSet<>();
 
     for (Transaction<BlockSnapshot> transaction : e.getTransactions()) {
@@ -86,11 +80,9 @@ public class BlockListener extends FlagListener {
       RegionSet regionSet = Nope.getInstance().getGlobalHost().getRegions(loc);
       Region region = regionSet.getHighestPriorityRegion().orElse(null);
       if (region == null) {
-        Nope.getInstance().getLogger().info("region was null");
         continue; // Wouldn't really ever expect this, should always be a __global__ region.
       }
       if (checkedRegions.contains(region)) {
-        Nope.getInstance().getLogger().info("skipping, already checked");
         continue;
       }
       checkedRegions.add(region);
@@ -104,22 +96,25 @@ public class BlockListener extends FlagListener {
         e.setCancelled(true);*/ // Crashes server, sponge bug.
         return;
       }
+      else if (root instanceof Game) {
+        e.setCancelled(true);
+        return; // Because obviously, lava and water, thats caused by the game,
+        // and has no information about, i don't know, where the lava came from
+      }
       else {
         return;
       }
       Setting<FlagState> specialSetting;
       // Setting to check for this particular break, i.e if its a place, the place setting,
       // if its the break, break setting, or null if no specialization
-      if (e instanceof ChangeBlockEvent.Modify) {
+      /*if (e instanceof ChangeBlockEvent.Modify) {
         Nope.getInstance().getLogger().info("modify event");
         specialSetting = Settings.FLAG_INTERACT;
       }
-      else if (e instanceof ChangeBlockEvent.Break) {
-        Nope.getInstance().getLogger().info("break event");
+      else */if (e instanceof ChangeBlockEvent.Break) {
         specialSetting = Settings.FLAG_BLOCK_BREAK;
       }
       else if (e instanceof ChangeBlockEvent.Place) {
-        Nope.getInstance().getLogger().info("place event");
         specialSetting = Settings.FLAG_BLOCK_PLACE;
       }
       else {
@@ -129,10 +124,9 @@ public class BlockListener extends FlagListener {
       boolean shouldCancel = checkBuildFlags(regionSet, membership, specialSetting);
       if (shouldCancel) {
         e.setCancelled(true);
-        //cancelledSources.add(root);
         Nope.getInstance().getLogger().info(e.getContext().toString());
         if (root instanceof CommandSource) {
-          Text msg = Text.of("You can't do this here!");//TextSerializers.FORMATTING_CODE.deserialize(region.getSettingValueOrDefault(Settings.FLAG_DENY_MESSAGE).getValue());
+          Text msg = TextSerializers.FORMATTING_CODE.deserialize(region.getSettingValueOrDefault(Settings.FLAG_DENY_MESSAGE).getValue());
           if (!msg.isEmpty()) {
             ((CommandSource)root).sendMessage(msg);
           }
@@ -145,13 +139,8 @@ public class BlockListener extends FlagListener {
   // Is this throwing errors about immutability, then maybe sponge updated so that
   // their code matches their documentation. If you're lucky, .filterDirections() will
   // now exist.
-  //@Listener(order = Order.EARLY) // Stop redstone propagation
+  @Listener // Stop redstone propagation
   public void onNotifyNeighborBlockEvent(NotifyNeighborBlockEvent e) {
-    Player player = e.getCause().first(Player.class).orElse(null);
-    //if (player != null && cancelledSources.contains(player)) {
-    //	e.setCancelled(true);
-    //	return;
-    //}
     // Disallow notifications across region borders unless they are allowed.
     LocatableBlock locatableBlock = (LocatableBlock) e.getSource();
     Location<World> source = locatableBlock.getLocation();
@@ -170,11 +159,9 @@ public class BlockListener extends FlagListener {
     }
   }
 
-  //@Listener // Piston handling.
+  @Listener // Piston handling.
   public void onChangeBlockEventPre(ChangeBlockEvent.Pre e) {
-    Nope.getInstance().getLogger().warn("in changeblockeventpre");
     if (!(e.getSource() instanceof LocatableBlock)) {
-      Nope.getInstance().getLogger().info("unexpected type in changeblockevent.pre: " + e.getSource());
       return;
     }
     LocatableBlock locatableBlock = (LocatableBlock) e.getSource();
@@ -193,6 +180,26 @@ public class BlockListener extends FlagListener {
         e.setCancelled(true);
       }
     }
+  }
+
+  //@Listener
+  public void interactBlockEvent(InteractBlockEvent.Secondary e) {
+    if (!(e.getSource() instanceof Player)) {
+      return;
+    }
+    e.getTargetBlock().getLocation().ifPresent(loc -> {
+      Player player = (Player)e.getSource();
+      Membership membership = Membership.player(player);
+
+      RegionSet regionSet = Nope.getInstance().getGlobalHost().getRegions(loc);
+      if (checkBuildFlags(regionSet, membership, Settings.FLAG_INTERACT)) {
+        e.setCancelled(true);
+        Text text = TextSerializers.FORMATTING_CODE.deserialize(regionSet.findFirstFlagSettingOrDefault(Settings.FLAG_DENY_MESSAGE, membership).getValue());
+        if (!text.isEmpty()) {
+          player.sendMessage(text);
+        }
+      }
+    });
   }
 
   /**
@@ -219,16 +226,13 @@ public class BlockListener extends FlagListener {
       else {
         shouldAllow = specializedSetting.getDefaultValue().getValue();
       }
-      //Nope.getInstance().getLogger().info("here1");
     }
     else if (buildFlag.isPresent()) {
       shouldAllow = buildFlag.get().getValue();
-      //Nope.getInstance().getLogger().info("here2, buildflag.getValue(): " + buildFlag.get().getValue());
     }
     else {
       shouldAllow = Settings.FLAG_BUILD.getDefaultValue().getValue();
     }
-    //Nope.getInstance().getLogger().info("shouldAllow: " + shouldAllow);
     return !shouldAllow;
   }
 
