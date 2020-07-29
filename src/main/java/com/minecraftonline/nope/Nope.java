@@ -29,7 +29,6 @@ import com.minecraftonline.nope.command.common.NopeCommandTree;
 import com.minecraftonline.nope.config.ConfigManager;
 import com.minecraftonline.nope.config.configurate.GlobalConfigurateConfigManager;
 import com.minecraftonline.nope.config.configurate.hocon.HoconGlobalConfigurateConfigManager;
-import com.minecraftonline.nope.config.sql.SqlConfigManager;
 import com.minecraftonline.nope.control.GlobalHost;
 import com.minecraftonline.nope.control.Settings;
 import com.minecraftonline.nope.key.NopeKeys;
@@ -107,7 +106,7 @@ public class Nope {
   public void onInit(GameInitializationEvent event) {
     globalConfigManager.loadAll();
     globalConfigManager.fillSettings(globalHost);
-    this.regionConfigManager = globalConfigManager.isSqlEnabled() ? new SqlConfigManager() : globalConfigManager;
+    this.regionConfigManager = globalConfigManager;
 
     NopeKeys.REGION_WAND = Key.builder()
         .type(TypeTokens.BOOLEAN_VALUE_TOKEN)

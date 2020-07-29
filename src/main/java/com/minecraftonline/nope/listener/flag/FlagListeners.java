@@ -32,6 +32,7 @@ import java.util.List;
 
 public final class FlagListeners {
   private static final List<FlagListener> FLAG_LISTENERS = Lists.newArrayList(
+      new BlockListener(),
       new DamageListener()
   );
 

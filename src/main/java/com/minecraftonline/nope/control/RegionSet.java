@@ -24,6 +24,10 @@
 
 package com.minecraftonline.nope.control;
 
+import com.minecraftonline.nope.control.flags.Flag;
+import com.minecraftonline.nope.control.flags.FlagUtil;
+import com.minecraftonline.nope.control.flags.Membership;
+
 import java.io.Serializable;
 import java.util.AbstractMap;
 import java.util.ArrayList;
@@ -54,5 +58,58 @@ public class RegionSet {
           .ifPresent(val -> values.add(new AbstractMap.SimpleEntry<>(val, region)));
     }
     return values;
+  }
+
+  public <T extends Serializable> Optional<Map.Entry<T, Region>> getHighestPrioritySettingValue(Setting<T> setting) {
+    if (regions.size() == 0) return Optional.empty();
+    Region region = this.regions.get(this.regions.size() - 1);
+    T val = region.getSettingValue(setting).orElse(null);
+    return val == null ? Optional.empty() : Optional.of(new AbstractMap.SimpleEntry<>(val, region));
+  }
+
+  /**
+   * Finds the first flag that is applicable
+   * @param setting Flag Setting to find value for
+   * @param isMember whether the caller is a member
+   * @param isOwner whether the caller is an owner
+   * @param <T> The type of setting
+   * @return Optional of Map.Entry of T and Region
+   * @deprecated use {@link #findFirstFlagSetting(Setting, Membership)}
+   */
+  @Deprecated
+  public <T extends Flag<?>> Optional<Map.Entry<T, Region>> findFirstApplicableFlagSetting(Setting<T> setting, boolean isMember, boolean isOwner) {
+    for (int i = regions.size() - 1; i >= 0; i--) {
+      Region region = regions.get(i);
+      Optional<T> val = region.getSettingValue(setting);
+      if (val.isPresent() && FlagUtil.appliesTo(val.get(), isOwner, isMember)) {
+        return Optional.of(new AbstractMap.SimpleEntry<>(val.get(), region));
+      }
+    }
+    return Optional.empty();
+  }
+
+  public <T extends Flag<?>> Optional<T> findFirstFlagSetting(Setting<T> setting, Membership membership) {
+    for (int i = regions.size() - 1; i >= 0; i--) {
+      Region region = regions.get(i);
+      Optional<T> val = region.getSettingValue(setting);
+      if (val.isPresent() && FlagUtil.appliesTo(val.get(), region, membership)) {
+        return val;
+      }
+    }
+    return Optional.empty();
+  }
+
+  public <T extends Flag<?>> T findFirstFlagSettingOrDefault(Setting<T> setting, Membership membership) {
+    return findFirstFlagSetting(setting, membership).orElse(setting.getDefaultValue());
+  }
+
+  @Deprecated
+  public <T extends Flag<?>> T findFirstApplicableFlagSettingOrDefault(Setting<T> setting, boolean isMember, boolean isOwner) {
+    return findFirstApplicableFlagSetting(setting, isMember, isOwner).map(Map.Entry::getKey).orElse(setting.getDefaultValue());
+  }
+
+  public Optional<Region> getHighestPriorityRegion() {
+    if (regions.size() == 0) return Optional.empty();
+    return Optional.of(regions.get(regions.size() - 1));
   }
 }

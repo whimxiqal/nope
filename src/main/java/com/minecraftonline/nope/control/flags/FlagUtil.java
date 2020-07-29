@@ -30,7 +30,6 @@ import com.minecraftonline.nope.control.Setting;
 import com.minecraftonline.nope.control.Settings;
 import com.minecraftonline.nope.control.target.TargetSet;
 import ninja.leaping.configurate.ConfigurationNode;
-import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.objectmapping.ObjectMappingException;
 import org.spongepowered.api.entity.living.player.Player;
 
@@ -65,23 +64,33 @@ public class FlagUtil {
     }
   }
 
-  public static <T extends Flag<?>> Map.Entry<T, Region> getLastValid(List<Map.Entry<T, Region>> list, Object root) {
+  public static <T extends Flag<?>> Map.Entry<T, Region> getLastValid(List<Map.Entry<T, Region>> list, boolean isOwner, boolean isMember) {
     for (int i = list.size() - 1; i >= 0; i--) {
       Map.Entry<T, Region> entry = list.get(i);
-      if (FlagUtil.isValid(entry.getKey(), entry.getValue(), root)) {
+      if (appliesTo(entry.getKey(), isOwner, isMember)) {
         return entry;
       }
     }
     return null;
   }
 
-  public static boolean isValid(Flag<?> flag, Region region, Object root) {
+  public static <T extends Flag<?>> Map.Entry<T, Region> getLastValid(List<Map.Entry<T, Region>> list, Object root) {
+    for (int i = list.size() - 1; i >= 0; i--) {
+      Map.Entry<T, Region> entry = list.get(i);
+      if (FlagUtil.appliesTo(entry.getKey(), entry.getValue(), root)) {
+        return entry;
+      }
+    }
+    return null;
+  }
+
+  public static boolean appliesTo(Flag<?> flag, Region region, Object root) {
     switch (flag.getGroup()) {
       case ALL: return true;
-      case OWNERS: return isTargeted(root, region, Settings.REGION_OWNERS);
-      case MEMBERS: return isTargeted(root, region, Settings.REGION_OWNERS) || isTargeted(root, region, Settings.REGION_MEMBERS);
-      case NONOWNERS: return !isTargeted(root, region, Settings.REGION_OWNERS);
-      case NONMEMBERS: return !isTargeted(root, region, Settings.REGION_OWNERS) && !isTargeted(root, region, Settings.REGION_MEMBERS);
+      case OWNERS: return isPlayerTargeted(root, region, Settings.REGION_OWNERS);
+      case MEMBERS: return isPlayerTargeted(root, region, Settings.REGION_OWNERS) || isPlayerTargeted(root, region, Settings.REGION_MEMBERS);
+      case NONOWNERS: return !isPlayerTargeted(root, region, Settings.REGION_OWNERS);
+      case NONMEMBERS: return !isPlayerTargeted(root, region, Settings.REGION_OWNERS) && !isPlayerTargeted(root, region, Settings.REGION_MEMBERS);
       default: {
         Nope.getInstance().getLogger().error("Missing case for enum in FlagUtil getLastValid()");
         return false;
@@ -89,8 +98,32 @@ public class FlagUtil {
     }
   }
 
-  private static boolean isTargeted(Object obj, Region region, Setting<TargetSet> targetSetSetting) {
+  public static boolean isPlayerTargeted(Object obj, Region region, Setting<TargetSet> targetSetSetting) {
     return obj instanceof Player && region.getSettingValueOrDefault(targetSetSetting).isPlayerTargeted((Player)obj);
+  }
+
+  @Deprecated
+  public static boolean appliesTo(Flag<?> flag, boolean isOwner, boolean isMember) {
+    switch (flag.getGroup()) {
+      case ALL: return true;
+      case OWNERS: return isOwner;
+      case MEMBERS: return isMember;
+      case NONMEMBERS: return !isMember;
+      case NONOWNERS: return !isOwner;
+      default: throw new IllegalStateException("More values to an enum than expected!");
+    }
+  }
+
+  public static boolean appliesTo(Flag<?> flag, Region region, Membership membership) {
+    Membership.Status status = membership.apply(region);
+    switch (flag.getGroup()) {
+      case ALL: return true;
+      case OWNERS: return status == Membership.Status.OWNER;
+      case MEMBERS: return status == Membership.Status.OWNER || status == Membership.Status.MEMBER;
+      case NONMEMBERS: return !(status == Membership.Status.OWNER || status == Membership.Status.MEMBER);
+      case NONOWNERS: return status != Membership.Status.OWNER;
+      default: throw new IllegalStateException("More values to an enum than expected!");
+    }
   }
 
   /**

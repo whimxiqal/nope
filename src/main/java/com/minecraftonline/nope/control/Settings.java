@@ -148,26 +148,6 @@ public final class Settings {
    */
   public static final Setting<Boolean> BUILD_PERMISSIONS = Setting.of("build-permission-nodes-enable", false, Boolean.class);
 
-  public static final Setting<String> SQL_USERNAME = Setting.of("sql-username", "worldguard", String.class)
-      .withApplicability(Setting.Applicability.GLOBAL)
-      .withConfigurationPath("regions.sql.sql-username");
-
-  public static final Setting<Boolean> SQL_ENABLE = Setting.of("sql-enable", false, Boolean.class)
-      .withApplicability(Setting.Applicability.GLOBAL)
-      .withConfigurationPath("regions.sql.sql-enable");
-
-  public static final Setting<String> SQL_DSN = Setting.of("sql-dsn", "jdbc:mysql://localhost/worldguard", String.class)
-      .withApplicability(Setting.Applicability.GLOBAL)
-      .withConfigurationPath("regions.sql.sql-dsn");
-
-  public static final Setting<String> SQL_PASSWORD = Setting.of("sql-password", "worldguard", String.class)
-      .withApplicability(Setting.Applicability.GLOBAL)
-      .withConfigurationPath("regions.sql.sql-password");
-
-  public static final Setting<String> SQL_TABLE_PREFIX = Setting.of("sql-table-prefix", "", String.class)
-      .withApplicability(Setting.Applicability.GLOBAL)
-      .withConfigurationPath("regions.sql.table-prefix");
-
   public static final Setting<Boolean> DEOP_ON_ENTER = Setting.of("deop-on-enter", false, Boolean.class)
       .withComment("Set to true will deop any player when they enter.")
       .withDescription("If this setting is applied globally, then anytime and op-ed player joins the server, their op status is removed. "
@@ -439,7 +419,7 @@ public final class Settings {
       .withApplicability(Setting.Applicability.REGION)
       .withConfigurationPath("flags.other-explosion");
 
-  public static final Setting<FlagState> FLAG_PASSTHROUGH = Setting.of("passthrough", new FlagState(false), FlagState.class)
+  public static final Setting<FlagState> FLAG_PASSTHROUGH = Setting.of("passthrough", new FlagState(true), FlagState.class) // By default, unlike WG, allow by default
       .withApplicability(Setting.Applicability.REGION)
       .withConfigurationPath("flags.passthrough");
 
@@ -545,6 +525,26 @@ public final class Settings {
   public static final Setting<Integer> REGION_PRIORITY = Setting.of("region-priority", 0, Integer.class)
       .withApplicability(Setting.Applicability.REGION)
       .withConfigurationPath("priority");
+
+  public static final Setting<String> SQL_DSN = Setting.of("sql-dsn", "jdbc:mysql://localhost/worldguard", String.class)
+      .withApplicability(Setting.Applicability.GLOBAL)
+      .withConfigurationPath("regions.sql.sql-dsn");
+
+  public static final Setting<Boolean> SQL_ENABLE = Setting.of("sql-enable", false, Boolean.class)
+      .withApplicability(Setting.Applicability.GLOBAL)
+      .withConfigurationPath("regions.sql.sql-enable");
+
+  public static final Setting<String> SQL_PASSWORD = Setting.of("sql-password", "worldguard", String.class)
+      .withApplicability(Setting.Applicability.GLOBAL)
+      .withConfigurationPath("regions.sql.sql-password");
+
+  public static final Setting<String> SQL_TABLE_PREFIX = Setting.of("sql-table-prefix", "", String.class)
+      .withApplicability(Setting.Applicability.GLOBAL)
+      .withConfigurationPath("regions.sql.table-prefix");
+
+  public static final Setting<String> SQL_USERNAME = Setting.of("sql-username", "worldguard", String.class)
+      .withApplicability(Setting.Applicability.GLOBAL)
+      .withConfigurationPath("regions.sql.sql-username");
 
   /**
    * TODO: add more config options, add ability for damage values, etc.

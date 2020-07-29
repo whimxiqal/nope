@@ -2,18 +2,6 @@
 This is an automagically generated description of all settings for easy reference.
 Contains a breakdown by Region, World and global applicable settings, some settings applicable to more than one
 The type of data is show by the name in brackets, if they start with Flag, then simply ignore the flag to get the more recognisable type. FlagState is allow/deny, whereas FlagBoolean is true/false.Region flags are unique: they can be only applied to a certain group, eg. no pvp only applies to non-members, etc.
-##WORLD
-* op-permissions (Boolean) - No description
-###dynamics
-* leaf-decay (Boolean) - Set to false will disable all natural leaf decay
-###security
-* deop-on-enter (Boolean) - If this setting is applied globally, then anytime and op-ed player joins the server, their op status is removed. If this setting is applied to just a world, then only when they join that specific world do they get de-opped.
-##GLOBAL
-* wand-item (ItemType) - Item given when /nope region wand is used
-###dynamics
-* leaf-decay (Boolean) - Set to false will disable all natural leaf decay
-###security
-* deop-on-enter (Boolean) - If this setting is applied globally, then anytime and op-ed player joins the server, their op status is removed. If this setting is applied to just a world, then only when they join that specific world do they get de-opped.
 ##REGION
 * min (Vector3i) - No description
 * max (Vector3i) - No description
@@ -47,16 +35,16 @@ The type of data is show by the name in brackets, if they start with Flag, then 
 * mob-spawning (FlagState) - No description
 * natural-hunger-drain (FlagState) - No description
 * crop-growth (FlagState) - No description
+* entry (FlagState) - No description
 * exit-override (FlagBoolean) - No description
 * exit (FlagState) - No description
-* entry (FlagState) - No description
 * creeper-explosion (FlagState) - No description
 * vine-growth (FlagState) - No description
-* heal-max-health (FlagDouble) - No description
 * blocked-cmds (FlagStringSet) - No description
+* heal-max-health (FlagDouble) - No description
 * damage-animals (FlagState) - No description
-* snow-melt (FlagState) - No description
 * notify-enter (FlagBoolean) - No description
+* snow-melt (FlagState) - No description
 * tnt (FlagState) - No description
 * greeting-title (FlagString) - No description
 * exit-via-teleport (FlagState) - No description
@@ -65,10 +53,10 @@ The type of data is show by the name in brackets, if they start with Flag, then 
 * entity-item-frame-destroy (FlagState) - No description
 * farewell (FlagString) - No description
 * allowed-cmds (FlagStringSet) - No description
-* time-lock (FlagString) - No description
 * natural-health-regen (FlagState) - No description
-* deny-message (FlagString) - No description
 * feed-max-hunger (FlagDouble) - No description
+* time-lock (FlagString) - No description
+* deny-message (FlagString) - No description
 * frosted-ice-form (FlagState) - No description
 * mycelium-spread (FlagState) - No description
 * teleport (FlagVector3d) - No description
@@ -76,8 +64,8 @@ The type of data is show by the name in brackets, if they start with Flag, then 
 * vehicle-destroy (FlagState) - No description
 * interact (FlagState) - No description
 * chess-access (FlagState) - No description
-* weather-lock (FlagState) - No description
 * ride (FlagState) - No description
+* weather-lock (FlagState) - No description
 * fire-spread (FlagState) - No description
 * enderdragon-block-damage (FlagState) - No description
 * sleep (FlagState) - No description
@@ -102,6 +90,25 @@ The type of data is show by the name in brackets, if they start with Flag, then 
 * frosted-ice-melt (FlagState) - No description
 * entry-deny-message (FlagString) - No description
 * lava-flow (FlagState) - No description
-* grass-growth (FlagState) - No description
 * feed-min-hunger (FlagDouble) - No description
+* grass-growth (FlagState) - No description
 * notify-leave (FlagBoolean) - No description
+##GLOBAL
+* wand-item (ItemType) - Item given when /nope region wand is used
+###dynamics
+* leaf-decay (Boolean) - Set to false will disable all natural leaf decay
+###security
+* deop-on-enter (Boolean) - If this setting is applied globally, then anytime and op-ed player joins the server, their op status is removed. If this setting is applied to just a world, then only when they join that specific world do they get de-opped.
+###regions
+####sql
+* sql-password (String) - No description
+* table-prefix (String) - No description
+* sql-dsn (String) - No description
+* sql-username (String) - No description
+* sql-enable (Boolean) - No description
+##WORLD
+* op-permissions (Boolean) - No description
+###dynamics
+* leaf-decay (Boolean) - Set to false will disable all natural leaf decay
+###security
+* deop-on-enter (Boolean) - If this setting is applied globally, then anytime and op-ed player joins the server, their op status is removed. If this setting is applied to just a world, then only when they join that specific world do they get de-opped.

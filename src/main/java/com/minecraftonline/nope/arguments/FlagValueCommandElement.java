@@ -55,6 +55,9 @@ public class FlagValueCommandElement extends CommandElement {
         .orElseThrow(() -> new ArgumentParseException(Text.of("No region flag with the name: '" + settingName + "'"), settingName, settingName.length()));
     String strValue = args.next();
     Object value = flagSetting.getDefaultValue().deserializeIngame(strValue);
+    if (value == null) {
+      throw new ArgumentParseException(Text.of(strValue + " is not a valid value for this flag!"), strValue, settingName.length() + strValue.length() + 1); // 1 space
+    }
     Flag<?> flag = FlagUtil.makeFlag(flagSetting.getDefaultValue(), value);
     if (args.hasNext()) {
       String targetGroup = args.next();
