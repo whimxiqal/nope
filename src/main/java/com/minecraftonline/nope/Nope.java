@@ -36,7 +36,6 @@ import com.minecraftonline.nope.key.regionwand.ImmutableRegionWandManipulator;
 import com.minecraftonline.nope.key.regionwand.RegionWandManipulator;
 import com.minecraftonline.nope.listener.flag.FlagListeners;
 import com.minecraftonline.nope.util.Extra;
-import com.minecraftonline.nope.util.Reference;
 import org.slf4j.Logger;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.config.ConfigDir;
@@ -56,15 +55,7 @@ import org.spongepowered.api.util.TypeTokens;
 
 import java.nio.file.Path;
 
-@Plugin(
-    id = Reference.ID,
-    name = Reference.NAME,
-    description = Reference.DESCRIPTION,
-    url = Reference.URL,
-    authors = {"PietElite", "tyhdefu", "14mRh4X0r"},
-    version = Reference.VERSION,
-    dependencies = {@Dependency(id = "worldedit")}
-)
+@Plugin(id = "nope", dependencies = @Dependency(id = "worldedit"))
 public class Nope {
 
   private static Nope instance;
