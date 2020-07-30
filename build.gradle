@@ -6,10 +6,17 @@ plugins {
 // For sortClassFields
 apply plugin: 'org.spongepowered.gradle'
 
-group = 'minecraftonline'
-version = '0.0.0'
+archivesBaseName = 'nope'
+group = 'com.minecraftonline'
+version = '0.1.0'
+description = "A region protection plugin"
 
 ext.spongeVersion = '7.2.0'
+
+sponge.plugin.meta {
+  authors = ['PietElite', 'tyhdefu', '14mRh4X0r']
+  url = "https://www.minecraftonline.com"
+}
 
 repositories {
     maven { url "http://maven.sk89q.com/repo/" }
@@ -36,7 +43,6 @@ sourceSets {
 configurations {
   settingDescriptionImplementation.extendsFrom testImplementation
 }
-
 
 sortClassFields {
     add 'com.minecraftonline.nope.control.Settings'
