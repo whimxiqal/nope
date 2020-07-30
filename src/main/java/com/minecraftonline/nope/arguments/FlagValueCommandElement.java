@@ -68,20 +68,6 @@ public class FlagValueCommandElement extends CommandElement {
         throw new ArgumentParseException(Text.of("Invalid Target Group"), targetGroup, settingName.length() + strValue.length() + targetGroup.length() + 2); // 2 for spaces
       }
     }
-    args.nextIfPresent().ifPresent(a -> Nope.getInstance().getLogger().info("Unused argument!: " + a));
-    args.nextIfPresent().ifPresent(a -> Nope.getInstance().getLogger().info("Unused argument!: " + a));
-    args.nextIfPresent().ifPresent(a -> Nope.getInstance().getLogger().info("Unused argument!: " + a));
-    args.nextIfPresent().ifPresent(a -> Nope.getInstance().getLogger().info("Unused argument!: " + a));
-    args.nextIfPresent().ifPresent(a -> Nope.getInstance().getLogger().info("Unused argument!: " + a));
-    args.nextIfPresent().ifPresent(a -> Nope.getInstance().getLogger().info("Unused argument!: " + a));
-    args.nextIfPresent().ifPresent(a -> Nope.getInstance().getLogger().info("Unused argument!: " + a));
-    args.nextIfPresent().ifPresent(a -> Nope.getInstance().getLogger().info("Unused argument!: " + a));
-    args.nextIfPresent().ifPresent(a -> Nope.getInstance().getLogger().info("Unused argument!: " + a));
-    args.nextIfPresent().ifPresent(a -> Nope.getInstance().getLogger().info("Unused argument!: " + a));
-    args.nextIfPresent().ifPresent(a -> Nope.getInstance().getLogger().info("Unused argument!: " + a));
-    args.nextIfPresent().ifPresent(a -> Nope.getInstance().getLogger().info("Unused argument!: " + a));
-    args.nextIfPresent().ifPresent(a -> Nope.getInstance().getLogger().info("Unused argument!: " + a));
-    args.nextIfPresent().ifPresent(a -> Nope.getInstance().getLogger().info("Unused argument!: " + a));
 
     return FlagValueWrapper.makeFlagValueWrapper(flagSetting, flag);
   }
