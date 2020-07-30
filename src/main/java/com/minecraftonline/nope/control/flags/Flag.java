@@ -25,8 +25,8 @@
 package com.minecraftonline.nope.control.flags;
 
 import com.minecraftonline.nope.config.configurate.GlobalConfigurateConfigManager;
-import jdk.internal.jline.internal.Nullable;
 
+import javax.annotation.Nullable;
 import java.io.Serializable;
 
 /**
