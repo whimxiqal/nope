@@ -54,8 +54,6 @@ import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.gradle.internal.impldep.com.google.api.client.repackaged.com.google.common.base.Preconditions.checkNotNull;
-
 /**
  * Global config manager, contains world configs, who contain regions
  * Not abstract as it has no methods that need to be implemented, but
