@@ -37,8 +37,11 @@ import org.spongepowered.api.Game;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.block.tileentity.Piston;
+import org.spongepowered.api.block.trait.IntegerTrait;
+import org.spongepowered.api.block.trait.IntegerTraits;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.data.Transaction;
+import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
@@ -54,13 +57,16 @@ import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 
 import javax.annotation.Nullable;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
 public class BlockListener extends FlagListener {
+
   @Exclude({ChangeBlockEvent.Post.class})
   @Listener
   public void onBlockChange(ChangeBlockEvent e) {
@@ -72,6 +78,31 @@ public class BlockListener extends FlagListener {
       return;
     }
     Set<Region> checkedRegions = new HashSet<>();
+
+    Membership membership;
+    if (root instanceof Player) {
+      membership = Membership.player((Player)root);
+    }
+    else if (root instanceof Piston) {
+        /*Piston piston = ((Piston)root);
+        membership = Membership.block(piston.getLocation().getBlockPosition());
+        e.setCancelled(true);*/ // Crashes server, sponge bug.
+      return;
+    }
+    else if (root instanceof Game) {
+      //e.setCancelled(true);
+      //membership = Membership.constant(Membership.Status.NONE);
+      //TODO: Advanced 5 sides source finding to see if the source of the lava was from
+      // Fun fun fun fun.
+      // Because obviously, lava and water, thats caused by the game,
+      // and has no information about, i don't know, where the lava came from
+      membership = Membership.constant(Membership.Status.NONE);
+      // You may think this is always initialized later, so why set it now. well, because
+      // Java doesn't agree.
+    }
+    else {
+      return;
+    }
 
     for (Transaction<BlockSnapshot> transaction : e.getTransactions()) {
       // Setup information so we can make an properly informed decision when deciding whether
@@ -86,24 +117,22 @@ public class BlockListener extends FlagListener {
         continue;
       }
       checkedRegions.add(region);
-      Membership membership;
-      if (root instanceof Player) {
-        membership = Membership.player((Player)root);
+
+      if (root instanceof Game) {
+        IntegerTrait heightTrait;
+        if (transaction.getFinal().getState().getType() == BlockTypes.FLOWING_LAVA) {
+          heightTrait = IntegerTraits.FLOWING_LAVA_LEVEL;
+        }
+        else if (transaction.getFinal().getState().getType() == BlockTypes.FLOWING_WATER) {
+          heightTrait = IntegerTraits.FLOWING_WATER_LEVEL;
+        }
+        else {
+          return;
+        }
+
+        membership = Membership.multipleLocations(getPossibleSources(transaction.getFinal().getLocation().get(), heightTrait));
       }
-      else if (root instanceof Piston) {
-        /*Piston piston = ((Piston)root);
-        membership = Membership.block(piston.getLocation().getBlockPosition());
-        e.setCancelled(true);*/ // Crashes server, sponge bug.
-        return;
-      }
-      else if (root instanceof Game) {
-        e.setCancelled(true);
-        return; // Because obviously, lava and water, thats caused by the game,
-        // and has no information about, i don't know, where the lava came from
-      }
-      else {
-        return;
-      }
+
       Setting<FlagState> specialSetting;
       // Setting to check for this particular break, i.e if its a place, the place setting,
       // if its the break, break setting, or null if no specialization
@@ -124,7 +153,6 @@ public class BlockListener extends FlagListener {
       boolean shouldCancel = checkBuildFlags(regionSet, membership, specialSetting);
       if (shouldCancel) {
         e.setCancelled(true);
-        Nope.getInstance().getLogger().info(e.getContext().toString());
         if (root instanceof CommandSource) {
           Text msg = TextSerializers.FORMATTING_CODE.deserialize(region.getSettingValueOrDefault(Settings.FLAG_DENY_MESSAGE).getValue());
           if (!msg.isEmpty()) {
@@ -182,7 +210,7 @@ public class BlockListener extends FlagListener {
     }
   }
 
-  //@Listener
+  @Listener
   public void interactBlockEvent(InteractBlockEvent.Secondary e) {
     if (!(e.getSource() instanceof Player)) {
       return;
@@ -291,5 +319,23 @@ public class BlockListener extends FlagListener {
       return optFlag;
     }
     return optFlag;
+  }
+
+  // I.e no down since lava/water can't flow upwards
+  private static final Direction[] possibleSources = new Direction[] {Direction.UP, Direction.NORTH, Direction.EAST, Direction.SOUTH, Direction.WEST};
+  private static List<Location<World>> getPossibleSources(Location<World> location, IntegerTrait heightTrait) {
+    int height = location.getBlock().getTraitValue(heightTrait)
+        .orElseThrow(() -> new IllegalArgumentException("Given a location that didn't support the given trait!"));
+    List<Location<World>> sources = new ArrayList<>();
+    for (Direction dir : possibleSources) {
+      Location<World> checkLoc = location.getRelative(dir);
+      Optional<Integer> optionalInteger = checkLoc.getBlock().getTraitValue(heightTrait);
+
+      if (optionalInteger.isPresent()
+          && optionalInteger.get() == height + 1) {
+        sources.add(checkLoc);
+      }
+    }
+    return sources;
   }
 }

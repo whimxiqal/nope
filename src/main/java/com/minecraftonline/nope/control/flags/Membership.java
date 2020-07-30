@@ -29,46 +29,25 @@ import com.minecraftonline.nope.control.Region;
 import com.minecraftonline.nope.control.Settings;
 import com.minecraftonline.nope.control.target.TargetSet;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.World;
 
+import java.util.List;
 import java.util.function.Function;
 
-public abstract class Membership implements Function<Region, Membership.Status> {
+public interface Membership extends Function<Region, Membership.Status> {
   public enum Status {
     OWNER,
     MEMBER,
     NONE
   }
 
-  public static Membership block(Vector3i loc) {
-    return new Block(loc);
+  static Membership block(Vector3i loc) {
+    return region -> region.isLocationInRegion(loc) ? Status.MEMBER : Status.NONE;
   }
 
-  public static Membership player(org.spongepowered.api.entity.living.player.Player player) {
-    return new Player(player);
-  }
-
-  private static class Block extends Membership {
-    private Vector3i loc;
-
-    public Block(Vector3i loc) {
-      this.loc = loc;
-    }
-
-    @Override
-    public Status apply(Region region) {
-      return region.isLocationInRegion(loc) ? Status.MEMBER : Status.NONE;
-    }
-  }
-
-  private static class Player extends Membership {
-    private org.spongepowered.api.entity.living.player.Player player;
-
-    public Player(org.spongepowered.api.entity.living.player.Player player) {
-      this.player = player;
-    }
-
-    @Override
-    public Status apply(Region region) {
+  static Membership player(org.spongepowered.api.entity.living.player.Player player) {
+    return region -> {
       TargetSet owners = region.getSettingValue(Settings.REGION_OWNERS).orElse(null);
       if (owners != null && owners.isPlayerTargeted(player)) {
         return Status.OWNER;
@@ -78,6 +57,29 @@ public abstract class Membership implements Function<Region, Membership.Status> 
         return Status.MEMBER;
       }
       return Status.NONE;
-    }
+    };
+  }
+
+  static Membership constant(Status status) {
+    return region -> status;
+  }
+
+  /**
+   * Multiple locations is useful when you don't know for certain where
+   * something came from, but any of the locations would produce the given result,
+   * in which case, as long as 1 of the locations is inside the region, member status
+   * is assumed
+   * @param locations List of Locations
+   * @return Membership
+   */
+  static Membership multipleLocations(List<Location<World>> locations) {
+    return region -> {
+      for (Location<World> loc : locations) {
+        if (region.isLocationInRegion(loc.getBlockPosition())) {
+          return Status.MEMBER;
+        }
+      }
+      return Status.NONE;
+    };
   }
 }

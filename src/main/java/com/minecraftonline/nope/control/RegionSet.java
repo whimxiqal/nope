@@ -27,6 +27,7 @@ package com.minecraftonline.nope.control;
 import com.minecraftonline.nope.control.flags.Flag;
 import com.minecraftonline.nope.control.flags.FlagUtil;
 import com.minecraftonline.nope.control.flags.Membership;
+import org.apache.commons.lang3.tuple.Pair;
 
 import java.io.Serializable;
 import java.util.AbstractMap;
@@ -88,15 +89,19 @@ public class RegionSet {
     return Optional.empty();
   }
 
-  public <T extends Flag<?>> Optional<T> findFirstFlagSetting(Setting<T> setting, Membership membership) {
+  public <T extends Flag<?>> Optional<Pair<T, Region>> findFirstFlagSettingWithRegion(Setting<T> setting, Membership membership) {
     for (int i = regions.size() - 1; i >= 0; i--) {
       Region region = regions.get(i);
       Optional<T> val = region.getSettingValue(setting);
       if (val.isPresent() && FlagUtil.appliesTo(val.get(), region, membership)) {
-        return val;
+        return Optional.of(Pair.of(val.get(), region));
       }
     }
     return Optional.empty();
+  }
+
+  public <T extends Flag<?>> Optional<T> findFirstFlagSetting(Setting<T> setting, Membership membership) {
+    return findFirstFlagSettingWithRegion(setting, membership).map(Pair::getKey);
   }
 
   public <T extends Flag<?>> T findFirstFlagSettingOrDefault(Setting<T> setting, Membership membership) {
@@ -111,5 +116,28 @@ public class RegionSet {
   public Optional<Region> getHighestPriorityRegion() {
     if (regions.size() == 0) return Optional.empty();
     return Optional.of(regions.get(regions.size() - 1));
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    RegionSet regionSet = (RegionSet) o;
+    // Regions must be equal with == operator, so slight optimisation vs
+    // list's .equals can be done
+    if (this.regions.size() != regionSet.regions.size()) {
+      return false;
+    }
+    for (int i = 0; i < regions.size(); i++) {
+      if (this.regions.get(i) != regionSet.regions.get(i)) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  @Override
+  public int hashCode() {
+    return regions.hashCode();
   }
 }
