@@ -8,19 +8,6 @@ The type of data is show by the name in brackets, if they start with Flag, then 
 * leaf-decay (Boolean) - Set to false will disable all natural leaf decay
 ###security
 * deop-on-enter (Boolean) - If this setting is applied globally, then anytime and op-ed player joins the server, their op status is removed. If this setting is applied to just a world, then only when they join that specific world do they get de-opped.
-##GLOBAL
-* wand-item (ItemType) - Item given when /nope region wand is used
-###dynamics
-* leaf-decay (Boolean) - Set to false will disable all natural leaf decay
-###security
-* deop-on-enter (Boolean) - If this setting is applied globally, then anytime and op-ed player joins the server, their op status is removed. If this setting is applied to just a world, then only when they join that specific world do they get de-opped.
-###regions
-####sql
-* sql-password (String) - No description
-* table-prefix (String) - No description
-* sql-dsn (String) - No description
-* sql-username (String) - No description
-* sql-enable (Boolean) - No description
 ##REGION
 * min (Vector3i) - No description
 * max (Vector3i) - No description
@@ -112,3 +99,16 @@ The type of data is show by the name in brackets, if they start with Flag, then 
 * feed-min-hunger (FlagDouble) - No description
 * grass-growth (FlagState) - No description
 * notify-leave (FlagBoolean) - No description
+##GLOBAL
+* wand-item (ItemType) - Item given when /nope region wand is used
+###dynamics
+* leaf-decay (Boolean) - Set to false will disable all natural leaf decay
+###security
+* deop-on-enter (Boolean) - If this setting is applied globally, then anytime and op-ed player joins the server, their op status is removed. If this setting is applied to just a world, then only when they join that specific world do they get de-opped.
+###regions
+####sql
+* sql-password (String) - No description
+* table-prefix (String) - No description
+* sql-dsn (String) - No description
+* sql-username (String) - No description
+* sql-enable (Boolean) - No description

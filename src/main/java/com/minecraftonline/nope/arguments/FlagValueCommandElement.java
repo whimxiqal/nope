@@ -25,6 +25,7 @@
 package com.minecraftonline.nope.arguments;
 
 import com.google.common.collect.Lists;
+import com.minecraftonline.nope.Nope;
 import com.minecraftonline.nope.control.Setting;
 import com.minecraftonline.nope.control.Settings;
 import com.minecraftonline.nope.control.flags.Flag;
@@ -67,6 +68,21 @@ public class FlagValueCommandElement extends CommandElement {
         throw new ArgumentParseException(Text.of("Invalid Target Group"), targetGroup, settingName.length() + strValue.length() + targetGroup.length() + 2); // 2 for spaces
       }
     }
+    args.nextIfPresent().ifPresent(a -> Nope.getInstance().getLogger().info("Unused argument!: " + a));
+    args.nextIfPresent().ifPresent(a -> Nope.getInstance().getLogger().info("Unused argument!: " + a));
+    args.nextIfPresent().ifPresent(a -> Nope.getInstance().getLogger().info("Unused argument!: " + a));
+    args.nextIfPresent().ifPresent(a -> Nope.getInstance().getLogger().info("Unused argument!: " + a));
+    args.nextIfPresent().ifPresent(a -> Nope.getInstance().getLogger().info("Unused argument!: " + a));
+    args.nextIfPresent().ifPresent(a -> Nope.getInstance().getLogger().info("Unused argument!: " + a));
+    args.nextIfPresent().ifPresent(a -> Nope.getInstance().getLogger().info("Unused argument!: " + a));
+    args.nextIfPresent().ifPresent(a -> Nope.getInstance().getLogger().info("Unused argument!: " + a));
+    args.nextIfPresent().ifPresent(a -> Nope.getInstance().getLogger().info("Unused argument!: " + a));
+    args.nextIfPresent().ifPresent(a -> Nope.getInstance().getLogger().info("Unused argument!: " + a));
+    args.nextIfPresent().ifPresent(a -> Nope.getInstance().getLogger().info("Unused argument!: " + a));
+    args.nextIfPresent().ifPresent(a -> Nope.getInstance().getLogger().info("Unused argument!: " + a));
+    args.nextIfPresent().ifPresent(a -> Nope.getInstance().getLogger().info("Unused argument!: " + a));
+    args.nextIfPresent().ifPresent(a -> Nope.getInstance().getLogger().info("Unused argument!: " + a));
+
     return FlagValueWrapper.makeFlagValueWrapper(flagSetting, flag);
   }
 
