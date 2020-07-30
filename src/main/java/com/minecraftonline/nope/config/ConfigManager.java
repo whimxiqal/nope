@@ -28,8 +28,9 @@ import com.minecraftonline.nope.control.GlobalHost;
 import com.minecraftonline.nope.control.Region;
 import com.minecraftonline.nope.control.Setting;
 import com.minecraftonline.nope.control.WorldHost;
-import jdk.internal.jline.internal.Nullable;
 import org.spongepowered.api.world.World;
+
+import javax.annotation.Nullable;
 
 /**
  * A config manager with various methods to handle config loading, saving and updating.

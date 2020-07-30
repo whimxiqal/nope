@@ -30,7 +30,6 @@ import com.minecraftonline.nope.key.regionwand.RegionWandManipulator;
 import com.minecraftonline.nope.util.Format;
 import com.sk89q.worldedit.blocks.BaseItemStack;
 import com.sk89q.worldedit.sponge.SpongeWorldEdit;
-import jdk.internal.jline.internal.Nullable;
 import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.command.CommandSource;
@@ -46,6 +45,7 @@ import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 
+import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.Map;
 
