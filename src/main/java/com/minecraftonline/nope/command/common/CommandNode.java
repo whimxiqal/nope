@@ -106,6 +106,7 @@ public abstract class CommandNode implements CommandExecutor {
             .stream()
             .collect(Collectors.toMap(CommandNode::getAliases, CommandNode::build)))
         .description(this.description)
+        .childArgumentParseExceptionFallback(false) // Stops too many argument error messages due to falling back to help subcommand
         .executor(this);
     if (permission != null) {
       builder.permission(permission.get());
