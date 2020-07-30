@@ -3,8 +3,7 @@ plugins {
     id 'net.minecrell.licenser' version '0.4.1'
 }
 
-// For sortClassFields
-apply plugin: 'org.spongepowered.gradle'
+apply from: 'settingDescription.gradle'
 
 archivesBaseName = 'nope'
 group = 'com.minecraftonline'
@@ -31,29 +30,3 @@ dependencies {
 
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.6.0'
 }
-
-// Taken from https://docs.gradle.org/current/userguide/java_testing.html#sec:configuring_java_integration_tests
-sourceSets {
-    settingDescription {
-        compileClasspath += sourceSets.main.output
-        runtimeClasspath += sourceSets.main.output
-    }
-}
-
-configurations {
-  settingDescriptionImplementation.extendsFrom testImplementation
-}
-
-sortClassFields {
-    add 'com.minecraftonline.nope.control.Settings'
-}
-
-compileJava.dependsOn sortClassFields
-
-task generateSettingDescriptions(type: Test) {
-    testClassesDirs = sourceSets.settingDescription.output.classesDirs
-    classpath = sourceSets.settingDescription.runtimeClasspath
-}
-
-build.finalizedBy generateSettingDescriptions
-
