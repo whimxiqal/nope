@@ -24,6 +24,7 @@
 
 package com.minecraftonline.nope.control.flags;
 
+import com.google.common.reflect.TypeToken;
 import com.minecraftonline.nope.config.configurate.GlobalConfigurateConfigManager;
 
 import javax.annotation.Nullable;
@@ -45,19 +46,19 @@ public abstract class Flag<T> implements Serializable {
 
   private TargetGroup group;
   private T value;
-  private Class<T> clazz;
+  private TypeToken<T> clazz;
 
-  public Flag(T value, Class<T> clazz) {
+  public Flag(T value, TypeToken<T> clazz) {
     this(value, clazz, TargetGroup.ALL);
   }
 
-  public Flag(T value, Class<T> clazz, TargetGroup group) {
+  public Flag(T value, TypeToken<T> clazz, TargetGroup group) {
     this.value = value;
     this.clazz = clazz;
     this.group = group;
   }
 
-  public Class<T> getFlagType() {
+  public TypeToken<T> getFlagType() {
     return this.clazz;
   }
 

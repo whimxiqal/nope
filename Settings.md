@@ -2,12 +2,6 @@
 This is an automagically generated description of all settings for easy reference.
 Contains a breakdown by Region, World and global applicable settings, some settings applicable to more than one
 The type of data is show by the name in brackets, if they start with Flag, then simply ignore the flag to get the more recognisable type. FlagState is allow/deny, whereas FlagBoolean is true/false.Region flags are unique: they can be only applied to a certain group, eg. no pvp only applies to non-members, etc.
-##WORLD
-* op-permissions (Boolean) - No description
-###dynamics
-* leaf-decay (Boolean) - Set to false will disable all natural leaf decay
-###security
-* deop-on-enter (Boolean) - If this setting is applied globally, then anytime and op-ed player joins the server, their op status is removed. If this setting is applied to just a world, then only when they join that specific world do they get de-opped.
 ##REGION
 * min (Vector3i) - No description
 * max (Vector3i) - No description
@@ -99,6 +93,12 @@ The type of data is show by the name in brackets, if they start with Flag, then 
 * feed-min-hunger (FlagDouble) - No description
 * grass-growth (FlagState) - No description
 * notify-leave (FlagBoolean) - No description
+##WORLD
+* op-permissions (Boolean) - No description
+###dynamics
+* leaf-decay (Boolean) - Set to false will disable all natural leaf decay
+###security
+* deop-on-enter (Boolean) - If this setting is applied globally, then anytime and op-ed player joins the server, their op status is removed. If this setting is applied to just a world, then only when they join that specific world do they get de-opped.
 ##GLOBAL
 * wand-item (ItemType) - Item given when /nope region wand is used
 ###dynamics

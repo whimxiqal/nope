@@ -34,6 +34,7 @@ import ninja.leaping.configurate.objectmapping.ObjectMappingException;
 import org.spongepowered.api.entity.living.player.Player;
 
 import javax.annotation.Nullable;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Map;
@@ -136,11 +137,15 @@ public class FlagUtil {
   @SuppressWarnings("unchecked")
   public static <V> Flag<V> makeFlag(Flag<V> defaultFlag, Object value) {
     try {
-      return defaultFlag.getClass().getConstructor(value.getClass()).newInstance((V)value);
-    } catch (NoSuchMethodException e) {
-      Nope.getInstance().getLogger().error("Could not find flag constructor, did you not include a constructor with only the value in the sub-class?", e);
+      for (Constructor<?> constructor : defaultFlag.getClass().getConstructors()) {
+        if (constructor.getParameterCount() == 1
+            && constructor.getParameterTypes()[0].isAssignableFrom(value.getClass())) {
+          return (Flag<V>) constructor.newInstance(value);
+        }
+      }
+      throw new IllegalStateException("Failed to make flag, could not find applicable constructor, that had 1 arg, and that arg was the flag's value.");
     } catch (IllegalAccessException | InvocationTargetException | InstantiationException e) {
-      Nope.getInstance().getLogger().error("Error making flag, did you make the constructor weirdly, use an abstract class or similar?", e);
+      Nope.getInstance().getLogger().error("Error making flag, was there no single constructor with the value?", e);
     }
     throw new IllegalStateException("Error while making flag - no value to return");
   }

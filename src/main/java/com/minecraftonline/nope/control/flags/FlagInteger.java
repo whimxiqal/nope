@@ -24,13 +24,15 @@
 
 package com.minecraftonline.nope.control.flags;
 
+import org.spongepowered.api.util.TypeTokens;
+
 public class FlagInteger extends Flag<Integer> {
   public FlagInteger(Integer value) {
-    super(value, Integer.class);
+    super(value, TypeTokens.INTEGER_TOKEN);
   }
 
   public FlagInteger(Integer value, TargetGroup group) {
-    super(value, Integer.class, group);
+    super(value, TypeTokens.INTEGER_TOKEN, group);
   }
 
   @Override

@@ -55,7 +55,7 @@ public class FlagSerializer implements TypeSerializer<Flag> {
       newFlag = FlagUtil.makeFlag(defaultFlag, defaultFlag.deserialize(s));
     }
     else {
-      Object val = value.getValue(TypeToken.of(defaultFlag.getFlagType()));
+      Object val = value.getValue(defaultFlag.getFlagType());
       if (val == null) {
         return null;
       }
@@ -98,7 +98,7 @@ public class FlagSerializer implements TypeSerializer<Flag> {
 
   @SuppressWarnings("UnstableApiUsage")
   private static <T> void serializeFlag(Flag<T> flag, ConfigurationNode node) throws ObjectMappingException {
-    node.setValue(TypeToken.of(flag.getFlagType()), flag.getValue());
+    node.setValue(flag.getFlagType(), flag.getValue());
   }
 
   // If this throws a classcastexception, it means we have a default value, that doesn't have the same type

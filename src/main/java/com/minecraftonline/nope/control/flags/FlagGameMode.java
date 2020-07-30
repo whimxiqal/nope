@@ -26,14 +26,15 @@ package com.minecraftonline.nope.control.flags;
 
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
+import org.spongepowered.api.util.TypeTokens;
 
 public class FlagGameMode extends Flag<GameMode> {
   public FlagGameMode(GameMode value) {
-    super(value, GameMode.class);
+    super(value, TypeTokens.GAME_MODE_TOKEN);
   }
 
   public FlagGameMode(GameMode value, TargetGroup group) {
-    super(value, GameMode.class, group);
+    super(value, TypeTokens.GAME_MODE_TOKEN, group);
   }
 
   @Override
