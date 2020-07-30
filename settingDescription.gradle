@@ -1,0 +1,34 @@
+// For sortClassFields
+apply plugin: 'org.spongepowered.gradle'
+
+// Taken from https://docs.gradle.org/current/userguide/java_testing.html#sec:configuring_java_integration_tests
+sourceSets {
+    settingDescription {
+        compileClasspath += sourceSets.main.output
+        runtimeClasspath += sourceSets.main.output
+    }
+}
+
+configurations {
+    settingDescriptionImplementation.extendsFrom testImplementation
+}
+
+sortClassFields {
+    outputs.file  sourceSets.main.java.matching {
+        include 'com/minecraftonline/nope/control/Settings.java'
+    }.singleFile
+
+    add 'com.minecraftonline.nope.control.Settings'
+}
+
+compileJava.dependsOn sortClassFields
+
+task generateSettingDescriptions(type: JavaExec) {
+    outputs.file reporting.file("settings.md")
+
+    classpath = sourceSets.settingDescription.runtimeClasspath
+    main = 'com.minecraftonline.nope.CreateSettingsDescriptionFile'
+    args outputs.files.singleFile.path
+}
+
+build.finalizedBy generateSettingDescriptions
