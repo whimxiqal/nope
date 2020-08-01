@@ -27,24 +27,27 @@ package com.minecraftonline.nope;
 import com.minecraftonline.nope.control.Setting;
 import com.minecraftonline.nope.control.Settings;
 import com.minecraftonline.nope.util.MDStringBuilder;
-import org.junit.Test;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Collection;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.stream.Stream;
 
 public class CreateSettingsDescriptionFile {
-  public static final String FILE_LOC = "Settings.md";
+  public final String outputLocation;
 
-  @Test
-  public void createFile() {
+  public CreateSettingsDescriptionFile(String outputLocation) {
+    this.outputLocation = outputLocation;
+  }
+
+  public void createFile() throws IOException {
     Settings.load();
 
-    Map<Setting.Applicability, ConfigPathNode> configPaths = new HashMap<>();
+    // Use LinkedHashMap for a stable output
+    Map<Setting.Applicability, ConfigPathNode> configPaths = new LinkedHashMap<>();
 
     Collection<Setting<?>> settings = Settings.REGISTRY_MODULE.getAll();
     for (Setting<?> setting : settings) {
@@ -55,8 +58,7 @@ public class CreateSettingsDescriptionFile {
             ConfigPathNode node;
             if (k == null || v == null) {
               node = new ConfigPathNode("");
-            }
-            else {
+            } else {
               node = v;
             }
             node.addChild(path, 0, setting);
@@ -67,37 +69,23 @@ public class CreateSettingsDescriptionFile {
     }
 
     MDStringBuilder builder = new MDStringBuilder();
+    builder.appendTitleLine("Nope Setting summary", 1);
+    builder.append(
+        "This is an automagically generated description of all settings for easy reference.\n" +
+        "Contains a breakdown by Region, World and global applicable settings, some settings applicable to more than one.\n" +
+        "The type of data is show by the name in brackets, if they start with Flag, then simply ignore the flag to get the more recognisable type. FlagState is allow/deny, whereas FlagBoolean is true/false.\n" +
+        "Region flags are unique: they can be only applied to a certain group, eg. no pvp only applies to non-members, etc.\n"
+    );
 
-    int titleSize = 1;
-    builder.appendTitleLine("Nope Setting summary", titleSize++);
-    builder.append("This is an automagically generated description of all settings for easy reference.").append("\n");
-    builder.append("Contains a breakdown by Region, World and global applicable settings, some settings applicable to more than one").append('\n');
-    builder.append("The type of data is show by the name in brackets, if they start with Flag, then simply ignore the flag to get the more recognisable type. FlagState is allow/deny, whereas FlagBoolean is true/false.");
-    builder.append("Region flags are unique: they can be only applied to a certain group, eg. no pvp only applies to non-members, etc.").append('\n');
-
-    for (Map.Entry<Setting.Applicability, ConfigPathNode> entry : configPaths.entrySet()) {
-      builder.appendTitleLine(entry.getKey().toString(), titleSize++);
+    configPaths.forEach((category, pathNode) -> {
+      builder.appendTitleLine(category.toString(), 2);
       // Ignore initial ConfigPathNode
       // We want childless children first, then grouped ones later
-      for (ConfigPathNode node : entry.getValue().getChildlessChildren()) {
-        parseConfigPath(node, builder, titleSize);
-      }
-      for (ConfigPathNode node : entry.getValue().getChildrenWithChildren()) {
-        parseConfigPath(node, builder, titleSize);
-      }
-      titleSize--;
-    }
+      Stream.concat(pathNode.getChildlessChildren().stream(), pathNode.getChildrenWithChildren().stream())
+          .forEach(node -> parseConfigPath(node, builder, 3));
+    });
 
-    File file = new File(FILE_LOC);
-    try {
-      file.createNewFile();
-      BufferedWriter writer = new BufferedWriter(new FileWriter(file));
-      writer.write(builder.build());
-      writer.close();
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
-
+    Files.write(Paths.get(outputLocation), builder.build().getBytes());
   }
 
   public void parseConfigPath(ConfigPathNode node, MDStringBuilder builder, int titleSize) {
@@ -105,19 +93,23 @@ public class CreateSettingsDescriptionFile {
       // Has children?
       builder.appendTitleLine(node.getKey(), titleSize);
       // We want childless children first for ordering purposes
-      for (ConfigPathNode childNode : node.getChildlessChildren()) {
-        parseConfigPath(childNode, builder, titleSize + 1);
-      }
-      for (ConfigPathNode childNode : node.getChildrenWithChildren()) {
-        parseConfigPath(childNode, builder, titleSize + 1);
-      }
-    }
-    else {
+      Stream.concat(node.getChildlessChildren().stream(), node.getChildrenWithChildren().stream())
+          .forEach(childNode -> parseConfigPath(childNode, builder, titleSize + 1));
+    } else {
       Setting<?> setting = node.getSetting().get();
       builder.appendBullet(node.getKey());
       builder.append(" (").append(setting.getTypeClass().getSimpleName()).append(")");
       builder.append(" - ").append(setting.getDescription().orElse(setting.getComment().orElse("No description")));
-      builder.append("\n");
+      builder.append('\n');
+    }
+  }
+
+  public static void main(String... args) {
+    try {
+      new CreateSettingsDescriptionFile(args[0]).createFile();
+    } catch (IOException e) {
+      e.printStackTrace();
+      System.exit(1);
     }
   }
 }
