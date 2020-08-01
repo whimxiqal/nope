@@ -52,13 +52,13 @@ public class MDStringBuilder {
    * @param size
    */
   public void appendTitleLine(String s, int size) {
-    if (length() != 0) append('\n');
+    if (length() != 0) append("\n\r");
     for (int i = 0; i < size; i++) {
       append('#');
     }
     append(' ');
     append(s);
-    append("\n\n");
+    append("\n\r\n\r");
   }
 
   public void appendBullet(String s) {

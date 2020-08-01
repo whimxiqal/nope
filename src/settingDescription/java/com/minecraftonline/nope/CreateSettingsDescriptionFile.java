@@ -71,10 +71,10 @@ public class CreateSettingsDescriptionFile {
     MDStringBuilder builder = new MDStringBuilder();
     builder.appendTitleLine("Nope Setting summary", 1);
     builder.append(
-        "This is an automagically generated description of all settings for easy reference.\n" +
-        "Contains a breakdown by Region, World and global applicable settings, some settings applicable to more than one.\n" +
-        "The type of data is show by the name in brackets, if they start with Flag, then simply ignore the flag to get the more recognisable type. FlagState is allow/deny, whereas FlagBoolean is true/false.\n" +
-        "Region flags are unique: they can be only applied to a certain group, eg. no pvp only applies to non-members, etc.\n"
+        "This is an automagically generated description of all settings for easy reference.\n\r" +
+        "Contains a breakdown by Region, World and global applicable settings, some settings applicable to more than one.\n\r" +
+        "The type of data is show by the name in brackets, if they start with Flag, then simply ignore the flag to get the more recognisable type. FlagState is allow/deny, whereas FlagBoolean is true/false.\n\r" +
+        "Region flags are unique: they can be only applied to a certain group, eg. no pvp only applies to non-members, etc.\n\r"
     );
 
     configPaths.forEach((category, pathNode) -> {
@@ -100,7 +100,7 @@ public class CreateSettingsDescriptionFile {
       builder.appendBullet(node.getKey());
       builder.append(" (").append(setting.getTypeClass().getSimpleName()).append(")");
       builder.append(" - ").append(setting.getDescription().orElse(setting.getComment().orElse("No description")));
-      builder.append('\n');
+      builder.append("\n\r");
     }
   }
 
