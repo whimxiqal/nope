@@ -43,6 +43,7 @@ import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.DataRegistration;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.event.Listener;
+import org.spongepowered.api.event.game.GameReloadEvent;
 import org.spongepowered.api.event.game.state.GameInitializationEvent;
 import org.spongepowered.api.event.game.state.GamePreInitializationEvent;
 import org.spongepowered.api.event.game.state.GameStartedServerEvent;
@@ -95,9 +96,7 @@ public class Nope {
 
   @Listener
   public void onInit(GameInitializationEvent event) {
-    globalConfigManager.loadAll();
-    globalConfigManager.fillSettings(globalHost);
-    this.regionConfigManager = globalConfigManager;
+    onLoad();
 
     NopeKeys.REGION_WAND = Key.builder()
         .type(TypeTokens.BOOLEAN_VALUE_TOKEN)
@@ -114,9 +113,15 @@ public class Nope {
         .name("Nope region wand")
         .build();
 
-    regionWandHandler = new RegionWandHandler();
     Sponge.getEventManager().registerListeners(this, regionWandHandler);
     FlagListeners.registerAll();
+  }
+
+  public void onLoad() {
+    globalConfigManager.loadAll();
+    globalConfigManager.fillSettings(globalHost);
+    this.regionConfigManager = globalConfigManager;
+    regionWandHandler = new RegionWandHandler();
   }
 
   @Listener
@@ -135,6 +140,13 @@ public class Nope {
   @Listener
   public void onLoadWorld(LoadWorldEvent event) {
     globalHost.addWorldIfNotPresent(event.getTargetWorld());
+  }
+
+  @Listener
+  public void reload(GameReloadEvent e) {
+    globalConfigManager = new HoconGlobalConfigurateConfigManager(configDir);
+    // Also reset globalConfigManager, because thats not done in onLoad()
+    onLoad();
   }
 
   public static Nope getInstance() {

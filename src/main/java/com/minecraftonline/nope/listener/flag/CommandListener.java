@@ -47,13 +47,15 @@ public class CommandListener extends FlagListener {
     Membership membership = Membership.player(player);
     RegionSet regionSet = Nope.getInstance().getGlobalHost().getRegions(player.getLocation());
     regionSet.findFirstFlagSetting(Settings.FLAG_BLOCKED_COMMANDS, membership).ifPresent(value -> {
-      e.setCancelled(value.getValue().contains(e.getCommand()));
+      if (value.getValue().contains(e.getCommand())) {
+        e.setCancelled(true);
 
-      regionSet.findFirstFlagSetting(Settings.FLAG_DENY_MESSAGE, membership)
-          .map(FlagString::getValue)
-          .map(TextSerializers.FORMATTING_CODE::deserialize)
-          .filter(text -> !text.isEmpty())
-          .ifPresent(player::sendMessage);
+        regionSet.findFirstFlagSetting(Settings.FLAG_DENY_MESSAGE, membership)
+            .map(FlagString::getValue)
+            .map(TextSerializers.FORMATTING_CODE::deserialize)
+            .filter(text -> !text.isEmpty())
+            .ifPresent(player::sendMessage);
+      }
     });
   }
 }
