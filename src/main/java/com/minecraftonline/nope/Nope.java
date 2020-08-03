@@ -109,9 +109,9 @@ public class Nope {
         .dataClass(RegionWandManipulator.class)
         .immutableClass(ImmutableRegionWandManipulator.class)
         .builder(new RegionWandManipulator.Builder())
-        .id("nope-region-wand")
-        .name("Nope region wand")
-        .build();
+        .manipulatorId("nope-region-wand")
+        .dataName("Nope region wand")
+        .buildAndRegister(getPluginContainer());
 
     Sponge.getEventManager().registerListeners(this, regionWandHandler);
     FlagListeners.registerAll();

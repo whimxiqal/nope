@@ -33,6 +33,8 @@ import com.minecraftonline.nope.control.flags.Flag;
 import com.minecraftonline.nope.control.flags.FlagState;
 import com.minecraftonline.nope.control.flags.FlagUtil;
 import com.minecraftonline.nope.control.flags.Membership;
+import com.sk89q.craftbook.sponge.IC;
+import com.sk89q.craftbook.sponge.TriggeredMechanic;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockTypes;
@@ -41,7 +43,6 @@ import org.spongepowered.api.block.trait.IntegerTrait;
 import org.spongepowered.api.block.trait.IntegerTraits;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.data.Transaction;
-import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
@@ -70,9 +71,12 @@ public class BlockListener extends FlagListener {
   @Exclude({ChangeBlockEvent.Post.class})
   @Listener
   public void onBlockChange(ChangeBlockEvent e) {
-    if (e.getContext().get(EventContextKeys.PLUGIN).isPresent()) {
-      return; // Caused by a plugin, don't block.
-    }
+    Optional<IC> ic = e.getCause().first(IC.class);
+    Optional<TriggeredMechanic> mechanic = e.getCause().first(TriggeredMechanic.class);
+
+    //if (e.getContext().get(EventContextKeys.PLUGIN).isPresent()) {
+      //return; // Caused by a plugin, don't block.
+    //}
     Object root = e.getCause().root();
     if (e instanceof ChangeBlockEvent.Modify) {
       return;
@@ -80,7 +84,13 @@ public class BlockListener extends FlagListener {
     Set<Region> checkedRegions = new HashSet<>();
 
     Membership membership;
-    if (root instanceof Player) {
+    if (ic.isPresent()) {
+      membership = Membership.block(ic.get().getBlock().getBlockPosition());
+    }
+    else if (mechanic.isPresent()) {
+      membership = Membership.block(mechanic.get().getMechanicLocation().getBlockPosition());
+    }
+    else if (root instanceof Player) {
       membership = Membership.player((Player)root);
     }
     else if (root instanceof Piston) {

@@ -41,7 +41,7 @@ public class RegionWandManipulator extends AbstractBooleanData<RegionWandManipul
   public static final DataQuery QUERY = DataQuery.of("noperegionwand");
 
   public RegionWandManipulator(boolean value) {
-    super(NopeKeys.REGION_WAND, value, false);
+    super(value, NopeKeys.REGION_WAND, false);
   }
 
   public Value<Boolean> isWand() {
