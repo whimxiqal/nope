@@ -34,6 +34,10 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.util.TypeTokens;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
 public class TargetSetSerializer implements TypeSerializer<TargetSet> {
   @Nullable
   @Override
@@ -54,7 +58,10 @@ public class TargetSetSerializer implements TypeSerializer<TargetSet> {
       throw new ObjectMappingException("Cannot serialize a null TargetSet");
     }
     for (Target.TargetType targetType : obj.getTargets().keySet()) {
-      value.getNode(targetType.getKey()).setValue(obj.getTargets().get(targetType));
+      List<String> targets = obj.getTargets().get(targetType).stream()
+          .map(Target::serialize)
+          .collect(Collectors.toList());
+      value.getNode(targetType.getKey()).setValue(targets);
     }
   }
 }

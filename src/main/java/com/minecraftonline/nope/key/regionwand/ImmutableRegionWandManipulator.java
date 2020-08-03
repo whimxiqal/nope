@@ -30,7 +30,7 @@ import org.spongepowered.api.data.value.immutable.ImmutableValue;
 
 public class ImmutableRegionWandManipulator extends AbstractImmutableBooleanData<ImmutableRegionWandManipulator, RegionWandManipulator> {
   public ImmutableRegionWandManipulator(boolean value) {
-    super(value, NopeKeys.REGION_WAND, false);
+    super(NopeKeys.REGION_WAND, value,  false);
   }
 
   public ImmutableValue<Boolean> isWand() {
