@@ -45,6 +45,10 @@ public class DamageListener extends FlagListener {
     Location<World> targetLoc = targetEntity.getLocation();
     Object root = e.getCause().root();
     if (targetEntity instanceof Player) {
+      if (shouldCancel(Settings.FLAG_EVP, targetEntity.getLocation(), root)) {
+        e.setCancelled(true);
+        return;
+      }
       if (root instanceof Player) {
         // If one of them is in but not the other, still don't allow it.
         e.setCancelled(shouldCancel(Settings.FLAG_PVP, targetLoc, root)
@@ -53,15 +57,12 @@ public class DamageListener extends FlagListener {
       else if (root instanceof Living) {
         e.setCancelled(shouldCancel(Settings.FLAG_MOB_DAMAGE, targetLoc, root));
       }
-      else {
-        // TODO: Enviroment damage against players
-      }
     }
     else if (targetEntity instanceof Monster) {
-      // TODO: stop players hitting mobs
+      shouldCancelPVE(targetEntity, root);
     }
     else if (targetEntity instanceof Animal) {
-      e.setCancelled(shouldCancel(Settings.FLAG_DAMAGE_ANIMALS, targetLoc, root));
+      e.setCancelled(shouldCancel(Settings.FLAG_DAMAGE_ANIMALS, targetLoc, root) || shouldCancelPVE(targetEntity, root));
     }
     else if (targetEntity instanceof ItemFrame) {
       e.setCancelled(shouldCancel(Settings.FLAG_ENTITY_ITEM_FRAME_DESTROY, targetLoc, root));
@@ -69,5 +70,9 @@ public class DamageListener extends FlagListener {
     else if (targetEntity instanceof Painting) {
       e.setCancelled(shouldCancel(Settings.FLAG_ENTITY_PAINTING_DESTROY, targetLoc, root));
     }
+  }
+
+  public boolean shouldCancelPVE(Entity targetEntity, Object root) {
+    return shouldCancel(Settings.FLAG_PVE, targetEntity.getLocation(), root);
   }
 }

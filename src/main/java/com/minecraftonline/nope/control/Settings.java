@@ -243,6 +243,11 @@ public final class Settings {
       .withApplicability(Setting.Applicability.REGION)
       .withConfigurationPath("flags.entry-deny-message");
 
+  public static final Setting<FlagState> FLAG_EVP = Setting.of("evp", new FlagState(true), FlagState.class)
+      .withApplicability(Setting.Applicability.REGION)
+      .withConfigurationPath("flags.evp")
+      .withDescription("Whether players can receive damage from the enviroment");
+
   public static final Setting<FlagState> FLAG_EXIT = Setting.of("exit", new FlagState(true), FlagState.class)
       .withApplicability(Setting.Applicability.REGION)
       .withConfigurationPath("flags.exit");
@@ -422,6 +427,11 @@ public final class Settings {
   public static final Setting<FlagState> FLAG_PASSTHROUGH = Setting.of("passthrough", new FlagState(true), FlagState.class) // By default, unlike WG, allow by default
       .withApplicability(Setting.Applicability.REGION)
       .withConfigurationPath("flags.passthrough");
+
+  public static final Setting<FlagState> FLAG_PVE = Setting.of("pve", new FlagState(true), FlagState.class)
+      .withApplicability(Setting.Applicability.REGION)
+      .withConfigurationPath("flags.pve")
+      .withDescription("Whether players can hurt entities");
 
   public static final Setting<FlagState> FLAG_PVP = Setting.of("pvp", new FlagState(true), FlagState.class)
       .withApplicability(Setting.Applicability.REGION)
