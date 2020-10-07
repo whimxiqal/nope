@@ -31,6 +31,8 @@ import org.spongepowered.api.world.World;
 
 import javax.annotation.Nullable;
 import java.io.Serializable;
+import java.util.AbstractMap;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -48,16 +50,30 @@ public class RegularRegion extends Region {
       throw new IllegalStateException("Cannot have a region with corners in different worlds");
     }
     this.worldUUID = corner1.getExtent().getUniqueId();
-    this.aabb = new AABB(corner1.getBlockPosition(), corner2.getBlockPosition());
-    super.set(Settings.REGION_MIN, this.aabb.getMin().toInt());
-    super.set(Settings.REGION_MAX, this.aabb.getMax().toInt());
+    this.setCorners(corner1.getBlockPosition(), corner2.getBlockPosition());
   }
 
   public RegularRegion(World world, Vector3i corner1, Vector3i corner2) {
     this.worldUUID = world.getUniqueId();
-    this.aabb = new AABB(corner1, corner2);
-    super.set(Settings.REGION_MIN, this.aabb.getMin().toInt());
-    super.set(Settings.REGION_MAX, this.aabb.getMax().toInt());
+    this.setCorners(corner1, corner2);
+  }
+
+  private void setCorners(Vector3i pos1, Vector3i pos2) {
+    Vector3i min = new Vector3i(
+        Math.min(pos1.getX(), pos2.getX()),
+        Math.min(pos1.getY(), pos2.getY()),
+        Math.min(pos1.getZ(), pos2.getZ())
+    );
+    Vector3i max = new Vector3i(
+        Math.max(pos1.getX(), pos2.getX()),
+        Math.max(pos1.getY(), pos2.getY()),
+        Math.max(pos1.getZ(), pos2.getZ())
+    );
+    super.set(Settings.REGION_MIN, min);
+    super.set(Settings.REGION_MAX, max);
+    // We add one to the max corner so that we end up with a bounding box that uses the further corner
+    // of the provided blocks, meaning that
+    this.aabb = new AABB(min, max.add(Vector3i.ONE));
   }
 
   @Override
@@ -93,7 +109,7 @@ public class RegularRegion extends Region {
   public void updateAABB() {
     getSettingValue(Settings.REGION_MIN).ifPresent(min ->
         getSettingValue(Settings.REGION_MAX).ifPresent(max -> {
-          this.aabb = new AABB(min, max);
+          this.setCorners(min, max);
         })
     );
   }

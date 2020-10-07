@@ -97,7 +97,7 @@ public class WorldConfigurateConfigManager extends ConfigurateConfigManager {
       }
       this.worldHost.addRegion(key, region);
     }
-    if (this.worldHost.getRegions().get("__global_)") == null) {
+    if (this.worldHost.getRegions().get("__global__") == null) {
       this.worldHost.addRegion("__global__", new GlobalRegion(world.getUniqueId()));
     }
   }

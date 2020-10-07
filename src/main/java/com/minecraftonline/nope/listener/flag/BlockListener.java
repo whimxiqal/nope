@@ -164,7 +164,8 @@ public class BlockListener extends FlagListener {
       if (shouldCancel) {
         e.setCancelled(true);
         if (root instanceof CommandSource) {
-          Text msg = TextSerializers.FORMATTING_CODE.deserialize(region.getSettingValueOrDefault(Settings.FLAG_DENY_MESSAGE).getValue());
+
+          Text msg = TextSerializers.FORMATTING_CODE.deserialize(regionSet.findFirstFlagSettingOrDefault(Settings.FLAG_DENY_MESSAGE, membership).getValue());
           if (!msg.isEmpty()) {
             ((CommandSource)root).sendMessage(msg);
           }
