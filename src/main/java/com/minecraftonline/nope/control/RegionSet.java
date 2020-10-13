@@ -68,27 +68,6 @@ public class RegionSet {
     return val == null ? Optional.empty() : Optional.of(new AbstractMap.SimpleEntry<>(val, region));
   }
 
-  /**
-   * Finds the first flag that is applicable
-   * @param setting Flag Setting to find value for
-   * @param isMember whether the caller is a member
-   * @param isOwner whether the caller is an owner
-   * @param <T> The type of setting
-   * @return Optional of Map.Entry of T and Region
-   * @deprecated use {@link #findFirstFlagSetting(Setting, Membership)}
-   */
-  @Deprecated
-  public <T extends Flag<?>> Optional<Map.Entry<T, Region>> findFirstApplicableFlagSetting(Setting<T> setting, boolean isMember, boolean isOwner) {
-    for (int i = regions.size() - 1; i >= 0; i--) {
-      Region region = regions.get(i);
-      Optional<T> val = region.getSettingValue(setting);
-      if (val.isPresent() && FlagUtil.appliesTo(val.get(), isOwner, isMember)) {
-        return Optional.of(new AbstractMap.SimpleEntry<>(val.get(), region));
-      }
-    }
-    return Optional.empty();
-  }
-
   public <T extends Flag<?>> Optional<Pair<T, Region>> findFirstFlagSettingWithRegion(Setting<T> setting, Membership membership) {
     for (int i = regions.size() - 1; i >= 0; i--) {
       Region region = regions.get(i);
@@ -100,17 +79,54 @@ public class RegionSet {
     return Optional.empty();
   }
 
-  public <T extends Flag<?>> Optional<T> findFirstFlagSetting(Setting<T> setting, Membership membership) {
-    return findFirstFlagSettingWithRegion(setting, membership).map(Pair::getKey);
-  }
-
+  /**
+   * This is the preferred method, as it is the easiest to use.
+   * However, for some special cases it might not be suitable.
+   * @param setting Setting to check
+   * @param membership Membership level
+   * @param <T> Type of flag.
+   * @return Flag set in this region or its default.
+   */
   public <T extends Flag<?>> T findFirstFlagSettingOrDefault(Setting<T> setting, Membership membership) {
     return findFirstFlagSetting(setting, membership).orElse(setting.getDefaultValue());
   }
 
-  @Deprecated
-  public <T extends Flag<?>> T findFirstApplicableFlagSettingOrDefault(Setting<T> setting, boolean isMember, boolean isOwner) {
-    return findFirstApplicableFlagSetting(setting, isMember, isOwner).map(Map.Entry::getKey).orElse(setting.getDefaultValue());
+  /**
+   * Your second best option.
+   * Sometimes, you may need to know if there was a flag set, so you can check
+   * for other flags instead, such as for build, interact and block-break
+   * @param setting Setting to check
+   * @param membership Membership level
+   * @param <T> Type of flag.
+   * @return Flag set in this region or its default.
+   */
+  public <T extends Flag<?>> Optional<T> findFirstFlagSetting(Setting<T> setting, Membership membership) {
+    Optional<T> optFlag = findFirstFlagSettingNoParent(setting, membership);
+    if (optFlag.isPresent()) {
+      return optFlag;
+    }
+    // No flag found, look for parent.
+    if (setting.getParent().isPresent()) {
+      return findFirstFlagSetting(setting.getParent().get(), membership);
+    }
+    return Optional.empty();
+  }
+
+  public <T extends Flag<?>> Optional<T> findFirstFlagSettingNoParent(Setting<T> setting, Membership membership) {
+    for (int i = regions.size() - 1; i >= 0; i--) {
+      Region region = regions.get(i);
+      Optional<T> val = region.getSettingValue(setting);
+      if (val.isPresent() && FlagUtil.appliesTo(val.get(), region, membership)) {
+        return val;
+      }
+    }
+    return Optional.empty();
+  }
+
+  public <T extends Flag<?>> T findFirstSubFlagSettingOrDefault(Setting<T> setting, Setting<T> subSetting, Membership membership) {
+    return findFirstFlagSetting(subSetting, membership)
+        .orElse(findFirstFlagSetting(setting, membership)
+            .orElse(subSetting.getDefaultValue()));
   }
 
   public Optional<Region> getHighestPriorityRegion() {

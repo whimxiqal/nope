@@ -67,6 +67,9 @@ public class PositionListener extends FlagListener {
       return;
     }
     Player player = (Player) e.getTargetEntity();
+    if (Nope.getInstance().canOverrideRegion(player)) {
+      return; // Force allow
+    }
     Location<World> from = e.getFromTransform().getLocation();
     Location<World> to = e.getToTransform().getLocation();
     RegionSet regionSetFrom = Nope.getInstance().getGlobalHost().getRegions(from);
@@ -104,7 +107,6 @@ public class PositionListener extends FlagListener {
     boolean canChangeRegion = regionSet.findFirstFlagSettingOrDefault(allowed, membership).getValue();
     if (!canChangeRegion) {
       if (!otherRegion.findFirstFlagSettingOrDefault(allowed, membership).getValue()) {
-        Nope.getInstance().getLogger().info("hellllo");
         return Tristate.UNDEFINED;
       }
       if ((teleportOverride != null && isTeleport && regionSet.findFirstFlagSettingOrDefault(teleportOverride, membership).getValue())

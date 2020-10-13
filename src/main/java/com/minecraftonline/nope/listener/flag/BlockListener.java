@@ -50,6 +50,7 @@ import org.spongepowered.api.event.block.InteractBlockEvent;
 import org.spongepowered.api.event.block.NotifyNeighborBlockEvent;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.filter.type.Exclude;
+import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.serializer.TextSerializers;
 import org.spongepowered.api.util.Direction;
@@ -78,6 +79,10 @@ public class BlockListener extends FlagListener {
       //return; // Caused by a plugin, don't block.
     //}
     Object root = e.getCause().root();
+    if (root instanceof Subject
+        && Nope.getInstance().canOverrideRegion((Subject) e.getSource())) {
+      return; // Force allow
+    }
     if (e instanceof ChangeBlockEvent.Modify) {
       return;
     }
@@ -226,6 +231,9 @@ public class BlockListener extends FlagListener {
     if (!(e.getSource() instanceof Player)) {
       return;
     }
+    if (Nope.getInstance().canOverrideRegion((Subject) e.getSource())) {
+      return; // Force allow
+    }
     e.getTargetBlock().getLocation().ifPresent(loc -> {
       Player player = (Player)e.getSource();
       Membership membership = Membership.player(player);
@@ -249,30 +257,13 @@ public class BlockListener extends FlagListener {
    * @return
    */
   private static boolean checkBuildFlags(RegionSet regionSet, Membership membership, @Nullable Setting<FlagState> specializedSetting) {
-    boolean passthrough = regionSet.findFirstFlagSettingOrDefault(Settings.FLAG_PASSTHROUGH, membership).getValue();
-    Optional<FlagState> buildFlag = getFlagNoDefault(Settings.FLAG_BUILD, regionSet, passthrough, membership);
-    Optional<FlagState> specialFlag = specializedSetting == null ? Optional.empty() : getFlagNoDefault(specializedSetting, regionSet, passthrough, membership);
-
-    boolean shouldAllow;
     if (specializedSetting != null) {
-      // If theres a specialized setting, use their value, buildflag value or its default
-      if (specialFlag.isPresent()) {
-        shouldAllow = specialFlag.get().getValue();
-      }
-      else if (buildFlag.isPresent()) {
-        shouldAllow = buildFlag.get().getValue();
-      }
-      else {
-        shouldAllow = specializedSetting.getDefaultValue().getValue();
+      boolean passthrough = regionSet.findFirstFlagSettingOrDefault(Settings.FLAG_PASSTHROUGH, membership).getValue();
+      if (!passthrough) {
+        return !regionSet.findFirstFlagSettingNoParent(specializedSetting, membership).orElse(specializedSetting.getDefaultValue()).getValue();
       }
     }
-    else if (buildFlag.isPresent()) {
-      shouldAllow = buildFlag.get().getValue();
-    }
-    else {
-      shouldAllow = Settings.FLAG_BUILD.getDefaultValue().getValue();
-    }
-    return !shouldAllow;
+    return !regionSet.findFirstFlagSettingOrDefault(specializedSetting == null ? Settings.FLAG_BUILD : specializedSetting, membership).getValue();
   }
 
   /**

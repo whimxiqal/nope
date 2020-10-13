@@ -24,10 +24,8 @@
 
 package com.minecraftonline.nope.control;
 
-import com.flowpowered.math.vector.Vector3i;
+import com.flowpowered.math.vector.Vector3d;
 import com.google.common.base.Preconditions;
-import com.minecraftonline.nope.Nope;
-import org.spongepowered.api.Sponge;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
@@ -62,7 +60,7 @@ public class WorldHost extends Host {
     this.regions.remove(regionId);
   }
 
-  public RegionSet getRegions(Vector3i position) {
+  public RegionSet getRegions(Vector3d position) {
     List<Region> validRegions = new ArrayList<>();
     for (Region region : this.regions.values()) {
       if (region.isLocationInRegion(position)) {

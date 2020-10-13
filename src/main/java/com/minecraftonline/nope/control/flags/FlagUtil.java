@@ -32,6 +32,7 @@ import com.minecraftonline.nope.control.target.TargetSet;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.objectmapping.ObjectMappingException;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.service.permission.Subject;
 
 import javax.annotation.Nullable;
 import java.lang.reflect.Constructor;
@@ -65,16 +66,6 @@ public class FlagUtil {
     }
   }
 
-  public static <T extends Flag<?>> Map.Entry<T, Region> getLastValid(List<Map.Entry<T, Region>> list, boolean isOwner, boolean isMember) {
-    for (int i = list.size() - 1; i >= 0; i--) {
-      Map.Entry<T, Region> entry = list.get(i);
-      if (appliesTo(entry.getKey(), isOwner, isMember)) {
-        return entry;
-      }
-    }
-    return null;
-  }
-
   public static <T extends Flag<?>> Map.Entry<T, Region> getLastValid(List<Map.Entry<T, Region>> list, Object root) {
     for (int i = list.size() - 1; i >= 0; i--) {
       Map.Entry<T, Region> entry = list.get(i);
@@ -101,18 +92,6 @@ public class FlagUtil {
 
   public static boolean isPlayerTargeted(Object obj, Region region, Setting<TargetSet> targetSetSetting) {
     return obj instanceof Player && region.getSettingValueOrDefault(targetSetSetting).isPlayerTargeted((Player)obj);
-  }
-
-  @Deprecated
-  public static boolean appliesTo(Flag<?> flag, boolean isOwner, boolean isMember) {
-    switch (flag.getGroup()) {
-      case ALL: return true;
-      case OWNERS: return isOwner;
-      case MEMBERS: return isMember;
-      case NONMEMBERS: return !isMember;
-      case NONOWNERS: return !isOwner;
-      default: throw new IllegalStateException("More values to an enum than expected!");
-    }
   }
 
   public static boolean appliesTo(Flag<?> flag, Region region, Membership membership) {

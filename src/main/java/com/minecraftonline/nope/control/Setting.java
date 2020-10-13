@@ -56,6 +56,8 @@ public class Setting<T extends Serializable> implements CatalogType, Serializabl
   @Nullable
   private String comment;
   private Set<Applicability> applicability = Sets.newEnumSet(Lists.newArrayList(), Applicability.class);
+  @Nullable
+  private Setting<T> parent = null;
 
   protected Setting(@Nonnull String id,
             @Nonnull T defaultValue,
@@ -180,6 +182,19 @@ public class Setting<T extends Serializable> implements CatalogType, Serializabl
             + ". Valid ids only contain characters 'a-z', '-', and '.'.");
     this.path = path;
     return this;
+  }
+
+  public Optional<Setting<T>> getParent() {
+    return Optional.ofNullable(parent);
+  }
+
+  /**
+   * <b>WARNING: DO NOT INLINE THIS</b>
+   *
+   * @param parent
+   */
+  public void setParent(Setting<T> parent) {
+    this.parent = parent;
   }
 
   /**

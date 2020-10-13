@@ -44,13 +44,16 @@ public class CommandListener extends FlagListener {
       return;
     }
     Player player = (Player) source;
+    if (Nope.getInstance().canOverrideRegion(player)) {
+      return; // Force allow
+    }
     Membership membership = Membership.player(player);
     RegionSet regionSet = Nope.getInstance().getGlobalHost().getRegions(player.getLocation());
     regionSet.findFirstFlagSetting(Settings.FLAG_BLOCKED_COMMANDS, membership).ifPresent(value -> {
       if (value.getValue().contains(e.getCommand())) {
         e.setCancelled(true);
 
-        regionSet.findFirstFlagSetting(Settings.FLAG_DENY_MESSAGE, membership)
+        regionSet.findFirstFlagSetting(Settings.FLAG_COMMAND_DENY_MESSAGE, membership)
             .map(FlagString::getValue)
             .map(TextSerializers.FORMATTING_CODE::deserialize)
             .filter(text -> !text.isEmpty())

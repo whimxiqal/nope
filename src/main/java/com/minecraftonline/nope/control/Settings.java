@@ -32,6 +32,7 @@ import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
+import com.minecraftonline.nope.control.flags.Flag;
 import com.minecraftonline.nope.control.flags.FlagBoolean;
 import com.minecraftonline.nope.control.flags.FlagDouble;
 import com.minecraftonline.nope.control.flags.FlagEntitySet;
@@ -70,9 +71,10 @@ public final class Settings {
 
   /**
    * Loads this class.
-   * MUST be called before REGISTRY_MODULE is used
+   * MUST be called if you want this class to function properly
    */
   public static void load() {
+    setParents();
     Set<Setting<?>> mutableSettings = new HashSet<>();
     Multimap<Setting.Applicability, Setting<?>> mutableSettingApplicability = HashMultimap.create();
     for (Field field : Settings.class.getFields()) {
@@ -101,6 +103,23 @@ public final class Settings {
     }
     settings = ImmutableSet.copyOf(mutableSettings);
     settingApplicability = ImmutableMultimap.copyOf(mutableSettingApplicability);
+  }
+
+  /**
+   * Called when {@link #load()} is called,
+   * and sets up the parents of all the settings,
+   * since if they were inlined, they would be null
+   */
+  private static void setParents() {
+    Settings.FLAG_DAMAGE_ANIMALS.setParent(Settings.FLAG_PVE);
+
+    Settings.FLAG_BLOCK_BREAK.setParent(Settings.FLAG_BUILD);
+    Settings.FLAG_BLOCK_PLACE.setParent(Settings.FLAG_BUILD);
+    Settings.FLAG_INTERACT.setParent(Settings.FLAG_BUILD);
+    Settings.FLAG_ENTITY_ARMOR_STAND_DESTROY.setParent(Settings.FLAG_BUILD);
+    Settings.FLAG_ENTITY_ITEM_FRAME_DESTROY.setParent(Settings.FLAG_BUILD);
+    Settings.FLAG_ENTITY_PAINTING_DESTROY.setParent(Settings.FLAG_BUILD);
+    Settings.FLAG_VEHICLE_DESTROY.setParent(Settings.FLAG_BUILD);
   }
 
   public static final SettingRegistryModule REGISTRY_MODULE = new SettingRegistryModule() {
@@ -191,6 +210,10 @@ public final class Settings {
       .withApplicability(Setting.Applicability.REGION)
       .withConfigurationPath("flags.chorus-fruit-teleport");
 
+  public static final Setting<FlagString> FLAG_COMMAND_DENY_MESSAGE = Setting.of("command-deny-message", new FlagString(""), FlagString.class)
+      .withApplicability(Setting.Applicability.REGION)
+      .withConfigurationPath("flags.command-deny-message");
+
   public static final Setting<FlagState> FLAG_CORAL_FADE = Setting.of("coral-fade", new FlagState(true), FlagState.class)
       .withApplicability(Setting.Applicability.REGION)
       .withConfigurationPath("flags.coral-fade");
@@ -227,6 +250,11 @@ public final class Settings {
       .withApplicability(Setting.Applicability.REGION)
       .withConfigurationPath("flags.enderpearl");
 
+  public static final Setting<FlagState> FLAG_ENTITY_ARMOR_STAND_DESTROY = Setting.of("entity-armor-stand-destroy", new FlagState(true), FlagState.class)
+      .withApplicability(Setting.Applicability.REGION)
+      .withConfigurationPath("flags.entity-armor-stand-destroy")
+      .withDescription("A flag for whether a player can break armor stands in the region");
+
   public static final Setting<FlagState> FLAG_ENTITY_ITEM_FRAME_DESTROY = Setting.of("entity-item-frame-destroy", new FlagState(true), FlagState.class)
       .withApplicability(Setting.Applicability.REGION)
       .withConfigurationPath("flags.entity-item-frame-destroy");
@@ -234,6 +262,11 @@ public final class Settings {
   public static final Setting<FlagState> FLAG_ENTITY_PAINTING_DESTROY = Setting.of("entity-painting-destroy", new FlagState(true), FlagState.class)
       .withApplicability(Setting.Applicability.REGION)
       .withConfigurationPath("flags.entity-painting-destroy");
+
+  public static final Setting<FlagState> FLAG_ENTITY_VEHICLE_DESTROY = Setting.of("entity-vehicle-destroy", new FlagState(true), FlagState.class)
+      .withApplicability(Setting.Applicability.REGION)
+      .withConfigurationPath("flags.entity-vehicle-destroy")
+      .withDescription("A flag for whether a player can break vehicles in the region");
 
   public static final Setting<FlagState> FLAG_ENTRY = Setting.of("entry", new FlagState(true), FlagState.class)
       .withApplicability(Setting.Applicability.REGION)

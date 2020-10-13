@@ -36,6 +36,11 @@ import java.util.List;
 import java.util.function.Function;
 
 public interface Membership extends Function<Region, Membership.Status> {
+
+  Membership OWNER = constant(Status.OWNER);
+  Membership MEMBER = constant(Status.MEMBER);
+  Membership NONE = constant(Status.NONE);
+
   public enum Status {
     OWNER,
     MEMBER,
@@ -43,7 +48,7 @@ public interface Membership extends Function<Region, Membership.Status> {
   }
 
   static Membership block(Vector3i loc) {
-    return region -> region.isLocationInRegion(loc) ? Status.MEMBER : Status.NONE;
+    return region -> region.isLocationInRegion(loc.toDouble()) ? Status.MEMBER : Status.NONE;
   }
 
   static Membership player(org.spongepowered.api.entity.living.player.Player player) {
@@ -75,7 +80,7 @@ public interface Membership extends Function<Region, Membership.Status> {
   static Membership multipleLocations(List<Location<World>> locations) {
     return region -> {
       for (Location<World> loc : locations) {
-        if (region.isLocationInRegion(loc.getBlockPosition())) {
+        if (region.isLocationInRegion(loc.getPosition())) {
           return Status.MEMBER;
         }
       }

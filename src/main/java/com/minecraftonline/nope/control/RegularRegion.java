@@ -24,6 +24,7 @@
 
 package com.minecraftonline.nope.control;
 
+import com.flowpowered.math.vector.Vector3d;
 import com.flowpowered.math.vector.Vector3i;
 import org.spongepowered.api.util.AABB;
 import org.spongepowered.api.world.Location;
@@ -31,8 +32,6 @@ import org.spongepowered.api.world.World;
 
 import javax.annotation.Nullable;
 import java.io.Serializable;
-import java.util.AbstractMap;
-import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -77,7 +76,7 @@ public class RegularRegion extends Region {
   }
 
   @Override
-  public boolean isLocationInRegion(Vector3i location) {
+  public boolean isLocationInRegion(Vector3d location) {
     return aabb.contains(location);
   }
 

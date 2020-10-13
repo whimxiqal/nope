@@ -24,7 +24,7 @@
 
 package com.minecraftonline.nope.control;
 
-import com.flowpowered.math.vector.Vector3i;
+import com.flowpowered.math.vector.Vector3d;
 
 import java.util.UUID;
 
@@ -43,7 +43,7 @@ public class GlobalRegion extends Region {
   }
 
   @Override
-  public boolean isLocationInRegion(Vector3i location) {
+  public boolean isLocationInRegion(Vector3d location) {
     return true;
   }
 }

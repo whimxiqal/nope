@@ -70,7 +70,7 @@ public class GlobalHost extends Host {
    * @return RegionSet for getting values
    */
   public RegionSet getRegions(Location<World> location) {
-    return getWorld(location.getExtent()).getRegions(location.getBlockPosition());
+    return getWorld(location.getExtent()).getRegions(location.getPosition());
   }
 
   @Nonnull

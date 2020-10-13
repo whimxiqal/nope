@@ -52,6 +52,10 @@ import org.spongepowered.api.event.world.LoadWorldEvent;
 import org.spongepowered.api.plugin.Dependency;
 import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.plugin.PluginContainer;
+import org.spongepowered.api.service.permission.PermissionDescription;
+import org.spongepowered.api.service.permission.PermissionService;
+import org.spongepowered.api.service.permission.Subject;
+import org.spongepowered.api.text.Text;
 import org.spongepowered.api.util.TypeTokens;
 
 import java.nio.file.Path;
@@ -84,6 +88,8 @@ public class Nope {
 
   private RegionWandHandler regionWandHandler;
 
+  private PermissionDescription overridePermission;
+
   @Listener
   public void onPreInitialize(GamePreInitializationEvent event) {
     instance = this;
@@ -113,6 +119,16 @@ public class Nope {
         .name("Nope region wand")
         .build();
 
+    Sponge.getServiceManager().getRegistration(PermissionService.class).ifPresent(registration -> {
+      PermissionService service = registration.getProvider();
+
+      this.overridePermission = service.newDescriptionBuilder(this)
+          .id("nope.region.override")
+          .description(Text.of("Overrides any region flags that prevent you doing things."))
+          .assign(PermissionDescription.ROLE_ADMIN, true)
+          .register();
+    });
+
     Sponge.getEventManager().registerListeners(this, regionWandHandler);
     FlagListeners.registerAll();
   }
@@ -130,6 +146,8 @@ public class Nope {
     // Register entire Nope command tree
     commandTree = new NopeCommandTree();
     commandTree.register();
+
+
   }
 
   @Listener
@@ -175,5 +193,9 @@ public class Nope {
 
   public ConfigManager getRegionConfigManager() {
     return regionConfigManager;
+  }
+
+  public boolean canOverrideRegion(Subject subject) {
+    return subject.hasPermission(this.overridePermission.getId());
   }
 }
