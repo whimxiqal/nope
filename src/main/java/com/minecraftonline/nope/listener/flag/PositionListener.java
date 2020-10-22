@@ -33,7 +33,6 @@ import com.minecraftonline.nope.control.RegionSet;
 import com.minecraftonline.nope.control.RegularRegion;
 import com.minecraftonline.nope.control.Setting;
 import com.minecraftonline.nope.control.Settings;
-import com.minecraftonline.nope.control.flags.FlagBoolean;
 import com.minecraftonline.nope.control.flags.FlagState;
 import com.minecraftonline.nope.control.flags.FlagString;
 import com.minecraftonline.nope.control.flags.Membership;
@@ -48,12 +47,11 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.serializer.TextSerializers;
 import org.spongepowered.api.util.AABB;
 import org.spongepowered.api.util.Direction;
-import org.spongepowered.api.util.Tristate;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 
-import javax.annotation.Nullable;
 import java.util.List;
+import java.util.Optional;
 
 public class PositionListener extends FlagListener {
 
@@ -63,64 +61,104 @@ public class PositionListener extends FlagListener {
       return; // Caused by us.
     }
 
-    if (!(e.getTargetEntity() instanceof Player)) {
-      return;
-    }
-    Player player = (Player) e.getTargetEntity();
-    if (Nope.getInstance().canOverrideRegion(player)) {
-      return; // Force allow
-    }
     Location<World> from = e.getFromTransform().getLocation();
     Location<World> to = e.getToTransform().getLocation();
     RegionSet regionSetFrom = Nope.getInstance().getGlobalHost().getRegions(from);
     RegionSet regionSetTo = Nope.getInstance().getGlobalHost().getRegions(to);
+    Membership membership;
 
-    Membership membership = Membership.player(player);
+    if (e.getTargetEntity() instanceof Player) {
+      membership = Membership.player((Player) e.getTargetEntity());
+    }
+    else {
+      membership = Membership.NONE;
+    }
+
+    // Collision
+
+    FlagState toCollision = regionSetTo.findFirstFlagSettingOrDefault(Settings.FLAG_PLAYER_COLLISION, membership);
+
+    boolean setCollisionValue = toCollision.getValue();
+
+    if (!(e.getTargetEntity() instanceof Player)) {
+      // If it is a player, wait until we know if the event is going to be cancelled first
+      /*if (e.getTargetEntity() instanceof LivingCollisionBridge) {
+        Nope.getInstance().getCollisionHandler().disableCollision(e.getTargetEntity());
+        ((LivingCollisionBridge)e.getTargetEntity()).setCanBePushed(setCollisionValue);
+      }*/
+      return;
+    }
+
+    // Movement
+
+    Player player = (Player) e.getTargetEntity();
+
     boolean isTeleport = e instanceof MoveEntityEvent.Teleport;
 
-    Tristate canEnter = canChangeRegion(regionSetTo, regionSetFrom, player, membership,
-        Settings.FLAG_ENTRY, Settings.FLAG_ENTRY_DENY_MESSAGE, null, isTeleport, null);
-    if (canEnter == Tristate.FALSE) {
-      e.setCancelled(true);
+    boolean shouldCancel = false;
+
+    boolean canEnter = canChangeRegion(regionSetTo, regionSetFrom, membership, Settings.FLAG_ENTRY);
+    if (!canEnter) {
+      shouldCancel = true;
     }
 
-    Tristate canExit = canChangeRegion(regionSetFrom, regionSetTo, player, membership,
-        Settings.FLAG_EXIT, Settings.FLAG_EXIT_DENY_MESSAGE, Settings.FLAG_EXIT_VIA_TELEPORT, isTeleport, Settings.FLAG_EXIT_OVERRIDE);
-    if (canExit == Tristate.FALSE) {
-      e.setCancelled(true);
+    boolean canExit = canChangeRegion(regionSetFrom, regionSetTo, membership, isTeleport ? Settings.FLAG_EXIT_VIA_TELEPORT : Settings.FLAG_EXIT);
+    if (!canExit) {
+      shouldCancel = true;
     }
 
-    if (canEnter == Tristate.UNDEFINED) {
-      // Stuck in the region... need to teleport them out.
-      teleportPlayerOutSafely(regionSetTo, membership, player); // TODO: check tp doesn't put them into the ground or similar.
-    }
+    //if (canEnter) {
+    //	// Stuck in the region... need to teleport them out.
+    //	teleportPlayerOutSafely(regionSetTo, membership, player); // TODO: check tp doesn't put them into the ground or similar.
+    //}
 
-    if (canEnter == Tristate.FALSE
-    && canExit == Tristate.FALSE) {
-      e.setCancelled(false);
+    if (!canEnter && !canExit) {
+      shouldCancel = false;
       Nope.getInstance().getLogger().warn("Player: " + player.getName() + " is stuck at: " + player.getLocation() + ". Who made a region that you can't be in or leave...");
       Nope.getInstance().getLogger().warn("All region movement against this player will be disabled until they are unstuck.");
     }
+
+    if (Nope.getInstance().canOverrideRegion(player)) {
+      shouldCancel = false; // Never cancel events against an overriding player.
+    }
+
+    e.setCancelled(shouldCancel);
+
+    // Messaging
+
+    Setting<FlagString> entryMessage = shouldCancel ? Settings.FLAG_ENTRY_DENY_MESSAGE : Settings.FLAG_GREETING;
+    Setting<FlagString> exitMessage = shouldCancel ? Settings.FLAG_EXIT_DENY_MESSAGE : Settings.FLAG_FAREWELL;
+
+    regionSetTo.findFirstFlagSetting(entryMessage, membership)
+        .ifPresent(s -> player.sendMessage(TextSerializers.FORMATTING_CODE.deserialize(s.getValue())));
+
+    regionSetFrom.findFirstFlagSetting(exitMessage, membership)
+        .ifPresent(s -> player.sendMessage(TextSerializers.FORMATTING_CODE.deserialize(s.getValue())));
+
+    // Player Collision
+
+    if (!shouldCancel) {
+      // If not cancelling, set collision
+      //((LivingCollisionBridge)e.getTargetEntity()).setCanBePushed(setCollisionValue);
+      if (setCollisionValue) {
+        Nope.getInstance().getCollisionHandler().enableCollision(player);
+      }
+      else {
+        Nope.getInstance().getCollisionHandler().disableCollision(player);
+      }
+
+    }
   }
 
-  public Tristate canChangeRegion(RegionSet regionSet, RegionSet otherRegion, Player player, Membership membership, Setting<FlagState> allowed, Setting<FlagString> message, @Nullable Setting<FlagState> teleportOverride, boolean isTeleport, @Nullable Setting<FlagBoolean> override) {
-    boolean canChangeRegion = regionSet.findFirstFlagSettingOrDefault(allowed, membership).getValue();
-    if (!canChangeRegion) {
-      if (!otherRegion.findFirstFlagSettingOrDefault(allowed, membership).getValue()) {
-        return Tristate.UNDEFINED;
-      }
-      if ((teleportOverride != null && isTeleport && regionSet.findFirstFlagSettingOrDefault(teleportOverride, membership).getValue())
-        || (override != null && regionSet.findFirstFlagSettingOrDefault(override, membership).getValue())) {
-        return Tristate.TRUE; // Overrides.
-      }
-      // If we're not allowed to change region, and can't override that.
-      Text text = TextSerializers.FORMATTING_CODE.deserialize(regionSet.findFirstFlagSettingOrDefault(message, membership).getValue());
-      if (!text.isEmpty()) {
-        player.sendMessage(text);
-      }
-      return Tristate.FALSE;
-    }
-    return Tristate.TRUE;
+  public boolean canChangeRegion(RegionSet regionSet, RegionSet otherRegion, Membership membership, Setting<FlagState> allowed) {
+    Optional<Pair<FlagState, Region>> changeRegion = regionSet.findFirstFlagSettingWithRegion(allowed, membership);
+
+    boolean canChangeRegion = changeRegion.map(Pair::getKey).orElse(allowed.getDefaultValue()).getValue();
+
+    // We can change region,
+    // or we can't but we aren't changing regions
+    return canChangeRegion ||
+        !(changeRegion.isPresent() && otherRegion.containsRegion(changeRegion.get().getValue()));
   }
 
   public void teleportPlayerOutSafely(RegionSet regionSet, Membership membership, Player player) {

@@ -43,14 +43,24 @@ public class RegionSet {
 
   public RegionSet(List<Region> regions) {
     this.regions = regions;
-    this.regions.sort(Comparator.comparingInt(r -> r.getSettingValueOrDefault(Settings.REGION_PRIORITY)));
+    this.regions.sort(Comparator.comparingInt(r -> ((Region)r).getSettingValueOrDefault(Settings.REGION_PRIORITY)).reversed());
+  }
+
+  /**
+   * Check if the given region is contained in this region
+   * set. Useful to figure out if a player is changing regions.
+   * @param region Region to check
+   * @return If the region is part of this region set.
+   */
+  public boolean containsRegion(Region region) {
+    return this.regions.contains(region);
   }
 
   /**
    * Gets the settings from the regions
    * @param setting Setting to look for
    * @param <T> Type of value
-   * @return List of values, ordered least to highest priority
+   * @return List of values, ordered highest to least priority
    */
   public <T extends Serializable> List<Map.Entry<T, Region>> getSettingValue(Setting<T> setting) {
     List<Map.Entry<T, Region>> values = new ArrayList<>();
@@ -69,11 +79,13 @@ public class RegionSet {
   }
 
   public <T extends Flag<?>> Optional<Pair<T, Region>> findFirstFlagSettingWithRegion(Setting<T> setting, Membership membership) {
-    for (int i = regions.size() - 1; i >= 0; i--) {
-      Region region = regions.get(i);
+    for (Region region : regions) {
       Optional<T> val = region.getSettingValue(setting);
       if (val.isPresent() && FlagUtil.appliesTo(val.get(), region, membership)) {
         return Optional.of(Pair.of(val.get(), region));
+      }
+      else if (setting.getParent().isPresent()) {
+        return findFirstFlagSettingWithRegion(setting.getParent().get(), membership);
       }
     }
     return Optional.empty();
@@ -113,8 +125,7 @@ public class RegionSet {
   }
 
   public <T extends Flag<?>> Optional<T> findFirstFlagSettingNoParent(Setting<T> setting, Membership membership) {
-    for (int i = regions.size() - 1; i >= 0; i--) {
-      Region region = regions.get(i);
+    for (Region region : regions) {
       Optional<T> val = region.getSettingValue(setting);
       if (val.isPresent() && FlagUtil.appliesTo(val.get(), region, membership)) {
         return val;
@@ -123,15 +134,9 @@ public class RegionSet {
     return Optional.empty();
   }
 
-  public <T extends Flag<?>> T findFirstSubFlagSettingOrDefault(Setting<T> setting, Setting<T> subSetting, Membership membership) {
-    return findFirstFlagSetting(subSetting, membership)
-        .orElse(findFirstFlagSetting(setting, membership)
-            .orElse(subSetting.getDefaultValue()));
-  }
-
   public Optional<Region> getHighestPriorityRegion() {
     if (regions.size() == 0) return Optional.empty();
-    return Optional.of(regions.get(regions.size() - 1));
+    return Optional.of(regions.get(0));
   }
 
   @Override

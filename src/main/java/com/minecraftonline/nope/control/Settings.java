@@ -461,6 +461,11 @@ public final class Settings {
       .withApplicability(Setting.Applicability.REGION)
       .withConfigurationPath("flags.passthrough");
 
+  public static final Setting<FlagState> FLAG_PLAYER_COLLISION = Setting.of("player-collision", new FlagState(true), FlagState.class)
+      .withApplicability(Setting.Applicability.REGION)
+      .withConfigurationPath("flags.player-collision")
+      .withDescription("A flag for whether players should collide in a region");
+
   public static final Setting<FlagState> FLAG_PVE = Setting.of("pve", new FlagState(true), FlagState.class)
       .withApplicability(Setting.Applicability.REGION)
       .withConfigurationPath("flags.pve")

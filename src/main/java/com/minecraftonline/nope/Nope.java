@@ -87,6 +87,7 @@ public class Nope {
   private GlobalHost globalHost = new GlobalHost();
 
   private RegionWandHandler regionWandHandler;
+  private CollisionHandler collisionHandler;
 
   private PermissionDescription overridePermission;
 
@@ -138,6 +139,7 @@ public class Nope {
     globalConfigManager.fillSettings(globalHost);
     this.regionConfigManager = globalConfigManager;
     regionWandHandler = new RegionWandHandler();
+    collisionHandler = new CollisionHandler();
   }
 
   @Listener
@@ -189,6 +191,10 @@ public class Nope {
 
   public RegionWandHandler getRegionWandHandler() {
     return regionWandHandler;
+  }
+
+  public CollisionHandler getCollisionHandler() {
+    return collisionHandler;
   }
 
   public ConfigManager getRegionConfigManager() {
