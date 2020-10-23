@@ -46,5 +46,8 @@ public class RegionCommand extends FunctionlessCommandNode {
     addChildren(new RegionFlagCommand(this));
     addChildren(new TargetSetParentCommand(this, "owners", Settings.REGION_OWNERS));
     addChildren(new TargetSetParentCommand(this, "members", Settings.REGION_MEMBERS));
+    addChildren(new RegionRemoveFlagCommand(this));
+    addChildren(new RegionMoveCommand(this));
+    addChildren(new RegionSetPriorityCommand(this));
   }
 }

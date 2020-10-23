@@ -61,7 +61,7 @@ public class DeleteRegionCommand extends LambdaCommandNode {
       else {
         worldHost.removeRegion(region.getRegionName());
         Nope.getInstance().getRegionConfigManager().onRegionRemove(worldHost, region.getRegionName());
-        src.sendMessage(Format.info("Region: '" + region + "' has been deleted"));
+        src.sendMessage(Format.info("Region: '" + region.getRegionName() + "' has been deleted"));
       }
       return CommandResult.success();
     });

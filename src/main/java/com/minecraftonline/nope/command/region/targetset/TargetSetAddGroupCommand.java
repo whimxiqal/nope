@@ -5,6 +5,7 @@ import com.minecraftonline.nope.control.Setting;
 import com.minecraftonline.nope.control.target.GroupTarget;
 import com.minecraftonline.nope.control.target.Target;
 import com.minecraftonline.nope.control.target.TargetSet;
+import com.minecraftonline.nope.util.Format;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.args.CommandContext;
 import org.spongepowered.api.command.args.GenericArguments;
@@ -27,7 +28,7 @@ public class TargetSetAddGroupCommand extends AbstractTargetSetSubCommand {
     Target target = new GroupTarget(group);
     targetSet.add(target);
 
-    source.sendMessage(Text.of(TextColors.GREEN, "Successfully added group '" + group + "'"));
+    source.sendMessage(Format.info("Successfully added group '" + group + "'"));
 
     return CompletableFuture.completedFuture(targetSet);
   }

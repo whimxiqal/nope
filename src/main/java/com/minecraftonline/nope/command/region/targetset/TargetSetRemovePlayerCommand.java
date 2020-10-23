@@ -6,6 +6,7 @@ import com.minecraftonline.nope.command.common.CommandNode;
 import com.minecraftonline.nope.control.Setting;
 import com.minecraftonline.nope.control.target.PlayerTarget;
 import com.minecraftonline.nope.control.target.TargetSet;
+import com.minecraftonline.nope.util.Format;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.args.CommandContext;
@@ -34,14 +35,14 @@ public class TargetSetRemovePlayerCommand extends AbstractTargetSetSubCommand {
     future.whenComplete((profile, throwable) -> {
       if (throwable instanceof ExecutionException) {
         // No profile
-        source.sendMessage(Text.of(TextColors.RED, "Account for uuid does not exist!"));
+        source.sendMessage(Format.error("Account for uuid does not exist!"));
         result.complete(targetSet);
         return;
       }
 
       if (!profile.getName().isPresent()) {
-        source.sendMessage(Text.of(TextColors.RED, "Username for uuid: '" + profile.getUniqueId() + "' did not exist! Is it a real account?"));
-        source.sendMessage(Text.of(TextColors.RED, "Making no changes."));
+        source.sendMessage(Format.error("Username for uuid: '" + profile.getUniqueId() + "' did not exist! Is it a real account?"));
+        source.sendMessage(Format.error("Making no changes."));
         result.complete(targetSet);
         return;
       }
@@ -49,8 +50,8 @@ public class TargetSetRemovePlayerCommand extends AbstractTargetSetSubCommand {
       boolean removed = targetSet.remove(new PlayerTarget(profile.getUniqueId()));
       result.complete(targetSet);
 
-      Text text = removed ? Text.of(TextColors.GREEN, "Successfully removed player: '" + profile.getName().get() + "'")
-          : Text.of(TextColors.RED, "No player named '" + profile.getName().get() + "' to remove");
+      Text text = removed ? Format.info("Successfully removed player: '" + profile.getName().get() + "'")
+          : Format.error("No player named '" + profile.getName().get() + "' to remove");
 
       source.sendMessage(text);
     });

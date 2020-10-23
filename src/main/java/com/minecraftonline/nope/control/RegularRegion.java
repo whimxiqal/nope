@@ -38,10 +38,10 @@ import java.util.UUID;
 public class RegularRegion extends Region {
   @Nullable
   private AABB aabb;
-  private UUID worldUUID;
+  private final UUID worldUUID;
 
-  public RegularRegion(World world) {
-    this.worldUUID = world.getUniqueId();
+  public RegularRegion(UUID world) {
+    this.worldUUID = world;
   }
 
   public RegularRegion(Location<World> corner1, Location<World> corner2) {
@@ -111,6 +111,10 @@ public class RegularRegion extends Region {
           this.setCorners(min, max);
         })
     );
+  }
+
+  public void moveTo(Vector3i pos1, Vector3i pos2) {
+    setCorners(pos1, pos2);
   }
 
 }

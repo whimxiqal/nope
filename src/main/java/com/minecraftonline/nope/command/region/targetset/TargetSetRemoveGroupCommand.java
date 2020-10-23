@@ -4,6 +4,7 @@ import com.minecraftonline.nope.command.common.CommandNode;
 import com.minecraftonline.nope.control.Setting;
 import com.minecraftonline.nope.control.target.GroupTarget;
 import com.minecraftonline.nope.control.target.TargetSet;
+import com.minecraftonline.nope.util.Format;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.args.CommandContext;
 import org.spongepowered.api.command.args.GenericArguments;
@@ -25,8 +26,8 @@ public class TargetSetRemoveGroupCommand extends AbstractTargetSetSubCommand {
 
     boolean removed = targetSet.remove(new GroupTarget(group));
 
-    Text text = removed ? Text.of(TextColors.GREEN, "Successfully removed group: '" + group + "'")
-        : Text.of(TextColors.RED, "No group '" + group + "'");
+    Text text = removed ? Format.info("Successfully removed group: '" + group + "'")
+        : Format.error("No group '" + group + "'");
 
     source.sendMessage(text);
 

@@ -53,6 +53,7 @@ import java.io.Serializable;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 /**
  * Global config manager, contains world configs, who contain regions
@@ -62,7 +63,7 @@ import java.util.Map;
  */
 public class GlobalConfigurateConfigManager extends ConfigurateConfigManager implements ConfigManager {
   private boolean sqlEnabled;
-  private Map<World, WorldConfigurateConfigManager> worldConfigs = new HashMap<>();
+  private Map<UUID, WorldConfigurateConfigManager> worldConfigs = new HashMap<>();
 
   public GlobalConfigurateConfigManager(Path configDir, ConfigLoaderSupplier configLoaderSupplier) {
     super(configDir, "global", configLoaderSupplier);
@@ -75,12 +76,17 @@ public class GlobalConfigurateConfigManager extends ConfigurateConfigManager imp
     for (World world : Sponge.getServer().getWorlds()) {
       WorldConfigurateConfigManager worldConfigManager = new WorldConfigurateConfigManager(configDir, world, configLoaderSupplier, this.sqlEnabled);
       worldConfigManager.loadAll();
-      worldConfigs.put(world, worldConfigManager);
+      worldConfigs.put(world.getUniqueId(), worldConfigManager);
     }
   }
 
   public void saveExtra() {
     worldConfigs.values().forEach(WorldConfigurateConfigManager::saveAll);
+  }
+
+  @Override
+  public void removeRegion(UUID worldUUID, String name) {
+    this.worldConfigs.get(worldUUID).removeRegion(worldUUID, name);
   }
 
   /**
@@ -89,10 +95,10 @@ public class GlobalConfigurateConfigManager extends ConfigurateConfigManager imp
    */
   @Nullable
   public WorldHost loadWorld(World world) {
-    return worldConfigs.computeIfAbsent(world, k -> {
+    return worldConfigs.computeIfAbsent(world.getUniqueId(), k -> {
       WorldConfigurateConfigManager worldConfigManager = new WorldConfigurateConfigManager(configDir, world, configLoaderSupplier, this.sqlEnabled);
       worldConfigManager.loadAll();
-      this.worldConfigs.put(world, worldConfigManager);
+      this.worldConfigs.put(world.getUniqueId(), worldConfigManager);
       return worldConfigManager;
     }).getWorldHost();
   }
@@ -103,7 +109,7 @@ public class GlobalConfigurateConfigManager extends ConfigurateConfigManager imp
    * @param globalHost Host to fill
    */
   public void fillSettings(GlobalHost globalHost) {
-    for (Map.Entry<World, WorldConfigurateConfigManager> entry : this.worldConfigs.entrySet()) {
+    for (Map.Entry<UUID, WorldConfigurateConfigManager> entry : this.worldConfigs.entrySet()) {
       WorldHost worldHost = entry.getValue().getWorldHost();
       fillSettings(worldHost, entry.getValue().getConfig());
       globalHost.addWorld(entry.getKey(), worldHost);

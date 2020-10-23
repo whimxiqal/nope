@@ -25,6 +25,7 @@
 package com.minecraftonline.nope.config.configurate;
 
 import com.google.common.reflect.TypeToken;
+import com.minecraftonline.nope.Nope;
 import com.minecraftonline.nope.config.configurate.supplier.ConfigLoaderSupplier;
 import com.minecraftonline.nope.control.GlobalRegion;
 import com.minecraftonline.nope.control.Region;
@@ -38,23 +39,24 @@ import org.spongepowered.api.world.World;
 import java.io.Serializable;
 import java.nio.file.Path;
 import java.util.Map;
+import java.util.UUID;
 
 public class WorldConfigurateConfigManager extends ConfigurateConfigManager {
   private boolean sqlEnabled;
-  private World world;
+  private UUID world;
   private WorldHost worldHost;
   //private Map<String, Region> regionConfig = new HashMap<>();
   private ConfigContainer<CommentedConfigurationNode> regions;
 
   public WorldConfigurateConfigManager(Path configDir, World world, ConfigLoaderSupplier configLoaderSupplier, boolean sqlEnabled) {
     super(configDir.resolve(world.getName()), "config", configLoaderSupplier);
-    this.world = world;
+    this.world = world.getUniqueId();
     this.sqlEnabled = sqlEnabled;
   }
 
   @Override
   public void loadExtra() {
-    this.worldHost = new WorldHost(world.getUniqueId());
+    this.worldHost = new WorldHost(world);
     if (sqlEnabled) {
       return;
     }
@@ -83,7 +85,7 @@ public class WorldConfigurateConfigManager extends ConfigurateConfigManager {
       boolean isGlobalRegion = key.equals("__global__");
       Region region;
       if (isGlobalRegion) {
-        region = new GlobalRegion(world.getUniqueId());
+        region = new GlobalRegion(world);
       }
       else {
         region = new RegularRegion(world);
@@ -98,7 +100,7 @@ public class WorldConfigurateConfigManager extends ConfigurateConfigManager {
       this.worldHost.addRegion(key, region);
     }
     if (this.worldHost.getRegions().get("__global__") == null) {
-      this.worldHost.addRegion("__global__", new GlobalRegion(world.getUniqueId()));
+      this.worldHost.addRegion("__global__", new GlobalRegion(world));
     }
   }
 
@@ -113,13 +115,23 @@ public class WorldConfigurateConfigManager extends ConfigurateConfigManager {
   public void saveRegions() {
     for (Map.Entry<String, Region> entry : this.worldHost.getRegions().entrySet()) {
       CommentedConfigurationNode regionNode = this.regions.getConfigNode().getNode(entry.getKey());
-      for (Map.Entry<Setting<?>, ?> settingEntry : entry.getValue().getSettingMap().entrySet()) {
-        settingEntry.getKey().getConfigurationPath().ifPresent(confPath -> ConfigContainer.setNodeValue(confPath, settingEntry.getValue(), regionNode));
+      for (Setting<?> setting : Settings.REGISTRY_MODULE.getByApplicability(Setting.Applicability.REGION)) {
+        // Intentionally able to be null, which means if we unset a flag, it will give a null value here, removing it from config
+        // instead of not removing it.
+        Object value = entry.getValue().getSettingValue(setting).orElse(null);
+        setting.getConfigurationPath().ifPresent(confPath -> ConfigContainer.setNodeValue(confPath, value, regionNode));
       }
     }
   }
 
-  public void removeRegion(String region) {
+  @Override
+  public void removeRegion(UUID worldUUID, String region) {
+    if (!worldUUID.equals(this.world)) {
+      Nope.getInstance().getLogger().error("remove region was called on the wrong world config manager!");
+      return;
+    }
     this.regions.getConfigNode().removeChild(region);
   }
+
+
 }

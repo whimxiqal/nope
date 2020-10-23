@@ -26,6 +26,7 @@ package com.minecraftonline.nope.control;
 
 import com.flowpowered.math.vector.Vector3d;
 import com.google.common.base.Preconditions;
+import com.minecraftonline.nope.Nope;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
@@ -36,8 +37,8 @@ import java.util.UUID;
 
 public class WorldHost extends Host {
 
-  private UUID worldUuid;
-  private Map<String, Region> regions = new HashMap<>();
+  private final UUID worldUuid;
+  private final Map<String, Region> regions = new HashMap<>();
 
   public WorldHost(@Nonnull UUID worldUuid) {
     Preconditions.checkNotNull(worldUuid);
@@ -58,6 +59,7 @@ public class WorldHost extends Host {
 
   public void removeRegion(String regionId) {
     this.regions.remove(regionId);
+    Nope.getInstance().getGlobalConfigManager().removeRegion(this.worldUuid, regionId);
   }
 
   public RegionSet getRegions(Vector3d position) {

@@ -57,7 +57,12 @@ public class TargetSetSerializer implements TypeSerializer<TargetSet> {
     if (obj == null) {
       throw new ObjectMappingException("Cannot serialize a null TargetSet");
     }
-    for (Target.TargetType targetType : obj.getTargets().keySet()) {
+    for (Target.TargetType targetType : Target.TargetType.values()) {
+      // Use TargetType.values() to ensure that regions that have been changed from
+      // containing something that now contain nothing, are not left unchanged and
+      // are set to an empty list
+
+      // .get on multimap returns an empty collection (not null)
       List<String> targets = obj.getTargets().get(targetType).stream()
           .map(Target::serialize)
           .collect(Collectors.toList());

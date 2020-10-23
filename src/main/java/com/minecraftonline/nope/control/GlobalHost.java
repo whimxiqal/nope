@@ -32,9 +32,10 @@ import javax.annotation.Nonnull;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 public class GlobalHost extends Host {
-  private final Map<World, WorldHost> worlds = new HashMap<>();
+  private final Map<UUID, WorldHost> worlds = new HashMap<>();
 
   /**
    * Adds a world if it is not present.
@@ -44,7 +45,7 @@ public class GlobalHost extends Host {
    *              =
    */
   public void addWorldIfNotPresent(World world) {
-    worlds.computeIfAbsent(world, k -> Nope.getInstance().getGlobalConfigManager().loadWorld(world));
+    worlds.computeIfAbsent(world.getUniqueId(), k -> Nope.getInstance().getGlobalConfigManager().loadWorld(world));
   }
 
   /**
@@ -52,15 +53,15 @@ public class GlobalHost extends Host {
    * @param world World that the worldhost is for
    * @param worldHost WorldHost that is prepared, i.e filled or will be filled
    */
-  public void addWorld(World world, WorldHost worldHost) {
+  public void addWorld(UUID world, WorldHost worldHost) {
     this.worlds.put(world, worldHost);
   }
 
   public WorldHost getWorld(World world) {
-    return this.worlds.get(world);
+    return this.worlds.get(world.getUniqueId());
   }
 
-  public Map<World, WorldHost> getWorlds() {
+  public Map<UUID, WorldHost> getWorlds() {
     return this.worlds;
   }
 

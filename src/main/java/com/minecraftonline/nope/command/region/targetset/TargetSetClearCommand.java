@@ -3,6 +3,7 @@ package com.minecraftonline.nope.command.region.targetset;
 import com.minecraftonline.nope.command.common.CommandNode;
 import com.minecraftonline.nope.control.Setting;
 import com.minecraftonline.nope.control.target.TargetSet;
+import com.minecraftonline.nope.util.Format;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.args.CommandContext;
 import org.spongepowered.api.text.Text;
@@ -17,7 +18,7 @@ public class TargetSetClearCommand extends AbstractTargetSetSubCommand {
 
   @Override
   protected CompletableFuture<TargetSet> makeChanges(CommandSource source, CommandContext args, TargetSet targetSet) {
-    source.sendMessage(Text.of(TextColors.GREEN, "Successfully cleared region"));
+    source.sendMessage(Format.info("Successfully cleared region"));
     return CompletableFuture.completedFuture(new TargetSet());
   }
 }

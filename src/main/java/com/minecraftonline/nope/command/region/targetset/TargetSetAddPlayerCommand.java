@@ -6,6 +6,7 @@ import com.minecraftonline.nope.command.common.CommandNode;
 import com.minecraftonline.nope.control.Setting;
 import com.minecraftonline.nope.control.target.PlayerTarget;
 import com.minecraftonline.nope.control.target.TargetSet;
+import com.minecraftonline.nope.util.Format;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.args.CommandContext;
@@ -34,21 +35,21 @@ public class TargetSetAddPlayerCommand extends AbstractTargetSetSubCommand {
     future.whenComplete((profile, throwable) -> {
       if (throwable instanceof ExecutionException) {
         // No profile
-        source.sendMessage(Text.of(TextColors.RED, "Account for uuid does not exist!"));
+        source.sendMessage(Format.error("Account for uuid does not exist!"));
         result.complete(targetSet);
         return;
       }
 
       if (!profile.getName().isPresent()) {
-        source.sendMessage(Text.of(TextColors.RED, "Username for uuid: '" + profile.getUniqueId() + "' did not exist! Is it a real account?"));
-        source.sendMessage(Text.of(TextColors.RED, "Making no changes."));
+        source.sendMessage(Format.error("Username for uuid: '" + profile.getUniqueId() + "' did not exist! Is it a real account?"));
+        source.sendMessage(Format.error("Making no changes."));
         return;
       }
 
       targetSet.add(new PlayerTarget(profile.getUniqueId()));
       result.complete(targetSet);
 
-      source.sendMessage(Text.of(TextColors.GREEN, "Successfully added player: '" + profile.getName().get() + "'"));
+      source.sendMessage(Format.info("Successfully added player: '" + profile.getName().get() + "'"));
     });
 
     return result;

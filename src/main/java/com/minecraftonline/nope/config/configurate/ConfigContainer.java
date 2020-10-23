@@ -118,9 +118,15 @@ public class ConfigContainer<T extends ConfigurationNode> {
   }
 
   @SuppressWarnings({"unchecked", "UnstableApiUsage"})
-  public static <V> void setNodeValue(String path, V value, ConfigurationNode node) {
+  public static <V> void setNodeValue(String path, @Nullable V value, ConfigurationNode node) {
     try {
-      resolvePath(path, node).setValue(TypeToken.of((Class<V>)value.getClass()), value);
+      ConfigurationNode configNode = resolvePath(path, node);
+      if (value == null) {
+        configNode.setValue(null);
+      }
+      else {
+        configNode.setValue(TypeToken.of((Class<V>)value.getClass()), value);
+      }
     } catch (ObjectMappingException e) {
       Nope.getInstance().getLogger().error("Error setting node value", e);
     }
