@@ -38,8 +38,6 @@ import org.spongepowered.api.command.args.GenericArguments;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
 
-import java.util.Map;
-
 public class RegionCreateCommand extends LambdaCommandNode {
   public RegionCreateCommand(CommandNode parent) {
     super(parent,
@@ -47,7 +45,7 @@ public class RegionCreateCommand extends LambdaCommandNode {
         Text.of("Create a region with current selection and given name"),
         "create",
         "new");
-    setCommandElement(GenericArguments.onlyOne(GenericArguments.string(Text.of("name"))));
+    addCommandElements(GenericArguments.onlyOne(GenericArguments.string(Text.of("name"))));
     setExecutor((src, args) -> {
       String name = (String) args.getOne(Text.of("name")).get();
       if (!(src instanceof Player)) {

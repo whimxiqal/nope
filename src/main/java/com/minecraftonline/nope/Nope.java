@@ -164,6 +164,7 @@ public class Nope {
 
   @Listener
   public void reload(GameReloadEvent e) {
+    this.globalConfigManager.saveAll();
     globalConfigManager = new HoconGlobalConfigurateConfigManager(configDir);
     // Also reset globalConfigManager, because thats not done in onLoad()
     onLoad();

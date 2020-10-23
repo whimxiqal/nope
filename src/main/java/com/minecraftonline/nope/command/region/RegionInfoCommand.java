@@ -24,6 +24,7 @@
 
 package com.minecraftonline.nope.command.region;
 
+import com.minecraftonline.nope.Nope;
 import com.minecraftonline.nope.arguments.NopeArguments;
 import com.minecraftonline.nope.arguments.RegionWrapper;
 import com.minecraftonline.nope.command.common.CommandNode;
@@ -37,11 +38,20 @@ import com.minecraftonline.nope.control.target.Target;
 import com.minecraftonline.nope.control.target.TargetSet;
 import com.minecraftonline.nope.permission.Permissions;
 import com.minecraftonline.nope.util.Format;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandResult;
+import org.spongepowered.api.command.args.CommandElement;
 import org.spongepowered.api.command.args.GenericArguments;
+import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.text.Text;
 
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 public class RegionInfoCommand extends LambdaCommandNode {
   public RegionInfoCommand(CommandNode parent) {
@@ -51,9 +61,13 @@ public class RegionInfoCommand extends LambdaCommandNode {
         "info",
         "i");
 
-    setCommandElement(GenericArguments.onlyOne(NopeArguments.regionWrapper(Text.of("region"))));
+    CommandElement regionElement = GenericArguments.onlyOne(NopeArguments.regionWrapper(Text.of("region")));
+    regionElement = GenericArguments.flags().flag("f", "-friendly").buildWith(regionElement);
+    addCommandElements(regionElement);
     setExecutor((src, args) -> {
       RegionWrapper regionWrapper = args.<RegionWrapper>getOne(Text.of("region")).get();
+      boolean friendly = args.<Boolean>getOne(Text.of("f")).orElse(false);
+
       Region region = regionWrapper.getRegion();
       boolean isGlobal = region instanceof GlobalRegion;
       src.sendMessage(Format.info("-- Info for region " + regionWrapper.getRegionName() + " --"));
@@ -61,13 +75,13 @@ public class RegionInfoCommand extends LambdaCommandNode {
       if (!isGlobal) {
         // Non global regions only:
         src.sendMessage(Format.regionInfo("min: ", region.getSettingValue(Settings.REGION_MIN).get().toString()));
-        src.sendMessage(Format.regionInfo("min: ", region.getSettingValue(Settings.REGION_MAX).get().toString()));
+        src.sendMessage(Format.regionInfo("max: ", region.getSettingValue(Settings.REGION_MAX).get().toString()));
       }
 
-      // All regions
-      src.sendMessage(Format.regionInfo("owners: ", serializeTargetSet(region.getSettingValue(Settings.REGION_OWNERS).orElse(new TargetSet()))));
-      src.sendMessage(Format.regionInfo("members: ", serializeTargetSet(region.getSettingValue(Settings.REGION_MEMBERS).orElse(new TargetSet()))));
-      src.sendMessage(Format.regionInfo("priority: ", region.getSettingValue(Settings.REGION_PRIORITY).orElse(0).toString()));
+      CompletableFuture<String> ownersFuture = serializeTargetSet(region.getSettingValue(Settings.REGION_OWNERS).orElse(new TargetSet()), friendly);
+      CompletableFuture<String> membersFuture = serializeTargetSet(region.getSettingValue(Settings.REGION_MEMBERS).orElse(new TargetSet()), friendly);
+
+      String regionPriority = region.getSettingValue(Settings.REGION_PRIORITY).orElse(0).toString();
 
       // Flags
       StringBuilder builder = new StringBuilder("{ ");
@@ -79,14 +93,25 @@ public class RegionInfoCommand extends LambdaCommandNode {
         Flag<?> defaultValue = (Flag<?>) settingEntry.getKey().getDefaultValue();
 
         String settingName = settingEntry.getKey().getName();
-        builder.append(settingName).append(": ").append(serialize(defaultValue, flag)).append(",");
+        builder.append(settingName).append(": ").append(serialize(defaultValue, flag)).append(", ");
         if (flag.getGroup() != Flag.TargetGroup.ALL) {
-          builder.append(" ").append(settingName).append("-group: ").append(flag.getGroup().toString().toLowerCase());
+          builder.append(settingName).append("-group: ").append(flag.getGroup().toString().toLowerCase()).append(", ");
         }
       }
-      builder.deleteCharAt(builder.length() - 1).append(" }");
+      // Delete last comma
+      builder.deleteCharAt(builder.length() - 2).append("}");
 
-      src.sendMessage(Format.regionInfo("flags: ", builder.toString()));
+      // Send the message when we have converted uuids.
+
+      ownersFuture.whenComplete((owners, t) -> {
+        src.sendMessage(Format.regionInfo("owners: ", owners));
+        membersFuture.whenComplete((members, e) -> {
+          src.sendMessage(Format.regionInfo("members: ", members));
+          src.sendMessage(Format.regionInfo("priority: ", regionPriority));
+          src.sendMessage(Format.regionInfo("flags: ", builder.toString()));
+        });
+      });
+
       return CommandResult.success();
     });
   }
@@ -96,12 +121,17 @@ public class RegionInfoCommand extends LambdaCommandNode {
     return defaultValue.serialize((Flag<T>)value);
   }
 
-  private static String serializeTargetSet(TargetSet targetSet) {
+  private static CompletableFuture<String> serializeTargetSet(TargetSet targetSet, boolean convertUUIDs) {
     StringBuilder builder = new StringBuilder("{ ");
+    Set<UUID> toConvert = new HashSet<>();
+
     for (Map.Entry<Target.TargetType, Target> entry : targetSet.getTargets().entries()) {
       switch (entry.getKey()) {
         case PLAYER: {
           builder.append("p:");
+          if (convertUUIDs) {
+            toConvert.add(UUID.fromString(entry.getValue().serialize()));
+          }
           break;
         }
         case GROUP: {
@@ -116,6 +146,34 @@ public class RegionInfoCommand extends LambdaCommandNode {
     }
     // Remove trailing comma, add closing bracket.
     builder.deleteCharAt(builder.length() - 1).append(" }");
-    return builder.toString();
+
+    return CompletableFuture.supplyAsync(() -> {
+      for (UUID uuid : toConvert) {
+        try {
+          Optional<String> name = getProfile(uuid).get().getName();
+          if (name.isPresent()) {
+            String uuidStr = uuid.toString();
+            int start = builder.indexOf(uuidStr);
+            // Replace uuid with name
+            builder.replace(start, start + uuidStr.length(), name.get());
+          }
+          else {
+            Nope.getInstance().getLogger().warn("GameProfile for uuid: " + uuid + " had no username!");
+          }
+        } catch (InterruptedException | ExecutionException e) {
+          Nope.getInstance().getLogger().warn("Failed to get GameProfile for uuid: " + uuid);
+        }
+      }
+      return builder.toString();
+    });
+  }
+
+  /**
+   * Gets a gameprofile promise
+   * @param uuid UUID
+   * @return CompletableFuture to obtain a gameprofile.
+   */
+  private static CompletableFuture<GameProfile> getProfile(UUID uuid) {
+    return Sponge.getServer().getGameProfileManager().get(uuid);
   }
 }

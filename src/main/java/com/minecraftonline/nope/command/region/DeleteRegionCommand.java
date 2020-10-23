@@ -45,7 +45,7 @@ public class DeleteRegionCommand extends LambdaCommandNode {
         Text.of("Delete a given region"),
         "delete",
         "remove");
-    setCommandElement(GenericArguments.onlyOne(NopeArguments.regionWrapper(Text.of("region"))));
+    addCommandElements(GenericArguments.onlyOne(NopeArguments.regionWrapper(Text.of("region"))));
     setExecutor((src, args) -> {
       RegionWrapper region = args.<RegionWrapper>getOne(Text.of("region")).get();
       WorldHost worldHost = region.getWorldHost();

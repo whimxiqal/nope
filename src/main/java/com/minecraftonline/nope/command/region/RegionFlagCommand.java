@@ -43,7 +43,7 @@ public class RegionFlagCommand extends LambdaCommandNode {
         Text.of("Set region flag"),
         "flag",
         "fg");
-    setCommandElement(NopeArguments.regionWrapper(Text.of("region")),
+    addCommandElements(NopeArguments.regionWrapper(Text.of("region")),
         NopeArguments.flagValueWrapper(Text.of("flag")));
     setExecutor((src, args) -> {
       RegionWrapper regionWrapper = args.<RegionWrapper>getOne("region").get();
