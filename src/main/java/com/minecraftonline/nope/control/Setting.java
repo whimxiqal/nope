@@ -47,6 +47,15 @@ public class Setting<T extends Serializable> implements CatalogType, Serializabl
     GLOBAL
   }
 
+  // This order of these affects how they will be sorted in
+  // /nope setting list, so keep MISC last
+  public enum Category {
+    BLOCKS,
+    MOVEMENT,
+    DAMAGE,
+    MISC,
+  }
+
   private final String id;
   private String path;
   private final T defaultValue;
@@ -56,8 +65,10 @@ public class Setting<T extends Serializable> implements CatalogType, Serializabl
   @Nullable
   private String comment;
   private Set<Applicability> applicability = Sets.newEnumSet(Lists.newArrayList(), Applicability.class);
+  private Category category = Category.MISC;
   @Nullable
   private Setting<T> parent = null;
+  private boolean implemented = true;
 
   protected Setting(@Nonnull String id,
             @Nonnull T defaultValue,
@@ -167,6 +178,16 @@ public class Setting<T extends Serializable> implements CatalogType, Serializabl
     return this;
   }
 
+  public Setting<T> withCategory(@Nonnull Category category) {
+    Preconditions.checkNotNull(category);
+    this.category = category;
+    return this;
+  }
+
+  public Category getCategory() {
+    return this.category;
+  }
+
   public boolean isConfigurable() {
     return getConfigurationPath().isPresent();
   }
@@ -205,6 +226,19 @@ public class Setting<T extends Serializable> implements CatalogType, Serializabl
    */
   public Class<T> getTypeClass() {
     return this.clazz;
+  }
+
+  /**
+   * ONLY Settings should call this.
+   * If you wish to mark it as not implemented use
+   * {@link NotImplemented}
+   */
+  public void markNotImplemented() {
+    this.implemented = false;
+  }
+
+  public boolean isImplemented() {
+    return this.implemented;
   }
 
   @Override

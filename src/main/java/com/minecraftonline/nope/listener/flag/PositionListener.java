@@ -129,11 +129,15 @@ public class PositionListener extends FlagListener {
     Setting<FlagString> entryMessage = shouldCancel ? Settings.FLAG_ENTRY_DENY_MESSAGE : Settings.FLAG_GREETING;
     Setting<FlagString> exitMessage = shouldCancel ? Settings.FLAG_EXIT_DENY_MESSAGE : Settings.FLAG_FAREWELL;
 
-    regionSetTo.findFirstFlagSetting(entryMessage, membership)
-        .ifPresent(s -> player.sendMessage(TextSerializers.FORMATTING_CODE.deserialize(s.getValue())));
+    regionSetTo.findFirstFlagSettingWithRegion(entryMessage, membership)
+        .filter(pair -> !regionSetFrom.containsRegion(pair.getValue()))
+        .map(pair -> TextSerializers.FORMATTING_CODE.deserialize(pair.getKey().getValue()))
+        .ifPresent(player::sendMessage);
 
-    regionSetFrom.findFirstFlagSetting(exitMessage, membership)
-        .ifPresent(s -> player.sendMessage(TextSerializers.FORMATTING_CODE.deserialize(s.getValue())));
+    regionSetFrom.findFirstFlagSettingWithRegion(exitMessage, membership)
+        .filter(pair -> !regionSetTo.containsRegion(pair.getValue()))
+        .map(pair -> TextSerializers.FORMATTING_CODE.deserialize(pair.getKey().getValue()))
+        .ifPresent(player::sendMessage);
 
     // Player Collision
 

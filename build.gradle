@@ -28,6 +28,8 @@ apply plugin: 'org.spongepowered.mixin'
 
 apply from: 'settingDescription.gradle'
 
+compileJava.options.encoding = 'UTF-8'
+
 sourceSets {
     main {
         ext.refMap = "mixins.nope.refmap.json"
@@ -36,7 +38,7 @@ sourceSets {
 
 archivesBaseName = 'nope'
 group = 'com.minecraftonline'
-version = '0.2.1'
+version = '0.2.3'
 description = "A region protection plugin"
 
 ext.spongeVersion = '7.2.0'
@@ -58,6 +60,9 @@ dependencies {
 
     implementation "org.spongepowered:spongeapi:${spongeVersion}"
     annotationProcessor "org.spongepowered:spongeapi:${spongeVersion}"
+
+    compile 'org.spongepowered:spongecommon:1.12.2-7.3.0:dev'
+
     implementation("net.minecraftforge.gradle:ForgeGradle:3.0.185")
 
     compile 'org.spongepowered:mixin:0.8.1-SNAPSHOT'

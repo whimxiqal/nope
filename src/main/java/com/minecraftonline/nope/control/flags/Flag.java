@@ -119,4 +119,9 @@ public abstract class Flag<T> implements Serializable {
    */
   @Nullable
   public abstract T deserializeIngame(String s);
+
+  @Override
+  public String toString() {
+    return this.serialize(this);
+  }
 }
