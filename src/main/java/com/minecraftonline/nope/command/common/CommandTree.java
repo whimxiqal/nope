@@ -33,10 +33,13 @@ import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.args.CommandContext;
 import org.spongepowered.api.command.spec.CommandExecutor;
+import org.spongepowered.api.service.pagination.PaginationList;
 import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.format.TextColors;
 
 import javax.annotation.Nonnull;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 public abstract class CommandTree {
 
@@ -70,8 +73,33 @@ public abstract class CommandTree {
     @Nonnull
     @Override
     public CommandResult execute(CommandSource src, CommandContext args) throws CommandException {
-      src.sendMessage(Format.info(getDescription()));
-      // TODO: format help response
+      PaginationList.builder().title(Format.info("Command Help : ", Format.note(
+          "{",
+          Text.joinWith(
+              Text.of(", "),
+              getAliases().stream().map(Text::of).collect(Collectors.toList())),
+          "}")))
+          .header(Text.of(
+              TextColors.LIGHT_PURPLE, "Parameters:",
+              " ",
+              TextColors.GRAY,
+              build().getUsage(src),
+              "\n",
+              TextColors.LIGHT_PURPLE, "Description:",
+              " ",
+              TextColors.YELLOW, getDescription()))
+          .contents(getChildren().stream()
+              .filter(command -> src.hasPermission(command.getPermission().toString()))
+              .map(command -> Format.note(
+                  TextColors.AQUA, Format.hover(
+                      command.getAliases().get(0),
+                      "Aliases: " + String.join(", ", command.getAliases())),
+                  " ",
+                  TextColors.WHITE, command.getDescription()))
+              .collect(Collectors.toList()))
+          .padding(Format.note("="))
+          .build()
+          .sendTo(src);
       return CommandResult.success();
     }
 

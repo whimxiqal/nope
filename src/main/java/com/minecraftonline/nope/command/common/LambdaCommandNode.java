@@ -38,7 +38,7 @@ import java.util.function.BiFunction;
  * A function with a tighter implementation because the executor can be added
  * as a lambda function.
  */
-public class LambdaCommandNode extends CommandNode {
+public abstract class LambdaCommandNode extends CommandNode {
 
   private BiFunction<CommandSource, CommandContext, CommandResult> executor = (src, args) -> CommandResult.empty();
 

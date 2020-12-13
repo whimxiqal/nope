@@ -25,8 +25,10 @@
 package com.minecraftonline.nope.util;
 
 import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.action.TextActions;
 import org.spongepowered.api.text.format.TextColor;
 import org.spongepowered.api.text.format.TextColors;
+import org.spongepowered.api.text.format.TextStyles;
 
 public final class Format {
 
@@ -51,6 +53,19 @@ public final class Format {
     return Text.of(prefix(), TextColors.WHITE, Text.of(message));
   }
 
-  public static Text regionInfo(String key, String value) { return Text.of(TextColors.GREEN, key, TextColors.GRAY, value);}
+  public static Text note(Object... message) {
+    return Text.of(prefix(), TextColors.GRAY, Text.of(message));
+  }
+
+  public static Text regionInfo(String key, String value) {
+    return Text.of(TextColors.GREEN, key, TextColors.GRAY, value);
+  }
+
+  public static Text hover(String label, String onHover) {
+    return Text.builder()
+        .append(Text.of(TextStyles.ITALIC, label))
+        .onHover(TextActions.showText(Format.note(onHover)))
+        .build();
+  }
 
 }

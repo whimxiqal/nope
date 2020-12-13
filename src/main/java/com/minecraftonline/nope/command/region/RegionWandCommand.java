@@ -45,6 +45,8 @@ import org.spongepowered.api.item.inventory.entity.MainPlayerInventory;
 import org.spongepowered.api.item.inventory.query.QueryOperationTypes;
 import org.spongepowered.api.text.Text;
 
+import javax.annotation.Nonnull;
+
 public class RegionWandCommand extends CommandNode {
   public RegionWandCommand(CommandNode parent) {
     super(parent,
@@ -54,15 +56,21 @@ public class RegionWandCommand extends CommandNode {
         "w");
   }
 
+  @Nonnull
   @Override
-  public CommandResult execute(CommandSource src, CommandContext args) throws CommandException {
+  public CommandResult execute(@Nonnull CommandSource src, @Nonnull CommandContext args) {
     if (!(src instanceof Player)) {
       src.sendMessage(Format.error("You cannot use this command as a non-player"));
       return CommandResult.empty();
     }
-    Player player = (Player)src;
+    Player player = (Player) src;
     Inventory inv = player.getInventory().query(QueryOperationTypes.INVENTORY_TYPE.of(MainPlayerInventory.class));
-    ItemType itemType = Nope.getInstance().getGlobalHost().getSettingValue(Settings.WAND_ITEM).orElse(Settings.WAND_ITEM.getDefaultValue());
+
+    ItemType itemType = Nope.getInstance()
+        .getGlobalHost()
+        .getSettingValue(Settings.WAND_ITEM)
+        .orElse(Settings.WAND_ITEM.getDefaultValue());
+
     ItemStack itemStack = SpongeWorldEdit.toSpongeItemStack(new BaseItemStack(itemType.getID(), 1));
     itemStack.offer(new RegionWandManipulator(true));
     if (!inv.canFit(itemStack)) {
