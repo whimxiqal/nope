@@ -36,6 +36,7 @@ import com.minecraftonline.nope.control.flags.Membership;
 import com.sk89q.craftbook.sponge.IC;
 import com.sk89q.craftbook.sponge.TriggeredMechanic;
 import org.spongepowered.api.Game;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.block.tileentity.Piston;
@@ -43,7 +44,9 @@ import org.spongepowered.api.block.trait.IntegerTrait;
 import org.spongepowered.api.block.trait.IntegerTraits;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.data.Transaction;
+import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.event.block.InteractBlockEvent;
@@ -59,13 +62,7 @@ import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 public class BlockListener extends FlagListener {
 
@@ -75,9 +72,11 @@ public class BlockListener extends FlagListener {
     Optional<IC> ic = e.getCause().first(IC.class);
     Optional<TriggeredMechanic> mechanic = e.getCause().first(TriggeredMechanic.class);
 
-    //if (e.getContext().get(EventContextKeys.PLUGIN).isPresent()) {
-      //return; // Caused by a plugin, don't block.
-    //}
+    if (e.getContext().get(EventContextKeys.PLUGIN)
+        .filter(pluginContainer -> pluginContainer == Nope.getInstance().getPluginContainer())
+        .isPresent()) {
+      return; // Caused by us, allow
+    }
     Object root = e.getCause().root();
     if (root instanceof Subject
         && Nope.getInstance().canOverrideRegion((Subject) e.getSource())) {
@@ -144,8 +143,36 @@ public class BlockListener extends FlagListener {
         else {
           return;
         }
-
-        membership = Membership.multipleLocations(getPossibleSources(transaction.getFinal().getLocation().get(), heightTrait));
+        List<Location<World>> sources = getPossibleSources(transaction.getFinal().getLocation().get(), heightTrait);
+        if (sources.size() == 0) {
+          membership = Membership.MEMBER; // No sources, allowed because its must be draining
+        }
+        else {
+          // There is a source, only allow if atleast 1 is a member of the region
+          //membership = Membership.multipleLocations(sources);
+          membership = region1 -> {
+            for (Location<World> location : sources) {
+              if (region1.isLocationInRegion(location.getPosition())) {
+                return Membership.Status.MEMBER;
+              }
+            }
+            // No sources in the region, drain manually
+            try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+              frame.addContext(EventContextKeys.PLUGIN, Nope.getInstance().getPluginContainer());
+              int oldLevel = loc.require(Keys.FLUID_LEVEL);
+              if (oldLevel == 1) {
+                loc.setBlockType(BlockTypes.AIR);
+              }
+              else {
+                loc.offer(Keys.FLUID_LEVEL, oldLevel - 1);
+              }
+              loc.addScheduledUpdate(1, 5); // Re-fire this all again an a tick,
+            }
+            return Membership.Status.NONE;
+          };
+        }
+        // TODO: We are actually not quite done here, if removing blocks outside of the region that are possible sources
+        // causes the sources to be zero, we should manually drain the block over time.
       }
 
       Setting<FlagState> specialSetting;

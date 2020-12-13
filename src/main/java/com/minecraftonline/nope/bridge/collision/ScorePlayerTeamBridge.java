@@ -22,4 +22,6 @@ public interface ScorePlayerTeamBridge {
    * @param collisionRule CollisionRule to set
    */
   void nope$setCollisionQuietly(Team.CollisionRule collisionRule);
+
+  void nope$setSeeFriendlyInvisiblesQuietly(boolean canSeeFriendlyInvisibles);
 }

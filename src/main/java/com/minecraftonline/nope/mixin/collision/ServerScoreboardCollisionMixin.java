@@ -36,7 +36,9 @@ public class ServerScoreboardCollisionMixin implements ServerScoreboardBridge {
 
   @Inject(method = "<init>", at = @At("RETURN"))
   public void onInit(MinecraftServer mcServer, CallbackInfo ci) {
-    ((ScorePlayerTeamBridge)nope$dummyNoCollisionTeam).nope$setCollisionQuietly(Team.CollisionRule.NEVER);
+    ScorePlayerTeamBridge bridge = (ScorePlayerTeamBridge)nope$dummyNoCollisionTeam;
+    bridge.nope$setCollisionQuietly(Team.CollisionRule.NEVER);
+    bridge.nope$setSeeFriendlyInvisiblesQuietly(false);
   }
 
   /* Conflicts with sponges implementation

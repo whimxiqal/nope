@@ -12,7 +12,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import java.util.Set;
 
 @Mixin(ScorePlayerTeam.class)
-public class ScorePlayerTeamMixin implements ScorePlayerTeamBridge {
+public abstract class ScorePlayerTeamMixin implements ScorePlayerTeamBridge {
 
   @Shadow @Final private Scoreboard scoreboard;
   @Shadow @Final private Set<String> membershipSet;
@@ -28,6 +28,8 @@ public class ScorePlayerTeamMixin implements ScorePlayerTeamBridge {
   @Shadow private TextFormatting color;
 
   @Shadow private Team.CollisionRule collisionRule;
+
+  @Shadow public abstract boolean getSeeFriendlyInvisiblesEnabled();
 
   /** A set of all team member usernames. */
   /*private final Set<String> membershipSet = Sets.<String>newHashSet();
@@ -64,5 +66,10 @@ public class ScorePlayerTeamMixin implements ScorePlayerTeamBridge {
   @Override
   public void nope$setCollisionQuietly(Team.CollisionRule collisionRule) {
     this.collisionRule = collisionRule;
+  }
+
+  @Override
+  public void nope$setSeeFriendlyInvisiblesQuietly(boolean canSeeFriendlyInvisibles) {
+    this.canSeeFriendlyInvisibles = canSeeFriendlyInvisibles;
   }
 }
