@@ -24,64 +24,70 @@
 
 package com.minecraftonline.nope.config;
 
-import com.minecraftonline.nope.config.supplier.ConfigLoaderSupplier;
-import ninja.leaping.configurate.commented.CommentedConfigurationNode;
+import com.minecraftonline.nope.control.GlobalHost;
+import com.minecraftonline.nope.control.Region;
+import com.minecraftonline.nope.control.Setting;
+import com.minecraftonline.nope.control.WorldHost;
+import org.spongepowered.api.world.World;
 
-import java.nio.file.Path;
+import javax.annotation.Nullable;
 
-public abstract class ConfigManager {
-
-  public static final String CONFIG_FILE_EXTENSION = ".conf";
-
-  protected Path configDir;
-  protected String configFileName;
-  protected ConfigLoaderSupplier configLoaderSupplier;
-  private ConfigContainer<CommentedConfigurationNode> config = null;
+/**
+ * A config manager with various methods to handle config loading, saving and updating.
+ */
+public interface ConfigManager {
+  /**
+   * Load everything
+   */
+  void loadAll();
 
   /**
-   * Create a ConfigManager
-   *
-   * @param configDir            Path Directory to create config in
-   * @param configName           Filename excluding extension
-   * @param configLoaderSupplier ConfigLoaderSupplier A supplier for ConfigLoaders
+   * Save everything
    */
-  public ConfigManager(Path configDir, String configName, ConfigLoaderSupplier configLoaderSupplier) {
-    this.configDir = configDir;
-    this.configFileName = configName + CONFIG_FILE_EXTENSION;
-    this.configLoaderSupplier = configLoaderSupplier;
-  }
-
-  public void loadAll() {
-    this.configDir.toFile().mkdirs();
-    this.config
-        = new ConfigContainer<>(configLoaderSupplier.createConfigLoader(configDir.resolve(configFileName)));
-
-    this.config.load();
-
-    loadExtra();
-  }
-
-  public void saveAll() {
-    this.config.save();
-
-    saveExtra();
-  }
+  void saveAll();
 
   /**
-   * Load extra config or other things wanted to be loaded
-   * in {@link ConfigManager#loadAll()}
+   * From the data that was loaded, put it into the global host
+   * @param host GlobalHost to fill data into
    */
-  protected void loadExtra() {
-  }
+  void fillSettings(GlobalHost host);
 
   /**
-   * Save extra config or other things wanted to be saved
-   * in {@link ConfigManager#saveAll()}
+   * Loads a world if not already loaded
+   * @param world World to load
+   * @return Filled WorldHost or null if world already loaded
    */
-  protected void saveExtra() {
-  }
+  @Nullable
+  WorldHost loadWorld(World world);
 
-  public ConfigContainer<CommentedConfigurationNode> getConfig() {
-    return this.config;
-  }
+  /**
+   * Lets the config know that a region has been created.
+   * This should only be called when the user sends input to create a region, not somewhere
+   * generic like add a region to a host, that could be loading config
+   * Doesn't have to do anything, can just save everything on {@link #saveAll()}
+   * @param worldHost WorldHost that the region was created in
+   * @param name Name of the new region
+   * @param region the new Region
+   */
+  default void onRegionCreate(WorldHost worldHost, String name, Region region) {}
+
+  /**
+   * Lets the config know that a region has changed
+   * This should only be called when the user sends input to create a region, not somewhere
+   * generic like set host setting, that could be loading config
+   * @param worldHost WorldHost the region is in
+   * @param name Name of the region
+   * @param region The region
+   * @param setting The setting whos value has changed
+   */
+  default void onRegionModify(WorldHost worldHost, String name, Region region, Setting<?> setting) {}
+
+  /**
+   * Lets to config know that a region has been removed
+   * This should only be called when the user sends input to create a region, not somewhere
+   * generic like removing a region from a host, that could be loading config/similar
+   * @param worldHost WorldHost the region was in
+   * @param name Name of the region
+   */
+  default void onRegionRemove(WorldHost worldHost, String name) {}
 }

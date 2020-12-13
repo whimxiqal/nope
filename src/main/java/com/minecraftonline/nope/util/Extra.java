@@ -79,7 +79,8 @@ public final class Extra {
     builder.append(Text.of(TextColors.RED, "||   \\\\   || "));
     builder.append(Text.of(Format.THEME, "|____/   "));
     builder.append(Text.of(Format.THEME, "|      "));
-    builder.append(Text.of(TextColors.AQUA, "      v", Reference.VERSION));
+    builder.append(Text.of(TextColors.AQUA, "      v",
+            Sponge.getPluginManager().getPlugin("nope").get().getVersion().orElse("0.0.0")));
     Sponge.getServer().getConsole().sendMessage(builder.build());
 
     // Line 6

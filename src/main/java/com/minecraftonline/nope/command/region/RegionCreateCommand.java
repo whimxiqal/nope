@@ -28,6 +28,7 @@ import com.minecraftonline.nope.Nope;
 import com.minecraftonline.nope.RegionWandHandler;
 import com.minecraftonline.nope.command.common.CommandNode;
 import com.minecraftonline.nope.command.common.LambdaCommandNode;
+import com.minecraftonline.nope.control.Region;
 import com.minecraftonline.nope.control.RegularRegion;
 import com.minecraftonline.nope.control.WorldHost;
 import com.minecraftonline.nope.permission.Permissions;
@@ -37,8 +38,6 @@ import org.spongepowered.api.command.args.GenericArguments;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
 
-import java.util.Map;
-
 public class RegionCreateCommand extends LambdaCommandNode {
   public RegionCreateCommand(CommandNode parent) {
     super(parent,
@@ -46,7 +45,7 @@ public class RegionCreateCommand extends LambdaCommandNode {
         Text.of("Create a region with current selection and given name"),
         "create",
         "new");
-    setCommandElement(GenericArguments.onlyOne(GenericArguments.string(Text.of("name"))));
+    addCommandElements(GenericArguments.onlyOne(GenericArguments.string(Text.of("name"))));
     setExecutor((src, args) -> {
       String name = (String) args.getOne(Text.of("name")).get();
       if (!(src instanceof Player)) {
@@ -64,7 +63,9 @@ public class RegionCreateCommand extends LambdaCommandNode {
         player.sendMessage(Format.error("There is already a region with the name '" + name + "'"));
         return CommandResult.empty();
       }
-      worldHost.addRegion(name, new RegularRegion(selection.getWorld(), selection.getPos1(), selection.getPos2()));
+      Region region = new RegularRegion(selection.getWorld(), selection.getPos1(), selection.getPos2());
+      worldHost.addRegion(name, region);
+      Nope.getInstance().getRegionConfigManager().onRegionCreate(worldHost, name, region);
       player.sendMessage(Format.info("Region '" + name + "' successfully created"));
       return CommandResult.success();
     });

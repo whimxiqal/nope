@@ -25,16 +25,17 @@
 package com.minecraftonline.nope.control.flags;
 
 import com.google.common.collect.Sets;
+import com.minecraftonline.nope.util.NopeTypeTokens;
 
 import java.util.Set;
 
 public class FlagStringSet extends Flag<Set<String>> {
   public FlagStringSet(Set<String> value) {
-    super(value, (Class<Set<String>>) value.getClass()); // TODO: check this works correctly
+    super(value,  NopeTypeTokens.STRING_SET_TOKEN); // TODO: check this works correctly
   }
 
   public FlagStringSet(Set<String> value, TargetGroup group) {
-    super(value, (Class<Set<String>>) value.getClass(), group);
+    super(value, NopeTypeTokens.STRING_SET_TOKEN, group);
   }
 
   @Override

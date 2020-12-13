@@ -24,7 +24,7 @@
 
 package com.minecraftonline.nope.control;
 
-import com.flowpowered.math.vector.Vector3i;
+import com.flowpowered.math.vector.Vector3d;
 
 import java.util.UUID;
 
@@ -37,10 +37,13 @@ public class GlobalRegion extends Region {
 
   public GlobalRegion(UUID worldUUID) {
     this.worldUUID = worldUUID;
+    set(Settings.REGION_PRIORITY, -1);
+    // Default priority for global region is to be overriden by other regions,
+    // but if this is set after constructor, i.e during loading with a different value it can still be different easily.
   }
 
   @Override
-  public boolean isLocationInRegion(Vector3i location) {
+  public boolean isLocationInRegion(Vector3d location) {
     return true;
   }
 }

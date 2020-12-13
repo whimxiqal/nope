@@ -27,10 +27,11 @@ package com.minecraftonline.nope.control.target;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.Player;
 
+import java.util.Objects;
 import java.util.UUID;
 
 public class PlayerTarget implements Target {
-  private UUID uuid;
+  private final UUID uuid;
 
   public PlayerTarget(String name) throws PlayerNotFoundException {
     this.uuid = Sponge.getServer().getPlayer(name).map(Player::getUniqueId)
@@ -63,5 +64,18 @@ public class PlayerTarget implements Target {
   static class PlayerNotFoundException extends Exception {
     public PlayerNotFoundException() {
     }
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    PlayerTarget that = (PlayerTarget) o;
+    return uuid.equals(that.uuid);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(uuid);
   }
 }

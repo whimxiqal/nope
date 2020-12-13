@@ -29,10 +29,7 @@ import com.minecraftonline.nope.command.common.FunctionlessCommandNode;
 import com.minecraftonline.nope.command.common.LambdaCommandNode;
 import com.minecraftonline.nope.permission.Permission;
 import com.minecraftonline.nope.util.Format;
-import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
-import org.spongepowered.api.command.CommandSource;
-import org.spongepowered.api.command.args.CommandContext;
 import org.spongepowered.api.command.args.GenericArguments;
 import org.spongepowered.api.text.Text;
 
@@ -69,7 +66,7 @@ public final class ExampleCommand extends FunctionlessCommandNode {
           Text.of("This is another description"),
           "nextexample", "ex2");
       // Add an element to describe the arguments of this command node
-      setCommandElement(GenericArguments.optional(GenericArguments.integer(Text.of("int"))));
+      addCommandElements(GenericArguments.optional(GenericArguments.integer(Text.of("int"))));
       setExecutor((src, args) -> {
         // Use the elements down here
         if (!args.getOne(Text.of("int")).isPresent()) {

@@ -35,6 +35,7 @@ import org.spongepowered.api.text.Text;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -48,7 +49,7 @@ public abstract class CommandNode implements CommandExecutor {
   private final Text description;
   private final List<String> aliases;
   private final List<CommandNode> children;
-  private CommandElement[] commandElement = new CommandElement[] {GenericArguments.none()};
+  private final List<CommandElement> commandElements = new ArrayList<>();
 
   /**
    * A helpful constructor which easily allows for addition of
@@ -101,11 +102,12 @@ public abstract class CommandNode implements CommandExecutor {
   @Nonnull
   public final CommandSpec build() {
     CommandSpec.Builder builder = CommandSpec.builder();
-    builder.arguments(this.commandElement)
+    builder.arguments(this.commandElements.toArray(new CommandElement[0]))
         .children(this.children
             .stream()
             .collect(Collectors.toMap(CommandNode::getAliases, CommandNode::build)))
         .description(this.description)
+        .childArgumentParseExceptionFallback(false) // Stops too many argument error messages due to falling back to help subcommand
         .executor(this);
     if (permission != null) {
       builder.permission(permission.get());
@@ -161,14 +163,14 @@ public abstract class CommandNode implements CommandExecutor {
   }
 
   @Nonnull
-  public final CommandElement[] getCommandElements() {
-    return commandElement;
+  public final List<CommandElement> getCommandElements() {
+    return this.commandElements;
   }
 
-  protected final void setCommandElement(@Nonnull CommandElement... commandElement) {
-    this.commandElement = Objects.requireNonNull(commandElement);
+  protected final void addCommandElements(@Nonnull CommandElement... commandElement) {
+    Objects.requireNonNull(commandElement);
     for (int i = 0; i < commandElement.length; i++) {
-      Objects.requireNonNull(commandElement[i]);
+      this.commandElements.add(Objects.requireNonNull(commandElement[i]));
     }
   }
 

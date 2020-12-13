@@ -25,14 +25,15 @@
 package com.minecraftonline.nope.control.flags;
 
 import ninja.leaping.configurate.objectmapping.serialize.TypeSerializer;
+import org.spongepowered.api.util.TypeTokens;
 
 public class FlagDouble extends Flag<Double> {
   public FlagDouble(Double value) {
-    super(value, Double.class);
+    super(value, TypeTokens.DOUBLE_TOKEN);
   }
 
   public FlagDouble(Double value, TargetGroup group) {
-    super(value, Double.class, group);
+    super(value, TypeTokens.DOUBLE_TOKEN, group);
   }
 
   @Override

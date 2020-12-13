@@ -24,6 +24,7 @@
 
 package com.minecraftonline.nope.command.region;
 
+import com.minecraftonline.nope.Nope;
 import com.minecraftonline.nope.arguments.FlagValueWrapper;
 import com.minecraftonline.nope.arguments.NopeArguments;
 import com.minecraftonline.nope.arguments.RegionWrapper;
@@ -31,11 +32,9 @@ import com.minecraftonline.nope.command.common.CommandNode;
 import com.minecraftonline.nope.command.common.LambdaCommandNode;
 import com.minecraftonline.nope.control.Region;
 import com.minecraftonline.nope.permission.Permissions;
+import com.minecraftonline.nope.util.Format;
 import org.spongepowered.api.command.CommandResult;
-import org.spongepowered.api.command.args.GenericArguments;
 import org.spongepowered.api.text.Text;
-
-import java.io.Serializable;
 
 public class RegionFlagCommand extends LambdaCommandNode {
   public RegionFlagCommand(CommandNode parent) {
@@ -44,12 +43,14 @@ public class RegionFlagCommand extends LambdaCommandNode {
         Text.of("Set region flag"),
         "flag",
         "fg");
-    setCommandElement(NopeArguments.regionWrapper(Text.of("region")),
+    addCommandElements(NopeArguments.regionWrapper(Text.of("region")),
         NopeArguments.flagValueWrapper(Text.of("flag")));
     setExecutor((src, args) -> {
       RegionWrapper regionWrapper = args.<RegionWrapper>getOne("region").get();
       FlagValueWrapper<?> flagValueWrapper = args.<FlagValueWrapper<?>>getOne("flag").get();
       setValue(regionWrapper.getRegion(), flagValueWrapper);
+      Nope.getInstance().getRegionConfigManager().onRegionModify(regionWrapper.getWorldHost(), regionWrapper.getRegionName(), regionWrapper.getRegion(), flagValueWrapper.getSetting());
+      src.sendMessage(Format.info("Successfully set flag " + flagValueWrapper.getSetting().getId() + ", on region " + regionWrapper.getRegionName()));
       return CommandResult.success();
     });
   }

@@ -24,6 +24,7 @@
 
 package com.minecraftonline.nope.control.flags;
 
+import com.minecraftonline.nope.util.NopeTypeTokens;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.EntityType;
 
@@ -33,11 +34,11 @@ import java.util.Set;
 
 public class FlagEntitySet extends Flag<Set<EntityType>> {
   public FlagEntitySet(Set<EntityType> value) {
-    super(value, (Class<Set<EntityType>>) value.getClass());
+    super(value, NopeTypeTokens.ENTITY_SET_TOKEN);
   }
 
   public FlagEntitySet(Set<EntityType> value, TargetGroup group) {
-    super(value, (Class<Set<EntityType>>) value.getClass(), group);
+    super(value, NopeTypeTokens.ENTITY_SET_TOKEN, group);
   }
 
   @Override

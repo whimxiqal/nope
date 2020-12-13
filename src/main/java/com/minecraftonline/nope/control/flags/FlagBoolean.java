@@ -24,13 +24,15 @@
 
 package com.minecraftonline.nope.control.flags;
 
+import org.spongepowered.api.util.TypeTokens;
+
 public class FlagBoolean extends Flag<Boolean> {
   public FlagBoolean(Boolean value) {
-    super(value, Boolean.class);
+    super(value, TypeTokens.BOOLEAN_TOKEN);
   }
 
   public FlagBoolean(Boolean value, TargetGroup group) {
-    super(value, Boolean.class, group);
+    super(value, TypeTokens.BOOLEAN_TOKEN, group);
   }
 
   @Override

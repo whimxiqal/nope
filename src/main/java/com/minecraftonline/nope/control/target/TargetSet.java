@@ -30,8 +30,8 @@ import org.spongepowered.api.entity.living.player.Player;
 
 import java.io.Serializable;
 
-public class TargetSet implements Serializable {
-  private Multimap<Target.TargetType, Target> targets = HashMultimap.create();
+public class TargetSet implements Serializable, Cloneable {
+  private final Multimap<Target.TargetType, Target> targets = HashMultimap.create();
 
   public TargetSet() {}
 
@@ -42,6 +42,18 @@ public class TargetSet implements Serializable {
 
   public void add(Target target) {
     targets.put(target.getTargetType(), target);
+  }
+
+  /**
+   * Removes a target that matches the given target,
+   * which is determined by the equals and hashcode
+   * implementation.
+   *
+   * @param target Target to remove
+   * @return Whether a target was removed
+   */
+  public boolean remove(Target target) {
+    return targets.get(target.getTargetType()).remove(target);
   }
 
   public Multimap<Target.TargetType, Target> getTargets() {

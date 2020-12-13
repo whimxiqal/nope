@@ -41,4 +41,8 @@ public class NopeArguments {
   public static CommandElement flagValueWrapper(Text key) {
     return new FlagValueCommandElement(key);
   }
+
+  public static CommandElement playerOrPlayerUUID(Text key) {
+    return new PlayerOrPlayerUUID(key);
+  }
 }

@@ -26,8 +26,10 @@ package com.minecraftonline.nope.control.target;
 
 import org.spongepowered.api.entity.living.player.Player;
 
+import java.util.Objects;
+
 public class GroupTarget implements Target {
-  private String groupName;
+  private final String groupName;
 
   public GroupTarget(String group) {
     this.groupName = group;
@@ -50,5 +52,18 @@ public class GroupTarget implements Target {
 
   public static GroupTarget deserialize(String string) {
     return new GroupTarget(string);
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    GroupTarget that = (GroupTarget) o;
+    return groupName.equals(that.groupName);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(groupName);
   }
 }

@@ -25,14 +25,15 @@
 package com.minecraftonline.nope.control.flags;
 
 import com.flowpowered.math.vector.Vector3d;
+import org.spongepowered.api.util.TypeTokens;
 
 public class FlagVector3d extends Flag<Vector3d> {
   public FlagVector3d(Vector3d value) {
-    super(value, Vector3d.class);
+    super(value, TypeTokens.VECTOR_3D_TOKEN);
   }
 
   public FlagVector3d(Vector3d value, TargetGroup group) {
-    super(value, Vector3d.class, group);
+    super(value, TypeTokens.VECTOR_3D_TOKEN, group);
   }
 
   @Override

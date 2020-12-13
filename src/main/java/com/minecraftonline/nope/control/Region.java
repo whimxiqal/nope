@@ -24,7 +24,7 @@
 
 package com.minecraftonline.nope.control;
 
-import com.flowpowered.math.vector.Vector3i;
+import com.flowpowered.math.vector.Vector3d;
 
 import javax.annotation.Nonnull;
 
@@ -37,5 +37,5 @@ public abstract class Region extends Host {
     return Setting.Applicability.REGION;
   }
 
-  public abstract boolean isLocationInRegion(Vector3i location);
+  public abstract boolean isLocationInRegion(Vector3d location);
 }
