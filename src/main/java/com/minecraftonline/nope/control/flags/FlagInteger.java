@@ -36,7 +36,7 @@ public class FlagInteger extends Flag<Integer> {
   }
 
   @Override
-  public Integer deserializeIngame(String s) {
+  public Integer parseValue(String s) {
     try {
       return Integer.parseInt(s);
     } catch (NumberFormatException e) {

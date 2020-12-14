@@ -28,9 +28,12 @@ import com.minecraftonline.nope.util.NopeTypeTokens;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.EntityType;
 
+import javax.annotation.Nullable;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class FlagEntitySet extends Flag<Set<EntityType>> {
   public FlagEntitySet(Set<EntityType> value) {
@@ -51,7 +54,7 @@ public class FlagEntitySet extends Flag<Set<EntityType>> {
   }
 
   @Override
-  public Set<EntityType> deserializeIngame(String s) {
+  public Set<EntityType> parseValue(String s) {
     Set<EntityType> set = new HashSet<>();
     for (String strEntityType : s.split(",")) {
       Optional<EntityType> entityType = Sponge.getRegistry().getType(EntityType.class, strEntityType);
@@ -61,5 +64,15 @@ public class FlagEntitySet extends Flag<Set<EntityType>> {
       set.add(entityType.get());
     }
     return set.size() == 0 ? null : set;
+  }
+
+  @Nullable
+  @Override
+  public List<String> getParsable() {
+    return Sponge.getRegistry()
+        .getAllOf(EntityType.class)
+        .stream()
+        .map(EntityType::getName)
+        .collect(Collectors.toList());
   }
 }

@@ -24,6 +24,7 @@
 
 package com.minecraftonline.nope.command.region;
 
+import com.google.common.collect.Lists;
 import com.minecraftonline.nope.Nope;
 import com.minecraftonline.nope.arguments.NopeArguments;
 import com.minecraftonline.nope.arguments.RegionWrapper;
@@ -46,12 +47,14 @@ import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.text.Text;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
 
 public class RegionInfoCommand extends LambdaCommandNode {
   public RegionInfoCommand(CommandNode parent) {
@@ -74,8 +77,8 @@ public class RegionInfoCommand extends LambdaCommandNode {
 
       if (!isGlobal) {
         // Non global regions only:
-        src.sendMessage(Format.regionInfo("min: ", region.getSettingValue(Settings.REGION_MIN).get().toString()));
-        src.sendMessage(Format.regionInfo("max: ", region.getSettingValue(Settings.REGION_MAX).get().toString()));
+        src.sendMessage(Format.keyValue("min: ", region.getSettingValue(Settings.REGION_MIN).get().toString()));
+        src.sendMessage(Format.keyValue("max: ", region.getSettingValue(Settings.REGION_MAX).get().toString()));
       }
 
       CompletableFuture<String> ownersFuture = serializeTargetSet(region.getSettingValue(Settings.REGION_OWNERS).orElse(new TargetSet()), friendly);
@@ -84,31 +87,44 @@ public class RegionInfoCommand extends LambdaCommandNode {
       String regionPriority = region.getSettingValue(Settings.REGION_PRIORITY).orElse(0).toString();
 
       // Flags
-      StringBuilder builder = new StringBuilder("{ ");
-      for (Map.Entry<Setting<?>, ?> settingEntry : regionWrapper.getRegion().getSettingMap().entrySet()) {
-        if (!(settingEntry.getValue() instanceof Flag)) {
-          continue; // Only look at flags
-        }
-        Flag<?> flag = (Flag<?>) settingEntry.getValue();
-        Flag<?> defaultValue = (Flag<?>) settingEntry.getKey().getDefaultValue();
+//      StringBuilder builder = new StringBuilder("{ ");
+//      for (Map.Entry<Setting<?>, ?> settingEntry : regionWrapper.getRegion().getSettingMap().entrySet()) {
+//        if (!(settingEntry.getValue() instanceof Flag)) {
+//          continue; // Only look at flags
+//        }
+//        Flag<?> flag = (Flag<?>) settingEntry.getValue();
+//        Flag<?> defaultValue = (Flag<?>) settingEntry.getKey().getDefaultValue();
+//
+//        String settingName = settingEntry.getKey().getName();
+//        builder.append(settingName).append(": ").append(serializeFlag(defaultValue, flag)).append(", ");
+//        if (flag.getGroup() != Flag.TargetGroup.ALL) {
+//          builder.append(settingName).append("-group: ").append(flag.getGroup().toString().toLowerCase()).append(", ");
+//        }
+//      }
+//      // Delete last comma
+//      builder.deleteCharAt(builder.length() - 2).append("}");
 
-        String settingName = settingEntry.getKey().getName();
-        builder.append(settingName).append(": ").append(serialize(defaultValue, flag)).append(", ");
-        if (flag.getGroup() != Flag.TargetGroup.ALL) {
-          builder.append(settingName).append("-group: ").append(flag.getGroup().toString().toLowerCase()).append(", ");
-        }
-      }
-      // Delete last comma
-      builder.deleteCharAt(builder.length() - 2).append("}");
+      List<String> flags = Lists.newLinkedList();
+      String flagsDescription = regionWrapper.getRegion().getSettingMap().entrySet().stream()
+          .filter(settingEntry -> settingEntry.getValue() instanceof Flag)
+          .map(settingEntry -> {
+            Flag<?> flag = (Flag<?>) settingEntry.getValue();
+            Flag<?> defaultValue = (Flag<?>) settingEntry.getKey().getDefaultValue();
+
+            return settingEntry.getKey().getName() + ": " + serializeFlag(defaultValue, flag)
+                + ((flag.getGroup() != Flag.TargetGroup.ALL)
+                    ? " -group: " + flag.getGroup().toString().toLowerCase()
+                    : "");
+          }).collect(Collectors.joining(", "));
 
       // Send the message when we have converted uuids.
 
       ownersFuture.whenComplete((owners, t) -> {
-        src.sendMessage(Format.regionInfo("owners: ", owners));
+        src.sendMessage(Format.keyValue("owners: ", owners));
         membersFuture.whenComplete((members, e) -> {
-          src.sendMessage(Format.regionInfo("members: ", members));
-          src.sendMessage(Format.regionInfo("priority: ", regionPriority));
-          src.sendMessage(Format.regionInfo("flags: ", builder.toString()));
+          src.sendMessage(Format.keyValue("members: ", members));
+          src.sendMessage(Format.keyValue("priority: ", regionPriority));
+          src.sendMessage(Format.keyValue("flags: ", flagsDescription));
         });
       });
 
@@ -117,8 +133,8 @@ public class RegionInfoCommand extends LambdaCommandNode {
   }
 
   @SuppressWarnings("unchecked")
-  private static <T> String serialize(Flag<T> defaultValue, Flag<?> value) {
-    return defaultValue.serialize((Flag<T>)value);
+  private static <T> String serializeFlag(Flag<T> defaultValue, Flag<?> value) {
+    return defaultValue.serialize((Flag<T>) value);
   }
 
   private static CompletableFuture<String> serializeTargetSet(TargetSet targetSet, boolean convertUUIDs) {

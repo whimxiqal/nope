@@ -28,6 +28,10 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.util.TypeTokens;
 
+import javax.annotation.Nullable;
+import java.util.List;
+import java.util.stream.Collectors;
+
 public class FlagGameMode extends Flag<GameMode> {
   public FlagGameMode(GameMode value) {
     super(value, TypeTokens.GAME_MODE_TOKEN);
@@ -43,7 +47,17 @@ public class FlagGameMode extends Flag<GameMode> {
   }
 
   @Override
-  public GameMode deserializeIngame(String s) {
+  public GameMode parseValue(String s) {
     return Sponge.getRegistry().getType(GameMode.class, s).orElse(null);
+  }
+
+  @Nullable
+  @Override
+  public List<String> getParsable() {
+    return Sponge.getRegistry()
+        .getAllOf(GameMode.class)
+        .stream()
+        .map(GameMode::getName)
+        .collect(Collectors.toList());
   }
 }

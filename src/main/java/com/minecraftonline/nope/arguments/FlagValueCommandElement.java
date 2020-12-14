@@ -25,7 +25,6 @@
 package com.minecraftonline.nope.arguments;
 
 import com.google.common.collect.Lists;
-import com.minecraftonline.nope.Nope;
 import com.minecraftonline.nope.control.Setting;
 import com.minecraftonline.nope.control.Settings;
 import com.minecraftonline.nope.control.flags.Flag;
@@ -46,6 +45,8 @@ public class FlagValueCommandElement extends CommandElement {
     super(key);
   }
 
+  
+
   @Nullable
   @Override
   protected FlagValueWrapper<?> parseValue(CommandSource source, CommandArgs args) throws ArgumentParseException {
@@ -55,9 +56,17 @@ public class FlagValueCommandElement extends CommandElement {
         .map(setting -> (Setting<Flag<?>>)setting)
         .orElseThrow(() -> new ArgumentParseException(Text.of("No region flag with the name: '" + settingName + "'"), settingName, settingName.length()));
     String strValue = args.next();
-    Object value = flagSetting.getDefaultValue().deserializeIngame(strValue);
+    Object value = flagSetting.getDefaultValue().parseValue(strValue);
     if (value == null) {
-      throw new ArgumentParseException(Text.of(strValue + " is not a valid value for this flag!"), strValue, settingName.length() + strValue.length() + 1); // 1 space
+      List<String> parsable = flagSetting.getDefaultValue().getParsable();
+      throw new ArgumentParseException(
+          Text.of(strValue + " is not a valid value for this flag!",
+              Text.NEW_LINE,
+              (parsable == null || parsable.size() > 5
+                  ? "The value must be a " + flagSetting.getDefaultValue().getFlagType().toString()
+                  : "Allowed values are: " + String.join(", ", parsable))),
+          strValue,
+          settingName.length() + strValue.length() + 1); // 1 space
     }
     Flag<?> flag = FlagUtil.makeFlag(flagSetting.getDefaultValue(), value);
     if (args.hasNext()) {
@@ -75,7 +84,7 @@ public class FlagValueCommandElement extends CommandElement {
   @Override
   public List<String> complete(CommandSource src, CommandArgs args, CommandContext context) {
     try {
-      if (args.hasNext() && args.next().isEmpty()) {
+      if (args.hasNext() && args.peek().isEmpty()) {
         return ArgsUtil.getFlagSettings().stream()
             .map(Setting::getId)
             .collect(Collectors.toList());

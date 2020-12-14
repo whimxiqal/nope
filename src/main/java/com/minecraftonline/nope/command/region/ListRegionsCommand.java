@@ -52,7 +52,7 @@ public class ListRegionsCommand extends LambdaCommandNode {
       WorldHost host = Nope.getInstance().getGlobalHost().getWorld(((Player)src).getWorld());
       src.sendMessage(Format.info("------ Regions ------"));
       for (Map.Entry<String, Region> entry : host.getRegions().entrySet()) {
-        src.sendMessage(Format.info(entry.getKey()));
+        src.sendMessage(Text.of(Format.ACCENT, "> ", Format.note(entry.getKey())));
       }
       return CommandResult.success();
     });

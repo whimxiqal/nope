@@ -37,7 +37,7 @@ public class FlagDouble extends Flag<Double> {
   }
 
   @Override
-  public Double deserializeIngame(String s) {
+  public Double parseValue(String s) {
     try {
       return Double.parseDouble(s);
     } catch (NumberFormatException e) {

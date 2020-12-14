@@ -35,7 +35,7 @@ public class RegionCommand extends FunctionlessCommandNode {
   public RegionCommand(CommandNode parent) {
     super(parent,
         Permissions.REGION,
-        Text.of("Region sub command for all things regions"),
+        Text.of("Alter Nope regions"),
         "region",
         "rg");
     addChildren(new RegionWandCommand(this));

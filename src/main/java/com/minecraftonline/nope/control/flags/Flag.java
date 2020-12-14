@@ -29,6 +29,8 @@ import com.minecraftonline.nope.config.configurate.GlobalConfigurateConfigManage
 
 import javax.annotation.Nullable;
 import java.io.Serializable;
+import java.util.List;
+import java.util.function.Predicate;
 
 /**
  * Represents a WG Flag
@@ -118,7 +120,17 @@ public abstract class Flag<T> implements Serializable {
    * @return T value to be used to construct a new flag, or null if input is invalid
    */
   @Nullable
-  public abstract T deserializeIngame(String s);
+  public abstract T parseValue(String s);
+
+  /**
+   * Returns a list of parsable values for this Flag, null if it's any of its generic type
+   * @return list of parsable values
+   *
+   */
+  @Nullable
+  public List<String> getParsable() {
+    return null;
+  }
 
   @Override
   public String toString() {

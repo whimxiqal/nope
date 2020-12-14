@@ -309,7 +309,7 @@ public final class Settings {
   public static final Setting<FlagState> FLAG_EVP = Setting.of("evp", new FlagState(true), FlagState.class)
       .withApplicability(Setting.Applicability.REGION)
       .withConfigurationPath("flags.evp")
-      .withDescription("Whether players can receive damage from the enviroment")
+      .withDescription("Whether players can receive damage from the environment")
       .withCategory(Setting.Category.DAMAGE);
 
   public static final Setting<FlagState> FLAG_EXIT = Setting.of("exit", new FlagState(true), FlagState.class)

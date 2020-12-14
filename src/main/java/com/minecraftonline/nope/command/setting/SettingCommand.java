@@ -7,8 +7,10 @@ import org.spongepowered.api.text.Text;
 
 public class SettingCommand extends FunctionlessCommandNode {
   public SettingCommand(CommandNode parent) {
-    super(parent, Permission.of("nope.setting"), Text.of("Allows the user to change nope settings"), "setting");
-
+    super(parent,
+        Permission.of("nope.setting"),
+        Text.of("Configure Nope settings"),
+        "setting");
     addChildren(new ListSettingsCommand(this));
   }
 }

@@ -34,6 +34,7 @@ import com.minecraftonline.nope.control.Region;
 import com.minecraftonline.nope.permission.Permissions;
 import com.minecraftonline.nope.util.Format;
 import org.spongepowered.api.command.CommandResult;
+import org.spongepowered.api.command.args.GenericArguments;
 import org.spongepowered.api.text.Text;
 
 public class RegionFlagCommand extends LambdaCommandNode {

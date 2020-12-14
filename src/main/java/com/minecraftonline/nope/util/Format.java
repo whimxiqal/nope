@@ -24,11 +24,17 @@
 
 package com.minecraftonline.nope.util;
 
+import com.minecraftonline.nope.Nope;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.action.TextActions;
 import org.spongepowered.api.text.format.TextColor;
 import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.text.format.TextStyles;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.net.MalformedURLException;
+import java.net.URL;
 
 public final class Format {
 
@@ -36,9 +42,14 @@ public final class Format {
   }
 
   public static final TextColor THEME = TextColors.GRAY;
+  public static final TextColor ACCENT = TextColors.LIGHT_PURPLE;
 
   public static Text prefix() {
     return Text.of(THEME, "Nope ", TextColors.DARK_GRAY, "-=- ");
+  }
+
+  public static Text success(Object... message) {
+    return Text.of(prefix(), TextColors.GREEN, Text.of(message));
   }
 
   public static Text error(Object... message) {
@@ -54,11 +65,11 @@ public final class Format {
   }
 
   public static Text note(Object... message) {
-    return Text.of(prefix(), TextColors.GRAY, Text.of(message));
+    return Text.of(TextColors.GRAY, Text.of(message));
   }
 
-  public static Text regionInfo(String key, String value) {
-    return Text.of(TextColors.GREEN, key, TextColors.GRAY, value);
+  public static Text keyValue(String key, String value) {
+    return Text.of(Format.ACCENT, key, Format.note(value));
   }
 
   public static Text hover(String label, String onHover) {
@@ -66,6 +77,37 @@ public final class Format {
         .append(Text.of(TextStyles.ITALIC, label))
         .onHover(TextActions.showText(Format.note(onHover)))
         .build();
+  }
+
+  public static Text url(@Nonnull String label, @Nonnull String url) {
+    Text.Builder textBuilder = Text.builder();
+    textBuilder.append(Text.of(TextColors.BLUE, label));
+    textBuilder.onHover(TextActions.showText(Text.of(url)));
+    try {
+      textBuilder.onClick(TextActions.openUrl(new URL(url)));
+    } catch (MalformedURLException ex) {
+      textBuilder.onClick(TextActions.suggestCommand(url));
+      Nope.getInstance().getLogger().error("A url was not formed correctly for a"
+          + " click action: " + url);
+    }
+
+    return textBuilder.build();
+  }
+
+  public static Text command(@Nonnull String label,
+                             @Nonnull String command,
+                             @Nullable Text hoverMessage) {
+    Text.Builder builder = Text.builder()
+        .append(Text.of(TextColors.GOLD, TextStyles.ITALIC, "[",
+            Text.of(TextColors.GRAY, label), "]"))
+        .onClick(TextActions.runCommand(command));
+    if (hoverMessage != null) {
+      builder.onHover(TextActions.showText(Text.of(
+          hoverMessage,
+          hoverMessage.isEmpty() ? Text.EMPTY : "\n",
+          Format.note(command))));
+    }
+    return builder.build();
   }
 
 }

@@ -63,6 +63,7 @@ import java.nio.file.Path;
 @Plugin(id = "nope", dependencies = @Dependency(id = "worldedit"))
 public class Nope {
 
+  public static String REPO_URL = "https://gitlab.com/minecraftonline/nope/";
   private static Nope instance;
 
   // Injections

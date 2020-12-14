@@ -24,7 +24,11 @@
 
 package com.minecraftonline.nope.control.flags;
 
+import com.google.common.collect.Lists;
 import org.spongepowered.api.util.TypeTokens;
+
+import javax.annotation.Nullable;
+import java.util.List;
 
 public class FlagState extends Flag<Boolean> {
   public FlagState(Boolean value) {
@@ -60,11 +64,18 @@ public class FlagState extends Flag<Boolean> {
   }
 
   @Override
-  public Boolean deserializeIngame(String s) {
+  public Boolean parseValue(String s) {
     try {
       return deserialize(s);
     } catch (IllegalStateException e) {
       return null;
     }
   }
+
+  @Nullable
+  @Override
+  public List<String> getParsable() {
+    return Lists.newArrayList("allow", "deny");
+  }
+
 }

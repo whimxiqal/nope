@@ -34,17 +34,21 @@ import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.args.CommandContext;
+import org.spongepowered.api.command.args.GenericArguments;
 import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.format.TextColors;
+import org.spongepowered.api.text.format.TextStyles;
 
 import javax.annotation.Nonnull;
 
 public class NopeCommandRoot extends CommandNode {
 
-  // TODO: write description
-  private static final Text description = Text.of("NopeCommandRoot command description");
-
   public NopeCommandRoot() {
-    super(null, Permissions.COMMAND_ROOT, description, "nope");
+    super(null,
+        Permissions.COMMAND_ROOT,
+        Text.of("The base command for all commands pertaining to Nope"),
+        "nope");
+    addCommandElements();
     addChildren(new ExampleCommand(this));
     addChildren(new RegionCommand(this));
     addChildren(new SettingCommand(this));
@@ -53,12 +57,37 @@ public class NopeCommandRoot extends CommandNode {
   @Nonnull
   @Override
   public CommandResult execute(CommandSource src, CommandContext args) throws CommandException {
-    src.sendMessage(this.splashScreen());
+    src.sendMessage(Text.of(Format.note("==========================")));
+    src.sendMessage(Text.of(
+        Format.THEME, TextStyles.BOLD, String.format(
+            "Nope v%s",
+            Nope.getInstance().getPluginContainer().getVersion().orElse("unknown")),
+        " ",
+        TextStyles.RESET, Format.note("by MinecraftOnline")));
+    src.sendMessage(Text.of(
+        TextColors.AQUA, "Authors: ",
+        Format.note(String.join(
+            ", ",
+            Nope.getInstance().getPluginContainer().getAuthors()))));
+    src.sendMessage(Format.note(
+        "Check out the",
+        " ",
+        Format.url("website", Nope.getInstance().getPluginContainer().getUrl().orElse("unknown")),
+        " ",
+        "or",
+        " ",
+        Format.url("source code", Nope.REPO_URL),
+        "."));
+    src.sendMessage(Format.note(
+        "Try the",
+        " ",
+        Format.command(
+            "help",
+            "/griefalert help",
+            Text.EMPTY),
+        " ",
+        "command."));
     return CommandResult.success();
   }
 
-  private Text splashScreen() {
-    return Format.info("version ", Nope.getInstance().getPluginContainer().getVersion().orElse("unknown"));
-    // TODO: format plugin splash screen
-  }
 }

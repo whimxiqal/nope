@@ -37,7 +37,7 @@ public class FlagVector3d extends Flag<Vector3d> {
   }
 
   @Override
-  public Vector3d deserializeIngame(String s) {
+  public Vector3d parseValue(String s) {
     String[] strings = s.split(",");
     if (strings.length != 3) {
       return null;

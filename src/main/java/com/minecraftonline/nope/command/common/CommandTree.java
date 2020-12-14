@@ -73,23 +73,30 @@ public abstract class CommandTree {
     @Nonnull
     @Override
     public CommandResult execute(CommandSource src, CommandContext args) throws CommandException {
+      CommandNode parent = this.getParent();
+      if (parent == null) {
+        throw new CommandException(Text.of("You cannot run the help command without a parent"));
+      }
       PaginationList.builder().title(Format.info("Command Help : ", Format.note(
           "{",
           Text.joinWith(
               Text.of(", "),
-              getAliases().stream().map(Text::of).collect(Collectors.toList())),
+              parent.getAliases().stream().map(Text::of).collect(Collectors.toList())),
           "}")))
           .header(Text.of(
               TextColors.LIGHT_PURPLE, "Parameters:",
               " ",
               TextColors.GRAY,
-              build().getUsage(src),
+              parent.build().getUsage(src),
               "\n",
               TextColors.LIGHT_PURPLE, "Description:",
               " ",
-              TextColors.YELLOW, getDescription()))
-          .contents(getChildren().stream()
-              .filter(command -> src.hasPermission(command.getPermission().toString()))
+              TextColors.YELLOW, parent.getDescription()))
+          .contents(parent.getChildren().stream()
+              .filter(command ->
+                  command.getPermission()
+                      .map(perm -> src.hasPermission(perm.get()))
+                      .orElse(true))
               .map(command -> Format.note(
                   TextColors.AQUA, Format.hover(
                       command.getAliases().get(0),

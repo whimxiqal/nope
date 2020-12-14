@@ -36,7 +36,7 @@ public class FlagBoolean extends Flag<Boolean> {
   }
 
   @Override
-  public Boolean deserializeIngame(String s) {
+  public Boolean parseValue(String s) {
     if ("true".equals(s)) {
       return true;
     }

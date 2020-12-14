@@ -46,7 +46,7 @@ public class FlagStringSet extends Flag<Set<String>> {
   }
 
   @Override
-  public Set<String> deserializeIngame(String s) {
+  public Set<String> parseValue(String s) {
     return Sets.newHashSet(s.split(","));
   }
 }

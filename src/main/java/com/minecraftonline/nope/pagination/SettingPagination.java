@@ -1,18 +1,19 @@
 package com.minecraftonline.nope.pagination;
 
 import com.google.common.collect.HashMultimap;
-import com.google.common.collect.HashMultiset;
 import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Multimap;
 import com.minecraftonline.nope.control.Setting;
 import com.minecraftonline.nope.control.Settings;
+import com.minecraftonline.nope.util.Format;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.action.TextActions;
 import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.text.format.TextStyles;
 import org.spongepowered.common.service.pagination.NopePagination;
 
-import java.util.Collection;
+import java.util.Arrays;
+import java.util.stream.Collectors;
 
 public class SettingPagination implements PaginationProvider {
   private NopePagination cache = null;
@@ -30,9 +31,6 @@ public class SettingPagination implements PaginationProvider {
 
       Text.Builder idText = Text.builder().append(Text.of(TextColors.GREEN, setting.getId()));
 
-      Text inlineDescription = Text.of(TextColors.WHITE, " - " +
-          setting.getComment().orElse(setting.getComment().orElse("No description")));
-
       Text.Builder onHover = Text.builder();
 
       if (!setting.isImplemented()) {
@@ -41,41 +39,27 @@ public class SettingPagination implements PaginationProvider {
         onHover.append(Text.NEW_LINE);
       }
 
-      onHover.append(Text.of(TextColors.GRAY, "Type: " + setting.getTypeClass().getSimpleName()))
-          .append(Text.NEW_LINE);
+      onHover.append(Format.keyValue("Type: ", setting.getTypeClass().getSimpleName()));
+      onHover.append(Text.NEW_LINE);
 
       if (setting.getParent().isPresent()) {
-        onHover.append(Text.of(TextColors.GRAY, "Parent: " + setting.getParent().get().getId()));
+        onHover.append(Format.keyValue("Parent: ", setting.getParent().get().getId()));
         onHover.append(Text.NEW_LINE);
       }
 
-      Text.Builder applicabilityText = Text.builder().append(Text.of(TextColors.GRAY, "Applicability: "));
-
-      StringBuilder applicabilityBuilder = new StringBuilder();
-      for (Setting.Applicability applicability : Setting.Applicability.values()) {
-        applicabilityBuilder.append(applicability.name()).append(',');
-      }
-
-      if (applicabilityBuilder.length() == 0) {
-        applicabilityBuilder.append("NONE");
-      }
-      else {
-        // Delete trailing comma
-        applicabilityBuilder.deleteCharAt(applicabilityBuilder.length() - 1);
-      }
-
-      applicabilityText.append(Text.of(TextColors.GRAY, applicabilityBuilder.toString()));
-
-      onHover.append(applicabilityText.build());
+      onHover.append(Format.keyValue("Applicability: ", (Setting.Applicability.values().length != 0
+          ? Arrays.stream(Setting.Applicability.values())
+              .map(Setting.Applicability::name)
+              .collect(Collectors.joining(", "))
+          : "NONE")));
       onHover.append(Text.NEW_LINE);
 
-      onHover.append(Text.of(TextColors.GRAY, "Default value: " + setting.getDefaultValue()));
+      onHover.append(Format.keyValue("Default value: ", setting.getDefaultValue().toString()));
 
       if (setting.getDescription().isPresent()) {
         onHover.append(Text.NEW_LINE).append(Text.NEW_LINE);
         onHover.append(Text.of(TextColors.GRAY, setting.getDescription().get()));
-      }
-      else if (setting.getComment().isPresent()) {
+      } else if (setting.getComment().isPresent()) {
         onHover.append(Text.NEW_LINE).append(Text.NEW_LINE);
         onHover.append(Text.of(TextColors.GRAY, setting.getComment().get()));
       }
@@ -83,7 +67,8 @@ public class SettingPagination implements PaginationProvider {
       builder.onHover(TextActions.showText(onHover.build()));
 
       builder.append(idText.build());
-      builder.append(inlineDescription);
+      builder.append(Text.of(TextColors.WHITE, " - "
+          + setting.getComment().orElse(setting.getComment().orElse("No description"))));
 
       categoryContentsMap.put(setting.getCategory().toString(), builder.build());
     }

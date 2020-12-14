@@ -44,6 +44,7 @@ public class RegionCreateCommand extends LambdaCommandNode {
         Permissions.CREATE_REGION,
         Text.of("Create a region with current selection and given name"),
         "create",
+        "c",
         "new");
     addCommandElements(GenericArguments.onlyOne(GenericArguments.string(Text.of("name"))));
     setExecutor((src, args) -> {
@@ -55,7 +56,12 @@ public class RegionCreateCommand extends LambdaCommandNode {
       Player player = (Player)src;
       RegionWandHandler.Selection selection = Nope.getInstance().getRegionWandHandler().getSelectionMap().get(player);
       if (selection == null || !selection.isComplete()) {
-        player.sendMessage(Format.error("You must have a selection (use /nope region wand to get a wand)"));
+        player.sendMessage(Format.error(
+            Text.of("Make a selection first using the "),
+            Format.command(
+                "wand",
+                "nope region wand",
+                Text.of("Get a region wand"))));
         return CommandResult.empty();
       }
       WorldHost worldHost = Nope.getInstance().getGlobalHost().getWorld(selection.getWorld());
@@ -66,7 +72,7 @@ public class RegionCreateCommand extends LambdaCommandNode {
       Region region = new RegularRegion(selection.getWorld(), selection.getPos1(), selection.getPos2());
       worldHost.addRegion(name, region);
       Nope.getInstance().getRegionConfigManager().onRegionCreate(worldHost, name, region);
-      player.sendMessage(Format.info("Region '" + name + "' successfully created"));
+      player.sendMessage(Format.success("Region '" + name + "' successfully created"));
       return CommandResult.success();
     });
   }

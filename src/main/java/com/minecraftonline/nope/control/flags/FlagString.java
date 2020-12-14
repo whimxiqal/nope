@@ -36,7 +36,7 @@ public class FlagString extends Flag<String> {
   }
 
   @Override
-  public String deserializeIngame(String s) {
+  public String parseValue(String s) {
     return s;
   }
 }

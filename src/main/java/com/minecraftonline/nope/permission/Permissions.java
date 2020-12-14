@@ -35,19 +35,16 @@ public final class Permissions {
   // Command permissions
   public static final Permission COMMAND_ROOT = Permission.of("nope.command");
 
-  public static final Permission REGION = Permission.of("nope.region");
+  public static final Permission REGION = Permission.of("nope.command.region");
 
-  public static final Permission CREATE_REGION = Permission.of("nope.region.create");
+  public static final Permission CREATE_REGION = Permission.of("nope.command.region.create");
 
-  public static final Permission EDIT_REGION = Permission.of("nope.region.create");
+  public static final Permission EDIT_REGION = Permission.of("nope.command.region.edit");
 
-  public static final Permission LIST_REGIONS = Permission.of("nope.region.list");
+  public static final Permission LIST_REGIONS = Permission.of("nope.command.region.list");
 
-  public static final Permission INFO_REGION = Permission.of("nope.region.info");
+  public static final Permission INFO_REGION = Permission.of("nope.command.region.info");
 
-  public static final Permission DELETE_REGIONS = Permission.of("nope.region.delete");
-
-  // Override permissions
-  public static final Permission OVERRIDE_ALL = Permission.of("nope.override-all");
+  public static final Permission DELETE_REGIONS = Permission.of("nope.command.region.delete");
 
 }
