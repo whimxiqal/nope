@@ -83,7 +83,7 @@ public class NopeCommandRoot extends CommandNode {
         " ",
         Format.command(
             "help",
-            "/griefalert help",
+            "/nope help",
             Text.EMPTY),
         " ",
         "command."));

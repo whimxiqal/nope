@@ -69,11 +69,11 @@ public class BlockListener extends FlagListener {
   @Exclude({ChangeBlockEvent.Post.class})
   @Listener
   public void onBlockChange(ChangeBlockEvent e) {
-    Optional<IC> ic = e.getCause().first(IC.class);
-    Optional<TriggeredMechanic> mechanic = e.getCause().first(TriggeredMechanic.class);
+    //Optional<IC> ic = e.getCause().first(IC.class);
+    //Optional<TriggeredMechanic> mechanic = e.getCause().first(TriggeredMechanic.class);
 
     if (e.getContext().get(EventContextKeys.PLUGIN)
-        .filter(pluginContainer -> pluginContainer == Nope.getInstance().getPluginContainer())
+        //.filter(pluginContainer -> pluginContainer == Nope.getInstance().getPluginContainer())
         .isPresent()) {
       return; // Caused by us, allow
     }
@@ -88,13 +88,13 @@ public class BlockListener extends FlagListener {
     Set<Region> checkedRegions = new HashSet<>();
 
     Membership membership;
-    if (ic.isPresent()) {
+    /*if (ic.isPresent()) {
       membership = Membership.block(ic.get().getBlock().getBlockPosition());
     }
     else if (mechanic.isPresent()) {
       membership = Membership.block(mechanic.get().getMechanicLocation().getBlockPosition());
     }
-    else if (root instanceof Player) {
+    else */if (root instanceof Player) {
       membership = Membership.player((Player)root);
     }
     else if (root instanceof Piston) {
@@ -148,28 +148,7 @@ public class BlockListener extends FlagListener {
           membership = Membership.MEMBER; // No sources, allowed because its must be draining
         }
         else {
-          // There is a source, only allow if atleast 1 is a member of the region
-          //membership = Membership.multipleLocations(sources);
-          membership = region1 -> {
-            for (Location<World> location : sources) {
-              if (region1.isLocationInRegion(location.getPosition())) {
-                return Membership.Status.MEMBER;
-              }
-            }
-            // No sources in the region, drain manually
-            try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-              frame.addContext(EventContextKeys.PLUGIN, Nope.getInstance().getPluginContainer());
-              int oldLevel = loc.require(Keys.FLUID_LEVEL);
-              if (oldLevel == 1) {
-                loc.setBlockType(BlockTypes.AIR);
-              }
-              else {
-                loc.offer(Keys.FLUID_LEVEL, oldLevel - 1);
-              }
-              loc.addScheduledUpdate(1, 5); // Re-fire this all again an a tick,
-            }
-            return Membership.Status.NONE;
-          };
+          membership = getFluidMembership(sources, loc);
         }
         // TODO: We are actually not quite done here, if removing blocks outside of the region that are possible sources
         // causes the sources to be zero, we should manually drain the block over time.
@@ -212,6 +191,11 @@ public class BlockListener extends FlagListener {
   // now exist.
   @Listener // Stop redstone propagation
   public void onNotifyNeighborBlockEvent(NotifyNeighborBlockEvent e) {
+    if (e.getContext().get(EventContextKeys.PLUGIN)
+        .isPresent()) {
+      return;
+    }
+
     // Disallow notifications across region borders unless they are allowed.
     LocatableBlock locatableBlock = (LocatableBlock) e.getSource();
     Location<World> source = locatableBlock.getLocation();
@@ -232,6 +216,10 @@ public class BlockListener extends FlagListener {
 
   @Listener // Piston handling.
   public void onChangeBlockEventPre(ChangeBlockEvent.Pre e) {
+    if (e.getContext().get(EventContextKeys.PLUGIN)
+        .isPresent()) {
+      return;
+    }
     if (!(e.getSource() instanceof LocatableBlock)) {
       return;
     }
@@ -255,6 +243,10 @@ public class BlockListener extends FlagListener {
 
   @Listener
   public void interactBlockEvent(InteractBlockEvent.Secondary e) {
+    if (e.getContext().get(EventContextKeys.PLUGIN)
+        .isPresent()) {
+      return;
+    }
     if (!(e.getSource() instanceof Player)) {
       return;
     }
@@ -274,6 +266,31 @@ public class BlockListener extends FlagListener {
         }
       }
     });
+  }
+
+  private static Membership getFluidMembership(List<Location<World>> sources, Location<World> loc) {
+    // There is a source, only allow if atleast 1 is a member of the region
+    //membership = Membership.multipleLocations(sources);
+    return region1 -> {
+      for (Location<World> location : sources) {
+        if (region1.isLocationInRegion(location.getPosition())) {
+          return Membership.Status.MEMBER;
+        }
+      }
+      // No sources in the region, drain manually
+      try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+        frame.addContext(EventContextKeys.PLUGIN, Nope.getInstance().getPluginContainer());
+        int oldLevel = loc.require(Keys.FLUID_LEVEL);
+        if (oldLevel == 1) {
+          loc.setBlockType(BlockTypes.AIR);
+        }
+        else {
+          loc.offer(Keys.FLUID_LEVEL, oldLevel - 1);
+        }
+        loc.addScheduledUpdate(1, 5); // Re-fire this all again an a tick,
+      }
+      return Membership.Status.NONE;
+    };
   }
 
   /**
