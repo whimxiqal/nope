@@ -229,7 +229,7 @@ public class Setting<T extends Serializable> implements CatalogType, Serializabl
   }
 
   /**
-   * ONLY Settings should call this.
+   * ONLY SettingLibrary should call this.
    * If you wish to mark it as not implemented use
    * {@link NotImplemented}
    */

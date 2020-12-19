@@ -35,6 +35,7 @@ import com.minecraftonline.nope.key.NopeKeys;
 import com.minecraftonline.nope.key.regionwand.ImmutableRegionWandManipulator;
 import com.minecraftonline.nope.key.regionwand.RegionWandManipulator;
 import com.minecraftonline.nope.listener.flag.FlagListeners;
+import com.minecraftonline.nope.structures.HostTree;
 import com.minecraftonline.nope.util.Extra;
 import org.slf4j.Logger;
 import org.spongepowered.api.Sponge;
@@ -85,7 +86,7 @@ public class Nope {
   private GlobalConfigurateConfigManager globalConfigManager;
   private ConfigManager regionConfigManager;
 
-  private GlobalHost globalHost = new GlobalHost();
+  private HostTree hostTree;
 
   private RegionWandHandler regionWandHandler;
   private CollisionHandler collisionHandler;
@@ -136,11 +137,13 @@ public class Nope {
   }
 
   public void onLoad() {
-    globalConfigManager.loadAll();
-    globalConfigManager.fillSettings(globalHost);
-    this.regionConfigManager = globalConfigManager;
-    regionWandHandler = new RegionWandHandler();
-    collisionHandler = new CollisionHandler();
+//    globalConfigManager.loadAll();
+//    globalConfigManager.fillSettings(globalHost);
+//    this.regionConfigManager = globalConfigManager;
+//    regionWandHandler = new RegionWandHandler();
+//    collisionHandler = new CollisionHandler();
+
+    hostTree = HostTree.up();
   }
 
   @Listener
@@ -156,11 +159,6 @@ public class Nope {
   @Listener
   public void onServerStopping(GameStoppingServerEvent event) {
     globalConfigManager.saveAll();
-  }
-
-  @Listener
-  public void onLoadWorld(LoadWorldEvent event) {
-    globalHost.addWorldIfNotPresent(event.getTargetWorld());
   }
 
   @Listener
@@ -185,10 +183,6 @@ public class Nope {
 
   public PluginContainer getPluginContainer() {
     return pluginContainer;
-  }
-
-  public GlobalHost getGlobalHost() {
-    return globalHost;
   }
 
   public RegionWandHandler getRegionWandHandler() {

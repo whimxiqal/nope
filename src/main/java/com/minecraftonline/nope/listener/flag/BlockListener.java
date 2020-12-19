@@ -159,7 +159,7 @@ public class BlockListener extends FlagListener {
       // if its the break, break setting, or null if no specialization
       /*if (e instanceof ChangeBlockEvent.Modify) {
         Nope.getInstance().getLogger().info("modify event");
-        specialSetting = Settings.FLAG_INTERACT;
+        specialSetting = SettingLibrary.FLAG_INTERACT;
       }
       else */if (e instanceof ChangeBlockEvent.Break) {
         specialSetting = Settings.FLAG_BLOCK_BREAK;
