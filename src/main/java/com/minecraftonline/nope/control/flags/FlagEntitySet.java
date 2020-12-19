@@ -37,11 +37,11 @@ import java.util.stream.Collectors;
 
 public class FlagEntitySet extends Flag<Set<EntityType>> {
   public FlagEntitySet(Set<EntityType> value) {
-    super(value, NopeTypeTokens.ENTITY_SET_TOKEN);
+    super(value, NopeTypeTokens.ENTITY_TYPE_SET_TOKEN);
   }
 
   public FlagEntitySet(Set<EntityType> value, TargetGroup group) {
-    super(value, NopeTypeTokens.ENTITY_SET_TOKEN, group);
+    super(value, NopeTypeTokens.ENTITY_TYPE_SET_TOKEN, group);
   }
 
   @Override

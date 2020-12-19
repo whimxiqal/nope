@@ -39,6 +39,7 @@ import org.spongepowered.api.world.storage.WorldProperties;
 import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 public class HostTree {
@@ -68,31 +69,31 @@ public class HostTree {
 
     @Nullable
     @SuppressWarnings("unchecked")
-    <A> A putSetting(SettingLibrary.Setting<A> setting, A value) {
+    public <A> A putSetting(SettingLibrary.Setting<A> setting, A value) {
       return (A) settings.put(setting.getInfo().getId(), value);
     }
 
     @Nullable
     @SuppressWarnings("unchecked")
-    <A> A getSetting(SettingLibrary.Setting<A> setting) {
+    public <A> A getSetting(SettingLibrary.Setting<A> setting) {
       return (A) settings.get(setting.getInfo().getId());
     }
 
-    boolean hasSetting(SettingLibrary.Setting<?> setting) {
+    public boolean hasSetting(SettingLibrary.Setting<?> setting) {
       return settings.containsKey(setting.getInfo().getId());
     }
 
-    boolean contains(Locatable spongeLocatable) {
+    public boolean contains(Locatable spongeLocatable) {
       return true;
     }
 
-    abstract String getName();
+    public abstract String getName();
   }
 
   public static class GlobalHost extends Host {
 
     @Override
-    String getName() {
+    public String getName() {
       return "__global__";
     }
   }
@@ -105,13 +106,13 @@ public class HostTree {
     }
 
     @Override
-    boolean contains(Locatable spongeLocatable) {
+    public boolean contains(Locatable spongeLocatable) {
       return super.contains(spongeLocatable)
           && spongeLocatable.getWorld().getUniqueId().equals(this.spongeWorldProperties.getUniqueId());
     }
 
     @Override
-    String getName() {
+    public String getName() {
       return spongeWorldProperties.getWorldName();
     }
   }
@@ -133,7 +134,7 @@ public class HostTree {
     private final int zmax;
 
     @Override
-    boolean contains(Locatable spongeLocatable) {
+    public boolean contains(Locatable spongeLocatable) {
       return worldHost.contains(spongeLocatable)
           && spongeLocatable.getLocation().getBlockX() >= xmin
           && spongeLocatable.getLocation().getBlockX() <= xmax
@@ -145,7 +146,7 @@ public class HostTree {
     }
 
     @Override
-    String getName() {
+    public String getName() {
       return name;
     }
   }
@@ -170,6 +171,16 @@ public class HostTree {
     WorldHost worldHost = worldHosts.get(location.getExtent().getUniqueId());
     // TODO run through data structure to find regions
     return Lists.newArrayList();
+  }
+
+  /**
+   * Gets all regions for saving.
+   * Do not use for getting a region at a location, use
+   * {@link #getRegions(Location)} for that.
+   * @return A Map of Worlds to their Regions
+   */
+  public Map<WorldHost, Region> getAllRegions() {
+    return Maps.newHashMap();
   }
 
 }
