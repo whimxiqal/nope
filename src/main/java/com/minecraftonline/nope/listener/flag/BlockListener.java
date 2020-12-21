@@ -199,16 +199,31 @@ public class BlockListener extends FlagListener {
     // Disallow notifications across region borders unless they are allowed.
     LocatableBlock locatableBlock = (LocatableBlock) e.getSource();
     Location<World> source = locatableBlock.getLocation();
+    Nope.getInstance().getLogger().info("Source: " + source);
+
+    World world = source.getExtent();
+
     Iterator<Direction> iter = e.getNeighbors().keySet().iterator();
     while (iter.hasNext()) {
-      Location<World> target = source.add(iter.next().asBlockOffset());
+      final Direction dir = iter.next();
+      Nope.getInstance().getLogger().info("Direction: " + dir);
+      Location<World> target = source.add(dir.asBlockOffset());
+      Boolean cachedAllowed = Nope.getInstance().getCacheHandler().isAllowed(world, target.getBlockPosition(), source);
+      if (cachedAllowed != null) {
+        if (!cachedAllowed) {
+          iter.remove(); // Cached to not be allowed
+        }
+        continue;
+      }
       RegionSet regionSet = Nope.getInstance().getGlobalHost().getRegions(target);
       Region region = regionSet.getHighestPriorityRegion().orElse(null);
       if (region == null) {
         continue;
       }
+      boolean shouldCancel = checkBuildFlags(regionSet, Membership.block(source.getBlockPosition()), Settings.FLAG_INTERACT);
+      Nope.getInstance().getCacheHandler().addToCache(world, target.getBlockPosition(), source, !shouldCancel); // Add to cache
 
-      if (checkBuildFlags(regionSet, Membership.block(source.getBlockPosition()), Settings.FLAG_INTERACT)) { // Interaction is best fit i think.
+      if (shouldCancel) { // Interaction is best fit i think.
         iter.remove();
       }
     }
@@ -224,6 +239,7 @@ public class BlockListener extends FlagListener {
       return;
     }
     LocatableBlock locatableBlock = (LocatableBlock) e.getSource();
+    World world = locatableBlock.getWorld();
     if (locatableBlock.getBlockState().getType() != BlockTypes.STICKY_PISTON
     && e.getContext().get(EventContextKeys.PISTON_RETRACT).isPresent()) {
       // We're retracting and not sticky, no problems
@@ -232,11 +248,21 @@ public class BlockListener extends FlagListener {
     Membership membership = Membership.block(locatableBlock.getPosition());
 
     for (Location<World> loc : e.getLocations()) {
+      Boolean cachedAllowed = Nope.getInstance().getCacheHandler().isAllowed(world, loc.getBlockPosition(), locatableBlock.getLocation());
+      if (cachedAllowed != null) {
+        if (!cachedAllowed) {
+          e.setCancelled(true);
+          return;
+        }
+        continue;
+      }
       RegionSet regionSet = Nope.getInstance().getGlobalHost().getRegions(loc);
       if (checkBuildFlags(regionSet, membership, Settings.FLAG_BLOCK_BREAK)
           || checkBuildFlags(regionSet, membership, Settings.FLAG_BLOCK_PLACE)) {
         // Could be optimised a fair amount, i.e caching regions and checking if already passed.
+
         e.setCancelled(true);
+        return;
       }
     }
   }

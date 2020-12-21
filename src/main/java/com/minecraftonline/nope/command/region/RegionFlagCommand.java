@@ -51,6 +51,7 @@ public class RegionFlagCommand extends LambdaCommandNode {
       FlagValueWrapper<?> flagValueWrapper = args.<FlagValueWrapper<?>>getOne("flag").get();
       setValue(regionWrapper.getRegion(), flagValueWrapper);
       Nope.getInstance().getRegionConfigManager().onRegionModify(regionWrapper.getWorldHost(), regionWrapper.getRegionName(), regionWrapper.getRegion(), flagValueWrapper.getSetting());
+      Nope.getInstance().getCacheHandler().markInvalid();
       src.sendMessage(Format.info("Successfully set flag " + flagValueWrapper.getSetting().getId() + ", on region " + regionWrapper.getRegionName()));
       return CommandResult.success();
     });

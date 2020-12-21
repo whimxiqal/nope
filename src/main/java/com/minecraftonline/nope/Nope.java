@@ -89,6 +89,7 @@ public class Nope {
 
   private RegionWandHandler regionWandHandler;
   private CollisionHandler collisionHandler;
+  private CacheHandler cacheHandler;
 
   private PermissionDescription overridePermission;
 
@@ -141,6 +142,7 @@ public class Nope {
     this.regionConfigManager = globalConfigManager;
     regionWandHandler = new RegionWandHandler();
     collisionHandler = new CollisionHandler();
+    cacheHandler = new CacheHandler();
   }
 
   @Listener
@@ -197,6 +199,10 @@ public class Nope {
 
   public CollisionHandler getCollisionHandler() {
     return collisionHandler;
+  }
+
+  public CacheHandler getCacheHandler() {
+    return cacheHandler;
   }
 
   public ConfigManager getRegionConfigManager() {
