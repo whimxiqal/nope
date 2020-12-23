@@ -199,14 +199,12 @@ public class BlockListener extends FlagListener {
     // Disallow notifications across region borders unless they are allowed.
     LocatableBlock locatableBlock = (LocatableBlock) e.getSource();
     Location<World> source = locatableBlock.getLocation();
-    Nope.getInstance().getLogger().info("Source: " + source);
 
     World world = source.getExtent();
 
     Iterator<Direction> iter = e.getNeighbors().keySet().iterator();
     while (iter.hasNext()) {
       final Direction dir = iter.next();
-      Nope.getInstance().getLogger().info("Direction: " + dir);
       Location<World> target = source.add(dir.asBlockOffset());
       Boolean cachedAllowed = Nope.getInstance().getCacheHandler().isAllowed(world, target.getBlockPosition(), source);
       if (cachedAllowed != null) {

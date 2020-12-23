@@ -38,7 +38,7 @@ sourceSets {
 
 archivesBaseName = 'nope'
 group = 'com.minecraftonline'
-version = '0.2.6'
+version = '0.2.7'
 description = "A region protection plugin"
 
 ext.spongeVersion = '7.2.0'
