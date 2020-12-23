@@ -26,19 +26,80 @@
 package com.minecraftonline.nope;
 
 import com.flowpowered.math.vector.Vector3d;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.gson.Gson;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import lombok.Builder;
 import lombok.Data;
 import lombok.Getter;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 
-import java.util.Set;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.lang.reflect.Modifier;
+import java.util.*;
 
 public class SettingLibrary {
 
+  private static final HashMap<String, Setting<?>> settingMap = Maps.newHashMap();
+
   private SettingLibrary() {
+  }
+
+  public static Setting<?> lookup(@Nonnull String id) throws NoSuchElementException {
+    if (settingMap.isEmpty()) load();
+    Setting<?> output = settingMap.get(id);
+    if (output == null) {
+      throw new NoSuchElementException(String.format(
+              "There is no setting with id '%s'",
+              id));
+    }
+    return output;
+  }
+
+  public static void load() {
+    Arrays.stream(SettingLibrary.class.getDeclaredFields())
+            .filter(field -> Modifier.isStatic(field.getModifiers()))
+            .filter(field -> field.getType().equals(Setting.class))
+            .forEach(field -> {
+              try {
+                Setting<?> setting = (Setting<?>) field.get(null);
+                if (settingMap.put(setting.id, setting) != null) {
+                  throw new IllegalStateException("Settings may not have the same id: " + setting.id);
+                }
+              } catch (IllegalAccessException e) {
+                e.printStackTrace();
+              }
+            });
+  }
+
+  public static JsonElement serializeSettingAssignments(Map<Setting<?>, Object> assignments) {
+    List<Map<String, Object>> settingList = Lists.newLinkedList();
+    for (Map.Entry<Setting<?>, Object> assignment : assignments.entrySet()) {
+      Setting<?> setting = assignment.getKey();
+      Map<String, Object> elem = Maps.newHashMap();
+      elem.put("id", setting.getId());
+      elem.put("description", setting.getInfo().getDescription());  // does not deserialize
+      elem.put("comment", setting.getInfo().getComment());  // does not deserialize
+      elem.put("value", setting.encodeValue(assignment.getValue()));
+      settingList.add(elem);
+    }
+    return new Gson().toJsonTree(settingList);
+  }
+
+  public static Map<Setting<?>, Object> deserializeSettingAssignments(JsonElement json) {
+    JsonArray serializedSettings = json.getAsJsonObject().get("settings").getAsJsonArray();
+    Map<Setting<?>, Object> assignments = Maps.newHashMap();
+    for (JsonElement serializedSetting : serializedSettings) {
+      JsonObject object = serializedSetting.getAsJsonObject();
+      Setting<?> setting = lookup(object.get("id").getAsString());
+      assignments.put(setting, setting.parseValue(object.get("value")));
+    }
+    return assignments;
   }
 
   @Data
@@ -53,20 +114,24 @@ public class SettingLibrary {
       MISC,
     }
 
-    protected final Info info;
+    protected final String id;
     protected final T defaultValue;
+    protected final Info info;
+
     protected final Class<T> valueType;
 
-    JsonElement serialize() {
+    public JsonElement encodeValue(Object value) {
       return new Gson().toJsonTree(defaultValue);
+    }
+
+    public Object parseValue(JsonElement json) {
+      return new Gson().fromJson(json, valueType);
     }
 
     @Builder
     @Getter
     public static class Info {
       /* Header */
-      private final String id;
-      private final String path;
       private final Category category;
 
       /* Context */
@@ -85,20 +150,20 @@ public class SettingLibrary {
 
 
   public static class BooleanSetting extends Setting<Boolean> {
-    public BooleanSetting(Info info, Boolean defaultValue) {
-      super(info, defaultValue, Boolean.class);
+    public BooleanSetting(String id, Boolean defaultValue, Info info) {
+      super(id, defaultValue, info, Boolean.class);
     }
   }
 
   public static class IntegerSetting extends Setting<Integer> {
-    public IntegerSetting(Info info, Integer defaultValue) {
-      super(info, defaultValue, Integer.class);
+    public IntegerSetting(String id, Integer defaultValue, Info info) {
+      super(id, defaultValue, info, Integer.class);
     }
   }
 
   public static class StringSetting extends Setting<String> {
-    public StringSetting(Info info, String defaultValue) {
-      super(info, defaultValue, String.class);
+    public StringSetting(String id, String defaultValue, Info info) {
+      super(id, defaultValue, info, String.class);
     }
   }
 
@@ -108,35 +173,35 @@ public class SettingLibrary {
 
 
   public static class StateSetting extends Setting<Boolean> {
-    public StateSetting(Info info, Boolean defaultValue) {
-      super(info, defaultValue, Boolean.class);
+    public StateSetting(String id, Boolean defaultValue, Info info) {
+      super(id, defaultValue, info, Boolean.class);
     }
   }
 
   public static class GameModeSetting extends Setting<GameMode> {
-    public GameModeSetting(Info info, GameMode defaultVaule) {
-      super(info, defaultVaule, GameMode.class);
+    public GameModeSetting(String id, GameMode defaultVaule, Info info) {
+      super(id, defaultVaule, info, GameMode.class);
     }
   }
 
   public static class StringSetSetting extends Setting<Set<String>> {
     @SuppressWarnings("unchecked")
-    public StringSetSetting(Info info, Set<String> defaultValue) {
-      super(info, defaultValue, (Class<Set<String>>) (Class<?>) Set.class);
+    public StringSetSetting(String id, Set<String> defaultValue, Info info) {
+      super(id, defaultValue, info, (Class<Set<String>>) (Class<?>) Set.class);
     }
   }
 
 
   public static class EntitySetSetting extends Setting<Set<Entity>> {
     @SuppressWarnings("unchecked")
-    public EntitySetSetting(Info info, Set<Entity> defaultValue) {
-      super(info, defaultValue, (Class<Set<Entity>>) (Class<?>) Set.class);
+    public EntitySetSetting(String id, Info info, Set<Entity> defaultValue) {
+      super(id, defaultValue, info, (Class<Set<Entity>>) (Class<?>) Set.class);
     }
   }
 
   public static class Vector3DSetting extends Setting<Vector3d> {
-    public Vector3DSetting(Info info, Vector3d defaultValue) {
-      super(info, defaultValue, Vector3d.class);
+    public Vector3DSetting(String id, Info info, Vector3d defaultValue) {
+      super(id, defaultValue, info, Vector3d.class);
     }
   }
 
@@ -146,10 +211,9 @@ public class SettingLibrary {
 
 
   public static final BooleanSetting BUILD_PERMISSIONS = new BooleanSetting(
-      Setting.Info.builder()
-          .id("build-permission-nodes-enable")
-          .implemented(false)
-          .build(),
-      false);
-
+          "build-permission-nodes-enable",
+          false,
+          Setting.Info.builder()
+                  .implemented(false)
+                  .build());
 }

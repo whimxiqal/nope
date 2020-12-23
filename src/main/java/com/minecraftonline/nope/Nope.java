@@ -31,11 +31,13 @@ import com.minecraftonline.nope.config.configurate.GlobalConfigurateConfigManage
 import com.minecraftonline.nope.config.configurate.hocon.HoconGlobalConfigurateConfigManager;
 import com.minecraftonline.nope.control.GlobalHost;
 import com.minecraftonline.nope.control.Settings;
+import com.minecraftonline.nope.host.HostTree;
+import com.minecraftonline.nope.host.YamlHostTreeStorage;
 import com.minecraftonline.nope.key.NopeKeys;
 import com.minecraftonline.nope.key.regionwand.ImmutableRegionWandManipulator;
 import com.minecraftonline.nope.key.regionwand.RegionWandManipulator;
 import com.minecraftonline.nope.listener.flag.FlagListeners;
-import com.minecraftonline.nope.structures.HostTree;
+import com.minecraftonline.nope.host.HostTreeImpl;
 import com.minecraftonline.nope.util.Extra;
 import org.slf4j.Logger;
 import org.spongepowered.api.Sponge;
@@ -49,7 +51,6 @@ import org.spongepowered.api.event.game.state.GameInitializationEvent;
 import org.spongepowered.api.event.game.state.GamePreInitializationEvent;
 import org.spongepowered.api.event.game.state.GameStartedServerEvent;
 import org.spongepowered.api.event.game.state.GameStoppingServerEvent;
-import org.spongepowered.api.event.world.LoadWorldEvent;
 import org.spongepowered.api.plugin.Dependency;
 import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.plugin.PluginContainer;
@@ -143,7 +144,10 @@ public class Nope {
 //    regionWandHandler = new RegionWandHandler();
 //    collisionHandler = new CollisionHandler();
 
-    hostTree = HostTree.up();
+    hostTree = new HostTreeImpl(new YamlHostTreeStorage(),
+            "__global__",
+            s -> "__world_" + s + "__",
+            "__world_.*__");
   }
 
   @Listener
@@ -191,6 +195,15 @@ public class Nope {
 
   public CollisionHandler getCollisionHandler() {
     return collisionHandler;
+  }
+
+  @Deprecated
+  public GlobalHost getGlobalHost() {
+    return new GlobalHost();
+  }
+
+  public HostTree getHostTree() {
+    return hostTree;
   }
 
   public ConfigManager getRegionConfigManager() {
