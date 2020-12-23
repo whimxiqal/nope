@@ -123,7 +123,7 @@ public class WorldConfigurateConfigManager extends ConfigurateConfigManager {
     }
   }
 
-  private <T> void setRegionValue(SettingLibrary.Setting<T> setting, HostTree.Region region, ConfigurationNode node) {
+  /*private <T> void setRegionValue(SettingLibrary.Setting<T> setting, HostTree.Region region, ConfigurationNode node) {
     T value = region.getSetting(setting);
     JsonElement jsonElement = setting.serialize(value);
     try {
@@ -131,7 +131,7 @@ public class WorldConfigurateConfigManager extends ConfigurateConfigManager {
     } catch (ObjectMappingException e) {
       Nope.getInstance().getLogger().error("Error setting Setting '" + setting.getInfo().getId() + "' in region '" + region.getName() + "', . Skipping save", e);
     }
-  }
+  }*/
 
   @Override
   public void removeRegion(UUID worldUUID, String region) {

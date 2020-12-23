@@ -29,6 +29,11 @@ import java.util.Collection;
 
 public class YamlHostTreeStorage implements HostTreeImpl.Storage {
   @Override
+  public StorageConnection open() {
+    return null; // TODO implement
+  }
+
+  @Override
   public HostTreeImpl.GlobalHost readGlobalHost(Host.HostSerializer<HostTreeImpl.GlobalHost> serializer) throws HostParseException {
     return null; // TODO implement
   }

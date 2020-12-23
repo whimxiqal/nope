@@ -213,4 +213,8 @@ public class Nope {
   public boolean canOverrideRegion(Subject subject) {
     return subject.hasPermission(this.overridePermission.getId());
   }
+
+  public Path getConfigDir() {
+    return this.configDir;
+  }
 }
