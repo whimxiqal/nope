@@ -34,19 +34,16 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import com.minecraftonline.nope.util.NopeTypeTokens;
-import com.google.gson.JsonObject;
 import lombok.Builder;
 import lombok.Data;
 import lombok.Getter;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 
 import java.util.HashSet;
 import java.util.Set;
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.lang.reflect.Modifier;
 import java.util.*;
 
@@ -127,12 +124,30 @@ public class SettingLibrary {
 
     protected final Class<T> valueType;
 
-    public JsonElement encodeValue(Object value) {
-      return new Gson().toJsonTree(defaultValue);
+    public final JsonElement encodeValue(Object value) {
+      return encodeGenerifiedValue(castValue(value));
     }
 
-    public Object parseValue(JsonElement json) {
+    public JsonElement encodeGenerifiedValue(T value) {
+      return new Gson().toJsonTree(value);
+    }
+
+    public final Object parseValue(JsonElement json) {
+      return parseGenerifiedValue(json);
+    }
+
+    public T parseGenerifiedValue(JsonElement json) {
       return new Gson().fromJson(json, valueType);
+    }
+
+    public final T castValue(Object object) {
+      if (!valueType.isInstance(object)) {
+        throw new IllegalArgumentException(String.format(
+                "input %s must be of type %s",
+                object.getClass().getName(),
+                valueType.getName()));
+      }
+      return valueType.cast(object);
     }
 
     @Builder
@@ -160,32 +175,17 @@ public class SettingLibrary {
     public BooleanSetting(String id, Boolean defaultValue, Info info) {
       super(id, defaultValue, info, Boolean.class);
     }
-
-    @Override
-    public Boolean deserialize(JsonElement jsonElement) {
-      return jsonElement.getAsBoolean();
-    }
   }
 
   public static class IntegerSetting extends Setting<Integer> {
     public IntegerSetting(String id, Integer defaultValue, Info info) {
       super(id, defaultValue, info, Integer.class);
     }
-
-    @Override
-    public Integer deserialize(JsonElement jsonElement) {
-      return jsonElement.getAsInt();
-    }
   }
 
   public static class StringSetting extends Setting<String> {
     public StringSetting(String id, String defaultValue, Info info) {
       super(id, defaultValue, info, String.class);
-    }
-
-    @Override
-    public String deserialize(JsonElement jsonElement) {
-      return jsonElement.getAsString();
     }
   }
 
@@ -200,12 +200,12 @@ public class SettingLibrary {
     }
 
     @Override
-    public JsonElement serialize(Boolean value) {
+    public JsonElement encodeGenerifiedValue(Boolean value) {
       return new JsonPrimitive(value ? "allow" : "deny");
     }
 
     @Override
-    public Boolean deserialize(JsonElement jsonElement) {
+    public Boolean parseGenerifiedValue(JsonElement jsonElement) {
       final String s = jsonElement.getAsString();
       switch (s) {
         case "allow": return true;
@@ -216,36 +216,36 @@ public class SettingLibrary {
   }
 
   public static class GameModeSetting extends Setting<GameMode> {
-    public GameModeSetting(Info info, GameMode defaultValue) {
-      super(info, defaultValue, GameMode.class);
+    public GameModeSetting(String id, GameMode defaultValue, Info info) {
+      super(id, defaultValue, info, GameMode.class);
     }
 
     @Override
-    public JsonElement serialize(GameMode value) {
-      return new JsonPrimitive(value.getId());
+    public JsonElement encodeGenerifiedValue(GameMode value) {
+      return new JsonPrimitive(castValue(value).getId());
     }
 
     @Override
-    public GameMode deserialize(JsonElement jsonElement) {
+    public GameMode parseGenerifiedValue(JsonElement jsonElement) {
       final String s = jsonElement.getAsString();
-      Sponge.getRegistry().getType(GameMode.class, s)
+      return Sponge.getRegistry().getType(GameMode.class, s)
           .orElseThrow(() -> new IllegalStateException("Invalid GameMode String. Got: " + s));
     }
   }
 
   public static class StringSetSetting extends Setting<Set<String>> {
     @SuppressWarnings("unchecked")
-    public StringSetSetting(Info info, Set<String> defaultValue) {
-      super(info, defaultValue, (Class<Set<String>>) NopeTypeTokens.STRING_SET_TOKEN.getRawType());
+    public StringSetSetting(String id, Set<String> defaultValue, Info info) {
+      super(id, defaultValue, info, (Class<Set<String>>) NopeTypeTokens.STRING_SET_TOKEN.getRawType());
     }
 
     @Override
-    public JsonElement serialize(Set<String> value) {
+    public JsonElement encodeGenerifiedValue(Set<String> value) {
       return new Gson().toJsonTree(value, NopeTypeTokens.STRING_SET_TOKEN.getType());
     }
 
     @Override
-    public Set<String> deserialize(JsonElement jsonElement) {
+    public Set<String> parseGenerifiedValue(JsonElement jsonElement) {
       final Set<String> set = new HashSet<>();
       jsonElement.getAsJsonArray().forEach(element -> set.add(element.getAsString()));
       return set;
@@ -255,20 +255,21 @@ public class SettingLibrary {
 
   public static class EntityTypeSetSetting extends Setting<Set<EntityType>> {
     @SuppressWarnings("unchecked")
-    public EntityTypeSetSetting(Info info, Set<EntityType> defaultValue) {
-      super(info, defaultValue, (Class<Set<EntityType>>) NopeTypeTokens.ENTITY_TYPE_SET_TOKEN.getRawType());
+    public EntityTypeSetSetting(String id, Set<EntityType> defaultValue, Info info) {
+      super(id, defaultValue, info, (Class<Set<EntityType>>) NopeTypeTokens.ENTITY_TYPE_SET_TOKEN.getRawType());
     }
 
     @Override
-    public JsonElement serialize(Set<EntityType> value) {
+    public JsonElement encodeGenerifiedValue(Set<EntityType> value) {
       final JsonArray jsonArray = new JsonArray();
       for (EntityType entityType : value) {
         jsonArray.add(new JsonPrimitive(entityType.getId()));
       }
+      return jsonArray;
     }
 
     @Override
-    public Set<EntityType> deserialize(JsonElement jsonElement) {
+    public Set<EntityType> parseGenerifiedValue(JsonElement jsonElement) {
       final Set<EntityType> set = new HashSet<>();
       for (JsonElement element : jsonElement.getAsJsonArray()) {
         final String s = element.getAsString();
@@ -286,7 +287,7 @@ public class SettingLibrary {
     }
 
     @Override
-    public JsonElement serialize(Vector3d value) {
+    public JsonElement encodeGenerifiedValue(Vector3d value) {
       final JsonObject jsonObject = new JsonObject();
       jsonObject.addProperty("x", value.getX());
       jsonObject.addProperty("y", value.getY());
@@ -295,7 +296,7 @@ public class SettingLibrary {
     }
 
     @Override
-    public Vector3d deserialize(JsonElement jsonElement) {
+    public Vector3d parseGenerifiedValue(JsonElement jsonElement) {
       final JsonObject jsonObject = jsonElement.getAsJsonObject();
       return Vector3d.from(
           jsonObject.get("x").getAsDouble(),

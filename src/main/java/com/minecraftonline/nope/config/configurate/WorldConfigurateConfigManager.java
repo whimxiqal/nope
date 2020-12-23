@@ -35,7 +35,6 @@ import com.minecraftonline.nope.control.RegularRegion;
 import com.minecraftonline.nope.control.Setting;
 import com.minecraftonline.nope.control.Settings;
 import com.minecraftonline.nope.control.WorldHost;
-import com.minecraftonline.nope.structures.HostTree;
 import com.minecraftonline.nope.util.NopeTypeTokens;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
