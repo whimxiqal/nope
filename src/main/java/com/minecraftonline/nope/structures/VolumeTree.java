@@ -28,8 +28,8 @@ package com.minecraftonline.nope.structures;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 
 import java.util.*;
@@ -211,18 +211,58 @@ public class VolumeTree<S, T extends VolumeTree.Volume> {
   }
 
   public interface Volume {
+
+    /**
+     * Get minimum X value, inclusive.
+     *
+     * @return x min
+     */
     int xMin();
 
+    /**
+     * Get maximum X value, inclusive.
+     *
+     * @return x max
+     */
     int xMax();
 
+    /**
+     * Get minimum Y value, inclusive.
+     *
+     * @return y min
+     */
     int yMin();
 
+    /**
+     * Get maximum Y value, inclusive.
+     *
+     * @return y max
+     */
     int yMax();
 
+    /**
+     * Get minimum Z value, inclusive.
+     *
+     * @return z min
+     */
     int zMin();
 
+    /**
+     * Get maximum Z value, inclusive.
+     *
+     * @return z max
+     */
     int zMax();
 
+    /**
+     * Check if this volume contains a point, given three
+     * cartesian coordinates.
+     *
+     * @param x x value
+     * @param y y value
+     * @param z z value
+     * @return true if the point is contained
+     */
     default boolean contains(int x, int y, int z) {
       return x >= this.xMin()
               && x <= this.xMax()
@@ -232,6 +272,13 @@ public class VolumeTree<S, T extends VolumeTree.Volume> {
               && z <= this.zMax();
     }
 
+    /**
+     * Check if this volume intersects with another volume
+     * or shares a face.
+     *
+     * @param other another volume
+     * @return true if intersects
+     */
     default boolean intersects(Volume other) {
       return (this.xMin() <= other.xMax() && this.xMax() >= other.xMin()) &&
               (this.yMin() <= other.yMax() && this.yMax() >= other.yMin()) &&
@@ -251,6 +298,7 @@ public class VolumeTree<S, T extends VolumeTree.Volume> {
     }
   }
 
+  @EqualsAndHashCode(callSuper = false)
   @Data
   private abstract class DimensionDivider extends Node {
     protected final int divider;
@@ -262,6 +310,7 @@ public class VolumeTree<S, T extends VolumeTree.Volume> {
     public DimensionDividerXMin(int divider, Node left, Node right) {
       super(divider, left, right);
     }
+
     @Override
     Set<S> findVolumes(int x, int y, int z) {
       if (x < divider) {
@@ -276,6 +325,7 @@ public class VolumeTree<S, T extends VolumeTree.Volume> {
     public DimensionDividerXMax(int divider, Node left, Node right) {
       super(divider, left, right);
     }
+
     @Override
     Set<S> findVolumes(int x, int y, int z) {
       if (x <= divider) {
@@ -290,6 +340,7 @@ public class VolumeTree<S, T extends VolumeTree.Volume> {
     public DimensionDividerZMin(int divider, Node left, Node right) {
       super(divider, left, right);
     }
+
     @Override
     Set<S> findVolumes(int x, int y, int z) {
       if (z < divider) {
@@ -304,6 +355,7 @@ public class VolumeTree<S, T extends VolumeTree.Volume> {
     public DimensionDividerZMax(int divider, Node left, Node right) {
       super(divider, left, right);
     }
+
     @Override
     Set<S> findVolumes(int x, int y, int z) {
       if (z <= divider) {

@@ -27,7 +27,6 @@ package com.minecraftonline.nope.host;
 
 import com.flowpowered.math.vector.Vector3i;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.minecraftonline.nope.SettingLibrary;
@@ -49,7 +48,7 @@ public class HostTreeImpl implements HostTree {
   private GlobalHost globalHost = new GlobalHost();
   private final HashMap<UUID, WorldHost> worldHosts = Maps.newHashMap();
 
-  private final Set<String> regionNames = Sets.newHashSet();
+  private final Map<String, UUID> regionToWorld = Maps.newHashMap();
 
   private final Storage storage;
   private final String globalHostName;
@@ -195,20 +194,8 @@ public class HostTreeImpl implements HostTree {
    * space and it stores Setting data for handling and manipulating Sponge events
    * based in its specific configuration.
    */
-  public class Region extends Host implements VolumeTree.Volume {
-    /**
-     * Must be unique in a HostTree.
-     */
-    private final String name;
+  public class Region extends VolumeHost {
 
-    private final int xmin;
-    private final int xmax;
-
-    private final int ymin;
-    private final int ymax;
-
-    private final int zmin;
-    private final int zmax;
 
     /**
      * Default constructor.
@@ -222,22 +209,10 @@ public class HostTreeImpl implements HostTree {
      * @param zmax end point of z range, inclusive
      */
     public Region(UUID worldUuid, String name, int xmin, int xmax, int ymin, int ymax, int zmin, int zmax) {
-      super(name);
+      super(name, xmin, xmax, ymin, ymax, zmin, zmax);
       if (!worldHosts.containsKey(worldUuid)) {
         throw new IllegalArgumentException("No world exists with UUID " + worldUuid.toString());
       }
-
-      if (xmin > xmax || ymin > ymax || zmin > zmax) {
-        throw new IllegalArgumentException("Minimum values must be less than or equal to maximum values");
-      }
-      this.name = name;
-      this.xmin = xmin;
-      this.xmax = xmax;
-      this.ymin = ymin;
-      this.ymax = ymax;
-      this.zmin = zmin;
-      this.zmax = zmax;
-
       setParent(worldHosts.get(worldUuid));
       setPriority(2);
     }
@@ -262,47 +237,12 @@ public class HostTreeImpl implements HostTree {
 
     @Override
     boolean encompasses(Location<World> spongeLocation) {
-      return spongeLocation.getBlockX() >= xmin
-              && spongeLocation.getBlockX() <= xmax
-              && spongeLocation.getBlockY() >= ymin
-              && spongeLocation.getBlockY() <= ymax
-              && spongeLocation.getBlockZ() >= zmin
-              && spongeLocation.getBlockZ() <= zmax;
-    }
-
-    @Override
-    public String getName() {
-      return name;
-    }
-
-    @Override
-    public int xMin() {
-      return xmin;
-    }
-
-    @Override
-    public int xMax() {
-      return xmax;
-    }
-
-    @Override
-    public int yMin() {
-      return ymin;
-    }
-
-    @Override
-    public int yMax() {
-      return ymax;
-    }
-
-    @Override
-    public int zMin() {
-      return zmin;
-    }
-
-    @Override
-    public int zMax() {
-      return zmax;
+      return spongeLocation.getBlockX() >= xMin()
+              && spongeLocation.getBlockX() <= xMax()
+              && spongeLocation.getBlockY() >= yMin()
+              && spongeLocation.getBlockY() <= yMax()
+              && spongeLocation.getBlockZ() >= zMin()
+              && spongeLocation.getBlockZ() <= zMax();
     }
 
   }
@@ -322,12 +262,12 @@ public class HostTreeImpl implements HostTree {
                       ((WorldHost) host.getParent()).worldUuid.toString()))));
       serializedHost.put("priority", host.getPriority());
       Map<String, Integer> volume = Maps.newHashMap();
-      volume.put("xmin", host.xmin);
-      volume.put("xmax", host.xmax);
-      volume.put("ymin", host.ymin);
-      volume.put("ymax", host.ymax);
-      volume.put("zmin", host.zmin);
-      volume.put("zmax", host.zmax);
+      volume.put("xmin", host.xMin());
+      volume.put("xmax", host.xMax());
+      volume.put("ymin", host.yMin());
+      volume.put("ymax", host.yMax());
+      volume.put("zmin", host.zMin());
+      volume.put("zmax", host.zMax());
       serializedHost.put("volume", volume);
 
       return new Gson().toJsonTree(serializedHost);
@@ -437,29 +377,24 @@ public class HostTreeImpl implements HostTree {
               region.getPriority()));
     }
     worldHosts.get(worldUuid).regionTree.push(name, region);  // Should return null
-    regionNames.add(name);
+    regionToWorld.put(name, worldUuid);
     return region;
   }
 
   @Nonnull
   @Override
-  public Region removeRegion(UUID worldUuid, String name) {
+  public Region removeRegion(String name) {
     if (!hasRegion(name)) {
       throw new IllegalArgumentException(String.format(
-              "Region deletion failed because name %s does not exist in world %s",
-              name,
-              Sponge.getServer()
-                      .getAllWorldProperties()
-                      .stream().filter(prop -> prop.getUniqueId().equals(worldUuid))
-                      .findFirst().map(WorldProperties::getWorldName)
-                      .orElse("unknown")));
+              "Region deletion failed because name %s does not exist",
+              name));
     }
-    return worldHosts.get(worldUuid).regionTree.remove(name);
+    return worldHosts.get(regionToWorld.get(name)).regionTree.remove(name);
   }
 
   @Override
   public boolean hasRegion(String name) {
-    return regionNames.contains(name);
+    return regionToWorld.containsKey(name);
   }
 
   public <V> V lookup(SettingLibrary.Setting<V> setting, Location<World> location) {

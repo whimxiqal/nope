@@ -34,7 +34,21 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.UUID;
 
+/**
+ * A generic interface for all Host interaction. Generally, in the
+ * context of Nope, this means managing all data which has to
+ */
 public interface HostTree {
+
+  /**
+   * Load all data from some specified storage.
+   */
+  void load();
+
+  /**
+   * Save all data to some specified storage.
+   */
+  void save();
 
   @Nonnull
   Host getGlobalHost();
@@ -43,7 +57,7 @@ public interface HostTree {
   Host getWorldHost(UUID worldUuid);
 
   @Nullable
-  Host getRegion(String name);
+  VolumeHost getRegion(String name);
 
   /**
    * Add a region to the HostTree with the given parameters.
@@ -57,7 +71,9 @@ public interface HostTree {
    * @param priority  a priority level. The higher the priority, the larger the precedence.
    *                  Two intersecting regions may not have the same priority level.
    * @return the created region
-   * @throws IllegalArgumentException if the inputs will lead to an invalid HostTree state.
+   * @throws IllegalArgumentException if the inputs will lead to an invalid HostTree state,
+   *                                  like if the name is not unique or the priority is the same
+   *                                  as an overlapping region
    */
   @Nullable
   Host addRegion(UUID worldUuid, String name, Vector3i pos1, Vector3i pos2, int priority)
@@ -72,7 +88,7 @@ public interface HostTree {
    * @return the removed region
    */
   @Nullable
-  Host removeRegion(UUID worldUuid, String name);
+  Host removeRegion(String name);
 
   /**
    * Check if a given world has a region called a given name.
