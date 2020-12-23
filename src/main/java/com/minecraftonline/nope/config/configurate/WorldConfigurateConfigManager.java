@@ -25,7 +25,9 @@
 package com.minecraftonline.nope.config.configurate;
 
 import com.google.common.reflect.TypeToken;
+import com.google.gson.JsonElement;
 import com.minecraftonline.nope.Nope;
+import com.minecraftonline.nope.SettingLibrary;
 import com.minecraftonline.nope.config.configurate.supplier.ConfigLoaderSupplier;
 import com.minecraftonline.nope.control.GlobalRegion;
 import com.minecraftonline.nope.control.Region;
@@ -33,7 +35,11 @@ import com.minecraftonline.nope.control.RegularRegion;
 import com.minecraftonline.nope.control.Setting;
 import com.minecraftonline.nope.control.Settings;
 import com.minecraftonline.nope.control.WorldHost;
+import com.minecraftonline.nope.structures.HostTree;
+import com.minecraftonline.nope.util.NopeTypeTokens;
+import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
+import ninja.leaping.configurate.objectmapping.ObjectMappingException;
 import org.spongepowered.api.world.World;
 
 import java.io.Serializable;
@@ -42,24 +48,19 @@ import java.util.Map;
 import java.util.UUID;
 
 public class WorldConfigurateConfigManager extends ConfigurateConfigManager {
-  private boolean sqlEnabled;
   private UUID world;
   private WorldHost worldHost;
   //private Map<String, Region> regionConfig = new HashMap<>();
   private ConfigContainer<CommentedConfigurationNode> regions;
 
-  public WorldConfigurateConfigManager(Path configDir, World world, ConfigLoaderSupplier configLoaderSupplier, boolean sqlEnabled) {
+  public WorldConfigurateConfigManager(Path configDir, World world, ConfigLoaderSupplier configLoaderSupplier) {
     super(configDir.resolve(world.getName()), "config", configLoaderSupplier);
     this.world = world.getUniqueId();
-    this.sqlEnabled = sqlEnabled;
   }
 
   @Override
   public void loadExtra() {
     this.worldHost = new WorldHost(world);
-    if (sqlEnabled) {
-      return;
-    }
     Path regions = this.configDir.resolve("regions" + CONFIG_FILE_EXTENSION);
     loadRegions(regions);
   }
@@ -67,9 +68,6 @@ public class WorldConfigurateConfigManager extends ConfigurateConfigManager {
   @Override
   public void saveExtra() {
     saveRegions();
-    if (sqlEnabled) {
-      return;
-    }
     this.regions.save();
   }
 
@@ -120,7 +118,19 @@ public class WorldConfigurateConfigManager extends ConfigurateConfigManager {
         // instead of not removing it.
         Object value = entry.getValue().getSettingValue(setting).orElse(null);
         setting.getConfigurationPath().ifPresent(confPath -> ConfigContainer.setNodeValue(confPath, value, regionNode));
+        // TODO: Uncomment line below when we have a way to get all settings.
+        //setRegionValue(setting, region, regionNode.getNode((Object[])setting.getInfo().getPath().split("\\."));
       }
+    }
+  }
+
+  private <T> void setRegionValue(SettingLibrary.Setting<T> setting, HostTree.Region region, ConfigurationNode node) {
+    T value = region.getSetting(setting);
+    JsonElement jsonElement = setting.serialize(value);
+    try {
+      node.setValue(NopeTypeTokens.JSON_ELEMENT_TYPE_TOKEN, jsonElement);
+    } catch (ObjectMappingException e) {
+      Nope.getInstance().getLogger().error("Error setting Setting '" + setting.getInfo().getId() + "' in region '" + region.getName() + "', . Skipping save", e);
     }
   }
 

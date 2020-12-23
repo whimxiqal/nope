@@ -27,8 +27,10 @@ package com.minecraftonline.nope.config.configurate;
 import com.flowpowered.math.vector.Vector3d;
 import com.flowpowered.math.vector.Vector3i;
 import com.google.common.reflect.TypeToken;
+import com.google.gson.JsonElement;
 import com.minecraftonline.nope.config.ConfigManager;
 import com.minecraftonline.nope.config.configurate.hocon.HoconGlobalConfigurateConfigManager;
+import com.minecraftonline.nope.config.configurate.serializer.JsonElementSerializer;
 import com.minecraftonline.nope.config.configurate.serializer.TargetSetSerializer;
 import com.minecraftonline.nope.config.configurate.serializer.Vector3dSerializer;
 import com.minecraftonline.nope.config.configurate.serializer.Vector3iSerializer;
@@ -62,7 +64,6 @@ import java.util.UUID;
  * is suggested
  */
 public class GlobalConfigurateConfigManager extends ConfigurateConfigManager implements ConfigManager {
-  private boolean sqlEnabled;
   private Map<UUID, WorldConfigurateConfigManager> worldConfigs = new HashMap<>();
 
   public GlobalConfigurateConfigManager(Path configDir, ConfigLoaderSupplier configLoaderSupplier) {
@@ -71,10 +72,8 @@ public class GlobalConfigurateConfigManager extends ConfigurateConfigManager imp
 
   @Override
   public void loadExtra() {
-    Boolean sqlEnabled = getConfig().getNodeValue(Settings.SQL_ENABLE.getConfigurationPath().get(), TypeToken.of(Settings.SQL_ENABLE.getTypeClass()));
-    this.sqlEnabled = sqlEnabled == null ? Settings.SQL_ENABLE.getDefaultValue() : sqlEnabled;
     for (World world : Sponge.getServer().getWorlds()) {
-      WorldConfigurateConfigManager worldConfigManager = new WorldConfigurateConfigManager(configDir, world, configLoaderSupplier, this.sqlEnabled);
+      WorldConfigurateConfigManager worldConfigManager = new WorldConfigurateConfigManager(configDir, world, configLoaderSupplier);
       worldConfigManager.loadAll();
       worldConfigs.put(world.getUniqueId(), worldConfigManager);
     }
@@ -96,7 +95,7 @@ public class GlobalConfigurateConfigManager extends ConfigurateConfigManager imp
   @Nullable
   public WorldHost loadWorld(World world) {
     return worldConfigs.computeIfAbsent(world.getUniqueId(), k -> {
-      WorldConfigurateConfigManager worldConfigManager = new WorldConfigurateConfigManager(configDir, world, configLoaderSupplier, this.sqlEnabled);
+      WorldConfigurateConfigManager worldConfigManager = new WorldConfigurateConfigManager(configDir, world, configLoaderSupplier);
       worldConfigManager.loadAll();
       this.worldConfigs.put(world.getUniqueId(), worldConfigManager);
       return worldConfigManager;
@@ -115,10 +114,6 @@ public class GlobalConfigurateConfigManager extends ConfigurateConfigManager imp
       globalHost.addWorld(entry.getKey(), worldHost);
       // Region uses different method of filling
     }
-  }
-
-  public boolean isSqlEnabled() {
-    return this.sqlEnabled;
   }
 
   /**
@@ -156,10 +151,11 @@ public class GlobalConfigurateConfigManager extends ConfigurateConfigManager imp
       return typeSerializerCollection;
     }
     typeSerializerCollection = ConfigurationOptions.defaults().getSerializers().newChild()
-        .registerType(TypeToken.of(TargetSet.class), new TargetSetSerializer())
-        .registerType(TypeToken.of(Vector3d.class), new Vector3dSerializer())
-        .registerType(TypeToken.of(Vector3i.class), new Vector3iSerializer())
-        .registerType(NopeTypeTokens.FLAG_RAW_TOKEN, new FlagSerializer());
+        .register(NopeTypeTokens.JSON_ELEMENT_TYPE_TOKEN, new JsonElementSerializer());
+        //.registerType(TypeToken.of(TargetSet.class), new TargetSetSerializer())
+        //.registerType(TypeToken.of(Vector3d.class), new Vector3dSerializer())
+        //.registerType(TypeToken.of(Vector3i.class), new Vector3iSerializer())
+        //.registerType(NopeTypeTokens.FLAG_RAW_TOKEN, new FlagSerializer());
         /*.registerType(TypeToken.of(FlagBoolean.class), new FlagBooleanSerializer())
         .registerType(TypeToken.of(FlagDouble.class), new FlagDoubleSerializer())
         .registerType(TypeToken.of(FlagEntitySet.class), new FlagEntitySetSerializer())

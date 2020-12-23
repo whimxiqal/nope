@@ -25,6 +25,8 @@
 package com.minecraftonline.nope.util;
 
 import com.google.common.reflect.TypeToken;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonPrimitive;
 import com.minecraftonline.nope.control.flags.Flag;
 import org.spongepowered.api.entity.EntityType;
 
@@ -32,7 +34,13 @@ import java.util.Set;
 
 @SuppressWarnings("UnstableApiUsage")
 public class NopeTypeTokens {
+
+  private NopeTypeTokens() {}
+
   public static final TypeToken<Flag> FLAG_RAW_TOKEN = new TypeToken<Flag>() {private static final long serialVersionUID = -1;};
   public static final TypeToken<Set<String>> STRING_SET_TOKEN = new TypeToken<Set<String>>() {private static final long serialVersionUID = -1;};
-  public static final TypeToken<Set<EntityType>> ENTITY_SET_TOKEN = new TypeToken<Set<EntityType>>() {private static final long serialVersionUID = -1;};
+  public static final TypeToken<Set<EntityType>> ENTITY_TYPE_SET_TOKEN = new TypeToken<Set<EntityType>>() {private static final long serialVersionUID = -1;};
+
+  public static final TypeToken<JsonElement> JSON_ELEMENT_TYPE_TOKEN = new TypeToken<JsonElement>() {};
+  public static final TypeToken<JsonPrimitive> JSON_PRIMITIVE_TYPE_TOKEN = new TypeToken<JsonPrimitive>() {};
 }
