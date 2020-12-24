@@ -33,75 +33,114 @@ import ninja.leaping.configurate.ConfigurationOptions;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
 import ninja.leaping.configurate.objectmapping.serialize.TypeSerializerCollection;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.util.Collection;
 
 public class HoconHostTreeStorage implements HostTreeImpl.Storage {
 
-  private static final String CONFIG_FILENAME = "regions.conf";
-  private final HoconConfigurationLoader loader;
+  private static final String REGION_CONFIG_FILENAME = "regions.conf";
+  private /* final */ HoconConfigurationLoader loader;
 
   public HoconHostTreeStorage() {
-    final TypeSerializerCollection typeSerializerCollection = TypeSerializerCollection.defaults().newChild()
-        .register(NopeTypeTokens.JSON_ELEMENT_TYPE_TOKEN, new JsonElementSerializer());
-
-    ConfigurationOptions options = ConfigurationOptions.defaults().withSerializers(typeSerializerCollection);
-
-    this.loader = HoconConfigurationLoader.builder()
-        .setDefaultOptions(options)
-        .setPath(Nope.getInstance().getConfigDir().resolve(CONFIG_FILENAME))
-        .build();
+    // These method calls threw errors, including the loader?
+//    final TypeSerializerCollection typeSerializerCollection = TypeSerializerCollection.defaults().newChild()
+//            .register(NopeTypeTokens.JSON_ELEMENT_TYPE_TOKEN, new JsonElementSerializer());
+//
+//    ConfigurationOptions options = ConfigurationOptions.defaults().withSerializers(typeSerializerCollection);
+//
+//    this.loader = HoconConfigurationLoader.builder()
+//            .setDefaultOptions(options)
+//            .setPath(Nope.getInstance().getConfigDir().resolve(REGION_CONFIG_FILENAME))
+//            .build();
   }
 
-  public StorageConnection open() {
+  public Connection open() {
     try {
-      return new HoconStorageConnection(loader.load());
+      return new Connection(loader.load());
     } catch (IOException e) {
       throw new HostParseException("Failed to save config file!", e);
     }
   }
 
-  public static class HoconStorageConnection implements StorageConnection {
+  @Override
+  public HostTreeImpl.GlobalHost readGlobalHost(Host.HostSerializer<HostTreeImpl.GlobalHost> serializer) throws HostParseException {
+    // TODO implement
+    ConfigurationNode globalHostConfigNode = null; // TODO get globalHostConfigNode?
+    try (Connection connection = new Connection(globalHostConfigNode)) {
+      // return GlobalHost
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+    return null;
+  }
 
+  @Override
+  public Collection<HostTreeImpl.WorldHost> readWorldHosts(Host.HostSerializer<HostTreeImpl.WorldHost> serializer) throws HostParseException {
+    // TODO implement
+    ConfigurationNode worldHostConfigNode = null; // TODO get worldHostConfigNode?
+    try (Connection connection = new Connection(worldHostConfigNode)) {
+      // return collection of WorldHosts
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+    return null;
+  }
+
+  @Override
+  public Collection<HostTreeImpl.Region> readRegions(Collection<HostTreeImpl.WorldHost> parents, Host.HostSerializer<HostTreeImpl.Region> serializer) throws HostParseException {
+    // TODO implement
+    ConfigurationNode regionConfigNode = null; // TODO get regionConfigNode?
+    try (Connection connection = new Connection(regionConfigNode)) {
+      // return collection of regions
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+    return null;
+  }
+
+  @Override
+  public void writeGlobalHost(HostTreeImpl.GlobalHost globalHost, Host.HostSerializer<HostTreeImpl.GlobalHost> serializer) {
+    // TODO implement
+    ConfigurationNode globalHostConfigNode = null; // TODO get globalHostConfigNode?
+    try (Connection connection = new Connection(globalHostConfigNode)) {
+      // write GlobalHost
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+  }
+
+  @Override
+  public void writeWorldHosts(Collection<HostTreeImpl.WorldHost> worldHosts, Host.HostSerializer<HostTreeImpl.WorldHost> serializer) {
+    // TODO implement
+    ConfigurationNode worldHostConfigNode = null; // TODO get worldHostConfigNode?
+    try (Connection connection = new Connection(worldHostConfigNode)) {
+      // write collection of WorldHosts
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+  }
+
+  @Override
+  public void writeRegions(Collection<HostTreeImpl.Region> region, Host.HostSerializer<HostTreeImpl.Region> serializer) {
+    // TODO implement
+    ConfigurationNode regionConfigNode = null; // TODO get regionConfigNode?
+    try (Connection connection = new Connection(regionConfigNode)) {
+      // write collection of regions
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+  }
+
+  /**
+   * Connection class for local Hocon implementation of HostTree storage
+   * TODO finish implementing
+   */
+  public class Connection implements Closeable {
     private final ConfigurationNode node;
 
-    public HoconStorageConnection(ConfigurationNode node) {
+    public Connection(ConfigurationNode node) {
       this.node = node;
-    }
-
-    @Override
-    public StorageConnection open() {
-      return this; // TODO see if we can get rid of this. Maybe split up more somehow?
-    }
-
-    @Override
-    public HostTreeImpl.GlobalHost readGlobalHost(Host.HostSerializer<HostTreeImpl.GlobalHost> serializer) throws HostParseException {
-      return null; // TODO implement
-    }
-
-    @Override
-    public Collection<HostTreeImpl.WorldHost> readWorldHosts(Host.HostSerializer<HostTreeImpl.WorldHost> serializer) throws HostParseException {
-      return null; // TODO implement
-    }
-
-    @Override
-    public Collection<HostTreeImpl.Region> readRegions(Collection<HostTreeImpl.WorldHost> parents, Host.HostSerializer<HostTreeImpl.Region> serializer) throws HostParseException {
-      return null; // TODO implement
-    }
-
-    @Override
-    public void writeGlobalHost(HostTreeImpl.GlobalHost globalHost, Host.HostSerializer<HostTreeImpl.GlobalHost> serializer) {
-      // TODO implement
-    }
-
-    @Override
-    public void writeWorldHosts(Collection<HostTreeImpl.WorldHost> worldHosts, Host.HostSerializer<HostTreeImpl.WorldHost> serializer) {
-      // TODO implement
-    }
-
-    @Override
-    public void writeRegions(Collection<HostTreeImpl.Region> region, Host.HostSerializer<HostTreeImpl.Region> serializer) {
-      // TODO implement
     }
 
     @Override

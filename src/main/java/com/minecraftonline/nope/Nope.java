@@ -31,8 +31,8 @@ import com.minecraftonline.nope.config.configurate.GlobalConfigurateConfigManage
 import com.minecraftonline.nope.config.configurate.hocon.HoconGlobalConfigurateConfigManager;
 import com.minecraftonline.nope.control.GlobalHost;
 import com.minecraftonline.nope.control.Settings;
+import com.minecraftonline.nope.host.HoconHostTreeStorage;
 import com.minecraftonline.nope.host.HostTree;
-import com.minecraftonline.nope.host.YamlHostTreeStorage;
 import com.minecraftonline.nope.key.NopeKeys;
 import com.minecraftonline.nope.key.regionwand.ImmutableRegionWandManipulator;
 import com.minecraftonline.nope.key.regionwand.RegionWandManipulator;
@@ -144,7 +144,7 @@ public class Nope {
 //    regionWandHandler = new RegionWandHandler();
 //    collisionHandler = new CollisionHandler();
 
-    hostTree = new HostTreeImpl(new YamlHostTreeStorage(),
+    hostTree = new HostTreeImpl(new HoconHostTreeStorage(),
             "__global__",
             s -> "__world_" + s + "__",
             "__world_.*__");

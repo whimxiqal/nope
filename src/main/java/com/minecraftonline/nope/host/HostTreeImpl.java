@@ -304,73 +304,21 @@ public class HostTreeImpl implements HostTree {
   }
 
   /**
-   * Storage for Nope.
-   * All read/write methods quickly open then close
-   * a {@link StorageConnection}. If you use more
-   * than one method at once, use {@link #open()}
-   * and then call the same methods on that object.
+   * Storage for Nope Hosts.
    */
   public interface Storage {
 
-    /**
-     * Opens a connection for this Storage,
-     * which stays open until it is closed.
-     *
-     * @return StorageConnection
-     */
-    StorageConnection open();
+    GlobalHost readGlobalHost(Host.HostSerializer<GlobalHost> serializer) throws HostParseException;
 
-    default GlobalHost readGlobalHost(Host.HostSerializer<GlobalHost> serializer) throws HostParseException {
-      return quickRead(connection -> connection.readGlobalHost(serializer));
-    }
+    Collection<WorldHost> readWorldHosts(Host.HostSerializer<WorldHost> serializer) throws HostParseException;
 
-    default Collection<WorldHost> readWorldHosts(Host.HostSerializer<WorldHost> serializer) throws HostParseException {
-      return quickRead(connection -> connection.readWorldHosts(serializer));
-    }
+    Collection<Region> readRegions(Collection<WorldHost> parents, Host.HostSerializer<Region> serializer);
 
-    default Collection<Region> readRegions(Collection<WorldHost> parents,
-                     Host.HostSerializer<Region> serializer)
-        throws HostParseException {
-      return quickRead(connection -> connection.readRegions(parents, serializer));
-    }
+    void writeGlobalHost(GlobalHost globalHost, Host.HostSerializer<GlobalHost> serializer);
 
-    default void writeGlobalHost(GlobalHost globalHost, Host.HostSerializer<GlobalHost> serializer) {
-      quickWrite(connection -> connection.writeGlobalHost(globalHost, serializer));
-    }
+    void writeWorldHosts(Collection<WorldHost> worldHosts, Host.HostSerializer<WorldHost> serializer);
 
-    default void writeWorldHosts(Collection<WorldHost> worldHosts, Host.HostSerializer<WorldHost> serializer) {
-      quickWrite(connection -> connection.writeWorldHosts(worldHosts, serializer));
-    }
-
-    default void writeRegions(Collection<Region> region, Host.HostSerializer<Region> serializer) {
-      quickWrite(connection -> connection.writeRegions(region, serializer));
-    }
-
-    interface StorageConnection extends Storage, Closeable {
-
-    }
-
-    default <T> T quickRead(Function<StorageConnection, T> connectionConsumer) {
-      if (this instanceof StorageConnection) {
-        throw new AssertionError("You must override read/write methods in StorageConnection");
-      }
-      try (StorageConnection connection = this.open()) {
-        return connectionConsumer.apply(connection);
-      } catch (IOException e) {
-        throw new HostParseException(e);
-      }
-    }
-
-    default void quickWrite(Consumer<StorageConnection> connectionConsumer) {
-      if (this instanceof StorageConnection) {
-        throw new AssertionError("You must override read/write methods in StorageConnection");
-      }
-      try (StorageConnection connection = this.open()) {
-        connectionConsumer.accept(connection);
-      } catch (IOException e) {
-        throw new HostParseException(e);
-      }
-    }
+    void writeRegions(Collection<Region> region, Host.HostSerializer<Region> serializer);
 
     class HostParseException extends RuntimeException {
       public HostParseException() {
