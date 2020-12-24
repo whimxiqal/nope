@@ -41,7 +41,7 @@ group = 'com.minecraftonline'
 version = '0.2.5'
 description = "A region protection plugin"
 
-ext.spongeVersion = '7.2.0'
+ext.spongeVersion = '7.3.0'
 
 sponge.plugin.meta {
   authors = ['PietElite', 'tyhdefu', '14mRh4X0r']
