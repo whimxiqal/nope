@@ -34,13 +34,12 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import com.minecraftonline.nope.util.NopeTypeTokens;
-import lombok.Builder;
-import lombok.Data;
 import lombok.Getter;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 
+import java.lang.annotation.*;
 import java.util.HashSet;
 import java.util.Set;
 import javax.annotation.Nonnull;
@@ -51,11 +50,14 @@ public class SettingLibrary {
 
   private static final HashMap<String, Setting<?>> settingMap = Maps.newHashMap();
 
+  /**
+   * Private constructor because its not supposed to be instantiated.
+   */
   private SettingLibrary() {
   }
 
   public static Setting<?> lookup(@Nonnull String id) throws NoSuchElementException {
-    if (settingMap.isEmpty()) load();
+    if (settingMap.isEmpty()) throw new RuntimeException("The SettingLibrary must be initialized");
     Setting<?> output = settingMap.get(id);
     if (output == null) {
       throw new NoSuchElementException(String.format(
@@ -65,7 +67,7 @@ public class SettingLibrary {
     return output;
   }
 
-  public static void load() {
+  public static void initialize() {
     Arrays.stream(SettingLibrary.class.getDeclaredFields())
             .filter(field -> Modifier.isStatic(field.getModifiers()))
             .filter(field -> field.getType().equals(Setting.class))
@@ -74,6 +76,17 @@ public class SettingLibrary {
                 Setting<?> setting = (Setting<?>) field.get(null);
                 if (settingMap.put(setting.id, setting) != null) {
                   throw new IllegalStateException("Settings may not have the same id: " + setting.id);
+                }
+                for (Annotation annotation : field.getAnnotations()) {
+                  if (annotation instanceof Setting.Comment) {
+                    setting.comment = ((Setting.Comment) annotation).comment();
+                  } else if (annotation instanceof Setting.Description) {
+                    setting.description = ((Setting.Description) annotation).description();
+                  } else if (annotation instanceof Setting.Category) {
+                    setting.category = ((Setting.Category) annotation).category();
+                  } else if (annotation instanceof Setting.NotImplemented) {
+                    setting.implemented = false;
+                  }
                 }
               } catch (IllegalAccessException e) {
                 e.printStackTrace();
@@ -87,8 +100,8 @@ public class SettingLibrary {
       Setting<?> setting = assignment.getKey();
       Map<String, Object> elem = Maps.newHashMap();
       elem.put("id", setting.getId());
-      elem.put("description", setting.getInfo().getDescription());  // does not deserialize
-      elem.put("comment", setting.getInfo().getComment());  // does not deserialize
+      setting.getComment().ifPresent(comment -> elem.put("comment", comment));  // does not deserialize
+      setting.getDescription().ifPresent(description -> elem.put("description", description));  // does not deserialize
       elem.put("value", setting.encodeValue(assignment.getValue()));
       settingList.add(elem);
     }
@@ -106,23 +119,34 @@ public class SettingLibrary {
     return assignments;
   }
 
-  @Data
   public abstract static class Setting<T> {
 
     // This order of these affects how they will be sorted in
     // /nope setting list, so keep MISC last
-    public enum Category {
+    public enum CategoryType {
       BLOCKS,
       MOVEMENT,
       DAMAGE,
       MISC,
     }
 
-    protected final String id;
-    protected final T defaultValue;
-    protected final Info info;
+    @Getter
+    private final String id;
+    @Getter
+    private final T defaultValue;
 
-    protected final Class<T> valueType;
+    private final Class<T> valueType;
+
+    public Setting(String id, T defaultValue, Class<T> valueType) {
+      this.id = id;
+      this.defaultValue = defaultValue;
+      this.valueType = valueType;
+    }
+
+    private String comment = null;
+    private String description = null;
+    private CategoryType category = CategoryType.MISC;
+    private boolean implemented = true;
 
     public final JsonElement encodeValue(Object value) {
       return encodeGenerifiedValue(castValue(value));
@@ -150,18 +174,42 @@ public class SettingLibrary {
       return valueType.cast(object);
     }
 
-    @Builder
-    @Getter
-    public static class Info {
-      /* Header */
-      private final Category category;
+    /* Reflections */
 
-      /* Context */
-      private final String description;
-      private final String comment;
+    public final Optional<String> getComment() {
+      return Optional.of(comment);
+    }
 
-      /* Implementation State */
-      private final boolean implemented;
+    public final Optional<String> getDescription() {
+      return Optional.of(description);
+    }
+
+    public final boolean isImplemented() {
+      return implemented;
+    }
+
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target(ElementType.FIELD)
+    public @interface Comment {
+      String comment();
+    }
+
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target(ElementType.FIELD)
+    public @interface Description {
+      String description();
+    }
+
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target(ElementType.FIELD)
+    public @interface Category {
+      CategoryType category();
+    }
+
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target(ElementType.FIELD)
+    public @interface NotImplemented {
+      // Empty
     }
 
   }
@@ -172,20 +220,20 @@ public class SettingLibrary {
 
 
   public static class BooleanSetting extends Setting<Boolean> {
-    public BooleanSetting(String id, Boolean defaultValue, Info info) {
-      super(id, defaultValue, info, Boolean.class);
+    public BooleanSetting(String id, Boolean defaultValue, CategoryType category) {
+      super(id, defaultValue, Boolean.class);
     }
   }
 
   public static class IntegerSetting extends Setting<Integer> {
-    public IntegerSetting(String id, Integer defaultValue, Info info) {
-      super(id, defaultValue, info, Integer.class);
+    public IntegerSetting(String id, Integer defaultValue, CategoryType category) {
+      super(id, defaultValue, Integer.class);
     }
   }
 
   public static class StringSetting extends Setting<String> {
-    public StringSetting(String id, String defaultValue, Info info) {
-      super(id, defaultValue, info, String.class);
+    public StringSetting(String id, String defaultValue, CategoryType category) {
+      super(id, defaultValue, String.class);
     }
   }
 
@@ -195,8 +243,8 @@ public class SettingLibrary {
 
 
   public static class StateSetting extends Setting<Boolean> {
-    public StateSetting(String id, Boolean defaultValue, Info info) {
-      super(id, defaultValue, info, Boolean.class);
+    public StateSetting(String id, Boolean defaultValue, CategoryType category) {
+      super(id, defaultValue, Boolean.class);
     }
 
     @Override
@@ -208,16 +256,19 @@ public class SettingLibrary {
     public Boolean parseGenerifiedValue(JsonElement jsonElement) {
       final String s = jsonElement.getAsString();
       switch (s) {
-        case "allow": return true;
-        case "deny": return false;
-        default: throw new IllegalStateException("Invalid state string. Should be allow or deny. Was: " + s);
+        case "allow":
+          return true;
+        case "deny":
+          return false;
+        default:
+          throw new IllegalStateException("Invalid state string. Should be allow or deny. Was: " + s);
       }
     }
   }
 
   public static class GameModeSetting extends Setting<GameMode> {
-    public GameModeSetting(String id, GameMode defaultValue, Info info) {
-      super(id, defaultValue, info, GameMode.class);
+    public GameModeSetting(String id, GameMode defaultValue, CategoryType category) {
+      super(id, defaultValue, GameMode.class);
     }
 
     @Override
@@ -229,14 +280,14 @@ public class SettingLibrary {
     public GameMode parseGenerifiedValue(JsonElement jsonElement) {
       final String s = jsonElement.getAsString();
       return Sponge.getRegistry().getType(GameMode.class, s)
-          .orElseThrow(() -> new IllegalStateException("Invalid GameMode String. Got: " + s));
+              .orElseThrow(() -> new IllegalStateException("Invalid GameMode String. Got: " + s));
     }
   }
 
   public static class StringSetSetting extends Setting<Set<String>> {
     @SuppressWarnings("unchecked")
-    public StringSetSetting(String id, Set<String> defaultValue, Info info) {
-      super(id, defaultValue, info, (Class<Set<String>>) NopeTypeTokens.STRING_SET_TOKEN.getRawType());
+    public StringSetSetting(String id, Set<String> defaultValue, CategoryType category) {
+      super(id, defaultValue, (Class<Set<String>>) NopeTypeTokens.STRING_SET_TOKEN.getRawType());
     }
 
     @Override
@@ -255,8 +306,8 @@ public class SettingLibrary {
 
   public static class EntityTypeSetSetting extends Setting<Set<EntityType>> {
     @SuppressWarnings("unchecked")
-    public EntityTypeSetSetting(String id, Set<EntityType> defaultValue, Info info) {
-      super(id, defaultValue, info, (Class<Set<EntityType>>) NopeTypeTokens.ENTITY_TYPE_SET_TOKEN.getRawType());
+    public EntityTypeSetSetting(String id, Set<EntityType> defaultValue, CategoryType category) {
+      super(id, defaultValue, (Class<Set<EntityType>>) NopeTypeTokens.ENTITY_TYPE_SET_TOKEN.getRawType());
     }
 
     @Override
@@ -273,8 +324,8 @@ public class SettingLibrary {
       final Set<EntityType> set = new HashSet<>();
       for (JsonElement element : jsonElement.getAsJsonArray()) {
         final String s = element.getAsString();
-        final EntityType entityType = Sponge.getRegistry().getType(EntityType.class,s )
-            .orElseThrow(() -> new IllegalStateException("Unknown EntityType: " + s));
+        final EntityType entityType = Sponge.getRegistry().getType(EntityType.class, s)
+                .orElseThrow(() -> new IllegalStateException("Unknown EntityType: " + s));
         set.add(entityType);
       }
       return set;
@@ -282,8 +333,8 @@ public class SettingLibrary {
   }
 
   public static class Vector3DSetting extends Setting<Vector3d> {
-    public Vector3DSetting(String id, Info info, Vector3d defaultValue) {
-      super(id, defaultValue, info, Vector3d.class);
+    public Vector3DSetting(String id, Vector3d defaultValue, CategoryType category) {
+      super(id, defaultValue, Vector3d.class);
     }
 
     @Override
@@ -299,9 +350,9 @@ public class SettingLibrary {
     public Vector3d parseGenerifiedValue(JsonElement jsonElement) {
       final JsonObject jsonObject = jsonElement.getAsJsonObject();
       return Vector3d.from(
-          jsonObject.get("x").getAsDouble(),
-          jsonObject.get("y").getAsDouble(),
-          jsonObject.get("z").getAsDouble()
+              jsonObject.get("x").getAsDouble(),
+              jsonObject.get("y").getAsDouble(),
+              jsonObject.get("z").getAsDouble()
       );
     }
   }
@@ -311,10 +362,22 @@ public class SettingLibrary {
   /* ======== */
 
 
+  @Setting.NotImplemented
   public static final BooleanSetting BUILD_PERMISSIONS = new BooleanSetting(
           "build-permission-nodes-enable",
           false,
-          Setting.Info.builder()
-                  .implemented(false)
-                  .build());
+          Setting.CategoryType.MISC);
+
+
+  @Setting.Comment(comment = "Set to true will deop any player when they enter")
+  @Setting.Description(description =
+          "If this setting is applied globally, then anytime "
+                  + "and op-ed player joins the server, their op status is removed. "
+                  + "If this setting is applied to just a world, then only "
+                  + "when they join that specific world do they get de-opped.")
+  @Setting.NotImplemented
+  public static final BooleanSetting DEOP_ON_ENTER = new BooleanSetting(
+          "deop-on-enter",
+          false,
+          Setting.CategoryType.MISC);
 }
