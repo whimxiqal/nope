@@ -98,7 +98,8 @@ public class Nope {
   @Listener
   public void onPreInitialize(GamePreInitializationEvent event) {
     instance = this;
-    Settings.load();
+    //Settings.load();
+    SettingLibrary.initialize();
     Extra.printSplashscreen();
 
     // Load config
@@ -159,7 +160,7 @@ public class Nope {
 
   @Listener
   public void onServerStopping(GameStoppingServerEvent event) {
-    // Nothing anymore.
+    hostTree.save();
   }
 
   @Listener

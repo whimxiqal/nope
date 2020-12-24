@@ -28,6 +28,7 @@ import com.google.common.reflect.TypeToken;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonPrimitive;
 import com.minecraftonline.nope.control.flags.Flag;
+import com.minecraftonline.nope.control.flags.FlagState;
 import org.spongepowered.api.entity.EntityType;
 
 import java.util.Set;

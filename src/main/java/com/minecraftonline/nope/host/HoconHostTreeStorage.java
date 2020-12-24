@@ -50,7 +50,7 @@ public class HoconHostTreeStorage implements HostTreeImpl.Storage {
 
   public HoconHostTreeStorage() {
     // These method calls threw errors, including the loader?
-    final TypeSerializerCollection typeSerializerCollection = TypeSerializerCollection.defaults().newChild()
+    final TypeSerializerCollection typeSerializerCollection = TypeSerializerCollection.create()
             .register(NopeTypeTokens.JSON_ELEMENT_TYPE_TOKEN, new JsonElementSerializer());
 
     ConfigurationOptions options = ConfigurationOptions.defaults().withSerializers(typeSerializerCollection);

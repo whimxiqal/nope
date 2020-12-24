@@ -34,18 +34,30 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import com.minecraftonline.nope.control.flags.Flag;
+import com.minecraftonline.nope.control.flags.FlagState;
 import com.minecraftonline.nope.util.NopeTypeTokens;
 import lombok.Getter;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 
-import java.lang.annotation.*;
-import java.util.HashSet;
-import java.util.Set;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.lang.annotation.Annotation;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.lang.reflect.Modifier;
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.NoSuchElementException;
+import java.util.Optional;
+import java.util.Set;
 
 public class SettingLibrary {
 
@@ -71,7 +83,7 @@ public class SettingLibrary {
   public static void initialize() {
     Arrays.stream(SettingLibrary.class.getDeclaredFields())
             .filter(field -> Modifier.isStatic(field.getModifiers()))
-            .filter(field -> field.getType().equals(Setting.class))
+            .filter(field -> Setting.class.isAssignableFrom(field.getType()))
             .forEach(field -> {
               try {
                 Setting<?> setting = (Setting<?>) field.get(null);
@@ -144,8 +156,11 @@ public class SettingLibrary {
       this.valueType = valueType;
     }
 
+    @Nullable
     private String comment = null;
+    @Nullable
     private String description = null;
+
     private CategoryType category = CategoryType.MISC;
     private boolean implemented = true;
 
@@ -178,11 +193,11 @@ public class SettingLibrary {
     /* Reflections */
 
     public final Optional<String> getComment() {
-      return Optional.of(comment);
+      return Optional.ofNullable(comment);
     }
 
     public final Optional<String> getDescription() {
-      return Optional.of(description);
+      return Optional.ofNullable(description);
     }
 
     public final boolean isImplemented() {
@@ -358,10 +373,35 @@ public class SettingLibrary {
     }
   }
 
-  public static class FlagSetting extends Setting<Flag<?>> {
+  public static class FlagSetting<T> extends Setting<T> {
 
-    public FlagSetting(String id, Flag<?> defaultValue, Class<Flag<?>> valueType) {
+    public FlagSetting(String id, T defaultValue, Class<T> valueType) {
       super(id, defaultValue, valueType);
+    }
+  }
+
+  public static class FlagStateSetting extends FlagSetting<FlagState> {
+
+    public FlagStateSetting(String id, FlagState defaultValue) {
+      super(id, defaultValue, FlagState.class);
+    }
+
+    @Override
+    public FlagState parseGenerifiedValue(JsonElement json) {
+      JsonObject jsonObject = json.getAsJsonObject();
+      Boolean value = jsonObject.get("value").getAsBoolean();
+      Flag.TargetGroup targetGroup = Flag.TargetGroup.valueOf(
+          jsonObject.get("target-group").getAsString().toUpperCase()
+      );
+      return new FlagState(value, targetGroup);
+    }
+
+    @Override
+    public JsonElement encodeGenerifiedValue(FlagState value) {
+      JsonObject json = new JsonObject();
+      json.addProperty("value", value.getValue());
+      json.addProperty("target-group", value.getGroup().name().toUpperCase());
+      return json;
     }
   }
 
@@ -388,4 +428,9 @@ public class SettingLibrary {
           "deop-on-enter",
           false,
           Setting.CategoryType.MISC);
+
+  public static final FlagStateSetting FLAG_BUILD = new FlagStateSetting(
+      "flag-build",
+      new FlagState(true)
+  );
 }
