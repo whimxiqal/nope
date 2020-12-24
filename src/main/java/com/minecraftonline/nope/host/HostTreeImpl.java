@@ -39,12 +39,10 @@ import org.spongepowered.api.world.storage.WorldProperties;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.io.Closeable;
-import java.io.IOException;
 import java.util.*;
-import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public class HostTreeImpl implements HostTree {
 
@@ -345,22 +343,36 @@ public class HostTreeImpl implements HostTree {
   /* ======= */
 
   @Nonnull
+  @Override
   public GlobalHost getGlobalHost() {
     return globalHost;
   }
 
   @Nullable
+  @Override
   public WorldHost getWorldHost(UUID worldUuid) {
     return worldHosts.get(worldUuid);
   }
 
   @Nullable
+  @Override
   public Region getRegion(String name) {
     for (WorldHost worldHost : worldHosts.values()) {
       Region region = worldHost.regionTree.get(name);
       if (region != null) return region;
     }
     return null;
+  }
+
+  @Nullable
+  @Override
+  public Collection<VolumeHost> getRegions(UUID worldUuid) {
+    return Optional.ofNullable(getWorldHost(worldUuid)).map(worldHost ->
+            worldHost.regionTree.volumes()
+                    .stream()
+                    .map(volume -> (VolumeHost) volume)
+                    .collect(Collectors.toList()))
+            .orElse(null);
   }
 
   @Nonnull

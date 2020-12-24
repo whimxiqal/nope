@@ -32,6 +32,7 @@ import org.spongepowered.api.world.World;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.Collection;
 import java.util.UUID;
 
 /**
@@ -50,14 +51,40 @@ public interface HostTree {
    */
   void save();
 
+  /**
+   * Get the GlobalHost.
+   *
+   * @return
+   */
   @Nonnull
   Host getGlobalHost();
 
+  /**
+   * Get the WorldHost associated with this World UUID.
+   *
+   * @param worldUuid the UUID of the world
+   * @return the associated WorldHost, or null if none exists
+   */
   @Nullable
   Host getWorldHost(UUID worldUuid);
 
+  /**
+   * Get the Region associated with this Region.
+   *
+   * @param name the name of the region
+   * @return the associated region, or null if none exists
+   */
   @Nullable
   VolumeHost getRegion(String name);
+
+  /**
+   * Get all the region within the world of the given id.
+   *
+   * @param worldUuid the UUID of the world
+   * @return the associated Regions, or null if no world exists with that UUID
+   */
+  @Nullable
+  Collection<VolumeHost> getRegions(UUID worldUuid);
 
   /**
    * Add a region to the HostTree with the given parameters.
@@ -83,8 +110,7 @@ public interface HostTree {
    * Remove a region from the given world. This method fails if it is called
    * with a name which is not in use.
    *
-   * @param worldUuid the uuid of the world from which to remove
-   * @param name      the name of the region which to remove
+   * @param name the name of the region which to remove
    * @return the removed region
    */
   @Nullable
