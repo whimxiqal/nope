@@ -25,110 +25,140 @@
 
 package com.minecraftonline.nope.host;
 
+import com.google.gson.JsonElement;
 import com.minecraftonline.nope.Nope;
 import com.minecraftonline.nope.config.configurate.serializer.JsonElementSerializer;
 import com.minecraftonline.nope.util.NopeTypeTokens;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.ConfigurationOptions;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
+import ninja.leaping.configurate.objectmapping.ObjectMappingException;
 import ninja.leaping.configurate.objectmapping.serialize.TypeSerializerCollection;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 
 public class HoconHostTreeStorage implements HostTreeImpl.Storage {
 
   private static final String REGION_CONFIG_FILENAME = "regions.conf";
-  private /* final */ HoconConfigurationLoader loader;
+  private static final String WORLD_SUB_REGIONS_KEY = "sub-regions";
+  private final HoconConfigurationLoader loader;
 
   public HoconHostTreeStorage() {
     // These method calls threw errors, including the loader?
-//    final TypeSerializerCollection typeSerializerCollection = TypeSerializerCollection.defaults().newChild()
-//            .register(NopeTypeTokens.JSON_ELEMENT_TYPE_TOKEN, new JsonElementSerializer());
-//
-//    ConfigurationOptions options = ConfigurationOptions.defaults().withSerializers(typeSerializerCollection);
-//
-//    this.loader = HoconConfigurationLoader.builder()
-//            .setDefaultOptions(options)
-//            .setPath(Nope.getInstance().getConfigDir().resolve(REGION_CONFIG_FILENAME))
-//            .build();
-  }
+    final TypeSerializerCollection typeSerializerCollection = TypeSerializerCollection.defaults().newChild()
+            .register(NopeTypeTokens.JSON_ELEMENT_TYPE_TOKEN, new JsonElementSerializer());
 
-  public Connection open() {
-    try {
-      return new Connection(loader.load());
-    } catch (IOException e) {
-      throw new HostParseException("Failed to save config file!", e);
-    }
+    ConfigurationOptions options = ConfigurationOptions.defaults().withSerializers(typeSerializerCollection);
+
+    this.loader = HoconConfigurationLoader.builder()
+            .setDefaultOptions(options)
+            .setPath(Nope.getInstance().getConfigDir().resolve(REGION_CONFIG_FILENAME))
+            .build();
   }
 
   @Override
   public HostTreeImpl.GlobalHost readGlobalHost(Host.HostSerializer<HostTreeImpl.GlobalHost> serializer) throws HostParseException {
-    // TODO implement
-    ConfigurationNode globalHostConfigNode = null; // TODO get globalHostConfigNode?
-    try (Connection connection = new Connection(globalHostConfigNode)) {
+
+    try (Connection connection = new Connection(loader)) {
+      final JsonElement jsonElement = connection.node.getNode(Nope.GLOBAL_HOST_NAME).getValue(NopeTypeTokens.JSON_ELEMENT_TYPE_TOKEN);
+      if (jsonElement == null) {
+        return null;
+      }
+      return serializer.deserialize(jsonElement);
       // return GlobalHost
-    } catch (IOException e) {
-      e.printStackTrace();
+    } catch (IOException | ObjectMappingException e) {
+      throw new HostParseException("Error reading global host config", e);
     }
-    return null;
   }
 
   @Override
   public Collection<HostTreeImpl.WorldHost> readWorldHosts(Host.HostSerializer<HostTreeImpl.WorldHost> serializer) throws HostParseException {
-    // TODO implement
-    ConfigurationNode worldHostConfigNode = null; // TODO get worldHostConfigNode?
-    try (Connection connection = new Connection(worldHostConfigNode)) {
-      // return collection of WorldHosts
-    } catch (IOException e) {
-      e.printStackTrace();
+
+    List<HostTreeImpl.WorldHost> worldHostList = new ArrayList<>();
+
+    try (Connection connection = new Connection(loader)) {
+
+      for (Map.Entry<Object, ? extends ConfigurationNode> entry : connection.node.getChildrenMap().entrySet()) {
+        final String key = entry.getKey().toString();
+        if (key.equals(Nope.GLOBAL_HOST_NAME)) {
+          continue;
+        }
+        // Assume all other top level nodes are world regions.
+        final JsonElement jsonElement = entry.getValue().getValue(NopeTypeTokens.JSON_ELEMENT_TYPE_TOKEN);
+
+        worldHostList.add(serializer.deserialize(jsonElement));
+      }
+      return worldHostList;
+    } catch (IOException | ObjectMappingException e) {
+      throw new HostParseException("Error reading world hosts", e);
     }
-    return null;
   }
 
   @Override
   public Collection<HostTreeImpl.Region> readRegions(Collection<HostTreeImpl.WorldHost> parents, Host.HostSerializer<HostTreeImpl.Region> serializer) throws HostParseException {
-    // TODO implement
-    ConfigurationNode regionConfigNode = null; // TODO get regionConfigNode?
-    try (Connection connection = new Connection(regionConfigNode)) {
+
+    List<HostTreeImpl.Region> regions = new ArrayList<>();
+
+    try (Connection connection = new Connection(loader)) {
       // return collection of regions
-    } catch (IOException e) {
-      e.printStackTrace();
+      for (HostTreeImpl.WorldHost worldHost : parents) {
+        final ConfigurationNode worldNode = connection.node.getNode(worldHost.getName(), WORLD_SUB_REGIONS_KEY);
+
+        for (Map.Entry<Object, ? extends ConfigurationNode> entry : worldNode.getChildrenMap().entrySet()) {
+
+          final HostTreeImpl.Region region = serializer.deserialize(entry.getValue().getValue(NopeTypeTokens.JSON_ELEMENT_TYPE_TOKEN));
+          regions.add(region);
+        }
+      }
+    } catch (IOException | ObjectMappingException e) {
+      throw new HostParseException("Error saving config after reading regions", e);
     }
-    return null;
+    return regions;
   }
 
   @Override
   public void writeGlobalHost(HostTreeImpl.GlobalHost globalHost, Host.HostSerializer<HostTreeImpl.GlobalHost> serializer) {
-    // TODO implement
-    ConfigurationNode globalHostConfigNode = null; // TODO get globalHostConfigNode?
-    try (Connection connection = new Connection(globalHostConfigNode)) {
+    try (Connection connection = new Connection(loader)) {
       // write GlobalHost
-    } catch (IOException e) {
-      e.printStackTrace();
+      final JsonElement element = serializer.serialize(globalHost);
+      connection.node.getNode(Nope.GLOBAL_HOST_NAME).setValue(NopeTypeTokens.JSON_ELEMENT_TYPE_TOKEN, element);
+    } catch (IOException | ObjectMappingException e) {
+      throw new HostParseException("Error writing globalhost", e);
     }
   }
 
   @Override
   public void writeWorldHosts(Collection<HostTreeImpl.WorldHost> worldHosts, Host.HostSerializer<HostTreeImpl.WorldHost> serializer) {
-    // TODO implement
-    ConfigurationNode worldHostConfigNode = null; // TODO get worldHostConfigNode?
-    try (Connection connection = new Connection(worldHostConfigNode)) {
+
+    try (Connection connection = new Connection(loader)) {
       // write collection of WorldHosts
-    } catch (IOException e) {
-      e.printStackTrace();
+      for (HostTreeImpl.WorldHost worldHost : worldHosts) {
+        final JsonElement element = serializer.serialize(worldHost);
+        connection.node.getNode(worldHost.getName()).setValue(NopeTypeTokens.JSON_ELEMENT_TYPE_TOKEN, element);
+      }
+    } catch (IOException | ObjectMappingException e) {
+      throw new HostParseException("Error writing world hosts", e);
     }
   }
 
   @Override
-  public void writeRegions(Collection<HostTreeImpl.Region> region, Host.HostSerializer<HostTreeImpl.Region> serializer) {
-    // TODO implement
-    ConfigurationNode regionConfigNode = null; // TODO get regionConfigNode?
-    try (Connection connection = new Connection(regionConfigNode)) {
+  public void writeRegions(Collection<HostTreeImpl.Region> regions, Host.HostSerializer<HostTreeImpl.Region> serializer) {
+
+    try (Connection connection = new Connection(loader)) {
       // write collection of regions
-    } catch (IOException e) {
-      e.printStackTrace();
+      for (HostTreeImpl.Region region : regions) {
+        final ConfigurationNode node = connection.node.getNode(region.getParent().getName(), WORLD_SUB_REGIONS_KEY, region.getName());
+
+        node.setValue(NopeTypeTokens.JSON_ELEMENT_TYPE_TOKEN, serializer.serialize(region));
+      }
+
+    } catch (IOException | ObjectMappingException e) {
+      throw new HostParseException("Error saving config after writing regions", e);
     }
   }
 
@@ -139,13 +169,17 @@ public class HoconHostTreeStorage implements HostTreeImpl.Storage {
   public class Connection implements Closeable {
     private final ConfigurationNode node;
 
-    public Connection(ConfigurationNode node) {
-      this.node = node;
+    public Connection(HoconConfigurationLoader loader) {
+      try {
+        this.node = loader.load();
+      } catch (IOException e) {
+        throw new HostParseException(e);
+      }
     }
 
     @Override
     public void close() throws IOException {
-      // TODO implement
+      loader.save(node);
     }
   }
 }

@@ -66,6 +66,7 @@ import java.nio.file.Path;
 public class Nope {
 
   public static String REPO_URL = "https://gitlab.com/minecraftonline/nope/";
+  public static final String GLOBAL_HOST_NAME = "__global__";
   private static Nope instance;
 
   // Injections
@@ -134,18 +135,14 @@ public class Nope {
     });
 
     Sponge.getEventManager().registerListeners(this, regionWandHandler);
-    FlagListeners.registerAll();
+    //FlagListeners.registerAll();
   }
 
   public void onLoad() {
-//    globalConfigManager.loadAll();
-//    globalConfigManager.fillSettings(globalHost);
-//    this.regionConfigManager = globalConfigManager;
-//    regionWandHandler = new RegionWandHandler();
-//    collisionHandler = new CollisionHandler();
+      regionWandHandler = new RegionWandHandler();
+      collisionHandler = new CollisionHandler();
 
     hostTree = new HostTreeImpl(new HoconHostTreeStorage(),
-            "__global__",
             s -> "__world_" + s + "__",
             "__world_.*__");
   }
@@ -162,7 +159,7 @@ public class Nope {
 
   @Listener
   public void onServerStopping(GameStoppingServerEvent event) {
-    globalConfigManager.saveAll();
+    // Nothing anymore.
   }
 
   @Listener

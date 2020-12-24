@@ -29,6 +29,7 @@ import com.flowpowered.math.vector.Vector3i;
 import com.google.common.collect.Maps;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
+import com.minecraftonline.nope.Nope;
 import com.minecraftonline.nope.SettingLibrary;
 import com.minecraftonline.nope.structures.VolumeTree;
 import lombok.Getter;
@@ -54,16 +55,13 @@ public class HostTreeImpl implements HostTree {
   private final Map<String, UUID> regionToWorld = Maps.newHashMap();
 
   private final Storage storage;
-  private final String globalHostName;
   private final Function<String, String> nameConverter;
   private final String worldHostNameRegex;
 
   public HostTreeImpl(Storage storage,
-                      String globalHostName,
                       Function<String, String> nameConverter,
                       String worldHostNameRegex) {
     this.storage = storage;
-    this.globalHostName = globalHostName;
     this.nameConverter = nameConverter;
     this.worldHostNameRegex = worldHostNameRegex;
     load();
@@ -80,7 +78,11 @@ public class HostTreeImpl implements HostTree {
                             new WorldHost(worldProperties.getUniqueId())));
 
     // Read GlobalHost
-    this.globalHost = storage.readGlobalHost(new GlobalHostSerializer());
+    GlobalHost savedGlobalHost = storage.readGlobalHost(new GlobalHostSerializer());
+    if (savedGlobalHost != null) {
+      this.globalHost = savedGlobalHost;
+    }
+
 
     // Read WorldHosts
     storage.readWorldHosts(new WorldHostSerializer()).forEach(worldHost ->
@@ -108,7 +110,7 @@ public class HostTreeImpl implements HostTree {
    */
   class GlobalHost extends Host {
     private GlobalHost() {
-      super(globalHostName);
+      super(Nope.GLOBAL_HOST_NAME);
       setParent(null);
       setPriority(0);
     }
@@ -318,7 +320,7 @@ public class HostTreeImpl implements HostTree {
 
     void writeWorldHosts(Collection<WorldHost> worldHosts, Host.HostSerializer<WorldHost> serializer);
 
-    void writeRegions(Collection<Region> region, Host.HostSerializer<Region> serializer);
+    void writeRegions(Collection<Region> regions, Host.HostSerializer<Region> serializer);
 
     class HostParseException extends RuntimeException {
       public HostParseException() {
