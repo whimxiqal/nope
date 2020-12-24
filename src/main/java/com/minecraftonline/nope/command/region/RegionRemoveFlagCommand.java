@@ -1,7 +1,6 @@
 package com.minecraftonline.nope.command.region;
 
 import com.minecraftonline.nope.arguments.NopeArguments;
-import com.minecraftonline.nope.arguments.RegionWrapper;
 import com.minecraftonline.nope.command.common.CommandNode;
 import com.minecraftonline.nope.command.common.LambdaCommandNode;
 import com.minecraftonline.nope.control.Setting;
@@ -22,7 +21,9 @@ public class RegionRemoveFlagCommand extends LambdaCommandNode {
     addCommandElements(GenericArguments.onlyOne(NopeArguments.regionWrapper(Text.of("region"))), GenericArguments.onlyOne(GenericArguments.string(Text.of("flag"))));
 
     setExecutor((src, args) -> {
-      RegionWrapper wrapper = args.<RegionWrapper>getOne("region").get();
+      src.sendMessage(Format.error("Command not implemented yet!"));
+      return CommandResult.empty();
+      /*HostWrapper wrapper = args.<HostWrapper>getOne("region").get();
       String flag = args.<String>getOne("flag").get();
 
       Optional<Setting<?>> optFlag = Settings.REGISTRY_MODULE.getById(flag)
@@ -34,7 +35,7 @@ public class RegionRemoveFlagCommand extends LambdaCommandNode {
       }
       wrapper.getRegion().unset(optFlag.get());
       src.sendMessage(Format.info("Unset flag '" + flag + "' on region '" + wrapper.getRegionName() + "'"));
-      return CommandResult.success();
+      return CommandResult.success();*/
     });
   }
 }

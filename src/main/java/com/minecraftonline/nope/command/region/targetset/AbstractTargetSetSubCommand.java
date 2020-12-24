@@ -2,7 +2,6 @@ package com.minecraftonline.nope.command.region.targetset;
 
 import com.minecraftonline.nope.Nope;
 import com.minecraftonline.nope.arguments.NopeArguments;
-import com.minecraftonline.nope.arguments.RegionWrapper;
 import com.minecraftonline.nope.command.common.CommandNode;
 import com.minecraftonline.nope.command.common.LambdaCommandNode;
 import com.minecraftonline.nope.control.Region;
@@ -34,16 +33,16 @@ public abstract class AbstractTargetSetSubCommand extends LambdaCommandNode {
     addCommandElements(GenericArguments.onlyOne(NopeArguments.regionWrapper(Text.of("region"))));
 
     setExecutor((src, args) -> {
-      RegionWrapper regionWrapper = args.<RegionWrapper>getOne(Text.of("region")).get();
-      Region region = regionWrapper.getRegion();
+      /*HostWrapper hostWrapper = args.<HostWrapper>getOne(Text.of("region")).get();
+      Region region = hostWrapper.getRegion();
 
       makeChanges(src, args, region.getSettingValueOrDefault(setting)).whenComplete((targetSet, throwable) -> {
         if (throwable != null) {
-          Nope.getInstance().getLogger().error("Error changing TargetSet '" + targetSetName + "' on region '" + regionWrapper.getRegionName() + "'");
+          Nope.getInstance().getLogger().error("Error changing TargetSet '" + targetSetName + "' on region '" + hostWrapper.getRegionName() + "'");
           return;
         }
         region.set(setting, targetSet);
-      });
+      });*/
       return CommandResult.success();
     });
   }

@@ -30,12 +30,12 @@ import org.spongepowered.api.text.Text;
 public class NopeArguments {
 
   /**
-   * Creates a region command element, that returns a <b>{@link RegionWrapper}<\b>
+   * Creates a region command element, that returns a <b>{@link HostWrapper}<\b>
    * @param key Key to use
    * @return CommandElement
    */
   public static CommandElement regionWrapper(Text key) {
-    return new RegionCommandElement(key);
+    return new HostCommandElement(key);
   }
 
   public static CommandElement flagValueWrapper(Text key) {

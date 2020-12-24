@@ -26,7 +26,6 @@ package com.minecraftonline.nope.command.region;
 
 import com.minecraftonline.nope.Nope;
 import com.minecraftonline.nope.arguments.NopeArguments;
-import com.minecraftonline.nope.arguments.RegionWrapper;
 import com.minecraftonline.nope.command.common.CommandNode;
 import com.minecraftonline.nope.command.common.LambdaCommandNode;
 import com.minecraftonline.nope.control.GlobalRegion;
@@ -34,6 +33,7 @@ import com.minecraftonline.nope.control.Region;
 import com.minecraftonline.nope.control.WorldHost;
 import com.minecraftonline.nope.permission.Permissions;
 import com.minecraftonline.nope.util.Format;
+import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.args.GenericArguments;
 import org.spongepowered.api.text.Text;
@@ -47,7 +47,9 @@ public class DeleteRegionCommand extends LambdaCommandNode {
         "remove");
     addCommandElements(GenericArguments.onlyOne(NopeArguments.regionWrapper(Text.of("region"))));
     setExecutor((src, args) -> {
-      RegionWrapper region = args.<RegionWrapper>getOne(Text.of("region")).get();
+      src.sendMessage(Format.error("Command not implemented yet!"));
+      return CommandResult.empty();
+      /*HostWrapper region = args.<HostWrapper>getOne(Text.of("region")).get();
       WorldHost worldHost = region.getWorldHost();
       boolean isGlobal = region.getRegion() instanceof GlobalRegion;
       if (isGlobal) {
@@ -63,7 +65,7 @@ public class DeleteRegionCommand extends LambdaCommandNode {
         Nope.getInstance().getRegionConfigManager().onRegionRemove(worldHost, region.getRegionName());
         src.sendMessage(Format.info("Region: '" + region.getRegionName() + "' has been deleted"));
       }
-      return CommandResult.success();
+      return CommandResult.success();*/
     });
   }
 }

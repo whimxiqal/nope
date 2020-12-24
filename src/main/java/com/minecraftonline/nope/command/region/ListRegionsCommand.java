@@ -29,12 +29,14 @@ import com.minecraftonline.nope.command.common.CommandNode;
 import com.minecraftonline.nope.command.common.LambdaCommandNode;
 import com.minecraftonline.nope.host.Host;
 import com.minecraftonline.nope.host.HostTreeImpl;
+import com.minecraftonline.nope.host.VolumeHost;
 import com.minecraftonline.nope.permission.Permissions;
 import com.minecraftonline.nope.util.Format;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.UUID;
 
@@ -51,10 +53,14 @@ public class ListRegionsCommand extends LambdaCommandNode {
         return CommandResult.empty();
       }
       UUID worldUUID = ((Player) src).getWorld().getUniqueId();
-      Host host = Nope.getInstance().getHostTree().getWorldHost(worldUUID);
+      Collection<VolumeHost> regions = Nope.getInstance().getHostTree().getRegions(worldUUID);
       src.sendMessage(Format.info("------ Regions ------"));
-      for (Map.Entry<String, HostTreeImpl.Region> entry : host.getRegions().entrySet()) {
-        src.sendMessage(Text.of(Format.ACCENT, "> ", Format.note(entry.getKey())));
+      if (regions == null) {
+        src.sendMessage(Format.info("No regions in this world"));
+        return CommandResult.success();
+      }
+      for (VolumeHost volumeHost : regions) {
+        src.sendMessage(Text.of(Format.ACCENT, "> ", Format.note(volumeHost.getName())));
       }
       return CommandResult.success();
     });

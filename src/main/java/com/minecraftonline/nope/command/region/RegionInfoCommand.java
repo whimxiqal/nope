@@ -25,18 +25,13 @@
 package com.minecraftonline.nope.command.region;
 
 import com.google.common.collect.Lists;
-import com.minecraftonline.nope.Nope;
+import com.minecraftonline.nope.SettingLibrary;
 import com.minecraftonline.nope.arguments.NopeArguments;
-import com.minecraftonline.nope.arguments.RegionWrapper;
 import com.minecraftonline.nope.command.common.CommandNode;
 import com.minecraftonline.nope.command.common.LambdaCommandNode;
-import com.minecraftonline.nope.control.GlobalRegion;
-import com.minecraftonline.nope.control.Region;
-import com.minecraftonline.nope.control.Setting;
-import com.minecraftonline.nope.control.Settings;
-import com.minecraftonline.nope.control.flags.Flag;
-import com.minecraftonline.nope.control.target.Target;
 import com.minecraftonline.nope.control.target.TargetSet;
+import com.minecraftonline.nope.host.Host;
+import com.minecraftonline.nope.host.VolumeHost;
 import com.minecraftonline.nope.permission.Permissions;
 import com.minecraftonline.nope.util.Format;
 import org.spongepowered.api.Sponge;
@@ -68,23 +63,24 @@ public class RegionInfoCommand extends LambdaCommandNode {
     regionElement = GenericArguments.flags().flag("f", "-friendly").buildWith(regionElement);
     addCommandElements(regionElement);
     setExecutor((src, args) -> {
-      RegionWrapper regionWrapper = args.<RegionWrapper>getOne(Text.of("region")).get();
+      Host host = args.<Host>getOne(Text.of("region")).get();
+
       boolean friendly = args.<Boolean>getOne(Text.of("f")).orElse(false);
 
-      Region region = regionWrapper.getRegion();
-      boolean isGlobal = region instanceof GlobalRegion;
-      src.sendMessage(Format.info("-- Info for region " + regionWrapper.getRegionName() + " --"));
+      src.sendMessage(Format.info("-- Info for region " + host.getName() + " --"));
 
-      if (!isGlobal) {
+      if (host instanceof VolumeHost) {
+        VolumeHost volumeHost = (VolumeHost)host;
         // Non global regions only:
-        src.sendMessage(Format.keyValue("min: ", region.getSettingValue(Settings.REGION_MIN).get().toString()));
-        src.sendMessage(Format.keyValue("max: ", region.getSettingValue(Settings.REGION_MAX).get().toString()));
+        src.sendMessage(Format.keyValue("min: ", volumeHost.xMin() + ", " + volumeHost.yMin() + ", " + volumeHost.zMin()));
+        src.sendMessage(Format.keyValue("max: ", volumeHost.xMax() + ", " + volumeHost.yMax() + ", " + volumeHost.zMax()));
       }
 
-      CompletableFuture<String> ownersFuture = serializeTargetSet(region.getSettingValue(Settings.REGION_OWNERS).orElse(new TargetSet()), friendly);
-      CompletableFuture<String> membersFuture = serializeTargetSet(region.getSettingValue(Settings.REGION_MEMBERS).orElse(new TargetSet()), friendly);
+      // TODO: add these settings and maybe redo these?
+      //CompletableFuture<String> ownersFuture = serializeTargetSet(host.get(SettingLibrary.REGION_OWNERS).orElse(new TargetSet()), friendly);
+      //CompletableFuture<String> membersFuture = serializeTargetSet(host.get(SettingLibrary.REGION_MEMBERS).orElse(new TargetSet()), friendly);
 
-      String regionPriority = region.getSettingValue(Settings.REGION_PRIORITY).orElse(0).toString();
+      int regionPriority = host.getPriority();
 
       // Flags
 //      StringBuilder builder = new StringBuilder("{ ");
@@ -104,40 +100,30 @@ public class RegionInfoCommand extends LambdaCommandNode {
 //      // Delete last comma
 //      builder.deleteCharAt(builder.length() - 2).append("}");
 
-      List<String> flags = Lists.newLinkedList();
-      String flagsDescription = regionWrapper.getRegion().getSettingMap().entrySet().stream()
-          .filter(settingEntry -> settingEntry.getValue() instanceof Flag)
+      String settings = host.getAll().entrySet().stream()
           .map(settingEntry -> {
-            Flag<?> flag = (Flag<?>) settingEntry.getValue();
-            Flag<?> defaultValue = (Flag<?>) settingEntry.getKey().getDefaultValue();
-
-            return settingEntry.getKey().getName() + ": " + serializeFlag(defaultValue, flag)
-                + ((flag.getGroup() != Flag.TargetGroup.ALL)
-                    ? " -group: " + flag.getGroup().toString().toLowerCase()
-                    : "");
+            SettingLibrary.Setting<?> setting = settingEntry.getKey();
+            return setting.getId() + ": " + setting.encodeValue(settingEntry.getValue());
           }).collect(Collectors.joining(", "));
+
+      src.sendMessage(Format.info("Settings: " + settings));
 
       // Send the message when we have converted uuids.
 
-      ownersFuture.whenComplete((owners, t) -> {
+      /*ownersFuture.whenComplete((owners, t) -> {
         src.sendMessage(Format.keyValue("owners: ", owners));
         membersFuture.whenComplete((members, e) -> {
           src.sendMessage(Format.keyValue("members: ", members));
           src.sendMessage(Format.keyValue("priority: ", regionPriority));
           src.sendMessage(Format.keyValue("flags: ", flagsDescription));
         });
-      });
+      });*/
 
       return CommandResult.success();
     });
   }
 
-  @SuppressWarnings("unchecked")
-  private static <T> String serializeFlag(Flag<T> defaultValue, Flag<?> value) {
-    return defaultValue.serialize((Flag<T>) value);
-  }
-
-  private static CompletableFuture<String> serializeTargetSet(TargetSet targetSet, boolean convertUUIDs) {
+  /*private static CompletableFuture<String> serializeTargetSet(TargetSet targetSet, boolean convertUUIDs) {
     StringBuilder builder = new StringBuilder("{ ");
     Set<UUID> toConvert = new HashSet<>();
 
@@ -182,7 +168,7 @@ public class RegionInfoCommand extends LambdaCommandNode {
       }
       return builder.toString();
     });
-  }
+  }*/
 
   /**
    * Gets a gameprofile promise

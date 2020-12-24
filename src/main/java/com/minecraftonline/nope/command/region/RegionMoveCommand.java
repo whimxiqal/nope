@@ -3,13 +3,11 @@ package com.minecraftonline.nope.command.region;
 import com.minecraftonline.nope.Nope;
 import com.minecraftonline.nope.RegionWandHandler;
 import com.minecraftonline.nope.arguments.NopeArguments;
-import com.minecraftonline.nope.arguments.RegionWrapper;
 import com.minecraftonline.nope.command.common.CommandNode;
 import com.minecraftonline.nope.command.common.LambdaCommandNode;
 import com.minecraftonline.nope.control.GlobalRegion;
 import com.minecraftonline.nope.control.Region;
 import com.minecraftonline.nope.control.RegularRegion;
-import com.minecraftonline.nope.control.Settings;
 import com.minecraftonline.nope.permission.Permission;
 import com.minecraftonline.nope.util.Format;
 import org.spongepowered.api.command.CommandResult;
@@ -23,15 +21,17 @@ public class RegionMoveCommand extends LambdaCommandNode {
 
     addCommandElements(GenericArguments.onlyOne(NopeArguments.regionWrapper(Text.of("region"))));
     setExecutor((src, args) -> {
-      if (!(src instanceof Player)) {
+      src.sendMessage(Format.error("Command not implemented yet!"));
+      return CommandResult.empty();
+      /*if (!(src instanceof Player)) {
         src.sendMessage(Format.error("You must execute this command as a player"));
         return CommandResult.empty();
       }
-      RegionWrapper regionWrapper = args.<RegionWrapper>getOne(Text.of("region")).get();
-      Region region = regionWrapper.getRegion();
+      HostWrapper hostWrapper = args.<HostWrapper>getOne(Text.of("region")).get();
+      Region region = hostWrapper.getRegion();
       Player player = (Player)src;
 
-      if (regionWrapper.getRegion() instanceof GlobalRegion) {
+      if (hostWrapper.getRegion() instanceof GlobalRegion) {
         player.sendMessage(Format.error("You cannot move the global region!"));
         return CommandResult.success();
       }
@@ -43,14 +43,14 @@ public class RegionMoveCommand extends LambdaCommandNode {
       }
 
       assert selection.getWorld() != null; // Not null selection is complete
-      if (!regionWrapper.getWorldHost().getWorldUuid().equals(selection.getWorld().getUniqueId())) {
+      if (!hostWrapper.getWorldHost().getWorldUuid().equals(selection.getWorld().getUniqueId())) {
         player.sendMessage(Format.error("You cannot change the region's world"));
       }
 
       // We need to set it like this because otherwise we end up with min-maxing old values with new
       ((RegularRegion)region).moveTo(selection.getPos1(), selection.getPos2());
 
-      return CommandResult.success();
+      return CommandResult.success();*/
     });
   }
 }

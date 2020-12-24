@@ -1,7 +1,6 @@
 package com.minecraftonline.nope.command.region;
 
 import com.minecraftonline.nope.arguments.NopeArguments;
-import com.minecraftonline.nope.arguments.RegionWrapper;
 import com.minecraftonline.nope.command.common.CommandNode;
 import com.minecraftonline.nope.command.common.LambdaCommandNode;
 import com.minecraftonline.nope.control.Region;
@@ -20,13 +19,15 @@ public class RegionSetPriorityCommand extends LambdaCommandNode {
 
     addCommandElements(GenericArguments.onlyOne(NopeArguments.regionWrapper(Text.of("region"))), GenericArguments.integer(Text.of("priority")));
     setExecutor((src, args) -> {
-      RegionWrapper regionWrapper = args.<RegionWrapper>getOne(Text.of("region")).get();
-      Region region = regionWrapper.getRegion();
+      src.sendMessage(Format.error("Command not implemented yet!"));
+      return CommandResult.empty();
+      /*HostWrapper hostWrapper = args.<HostWrapper>getOne(Text.of("region")).get();
+      Region region = hostWrapper.getRegion();
       int priority = args.<Integer>getOne(Text.of("priority")).get();
 
       region.set(Settings.REGION_PRIORITY, priority);
-      src.sendMessage(Text.of(TextColors.GREEN, "Successfully set priority on region '" + regionWrapper.getRegionName()));
-      return CommandResult.success();
+      src.sendMessage(Text.of(TextColors.GREEN, "Successfully set priority on region '" + hostWrapper.getRegionName()));
+      return CommandResult.success();*/
     });
   }
 }

@@ -33,6 +33,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
+import com.minecraftonline.nope.control.flags.Flag;
 import com.minecraftonline.nope.util.NopeTypeTokens;
 import lombok.Getter;
 import org.spongepowered.api.Sponge;
@@ -354,6 +355,13 @@ public class SettingLibrary {
               jsonObject.get("y").getAsDouble(),
               jsonObject.get("z").getAsDouble()
       );
+    }
+  }
+
+  public static class FlagSetting extends Setting<Flag<?>> {
+
+    public FlagSetting(String id, Flag<?> defaultValue, Class<Flag<?>> valueType) {
+      super(id, defaultValue, valueType);
     }
   }
 
