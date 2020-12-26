@@ -28,6 +28,7 @@ package com.minecraftonline.nope;
 import com.flowpowered.math.vector.Vector3d;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -91,13 +92,13 @@ public class SettingLibrary {
                   throw new IllegalStateException("Settings may not have the same id: " + setting.id);
                 }
                 for (Annotation annotation : field.getAnnotations()) {
-                  if (annotation instanceof Setting.Comment) {
-                    setting.comment = ((Setting.Comment) annotation).comment();
-                  } else if (annotation instanceof Setting.Description) {
-                    setting.description = ((Setting.Description) annotation).description();
-                  } else if (annotation instanceof Setting.Category) {
-                    setting.category = ((Setting.Category) annotation).category();
-                  } else if (annotation instanceof Setting.NotImplemented) {
+                  if (annotation instanceof Comment) {
+                    setting.comment = ((Comment) annotation).comment();
+                  } else if (annotation instanceof Description) {
+                    setting.description = ((Description) annotation).description();
+                  } else if (annotation instanceof Category) {
+                    setting.category = ((Category) annotation).category();
+                  } else if (annotation instanceof NotImplemented) {
                     setting.implemented = false;
                   }
                 }
@@ -160,7 +161,7 @@ public class SettingLibrary {
     private String comment = null;
     @Nullable
     private String description = null;
-
+    @Nonnull
     private CategoryType category = CategoryType.MISC;
     private boolean implemented = true;
 
@@ -200,34 +201,44 @@ public class SettingLibrary {
       return Optional.ofNullable(description);
     }
 
+    public final CategoryType getCategory() {
+      return this.category;
+    }
+
     public final boolean isImplemented() {
       return implemented;
     }
 
-    @Retention(RetentionPolicy.RUNTIME)
-    @Target(ElementType.FIELD)
-    public @interface Comment {
-      String comment();
-    }
 
-    @Retention(RetentionPolicy.RUNTIME)
-    @Target(ElementType.FIELD)
-    public @interface Description {
-      String description();
-    }
 
-    @Retention(RetentionPolicy.RUNTIME)
-    @Target(ElementType.FIELD)
-    public @interface Category {
-      CategoryType category();
-    }
+  }
 
-    @Retention(RetentionPolicy.RUNTIME)
-    @Target(ElementType.FIELD)
-    public @interface NotImplemented {
-      // Empty
-    }
+  /* =========== */
+  /* ANNOTATIONS */
+  /* =========== */
 
+  @Retention(RetentionPolicy.RUNTIME)
+  @Target(ElementType.FIELD)
+  public @interface Comment {
+    String comment();
+  }
+
+  @Retention(RetentionPolicy.RUNTIME)
+  @Target(ElementType.FIELD)
+  public @interface Description {
+    String description();
+  }
+
+  @Retention(RetentionPolicy.RUNTIME)
+  @Target(ElementType.FIELD)
+  public @interface Category {
+    Setting.CategoryType category();
+  }
+
+  @Retention(RetentionPolicy.RUNTIME)
+  @Target(ElementType.FIELD)
+  public @interface NotImplemented {
+    // Empty
   }
 
   /* ========== */
@@ -236,19 +247,19 @@ public class SettingLibrary {
 
 
   public static class BooleanSetting extends Setting<Boolean> {
-    public BooleanSetting(String id, Boolean defaultValue, CategoryType category) {
+    public BooleanSetting(String id, Boolean defaultValue) {
       super(id, defaultValue, Boolean.class);
     }
   }
 
   public static class IntegerSetting extends Setting<Integer> {
-    public IntegerSetting(String id, Integer defaultValue, CategoryType category) {
+    public IntegerSetting(String id, Integer defaultValue) {
       super(id, defaultValue, Integer.class);
     }
   }
 
   public static class StringSetting extends Setting<String> {
-    public StringSetting(String id, String defaultValue, CategoryType category) {
+    public StringSetting(String id, String defaultValue) {
       super(id, defaultValue, String.class);
     }
   }
@@ -259,7 +270,7 @@ public class SettingLibrary {
 
 
   public static class StateSetting extends Setting<Boolean> {
-    public StateSetting(String id, Boolean defaultValue, CategoryType category) {
+    public StateSetting(String id, Boolean defaultValue) {
       super(id, defaultValue, Boolean.class);
     }
 
@@ -283,7 +294,7 @@ public class SettingLibrary {
   }
 
   public static class GameModeSetting extends Setting<GameMode> {
-    public GameModeSetting(String id, GameMode defaultValue, CategoryType category) {
+    public GameModeSetting(String id, GameMode defaultValue) {
       super(id, defaultValue, GameMode.class);
     }
 
@@ -302,7 +313,7 @@ public class SettingLibrary {
 
   public static class StringSetSetting extends Setting<Set<String>> {
     @SuppressWarnings("unchecked")
-    public StringSetSetting(String id, Set<String> defaultValue, CategoryType category) {
+    public StringSetSetting(String id, Set<String> defaultValue) {
       super(id, defaultValue, (Class<Set<String>>) NopeTypeTokens.STRING_SET_TOKEN.getRawType());
     }
 
@@ -322,7 +333,7 @@ public class SettingLibrary {
 
   public static class EntityTypeSetSetting extends Setting<Set<EntityType>> {
     @SuppressWarnings("unchecked")
-    public EntityTypeSetSetting(String id, Set<EntityType> defaultValue, CategoryType category) {
+    public EntityTypeSetSetting(String id, Set<EntityType> defaultValue) {
       super(id, defaultValue, (Class<Set<EntityType>>) NopeTypeTokens.ENTITY_TYPE_SET_TOKEN.getRawType());
     }
 
@@ -349,7 +360,7 @@ public class SettingLibrary {
   }
 
   public static class Vector3DSetting extends Setting<Vector3d> {
-    public Vector3DSetting(String id, Vector3d defaultValue, CategoryType category) {
+    public Vector3DSetting(String id, Vector3d defaultValue) {
       super(id, defaultValue, Vector3d.class);
     }
 
@@ -410,24 +421,56 @@ public class SettingLibrary {
   /* ======== */
 
 
-  @Setting.NotImplemented
+  @NotImplemented
   public static final BooleanSetting BUILD_PERMISSIONS = new BooleanSetting(
           "build-permission-nodes-enable",
-          false,
-          Setting.CategoryType.MISC);
+          false);
 
 
-  @Setting.Comment(comment = "Set to true will deop any player when they enter")
-  @Setting.Description(description =
+  @Comment(comment = "Set to true will deop any player when they enter")
+  @Description(description =
           "If this setting is applied globally, then anytime "
                   + "and op-ed player joins the server, their op status is removed. "
                   + "If this setting is applied to just a world, then only "
                   + "when they join that specific world do they get de-opped.")
-  @Setting.NotImplemented
+  @NotImplemented
   public static final BooleanSetting DEOP_ON_ENTER = new BooleanSetting(
           "deop-on-enter",
-          false,
-          Setting.CategoryType.MISC);
+          false);
+
+  @Description(description = "Enables all plugin functionality. Can only be set globally.")
+  @NotImplemented
+  public static final Setting<Boolean> ENABLE_PLUGIN = new BooleanSetting(
+      "enable-plugin",
+      true);
+
+  @NotImplemented
+  public static final Setting<Set<String>> ALLOWED_COMMANDS = new StringSetSetting(
+      "allowed-cmds",
+      Sets.newHashSet());
+
+  @NotImplemented
+  public static final Setting<Set<String>> BLOCKED_COMMANDS = new StringSetSetting(
+      "blocked-cmds",
+      Sets.newHashSet());
+
+  @Category(category = Setting.CategoryType.BLOCKS)
+  @NotImplemented
+  public static final Setting<Boolean> BLOCK_BREAK = new StateSetting(
+      "block-break",
+      true);
+
+  @Category(category = Setting.CategoryType.BLOCKS)
+  @NotImplemented
+  public static final Setting<Boolean> BLOCK_PLACE = new StateSetting(
+      "block-place",
+      true);
+
+  @Category(category = Setting.CategoryType.BLOCKS)
+  @NotImplemented
+  public static final Setting<Boolean> BLOCK_TRAMPLE = new StateSetting(
+      "block-trample",
+      true);
 
   public static final FlagStateSetting FLAG_BUILD = new FlagStateSetting(
       "flag-build",
