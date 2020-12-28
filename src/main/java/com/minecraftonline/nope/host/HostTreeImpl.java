@@ -74,7 +74,7 @@ public class HostTreeImpl implements HostTree {
             .forEach(worldProperties ->
                     worldHosts.put(
                             worldProperties.getUniqueId(),
-                            new WorldHost(worldProperties.getUniqueId())));
+                            newWorldHost(worldProperties.getUniqueId())));
 
     // Read GlobalHost
     GlobalHost savedGlobalHost = storage.readGlobalHost(new GlobalHostSerializer());
@@ -107,7 +107,7 @@ public class HostTreeImpl implements HostTree {
   /**
    * Class for managing the single GlobalHost in this HostTree
    */
-  class GlobalHost extends Host {
+  static class GlobalHost extends Host {
     private GlobalHost() {
       super(Nope.GLOBAL_HOST_NAME);
       setParent(null);
@@ -132,6 +132,16 @@ public class HostTreeImpl implements HostTree {
     }
   }
 
+  public WorldHost newWorldHost(UUID worldUuid) {
+    return new WorldHost(Sponge.getServer()
+            .getWorldProperties(worldUuid)
+            .map(prop -> nameConverter.apply(prop.getWorldName()))
+            .orElseThrow(() -> new RuntimeException(String.format(
+                    "The worldUuid %s does not correspond to a Sponge world)",
+                    worldUuid.toString()))),
+            worldUuid);
+  }
+
   /**
    * Class for managing the few WorldHosts in this HostTree
    */
@@ -140,12 +150,8 @@ public class HostTreeImpl implements HostTree {
     private final UUID worldUuid;
     private final VolumeTree<String, Region> regionTree = new VolumeTree<>();
 
-    public WorldHost(UUID worldUuid) {
-      super(Sponge.getServer().getWorldProperties(worldUuid)
-              .map(prop -> nameConverter.apply(prop.getWorldName()))
-              .orElseThrow(() -> new RuntimeException(String.format(
-                      "The worldUuid %s does not correspond to a Sponge world)",
-                      worldUuid.toString()))));
+    WorldHost(String name, UUID worldUuid) {
+      super(name);
       this.worldUuid = worldUuid;
       setParent(globalHost);
       setPriority(1);
@@ -175,7 +181,7 @@ public class HostTreeImpl implements HostTree {
 
     @Override
     public WorldHost deserialize(JsonElement json) {
-      WorldHost host = new WorldHost(Sponge.getServer()
+      WorldHost host = newWorldHost(Sponge.getServer()
               .getWorldProperties(json.getAsJsonObject().get("world").getAsString())
               .map(WorldProperties::getUniqueId)
               .orElseThrow(() -> new RuntimeException(String.format(
