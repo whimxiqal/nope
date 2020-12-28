@@ -74,7 +74,6 @@ public abstract class SettingKey<T> {
     this.defaultData = defaultData;
   }
 
-  String comment = null;
   String description = null;
   @Nonnull
   CategoryType category = CategoryType.MISC;
@@ -148,11 +147,6 @@ public abstract class SettingKey<T> {
               valueType().getName()));
     }
     return valueType().cast(object);
-  }
-
-  @Nonnull
-  public final Optional<String> getComment() {
-    return Optional.ofNullable(comment);
   }
 
   @Nonnull

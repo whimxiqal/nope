@@ -104,9 +104,7 @@ public class SettingLibrary {
                   throw new IllegalStateException("Settings may not have the same id: " + key.id);
                 }
                 for (Annotation annotation : field.getAnnotations()) {
-                  if (annotation instanceof Comment) {
-                    key.comment = ((Comment) annotation).value();
-                  } else if (annotation instanceof Description) {
+                  if (annotation instanceof Description) {
                     key.description = ((Description) annotation).value();
                   } else if (annotation instanceof Category) {
                     key.category = ((Category) annotation).value();
@@ -125,7 +123,6 @@ public class SettingLibrary {
     for (Setting<?> setting : map.entries()) {
       Map<String, Object> elem = Maps.newHashMap();
       elem.put("id", setting.getKey().getId());
-      setting.getKey().getComment().ifPresent(comment -> elem.put("comment", comment));  // does not deserialize
       setting.getKey().getDescription().ifPresent(description -> elem.put("description", description));  // does not deserialize
       elem.put("value", setting.getKey().encodeData(setting.getValue().getData()));
       elem.put("target", setting.getValue().getTarget());
@@ -294,7 +291,8 @@ public class SettingLibrary {
   /* SETTINGS */
   /* ======== */
 
-
+  // TODO write description
+  // TODO remove this? What is this?
   @NotImplemented
   public static final SettingKey<Boolean> BUILD_PERMISSIONS = new BooleanSetting(
           "build-permission-nodes-enable",
@@ -302,11 +300,7 @@ public class SettingLibrary {
   );
 
 
-  @Comment("Set to true will deop any player when they enter")
-  @Description("If this setting is applied globally, then anytime "
-                  + "and op-ed player joins the server, their op status is removed. "
-                  + "If this setting is applied to just a world, then only "
-                  + "when they join that specific world do they get de-opped.")
+  @Description("Deop the player upon entering")
   @NotImplemented
   public static final SettingKey<Boolean> DEOP_ON_ENTER = new BooleanSetting(
           "deop-on-enter",
@@ -320,18 +314,7 @@ public class SettingLibrary {
           true
   );
 
-  @NotImplemented
-  public static final SettingKey<Set<String>> ALLOWED_COMMANDS = new StringSetSetting(
-          "allowed-cmds",
-          Sets.newHashSet()
-  );
-
-  @NotImplemented
-  public static final SettingKey<Set<String>> BLOCKED_COMMANDS = new StringSetSetting(
-          "blocked-cmds",
-          Sets.newHashSet()
-  );
-
+  @Description("When disabled, players may not break blocks")
   @Category(SettingKey.CategoryType.BLOCKS)
   @NotImplemented
   public static final SettingKey<Boolean> BLOCK_BREAK = new StateSetting(
@@ -339,6 +322,7 @@ public class SettingLibrary {
           true
   );
 
+  // TODO write description
   @Category(SettingKey.CategoryType.BLOCKS)
   @NotImplemented
   public static final SettingKey<Boolean> BLOCK_PLACE = new StateSetting(
@@ -346,6 +330,7 @@ public class SettingLibrary {
           true
   );
 
+  // TODO write description
   @Category(SettingKey.CategoryType.BLOCKS)
   @NotImplemented
   public static final SettingKey<Boolean> BLOCK_TRAMPLE = new StateSetting(
@@ -353,15 +338,97 @@ public class SettingLibrary {
           true
   );
 
+  // TODO write description
   public static final SettingKey<Boolean> FLAG_BUILD = new StateSetting(
           "flag-build",
           true
   );
 
+  // TODO write description
   @Category(SettingKey.CategoryType.BLOCKS)
   @NotImplemented
   public static final SettingKey<Boolean> CHEST_ACCESS = new StateSetting(
           "chest-access",
           true
   );
+
+  // TODO write description
+  @NotImplemented
+  public static final SettingKey<Boolean> CHORUS_FRUIT_TELEPORT = new StateSetting(
+          "chorus-fruit-teleport",
+          true
+  );
+
+  @Description("When disabled, coral does not fade")
+  @Category(SettingKey.CategoryType.BLOCKS)
+  @NotImplemented
+  public static final SettingKey<Boolean> CORAL_FADE = new StateSetting(
+          "coral-fade",
+          true
+  );
+
+  @Description("When disabled, creepers do not cause damage")
+  @NotImplemented
+  public static final SettingKey<Boolean> CREEPER_EXPLOSION_DAMAGE = new StateSetting(
+          "creeper-explosion-damage",
+          true
+  );
+
+  @Description("When disabled, creepers do not grief when they explode")
+  @NotImplemented
+  public static final SettingKey<Boolean> CREEPER_EXPLOSION_GRIEF = new StateSetting(
+          "creeper-explosion-grief",
+          true
+  );
+
+  @Description("When disabled, crops do not grow")
+  @NotImplemented
+  public static final SettingKey<Boolean> CROP_GROWTH = new StateSetting(
+          "crop-growth",
+          true
+  );
+
+  @Description("When disabled, animals are invincible")
+  @NotImplemented
+  public static final SettingKey<Boolean> DAMAGE_ANIMALS = new StateSetting(
+          "damage-animals",
+          true
+  );
+
+  @Description("Disallow a player to type messages in chat")
+  @NotImplemented
+  public static final SettingKey<String> DENY_CHAT = new StringSetting(
+          "deny-chat",
+          ""
+  );
+
+  @Description("These entity types will not be allowed to spawn")
+  @NotImplemented
+  public static final SettingKey<Set<EntityType>> DENY_SPAWN = new EntityTypeSetSetting(
+          "deny-spawn",
+          Sets.newHashSet()
+  );
+
+  @Description("Enables block damage caused by the enderdragon")
+  @NotImplemented
+  public static final SettingKey<Boolean> ENDERDRAGON_BLOCK_DAMAGE = new StateSetting(
+          "enderdragon-block-damage",
+          true
+  );
+
+  @Description("When disabled, endermen do not grief blocks by picking them up")
+  @NotImplemented
+  public static final SettingKey<Boolean> ENDERMAN_GRIEF = new StateSetting(
+          "enderman-grief",
+          true
+  );
+
+  @Description("When disabled, enderpearls may not be used for teleportation")
+  @NotImplemented
+  public static final SettingKey<Boolean> ENDERPEARL = new StateSetting(
+          "enderpearl",
+          true
+  );
+
+
 }
