@@ -26,9 +26,6 @@ package com.minecraftonline.nope.arguments;
 
 import com.google.common.collect.Lists;
 import com.minecraftonline.nope.Nope;
-import com.minecraftonline.nope.control.GlobalHost;
-import com.minecraftonline.nope.control.Region;
-import com.minecraftonline.nope.control.WorldHost;
 import com.minecraftonline.nope.host.Host;
 import com.minecraftonline.nope.host.HostTree;
 import com.minecraftonline.nope.host.VolumeHost;
@@ -38,14 +35,12 @@ import org.spongepowered.api.command.args.ArgumentParseException;
 import org.spongepowered.api.command.args.CommandArgs;
 import org.spongepowered.api.command.args.CommandContext;
 import org.spongepowered.api.command.args.CommandElement;
-import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.world.World;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 class HostCommandElement extends CommandElement {
 
@@ -85,14 +80,14 @@ class HostCommandElement extends CommandElement {
 
   @Override
   public List<String> complete(CommandSource src, CommandArgs args, CommandContext context) {
-    String beginning = args.nextIfPresent().orElse("");
+    final String prefix = args.nextIfPresent().orElse("");
 
     List<String> completions = new ArrayList<>();
 
     HostTree hostTree = Nope.getInstance().getHostTree();
 
     final String globalHostName = hostTree.getGlobalHost().getName();
-    if (globalHostName.startsWith(beginning)) {
+    if (globalHostName.startsWith(prefix)) {
       completions.add(globalHostName);
     }
 
@@ -103,13 +98,13 @@ class HostCommandElement extends CommandElement {
       if (worldHost == null) throw new RuntimeException("No worldhost for world: '" + world.getName() + "'");
 
       final String worldHostName = worldHost.getName();
-      if (worldHostName.startsWith(beginning)) {
+      if (worldHostName.startsWith(prefix)) {
         completions.add(worldHostName);
       }
 
       hostTree.getRegions(world.getUniqueId()).stream()
           .map(VolumeHost::getName)
-          .filter(name -> name.startsWith(beginning))
+          .filter(name -> name.startsWith(prefix))
           .forEach(completions::add);
     }
 

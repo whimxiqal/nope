@@ -34,6 +34,7 @@ import com.minecraftonline.nope.setting.SettingKey;
 import com.minecraftonline.nope.setting.SettingValue;
 import com.minecraftonline.nope.util.Format;
 import org.spongepowered.api.command.CommandResult;
+import org.spongepowered.api.command.args.GenericArguments;
 import org.spongepowered.api.text.Text;
 
 public class RegionSettingCommand extends LambdaCommandNode {
@@ -45,8 +46,8 @@ public class RegionSettingCommand extends LambdaCommandNode {
         "set");
     addCommandElements(
         NopeArguments.host(Text.of("region")),
-        NopeArguments.settingKey(Text.of("setting"))/*,
-        GenericArguments.remainingJoinedStrings(Text.of("value"))*/
+        NopeArguments.settingKey(Text.of("setting")),
+        GenericArguments.remainingJoinedStrings(Text.of("value"))
     );
     setExecutor((src, args) -> {
       Host region = args.requireOne("region");
