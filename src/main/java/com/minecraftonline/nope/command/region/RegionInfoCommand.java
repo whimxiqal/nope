@@ -38,7 +38,6 @@ import com.minecraftonline.nope.setting.SettingValue;
 import com.minecraftonline.nope.util.Format;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandResult;
-import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.args.CommandElement;
 import org.spongepowered.api.command.args.GenericArguments;
 import org.spongepowered.api.profile.GameProfile;
@@ -61,7 +60,7 @@ public class RegionInfoCommand extends LambdaCommandNode {
             "info",
             "i");
 
-    CommandElement regionElement = GenericArguments.onlyOne(NopeArguments.regionWrapper(Text.of("region")));
+    CommandElement regionElement = GenericArguments.onlyOne(NopeArguments.host(Text.of("region")));
     regionElement = GenericArguments.flags().flag("f", "-friendly").buildWith(regionElement);
     addCommandElements(regionElement);
     setExecutor((src, args) -> {
@@ -119,7 +118,7 @@ public class RegionInfoCommand extends LambdaCommandNode {
       SettingKey<?> key = entry.getKey();
       SettingValue<?> value = entry.getValue();
 
-      builder.append(Format.keyValue(key.getId() + ": value: ", key.encodeData(value).toString()));
+      builder.append(Format.keyValue(key.getId() + ": value: ", key.encodeData(value.getData()).toString()));
 
       if (value.getTarget() != null) {
         SettingValue.Target target = value.getTarget();

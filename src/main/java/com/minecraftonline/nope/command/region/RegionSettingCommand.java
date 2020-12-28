@@ -25,38 +25,50 @@
 package com.minecraftonline.nope.command.region;
 
 import com.minecraftonline.nope.Nope;
-import com.minecraftonline.nope.arguments.FlagValueWrapper;
 import com.minecraftonline.nope.arguments.NopeArguments;
 import com.minecraftonline.nope.command.common.CommandNode;
 import com.minecraftonline.nope.command.common.LambdaCommandNode;
-import com.minecraftonline.nope.control.Region;
+import com.minecraftonline.nope.host.Host;
 import com.minecraftonline.nope.permission.Permissions;
+import com.minecraftonline.nope.setting.SettingKey;
+import com.minecraftonline.nope.setting.SettingValue;
 import com.minecraftonline.nope.util.Format;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.text.Text;
 
-public class RegionFlagCommand extends LambdaCommandNode {
-  public RegionFlagCommand(CommandNode parent) {
+public class RegionSettingCommand extends LambdaCommandNode {
+  public RegionSettingCommand(CommandNode parent) {
     super(parent,
         Permissions.EDIT_REGION,
-        Text.of("Set region flag"),
-        "flag",
-        "fg");
-    addCommandElements(NopeArguments.regionWrapper(Text.of("region")),
-        NopeArguments.flagValueWrapper(Text.of("flag")));
+        Text.of("Set region a setting"),
+        "setting",
+        "set");
+    addCommandElements(
+        NopeArguments.host(Text.of("region")),
+        NopeArguments.settingKey(Text.of("setting"))/*,
+        GenericArguments.remainingJoinedStrings(Text.of("value"))*/
+    );
     setExecutor((src, args) -> {
-      src.sendMessage(Format.error("Command not implemented yet!"));
-      return CommandResult.empty();
-      /*HostWrapper hostWrapper = args.<HostWrapper>getOne("region").get();
-      FlagValueWrapper<?> flagValueWrapper = args.<FlagValueWrapper<?>>getOne("flag").get();
-      setValue(hostWrapper.getRegion(), flagValueWrapper);
-      Nope.getInstance().getRegionConfigManager().onRegionModify(hostWrapper.getWorldHost(), hostWrapper.getRegionName(), hostWrapper.getRegion(), flagValueWrapper.getSetting());
-      src.sendMessage(Format.info("Successfully set flag " + flagValueWrapper.getSetting().getId() + ", on region " + hostWrapper.getRegionName()));
-      return CommandResult.success();*/
+      Host region = args.requireOne("region");
+      SettingKey<?> settingKey = args.requireOne("setting");
+      String value = args.requireOne("value");
+
+      try {
+        addSetting(region, settingKey, value);
+      } catch (IllegalArgumentException e) {
+        src.sendMessage(Format.error("Invalid value: " + e.getMessage()));
+        return CommandResult.empty();
+      }
+
+      src.sendMessage(Text.of("Successfully set setting " + settingKey.getId() + ", on region " + region.getName()));
+
+      return CommandResult.success();
     });
+    Nope.getInstance().getLogger().info("Spec: " + build().toString());
   }
 
-  private static <T> void setValue(Region region, FlagValueWrapper<T> flagValueWrapper) {
-    region.set(flagValueWrapper.getSetting(), flagValueWrapper.getValue());
+  private <T> void addSetting(Host region, SettingKey<T> key, String s) {
+    T data = key.parseSimplified(s);
+    region.put(key, SettingValue.of(data));
   }
 }

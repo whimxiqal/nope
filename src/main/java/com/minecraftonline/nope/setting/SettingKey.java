@@ -123,6 +123,8 @@ public abstract class SettingKey<T> {
     return cast(new Gson().fromJson(json, defaultData.getClass()));
   }
 
+  public abstract T parseSimplified(String s) throws IllegalArgumentException;
+
   /**
    * Get the class type of this object's generic type.
    *

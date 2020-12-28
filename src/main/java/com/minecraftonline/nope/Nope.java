@@ -50,6 +50,7 @@ import org.spongepowered.api.event.game.state.GameInitializationEvent;
 import org.spongepowered.api.event.game.state.GamePreInitializationEvent;
 import org.spongepowered.api.event.game.state.GameStartedServerEvent;
 import org.spongepowered.api.event.game.state.GameStoppingServerEvent;
+import org.spongepowered.api.event.world.LoadWorldEvent;
 import org.spongepowered.api.plugin.Dependency;
 import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.plugin.PluginContainer;
@@ -99,6 +100,7 @@ public class Nope {
     instance = this;
     //Settings.load();
     SettingLibrary.initialize();
+    logger.info("Pre-init");
     Extra.printSplashscreen();
 
     // Load config
@@ -107,6 +109,7 @@ public class Nope {
 
   @Listener
   public void onInit(GameInitializationEvent event) {
+    logger.info("Init");
     onLoad();
 
     NopeKeys.REGION_WAND = Key.builder()
@@ -139,8 +142,9 @@ public class Nope {
   }
 
   public void onLoad() {
-      regionWandHandler = new RegionWandHandler();
-      collisionHandler = new CollisionHandler();
+    logger.info("onLoad");
+    regionWandHandler = new RegionWandHandler();
+    collisionHandler = new CollisionHandler();
 
     hostTree = new HostTreeImpl(new HoconHostTreeStorage(),
             s -> "__world_" + s + "__",
@@ -149,12 +153,18 @@ public class Nope {
 
   @Listener
   public void onServerStart(GameStartedServerEvent event) {
+    hostTree.load(); // Need worlds to have loaded first.
 
     // Register entire Nope command tree
     commandTree = new NopeCommandTree();
     commandTree.register();
 
 
+  }
+
+  @Listener
+  public void onWorldLoad(LoadWorldEvent e) {
+    // TODO load additional worlds.
   }
 
   @Listener

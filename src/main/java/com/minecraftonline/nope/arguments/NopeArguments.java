@@ -34,7 +34,7 @@ public class NopeArguments {
    * @param key Key to use
    * @return CommandElement
    */
-  public static CommandElement regionWrapper(Text key) {
+  public static CommandElement host(Text key) {
     return new HostCommandElement(key);
   }
 
@@ -44,5 +44,9 @@ public class NopeArguments {
 
   public static CommandElement playerOrPlayerUUID(Text key) {
     return new PlayerOrPlayerUUID(key);
+  }
+
+  public static CommandElement settingKey(Text key) {
+    return new SettingKeyCommandElement(key);
   }
 }

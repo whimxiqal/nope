@@ -41,6 +41,8 @@ import org.spongepowered.api.data.persistence.DataFormats;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.serializer.TextSerializer;
+import org.spongepowered.api.text.serializer.TextSerializers;
 
 import javax.annotation.Nonnull;
 import java.io.IOException;
@@ -51,6 +53,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.Modifier;
 import java.util.*;
+import java.util.regex.Pattern;
 
 public class SettingLibrary {
 
@@ -87,8 +90,12 @@ public class SettingLibrary {
   private SettingLibrary() {
   }
 
-  public static SettingKey<?> lookup(@Nonnull String id) throws NoSuchElementException {
+  private static void ensureInitialized() {
     if (settingMap.isEmpty()) throw new RuntimeException("The SettingLibrary must be initialized");
+  }
+
+  public static SettingKey<?> lookup(@Nonnull String id) throws NoSuchElementException {
+    ensureInitialized();
     SettingKey<?> output = settingMap.get(id);
     if (output == null) {
       throw new NoSuchElementException(String.format(
@@ -98,10 +105,15 @@ public class SettingLibrary {
     return output;
   }
 
+  public static Collection<String> getAll() {
+    ensureInitialized();
+    return settingMap.keySet();
+  }
+
   public static void initialize() {
     Arrays.stream(SettingLibrary.class.getDeclaredFields())
             .filter(field -> Modifier.isStatic(field.getModifiers()))
-            .filter(field -> Setting.class.isAssignableFrom(field.getType()))
+            .filter(field -> SettingKey.class.isAssignableFrom(field.getType()))
             .forEach(field -> {
               try {
                 SettingKey<?> key = (SettingKey<?>) field.get(null);
@@ -121,6 +133,7 @@ public class SettingLibrary {
                 e.printStackTrace();
               }
             });
+    if (settingMap.isEmpty()) throw new RuntimeException("Tried to initialize SettingLibrary, but it did not appear to work");
   }
 
   public static JsonElement serializeSettingAssignments(SettingMap map) {
@@ -138,8 +151,14 @@ public class SettingLibrary {
 
   @SuppressWarnings("unchecked")
   public static SettingMap deserializeSettingAssignments(JsonElement json) {
-    JsonArray serializedSettings = json.getAsJsonObject().get("settings").getAsJsonArray();
+    JsonElement element = json.getAsJsonObject().get("settings");
     SettingMap map = new SettingMap();
+
+    if (element == null) {
+      return map;
+    }
+
+    JsonArray serializedSettings = element.getAsJsonArray();
     for (JsonElement serializedSetting : serializedSettings) {
       JsonObject object = serializedSetting.getAsJsonObject();
       SettingKey<?> key = lookup(object.get("id").getAsString());
@@ -160,11 +179,29 @@ public class SettingLibrary {
     public BooleanSetting(String id, Boolean defaultValue) {
       super(id, defaultValue);
     }
+
+    @Override
+    public Boolean parseSimplified(String s) throws IllegalArgumentException {
+      switch(s.toLowerCase()) {
+        case "true": return true;
+        case "false": return false;
+        default: throw new IllegalArgumentException("Value must be true or false!");
+      }
+    }
   }
 
   public static class IntegerSetting extends SettingKey<Integer> {
     public IntegerSetting(String id, Integer defaultValue) {
       super(id, defaultValue);
+    }
+
+    @Override
+    public Integer parseSimplified(String s) throws IllegalArgumentException {
+      try {
+        return Integer.parseInt(s);
+      } catch (NumberFormatException e) {
+        throw new IllegalArgumentException("Value must be a number", e);
+      }
     }
   }
 
@@ -172,11 +209,18 @@ public class SettingLibrary {
     public StringSetting(String id, String defaultValue) {
       super(id, defaultValue);
     }
+
+    @Override
+    public String parseSimplified(String s) throws IllegalArgumentException {
+      return s;
+    }
   }
 
   /* ====== */
   /* EXTRAS */
   /* ====== */
+
+  public static final String setSplitRegex = "(, )|[ ,]";
 
   public static class StateSetting extends SettingKey<Boolean> {
     public StateSetting(String id, Boolean defaultValue) {
@@ -191,13 +235,15 @@ public class SettingLibrary {
     @Override
     public Boolean parseGenerifiedData(JsonElement jsonElement) {
       final String s = jsonElement.getAsString();
+      return parseSimplified(s);
+    }
+
+    @Override
+    public Boolean parseSimplified(String s) throws IllegalArgumentException {
       switch (s) {
-        case "allow":
-          return true;
-        case "deny":
-          return false;
-        default:
-          throw new IllegalStateException("Invalid state string. Should be allow or deny. Was: " + s);
+        case "allow": return true;
+        case "deny": return false;
+        default: throw new IllegalArgumentException("Invalid state string. Should be allow or deny. Was: " + s);
       }
     }
   }
@@ -231,6 +277,11 @@ public class SettingLibrary {
         return Text.EMPTY;
       }
     }
+
+    @Override
+    public Text parseSimplified(String s) throws IllegalArgumentException {
+      return TextSerializers.FORMATTING_CODE.deserialize(s);
+    }
   }
 
   public static class EnumSetting<E extends Enum<E>> extends SettingKey<E> {
@@ -249,7 +300,12 @@ public class SettingLibrary {
 
     @Override
     public E parseGenerifiedData(JsonElement json) {
-      return Enum.valueOf(enumClass, json.getAsString());
+      return parseSimplified(json.getAsString());
+    }
+
+    @Override
+    public E parseSimplified(String s) throws IllegalArgumentException {
+      return Enum.valueOf(enumClass, s);
     }
   }
 
@@ -266,8 +322,13 @@ public class SettingLibrary {
     @Override
     public GameMode parseGenerifiedData(JsonElement jsonElement) {
       final String s = jsonElement.getAsString();
+      return parseSimplified(s);
+    }
+
+    @Override
+    public GameMode parseSimplified(String s) throws IllegalArgumentException {
       return Sponge.getRegistry().getType(GameMode.class, s)
-              .orElseThrow(() -> new IllegalStateException("Invalid GameMode String. Got: " + s));
+          .orElseThrow(() -> new IllegalStateException("Invalid GameMode String. Got: " + s));
     }
   }
 
@@ -286,6 +347,11 @@ public class SettingLibrary {
       final Set<String> set = new HashSet<>();
       jsonElement.getAsJsonArray().forEach(element -> set.add(element.getAsString()));
       return set;
+    }
+
+    @Override
+    public Set<String> parseSimplified(String s) throws IllegalArgumentException {
+      return Sets.newHashSet(s.split(setSplitRegex));
     }
   }
 
@@ -314,6 +380,17 @@ public class SettingLibrary {
       }
       return set;
     }
+
+    @Override
+    public Set<EntityType> parseSimplified(String s) throws IllegalArgumentException {
+      Set<EntityType> set = new HashSet<>();
+      for (String part : s.split(setSplitRegex)) {
+        final EntityType entityType = Sponge.getRegistry().getType(EntityType.class, s)
+            .orElseThrow(() -> new IllegalStateException("Unknown EntityType: " + s));
+        set.add(entityType);
+      }
+      return set;
+    }
   }
 
   public static class Vector3DSetting extends SettingKey<Vector3d> {
@@ -338,6 +415,23 @@ public class SettingLibrary {
               jsonObject.get("y").getAsDouble(),
               jsonObject.get("z").getAsDouble()
       );
+    }
+
+    @Override
+    public Vector3d parseSimplified(String s) throws IllegalArgumentException {
+      String[] parts = s.split(setSplitRegex, 3);
+      if (parts.length != 3) {
+        throw new IllegalArgumentException("Expected 3 parts for Vector3d, got " + parts.length);
+      }
+      int i = 0;
+      try {
+        double x = Double.parseDouble(parts[i++]);
+        double y = Double.parseDouble(parts[i++]);
+        double z = Double.parseDouble(parts[i]);
+        return Vector3d.from(x,y,z);
+      } catch (NumberFormatException e) {
+        throw new IllegalArgumentException("Int number " + i + ", could not be parsed into a double");
+      }
     }
   }
 

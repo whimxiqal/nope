@@ -85,67 +85,34 @@ class HostCommandElement extends CommandElement {
 
   @Override
   public List<String> complete(CommandSource src, CommandArgs args, CommandContext context) {
-    // TODO: Completely redo.
+    String beginning = args.nextIfPresent().orElse("");
 
-    //Nope.getInstance().getLogger().info("here1");
-    // To get a region, we need a world and and a region string.
-    World world = null;
-    // Can we infer world from the player?
-    if (src instanceof Player) {
-      world = ((Player)src).getWorld();
-    };
-    //Nope.getInstance().getLogger().info("here2");
-    if (!args.hasNext()) {
-      if (world != null) {
-        // we know the world, and we have no hints, return all regions for the players world
-        return new ArrayList<>(Nope.getInstance().getGlobalHost().getWorld(world).getRegions().keySet());
-      }
-      // We don't know the world, the recommendation is to use the -w argument followed by a world
-      return Sponge.getServer().getWorlds().stream()
-          .map(World::getName)
-          .map(name -> "-w " + name)
-          .collect(Collectors.toList());
-    }
-    //Nope.getInstance().getLogger().info("here3");
-    try {
-      String regionArg = args.next();
-      if (regionArg.equals("-w")) {
-        //Nope.getInstance().getLogger().info("here4");
-        // Its a world flag
-        List<String> worlds = Sponge.getServer().getWorlds().stream()
-            .map(World::getName)
-            .collect(Collectors.toList());
-        //Nope.getInstance().getLogger().info("here5");
-        if (!args.hasNext()) {
-          //Nope.getInstance().getLogger().info("returning");
-          return Lists.newArrayList();
-        }
-        //Nope.getInstance().getLogger().info("passed check");
-        String nextArg = args.next();
-        //Nope.getInstance().getLogger().info("nextArg is '" + nextArg + "'");
-        if (nextArg.isEmpty()) {
-          //Nope.getInstance().getLogger().info("returning list of worlds " + worlds);
-          return Lists.newArrayList("-waaaaaa", "-w b");
-        }
-        //Nope.getInstance().getLogger().info("checking for world..");
-        world = Sponge.getServer().getWorld(nextArg).orElse(null);
-        if (world == null) {
-          //Nope.getInstance().getLogger().info("returning filtered possibilities");
-          return ArgsUtil.filterPossibilities(nextArg, worlds);
-        }
-      }
-      //Nope.getInstance().getLogger().info("past -w flag things");
-      if (world != null) {
-        // Parse regions
-        List<String> completions = ArgsUtil.filterPossibilities(regionArg, Nope.getInstance().getGlobalHost().getWorld(world).getRegions().keySet());
-        //Nope.getInstance().getLogger().info("complettions length: " + completions);
-        return completions == null ? Lists.newArrayList() : completions;
-      }
-      return Lists.newArrayList();
+    List<String> completions = new ArrayList<>();
 
-    } catch (ArgumentParseException e) {
-      Nope.getInstance().getLogger().error("Error while autocompleting Region argument", e);
-      return Lists.newArrayList();
+    HostTree hostTree = Nope.getInstance().getHostTree();
+
+    final String globalHostName = hostTree.getGlobalHost().getName();
+    if (globalHostName.startsWith(beginning)) {
+      completions.add(globalHostName);
     }
+
+    for (World world : Sponge.getServer().getWorlds()) {
+
+      Host worldHost = hostTree.getWorldHost(world.getUniqueId());
+
+      if (worldHost == null) throw new RuntimeException("No worldhost for world: '" + world.getName() + "'");
+
+      final String worldHostName = worldHost.getName();
+      if (worldHostName.startsWith(beginning)) {
+        completions.add(worldHostName);
+      }
+
+      hostTree.getRegions(world.getUniqueId()).stream()
+          .map(VolumeHost::getName)
+          .filter(name -> name.startsWith(beginning))
+          .forEach(completions::add);
+    }
+
+    return completions;
   }
 }

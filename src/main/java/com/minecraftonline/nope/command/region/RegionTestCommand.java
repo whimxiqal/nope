@@ -14,7 +14,7 @@ public class RegionTestCommand extends LambdaCommandNode {
     public RegionTestCommand(CommandNode parent) {
         super(parent, Permissions.EDIT_REGION, Text.of("Do a test operation"), "test");
 
-        addCommandElements(NopeArguments.regionWrapper(Text.of("host")));
+        addCommandElements(NopeArguments.host(Text.of("host")));
         setExecutor((src, args) -> {
             Host host = args.<Host>getOne("host").get();
             host.put(SettingLibrary.FLAG_BUILD, SettingValue.of(false));

@@ -24,16 +24,11 @@
 
 package com.minecraftonline.nope.command.region;
 
-import com.minecraftonline.nope.Nope;
 import com.minecraftonline.nope.arguments.NopeArguments;
 import com.minecraftonline.nope.command.common.CommandNode;
 import com.minecraftonline.nope.command.common.LambdaCommandNode;
-import com.minecraftonline.nope.control.GlobalRegion;
-import com.minecraftonline.nope.control.Region;
-import com.minecraftonline.nope.control.WorldHost;
 import com.minecraftonline.nope.permission.Permissions;
 import com.minecraftonline.nope.util.Format;
-import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.args.GenericArguments;
 import org.spongepowered.api.text.Text;
@@ -45,7 +40,7 @@ public class DeleteRegionCommand extends LambdaCommandNode {
         Text.of("Delete a given region"),
         "delete",
         "remove");
-    addCommandElements(GenericArguments.onlyOne(NopeArguments.regionWrapper(Text.of("region"))));
+    addCommandElements(GenericArguments.onlyOne(NopeArguments.host(Text.of("region"))));
     setExecutor((src, args) -> {
       src.sendMessage(Format.error("Command not implemented yet!"));
       return CommandResult.empty();

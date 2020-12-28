@@ -63,7 +63,6 @@ public class HostTreeImpl implements HostTree {
     this.storage = storage;
     this.nameConverter = nameConverter;
     this.worldHostNameRegex = worldHostNameRegex;
-    load();
   }
 
   public void load() {

@@ -1,10 +1,8 @@
 package com.minecraftonline.nope.command.region.targetset;
 
-import com.minecraftonline.nope.Nope;
 import com.minecraftonline.nope.arguments.NopeArguments;
 import com.minecraftonline.nope.command.common.CommandNode;
 import com.minecraftonline.nope.command.common.LambdaCommandNode;
-import com.minecraftonline.nope.control.Region;
 import com.minecraftonline.nope.control.Setting;
 import com.minecraftonline.nope.control.target.TargetSet;
 import com.minecraftonline.nope.permission.Permission;
@@ -30,7 +28,7 @@ public abstract class AbstractTargetSetSubCommand extends LambdaCommandNode {
   public AbstractTargetSetSubCommand(CommandNode parent, String alias, String targetSetName, String action, Setting<TargetSet> setting) {
     super(parent, Permission.of("nope.region.edit." + targetSetName + "." + alias), Text.of("Allows the user to " + action + " the " + targetSetName + " of a region"), alias);
 
-    addCommandElements(GenericArguments.onlyOne(NopeArguments.regionWrapper(Text.of("region"))));
+    addCommandElements(GenericArguments.onlyOne(NopeArguments.host(Text.of("region"))));
 
     setExecutor((src, args) -> {
       /*HostWrapper hostWrapper = args.<HostWrapper>getOne(Text.of("region")).get();
