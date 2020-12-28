@@ -34,12 +34,16 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
+import com.minecraftonline.nope.util.Format;
 import com.minecraftonline.nope.util.NopeTypeTokens;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.data.persistence.DataFormats;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
+import org.spongepowered.api.text.Text;
 
 import javax.annotation.Nonnull;
+import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -51,12 +55,6 @@ import java.util.*;
 public class SettingLibrary {
 
   private static final HashMap<String, SettingKey<?>> settingMap = Maps.newHashMap();
-
-  @Retention(RetentionPolicy.RUNTIME)
-  @Target(ElementType.FIELD)
-  public @interface Comment {
-    String value();
-  }
 
   @Retention(RetentionPolicy.RUNTIME)
   @Target(ElementType.FIELD)
@@ -74,6 +72,13 @@ public class SettingLibrary {
   @Target(ElementType.FIELD)
   public @interface NotImplemented {
     // Empty
+  }
+
+  enum Movement {
+    ALL,
+    ONLY_TRANSLATION,
+    ONLY_TELEPORTATION,
+    NONE,
   }
 
   /**
@@ -173,7 +178,6 @@ public class SettingLibrary {
   /* EXTRAS */
   /* ====== */
 
-
   public static class StateSetting extends SettingKey<Boolean> {
     public StateSetting(String id, Boolean defaultValue) {
       super(id, defaultValue);
@@ -195,6 +199,57 @@ public class SettingLibrary {
         default:
           throw new IllegalStateException("Invalid state string. Should be allow or deny. Was: " + s);
       }
+    }
+  }
+
+  public static class TextSetting extends SettingKey<Text> {
+
+    protected TextSetting(String id, Text defaultData) {
+      super(id, defaultData);
+    }
+
+    @Override
+    protected JsonElement encodeGenerifiedData(Text data) {
+      try {
+        return new Gson().toJsonTree(DataFormats.JSON.write(data.toContainer()));
+      } catch (IOException e) {
+        e.printStackTrace();
+        return new Gson().toJsonTree("");
+      }
+    }
+
+    @Override
+    public Text parseGenerifiedData(JsonElement json) {
+      try {
+        return Sponge.getDataManager()
+                .deserialize(Text.class, DataFormats.JSON.read(json.toString()))
+                .orElseThrow(() -> new RuntimeException(
+                        "The json for Text cannot be serialized: "
+                                + json.toString()));
+      } catch (IOException e) {
+        e.printStackTrace();
+        return Text.EMPTY;
+      }
+    }
+  }
+
+  public static class EnumSetting<E extends Enum<E>> extends SettingKey<E> {
+
+    private Class<E> enumClass;
+
+    protected EnumSetting(String id, E defaultData, Class<E> enumClass) {
+      super(id, defaultData);
+      this.enumClass = enumClass;
+    }
+
+    @Override
+    protected JsonElement encodeGenerifiedData(E data) {
+      return new Gson().toJsonTree(data.name().toLowerCase());
+    }
+
+    @Override
+    public E parseGenerifiedData(JsonElement json) {
+      return Enum.valueOf(enumClass, json.getAsString());
     }
   }
 
@@ -233,7 +288,6 @@ public class SettingLibrary {
       return set;
     }
   }
-
 
   public static class EntityTypeSetSetting extends SettingKey<Set<EntityType>> {
     public EntityTypeSetSetting(String id, Set<EntityType> defaultValue) {
@@ -314,7 +368,7 @@ public class SettingLibrary {
           true
   );
 
-  @Description("When disabled, players may not break blocks")
+  @Description("When disabled, blocks may not be broken")
   @Category(SettingKey.CategoryType.BLOCKS)
   @NotImplemented
   public static final SettingKey<Boolean> BLOCK_BREAK = new StateSetting(
@@ -322,7 +376,7 @@ public class SettingLibrary {
           true
   );
 
-  // TODO write description
+  @Description("When disabled, blocks may not be placed")
   @Category(SettingKey.CategoryType.BLOCKS)
   @NotImplemented
   public static final SettingKey<Boolean> BLOCK_PLACE = new StateSetting(
@@ -330,7 +384,7 @@ public class SettingLibrary {
           true
   );
 
-  // TODO write description
+  @Description("When disabled, blocks like farmland may not be trampled")
   @Category(SettingKey.CategoryType.BLOCKS)
   @NotImplemented
   public static final SettingKey<Boolean> BLOCK_TRAMPLE = new StateSetting(
@@ -338,13 +392,13 @@ public class SettingLibrary {
           true
   );
 
-  // TODO write description
+  // TODO write description. What does this do?
   public static final SettingKey<Boolean> FLAG_BUILD = new StateSetting(
           "flag-build",
           true
   );
 
-  // TODO write description
+  @Description("When disabled, players may not open chests")
   @Category(SettingKey.CategoryType.BLOCKS)
   @NotImplemented
   public static final SettingKey<Boolean> CHEST_ACCESS = new StateSetting(
@@ -395,13 +449,6 @@ public class SettingLibrary {
           true
   );
 
-  @Description("Disallow a player to type messages in chat")
-  @NotImplemented
-  public static final SettingKey<String> DENY_CHAT = new StringSetting(
-          "deny-chat",
-          ""
-  );
-
   @Description("These entity types will not be allowed to spawn")
   @NotImplemented
   public static final SettingKey<Set<EntityType>> DENY_SPAWN = new EntityTypeSetSetting(
@@ -430,5 +477,78 @@ public class SettingLibrary {
           true
   );
 
+  @Description("When disabled, armor stands may not be broken")
+  @NotImplemented
+  public static final SettingKey<Boolean> ARMOR_STAND_DESTROY = new StateSetting(
+          "armor-stand-destroy",
+          true
+  );
+
+  @Description("When disabled, item frames may not be broken")
+  @NotImplemented
+  public static final SettingKey<Boolean> ITEM_FRAME_DESTROY = new StateSetting(
+          "item-frame-destroy",
+          true
+  );
+
+  @Description("When disabled, paintings may not be broken")
+  @NotImplemented
+  public static final SettingKey<Boolean> PAINTING_DESTROY = new StateSetting(
+          "painting-destroy",
+          true
+  );
+
+  @Description("When disabled, vehicles may not be broken")
+  @NotImplemented
+  public static final SettingKey<Boolean> VEHICLE_DESTROY = new StateSetting(
+          "vehicle-destroy",
+          true
+  );
+
+  @Description("Specify which type of movement is allowed by players to enter. "
+          + "Options: all, only_translation, only_teleportation, none")
+  @NotImplemented
+  public static final SettingKey<Movement> ENTRY = new EnumSetting<>(
+          "entry",
+          Movement.ALL,
+          Movement.class
+  );
+
+  @Description("The message that is sent to a player if they are barred from entry")
+  @NotImplemented
+  public static final SettingKey<Text> ENTRY_DENY_MESSAGE = new TextSetting(
+          "entry-deny-message",
+          Format.error("You are not allowed to go there")
+  );
+
+  @Description("When disabled, players may not receive damage from the environment")
+  @NotImplemented
+  public static final SettingKey<Boolean> EVP = new StateSetting(
+          "evp",
+          true
+  );
+
+  @Description("Specify which type of movement is allowed by players to exit. "
+          + "Options: all, only_translation, only_teleportation, none")
+  @NotImplemented
+  public static final SettingKey<Movement> EXIT = new EnumSetting<>(
+          "exit",
+          Movement.ALL,
+          Movement.class
+  );
+
+  @Description("The message that is sent to the player if they are barred from exiting")
+  @NotImplemented
+  public static final SettingKey<Text> EXIT_DENY_MESSAGE = new TextSetting(
+          "exit-deny-message",
+          Format.error("You are not allowed to leave here")
+  );
+
+  @Description("When disabled, experience points are never dropped")
+  @NotImplemented
+  public static final SettingKey<Boolean> EXP_DROPS = new StateSetting(
+          "exp-drops",
+          false
+  );
 
 }
