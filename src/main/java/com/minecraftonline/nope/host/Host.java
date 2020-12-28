@@ -25,9 +25,8 @@
 
 package com.minecraftonline.nope.host;
 
-import com.google.common.collect.Maps;
 import com.google.gson.JsonElement;
-import com.minecraftonline.nope.SettingLibrary;
+import com.minecraftonline.nope.setting.*;
 import lombok.Getter;
 import lombok.Setter;
 import org.spongepowered.api.world.Locatable;
@@ -35,9 +34,6 @@ import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -53,7 +49,7 @@ public abstract class Host {
   private int priority;
   @Getter
   private final String name;
-  private final HashMap<String, Object> assignments = Maps.newHashMap();
+  private final SettingMap settings = new SettingMap();
 
   public Host(String name) {
     this.name = name;
@@ -62,54 +58,53 @@ public abstract class Host {
   /**
    * Assign a value to a setting for this Host
    *
-   * @param setting The setting
-   * @param value   The value to assign
-   * @param <A>     The type of value this is
+   * @param key   The setting
+   * @param value The value to assign
+   * @param <A>   The type of value this is
    * @return The value which was saved prior
    * @see SettingLibrary
    */
   @Nonnull
   @SuppressWarnings("unchecked")
-  public <A> Optional<A> put(SettingLibrary.Setting<A> setting, A value) {
-    return Optional.ofNullable((A) assignments.put(setting.getId(), value));
+  public <A> Optional<A> put(SettingKey<A> key, SettingValue<A> value) {
+    return Optional.ofNullable((A) settings.put(Setting.of(key, value)));
   }
 
   /**
    * Assigns all the values in the map under the given settings
    *
-   * @param assignments all settings
+   * @param settings all settings
    * @see SettingLibrary
    */
-  public void putAll(Map<SettingLibrary.Setting<?>, Object> assignments) {
-    assignments.forEach((key, value) -> this.assignments.put(key.getId(), value));
+  public void putAll(SettingMap settings) {
+    this.settings.putAll(settings);
   }
 
   /**
    * Retrieves the value associated with a setting under this Host.
    *
-   * @param setting the setting which keys the value
+   * @param key the setting which keys the value
    * @param <A>     the type of value stored
    * @return the value
    * @see SettingLibrary
    */
   @Nonnull
-  @SuppressWarnings("unchecked")
-  public <A> Optional<A> get(SettingLibrary.Setting<A> setting) {
-    return Optional.ofNullable((A) assignments.get(setting.getId()));
+  public <A> Optional<A> get(SettingKey<A> key) {
+    return Optional.ofNullable(this.settings.get(key).getData());
   }
 
   /**
    * Retrieves all values associated with settings under this Host.
-   * The types are hidden, so it is suggested you use {@link #get(SettingLibrary.Setting)}
+   * The types are hidden, so it is suggested you use {@link #get(SettingKey)}
    * wherever possible.
    *
    * @return a copy of all the setting assignments
    * @see SettingLibrary
    */
   @Nonnull
-  public Map<SettingLibrary.Setting<?>, Object> getAll() {
-    Map<SettingLibrary.Setting<?>, Object> settings = Maps.newHashMap();
-    assignments.forEach((key, value) -> settings.put(SettingLibrary.lookup(key), value));
+  public SettingMap getAll() {
+    SettingMap settings = new SettingMap();
+    settings.putAll(this.settings);
     return settings;
   }
 
@@ -120,15 +115,15 @@ public abstract class Host {
    * @return true if exists
    * @see SettingLibrary
    */
-  boolean has(SettingLibrary.Setting<?> setting) {
-    return assignments.containsKey(setting.getId());
+  boolean has(SettingKey<?> setting) {
+    return this.settings.containsKey(setting);
   }
 
   /**
-   * Clears all the {@link SettingLibrary.Setting} assignments.
+   * Clears all the {@link Setting} assignments.
    */
   void clear() {
-    assignments.clear();
+    this.settings.clear();
   }
 
   /**

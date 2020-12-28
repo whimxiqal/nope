@@ -25,7 +25,7 @@ public abstract class AbstractTargetSetSubCommand extends LambdaCommandNode {
    * @param alias Alias, name to call the command by
    * @param targetSetName Name of the target set setting, e.g owners, members
    * @param action Action string for the descriptor, see constructor for details
-   * @param setting Setting to change
+   * @param setting com.minecraftonline.nope.setting.Setting to change
    */
   public AbstractTargetSetSubCommand(CommandNode parent, String alias, String targetSetName, String action, Setting<TargetSet> setting) {
     super(parent, Permission.of("nope.region.edit." + targetSetName + "." + alias), Text.of("Allows the user to " + action + " the " + targetSetName + " of a region"), alias);

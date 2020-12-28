@@ -69,7 +69,7 @@ public class CreateSettingsDescriptionFile {
     }
 
     MDStringBuilder builder = new MDStringBuilder();
-    builder.appendTitleLine("Nope Setting summary", 1);
+    builder.appendTitleLine("Nope com.minecraftonline.nope.setting.Setting summary", 1);
     builder.append(
         "This is an automagically generated description of all settings for easy reference.\n\r" +
         "Contains a breakdown by Region, World and global applicable settings, some settings applicable to more than one.\n\r" +

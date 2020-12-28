@@ -26,7 +26,8 @@
 package com.minecraftonline.nope.host;
 
 import com.flowpowered.math.vector.Vector3i;
-import com.minecraftonline.nope.SettingLibrary;
+import com.minecraftonline.nope.setting.SettingKey;
+import com.minecraftonline.nope.setting.SettingLibrary;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 
@@ -135,6 +136,6 @@ public interface HostTree {
    * @return the value corresponding to this setting
    * @see SettingLibrary
    */
-  <V> V lookup(SettingLibrary.Setting<V> setting, Location<World> location);
+  <V> V lookup(SettingKey<V> setting, Location<World> location);
 
 }

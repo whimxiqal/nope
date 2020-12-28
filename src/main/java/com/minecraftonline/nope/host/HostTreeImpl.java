@@ -30,7 +30,8 @@ import com.google.common.collect.Maps;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.minecraftonline.nope.Nope;
-import com.minecraftonline.nope.SettingLibrary;
+import com.minecraftonline.nope.setting.SettingKey;
+import com.minecraftonline.nope.setting.SettingLibrary;
 import com.minecraftonline.nope.structures.VolumeTree;
 import lombok.Getter;
 import org.spongepowered.api.Sponge;
@@ -194,7 +195,7 @@ public class HostTreeImpl implements HostTree {
   /**
    * An object representing a three dimensional Nope Region in a Minecraft world.
    * The Region stores data about its location and extent in three dimensional
-   * space and it stores Setting data for handling and manipulating Sponge events
+   * space and it stores com.minecraftonline.nope.setting.Setting data for handling and manipulating Sponge events
    * based in its specific configuration.
    */
   public class Region extends VolumeHost {
@@ -430,7 +431,7 @@ public class HostTreeImpl implements HostTree {
     return regionToWorld.containsKey(name);
   }
 
-  public <V> V lookup(SettingLibrary.Setting<V> setting, Location<World> location) {
+  public <V> V lookup(SettingKey<V> setting, Location<World> location) {
     // Maximum priority queue (swapped int compare)
     Queue<Host> maximumHeap = new PriorityQueue<>((h1, h2) ->
             Integer.compare(h2.getPriority(), h1.getPriority()));
@@ -456,7 +457,7 @@ public class HostTreeImpl implements HostTree {
     Host dictator = maximumHeap.peek();
 
     if (dictator == null) {
-      return setting.getDefaultValue();
+      return setting.getDefaultData();
     }
 
     Optional<V> value = dictator.get(setting);

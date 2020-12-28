@@ -155,7 +155,7 @@ public class BlockListener extends FlagListener {
       }
 
       Setting<FlagState> specialSetting;
-      // Setting to check for this particular break, i.e if its a place, the place setting,
+      // com.minecraftonline.nope.setting.Setting to check for this particular break, i.e if its a place, the place setting,
       // if its the break, break setting, or null if no specialization
       /*if (e instanceof ChangeBlockEvent.Modify) {
         Nope.getInstance().getLogger().info("modify event");
@@ -313,7 +313,7 @@ public class BlockListener extends FlagListener {
   /**
    * Gets a flag from a region, or from lower priority regions if passthrough is set,
    * or its default if there is still no flag.
-   * @param setting Setting to check
+   * @param setting com.minecraftonline.nope.setting.Setting to check
    * @param regionSet RegionSet to check if passthrough is true and nothing is found in region
    * @param passthrough whether to check regionSet for flags
    * @param membership the membership supplier
@@ -326,7 +326,7 @@ public class BlockListener extends FlagListener {
 
   /**
    * Gets a flag from a region, or from lower priority regions if passthrough is set
-   * @param setting Setting to check
+   * @param setting com.minecraftonline.nope.setting.Setting to check
    * @param regionSet RegionSet to check if passthrough is true and nothing is found in region
    * @param passthrough whether to check regionSet for flags
    * @param membership the membership supplier
@@ -347,7 +347,7 @@ public class BlockListener extends FlagListener {
   /**
    * Gets any flag from a region or from regionSet if none in region
    * and passthrough is true
-   * @param setting Setting to get flag from
+   * @param setting com.minecraftonline.nope.setting.Setting to get flag from
    * @param region Main region
    * @param regionSet other overlapping regions
    * @param passthrough whether to grab flags from lower priority regions if not present

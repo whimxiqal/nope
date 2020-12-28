@@ -25,9 +25,7 @@
 package com.minecraftonline.nope.config.configurate;
 
 import com.google.common.reflect.TypeToken;
-import com.google.gson.JsonElement;
 import com.minecraftonline.nope.Nope;
-import com.minecraftonline.nope.SettingLibrary;
 import com.minecraftonline.nope.config.configurate.supplier.ConfigLoaderSupplier;
 import com.minecraftonline.nope.control.GlobalRegion;
 import com.minecraftonline.nope.control.Region;
@@ -35,10 +33,7 @@ import com.minecraftonline.nope.control.RegularRegion;
 import com.minecraftonline.nope.control.Setting;
 import com.minecraftonline.nope.control.Settings;
 import com.minecraftonline.nope.control.WorldHost;
-import com.minecraftonline.nope.util.NopeTypeTokens;
-import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
-import ninja.leaping.configurate.objectmapping.ObjectMappingException;
 import org.spongepowered.api.world.World;
 
 import java.io.Serializable;
@@ -123,13 +118,13 @@ public class WorldConfigurateConfigManager extends ConfigurateConfigManager {
     }
   }
 
-  /*private <T> void setRegionValue(SettingLibrary.Setting<T> setting, HostTree.Region region, ConfigurationNode node) {
+  /*private <T> void setRegionValue(SettingLibrary.com.minecraftonline.nope.setting.Setting<T> setting, HostTree.Region region, ConfigurationNode node) {
     T value = region.getSetting(setting);
     JsonElement jsonElement = setting.serialize(value);
     try {
       node.setValue(NopeTypeTokens.JSON_ELEMENT_TYPE_TOKEN, jsonElement);
     } catch (ObjectMappingException e) {
-      Nope.getInstance().getLogger().error("Error setting Setting '" + setting.getInfo().getId() + "' in region '" + region.getName() + "', . Skipping save", e);
+      Nope.getInstance().getLogger().error("Error setting com.minecraftonline.nope.setting.Setting '" + setting.getInfo().getId() + "' in region '" + region.getName() + "', . Skipping save", e);
     }
   }*/
 

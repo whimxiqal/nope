@@ -76,7 +76,7 @@ public class Setting<T extends Serializable> implements CatalogType, Serializabl
     Preconditions.checkNotNull(id);
     Validate.checkKebabCase(
         id,
-        "Invalid Setting id: " + id + ". Valid ids only contain characters 'a-z' and '-'.");
+        "Invalid com.minecraftonline.nope.setting.Setting id: " + id + ". Valid ids only contain characters 'a-z' and '-'.");
     Preconditions.checkNotNull(defaultValue);
     Preconditions.checkNotNull(clazz);
     this.id = id;
@@ -92,7 +92,7 @@ public class Setting<T extends Serializable> implements CatalogType, Serializabl
    * @param clazz        The class object representing the type of value this setting stores.
    *                     This is used so {@link com.google.common.reflect.TypeToken}s can be made
    * @param <S>          The type of value stored
-   * @return The generated Setting object
+   * @return The generated com.minecraftonline.nope.setting.Setting object
    */
   public static <S extends Serializable> Setting<S> of(@Nonnull String id,
                              @Nonnull S defaultValue,
@@ -124,7 +124,7 @@ public class Setting<T extends Serializable> implements CatalogType, Serializabl
    *
    * @param description The description of the setting.
    *                    If no comment has been set, it will be set as this description.
-   * @return The same Setting, for chaining
+   * @return The same com.minecraftonline.nope.setting.Setting, for chaining
    */
   public Setting<T> withDescription(@Nullable String description) {
     this.description = description;
@@ -147,7 +147,7 @@ public class Setting<T extends Serializable> implements CatalogType, Serializabl
    * A setter.
    *
    * @param comment The comment to be shown on configuration pages
-   * @return The same Setting, for chaining
+   * @return The same com.minecraftonline.nope.setting.Setting, for chaining
    */
   public Setting<T> withComment(@Nullable String comment) {
     this.comment = comment;
@@ -155,9 +155,9 @@ public class Setting<T extends Serializable> implements CatalogType, Serializabl
   }
 
   /**
-   * Determines whether this Setting is applicable somehow.
+   * Determines whether this com.minecraftonline.nope.setting.Setting is applicable somehow.
    *
-   * @return true if this Setting applies in the appropriate way
+   * @return true if this com.minecraftonline.nope.setting.Setting applies in the appropriate way
    */
   public boolean isApplicable(Applicability applicability) {
     return this.applicability.contains(applicability);
@@ -167,10 +167,10 @@ public class Setting<T extends Serializable> implements CatalogType, Serializabl
    * A setter. By default, it's `GLOBAL` but this method also erases all other Applicabilities
    * prior to setting values.
    *
-   * @param applicability `GLOBAL` if this Setting applies to the entire server,
-   *                      `WORLD` if this Setting applies to individual worlds,
-   *                      `REGION` if this Setting applies to individual regions
-   * @return The same Setting, for chaining
+   * @param applicability `GLOBAL` if this com.minecraftonline.nope.setting.Setting applies to the entire server,
+   *                      `WORLD` if this com.minecraftonline.nope.setting.Setting applies to individual worlds,
+   *                      `REGION` if this com.minecraftonline.nope.setting.Setting applies to individual regions
+   * @return The same com.minecraftonline.nope.setting.Setting, for chaining
    */
   public Setting<T> withApplicability(Applicability... applicability) {
     this.applicability.clear();
@@ -198,7 +198,7 @@ public class Setting<T extends Serializable> implements CatalogType, Serializabl
 
   public Setting<T> withConfigurationPath(String path) {
     Validate.checkConfigFormat(path,
-        "Invalid configuration path for Setting: "
+        "Invalid configuration path for com.minecraftonline.nope.setting.Setting: "
             + path
             + ". Valid ids only contain characters 'a-z', '-', and '.'.");
     this.path = path;
@@ -221,7 +221,7 @@ public class Setting<T extends Serializable> implements CatalogType, Serializabl
   /**
    * Generic getter.
    *
-   * @return The class of the type stored in this Setting.
+   * @return The class of the type stored in this com.minecraftonline.nope.setting.Setting.
    * Generally this is used for deserialization purposes.
    */
   public Class<T> getTypeClass() {

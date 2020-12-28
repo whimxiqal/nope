@@ -26,8 +26,8 @@ public class RegionRemoveFlagCommand extends LambdaCommandNode {
       /*HostWrapper wrapper = args.<HostWrapper>getOne("region").get();
       String flag = args.<String>getOne("flag").get();
 
-      Optional<Setting<?>> optFlag = Settings.REGISTRY_MODULE.getById(flag)
-          .filter(setting -> setting.isApplicable(Setting.Applicability.REGION))
+      Optional<com.minecraftonline.nope.setting.Setting<?>> optFlag = Settings.REGISTRY_MODULE.getById(flag)
+          .filter(setting -> setting.isApplicable(com.minecraftonline.nope.setting.Setting.Applicability.REGION))
           .filter(setting -> setting.getDefaultValue() instanceof Flag); // Only flags
 
       if (!optFlag.isPresent()) {

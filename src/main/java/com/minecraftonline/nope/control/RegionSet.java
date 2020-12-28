@@ -58,7 +58,7 @@ public class RegionSet {
 
   /**
    * Gets the settings from the regions
-   * @param setting Setting to look for
+   * @param setting com.minecraftonline.nope.setting.Setting to look for
    * @param <T> Type of value
    * @return List of values, ordered highest to least priority
    */
@@ -94,7 +94,7 @@ public class RegionSet {
   /**
    * This is the preferred method, as it is the easiest to use.
    * However, for some special cases it might not be suitable.
-   * @param setting Setting to check
+   * @param setting com.minecraftonline.nope.setting.Setting to check
    * @param membership Membership level
    * @param <T> Type of flag.
    * @return Flag set in this region or its default.
@@ -107,7 +107,7 @@ public class RegionSet {
    * Your second best option.
    * Sometimes, you may need to know if there was a flag set, so you can check
    * for other flags instead, such as for build, interact and block-break
-   * @param setting Setting to check
+   * @param setting com.minecraftonline.nope.setting.Setting to check
    * @param membership Membership level
    * @param <T> Type of flag.
    * @return Flag set in this region or its default.

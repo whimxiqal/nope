@@ -72,11 +72,11 @@ public class FlagSerializer implements TypeSerializer<Flag> {
     }
     Optional<Setting<?>> setting = Settings.REGISTRY_MODULE.getById(key);
     if (!setting.isPresent()) {
-      throw new IllegalArgumentException("Setting for flag node did not exist");
+      throw new IllegalArgumentException("com.minecraftonline.nope.setting.Setting for flag node did not exist");
     }
     Object obj = setting.get().getDefaultValue();
     if (!(obj instanceof Flag)) {
-      throw new IllegalArgumentException("Setting was not for a flag!");
+      throw new IllegalArgumentException("com.minecraftonline.nope.setting.Setting was not for a flag!");
     }
     return (Flag<?>)obj;
   }

@@ -24,15 +24,13 @@
 
 package com.minecraftonline.nope.command.region;
 
-import com.google.common.collect.Lists;
-import com.minecraftonline.nope.SettingLibrary;
 import com.minecraftonline.nope.arguments.NopeArguments;
 import com.minecraftonline.nope.command.common.CommandNode;
 import com.minecraftonline.nope.command.common.LambdaCommandNode;
-import com.minecraftonline.nope.control.target.TargetSet;
 import com.minecraftonline.nope.host.Host;
 import com.minecraftonline.nope.host.VolumeHost;
 import com.minecraftonline.nope.permission.Permissions;
+import com.minecraftonline.nope.setting.SettingMap;
 import com.minecraftonline.nope.util.Format;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandResult;
@@ -41,23 +39,17 @@ import org.spongepowered.api.command.args.GenericArguments;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.text.Text;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 public class RegionInfoCommand extends LambdaCommandNode {
   public RegionInfoCommand(CommandNode parent) {
     super(parent,
-        Permissions.INFO_REGION,
-        Text.of("View detailed information about a region"),
-        "info",
-        "i");
+            Permissions.INFO_REGION,
+            Text.of("View detailed information about a region"),
+            "info",
+            "i");
 
     CommandElement regionElement = GenericArguments.onlyOne(NopeArguments.regionWrapper(Text.of("region")));
     regionElement = GenericArguments.flags().flag("f", "-friendly").buildWith(regionElement);
@@ -70,7 +62,7 @@ public class RegionInfoCommand extends LambdaCommandNode {
       src.sendMessage(Format.info("-- Info for region " + host.getName() + " --"));
 
       if (host instanceof VolumeHost) {
-        VolumeHost volumeHost = (VolumeHost)host;
+        VolumeHost volumeHost = (VolumeHost) host;
         // Non global regions only:
         src.sendMessage(Format.keyValue("min: ", volumeHost.xMin() + ", " + volumeHost.yMin() + ", " + volumeHost.zMin()));
         src.sendMessage(Format.keyValue("max: ", volumeHost.xMax() + ", " + volumeHost.yMax() + ", " + volumeHost.zMax()));
@@ -84,7 +76,7 @@ public class RegionInfoCommand extends LambdaCommandNode {
 
       // Flags
 //      StringBuilder builder = new StringBuilder("{ ");
-//      for (Map.Entry<Setting<?>, ?> settingEntry : regionWrapper.getRegion().getSettingMap().entrySet()) {
+//      for (Map.Entry<com.minecraftonline.nope.setting.Setting<?>, ?> settingEntry : regionWrapper.getRegion().getSettingMap().entrySet()) {
 //        if (!(settingEntry.getValue() instanceof Flag)) {
 //          continue; // Only look at flags
 //        }
@@ -100,11 +92,12 @@ public class RegionInfoCommand extends LambdaCommandNode {
 //      // Delete last comma
 //      builder.deleteCharAt(builder.length() - 2).append("}");
 
-      String settings = host.getAll().entrySet().stream()
-          .map(settingEntry -> {
-            SettingLibrary.Setting<?> setting = settingEntry.getKey();
-            return setting.getId() + ": " + setting.encodeValue(settingEntry.getValue());
-          }).collect(Collectors.joining(", "));
+      SettingMap map = host.getAll();
+      String settings = map.keySet()
+              .stream()
+              .map(key -> {
+                return key.getId() + ": " + key.encodeData(map.get(key).getData());
+              }).collect(Collectors.joining(", "));
 
       src.sendMessage(Format.info("Settings: " + settings));
 
@@ -172,6 +165,7 @@ public class RegionInfoCommand extends LambdaCommandNode {
 
   /**
    * Gets a gameprofile promise
+   *
    * @param uuid UUID
    * @return CompletableFuture to obtain a gameprofile.
    */
