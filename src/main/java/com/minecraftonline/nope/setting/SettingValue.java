@@ -25,6 +25,7 @@
 
 package com.minecraftonline.nope.setting;
 
+import com.google.common.collect.ImmutableSet;
 import com.minecraftonline.nope.host.Host;
 import lombok.Builder;
 import lombok.Getter;
@@ -93,6 +94,14 @@ public class SettingValue<T> {
   public static class Target {
     private Set<String> groups;
     private Set<UUID> players;
+
+    public Set<String> getGroups() {
+      return ImmutableSet.copyOf(groups);
+    }
+
+    public Set<UUID> getPlayers() {
+      return ImmutableSet.copyOf(players);
+    }
   }
 
 }

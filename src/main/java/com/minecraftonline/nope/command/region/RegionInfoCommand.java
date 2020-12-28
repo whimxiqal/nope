@@ -24,23 +24,33 @@
 
 package com.minecraftonline.nope.command.region;
 
+import com.minecraftonline.nope.Nope;
 import com.minecraftonline.nope.arguments.NopeArguments;
 import com.minecraftonline.nope.command.common.CommandNode;
 import com.minecraftonline.nope.command.common.LambdaCommandNode;
 import com.minecraftonline.nope.host.Host;
 import com.minecraftonline.nope.host.VolumeHost;
 import com.minecraftonline.nope.permission.Permissions;
+import com.minecraftonline.nope.setting.Setting;
+import com.minecraftonline.nope.setting.SettingKey;
 import com.minecraftonline.nope.setting.SettingMap;
+import com.minecraftonline.nope.setting.SettingValue;
 import com.minecraftonline.nope.util.Format;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandResult;
+import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.args.CommandElement;
 import org.spongepowered.api.command.args.GenericArguments;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.text.Text;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 public class RegionInfoCommand extends LambdaCommandNode {
@@ -68,100 +78,88 @@ public class RegionInfoCommand extends LambdaCommandNode {
         src.sendMessage(Format.keyValue("max: ", volumeHost.xMax() + ", " + volumeHost.yMax() + ", " + volumeHost.zMax()));
       }
 
-      // TODO: add these settings and maybe redo these?
-      //CompletableFuture<String> ownersFuture = serializeTargetSet(host.get(SettingLibrary.REGION_OWNERS).orElse(new TargetSet()), friendly);
-      //CompletableFuture<String> membersFuture = serializeTargetSet(host.get(SettingLibrary.REGION_MEMBERS).orElse(new TargetSet()), friendly);
-
       int regionPriority = host.getPriority();
-
-      // Flags
-//      StringBuilder builder = new StringBuilder("{ ");
-//      for (Map.Entry<com.minecraftonline.nope.setting.Setting<?>, ?> settingEntry : regionWrapper.getRegion().getSettingMap().entrySet()) {
-//        if (!(settingEntry.getValue() instanceof Flag)) {
-//          continue; // Only look at flags
-//        }
-//        Flag<?> flag = (Flag<?>) settingEntry.getValue();
-//        Flag<?> defaultValue = (Flag<?>) settingEntry.getKey().getDefaultValue();
-//
-//        String settingName = settingEntry.getKey().getName();
-//        builder.append(settingName).append(": ").append(serializeFlag(defaultValue, flag)).append(", ");
-//        if (flag.getGroup() != Flag.TargetGroup.ALL) {
-//          builder.append(settingName).append("-group: ").append(flag.getGroup().toString().toLowerCase()).append(", ");
-//        }
-//      }
-//      // Delete last comma
-//      builder.deleteCharAt(builder.length() - 2).append("}");
+      src.sendMessage(Format.keyValue("priority: ", String.valueOf(regionPriority)));
 
       SettingMap map = host.getAll();
-      String settings = map.keySet()
-              .stream()
-              .map(key -> {
-                return key.getId() + ": " + key.encodeData(map.get(key).getData());
-              }).collect(Collectors.joining(", "));
 
-      src.sendMessage(Format.info("Settings: " + settings));
+      Runnable sendMsg = () -> {
+        Text msg = buildMessage(map, friendly);
+        src.sendMessage(msg);
+      };
+
+      if (friendly) {
+        Sponge.getScheduler().createTaskBuilder()
+            .async()
+            .execute(sendMsg)
+            .submit(Nope.getInstance());
+      }
+      else {
+        sendMsg.run();
+      }
 
       // Send the message when we have converted uuids.
-
-      /*ownersFuture.whenComplete((owners, t) -> {
-        src.sendMessage(Format.keyValue("owners: ", owners));
-        membersFuture.whenComplete((members, e) -> {
-          src.sendMessage(Format.keyValue("members: ", members));
-          src.sendMessage(Format.keyValue("priority: ", regionPriority));
-          src.sendMessage(Format.keyValue("flags: ", flagsDescription));
-        });
-      });*/
 
       return CommandResult.success();
     });
   }
 
-  /*private static CompletableFuture<String> serializeTargetSet(TargetSet targetSet, boolean convertUUIDs) {
-    StringBuilder builder = new StringBuilder("{ ");
-    Set<UUID> toConvert = new HashSet<>();
+  /**
+   * Sends an info message to the command source about the given SettingMap
+   * @param map Map of settings to build text with
+   * @param friendly Whether to convert uuids to usernames. If true this method <b>WILL BLOCK</b>
+   * @return Text built text with information about the settings.
+   */
+  public static Text buildMessage(SettingMap map, boolean friendly) {
+    Map<UUID, String> uuidUsernameMap = new HashMap<>();
 
-    for (Map.Entry<Target.TargetType, Target> entry : targetSet.getTargets().entries()) {
-      switch (entry.getKey()) {
-        case PLAYER: {
-          builder.append("p:");
-          if (convertUUIDs) {
-            toConvert.add(UUID.fromString(entry.getValue().serialize()));
+    Text.Builder builder = Text.builder();
+
+    for (Setting<?> entry : map.entries()) {
+      SettingKey<?> key = entry.getKey();
+      SettingValue<?> value = entry.getValue();
+
+      builder.append(Format.keyValue(key.getId() + ": value: ", key.encodeData(value).toString()));
+
+      if (value.getTarget() != null) {
+        SettingValue.Target target = value.getTarget();
+
+        builder.append(Text.of("("))
+            .append(Format.keyValue("groups: ", String.join(",", target.getGroups())));
+
+        List<String> players;
+
+        if (friendly) {
+          // Convert uuids to usernames
+          players = new ArrayList<>();
+          for (UUID uuid : target.getPlayers()) {
+            String username = uuidUsernameMap.get(uuid);
+            if (username != null) {
+              players.add(username);
+            }
+            try {
+              GameProfile profile = Sponge.getServer().getGameProfileManager().get(uuid).get();
+              username = profile.getName().orElse("INVALID_UUID");
+            } catch (InterruptedException | ExecutionException e) {
+              Nope.getInstance().getLogger().error("Error converting uuids!", e);
+            }
+            uuidUsernameMap.put(uuid, username);
+            players.add(username);
           }
-          break;
         }
-        case GROUP: {
-          builder.append("g:");
-          break;
+        else {
+          players = target.getPlayers().stream()
+              .map(UUID::toString)
+              .collect(Collectors.toList());
         }
-        default: {
-          throw new IllegalStateException("Missed an enum!");
-        }
+        builder.append(Text.of(" "))
+            .append(Format.keyValue("players: ", String.join(",", players) + ")"))
+            .append(Text.of(")"));
       }
-      builder.append(entry.getValue().serialize()).append(",");
     }
-    // Remove trailing comma, add closing bracket.
-    builder.deleteCharAt(builder.length() - 1).append(" }");
 
-    return CompletableFuture.supplyAsync(() -> {
-      for (UUID uuid : toConvert) {
-        try {
-          Optional<String> name = getProfile(uuid).get().getName();
-          if (name.isPresent()) {
-            String uuidStr = uuid.toString();
-            int start = builder.indexOf(uuidStr);
-            // Replace uuid with name
-            builder.replace(start, start + uuidStr.length(), name.get());
-          }
-          else {
-            Nope.getInstance().getLogger().warn("GameProfile for uuid: " + uuid + " had no username!");
-          }
-        } catch (InterruptedException | ExecutionException e) {
-          Nope.getInstance().getLogger().warn("Failed to get GameProfile for uuid: " + uuid);
-        }
-      }
-      return builder.toString();
-    });
-  }*/
+    return builder.build();
+  }
 
   /**
    * Gets a gameprofile promise
