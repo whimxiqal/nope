@@ -30,7 +30,7 @@ import org.spongepowered.api.text.Text;
 public class NopeArguments {
 
   /**
-   * Creates a region command element, that returns a <b>{@link HostWrapper}<\b>
+   * Creates a region command element, that returns a <b>{@link com.minecraftonline.nope.host.Host}<\b>
    * @param key Key to use
    * @return CommandElement
    */
