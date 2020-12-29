@@ -167,7 +167,7 @@ public class SettingLibrary {
       JsonObject object = serializedSetting.getAsJsonObject();
       SettingKey<?> key = lookup(object.get("id").getAsString());
       SettingValue<Object> val = SettingValue.of(
-              key.dataFromJson(object.get("value").getAsJsonObject()),
+              key.dataFromJson(object.get("value")),
               new Gson().fromJson(object.get("target"), SettingValue.Target.class));
       map.put(Setting.of((SettingKey<Object>) key, val));
     }
