@@ -5,6 +5,7 @@ import com.minecraftonline.nope.Nope;
 import com.minecraftonline.nope.host.Host;
 import com.minecraftonline.nope.host.HostTree;
 import com.minecraftonline.nope.host.VolumeHost;
+import com.minecraftonline.nope.host.Worlded;
 import org.slf4j.Logger;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandSource;
@@ -24,7 +25,12 @@ public class VolumeHostUtil {
      * @param min New corner of region
      * @param max New corner of region
      */
-    public static Host remakeRegion(CommandSource src, Host host, String newName, World world, Vector3i min, Vector3i max) throws IllegalArgumentException {
+    public static Host remakeRegion(CommandSource src, VolumeHost host, String newName, World world, Vector3i min, Vector3i max) throws IllegalArgumentException {
+
+        if (!(host instanceof Worlded)) {
+            throw new IllegalArgumentException("Cannot move a host if we do not what world it is in");
+        }
+
         HostTree hostTree = Nope.getInstance().getHostTree();
 
         hostTree.removeRegion(host.getName());
@@ -40,8 +46,8 @@ public class VolumeHostUtil {
             return newHost;
         } catch (IllegalArgumentException e) {
             // Add back the region we removed.
-            VolumeHost volumeHost = (VolumeHost) host;
-            UUID worldUUID = volumeHost.getWorldUuid();
+            Worlded worldedHost = (Worlded) host;
+            UUID worldUUID = worldedHost.getWorldUuid();
             try {
                 hostTree.addRegion(worldUUID,
                         host.getName(),
@@ -54,8 +60,8 @@ public class VolumeHostUtil {
                 src.sendMessage(Format.error("Failed moving region, and then failed adding back the original region."));
                 src.sendMessage(Format.error("If you wish to keep this region please make a backup of the config before restarting!!"));
                 src.sendMessage(Format.error("Logging circumstances now. Please report this asap!"));
-                Vector3i fromMin = Vector3i.from(volumeHost.xMin(), volumeHost.yMin(), volumeHost.zMin());
-                Vector3i fromMax = Vector3i.from(volumeHost.xMax(), volumeHost.yMax(), volumeHost.zMax());
+                Vector3i fromMin = Vector3i.from(host.xMin(), host.yMin(), host.zMin());
+                Vector3i fromMax = Vector3i.from(host.xMax(), host.yMax(), host.zMax());
                 String worldName = Sponge.getServer().getWorld(worldUUID).map(World::getName).orElse(worldUUID.toString());
 
                 Logger logger = Nope.getInstance().getLogger();

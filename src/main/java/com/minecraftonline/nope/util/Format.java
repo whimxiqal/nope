@@ -25,6 +25,7 @@
 package com.minecraftonline.nope.util;
 
 import com.minecraftonline.nope.Nope;
+import com.minecraftonline.nope.host.Host;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.action.TextActions;
 import org.spongepowered.api.text.format.TextColor;
@@ -69,6 +70,10 @@ public final class Format {
   }
 
   public static Text keyValue(String key, String value) {
+    return keyValue(key, Text.of(value));
+  }
+
+  public static Text keyValue(String key, Text value) {
     return Text.of(Format.ACCENT, key, Format.note(value));
   }
 
@@ -110,4 +115,25 @@ public final class Format {
     return builder.build();
   }
 
+  public static Text subtleCommand(@Nonnull String text, @Nonnull String command, @Nullable Text hoverMessage) {
+    Text.Builder builder = Text.builder().append(Text.of(text))
+        .onClick(TextActions.runCommand(command));
+
+    if (hoverMessage != null) {
+      builder.onHover(TextActions.showText(Text.of(
+          hoverMessage,
+          hoverMessage.isEmpty() ? Text.EMPTY : "\n",
+          Format.note(command))));
+    }
+    return builder.build();
+  }
+
+  public static Text host(@Nonnull Host host) {
+    String name = host.getName();
+    return Format.subtleCommand(
+        name,
+        "/nope rg info " + name,
+        Text.of("Click for more details about this region")
+    );
+  }
 }

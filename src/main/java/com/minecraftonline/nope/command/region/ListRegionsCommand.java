@@ -27,8 +27,6 @@ package com.minecraftonline.nope.command.region;
 import com.minecraftonline.nope.Nope;
 import com.minecraftonline.nope.command.common.CommandNode;
 import com.minecraftonline.nope.command.common.LambdaCommandNode;
-import com.minecraftonline.nope.host.Host;
-import com.minecraftonline.nope.host.HostTreeImpl;
 import com.minecraftonline.nope.host.VolumeHost;
 import com.minecraftonline.nope.permission.Permissions;
 import com.minecraftonline.nope.util.Format;
@@ -37,7 +35,6 @@ import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
 
 import java.util.Collection;
-import java.util.Map;
 import java.util.UUID;
 
 public class ListRegionsCommand extends LambdaCommandNode {
@@ -60,7 +57,7 @@ public class ListRegionsCommand extends LambdaCommandNode {
         return CommandResult.success();
       }
       for (VolumeHost volumeHost : regions) {
-        src.sendMessage(Text.of(Format.ACCENT, "> ", Format.note(volumeHost.getName())));
+        src.sendMessage(Text.of(Format.ACCENT, "> ", Format.host(volumeHost)));
       }
       return CommandResult.success();
     });

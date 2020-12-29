@@ -47,6 +47,7 @@ import org.spongepowered.api.world.World;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -78,6 +79,10 @@ public class RegionInfoCommand extends LambdaCommandNode {
         src.sendMessage(Format.keyValue("world: ", worldName));
       }
 
+      if (host.getParent() != null) {
+        src.sendMessage(Format.keyValue("parent: ", Format.host(host.getParent())));
+      }
+
       if (host instanceof VolumeHost) {
         VolumeHost volumeHost = (VolumeHost) host;
         // Volume regions only:
@@ -92,7 +97,9 @@ public class RegionInfoCommand extends LambdaCommandNode {
 
       Runnable sendMsg = () -> {
         Text msg = buildMessage(map, friendly);
-        src.sendMessage(msg);
+        if (!msg.isEmpty()) {
+          src.sendMessage(msg);
+        }
       };
 
       if (friendly) {
@@ -120,9 +127,7 @@ public class RegionInfoCommand extends LambdaCommandNode {
   public static Text buildMessage(SettingMap map, boolean friendly) {
     Map<UUID, String> uuidUsernameMap = new HashMap<>();
 
-    List<Text> lines = new ArrayList<>();
-
-    lines.add(Text.of("- Settings -"));
+    LinkedList<Text> lines = new LinkedList<>();
 
     for (Setting<?> entry : map.entries()) {
       SettingKey<?> key = entry.getKey();
@@ -168,6 +173,10 @@ public class RegionInfoCommand extends LambdaCommandNode {
             .append(Text.of(")"));
       }
       lines.add(builder.build());
+    }
+
+    if (!lines.isEmpty()) {
+      lines.addFirst(Text.of("- Settings -"));
     }
 
     return Text.joinWith(Text.NEW_LINE, lines);

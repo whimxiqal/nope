@@ -204,7 +204,9 @@ public class HostTreeImpl implements HostTree {
    * space and it stores com.minecraftonline.nope.setting.Setting data for handling and manipulating Sponge events
    * based in its specific configuration.
    */
-  public class Region extends VolumeHost {
+  public class Region extends VolumeHost implements Worlded {
+
+    private final UUID worldUuid;
 
     /**
      * Default constructor.
@@ -218,7 +220,8 @@ public class HostTreeImpl implements HostTree {
      * @param zmax end point of z range, inclusive
      */
     public Region(UUID worldUuid, String name, int xmin, int xmax, int ymin, int ymax, int zmin, int zmax) {
-      super(worldUuid, name, xmin, xmax, ymin, ymax, zmin, zmax);
+      super(name, xmin, xmax, ymin, ymax, zmin, zmax);
+      this.worldUuid = worldUuid;
       if (!worldHosts.containsKey(worldUuid)) {
         throw new IllegalArgumentException("No world exists with UUID " + worldUuid.toString());
       }
@@ -254,6 +257,10 @@ public class HostTreeImpl implements HostTree {
               && spongeLocation.getBlockZ() <= zMax();
     }
 
+    @Override
+    public UUID getWorldUuid() {
+      return worldUuid;
+    }
   }
 
   public class RegionSerializer implements Host.HostSerializer<Region> {

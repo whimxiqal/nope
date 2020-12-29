@@ -44,7 +44,7 @@ public class RegionMoveCommand extends LambdaCommandNode {
 
       try {
         Host newHost = VolumeHostUtil.remakeRegion(src,
-            host,
+            (VolumeHost) host,
             host.getName(),
             world,
             min,
