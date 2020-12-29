@@ -27,7 +27,11 @@ package com.minecraftonline.nope.host;
 
 import com.minecraftonline.nope.structures.VolumeTree;
 
-public class VolumeHost extends Host implements VolumeTree.Volume {
+import java.util.UUID;
+
+public class VolumeHost extends Host implements VolumeTree.Volume, Worlded {
+
+  private final UUID worldUuid;
 
   private final int xmin;
   private final int xmax;
@@ -38,8 +42,9 @@ public class VolumeHost extends Host implements VolumeTree.Volume {
   private final int zmin;
   private final int zmax;
 
-  public VolumeHost(String name, int xmin, int xmax, int ymin, int ymax, int zmin, int zmax) {
+  public VolumeHost(UUID worldUuid, String name, int xmin, int xmax, int ymin, int ymax, int zmin, int zmax) {
     super(name);
+    this.worldUuid = worldUuid;
     if (xmin > xmax || ymin > ymax || zmin > zmax) {
       throw new IllegalArgumentException("Minimum values must be less than or equal to maximum values");
     }
@@ -79,5 +84,10 @@ public class VolumeHost extends Host implements VolumeTree.Volume {
   @Override
   public int zMax() {
     return zmax;
+  }
+
+  @Override
+  public UUID getWorldUuid() {
+    return this.worldUuid;
   }
 }

@@ -27,6 +27,7 @@ package com.minecraftonline.nope.control;
 import com.flowpowered.math.vector.Vector3d;
 import com.google.common.base.Preconditions;
 import com.minecraftonline.nope.Nope;
+import com.minecraftonline.nope.host.Worlded;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
@@ -35,7 +36,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-public class WorldHost extends Host {
+public class WorldHost extends Host implements Worlded {
 
   private final UUID worldUuid;
   private final Map<String, Region> regions = new HashMap<>();
@@ -45,8 +46,9 @@ public class WorldHost extends Host {
     this.worldUuid = worldUuid;
   }
 
+  @Override
   public UUID getWorldUuid() {
-    return this.worldUuid;
+    return worldUuid;
   }
 
   public Map<String, Region> getRegions() {
