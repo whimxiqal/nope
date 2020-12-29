@@ -25,8 +25,6 @@ public class RegionMoveCommand extends LambdaCommandNode {
         NopeArguments.regionLocation(Text.of("selection"))
     );
     setExecutor((src, args) -> {
-      src.sendMessage(Format.error("Command not implemented yet!"));
-
       Host host = args.requireOne("host");
       RegionWandHandler.Selection selection = args.requireOne("selection");
 
@@ -34,10 +32,6 @@ public class RegionMoveCommand extends LambdaCommandNode {
         src.sendMessage(Format.error("You can only move volume regions!"));
         return CommandResult.empty();
       }
-
-      HostTree hostTree = Nope.getInstance().getHostTree();
-
-      hostTree.removeRegion(host.getName());
 
       Vector3i min = selection.getMin();
       Vector3i max = selection.getMax();

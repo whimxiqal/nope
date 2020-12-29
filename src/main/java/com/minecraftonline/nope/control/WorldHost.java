@@ -36,7 +36,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-public class WorldHost extends Host implements Worlded {
+public class WorldHost extends Host {
 
   private final UUID worldUuid;
   private final Map<String, Region> regions = new HashMap<>();
@@ -46,7 +46,6 @@ public class WorldHost extends Host implements Worlded {
     this.worldUuid = worldUuid;
   }
 
-  @Override
   public UUID getWorldUuid() {
     return worldUuid;
   }

@@ -29,6 +29,7 @@ import com.flowpowered.math.vector.Vector3i;
 import com.google.common.collect.Maps;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.minecraftonline.nope.Nope;
 import com.minecraftonline.nope.setting.SettingKey;
 import com.minecraftonline.nope.setting.SettingLibrary;
@@ -144,7 +145,7 @@ public class HostTreeImpl implements HostTree {
   /**
    * Class for managing the few WorldHosts in this HostTree
    */
-  class WorldHost extends Host {
+  class WorldHost extends Host implements Worlded {
     @Getter
     private final UUID worldUuid;
     private final VolumeTree<String, Region> regionTree = new VolumeTree<>();
@@ -203,7 +204,7 @@ public class HostTreeImpl implements HostTree {
    * space and it stores com.minecraftonline.nope.setting.Setting data for handling and manipulating Sponge events
    * based in its specific configuration.
    */
-  public class Region extends VolumeHost implements Worlded {
+  public class Region extends VolumeHost {
 
     /**
      * Default constructor.
@@ -291,12 +292,13 @@ public class HostTreeImpl implements HostTree {
                       "This JSON element for a WorldHost is storing an invalid World name '%s': %s",
                       json.getAsJsonObject().get("world"),
                       json)));
-      int xmin = json.getAsJsonObject().get("xmin").getAsInt();
-      int xmax = json.getAsJsonObject().get("xmax").getAsInt();
-      int ymin = json.getAsJsonObject().get("ymin").getAsInt();
-      int ymax = json.getAsJsonObject().get("ymax").getAsInt();
-      int zmin = json.getAsJsonObject().get("zmin").getAsInt();
-      int zmax = json.getAsJsonObject().get("zmax").getAsInt();
+      JsonObject volume = json.getAsJsonObject().get("volume").getAsJsonObject();
+      int xmin = volume.get("xmin").getAsInt();
+      int xmax = volume.get("xmax").getAsInt();
+      int ymin = volume.get("ymin").getAsInt();
+      int ymax = volume.get("ymax").getAsInt();
+      int zmin = volume.get("zmin").getAsInt();
+      int zmax = volume.get("zmax").getAsInt();
       Region host = new Region(parent, name, xmin, xmax, ymin, ymax, zmin, zmax);
 
       host.setPriority(json.getAsJsonObject().get("priority").getAsInt());
@@ -427,7 +429,9 @@ public class HostTreeImpl implements HostTree {
               "Region deletion failed because name %s does not exist",
               name));
     }
-    return worldHosts.get(regionToWorld.get(name)).regionTree.remove(name);
+    WorldHost worldHost = worldHosts.get(regionToWorld.get(name));
+    regionToWorld.remove(name);
+    return worldHost.regionTree.remove(name);
   }
 
   @Override

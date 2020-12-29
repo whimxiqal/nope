@@ -66,7 +66,7 @@ public class RegionInfoCommand extends LambdaCommandNode {
     regionElement = GenericArguments.flags().flag("f", "-friendly").buildWith(regionElement);
     addCommandElements(regionElement);
     setExecutor((src, args) -> {
-      Host host = args.<Host>getOne(Text.of("region")).get();
+      Host host = args.requireOne(Text.of("region"));
 
       boolean friendly = args.<Boolean>getOne(Text.of("f")).orElse(false);
 
@@ -120,11 +120,15 @@ public class RegionInfoCommand extends LambdaCommandNode {
   public static Text buildMessage(SettingMap map, boolean friendly) {
     Map<UUID, String> uuidUsernameMap = new HashMap<>();
 
-    Text.Builder builder = Text.builder();
+    List<Text> lines = new ArrayList<>();
+
+    lines.add(Text.of("- Settings -"));
 
     for (Setting<?> entry : map.entries()) {
       SettingKey<?> key = entry.getKey();
       SettingValue<?> value = entry.getValue();
+
+      Text.Builder builder = Text.builder();
 
       builder.append(Format.keyValue(key.getId() + ": value: ", key.encodeData(value.getData()).toString()));
 
@@ -163,9 +167,10 @@ public class RegionInfoCommand extends LambdaCommandNode {
             .append(Format.keyValue("players: ", String.join(",", players) + ")"))
             .append(Text.of(")"));
       }
+      lines.add(builder.build());
     }
 
-    return builder.build();
+    return Text.joinWith(Text.NEW_LINE, lines);
   }
 
   /**

@@ -152,8 +152,11 @@ public class HoconHostTreeStorage implements HostTreeImpl.Storage {
 
     try (Connection connection = new Connection(loader)) {
       // write collection of regions
+      List<String> worlds = new ArrayList<>();
       for (HostTreeImpl.Region region : regions) {
-        final ConfigurationNode node = connection.node.getNode(region.getParent().getName(), WORLD_SUB_REGIONS_KEY, region.getName());
+        final String worldName = region.getParent().getName();
+        worlds.add(worldName);
+        final ConfigurationNode node = connection.node.getNode(worldName, WORLD_SUB_REGIONS_KEY, region.getName());
 
         node.setValue(NopeTypeTokens.JSON_ELEMENT_TYPE_TOKEN, serializer.serialize(region));
       }
