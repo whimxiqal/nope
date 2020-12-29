@@ -30,6 +30,7 @@ import com.minecraftonline.nope.command.common.CommandNode;
 import com.minecraftonline.nope.command.common.LambdaCommandNode;
 import com.minecraftonline.nope.host.Host;
 import com.minecraftonline.nope.host.VolumeHost;
+import com.minecraftonline.nope.host.Worlded;
 import com.minecraftonline.nope.permission.Permissions;
 import com.minecraftonline.nope.setting.Setting;
 import com.minecraftonline.nope.setting.SettingKey;
@@ -42,6 +43,7 @@ import org.spongepowered.api.command.args.CommandElement;
 import org.spongepowered.api.command.args.GenericArguments;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.text.Text;
+import org.spongepowered.api.world.World;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -70,9 +72,15 @@ public class RegionInfoCommand extends LambdaCommandNode {
 
       src.sendMessage(Format.info("-- Info for region " + host.getName() + " --"));
 
+      if (host instanceof Worlded) {
+        UUID worldUUID = ((Worlded) host).getWorldUuid();
+        String worldName = Sponge.getServer().getWorld(worldUUID).map(World::getName).orElse(worldUUID.toString());
+        src.sendMessage(Format.keyValue("world: ", worldName));
+      }
+
       if (host instanceof VolumeHost) {
         VolumeHost volumeHost = (VolumeHost) host;
-        // Non global regions only:
+        // Volume regions only:
         src.sendMessage(Format.keyValue("min: ", volumeHost.xMin() + ", " + volumeHost.yMin() + ", " + volumeHost.zMin()));
         src.sendMessage(Format.keyValue("max: ", volumeHost.xMax() + ", " + volumeHost.yMax() + ", " + volumeHost.zMax()));
       }

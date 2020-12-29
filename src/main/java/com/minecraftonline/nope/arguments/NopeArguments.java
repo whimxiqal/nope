@@ -49,4 +49,8 @@ public class NopeArguments {
   public static CommandElement settingKey(Text key) {
     return new SettingKeyCommandElement(key);
   }
+
+  public static CommandElement regionLocation(Text key) {
+    return new RegionLocationSelectionCommandElement(key);
+  }
 }
