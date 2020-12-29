@@ -34,6 +34,7 @@ import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.Optional;
 
 /**
@@ -51,8 +52,13 @@ public abstract class Host {
   private final String name;
   private final SettingMap settings = new SettingMap();
 
-  public Host(String name) {
+  public Host(String name, int priority) {
     this.name = name;
+    this.priority = priority;
+  }
+
+  public Host(String name) {
+    this(name, 0);
   }
 
   /**

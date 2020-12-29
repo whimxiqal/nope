@@ -109,9 +109,13 @@ public class HostTreeImpl implements HostTree {
    */
   static class GlobalHost extends Host {
     private GlobalHost() {
-      super(Nope.GLOBAL_HOST_NAME);
+      super(Nope.GLOBAL_HOST_NAME, -2);
       setParent(null);
-      setPriority(0);
+    }
+
+    @Override
+    public void setPriority(int priority) {
+      throw new UnsupportedOperationException("You cannot set the priority of the global host!");
     }
   }
 
@@ -151,10 +155,9 @@ public class HostTreeImpl implements HostTree {
     private final VolumeTree<String, Region> regionTree = new VolumeTree<>();
 
     WorldHost(String name, UUID worldUuid) {
-      super(name);
+      super(name, -1);
       this.worldUuid = worldUuid;
       setParent(globalHost);
-      setPriority(1);
     }
 
     @Override
@@ -162,6 +165,10 @@ public class HostTreeImpl implements HostTree {
       return spongeLocation.getExtent().getUniqueId().equals(this.worldUuid);
     }
 
+    @Override
+    public void setPriority(int priority) {
+      throw new UnsupportedOperationException("You cannot set the priority of a WorldHost!");
+    }
   }
 
   public class WorldHostSerializer implements Host.HostSerializer<WorldHost> {
@@ -226,7 +233,6 @@ public class HostTreeImpl implements HostTree {
         throw new IllegalArgumentException("No world exists with UUID " + worldUuid.toString());
       }
       setParent(worldHosts.get(worldUuid));
-      setPriority(2);
     }
 
     /**
@@ -260,6 +266,21 @@ public class HostTreeImpl implements HostTree {
     @Override
     public UUID getWorldUuid() {
       return worldUuid;
+    }
+
+    @Override
+    public void setPriority(int priority) {
+      if (priority < 0) {
+        throw new IllegalArgumentException("Cannot set a negative priority");
+      }
+      Optional<Region> intersection = findIntersectingRegionWithSamePriority(worldUuid, this);
+      if (intersection.isPresent()) {
+        throw new IllegalArgumentException(String.format("Cannot set priority of %s to %d, because region %s which this intersects has that priority",
+            getName(),
+            priority,
+            intersection.get().getName()
+        ));
+      }
     }
   }
 
@@ -411,11 +432,7 @@ public class HostTreeImpl implements HostTree {
     }
     Region region = new Region(worldUuid, name, pos1, pos2);
     region.setPriority(priority);
-    Optional<Region> intersection = worldHosts.get(worldUuid).regionTree
-            .volumes()
-            .stream()
-            .filter(other -> region.intersects(other) && region.getPriority() == other.getPriority())
-            .findAny();
+    Optional<Region> intersection = findIntersectingRegionWithSamePriority(worldUuid, region);
     if (intersection.isPresent()) {
       throw new IllegalArgumentException(String.format(
               "Region insertion failed because the new region %s and region %s have the same priority level: %d",
@@ -427,6 +444,15 @@ public class HostTreeImpl implements HostTree {
     regionToWorld.put(name, worldUuid);
     return region;
   }
+
+  public Optional<Region> findIntersectingRegionWithSamePriority(UUID worldUuid, Region region) {
+    return worldHosts.get(worldUuid).regionTree
+        .volumes()
+        .stream()
+        .filter(other -> other != region && region.intersects(other) && region.getPriority() == other.getPriority())
+        .findAny();
+  }
+
 
   @Nonnull
   @Override
