@@ -57,7 +57,7 @@ public class ListRegionsCommand extends LambdaCommandNode {
         return CommandResult.success();
       }
       for (VolumeHost volumeHost : regions) {
-        src.sendMessage(Text.of(Format.ACCENT, "> ", Format.host(volumeHost)));
+        src.sendMessage(Text.of(Format.ACCENT, "> ", Format.note(Format.host(volumeHost))));
       }
       return CommandResult.success();
     });

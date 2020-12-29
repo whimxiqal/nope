@@ -113,9 +113,10 @@ public interface HostTree {
    *
    * @param name the name of the region which to remove
    * @return the removed region
+   * @throws IllegalArgumentException If this host cannot be removed or does not exist
    */
   @Nullable
-  Host removeRegion(String name);
+  Host removeRegion(String name) throws IllegalArgumentException;
 
   /**
    * Check if a given world has a region called a given name.

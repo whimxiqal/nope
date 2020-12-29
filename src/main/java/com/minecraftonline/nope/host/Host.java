@@ -126,6 +126,19 @@ public abstract class Host {
   }
 
   /**
+   * Removes any value associated with the given
+   * {@link SettingKey} from this host.
+   *
+   * @param key Key to remove the mapping for.
+   * @return The no longer associated {@link SettingValue}, or null,
+   * if nothing was removed.
+   */
+  @Nullable
+  public <A> SettingValue<A> remove(SettingKey<A> key) {
+    return settings.remove(key);
+  }
+
+  /**
    * Clears all the {@link Setting} assignments.
    */
   void clear() {

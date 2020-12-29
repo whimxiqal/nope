@@ -24,9 +24,11 @@
 
 package com.minecraftonline.nope.command.region;
 
+import com.minecraftonline.nope.Nope;
 import com.minecraftonline.nope.arguments.NopeArguments;
 import com.minecraftonline.nope.command.common.CommandNode;
 import com.minecraftonline.nope.command.common.LambdaCommandNode;
+import com.minecraftonline.nope.host.Host;
 import com.minecraftonline.nope.permission.Permissions;
 import com.minecraftonline.nope.util.Format;
 import org.spongepowered.api.command.CommandResult;
@@ -40,27 +42,20 @@ public class DeleteRegionCommand extends LambdaCommandNode {
         Text.of("Delete a given region"),
         "delete",
         "remove");
-    addCommandElements(GenericArguments.onlyOne(NopeArguments.host(Text.of("region"))));
+    addCommandElements(GenericArguments.onlyOne(NopeArguments.host(Text.of("host"))));
     setExecutor((src, args) -> {
-      src.sendMessage(Format.error("Command not implemented yet!"));
+      Host host = args.requireOne("host");
+
+      try {
+        Nope.getInstance().getHostTree().removeRegion(host.getName());
+      } catch (IllegalArgumentException e) {
+        src.sendMessage(Format.error("This region cannot be deleted!"));
+        return CommandResult.empty();
+      }
+
+      src.sendMessage(Format.success("Region " + host.getName() + ", was successfully deleted."));
+
       return CommandResult.empty();
-      /*HostWrapper region = args.<HostWrapper>getOne(Text.of("region")).get();
-      WorldHost worldHost = region.getWorldHost();
-      boolean isGlobal = region.getRegion() instanceof GlobalRegion;
-      if (isGlobal) {
-        worldHost.removeRegion(region.getRegionName());
-        Nope.getInstance().getRegionConfigManager().onRegionRemove(worldHost, region.getRegionName());
-        Region newRegion = new GlobalRegion(worldHost.getWorldUuid());
-        worldHost.addRegion(region.getRegionName(), newRegion);
-        Nope.getInstance().getRegionConfigManager().onRegionCreate(worldHost, region.getRegionName(), newRegion);
-        src.sendMessage(Format.info("Global region successfully cleared - it cannot be deleted"));
-      }
-      else {
-        worldHost.removeRegion(region.getRegionName());
-        Nope.getInstance().getRegionConfigManager().onRegionRemove(worldHost, region.getRegionName());
-        src.sendMessage(Format.info("Region: '" + region.getRegionName() + "' has been deleted"));
-      }
-      return CommandResult.success();*/
     });
   }
 }
