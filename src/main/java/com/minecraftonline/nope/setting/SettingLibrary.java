@@ -36,11 +36,14 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import com.minecraftonline.nope.util.Format;
 import com.minecraftonline.nope.util.NopeTypeTokens;
+import org.spongepowered.api.CatalogType;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.persistence.DataFormats;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.entity.living.player.gamemode.GameModes;
+import org.spongepowered.api.item.ItemType;
+import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.serializer.TextSerializers;
 
@@ -133,7 +136,8 @@ public class SettingLibrary {
                 e.printStackTrace();
               }
             });
-    if (settingMap.isEmpty()) throw new RuntimeException("Tried to initialize SettingLibrary, but it did not appear to work");
+    if (settingMap.isEmpty())
+      throw new RuntimeException("Tried to initialize SettingLibrary, but it did not appear to work");
   }
 
   public static JsonElement serializeSettingAssignments(SettingMap map) {
@@ -247,9 +251,12 @@ public class SettingLibrary {
     @Override
     public Boolean parse(String s) throws IllegalArgumentException {
       switch (s) {
-        case "allow": return true;
-        case "deny": return false;
-        default: throw new IllegalArgumentException("Invalid state string. Should be allow or deny. Was: " + s);
+        case "allow":
+          return true;
+        case "deny":
+          return false;
+        default:
+          throw new IllegalArgumentException("Invalid state string. Should be allow or deny. Was: " + s);
       }
     }
   }
@@ -315,26 +322,27 @@ public class SettingLibrary {
     }
   }
 
-  public static class GameModeSetting extends SettingKey<GameMode> {
-    public GameModeSetting(String id, GameMode defaultValue) {
+  public static class CatalogTypeSetting<C extends CatalogType> extends SettingKey<C> {
+    public CatalogTypeSetting(String id, C defaultValue) {
       super(id, defaultValue);
     }
 
     @Override
-    public JsonElement dataToJsonGenerified(GameMode value) {
+    public JsonElement dataToJsonGenerified(C value) {
       return new JsonPrimitive(cast(value).getId());
     }
 
     @Override
-    public GameMode dataFromJsonGenerified(JsonElement jsonElement) {
+    public C dataFromJsonGenerified(JsonElement jsonElement) {
       final String s = jsonElement.getAsString();
       return parse(s);
     }
 
     @Override
-    public GameMode parse(String s) throws IllegalArgumentException {
-      return Sponge.getRegistry().getType(GameMode.class, s)
-          .orElseThrow(() -> new IllegalStateException("Invalid GameMode String. Got: " + s));
+    public C parse(String s) throws IllegalArgumentException {
+      return Sponge.getRegistry()
+              .getType(valueType(), s)
+              .orElseThrow(() -> new IllegalStateException("Invalid GameMode String. Got: " + s));
     }
   }
 
@@ -435,7 +443,7 @@ public class SettingLibrary {
         double x = Double.parseDouble(parts[i++]);
         double y = Double.parseDouble(parts[i++]);
         double z = Double.parseDouble(parts[i]);
-        return Vector3d.from(x,y,z);
+        return Vector3d.from(x, y, z);
       } catch (NumberFormatException e) {
         throw new IllegalArgumentException("Int number " + i + ", could not be parsed into a double");
       }
@@ -599,13 +607,6 @@ public class SettingLibrary {
           true
   );
 
-  @Description("When disabled, vehicles may not be broken")
-  @NotImplemented
-  public static final SettingKey<Boolean> VEHICLE_DESTROY = new StateSetting(
-          "vehicle-destroy",
-          true
-  );
-
   @Description("Specify which type of movement is allowed by players to enter. "
           + "Options: all, only_translation, only_teleportation, none")
   @NotImplemented
@@ -727,7 +728,7 @@ public class SettingLibrary {
 
   @Description("The default gamemode of players")
   @NotImplemented
-  public static final SettingKey<GameMode> GAME_MODE = new GameModeSetting(
+  public static final SettingKey<GameMode> GAME_MODE = new CatalogTypeSetting<>(
           "game-mode",
           GameModes.NOT_SET
   );
@@ -1007,6 +1008,125 @@ public class SettingLibrary {
   public static final SettingKey<Vector3d> SPAWN = new Vector3DSetting(
           "spawn",
           Vector3d.ZERO
+  );
+
+  @Description("When disabled, players may not teleport in or out")
+  @NotImplemented
+  public static final SettingKey<Vector3d> TELEPORT_LOCATION = new Vector3DSetting(
+          "teleport",
+          Vector3d.ZERO
+  );
+
+  // TODO write description
+  @NotImplemented
+  public static final SettingKey<String> TIME_LOCK = new StringSetting(
+          "time-lock",
+          ""
+  );
+
+  @Description("When disabled, tnt may not be placed or activated")
+  @NotImplemented
+  public static final SettingKey<Boolean> FLAG_TNT = new StateSetting(
+          "tnt",
+          true
+  );
+
+  // TODO write description
+  @NotImplemented
+  public static final SettingKey<Boolean> USE = new StateSetting(
+          "use",
+          true
+  );
+
+  @Description("When disabled, players may not break vehicles")
+  @NotImplemented
+  public static final SettingKey<Boolean> VEHICLE_DESTROY = new StateSetting(
+          "vehicle-destroy",
+          true
+  );
+
+  @Description("When disabled, players may not place vehicles")
+  @NotImplemented
+  public static final SettingKey<Boolean> VEHICLE_PLACE = new StateSetting(
+          "vehicle-place",
+          true
+  );
+
+  @Description("When disabled, vines do not grow naturally")
+  @NotImplemented
+  public static final SettingKey<Boolean> VINE_GROWTH = new StateSetting(
+          "vine-growth",
+          true
+  );
+
+  @Description("When disabled, water cannot flow")
+  @NotImplemented
+  public static final SettingKey<Boolean> WATER_FLOW = new StateSetting(
+          "water-flow",
+          true
+  );
+
+  @Description("When disabled, the wither does not cause any damage to players")
+  @NotImplemented
+  public static final SettingKey<Boolean> WITHER_DAMAGE = new StateSetting(
+          "wither-damage",
+          true
+  );
+
+  // TODO write description
+  @NotImplemented
+  public static final SettingKey<Boolean> OP_PERMISSIONS = new StateSetting(
+          "op-permissions",
+          true
+  );
+
+  @Description("The Data Source name of the SQL database to be used if SQL is the storage type")
+  @NotImplemented
+  public static final SettingKey<String> SQL_DSN = new StringSetting(
+          "sql-dsn",
+          "jdbc:mysql://localhost/nope"
+  );
+
+  @Description("The password for the SQL database to be used if SQL is the storage type")
+  @NotImplemented
+  public static final SettingKey<String> SQL_PASSWORD = new StringSetting(
+          "sql-password",
+          "nope"
+  );
+
+  @Description("The table prefix to be placed before SQL tables if SQL is the storage type")
+  @NotImplemented
+  public static final SettingKey<String> SQL_TABLE_PREFIX = new StringSetting(
+          "sql-table-prefix",
+          "nope"
+  );
+
+  @Description("The username for the SQL database to be used if SQL is the storage type")
+  @NotImplemented
+  public static final SettingKey<String> SQL_USERNAME = new StringSetting(
+          "sql-username",
+          "nope"
+  );
+
+  enum StorageType {
+    MariaDB,
+    SQLite,
+    HOCON
+  }
+
+  @Description("The type of storage to persist Nope server state")
+  @NotImplemented
+  public static final SettingKey<StorageType> STORAGE_TYPE = new EnumSetting<StorageType>(
+          "storage-type",
+          StorageType.HOCON,
+          StorageType.class
+  );
+
+  @Description("The type of item to be used as the Nope wand")
+  @NotImplemented
+  public static final SettingKey<ItemType> WAND_ITEM = new CatalogTypeSetting<>(
+          "wand-item",
+          ItemTypes.STICK
   );
 
 }
