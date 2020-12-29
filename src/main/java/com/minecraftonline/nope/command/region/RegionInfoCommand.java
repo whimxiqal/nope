@@ -30,6 +30,7 @@ import com.minecraftonline.nope.command.common.CommandNode;
 import com.minecraftonline.nope.command.common.LambdaCommandNode;
 import com.minecraftonline.nope.host.Host;
 import com.minecraftonline.nope.host.VolumeHost;
+import com.minecraftonline.nope.host.Worlded;
 import com.minecraftonline.nope.permission.Permissions;
 import com.minecraftonline.nope.setting.Setting;
 import com.minecraftonline.nope.setting.SettingKey;
@@ -42,6 +43,7 @@ import org.spongepowered.api.command.args.CommandElement;
 import org.spongepowered.api.command.args.GenericArguments;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.text.Text;
+import org.spongepowered.api.world.World;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -64,15 +66,21 @@ public class RegionInfoCommand extends LambdaCommandNode {
     regionElement = GenericArguments.flags().flag("f", "-friendly").buildWith(regionElement);
     addCommandElements(regionElement);
     setExecutor((src, args) -> {
-      Host host = args.<Host>getOne(Text.of("region")).get();
+      Host host = args.requireOne(Text.of("region"));
 
       boolean friendly = args.<Boolean>getOne(Text.of("f")).orElse(false);
 
       src.sendMessage(Format.info("-- Info for region " + host.getName() + " --"));
 
+      if (host instanceof Worlded) {
+        UUID worldUUID = ((Worlded) host).getWorldUuid();
+        String worldName = Sponge.getServer().getWorld(worldUUID).map(World::getName).orElse(worldUUID.toString());
+        src.sendMessage(Format.keyValue("world: ", worldName));
+      }
+
       if (host instanceof VolumeHost) {
         VolumeHost volumeHost = (VolumeHost) host;
-        // Non global regions only:
+        // Volume regions only:
         src.sendMessage(Format.keyValue("min: ", volumeHost.xMin() + ", " + volumeHost.yMin() + ", " + volumeHost.zMin()));
         src.sendMessage(Format.keyValue("max: ", volumeHost.xMax() + ", " + volumeHost.yMax() + ", " + volumeHost.zMax()));
       }
@@ -112,13 +120,17 @@ public class RegionInfoCommand extends LambdaCommandNode {
   public static Text buildMessage(SettingMap map, boolean friendly) {
     Map<UUID, String> uuidUsernameMap = new HashMap<>();
 
-    Text.Builder builder = Text.builder();
+    List<Text> lines = new ArrayList<>();
+
+    lines.add(Text.of("- Settings -"));
 
     for (Setting<?> entry : map.entries()) {
       SettingKey<?> key = entry.getKey();
       SettingValue<?> value = entry.getValue();
 
-      builder.append(Format.keyValue(key.getId() + ": value: ", key.dataToJson(value.getData()).toString()));
+      Text.Builder builder = Text.builder();
+
+      builder.append(Format.keyValue(key.getId() + ": value: ", key.encodeData(value.getData()).toString()));
 
       if (value.getTarget() != null) {
         SettingValue.Target target = value.getTarget();
@@ -155,9 +167,10 @@ public class RegionInfoCommand extends LambdaCommandNode {
             .append(Format.keyValue("players: ", String.join(",", players) + ")"))
             .append(Text.of(")"));
       }
+      lines.add(builder.build());
     }
 
-    return builder.build();
+    return Text.joinWith(Text.NEW_LINE, lines);
   }
 
   /**

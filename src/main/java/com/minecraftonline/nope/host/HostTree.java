@@ -103,9 +103,9 @@ public interface HostTree {
    *                                  like if the name is not unique or the priority is the same
    *                                  as an overlapping region
    */
-  @Nullable
+  @Nonnull
   Host addRegion(UUID worldUuid, String name, Vector3i pos1, Vector3i pos2, int priority)
-          throws IllegalStateException;
+          throws IllegalArgumentException;
 
   /**
    * Remove a region from the given world. This method fails if it is called

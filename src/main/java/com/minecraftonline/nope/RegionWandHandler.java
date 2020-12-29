@@ -110,6 +110,12 @@ public class RegionWandHandler {
 
     public Selection() {}
 
+    public Selection(World world, Vector3i pos1, Vector3i pos2) {
+      this.world = world;
+      this.pos1 = pos1;
+      this.pos2 = pos2;
+    }
+
     public void setPos1(Location<World> location, CommandSource src) {
       if (this.world != null && !this.world.equals(location.getExtent())) {
         this.pos2 = null;
@@ -141,12 +147,12 @@ public class RegionWandHandler {
           && this.pos2 != null;
     }
 
-    public Vector3i getPos1() {
-      return pos1;
+    public Vector3i getMin() {
+      return pos1.min(pos2);
     }
 
-    public Vector3i getPos2() {
-      return pos2;
+    public Vector3i getMax() {
+      return pos1.max(pos2);
     }
 
     public World getWorld() {
