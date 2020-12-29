@@ -82,13 +82,13 @@ public abstract class SettingKey<T> {
   /**
    * Convert some data into a Json structure.
    * Data must be of the type of this object's generic type.
-   * Uses {@link #encodeGenerifiedData(Object)}.
+   * Uses {@link #dataToJsonGenerified(Object)}.
    *
    * @param data the encoding data
    * @return Json structure representing data
    */
-  public final JsonElement encodeData(Object data) {
-    return encodeGenerifiedData(cast(data));
+  public final JsonElement dataToJson(Object data) {
+    return dataToJsonGenerified(cast(data));
   }
 
   /**
@@ -97,20 +97,20 @@ public abstract class SettingKey<T> {
    * @param data the encoding data
    * @return json structure representing data
    */
-  protected JsonElement encodeGenerifiedData(T data) {
+  protected JsonElement dataToJsonGenerified(T data) {
     return new Gson().toJsonTree(data);
   }
 
   /**
    * Parse some data from a Json structure.
    * Data will be of the type of this object's generic type.
-   * Uses {@link #parseGenerifiedData(JsonElement)}.
+   * Uses {@link #dataFromJsonGenerified(JsonElement)}.
    *
    * @param json Json structure
    * @return the data represented by the Json structure
    */
-  public final Object parseData(JsonElement json) {
-    return parseGenerifiedData(json);
+  public final Object dataFromJson(JsonElement json) throws ParseSettingException {
+    return dataFromJsonGenerified(json);
   }
 
   /**
@@ -119,11 +119,22 @@ public abstract class SettingKey<T> {
    * @param json Json structure
    * @return the data represented by the Json structure
    */
-  public T parseGenerifiedData(JsonElement json) {
-    return cast(new Gson().fromJson(json, defaultData.getClass()));
+  public T dataFromJsonGenerified(JsonElement json) throws ParseSettingException {
+    return new Gson().fromJson(json, valueType());
   }
 
-  public abstract T parseSimplified(String s) throws IllegalArgumentException;
+  /**
+   * Parse some data in some custom format.
+   * Used for dealing with data from in-game usages of
+   * declaring data.
+   *
+   * @param data string representation of data
+   * @return the data object
+   * @throws ParseSettingException if data cannot be parsed
+   */
+  public T parse(String data) throws ParseSettingException {
+    return new Gson().fromJson(data, valueType());
+  }
 
   /**
    * Get the class type of this object's generic type.
@@ -178,5 +189,8 @@ public abstract class SettingKey<T> {
   @Override
   public String toString() {
     return this.id;
+  }
+
+  public static class ParseSettingException extends IllegalArgumentException {
   }
 }
