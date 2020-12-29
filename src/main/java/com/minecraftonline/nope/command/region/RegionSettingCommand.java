@@ -68,7 +68,7 @@ public class RegionSettingCommand extends LambdaCommandNode {
   }
 
   private <T> void addSetting(Host region, SettingKey<T> key, String s) {
-    T data = key.parseSimplified(s);
+    T data = key.parse(s);
     region.put(key, SettingValue.of(data));
   }
 }

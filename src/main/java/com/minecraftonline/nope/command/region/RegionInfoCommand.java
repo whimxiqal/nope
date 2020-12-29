@@ -118,7 +118,7 @@ public class RegionInfoCommand extends LambdaCommandNode {
       SettingKey<?> key = entry.getKey();
       SettingValue<?> value = entry.getValue();
 
-      builder.append(Format.keyValue(key.getId() + ": value: ", key.encodeData(value.getData()).toString()));
+      builder.append(Format.keyValue(key.getId() + ": value: ", key.dataToJson(value.getData()).toString()));
 
       if (value.getTarget() != null) {
         SettingValue.Target target = value.getTarget();
