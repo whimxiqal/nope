@@ -53,7 +53,12 @@ public class DeleteRegionCommand extends LambdaCommandNode {
         return CommandResult.empty();
       }
 
+      // TODO: Confirmation message?
       src.sendMessage(Format.success("Region " + host.getName() + ", was successfully deleted."));
+      src.sendMessage(Format.info("If this was a mistake, run ", Format.command("reload",
+          "/nope reload",
+          Format.note("Discards all changes")
+          ), " to discard all changes since the last save/restart"));
 
       return CommandResult.empty();
     });

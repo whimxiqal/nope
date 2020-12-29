@@ -34,7 +34,6 @@ import ninja.leaping.configurate.ConfigurationOptions;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
 import ninja.leaping.configurate.objectmapping.ObjectMappingException;
 import ninja.leaping.configurate.objectmapping.serialize.TypeSerializerCollection;
-import ninja.leaping.configurate.objectmapping.serialize.TypeSerializers;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -42,6 +41,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public class HoconHostTreeStorage implements HostTreeImpl.Storage {
 
@@ -126,8 +127,10 @@ public class HoconHostTreeStorage implements HostTreeImpl.Storage {
   public void writeGlobalHost(HostTreeImpl.GlobalHost globalHost, Host.HostSerializer<HostTreeImpl.GlobalHost> serializer) {
     try (Connection connection = new Connection(loader)) {
       // write GlobalHost
+      final ConfigurationNode node = connection.node.getNode(Nope.GLOBAL_HOST_NAME);
+      node.setValue(null); // Blank it.
       final JsonElement element = serializer.serialize(globalHost);
-      connection.node.getNode(Nope.GLOBAL_HOST_NAME).setValue(NopeTypeTokens.JSON_ELEMENT_TYPE_TOKEN, element);
+      node.setValue(NopeTypeTokens.JSON_ELEMENT_TYPE_TOKEN, element);
     } catch (IOException | ObjectMappingException e) {
       throw new HostParseException("Error writing globalhost", e);
     }
@@ -139,8 +142,10 @@ public class HoconHostTreeStorage implements HostTreeImpl.Storage {
     try (Connection connection = new Connection(loader)) {
       // write collection of WorldHosts
       for (HostTreeImpl.WorldHost worldHost : worldHosts) {
+        final ConfigurationNode node = connection.node.getNode(worldHost.getName());
+        node.setValue(null); // Blank it.
         final JsonElement element = serializer.serialize(worldHost);
-        connection.node.getNode(worldHost.getName()).setValue(NopeTypeTokens.JSON_ELEMENT_TYPE_TOKEN, element);
+        node.setValue(NopeTypeTokens.JSON_ELEMENT_TYPE_TOKEN, element);
       }
     } catch (IOException | ObjectMappingException e) {
       throw new HostParseException("Error writing world hosts", e);
@@ -152,7 +157,11 @@ public class HoconHostTreeStorage implements HostTreeImpl.Storage {
 
     try (Connection connection = new Connection(loader)) {
       // write collection of regions
-      List<String> worlds = new ArrayList<>();
+      Set<String> worlds = regions.stream().map(region -> region.getParent().getName()).collect(Collectors.toSet());
+      for (String world : worlds) {
+        final ConfigurationNode node = connection.node.getNode(world, WORLD_SUB_REGIONS_KEY);
+        node.setValue(null); // Blank it to stop deleted regions/settings from reappearing
+      }
       for (HostTreeImpl.Region region : regions) {
         final String worldName = region.getParent().getName();
         worlds.add(worldName);
@@ -160,7 +169,6 @@ public class HoconHostTreeStorage implements HostTreeImpl.Storage {
 
         node.setValue(NopeTypeTokens.JSON_ELEMENT_TYPE_TOKEN, serializer.serialize(region));
       }
-
     } catch (IOException | ObjectMappingException e) {
       throw new HostParseException("Error saving config after writing regions", e);
     }

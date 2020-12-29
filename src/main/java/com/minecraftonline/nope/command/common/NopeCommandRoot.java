@@ -26,6 +26,8 @@ package com.minecraftonline.nope.command.common;
 
 import com.minecraftonline.nope.Nope;
 import com.minecraftonline.nope.command.ExampleCommand;
+import com.minecraftonline.nope.command.ReloadCommand;
+import com.minecraftonline.nope.command.SaveCommand;
 import com.minecraftonline.nope.command.region.RegionCommand;
 import com.minecraftonline.nope.command.setting.SettingCommand;
 import com.minecraftonline.nope.permission.Permissions;
@@ -34,7 +36,6 @@ import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.args.CommandContext;
-import org.spongepowered.api.command.args.GenericArguments;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.text.format.TextStyles;
@@ -52,6 +53,8 @@ public class NopeCommandRoot extends CommandNode {
     addChildren(new ExampleCommand(this));
     addChildren(new RegionCommand(this));
     addChildren(new SettingCommand(this));
+    addChildren(new ReloadCommand(this));
+    addChildren(new SaveCommand(this));
   }
 
   @Nonnull

@@ -174,10 +174,13 @@ public class Nope {
 
   @Listener
   public void reload(GameReloadEvent e) {
-    this.globalConfigManager.saveAll();
-    globalConfigManager = new HoconGlobalConfigurateConfigManager(configDir);
-    // Also reset globalConfigManager, because thats not done in onLoad()
+    // Do not add anything else here or you will break the /nope reload command.
+    reload();
+  }
+
+  public void reload() {
     onLoad();
+    hostTree.load();
   }
 
   public static Nope getInstance() {

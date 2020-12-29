@@ -56,7 +56,7 @@ public class RegionLocationSelectionCommandElement extends CommandElement {
                 throw new ArgumentParseException(Format.error("Make a selection first using the ",
                         Format.command(
                                 "wand",
-                                "nope region wand",
+                                "/nope region wand",
                                 Text.of("Get a region wand"))), "", 0);
             }
             return selection;
