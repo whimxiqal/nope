@@ -110,7 +110,14 @@ public class Nope {
   @Listener
   public void onInit(GameInitializationEvent event) {
     logger.info("Init");
-    onLoad();
+    regionWandHandler = new RegionWandHandler();
+    collisionHandler = new CollisionHandler();
+
+    hostTree = new HostTreeImpl(
+        new HoconHostTreeStorage(),
+        Nope.GLOBAL_HOST_NAME,
+        s -> "__world_" + s + "__",
+        "__world_.*__");
 
     NopeKeys.REGION_WAND = Key.builder()
         .type(TypeTokens.BOOLEAN_VALUE_TOKEN)
@@ -141,16 +148,6 @@ public class Nope {
     //FlagListeners.registerAll();
   }
 
-  public void onLoad() {
-    logger.info("onLoad");
-    regionWandHandler = new RegionWandHandler();
-    collisionHandler = new CollisionHandler();
-
-    hostTree = new HostTreeImpl(new HoconHostTreeStorage(),
-            s -> "__world_" + s + "__",
-            "__world_.*__");
-  }
-
   @Listener
   public void onServerStart(GameStartedServerEvent event) {
     hostTree.load(); // Need worlds to have loaded first.
@@ -158,7 +155,6 @@ public class Nope {
     // Register entire Nope command tree
     commandTree = new NopeCommandTree();
     commandTree.register();
-
 
   }
 
@@ -179,7 +175,6 @@ public class Nope {
   }
 
   public void reload() {
-    onLoad();
     hostTree.load();
   }
 

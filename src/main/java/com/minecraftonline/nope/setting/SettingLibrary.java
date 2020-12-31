@@ -108,9 +108,9 @@ public class SettingLibrary {
     return output;
   }
 
-  public static Collection<String> getAll() {
+  public static Collection<SettingKey<?>> getAll() {
     ensureInitialized();
-    return settingMap.keySet();
+    return settingMap.values();
   }
 
   public static void initialize() {

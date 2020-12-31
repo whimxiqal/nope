@@ -69,14 +69,20 @@ public abstract class SettingKey<T> {
     MISC,
   }
 
-  protected SettingKey(String id, T defaultData) {
+  protected SettingKey(String id, T defaultData, SettingKey<T> parent) {
     this.id = id;
     this.defaultData = defaultData;
+    this.parent = parent;
+  }
+
+  protected SettingKey(String id, T defaultData) {
+    this(id, defaultData, null);
   }
 
   String description = null;
   @Nonnull
   CategoryType category = CategoryType.MISC;
+  final SettingKey<T> parent;
   boolean implemented = true;
 
   /**
@@ -155,9 +161,9 @@ public abstract class SettingKey<T> {
   public final T cast(Object object) {
     if (!valueType().isInstance(object)) {
       throw new IllegalArgumentException(String.format(
-              "input %s must be of type %s",
-              object.getClass().getName(),
-              valueType().getName()));
+          "input %s must be of type %s",
+          object.getClass().getName(),
+          valueType().getName()));
     }
     return valueType().cast(object);
   }
@@ -170,6 +176,11 @@ public abstract class SettingKey<T> {
   @Nonnull
   public final CategoryType getCategory() {
     return this.category;
+  }
+
+  @Nonnull
+  public final Optional<SettingKey<T>> getParent() {
+    return Optional.ofNullable(parent);
   }
 
   public final boolean isImplemented() {

@@ -70,14 +70,13 @@ public class RegionWandHandler {
     MutableBoolean mutableBoolean = new MutableBoolean(false);
     event.getCause().first(Player.class).ifPresent(player -> player.getItemInHand(HandTypes.MAIN_HAND).filter(this::isWand).ifPresent(wand -> {
       mutableBoolean.setTrue();
-      selectionMap.compute(player, (k,v) -> {
+      selectionMap.compute(player, (k, v) -> {
         if (v == null) {
           v = new Selection();
         }
         if (event instanceof InteractBlockEvent.Primary) {
           v.setPos1(block.getLocation().get(), player); // left click
-        }
-        else if (event instanceof InteractBlockEvent.Secondary){
+        } else if (event instanceof InteractBlockEvent.Secondary) {
           v.setPos2(block.getLocation().get(), player); // right click
         }
         return v;
@@ -108,7 +107,8 @@ public class RegionWandHandler {
     @Nullable
     private Vector3i pos2 = null;
 
-    public Selection() {}
+    public Selection() {
+    }
 
     public Selection(World world, Vector3i pos1, Vector3i pos2) {
       this.world = world;

@@ -95,8 +95,8 @@ public abstract class Host {
    * @see SettingLibrary
    */
   @Nonnull
-  public <A> Optional<A> get(SettingKey<A> key) {
-    return Optional.ofNullable(this.settings.get(key).getData());
+  public <A> Optional<SettingValue<A>> get(SettingKey<A> key) {
+    return Optional.ofNullable(this.settings.get(key));
   }
 
   /**

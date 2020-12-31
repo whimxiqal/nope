@@ -61,6 +61,7 @@ public class RegionCreateCommand extends LambdaCommandNode {
             selection.getMax(),
             priority
         );
+        src.sendMessage(Format.success("Successfully created region ", Format.note(name), "!"));
       } catch (IllegalArgumentException e) {
         src.sendMessage(Format.error("Could not create region: " + e.getMessage()));
         return CommandResult.empty();
