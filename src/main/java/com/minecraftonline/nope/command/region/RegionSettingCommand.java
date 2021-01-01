@@ -61,6 +61,7 @@ public class RegionSettingCommand extends LambdaCommandNode {
         return CommandResult.empty();
       }
 
+      Nope.getInstance().getHostTree().save();
       src.sendMessage(Format.success("Successfully set setting " + settingKey.getId() + ", on region " + region.getName()));
 
       return CommandResult.success();

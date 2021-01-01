@@ -1,5 +1,6 @@
 package com.minecraftonline.nope.command.region;
 
+import com.minecraftonline.nope.Nope;
 import com.minecraftonline.nope.arguments.NopeArguments;
 import com.minecraftonline.nope.command.common.CommandNode;
 import com.minecraftonline.nope.command.common.LambdaCommandNode;
@@ -33,6 +34,7 @@ public class RegionSetPriorityCommand extends LambdaCommandNode {
         return CommandResult.empty();
       }
 
+      Nope.getInstance().getHostTree().save();
       src.sendMessage(Format.success("Set priority of host " + host.getName() + ", to " + priority));
 
       return CommandResult.success();

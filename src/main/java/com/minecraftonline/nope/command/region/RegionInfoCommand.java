@@ -30,7 +30,6 @@ import com.minecraftonline.nope.command.common.CommandNode;
 import com.minecraftonline.nope.command.common.LambdaCommandNode;
 import com.minecraftonline.nope.host.Host;
 import com.minecraftonline.nope.host.VolumeHost;
-import com.minecraftonline.nope.host.Worlded;
 import com.minecraftonline.nope.permission.Permissions;
 import com.minecraftonline.nope.setting.Setting;
 import com.minecraftonline.nope.setting.SettingKey;
@@ -73,9 +72,11 @@ public class RegionInfoCommand extends LambdaCommandNode {
 
       src.sendMessage(Format.info("-- Info for region " + host.getName() + " --"));
 
-      if (host instanceof Worlded) {
-        UUID worldUUID = ((Worlded) host).getWorldUuid();
-        String worldName = Sponge.getServer().getWorld(worldUUID).map(World::getName).orElse(worldUUID.toString());
+      if (host.getWorldUuid() != null) {
+        String worldName = Sponge.getServer()
+            .getWorld(host.getWorldUuid())
+            .map(World::getName)
+            .orElseThrow(() -> new RuntimeException("Sponge cannot find world with UUID: " + host.getWorldUuid()));
         src.sendMessage(Format.keyValue("world: ", worldName));
       }
 
@@ -86,8 +87,8 @@ public class RegionInfoCommand extends LambdaCommandNode {
       if (host instanceof VolumeHost) {
         VolumeHost volumeHost = (VolumeHost) host;
         // Volume regions only:
-        src.sendMessage(Format.keyValue("min: ", volumeHost.xMin() + ", " + volumeHost.yMin() + ", " + volumeHost.zMin()));
-        src.sendMessage(Format.keyValue("max: ", volumeHost.xMax() + ", " + volumeHost.yMax() + ", " + volumeHost.zMax()));
+        src.sendMessage(Format.keyValue("min: ", volumeHost.getMinX() + ", " + volumeHost.getMinY() + ", " + volumeHost.getMinZ()));
+        src.sendMessage(Format.keyValue("max: ", volumeHost.getMaxX() + ", " + volumeHost.getMaxY() + ", " + volumeHost.getMaxZ()));
       }
 
       int regionPriority = host.getPriority();

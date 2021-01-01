@@ -11,7 +11,6 @@ import com.minecraftonline.nope.host.HostTree;
 import com.minecraftonline.nope.host.VolumeHost;
 import com.minecraftonline.nope.permission.Permission;
 import com.minecraftonline.nope.util.Format;
-import com.minecraftonline.nope.util.VolumeHostUtil;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.world.World;
@@ -43,23 +42,26 @@ public class RegionMoveCommand extends LambdaCommandNode {
       }
 
       try {
-        Host newHost = VolumeHostUtil.remakeRegion(src,
-            (VolumeHost) host,
+        Host newHost = Nope.getInstance().getHostTree().updateRegion(
             host.getName(),
-            world,
+            world.getUniqueId(),
             min,
-            max
+            max,
+            host.getPriority()
         );
         if (newHost == null) {
           // Something bad happened. Already logged.
           return CommandResult.empty();
         }
+
       } catch (IllegalArgumentException e) {
         src.sendMessage(Format.error("Could not move region: " + e.getMessage()));
         return CommandResult.empty();
       }
 
+      Nope.getInstance().getHostTree().save();
       src.sendMessage(Format.success("Moved region " + host.getName() + ". New corners : " + min + " " + max + ". In world " + world.getName()));
+
       return CommandResult.success();
     });
   }

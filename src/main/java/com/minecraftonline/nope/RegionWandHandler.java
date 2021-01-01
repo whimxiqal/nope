@@ -27,6 +27,8 @@ package com.minecraftonline.nope;
 import com.flowpowered.math.vector.Vector3i;
 import com.minecraftonline.nope.control.Settings;
 import com.minecraftonline.nope.key.regionwand.RegionWandManipulator;
+import com.minecraftonline.nope.setting.SettingLibrary;
+import com.minecraftonline.nope.setting.SettingValue;
 import com.minecraftonline.nope.util.Format;
 import com.sk89q.worldedit.blocks.BaseItemStack;
 import com.sk89q.worldedit.sponge.SpongeWorldEdit;
@@ -86,7 +88,14 @@ public class RegionWandHandler {
   }
 
   private boolean isWand(ItemStack itemStack) {
-    ItemStack wandItemStack = SpongeWorldEdit.inst().getAdapter().makeSpongeStack(new BaseItemStack(Nope.getInstance().getGlobalHost().getSettingValueOrDefault(Settings.WAND_ITEM).getID(), 1));
+    ItemStack wandItemStack = ItemStack.builder()
+        .itemType(Nope.getInstance().getHostTree()
+            .getGlobalHost()
+            .get(SettingLibrary.WAND_ITEM)
+            .map(SettingValue::getData)
+            .orElse(SettingLibrary.WAND_ITEM.getDefaultData()))
+        .quantity(1)
+        .build();
     if (!wandItemStack.getType().equals(itemStack.getType())) {
       return false;
     }

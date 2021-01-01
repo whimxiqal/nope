@@ -1,5 +1,6 @@
 package com.minecraftonline.nope.command.region;
 
+import com.minecraftonline.nope.Nope;
 import com.minecraftonline.nope.arguments.NopeArguments;
 import com.minecraftonline.nope.command.common.CommandNode;
 import com.minecraftonline.nope.command.common.LambdaCommandNode;
@@ -31,7 +32,7 @@ public class RegionRemoveSettingCommand extends LambdaCommandNode {
         src.sendMessage(Format.error(settingKey.getId() + " is not assigned on this host!"));
         return CommandResult.empty();
       }
-
+      Nope.getInstance().getHostTree().save();
       src.sendMessage(Format.success("Unset " + settingKey.getId() + " on this host"));
 
       return CommandResult.empty();

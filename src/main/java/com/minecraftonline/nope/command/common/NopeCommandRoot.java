@@ -27,7 +27,6 @@ package com.minecraftonline.nope.command.common;
 import com.minecraftonline.nope.Nope;
 import com.minecraftonline.nope.command.ExampleCommand;
 import com.minecraftonline.nope.command.ReloadCommand;
-import com.minecraftonline.nope.command.SaveCommand;
 import com.minecraftonline.nope.command.region.RegionCommand;
 import com.minecraftonline.nope.command.setting.SettingCommand;
 import com.minecraftonline.nope.permission.Permissions;
@@ -54,7 +53,6 @@ public class NopeCommandRoot extends CommandNode {
     addChildren(new RegionCommand(this));
     addChildren(new SettingCommand(this));
     addChildren(new ReloadCommand(this));
-    addChildren(new SaveCommand(this));
   }
 
   @Nonnull

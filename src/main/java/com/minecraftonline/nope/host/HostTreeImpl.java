@@ -95,10 +95,10 @@ public class HostTreeImpl implements HostTree {
 
     // Read Regions
     storage.readRegions(worldHosts.values(), new RegionSerializer()).forEach(region ->
-        addRegion(((WorldHost) region.getParent()).getWorldUuid(),
-            region.getName(),
-            new Vector3i(region.xMin(), region.yMin(), region.zMin()),
-            new Vector3i(region.xMax(), region.yMax(), region.zMax()),
+        addRegion(region.getName(),
+            region.getParent().getWorldUuid(),
+            new Vector3i(region.getMinX(), region.getMinY(), region.getMinZ()),
+            new Vector3i(region.getMaxX(), region.getMaxY(), region.getMaxZ()),
             region.getPriority()));
 
   }
@@ -123,6 +123,11 @@ public class HostTreeImpl implements HostTree {
     @Override
     public void setPriority(int priority) {
       throw new UnsupportedOperationException("You cannot set the priority of the global host!");
+    }
+
+    @Override
+    public UUID getWorldUuid() {
+      return null;
     }
   }
 
@@ -156,7 +161,8 @@ public class HostTreeImpl implements HostTree {
   /**
    * Class for managing the few WorldHosts in this HostTree
    */
-  class WorldHost extends Host implements Worlded {
+  class WorldHost extends Host {
+
     @Getter
     private final UUID worldUuid;
     private final VolumeTree<String, Region> regionTree = new VolumeTree<>();
@@ -176,6 +182,7 @@ public class HostTreeImpl implements HostTree {
     public void setPriority(int priority) {
       throw new UnsupportedOperationException("You cannot set the priority of a WorldHost!");
     }
+
   }
 
   public class WorldHostSerializer implements Host.HostSerializer<WorldHost> {
@@ -218,8 +225,9 @@ public class HostTreeImpl implements HostTree {
    * space and it stores com.minecraftonline.nope.setting.Setting data for handling and manipulating Sponge events
    * based in its specific configuration.
    */
-  public class Region extends VolumeHost implements Worlded {
+  public class Region extends VolumeHost {
 
+    @Getter
     private final UUID worldUuid;
 
     /**
@@ -262,17 +270,12 @@ public class HostTreeImpl implements HostTree {
 
     @Override
     boolean encompasses(Location<World> spongeLocation) {
-      return spongeLocation.getBlockX() >= xMin()
-          && spongeLocation.getBlockX() <= xMax()
-          && spongeLocation.getBlockY() >= yMin()
-          && spongeLocation.getBlockY() <= yMax()
-          && spongeLocation.getBlockZ() >= zMin()
-          && spongeLocation.getBlockZ() <= zMax();
-    }
-
-    @Override
-    public UUID getWorldUuid() {
-      return worldUuid;
+      return spongeLocation.getBlockX() >= getMinX()
+          && spongeLocation.getBlockX() <= getMaxX()
+          && spongeLocation.getBlockY() >= getMinY()
+          && spongeLocation.getBlockY() <= getMaxY()
+          && spongeLocation.getBlockZ() >= getMinZ()
+          && spongeLocation.getBlockZ() <= getMaxZ();
     }
 
     @Override
@@ -308,12 +311,12 @@ public class HostTreeImpl implements HostTree {
               ((WorldHost) host.getParent()).worldUuid.toString()))));
       serializedHost.put("priority", host.getPriority());
       Map<String, Integer> volume = Maps.newHashMap();
-      volume.put("xmin", host.xMin());
-      volume.put("xmax", host.xMax());
-      volume.put("ymin", host.yMin());
-      volume.put("ymax", host.yMax());
-      volume.put("zmin", host.zMin());
-      volume.put("zmax", host.zMax());
+      volume.put("xmin", host.getMinX());
+      volume.put("xmax", host.getMaxX());
+      volume.put("ymin", host.getMinY());
+      volume.put("ymax", host.getMaxY());
+      volume.put("zmin", host.getMinZ());
+      volume.put("zmax", host.getMaxZ());
       serializedHost.put("volume", volume);
 
       return new Gson().toJsonTree(serializedHost);
@@ -403,11 +406,11 @@ public class HostTreeImpl implements HostTree {
   @Nullable
   @Override
   public Region getRegion(String name) {
-    for (WorldHost worldHost : worldHosts.values()) {
-      Region region = worldHost.regionTree.get(name);
-      if (region != null) return region;
+    UUID worldUuid = regionToWorld.get(name);
+    if (worldUuid == null) {
+      return null;
     }
-    return null;
+    return worldHosts.get(worldUuid).regionTree.get(name);
   }
 
   @Nullable
@@ -423,7 +426,7 @@ public class HostTreeImpl implements HostTree {
 
   @Nonnull
   @Override
-  public Region addRegion(UUID worldUuid, String name, Vector3i pos1, Vector3i pos2, int priority) {
+  public Region addRegion(String name, UUID worldUuid, Vector3i pos1, Vector3i pos2, int priority) {
     if (Pattern.matches(worldHostNameRegex, name)) {
       throw new IllegalArgumentException(String.format(
           "Region insertion failed because the name %s has the name format of a WorldHost",
@@ -462,6 +465,13 @@ public class HostTreeImpl implements HostTree {
         .findAny();
   }
 
+  @Nonnull
+  @Override
+  public Region updateRegion(String name, UUID worldUuid, Vector3i pos1, Vector3i pos2, int priority)
+      throws IllegalArgumentException {
+    // TODO Basically just delete the old Region and push a new one.
+    return null;
+  }
 
   @Nonnull
   @Override

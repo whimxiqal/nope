@@ -27,7 +27,7 @@ package com.minecraftonline.nope.host;
 
 import com.minecraftonline.nope.structures.VolumeTree;
 
-public class VolumeHost extends Host implements VolumeTree.Volume {
+public abstract class VolumeHost extends Host implements VolumeTree.Volume {
 
   private final int xmin;
   private final int xmax;
@@ -52,32 +52,33 @@ public class VolumeHost extends Host implements VolumeTree.Volume {
   }
 
   @Override
-  public int xMin() {
+  public int getMinX() {
     return xmin;
   }
 
   @Override
-  public int xMax() {
+  public int getMaxX() {
     return xmax;
   }
 
   @Override
-  public int yMin() {
+  public int getMinY() {
     return ymin;
   }
 
   @Override
-  public int yMax() {
+  public int getMaxY() {
     return ymax;
   }
 
   @Override
-  public int zMin() {
+  public int getMinZ() {
     return zmin;
   }
 
   @Override
-  public int zMax() {
+  public int getMaxZ() {
     return zmax;
   }
+
 }

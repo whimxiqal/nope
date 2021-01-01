@@ -93,8 +93,8 @@ public interface HostTree {
    * The name must be unique. This method fails if it is called with a name
    * which is already in use.
    *
-   * @param worldUuid the uuid of the world in which this region resides
    * @param name      the unique name of this region, which cannot be formatted like a WorldHost name
+   * @param worldUuid the uuid of the world in which this region resides
    * @param pos1      a point which defines this region
    * @param pos2      another point which defines this region
    * @param priority  a priority level. The higher the priority, the larger the precedence.
@@ -105,8 +105,27 @@ public interface HostTree {
    *                                  as an overlapping region
    */
   @Nonnull
-  Host addRegion(UUID worldUuid, String name, Vector3i pos1, Vector3i pos2, int priority)
-          throws IllegalArgumentException;
+  Host addRegion(String name, UUID worldUuid, Vector3i pos1, Vector3i pos2, int priority)
+      throws IllegalArgumentException;
+
+  /**
+   * Updates the information associated with a region.
+   * The name must exist. This method fails if it is called with a name
+   * which is not in use.
+   *
+   * @param name      the unique name of this region
+   * @param worldUuid the uuid of the world in which this region resides
+   * @param pos1      a point which defines this region
+   * @param pos2      another point which defines this region
+   * @param priority  a priority level. The higher the priority, the larger the precedence.
+   * @return the updated host
+   * @throws IllegalArgumentException if the inputs will lead to an invalid HostTree state,
+   *                                  like if the name is not unique or the priority is the same
+   *                                  as an overlapping region
+   */
+  @Nonnull
+  Host updateRegion(String name, UUID worldUuid, Vector3i pos1, Vector3i pos2, int priority)
+      throws IllegalArgumentException;
 
   /**
    * Remove a region from the given world. This method fails if it is called
@@ -128,16 +147,16 @@ public interface HostTree {
   boolean hasRegion(String name);
 
   /**
-   * Find the value corresponding to this setting dependent on whether
+   * Find the value corresponding to this setting key dependent on whether
    * this location is inside a host, such as a Region or a World.
    * This is the most important function of the HostTree.
    *
-   * @param setting  the setting, obtained from the SettingLibrary
+   * @param key      the setting, obtained from the SettingLibrary
    * @param location the location to query
    * @param <V>      the type of value to retrieve
    * @return the value corresponding to this setting
    * @see SettingLibrary
    */
-  <V> SettingValue<V> lookup(SettingKey<V> setting, Location<World> location);
+  <V> SettingValue<V> lookup(SettingKey<V> key, Location<World> location);
 
 }

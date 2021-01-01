@@ -55,12 +55,13 @@ public class RegionCreateCommand extends LambdaCommandNode {
 
       try {
         Nope.getInstance().getHostTree().addRegion(
-            selection.getWorld().getUniqueId(),
             name,
+            selection.getWorld().getUniqueId(),
             selection.getMin(),
             selection.getMax(),
             priority
         );
+        Nope.getInstance().getHostTree().save();
         src.sendMessage(Format.success("Successfully created region ", Format.note(name), "!"));
       } catch (IllegalArgumentException e) {
         src.sendMessage(Format.error("Could not create region: " + e.getMessage()));

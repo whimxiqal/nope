@@ -62,32 +62,32 @@ public class VolumeTreeTest {
     final int zmax;
 
     @Override
-    public int xMin() {
+    public int getMinX() {
       return xmin;
     }
 
     @Override
-    public int xMax() {
+    public int getMaxX() {
       return xmax;
     }
 
     @Override
-    public int yMin() {
+    public int getMinY() {
       return ymin;
     }
 
     @Override
-    public int yMax() {
+    public int getMaxY() {
       return ymax;
     }
 
     @Override
-    public int zMin() {
+    public int getMinZ() {
       return zmin;
     }
 
     @Override
-    public int zMax() {
+    public int getMaxZ() {
       return zmax;
     }
   }
@@ -109,8 +109,8 @@ public class VolumeTreeTest {
       }
     }
     for (VolumeTree.Volume volume : volumes) {
-      for (int x = volume.xMin(); x <= volume.xMax(); x++) {
-        for (int z = volume.zMin(); z <= volume.zMax(); z++) {
+      for (int x = volume.getMinX(); x <= volume.getMaxX(); x++) {
+        for (int z = volume.getMinZ(); z <= volume.getMaxZ(); z++) {
           if (board[x][z] == '9' || board[x][z] == '+') {
             board[x][z] = '+';
           } else {
@@ -148,9 +148,9 @@ public class VolumeTreeTest {
       }
     }
     for (VolumeTree.Volume v : volumes) {
-      for (int z = v.zMin(); z <= v.zMax(); z++) {
-        for (int y = v.yMin(); y <= v.yMax(); y++) {
-          for (int x = v.xMin(); x <= v.xMax(); x++) {
+      for (int z = v.getMinZ(); z <= v.getMaxZ(); z++) {
+        for (int y = v.getMinY(); y <= v.getMaxY(); y++) {
+          for (int x = v.getMinX(); x <= v.getMaxX(); x++) {
             answers[x][y][z]++;
           }
         }
@@ -272,12 +272,12 @@ public class VolumeTreeTest {
       for (VolumeTree.Volume volume : regions.values()) {
         if (volume.contains(xpoints[i], ypoints[i], zpoints[i])) {
           answers.get(i).add(String.format("{[%d, %d], [%d, %d], [%d, %d]}",
-                  volume.xMin(),
-                  volume.xMax(),
-                  volume.yMin(),
-                  volume.yMax(),
-                  volume.zMin(),
-                  volume.zMax()));
+                  volume.getMinX(),
+                  volume.getMaxX(),
+                  volume.getMinY(),
+                  volume.getMaxY(),
+                  volume.getMinZ(),
+                  volume.getMaxZ()));
         }
       }
     }
@@ -290,12 +290,12 @@ public class VolumeTreeTest {
               .stream()
               .map(volume ->
                       String.format("{[%d, %d], [%d, %d], [%d, %d]}",
-                              volume.xMin(),
-                              volume.xMax(),
-                              volume.yMin(),
-                              volume.yMax(),
-                              volume.zMin(),
-                              volume.zMax()))
+                              volume.getMinX(),
+                              volume.getMaxX(),
+                              volume.getMinY(),
+                              volume.getMaxY(),
+                              volume.getMinZ(),
+                              volume.getMaxZ()))
               .forEach(dump::add);
     }
     treeElapse = System.currentTimeMillis() - treeElapse;

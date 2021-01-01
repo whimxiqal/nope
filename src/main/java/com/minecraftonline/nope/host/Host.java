@@ -36,6 +36,7 @@ import org.spongepowered.api.world.World;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Optional;
+import java.util.UUID;
 
 /**
  * A storage class for setting assignments.
@@ -90,7 +91,7 @@ public abstract class Host {
    * Retrieves the value associated with a setting under this Host.
    *
    * @param key the setting which keys the value
-   * @param <A>     the type of value stored
+   * @param <A> the type of value stored
    * @return the value
    * @see SettingLibrary
    */
@@ -166,6 +167,16 @@ public abstract class Host {
   boolean encompasses(Location<World> spongeLocation) {
     return true;
   }
+
+  /**
+   * Get the UUID of the Sponge Minecraft
+   * world to which this Host is associated.
+   *
+   * @return the world's UUID, or null if the host is
+   * not associated with a world
+   */
+  @Nullable
+  public abstract UUID getWorldUuid();
 
   public interface HostSerializer<T extends Host> {
     JsonElement serialize(T host);

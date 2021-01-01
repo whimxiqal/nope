@@ -141,15 +141,15 @@ public class VolumeTree<S, T extends VolumeTree.Volume> {
       if (comparison == Comparison.MIN) {
 
         /* X MIN */
-        keys.sort(Comparator.comparing(key -> volumes.get(key).xMin()));
-        while (divIndex > 0 && volumes.get(keys.get(divIndex)).xMin() == volumes.get(keys.get(divIndex - 1)).xMin()) {
+        keys.sort(Comparator.comparing(key -> volumes.get(key).getMinX()));
+        while (divIndex > 0 && volumes.get(keys.get(divIndex)).getMinX() == volumes.get(keys.get(divIndex - 1)).getMinX()) {
           divIndex--;
         }
-        divider = volumes.get(keys.get(divIndex)).xMin();
+        divider = volumes.get(keys.get(divIndex)).getMinX();
         leftKeys = keys.subList(0, divIndex);
         rightKeys = Lists.newLinkedList(keys);
         // get rid of invalid elements in rightKeys
-        changed = rightKeys.removeIf(key -> volumes.get(key).xMax() < divider);
+        changed = rightKeys.removeIf(key -> volumes.get(key).getMaxX() < divider);
 
         left = construct(Dimension.Z, Comparison.MIN, leftKeys, 0);
         right = construct(Dimension.Z, Comparison.MIN, rightKeys, changed ? 0 : unchangedCount + 1);
@@ -157,15 +157,15 @@ public class VolumeTree<S, T extends VolumeTree.Volume> {
       } else {  // comparison == Comparison.MAX
 
         /* X MAX */
-        keys.sort(Comparator.comparing(key -> volumes.get(key).xMax()));
-        while (divIndex < count - 1 && volumes.get(keys.get(divIndex)).xMax() == volumes.get(keys.get(divIndex - 1)).xMax()) {
+        keys.sort(Comparator.comparing(key -> volumes.get(key).getMaxX()));
+        while (divIndex < count - 1 && volumes.get(keys.get(divIndex)).getMaxX() == volumes.get(keys.get(divIndex - 1)).getMaxX()) {
           divIndex++;
         }
-        divider = volumes.get(keys.get(divIndex - 1)).xMax();
+        divider = volumes.get(keys.get(divIndex - 1)).getMaxX();
         leftKeys = Lists.newLinkedList(keys);
         rightKeys = keys.subList(divIndex, count);
         // get rid of invalid elements in leftKeys
-        changed = leftKeys.removeIf(key -> volumes.get(key).xMin() > divider);
+        changed = leftKeys.removeIf(key -> volumes.get(key).getMinX() > divider);
 
         left = construct(Dimension.Z, Comparison.MAX, leftKeys, changed ? 0 : unchangedCount + 1);
         right = construct(Dimension.Z, Comparison.MAX, rightKeys, 0);
@@ -175,15 +175,15 @@ public class VolumeTree<S, T extends VolumeTree.Volume> {
       if (comparison == Comparison.MIN) {
 
         /* Z MIN */
-        keys.sort(Comparator.comparing(key -> volumes.get(key).zMin()));
-        while (divIndex > 0 && volumes.get(keys.get(divIndex)).zMin() == volumes.get(keys.get(divIndex - 1)).zMin()) {
+        keys.sort(Comparator.comparing(key -> volumes.get(key).getMinZ()));
+        while (divIndex > 0 && volumes.get(keys.get(divIndex)).getMinZ() == volumes.get(keys.get(divIndex - 1)).getMinZ()) {
           divIndex--;
         }
-        divider = volumes.get(keys.get(divIndex)).zMin();
+        divider = volumes.get(keys.get(divIndex)).getMinZ();
         leftKeys = keys.subList(0, divIndex);
         rightKeys = Lists.newLinkedList(keys);
         // get rid of invalid elements in rightKeys
-        changed = rightKeys.removeIf(key -> volumes.get(key).zMax() < divider);
+        changed = rightKeys.removeIf(key -> volumes.get(key).getMaxZ() < divider);
 
         left = construct(Dimension.X, Comparison.MAX, leftKeys, 0);
         right = construct(Dimension.X, Comparison.MAX, rightKeys, changed ? 0 : unchangedCount + 1);
@@ -191,15 +191,15 @@ public class VolumeTree<S, T extends VolumeTree.Volume> {
       } else {
 
         /* Z MAX */
-        keys.sort(Comparator.comparing(key -> volumes.get(key).zMax()));
-        while (divIndex < count - 1 && volumes.get(keys.get(divIndex)).zMax() == volumes.get(keys.get(divIndex - 1)).zMax()) {
+        keys.sort(Comparator.comparing(key -> volumes.get(key).getMaxZ()));
+        while (divIndex < count - 1 && volumes.get(keys.get(divIndex)).getMaxZ() == volumes.get(keys.get(divIndex - 1)).getMaxZ()) {
           divIndex++;
         }
-        divider = volumes.get(keys.get(divIndex - 1)).zMax();
+        divider = volumes.get(keys.get(divIndex - 1)).getMaxZ();
         leftKeys = Lists.newLinkedList(keys);
         rightKeys = keys.subList(divIndex, count);
         // get rid of invalid elements in leftKeys
-        changed = leftKeys.removeIf(key -> volumes.get(key).zMin() > divider);
+        changed = leftKeys.removeIf(key -> volumes.get(key).getMinZ() > divider);
 
         left = construct(Dimension.X, Comparison.MIN, leftKeys, changed ? 0 : unchangedCount + 1);
         right = construct(Dimension.X, Comparison.MIN, rightKeys, 0);
@@ -217,42 +217,42 @@ public class VolumeTree<S, T extends VolumeTree.Volume> {
      *
      * @return x min
      */
-    int xMin();
+    int getMinX();
 
     /**
      * Get maximum X value, inclusive.
      *
      * @return x max
      */
-    int xMax();
+    int getMaxX();
 
     /**
      * Get minimum Y value, inclusive.
      *
      * @return y min
      */
-    int yMin();
+    int getMinY();
 
     /**
      * Get maximum Y value, inclusive.
      *
      * @return y max
      */
-    int yMax();
+    int getMaxY();
 
     /**
      * Get minimum Z value, inclusive.
      *
      * @return z min
      */
-    int zMin();
+    int getMinZ();
 
     /**
      * Get maximum Z value, inclusive.
      *
      * @return z max
      */
-    int zMax();
+    int getMaxZ();
 
     /**
      * Check if this volume contains a point, given three
@@ -264,12 +264,12 @@ public class VolumeTree<S, T extends VolumeTree.Volume> {
      * @return true if the point is contained
      */
     default boolean contains(int x, int y, int z) {
-      return x >= this.xMin()
-              && x <= this.xMax()
-              && y >= this.yMin()
-              && y <= this.yMax()
-              && z >= this.zMin()
-              && z <= this.zMax();
+      return x >= this.getMinX()
+          && x <= this.getMaxX()
+          && y >= this.getMinY()
+          && y <= this.getMaxY()
+          && z >= this.getMinZ()
+          && z <= this.getMaxZ();
     }
 
     /**
@@ -280,9 +280,9 @@ public class VolumeTree<S, T extends VolumeTree.Volume> {
      * @return true if intersects
      */
     default boolean intersects(Volume other) {
-      return (this.xMin() <= other.xMax() && this.xMax() >= other.xMin()) &&
-              (this.yMin() <= other.yMax() && this.yMax() >= other.yMin()) &&
-              (this.zMin() <= other.zMax() && this.zMax() >= other.zMin());
+      return (this.getMinX() <= other.getMaxX() && this.getMaxX() >= other.getMinX()) &&
+          (this.getMinY() <= other.getMaxY() && this.getMaxY() >= other.getMinY()) &&
+          (this.getMinZ() <= other.getMaxZ() && this.getMaxZ() >= other.getMinZ());
     }
 
   }
@@ -385,8 +385,8 @@ public class VolumeTree<S, T extends VolumeTree.Volume> {
   private int calculateHeight(Node node) {
     if (node instanceof VolumeTree.DimensionDivider) {
       return 1 + Math.max(
-              calculateHeight(((DimensionDivider) node).left),
-              calculateHeight(((DimensionDivider) node).right));
+          calculateHeight(((DimensionDivider) node).left),
+          calculateHeight(((DimensionDivider) node).right));
     }
     return 0;
   }
@@ -394,7 +394,7 @@ public class VolumeTree<S, T extends VolumeTree.Volume> {
   private int calculateSize(Node node) {
     if (node instanceof VolumeTree.DimensionDivider) {
       return 1 + calculateSize(((DimensionDivider) node).left)
-              + calculateSize(((DimensionDivider) node).right);
+          + calculateSize(((DimensionDivider) node).right);
     }
     return 0;
   }

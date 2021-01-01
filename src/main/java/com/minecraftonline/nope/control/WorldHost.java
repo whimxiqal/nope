@@ -27,7 +27,6 @@ package com.minecraftonline.nope.control;
 import com.flowpowered.math.vector.Vector3d;
 import com.google.common.base.Preconditions;
 import com.minecraftonline.nope.Nope;
-import com.minecraftonline.nope.host.Worlded;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
