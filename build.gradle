@@ -61,8 +61,6 @@ dependencies {
     implementation "org.spongepowered:spongeapi:${spongeVersion}"
     annotationProcessor "org.spongepowered:spongeapi:${spongeVersion}"
 
-    compile 'org.spongepowered:spongecommon:1.12.2-7.3.0:dev'
-
     implementation("net.minecraftforge.gradle:ForgeGradle:3.0.185")
 
     compile 'org.spongepowered:mixin:0.8.1-SNAPSHOT'
