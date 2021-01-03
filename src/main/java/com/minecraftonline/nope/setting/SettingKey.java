@@ -27,9 +27,9 @@ package com.minecraftonline.nope.setting;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
-import lombok.Getter;
 
 import javax.annotation.Nonnull;
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -48,7 +48,6 @@ public abstract class SettingKey<T> {
   /**
    * The global unique identifier for this key.
    */
-  @Getter
   final String id;
 
   /**
@@ -56,8 +55,13 @@ public abstract class SettingKey<T> {
    * This is what determines the behavior associated with this key
    * if the user does not specify something different.
    */
-  @Getter
   final T defaultData;
+  String description = null;
+  @Nonnull
+  CategoryType category = CategoryType.MISC;
+  final SettingKey<T> parent;
+  boolean implemented = true;
+  boolean unnaturalDefault = false;
 
   /**
    * Type of {@link SettingKey} for ordering purposes.
@@ -79,11 +83,25 @@ public abstract class SettingKey<T> {
     this(id, defaultData, null);
   }
 
-  String description = null;
-  @Nonnull
-  CategoryType category = CategoryType.MISC;
-  final SettingKey<T> parent;
-  boolean implemented = true;
+  /**
+   * The global unique identifier for this key.
+   *
+   * @return the identifier
+   */
+  public final String getId() {
+    return this.id;
+  }
+
+  /**
+   * The default data of a setting keyed with this object.
+   * This is what determines the behavior associated with this key
+   * if the user does not specify something different.
+   *
+   * @return the default data
+   */
+  public final T getDefaultData() {
+    return this.defaultData;
+  }
 
   /**
    * Convert some data into a Json structure.
@@ -143,6 +161,16 @@ public abstract class SettingKey<T> {
   }
 
   /**
+   * Get a list of all parsable strings for data stored
+   * under this SettingKey.
+   *
+   * @return a list of parsable strings only if there are finite possibilities
+   */
+  public Optional<List<String>> getParsable() {
+    return Optional.empty();
+  }
+
+  /**
    * Get the class type of this object's generic type.
    *
    * @return the generic class
@@ -161,9 +189,9 @@ public abstract class SettingKey<T> {
   public final T cast(Object object) {
     if (!valueType().isInstance(object)) {
       throw new IllegalArgumentException(String.format(
-          "input %s must be of type %s",
-          object.getClass().getName(),
-          valueType().getName()));
+              "input %s must be of type %s",
+              object.getClass().getName(),
+              valueType().getName()));
     }
     return valueType().cast(object);
   }
@@ -185,6 +213,10 @@ public abstract class SettingKey<T> {
 
   public final boolean isImplemented() {
     return implemented;
+  }
+
+  public final boolean hasUnnaturalDefault() {
+    return unnaturalDefault;
   }
 
   @Override

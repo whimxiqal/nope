@@ -26,8 +26,6 @@ package com.minecraftonline.nope.command.region;
 
 import com.minecraftonline.nope.command.common.CommandNode;
 import com.minecraftonline.nope.command.common.FunctionlessCommandNode;
-import com.minecraftonline.nope.command.region.targetset.TargetSetParentCommand;
-import com.minecraftonline.nope.control.Settings;
 import com.minecraftonline.nope.permission.Permissions;
 import org.spongepowered.api.text.Text;
 
@@ -40,16 +38,15 @@ public class RegionCommand extends FunctionlessCommandNode {
         "rg");
     addChildren(new RegionWandCommand(this));
     addChildren(new RegionCreateCommand(this));
-    addChildren(new ListRegionsCommand(this));
-    addChildren(new DeleteRegionCommand(this));
+    addChildren(new RegionListCommand(this));
+    addChildren(new RegionDeleteCommand(this));
     addChildren(new RegionInfoCommand(this));
-    addChildren(new RegionSettingCommand(this));
+    addChildren(new RegionSetCommand(this));
     //addChildren(new TargetSetParentCommand(this, "owners", Settings.REGION_OWNERS));
     //addChildren(new TargetSetParentCommand(this, "members", Settings.REGION_MEMBERS));
-    addChildren(new RegionRemoveSettingCommand(this));
+    addChildren(new RegionUnsetCommand(this));
     addChildren(new RegionMoveCommand(this));
     addChildren(new RegionSetPriorityCommand(this));
 
-    addChildren(new RegionTestCommand(this));
   }
 }

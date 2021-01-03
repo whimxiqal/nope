@@ -24,7 +24,6 @@
 
 package com.minecraftonline.nope.arguments;
 
-import com.google.common.collect.Lists;
 import com.minecraftonline.nope.Nope;
 import com.minecraftonline.nope.host.Host;
 import com.minecraftonline.nope.host.HostTree;
@@ -36,11 +35,13 @@ import org.spongepowered.api.command.args.CommandArgs;
 import org.spongepowered.api.command.args.CommandContext;
 import org.spongepowered.api.command.args.CommandElement;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.world.World;
+import org.spongepowered.api.util.StartsWithPredicate;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 class HostCommandElement extends CommandElement {
 
@@ -51,63 +52,29 @@ class HostCommandElement extends CommandElement {
   @Nullable
   @Override
   protected Host parseValue(CommandSource source, CommandArgs args) throws ArgumentParseException {
-    String regionStr = args.next();
+    String hostName = args.next();
+    Host host = Nope.getInstance().getHostTree().getHosts().get(hostName);
 
-    final HostTree hostTree = Nope.getInstance().getHostTree();
-
-    VolumeHost volumeHost = hostTree.getRegion(regionStr);
-
-    if (volumeHost != null) {
-      return volumeHost;
+    if (host != null) {
+      return host;
     }
 
-    if (regionStr.equals(Nope.GLOBAL_HOST_NAME)) {
-      return hostTree.getGlobalHost();
-    }
-
-    for (World world : Sponge.getServer().getWorlds()) {
-      Host worldHost = hostTree.getWorldHost(world.getUniqueId());
-      if (worldHost == null) {
-        throw new IllegalStateException("Missing world host for world " + world.getName());
-      }
-      if (regionStr.equals(worldHost.getName())) {
-        return worldHost;
-      }
-    }
-
-    throw new ArgumentParseException(Text.of("Region '" + regionStr + "' does not exist!"), regionStr, regionStr.length());
+    throw new ArgumentParseException(Text.of("Region '" + hostName + "' does not exist!"),
+            hostName,
+            hostName.length());
   }
 
+  @Nonnull
   @Override
-  public List<String> complete(CommandSource src, CommandArgs args, CommandContext context) {
-    final String prefix = args.nextIfPresent().orElse("");
-
-    List<String> completions = new ArrayList<>();
-
-    HostTree hostTree = Nope.getInstance().getHostTree();
-
-    final String globalHostName = hostTree.getGlobalHost().getName();
-    if (globalHostName.startsWith(prefix)) {
-      completions.add(globalHostName);
-    }
-
-    for (World world : Sponge.getServer().getWorlds()) {
-
-      Host worldHost = hostTree.getWorldHost(world.getUniqueId());
-
-      if (worldHost == null) throw new RuntimeException("No worldhost for world: '" + world.getName() + "'");
-
-      final String worldHostName = worldHost.getName();
-      if (worldHostName.startsWith(prefix)) {
-        completions.add(worldHostName);
-      }
-
-      hostTree.getRegions(world.getUniqueId()).stream()
-          .map(VolumeHost::getName)
-          .filter(name -> name.startsWith(prefix))
-          .forEach(completions::add);
-    }
-
-    return completions;
+  public List<String> complete(@Nonnull CommandSource src,
+                               CommandArgs args,
+                               @Nonnull CommandContext context) {
+    final Predicate<String> startsWith = new StartsWithPredicate(args.nextIfPresent().orElse(""));
+    return Nope.getInstance().getHostTree()
+            .getHosts()
+            .keySet()
+            .stream()
+            .filter(startsWith)
+            .collect(Collectors.toList());
   }
 }

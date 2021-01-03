@@ -25,51 +25,41 @@
 package com.minecraftonline.nope.command.region;
 
 import com.minecraftonline.nope.Nope;
-import com.minecraftonline.nope.arguments.NopeArguments;
 import com.minecraftonline.nope.command.common.CommandNode;
 import com.minecraftonline.nope.command.common.LambdaCommandNode;
-import com.minecraftonline.nope.host.Host;
+import com.minecraftonline.nope.host.VolumeHost;
 import com.minecraftonline.nope.permission.Permissions;
-import com.minecraftonline.nope.setting.SettingKey;
-import com.minecraftonline.nope.setting.SettingValue;
 import com.minecraftonline.nope.util.Format;
 import org.spongepowered.api.command.CommandResult;
-import org.spongepowered.api.command.args.GenericArguments;
+import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
 
-public class RegionSettingCommand extends LambdaCommandNode {
-  public RegionSettingCommand(CommandNode parent) {
-    super(parent,
-        Permissions.EDIT_REGION,
-        Text.of("Set region a setting"),
-        "setting",
-        "set");
-    addCommandElements(
-        NopeArguments.host(Text.of("region")),
-        NopeArguments.settingKey(Text.of("setting")),
-        GenericArguments.remainingJoinedStrings(Text.of("value"))
-    );
-    setExecutor((src, args) -> {
-      Host region = args.requireOne("region");
-      SettingKey<?> settingKey = args.requireOne("setting");
-      String value = args.requireOne("value");
+import java.util.Collection;
+import java.util.UUID;
 
-      try {
-        addSetting(region, settingKey, value);
-      } catch (IllegalArgumentException e) {
-        src.sendMessage(Format.error("Invalid value: " + e.getMessage()));
+public class RegionListCommand extends LambdaCommandNode {
+  public RegionListCommand(CommandNode parent) {
+    super(parent,
+        Permissions.LIST_REGIONS,
+        Text.of("List the regions in the current world"),
+        "list",
+        "l");
+    setExecutor((src, args) -> {
+      if (!(src instanceof Player)) {
+        src.sendMessage(Format.error("You must be a player to use this command!"));
         return CommandResult.empty();
       }
-
-      Nope.getInstance().getHostTree().save();
-      src.sendMessage(Format.success("Successfully set setting " + settingKey.getId() + ", on region " + region.getName()));
-
+      UUID worldUUID = ((Player) src).getWorld().getUniqueId();
+      Collection<VolumeHost> regions = Nope.getInstance().getHostTree().getRegions(worldUUID);
+      src.sendMessage(Format.info("------ Regions ------"));
+      if (regions == null) {
+        src.sendMessage(Format.info("No regions in this world"));
+        return CommandResult.success();
+      }
+      for (VolumeHost volumeHost : regions) {
+        src.sendMessage(Text.of(Format.ACCENT, "> ", Format.note(Format.host(volumeHost))));
+      }
       return CommandResult.success();
     });
-  }
-
-  private <T> void addSetting(Host region, SettingKey<T> key, String s) {
-    T data = key.parse(s);
-    region.put(key, SettingValue.of(data));
   }
 }

@@ -25,13 +25,10 @@
 package com.minecraftonline.nope;
 
 import com.flowpowered.math.vector.Vector3i;
-import com.minecraftonline.nope.control.Settings;
 import com.minecraftonline.nope.key.regionwand.RegionWandManipulator;
 import com.minecraftonline.nope.setting.SettingLibrary;
 import com.minecraftonline.nope.setting.SettingValue;
 import com.minecraftonline.nope.util.Format;
-import com.sk89q.worldedit.blocks.BaseItemStack;
-import com.sk89q.worldedit.sponge.SpongeWorldEdit;
 import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.command.CommandSource;
@@ -40,9 +37,7 @@ import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.Listener;
-import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.event.block.InteractBlockEvent;
-import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;

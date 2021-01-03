@@ -29,12 +29,16 @@ import com.flowpowered.math.vector.Vector3i;
 import com.minecraftonline.nope.setting.SettingKey;
 import com.minecraftonline.nope.setting.SettingLibrary;
 import com.minecraftonline.nope.setting.SettingValue;
+import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.entity.living.player.User;
+import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Collection;
+import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -56,7 +60,7 @@ public interface HostTree {
   /**
    * Get the GlobalHost.
    *
-   * @return
+   * @return the single global host associated in this tree
    */
   @Nonnull
   Host getGlobalHost();
@@ -68,7 +72,7 @@ public interface HostTree {
    * @return the associated WorldHost, or null if none exists
    */
   @Nullable
-  Host getWorldHost(UUID worldUuid);
+  Host getWorldHost(final UUID worldUuid);
 
   /**
    * Get the Region associated with this Region.
@@ -77,7 +81,15 @@ public interface HostTree {
    * @return the associated region, or null if none exists
    */
   @Nullable
-  VolumeHost getRegion(String name);
+  VolumeHost getRegion(final String name);
+
+  /**
+   * Get a map of all hosts keyed by their unique names.
+   *
+   * @return a map of hosts
+   */
+  @Nonnull
+  Map<String, Host> getHosts();
 
   /**
    * Get all the region within the world of the given id.
@@ -86,7 +98,7 @@ public interface HostTree {
    * @return the associated Regions, or null if no world exists with that UUID
    */
   @Nullable
-  Collection<VolumeHost> getRegions(UUID worldUuid);
+  Collection<VolumeHost> getRegions(final UUID worldUuid);
 
   /**
    * Add a region to the HostTree with the given parameters.
@@ -105,27 +117,12 @@ public interface HostTree {
    *                                  as an overlapping region
    */
   @Nonnull
-  Host addRegion(String name, UUID worldUuid, Vector3i pos1, Vector3i pos2, int priority)
-      throws IllegalArgumentException;
-
-  /**
-   * Updates the information associated with a region.
-   * The name must exist. This method fails if it is called with a name
-   * which is not in use.
-   *
-   * @param name      the unique name of this region
-   * @param worldUuid the uuid of the world in which this region resides
-   * @param pos1      a point which defines this region
-   * @param pos2      another point which defines this region
-   * @param priority  a priority level. The higher the priority, the larger the precedence.
-   * @return the updated host
-   * @throws IllegalArgumentException if the inputs will lead to an invalid HostTree state,
-   *                                  like if the name is not unique or the priority is the same
-   *                                  as an overlapping region
-   */
-  @Nonnull
-  Host updateRegion(String name, UUID worldUuid, Vector3i pos1, Vector3i pos2, int priority)
-      throws IllegalArgumentException;
+  VolumeHost addRegion(final String name,
+                       final UUID worldUuid,
+                       final Vector3i pos1,
+                       final Vector3i pos2,
+                       int priority)
+          throws IllegalArgumentException;
 
   /**
    * Remove a region from the given world. This method fails if it is called
@@ -135,8 +132,8 @@ public interface HostTree {
    * @return the removed region
    * @throws IllegalArgumentException If this host cannot be removed or does not exist
    */
-  @Nullable
-  Host removeRegion(String name) throws IllegalArgumentException;
+  @Nonnull
+  VolumeHost removeRegion(final String name) throws IllegalArgumentException;
 
   /**
    * Check if a given world has a region called a given name.
@@ -144,7 +141,15 @@ public interface HostTree {
    * @param name the name of the region for which to check
    * @return true if a region exists, false if not
    */
-  boolean hasRegion(String name);
+  boolean hasRegion(final String name);
+
+  /**
+   * Check if this SettingKey has been assigned to any hosts in the host tree.
+   *
+   * @param key the setting key
+   * @return true if this key has been assigned to a host, false if not.
+   */
+  boolean isAssigned(final SettingKey<?> key);
 
   /**
    * Find the value corresponding to this setting key dependent on whether
@@ -152,11 +157,12 @@ public interface HostTree {
    * This is the most important function of the HostTree.
    *
    * @param key      the setting, obtained from the SettingLibrary
-   * @param location the location to query
+   * @param subject  the subject to check for the setting
+   * @param location the location in the world to check for the setting
    * @param <V>      the type of value to retrieve
    * @return the value corresponding to this setting
    * @see SettingLibrary
    */
-  <V> SettingValue<V> lookup(SettingKey<V> key, Location<World> location);
+  <V> V lookup(final SettingKey<V> key, final Subject subject, final Location<World> location);
 
 }

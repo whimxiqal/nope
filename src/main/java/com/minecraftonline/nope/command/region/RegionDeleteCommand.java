@@ -25,41 +25,37 @@
 package com.minecraftonline.nope.command.region;
 
 import com.minecraftonline.nope.Nope;
+import com.minecraftonline.nope.arguments.NopeArguments;
 import com.minecraftonline.nope.command.common.CommandNode;
 import com.minecraftonline.nope.command.common.LambdaCommandNode;
-import com.minecraftonline.nope.host.VolumeHost;
+import com.minecraftonline.nope.host.Host;
 import com.minecraftonline.nope.permission.Permissions;
 import com.minecraftonline.nope.util.Format;
 import org.spongepowered.api.command.CommandResult;
-import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.command.args.GenericArguments;
 import org.spongepowered.api.text.Text;
 
-import java.util.Collection;
-import java.util.UUID;
-
-public class ListRegionsCommand extends LambdaCommandNode {
-  public ListRegionsCommand(CommandNode parent) {
+public class RegionDeleteCommand extends LambdaCommandNode {
+  public RegionDeleteCommand(CommandNode parent) {
     super(parent,
-        Permissions.LIST_REGIONS,
-        Text.of("List the regions in the current world"),
-        "list",
-        "l");
+        Permissions.DELETE_REGIONS,
+        Text.of("Delete a given region"),
+        "delete",
+        "remove");
+    addCommandElements(GenericArguments.onlyOne(NopeArguments.host(Text.of("host"))));
     setExecutor((src, args) -> {
-      if (!(src instanceof Player)) {
-        src.sendMessage(Format.error("You must be a player to use this command!"));
+      Host host = args.requireOne("host");
+
+      try {
+        Nope.getInstance().getHostTree().removeRegion(host.getName());
+      } catch (IllegalArgumentException e) {
+        src.sendMessage(Format.error("This region cannot be deleted!"));
         return CommandResult.empty();
       }
-      UUID worldUUID = ((Player) src).getWorld().getUniqueId();
-      Collection<VolumeHost> regions = Nope.getInstance().getHostTree().getRegions(worldUUID);
-      src.sendMessage(Format.info("------ Regions ------"));
-      if (regions == null) {
-        src.sendMessage(Format.info("No regions in this world"));
-        return CommandResult.success();
-      }
-      for (VolumeHost volumeHost : regions) {
-        src.sendMessage(Text.of(Format.ACCENT, "> ", Format.note(Format.host(volumeHost))));
-      }
-      return CommandResult.success();
+
+      src.sendMessage(Format.success("Region " + host.getName() + ", was successfully deleted."));
+
+      return CommandResult.empty();
     });
   }
 }

@@ -36,7 +36,9 @@ import ninja.leaping.configurate.objectmapping.ObjectMappingException;
 import ninja.leaping.configurate.objectmapping.serialize.TypeSerializerCollection;
 
 import java.io.Closeable;
+import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -44,22 +46,31 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class HoconHostTreeStorage implements HostTreeImpl.Storage {
+public class HoconHostTreeImplStorage implements HostTreeImpl.Storage {
 
   private static final String REGION_CONFIG_FILENAME = "regions.conf";
   private static final String WORLD_SUB_REGIONS_KEY = "sub-regions";
   private final HoconConfigurationLoader loader;
 
-  public HoconHostTreeStorage() {
+  public HoconHostTreeImplStorage() {
     // These method calls threw errors, including the loader?
     final TypeSerializerCollection typeSerializerCollection = TypeSerializerCollection.create()
             .register(NopeTypeTokens.JSON_ELEMENT_TYPE_TOKEN, new JsonElementSerializer());
 
     ConfigurationOptions options = ConfigurationOptions.defaults().withSerializers(typeSerializerCollection);
 
+    Path regionConfig = Nope.getInstance().getConfigDir().resolve(REGION_CONFIG_FILENAME);
+    try {
+      if (regionConfig.toFile().createNewFile()) {
+        Nope.getInstance().getLogger().info("No config file found. New config file created.");
+      }
+    } catch (IOException e) {
+      throw new RuntimeException("Region config file was not found but could not be created.");
+    }
+
     this.loader = HoconConfigurationLoader.builder()
             .setDefaultOptions(options)
-            .setPath(Nope.getInstance().getConfigDir().resolve(REGION_CONFIG_FILENAME))
+            .setPath(regionConfig)
             .build();
   }
 
@@ -67,14 +78,18 @@ public class HoconHostTreeStorage implements HostTreeImpl.Storage {
   public HostTreeImpl.GlobalHost readGlobalHost(Host.HostSerializer<HostTreeImpl.GlobalHost> serializer) throws HostParseException {
 
     try (Connection connection = new Connection(loader)) {
-      final JsonElement jsonElement = connection.node.getNode(Nope.GLOBAL_HOST_NAME).getValue(NopeTypeTokens.JSON_ELEMENT_TYPE_TOKEN);
+      final JsonElement jsonElement = connection.node
+              .getNode(Nope.GLOBAL_HOST_NAME)
+              .getValue(NopeTypeTokens.JSON_ELEMENT_TYPE_TOKEN);
       if (jsonElement == null) {
         return null;
       }
       return serializer.deserialize(jsonElement);
       // return GlobalHost
-    } catch (IOException | ObjectMappingException e) {
-      throw new HostParseException("Error reading global host config", e);
+    } catch (IOException e) {
+      throw new HostParseException("IOException when reading global host config", e);
+    } catch (ObjectMappingException e) {
+      throw new HostParseException("ObjectMappingException when trying read Global Host node", e);
     }
   }
 
@@ -96,8 +111,10 @@ public class HoconHostTreeStorage implements HostTreeImpl.Storage {
         worldHostList.add(serializer.deserialize(jsonElement));
       }
       return worldHostList;
-    } catch (IOException | ObjectMappingException e) {
-      throw new HostParseException("Error reading world hosts", e);
+    } catch (IOException e) {
+      throw new HostParseException("IOException when reading global host config", e);
+    } catch (ObjectMappingException e) {
+      throw new HostParseException("ObjectMappingException when trying read World Host node", e);
     }
   }
 
@@ -113,12 +130,15 @@ public class HoconHostTreeStorage implements HostTreeImpl.Storage {
 
         for (Map.Entry<Object, ? extends ConfigurationNode> entry : worldNode.getChildrenMap().entrySet()) {
 
-          final HostTreeImpl.Region region = serializer.deserialize(entry.getValue().getValue(NopeTypeTokens.JSON_ELEMENT_TYPE_TOKEN));
+          final HostTreeImpl.Region region = serializer.deserialize(entry.getValue()
+                  .getValue(NopeTypeTokens.JSON_ELEMENT_TYPE_TOKEN));
           regions.add(region);
         }
       }
-    } catch (IOException | ObjectMappingException e) {
-      throw new HostParseException("Error saving config after reading regions", e);
+    } catch (IOException e) {
+      throw new HostParseException("IOException when reading global host config", e);
+    } catch (ObjectMappingException e) {
+      throw new HostParseException("ObjectMappingException when trying read Region Host node", e);
     }
     return regions;
   }

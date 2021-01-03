@@ -24,10 +24,7 @@
 
 package com.minecraftonline.nope.config.configurate;
 
-import com.minecraftonline.nope.config.ConfigManager;
 import com.minecraftonline.nope.config.configurate.supplier.ConfigLoaderSupplier;
-import com.minecraftonline.nope.control.Region;
-import com.minecraftonline.nope.control.Setting;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 
 import java.nio.file.Path;

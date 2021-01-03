@@ -26,19 +26,15 @@ package com.minecraftonline.nope.command.region;
 
 import com.minecraftonline.nope.Nope;
 import com.minecraftonline.nope.command.common.CommandNode;
-import com.minecraftonline.nope.control.Settings;
-import com.minecraftonline.nope.key.NopeKeys;
 import com.minecraftonline.nope.key.regionwand.RegionWandManipulator;
 import com.minecraftonline.nope.permission.Permissions;
+import com.minecraftonline.nope.setting.SettingLibrary;
 import com.minecraftonline.nope.util.Format;
-import com.sk89q.worldedit.blocks.BaseItemStack;
-import com.sk89q.worldedit.blocks.ItemType;
-import com.sk89q.worldedit.sponge.SpongeWorldEdit;
-import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.args.CommandContext;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.entity.MainPlayerInventory;
@@ -50,10 +46,10 @@ import javax.annotation.Nonnull;
 public class RegionWandCommand extends CommandNode {
   public RegionWandCommand(CommandNode parent) {
     super(parent,
-        Permissions.CREATE_REGION,
-        Text.of("Get a wand for easy creation of regions"),
-        "wand",
-        "w");
+            Permissions.CREATE_REGION,
+            Text.of("Get a wand for easy creation of regions"),
+            "wand",
+            "w");
   }
 
   @Nonnull
@@ -67,11 +63,11 @@ public class RegionWandCommand extends CommandNode {
     Inventory inv = player.getInventory().query(QueryOperationTypes.INVENTORY_TYPE.of(MainPlayerInventory.class));
 
     ItemType itemType = Nope.getInstance()
-        .getGlobalHost()
-        .getSettingValue(Settings.WAND_ITEM)
-        .orElse(Settings.WAND_ITEM.getDefaultValue());
+            .getHostTree()
+            .lookup(SettingLibrary.WAND_ITEM, player, player.getLocation());
 
-    ItemStack itemStack = SpongeWorldEdit.toSpongeItemStack(new BaseItemStack(itemType.getID(), 1));
+    ItemStack itemStack = ItemStack.builder().itemType(itemType).quantity(1).build();
+
     itemStack.offer(new RegionWandManipulator(true));
     if (!inv.canFit(itemStack)) {
       player.sendMessage(Format.error("You have no room in your inventory, make way for the magic wand and try again"));

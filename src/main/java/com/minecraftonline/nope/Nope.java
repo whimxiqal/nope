@@ -26,16 +26,13 @@ package com.minecraftonline.nope;
 
 import com.google.inject.Inject;
 import com.minecraftonline.nope.command.common.NopeCommandTree;
-import com.minecraftonline.nope.config.ConfigManager;
-import com.minecraftonline.nope.config.configurate.GlobalConfigurateConfigManager;
-import com.minecraftonline.nope.config.configurate.hocon.HoconGlobalConfigurateConfigManager;
-import com.minecraftonline.nope.control.GlobalHost;
-import com.minecraftonline.nope.host.HoconHostTreeStorage;
+import com.minecraftonline.nope.host.HoconHostTreeImplStorage;
 import com.minecraftonline.nope.host.HostTree;
 import com.minecraftonline.nope.key.NopeKeys;
 import com.minecraftonline.nope.key.regionwand.ImmutableRegionWandManipulator;
 import com.minecraftonline.nope.key.regionwand.RegionWandManipulator;
 import com.minecraftonline.nope.host.HostTreeImpl;
+import com.minecraftonline.nope.listener.SettingListeners;
 import com.minecraftonline.nope.setting.SettingLibrary;
 import com.minecraftonline.nope.util.Extra;
 import org.slf4j.Logger;
@@ -62,11 +59,11 @@ import org.spongepowered.api.util.TypeTokens;
 
 import java.nio.file.Path;
 
-@Plugin(id = "nope", dependencies = @Dependency(id = "worldedit"))
+@Plugin(id = "nope")
 public class Nope {
 
   public static String REPO_URL = "https://gitlab.com/minecraftonline/nope/";
-  public static final String GLOBAL_HOST_NAME = "__global__";
+  public static final String GLOBAL_HOST_NAME = "!global";
   private static Nope instance;
 
   // Injections
@@ -85,9 +82,6 @@ public class Nope {
 
   NopeCommandTree commandTree;
 
-  private GlobalConfigurateConfigManager globalConfigManager;
-  private ConfigManager regionConfigManager;
-
   private HostTree hostTree;
 
   private RegionWandHandler regionWandHandler;
@@ -97,14 +91,12 @@ public class Nope {
 
   @Listener
   public void onPreInitialize(GamePreInitializationEvent event) {
-    instance = this;
-    //Settings.load();
-    SettingLibrary.initialize();
     logger.info("Pre-init");
-    Extra.printSplashscreen();
-
-    // Load config
-    globalConfigManager = new HoconGlobalConfigurateConfigManager(configDir);
+    instance = this;
+    SettingLibrary.initialize();
+    if (configDir.toFile().mkdirs()) {
+      logger.info("Created directories for Nope configuration");
+    }
   }
 
   @Listener
@@ -114,10 +106,10 @@ public class Nope {
     collisionHandler = new CollisionHandler();
 
     hostTree = new HostTreeImpl(
-        new HoconHostTreeStorage(),
+        new HoconHostTreeImplStorage(),
         Nope.GLOBAL_HOST_NAME,
-        s -> "__world_" + s + "__",
-        "__world_.*__");
+        s -> "!world-" + s,
+        "!.*");
 
     NopeKeys.REGION_WAND = Key.builder()
         .type(TypeTokens.BOOLEAN_VALUE_TOKEN)
@@ -150,7 +142,10 @@ public class Nope {
 
   @Listener
   public void onServerStart(GameStartedServerEvent event) {
+    Extra.printSplashscreen();
+
     hostTree.load(); // Need worlds to have loaded first.
+    SettingListeners.register();
 
     // Register entire Nope command tree
     commandTree = new NopeCommandTree();
@@ -186,10 +181,6 @@ public class Nope {
     return logger;
   }
 
-  public GlobalConfigurateConfigManager getGlobalConfigManager() {
-    return globalConfigManager;
-  }
-
   public PluginContainer getPluginContainer() {
     return pluginContainer;
   }
@@ -202,17 +193,8 @@ public class Nope {
     return collisionHandler;
   }
 
-  @Deprecated
-  public GlobalHost getGlobalHost() {
-    return new GlobalHost();
-  }
-
   public HostTree getHostTree() {
     return hostTree;
-  }
-
-  public ConfigManager getRegionConfigManager() {
-    return regionConfigManager;
   }
 
   public boolean canOverrideRegion(Subject subject) {

@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2020 MinecraftOnline
+ * Copyright (c) 2021 MinecraftOnline
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,23 +23,7 @@
  *
  */
 
-package com.minecraftonline.nope.setting;
+package com.minecraftonline.nope.listener;
 
-public abstract class SettingDataHandler<T> {
-
-  /**
-   * Convert some data into a Json structure.
-   *
-   * @param data the encoding data
-   * @return json structure representing data
-   */
-  public abstract String toJson(T data);
-
-  /**
-   * Parse some data from a Json structure.
-   *
-   * @param json Json structure
-   * @return the data represented by the Json structure
-   */
-  public abstract T fromJson(String json);
+public class BlockListeners {
 }

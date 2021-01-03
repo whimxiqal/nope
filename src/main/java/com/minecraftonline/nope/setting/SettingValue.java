@@ -25,13 +25,19 @@
 
 package com.minecraftonline.nope.setting;
 
-import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Sets;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.minecraftonline.nope.host.Host;
-import lombok.Builder;
+import com.minecraftonline.nope.util.NopeTypeTokens;
+import jdk.internal.jline.internal.Nullable;
 import lombok.Getter;
+import org.spongepowered.api.service.permission.Subject;
 
+import javax.annotation.Nonnull;
+import java.util.HashSet;
 import java.util.Set;
-import java.util.UUID;
+import java.util.function.Predicate;
 
 /**
  * The value component of a {@link Setting}.
@@ -64,23 +70,23 @@ public class SettingValue<T> {
    * @param <X>  the type of data stored
    * @return the setting value
    */
-  public static <X> SettingValue<X> of(X data) {
-    return new SettingValue<>(data, null);
+  public static <X> SettingValue<X> of(@Nonnull X data) {
+    return new SettingValue<>(data, Target.all());
   }
 
   /**
    * Full static factory.
    *
-   * @param data the core data
+   * @param data   the core data
    * @param target the intended target of the setting
-   * @param <X> the type of raw data stored
+   * @param <X>    the type of raw data stored
    * @return the setting
    */
-  public static <X> SettingValue<X> of(X data, Target target) {
+  public static <X> SettingValue<X> of(@Nonnull X data, @Nonnull Target target) {
     return new SettingValue<>(data, target);
   }
 
-  private SettingValue(T data, Target target) {
+  private SettingValue(@Nonnull T data, @Nonnull Target target) {
     this.data = data;
     this.target = target;
   }
@@ -90,18 +96,42 @@ public class SettingValue<T> {
    * A class to manage the entities to which an instance of
    * a {@link Setting} applies.
    */
-  @Builder
-  public static class Target {
-    private Set<String> groups;
-    private Set<UUID> players;
+  public static class Target extends HashSet<String> implements Predicate<Subject> {
 
-    public Set<String> getGroups() {
-      return ImmutableSet.copyOf(groups);
+    private Target(@Nullable Set<String> permissionRequirements) {
+      if (permissionRequirements != null) {
+        this.addAll(permissionRequirements);
+      }
     }
 
-    public Set<UUID> getPlayers() {
-      return ImmutableSet.copyOf(players);
+    public static String toJson(Target target) {
+      return new Gson().toJson(target);
     }
+
+    public static Target fromJson(String json) {
+      return new Target(new Gson().fromJson(json, NopeTypeTokens.STRING_SET_TOKEN.getType()));
+    }
+
+    public static Target all() {
+      return new Target(Sets.newHashSet());
+    }
+
+    public static Target hasAnyPermissionOf(String... permissions) {
+      return new Target(Sets.newHashSet(permissions));
+    }
+
+    /**
+     * Decide whether this subject is targeted.
+     *
+     * @param subject the permission subject
+     * @return true if the subject is targeted
+     */
+    @Override
+    public boolean test(Subject subject) {
+      return this.isEmpty() ||
+              this.stream().anyMatch(subject::hasPermission);
+    }
+
   }
 
 }

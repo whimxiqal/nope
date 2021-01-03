@@ -34,6 +34,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
+import com.minecraftonline.nope.Nope;
 import com.minecraftonline.nope.util.Format;
 import com.minecraftonline.nope.util.NopeTypeTokens;
 import org.spongepowered.api.CatalogType;
@@ -61,6 +62,7 @@ import java.util.stream.Collectors;
 public class SettingLibrary {
 
   private static final HashMap<String, SettingKey<?>> settingMap = Maps.newHashMap();
+  public static final String SET_SPLIT_REGEX = "( )*,?( )*";  //"(, )|[ ,]";
 
   @Retention(RetentionPolicy.RUNTIME)
   @Target(ElementType.FIELD)
@@ -77,6 +79,17 @@ public class SettingLibrary {
   @Retention(RetentionPolicy.RUNTIME)
   @Target(ElementType.FIELD)
   public @interface NotImplemented {
+    // Empty
+  }
+
+  /**
+   * An annotation for SettingKeys to designate its
+   * default value as unnatural. This is uesd for
+   * listener initializations.
+   */
+  @Retention(RetentionPolicy.RUNTIME)
+  @Target(ElementType.FIELD)
+  public @interface UnnaturalDefault {
     // Empty
   }
 
@@ -113,7 +126,11 @@ public class SettingLibrary {
     return settingMap.values();
   }
 
-  public static void initialize() {
+  /**
+   * Prepare the SettingLibrary for easy accessing of SettingKeys.
+   * @throws IllegalStateException if there are multiple SettingKeys with the same ID.
+   */
+  public static void initialize() throws IllegalStateException {
     Arrays.stream(SettingLibrary.class.getDeclaredFields())
             .filter(field -> Modifier.isStatic(field.getModifiers()))
             .filter(field -> SettingKey.class.isAssignableFrom(field.getType()))
@@ -121,7 +138,7 @@ public class SettingLibrary {
               try {
                 SettingKey<?> key = (SettingKey<?>) field.get(null);
                 if (settingMap.put(key.id, key) != null) {
-                  throw new IllegalStateException("Settings may not have the same id: " + key.id);
+                  throw new IllegalStateException("SettingKeys may not have the same id: " + key.id);
                 }
                 for (Annotation annotation : field.getAnnotations()) {
                   if (annotation instanceof Description) {
@@ -130,6 +147,8 @@ public class SettingLibrary {
                     key.category = ((Category) annotation).value();
                   } else if (annotation instanceof NotImplemented) {
                     key.implemented = false;
+                  } else if (annotation instanceof UnnaturalDefault) {
+                    key.unnaturalDefault = true;
                   }
                 }
               } catch (IllegalAccessException e) {
@@ -147,7 +166,7 @@ public class SettingLibrary {
       elem.put("id", setting.getKey().getId());
       setting.getKey().getDescription().ifPresent(description -> elem.put("description", description));  // does not deserialize
       elem.put("value", setting.getKey().dataToJson(setting.getValue().getData()));
-      elem.put("target", setting.getValue().getTarget());
+      elem.put("target", SettingValue.Target.toJson(setting.getValue().getTarget()));
       settingList.add(elem);
     }
     return new Gson().toJsonTree(settingList);
@@ -168,7 +187,7 @@ public class SettingLibrary {
       SettingKey<?> key = lookup(object.get("id").getAsString());
       SettingValue<Object> val = SettingValue.of(
               key.dataFromJson(object.get("value")),
-              new Gson().fromJson(object.get("target"), SettingValue.Target.class));
+              SettingValue.Target.fromJson(object.get("target").getAsString()));
       map.put(Setting.of((SettingKey<Object>) key, val));
     }
     return map;
@@ -178,35 +197,24 @@ public class SettingLibrary {
   /* PRIMITIVES */
   /* ========== */
 
-
   public static class BooleanSetting extends SettingKey<Boolean> {
     public BooleanSetting(String id, Boolean defaultValue) {
       super(id, defaultValue);
     }
+    public BooleanSetting(String id, Boolean defaultValue, SettingKey<Boolean> parent) {
+      super(id, defaultValue, parent);
+    }
 
-//    @Override
-//    public Boolean parse(String s) throws IllegalArgumentException {
-//      switch(s.toLowerCase()) {
-//        case "true": return true;
-//        case "false": return false;
-//        default: throw new IllegalArgumentException("Value must be true or false!");
-//      }
-//    }
+    @Override
+    public Optional<List<String>> getParsable() {
+      return Optional.of(Lists.newArrayList("true", "false"));
+    }
   }
 
   public static class IntegerSetting extends SettingKey<Integer> {
     public IntegerSetting(String id, Integer defaultValue) {
       super(id, defaultValue);
     }
-
-//    @Override
-//    public Integer parse(String s) throws IllegalArgumentException {
-//      try {
-//        return Integer.parseInt(s);
-//      } catch (NumberFormatException e) {
-//        throw new IllegalArgumentException("Value must be a number", e);
-//      }
-//    }
   }
 
   public static class DoubleSetting extends SettingKey<Double> {
@@ -219,22 +227,18 @@ public class SettingLibrary {
     public StringSetting(String id, String defaultValue) {
       super(id, defaultValue);
     }
-
-//    @Override
-//    public String parse(String s) throws IllegalArgumentException {
-//      return s;
-//    }
   }
 
   /* ====== */
   /* EXTRAS */
   /* ====== */
 
-  public static final String SET_SPLIT_REGEX = "( )*,?( )*";  //"(, )|[ ,]";
-
   public static class StateSetting extends SettingKey<Boolean> {
     public StateSetting(String id, Boolean defaultValue) {
       super(id, defaultValue);
+    }
+    public StateSetting(String id, Boolean defaultValue, SettingKey<Boolean> parent) {
+      super(id, defaultValue, parent);
     }
 
     @Override
@@ -250,7 +254,7 @@ public class SettingLibrary {
 
     @Override
     public Boolean parse(String s) throws IllegalArgumentException {
-      switch (s) {
+      switch (s.toLowerCase()) {
         case "allow":
           return true;
         case "deny":
@@ -258,6 +262,11 @@ public class SettingLibrary {
         default:
           throw new IllegalArgumentException("Invalid state string. Should be allow or deny. Was: " + s);
       }
+    }
+
+    @Override
+    public Optional<List<String>> getParsable() {
+      return Optional.of(Lists.newArrayList("allow", "deny"));
     }
   }
 
@@ -320,11 +329,19 @@ public class SettingLibrary {
     public E parse(String s) throws IllegalArgumentException {
       return Enum.valueOf(enumClass, s);
     }
+
+    @Override
+    public Optional<List<String>> getParsable() {
+      return Optional.of(Arrays.stream(enumClass.getEnumConstants())
+              .map(E::toString)
+              .map(String::toLowerCase)
+              .collect(Collectors.toList()));
+    }
   }
 
   public static class CatalogTypeSetting<C extends CatalogType> extends SettingKey<C> {
-    public CatalogTypeSetting(String id, C defaultValue) {
-      super(id, defaultValue);
+    public CatalogTypeSetting(String id, C defaultData) {
+      super(id, defaultData);
     }
 
     @Override
@@ -343,6 +360,15 @@ public class SettingLibrary {
       return Sponge.getRegistry()
               .getType(valueType(), s)
               .orElseThrow(() -> new IllegalStateException("Invalid GameMode String. Got: " + s));
+    }
+
+    @Override
+    public Optional<List<String>> getParsable() {
+      return Optional.of(Lists.newArrayList(Sponge.getRegistry()
+              .getAllOf(defaultData.getClass())
+              .stream()
+              .map(CatalogType::getName)
+              .collect(Collectors.toList())));
     }
   }
 
@@ -454,12 +480,10 @@ public class SettingLibrary {
   /* SETTINGS */
   /* ======== */
 
-  // TODO write description
-  // TODO remove this? What is this?
-  @NotImplemented
+  @Description("When disabled, blocks may not be changed")
   public static final SettingKey<Boolean> BUILD_PERMISSIONS = new BooleanSetting(
-          "build-permission-nodes-enable",
-          false
+          "build-permission",
+          true
   );
 
 
@@ -479,32 +503,26 @@ public class SettingLibrary {
 
   @Description("When disabled, blocks may not be broken")
   @Category(SettingKey.CategoryType.BLOCKS)
-  @NotImplemented
   public static final SettingKey<Boolean> BLOCK_BREAK = new StateSetting(
           "block-break",
-          true
+          true,
+          BUILD_PERMISSIONS
   );
 
   @Description("When disabled, blocks may not be placed")
   @Category(SettingKey.CategoryType.BLOCKS)
-  @NotImplemented
   public static final SettingKey<Boolean> BLOCK_PLACE = new StateSetting(
           "block-place",
-          true
+          true,
+          BUILD_PERMISSIONS
   );
 
   @Description("When disabled, blocks like farmland may not be trampled")
   @Category(SettingKey.CategoryType.BLOCKS)
-  @NotImplemented
   public static final SettingKey<Boolean> BLOCK_TRAMPLE = new StateSetting(
           "block-trample",
-          true
-  );
-
-  // TODO write description. What does this do?
-  public static final SettingKey<Boolean> FLAG_BUILD = new StateSetting(
-          "flag-build",
-          true
+          true,
+          BUILD_PERMISSIONS
   );
 
   @Description("When disabled, players may not open chests")
@@ -1116,7 +1134,7 @@ public class SettingLibrary {
 
   @Description("The type of storage to persist Nope server state")
   @NotImplemented
-  public static final SettingKey<StorageType> STORAGE_TYPE = new EnumSetting<StorageType>(
+  public static final SettingKey<StorageType> STORAGE_TYPE = new EnumSetting<>(
           "storage-type",
           StorageType.HOCON,
           StorageType.class

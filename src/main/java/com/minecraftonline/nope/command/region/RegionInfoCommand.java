@@ -139,39 +139,43 @@ public class RegionInfoCommand extends LambdaCommandNode {
       builder.append(Format.keyValue(key.getId() + ": value: ", key.dataToJson(value.getData()).toString()));
 
       if (value.getTarget() != null) {
-        SettingValue.Target target = value.getTarget();
-
-        builder.append(Text.of("("))
-            .append(Format.keyValue("groups: ", String.join(",", target.getGroups())));
-
-        List<String> players;
-
-        if (friendly) {
-          // Convert uuids to usernames
-          players = new ArrayList<>();
-          for (UUID uuid : target.getPlayers()) {
-            String username = uuidUsernameMap.get(uuid);
-            if (username != null) {
-              players.add(username);
-            }
-            try {
-              GameProfile profile = Sponge.getServer().getGameProfileManager().get(uuid).get();
-              username = profile.getName().orElse("INVALID_UUID");
-            } catch (InterruptedException | ExecutionException e) {
-              Nope.getInstance().getLogger().error("Error converting uuids!", e);
-            }
-            uuidUsernameMap.put(uuid, username);
-            players.add(username);
-          }
-        }
-        else {
-          players = target.getPlayers().stream()
-              .map(UUID::toString)
-              .collect(Collectors.toList());
-        }
+//        SettingValue.Target target = value.getTarget();
+//
+//        builder.append(Text.of("("))
+//            .append(Format.keyValue("groups: ", String.join(",", target.getGroups())));
+//
+//        List<String> players;
+//
+//        if (friendly) {
+//          // Convert uuids to usernames
+//          players = new ArrayList<>();
+//          for (UUID uuid : target.getPlayers()) {
+//            String username = uuidUsernameMap.get(uuid);
+//            if (username != null) {
+//              players.add(username);
+//            }
+//            try {
+//              GameProfile profile = Sponge.getServer().getGameProfileManager().get(uuid).get();
+//              username = profile.getName().orElse("INVALID_UUID");
+//            } catch (InterruptedException | ExecutionException e) {
+//              Nope.getInstance().getLogger().error("Error converting uuids!", e);
+//            }
+//            uuidUsernameMap.put(uuid, username);
+//            players.add(username);
+//          }
+//        }
+//        else {
+//          players = target.getPlayers().stream()
+//              .map(UUID::toString)
+//              .collect(Collectors.toList());
+//        }
+//        builder.append(Text.of(" "))
+//            .append(Format.keyValue("players: ", String.join(",", players) + ")"))
+//            .append(Text.of(")"));
         builder.append(Text.of(" "))
-            .append(Format.keyValue("players: ", String.join(",", players) + ")"))
-            .append(Text.of(")"));
+                .append(Format.keyValue(
+                        "permissions: ",
+                        String.join(", ", value.getTarget())));
       }
       lines.add(builder.build());
     }

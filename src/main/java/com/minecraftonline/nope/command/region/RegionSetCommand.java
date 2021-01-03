@@ -25,55 +25,51 @@
 package com.minecraftonline.nope.command.region;
 
 import com.minecraftonline.nope.Nope;
-import com.minecraftonline.nope.RegionWandHandler;
 import com.minecraftonline.nope.arguments.NopeArguments;
 import com.minecraftonline.nope.command.common.CommandNode;
 import com.minecraftonline.nope.command.common.LambdaCommandNode;
+import com.minecraftonline.nope.host.Host;
 import com.minecraftonline.nope.permission.Permissions;
+import com.minecraftonline.nope.setting.SettingKey;
+import com.minecraftonline.nope.setting.SettingValue;
 import com.minecraftonline.nope.util.Format;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.args.GenericArguments;
-import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
 
-public class RegionCreateCommand extends LambdaCommandNode {
-  public RegionCreateCommand(CommandNode parent) {
+public class RegionSetCommand extends LambdaCommandNode {
+  public RegionSetCommand(CommandNode parent) {
     super(parent,
-        Permissions.CREATE_REGION,
-        Text.of("Create a region with current selection and given name"),
-        "create",
-        "c",
-        "new");
+            Permissions.EDIT_REGION,
+            Text.of("Set setting on a region"),
+            "set");
     addCommandElements(
-        GenericArguments.onlyOne(GenericArguments.string(Text.of("name"))),
-//        NopeArguments.regionLocation(Text.of("selection")),
-        GenericArguments.optional(GenericArguments.integer(Text.of("priority")), 0)
+            NopeArguments.host(Text.of("region")),
+            NopeArguments.settingKey(Text.of("setting")),
+            GenericArguments.remainingJoinedStrings(Text.of("value"))
     );
     setExecutor((src, args) -> {
-      if (!(src instanceof Player)) {
-        return CommandResult.empty();
-      }
-      Player player = (Player) src;
-      String name = args.requireOne(Text.of("name"));
-//      RegionWandHandler.Selection selection = args.requireOne(Text.of("selection"));
-      RegionWandHandler.Selection selection = Nope.getInstance().getRegionWandHandler().getSelectionMap().get(player);
-      int priority = args.requireOne("priority");
+      Host region = args.requireOne("region");
+      SettingKey<?> settingKey = args.requireOne("setting");
+      String value = args.requireOne("value");
 
       try {
-        Nope.getInstance().getHostTree().addRegion(
-            name,
-            selection.getWorld().getUniqueId(),
-            selection.getMin(),
-            selection.getMax(),
-            priority
-        );
-        Nope.getInstance().getHostTree().save();
-        src.sendMessage(Format.success("Successfully created region ", Format.note(name), "!"));
+        addSetting(region, settingKey, value);
       } catch (IllegalArgumentException e) {
-        src.sendMessage(Format.error("Could not create region: " + e.getMessage()));
+        src.sendMessage(Format.error("Invalid value: " + e.getMessage()));
         return CommandResult.empty();
       }
+
+      Nope.getInstance().getHostTree().save();
+      src.sendMessage(Format.success("Successfully set setting " + settingKey.getId() + ", on region " + region.getName()));
+
       return CommandResult.success();
     });
+  }
+
+  private <T> void addSetting(Host region, SettingKey<T> key, String s)
+          throws IllegalArgumentException {
+    T data = key.parse(s);
+    region.put(key, SettingValue.of(data));
   }
 }
