@@ -25,21 +25,29 @@
 
 package com.minecraftonline.nope.listener;
 
+import com.google.common.collect.Lists;
 import com.minecraftonline.nope.Nope;
 import com.minecraftonline.nope.setting.SettingKey;
 import com.minecraftonline.nope.setting.SettingLibrary;
+import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Cancellable;
 import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
+import org.spongepowered.api.event.block.InteractBlockEvent;
 
 import javax.annotation.Nonnull;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
+import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.BiPredicate;
 
+/**
+ * A container class for all dynamically registered listeners.
+ */
+@SuppressWarnings("unused")
 public class SettingListeners {
 
   public static void register() {
@@ -99,74 +107,110 @@ public class SettingListeners {
     }
   }
 
+  private static RuntimeException noLocation(SettingKey<?> key,
+                                             Class<? extends Event> eventClass,
+                                             Player player) {
+    return new RuntimeException(String.format(
+            "The relevant location for the dynamic event listener for "
+                    + "Setting Key %s and event class %s could not be found. "
+                    + "The player is %s at location (%d, %d, %d) in %s",
+            key.getId(),
+            eventClass.getName(),
+            player.getName(),
+            player.getLocation().getBlockX(),
+            player.getLocation().getBlockY(),
+            player.getLocation().getBlockZ(),
+            player.getLocation().getExtent().getName()
+    ));
+  }
+
   public static SettingListener<ChangeBlockEvent> BUILD_PERMISSIONS_LISTENER = new PlayerCancelConditionSettingListener<>(
           SettingLibrary.BUILD_PERMISSIONS,
           ChangeBlockEvent.class,
-          (event, player) -> event.getTransactions()
-                  .stream()
-                  .anyMatch(transaction -> !Nope.getInstance().getHostTree().lookup(
+          (event, player) -> event.getTransactions().stream().anyMatch(transaction ->
+                  !Nope.getInstance().getHostTree().lookup(
                           SettingLibrary.BUILD_PERMISSIONS,
                           player,
-                          transaction.getOriginal()
+                          transaction.getOriginal().getLocation().orElse(transaction.getFinal()
                                   .getLocation()
-                                  .orElse(transaction
-                                          .getFinal()
-                                          .getLocation()
-                                          .orElse(player.getLocation()))))
-  );
+                                  .orElseThrow(() -> noLocation(SettingLibrary.BUILD_PERMISSIONS,
+                                          ChangeBlockEvent.class,
+                                          player))))));
 
   public static SettingListener<ChangeBlockEvent.Break> BLOCK_BREAK_LISTENER = new PlayerCancelConditionSettingListener<>(
           SettingLibrary.BLOCK_BREAK,
           ChangeBlockEvent.Break.class,
-          (event, player) -> event.getTransactions()
-                  .stream()
-                  .anyMatch(transaction -> !Nope.getInstance().getHostTree().lookup(
+          (event, player) -> event.getTransactions().stream().anyMatch(transaction ->
+                  !Nope.getInstance().getHostTree().lookup(
                           SettingLibrary.BLOCK_BREAK,
                           player,
-                          transaction.getOriginal()
+                          transaction.getOriginal().getLocation().orElse(transaction.getFinal()
                                   .getLocation()
-                                  .orElse(transaction
-                                          .getFinal()
-                                          .getLocation()
-                                          .orElse(player.getLocation()))))
-  );
+                                  .orElseThrow(() -> noLocation(SettingLibrary.BLOCK_BREAK,
+                                          ChangeBlockEvent.Break.class,
+                                          player))))));
 
   public static SettingListener<ChangeBlockEvent.Place> BLOCK_PLACE_LISTENER = new PlayerCancelConditionSettingListener<>(
           SettingLibrary.BLOCK_PLACE,
           ChangeBlockEvent.Place.class,
-          (event, player) -> event.getTransactions()
-                  .stream()
-                  .anyMatch(transaction -> !Nope.getInstance().getHostTree().lookup(
+          (event, player) -> event.getTransactions().stream().anyMatch(transaction ->
+                  !Nope.getInstance().getHostTree().lookup(
                           SettingLibrary.BLOCK_PLACE,
                           player,
-                          transaction.getOriginal()
+                          transaction.getOriginal().getLocation().orElse(transaction.getFinal()
                                   .getLocation()
-                                  .orElse(transaction
-                                          .getFinal()
-                                          .getLocation()
-                                          .orElse(player.getLocation()))))
-  );
+                                  .orElseThrow(() -> noLocation(SettingLibrary.BLOCK_PLACE,
+                                          ChangeBlockEvent.Place.class,
+                                          player))))));
 
   public static SettingListener<ChangeBlockEvent> BLOCK_TRAMPLE = new PlayerCancelConditionSettingListener<>(
           SettingLibrary.BLOCK_TRAMPLE,
           ChangeBlockEvent.class,
-          (event, player) -> event.getTransactions()
-                  .stream()
-                  .anyMatch(transaction -> !Nope.getInstance().getHostTree().lookup(
+          (event, player) -> event.getTransactions().stream().anyMatch(transaction ->
+                  !Nope.getInstance().getHostTree().lookup(
                           SettingLibrary.BLOCK_TRAMPLE,
                           player,
-                          transaction.getOriginal()
+                          transaction.getOriginal().getLocation().orElse(transaction.getFinal()
                                   .getLocation()
-                                  .orElse(transaction
-                                          .getFinal()
-                                          .getLocation()
-                                          .orElse(player.getLocation())))
+                                  .orElse(player.getLocation())))
                           && transaction.getOriginal()
                           .getState()
                           .getType().equals(BlockTypes.FARMLAND)
                           && transaction.getFinal()
                           .getState()
-                          .getType().equals(BlockTypes.DIRT))
-  );
+                          .getType().equals(BlockTypes.DIRT)));
+
+  public static SettingListener<InteractBlockEvent.Secondary> CHEST_ACCESS_LISTENER = new PlayerCancelConditionSettingListener<>(
+          SettingLibrary.CHEST_ACCESS,
+          InteractBlockEvent.Secondary.class,
+          (event, player) -> {
+            List<BlockType> chests = Lists.newArrayList(
+                    BlockTypes.CHEST,
+                    BlockTypes.ENDER_CHEST,
+                    BlockTypes.TRAPPED_CHEST,
+                    BlockTypes.BLACK_SHULKER_BOX,
+                    BlockTypes.BLUE_SHULKER_BOX,
+                    BlockTypes.BROWN_SHULKER_BOX,
+                    BlockTypes.CYAN_SHULKER_BOX,
+                    BlockTypes.GRAY_SHULKER_BOX,
+                    BlockTypes.GREEN_SHULKER_BOX,
+                    BlockTypes.LIGHT_BLUE_SHULKER_BOX,
+                    BlockTypes.LIME_SHULKER_BOX,
+                    BlockTypes.MAGENTA_SHULKER_BOX,
+                    BlockTypes.ORANGE_SHULKER_BOX,
+                    BlockTypes.PINK_SHULKER_BOX,
+                    BlockTypes.PURPLE_SHULKER_BOX,
+                    BlockTypes.RED_SHULKER_BOX,
+                    BlockTypes.SILVER_SHULKER_BOX,
+                    BlockTypes.WHITE_SHULKER_BOX,
+                    BlockTypes.YELLOW_SHULKER_BOX);
+            return chests.contains(event.getTargetBlock().getState().getType())
+                    && !Nope.getInstance().getHostTree().lookup(SettingLibrary.CHEST_ACCESS,
+                    player,
+                    event.getTargetBlock().getLocation()
+                            .orElseThrow(() -> noLocation(SettingLibrary.CHEST_ACCESS,
+                                    InteractBlockEvent.Secondary.class,
+                                    player)));
+          });
 
 }

@@ -527,7 +527,6 @@ public class SettingLibrary {
 
   @Description("When disabled, players may not open chests")
   @Category(SettingKey.CategoryType.BLOCKS)
-  @NotImplemented
   public static final SettingKey<Boolean> CHEST_ACCESS = new StateSetting(
           "chest-access",
           true
