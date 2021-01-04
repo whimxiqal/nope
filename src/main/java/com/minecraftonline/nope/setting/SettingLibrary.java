@@ -64,12 +64,22 @@ public class SettingLibrary {
   @Retention(RetentionPolicy.RUNTIME)
   @Target(ElementType.FIELD)
   public @interface Description {
+    /**
+     * The description of a {@link SettingKey}.
+     *
+     * @return SettingKey description
+     */
     String value();
   }
 
   @Retention(RetentionPolicy.RUNTIME)
   @Target(ElementType.FIELD)
   public @interface Category {
+    /**
+     * The category of a {@link SettingKey}.
+     *
+     * @return SettingKey category
+     */
     SettingKey.CategoryType value();
   }
 
@@ -81,7 +91,7 @@ public class SettingLibrary {
 
   /**
    * An annotation for SettingKeys to designate its
-   * default value as unnatural. This is uesd for
+   * default value as unnatural. This is used for
    * listener initializations.
    */
   @Retention(RetentionPolicy.RUNTIME)
@@ -104,16 +114,25 @@ public class SettingLibrary {
   }
 
   private static void ensureInitialized() {
-    if (settingMap.isEmpty()) throw new RuntimeException("The SettingLibrary must be initialized");
+    if (settingMap.isEmpty()) {
+      throw new RuntimeException("The SettingLibrary must be initialized");
+    }
   }
 
+  /**
+   * Get a SettingKey based on its id.
+   *
+   * @param id the id of a SettingKey
+   * @return the SettingKey keyed with that id
+   * @throws NoSuchElementException if there is no SettingKey with that id
+   */
   public static SettingKey<?> lookup(@Nonnull String id) throws NoSuchElementException {
     ensureInitialized();
     SettingKey<?> output = settingMap.get(id);
     if (output == null) {
       throw new NoSuchElementException(String.format(
-              "There is no setting with id '%s'",
-              id));
+          "There is no setting with id '%s'",
+          id));
     }
     return output;
   }
@@ -125,43 +144,56 @@ public class SettingLibrary {
 
   /**
    * Prepare the SettingLibrary for easy accessing of SettingKeys.
+   *
    * @throws IllegalStateException if there are multiple SettingKeys with the same ID.
    */
   public static void initialize() throws IllegalStateException {
     Arrays.stream(SettingLibrary.class.getDeclaredFields())
-            .filter(field -> Modifier.isStatic(field.getModifiers()))
-            .filter(field -> SettingKey.class.isAssignableFrom(field.getType()))
-            .forEach(field -> {
-              try {
-                SettingKey<?> key = (SettingKey<?>) field.get(null);
-                if (settingMap.put(key.id, key) != null) {
-                  throw new IllegalStateException("SettingKeys may not have the same id: " + key.id);
-                }
-                for (Annotation annotation : field.getAnnotations()) {
-                  if (annotation instanceof Description) {
-                    key.description = ((Description) annotation).value();
-                  } else if (annotation instanceof Category) {
-                    key.category = ((Category) annotation).value();
-                  } else if (annotation instanceof NotImplemented) {
-                    key.implemented = false;
-                  } else if (annotation instanceof UnnaturalDefault) {
-                    key.unnaturalDefault = true;
-                  }
-                }
-              } catch (IllegalAccessException e) {
-                e.printStackTrace();
+        .filter(field -> Modifier.isStatic(field.getModifiers()))
+        .filter(field -> SettingKey.class.isAssignableFrom(field.getType()))
+        .forEach(field -> {
+          try {
+            SettingKey<?> key = (SettingKey<?>) field.get(null);
+            if (settingMap.put(key.id, key) != null) {
+              throw new IllegalStateException("SettingKeys may not have the same id: " + key.id);
+            }
+            for (Annotation annotation : field.getAnnotations()) {
+              if (annotation instanceof Description) {
+                key.description = ((Description) annotation).value();
+              } else if (annotation instanceof Category) {
+                key.category = ((Category) annotation).value();
+              } else if (annotation instanceof NotImplemented) {
+                key.implemented = false;
+              } else if (annotation instanceof UnnaturalDefault) {
+                key.unnaturalDefault = true;
               }
-            });
-    if (settingMap.isEmpty())
-      throw new RuntimeException("Tried to initialize SettingLibrary, but it did not appear to work");
+            }
+          } catch (IllegalAccessException e) {
+            e.printStackTrace();
+          }
+        });
+    if (settingMap.isEmpty()) {
+      throw new RuntimeException("Tried to initialize SettingLibrary, "
+          + "but it did not appear to work");
+    }
   }
 
+  /**
+   * Send a SettingMap to a JsonElement to be saved elsewhere
+   * so that it can be restored later using
+   * {@link #deserializeSettingAssignments(JsonElement)}.
+   *
+   * @param map the map of settings
+   * @return the finished json element
+   */
   public static JsonElement serializeSettingAssignments(SettingMap map) {
     List<Map<String, Object>> settingList = Lists.newLinkedList();
     for (Setting<?> setting : map.entries()) {
       Map<String, Object> elem = Maps.newHashMap();
       elem.put("id", setting.getKey().getId());
-      setting.getKey().getDescription().ifPresent(description -> elem.put("description", description));  // does not deserialize
+      // This does not deserialize:
+      setting.getKey().getDescription().ifPresent(description ->
+          elem.put("description", description));
       elem.put("value", setting.getKey().dataToJson(setting.getValue().getData()));
       elem.put("target", SettingValue.Target.toJson(setting.getValue().getTarget()));
       settingList.add(elem);
@@ -169,6 +201,13 @@ public class SettingLibrary {
     return new Gson().toJsonTree(settingList);
   }
 
+  /**
+   * Rebuild a SettingMap from a JsonElement that was stored
+   * in some persistent storage location.
+   *
+   * @param json the json object
+   * @return the restored SettingMap
+   */
   @SuppressWarnings("unchecked")
   public static SettingMap deserializeSettingAssignments(JsonElement json) {
     JsonElement element = json.getAsJsonObject().get("settings");
@@ -183,8 +222,8 @@ public class SettingLibrary {
       JsonObject object = serializedSetting.getAsJsonObject();
       SettingKey<?> key = lookup(object.get("id").getAsString());
       SettingValue<Object> val = SettingValue.of(
-              key.dataFromJson(object.get("value")),
-              SettingValue.Target.fromJson(object.get("target").getAsString()));
+          key.dataFromJson(object.get("value")),
+          SettingValue.Target.fromJson(object.get("target").getAsString()));
       map.put(Setting.of((SettingKey<Object>) key, val));
     }
     return map;
@@ -198,7 +237,10 @@ public class SettingLibrary {
     public BooleanSetting(String id, Boolean defaultValue) {
       super(id, defaultValue);
     }
-    public BooleanSetting(String id, Boolean defaultValue, SettingKey<Boolean> parent) {
+
+    public BooleanSetting(String id,
+                          Boolean defaultValue,
+                          SettingKey<Boolean> parent) {
       super(id, defaultValue, parent);
     }
 
@@ -234,7 +276,10 @@ public class SettingLibrary {
     public StateSetting(String id, Boolean defaultValue) {
       super(id, defaultValue);
     }
-    public StateSetting(String id, Boolean defaultValue, SettingKey<Boolean> parent) {
+
+    public StateSetting(String id,
+                        Boolean defaultValue,
+                        SettingKey<Boolean> parent) {
       super(id, defaultValue, parent);
     }
 
@@ -257,7 +302,8 @@ public class SettingLibrary {
         case "deny":
           return false;
         default:
-          throw new IllegalArgumentException("Invalid state string. Should be allow or deny. Was: " + s);
+          throw new IllegalArgumentException("Invalid state string. "
+              + "Should be allow or deny. Was: " + s);
       }
     }
 
@@ -287,10 +333,10 @@ public class SettingLibrary {
     public Text dataFromJsonGenerified(JsonElement json) {
       try {
         return Sponge.getDataManager()
-                .deserialize(Text.class, DataFormats.JSON.read(json.toString()))
-                .orElseThrow(() -> new RuntimeException(
-                        "The json for Text cannot be serialized: "
-                                + json.toString()));
+            .deserialize(Text.class, DataFormats.JSON.read(json.toString()))
+            .orElseThrow(() -> new RuntimeException(
+                "The json for Text cannot be serialized: "
+                    + json.toString()));
       } catch (IOException e) {
         e.printStackTrace();
         return Text.EMPTY;
@@ -330,9 +376,9 @@ public class SettingLibrary {
     @Override
     public Optional<List<String>> getParsable() {
       return Optional.of(Arrays.stream(enumClass.getEnumConstants())
-              .map(E::toString)
-              .map(String::toLowerCase)
-              .collect(Collectors.toList()));
+          .map(E::toString)
+          .map(String::toLowerCase)
+          .collect(Collectors.toList()));
     }
   }
 
@@ -355,17 +401,17 @@ public class SettingLibrary {
     @Override
     public C parse(String s) throws IllegalArgumentException {
       return Sponge.getRegistry()
-              .getType(valueType(), s)
-              .orElseThrow(() -> new IllegalStateException("Invalid GameMode String. Got: " + s));
+          .getType(valueType(), s)
+          .orElseThrow(() -> new IllegalStateException("Invalid GameMode String. Got: " + s));
     }
 
     @Override
     public Optional<List<String>> getParsable() {
       return Optional.of(Lists.newArrayList(Sponge.getRegistry()
-              .getAllOf(defaultData.getClass())
-              .stream()
-              .map(CatalogType::getName)
-              .collect(Collectors.toList())));
+          .getAllOf(defaultData.getClass())
+          .stream()
+          .map(CatalogType::getName)
+          .collect(Collectors.toList())));
     }
   }
 
@@ -410,9 +456,9 @@ public class SettingLibrary {
     @Override
     public Set<EntityType> dataFromJsonGenerified(JsonElement jsonElement) {
       return stringsToEntityTypes(Lists.newLinkedList(jsonElement.getAsJsonArray())
-              .stream()
-              .map(JsonElement::getAsString)
-              .collect(Collectors.toList()));
+          .stream()
+          .map(JsonElement::getAsString)
+          .collect(Collectors.toList()));
     }
 
     @Override
@@ -426,8 +472,8 @@ public class SettingLibrary {
       Set<EntityType> set = new HashSet<>();
       for (String s : strings) {
         final EntityType entityType = Sponge.getRegistry()
-                .getType(EntityType.class, s)
-                .orElseThrow(() -> new IllegalArgumentException("Unknown EntityType: " + s));
+            .getType(EntityType.class, s)
+            .orElseThrow(() -> new IllegalArgumentException("Unknown EntityType: " + s));
         set.add(entityType);
       }
       return set;
@@ -452,9 +498,9 @@ public class SettingLibrary {
     public Vector3d dataFromJsonGenerified(JsonElement jsonElement) {
       final JsonObject jsonObject = jsonElement.getAsJsonObject();
       return Vector3d.from(
-              jsonObject.get("x").getAsDouble(),
-              jsonObject.get("y").getAsDouble(),
-              jsonObject.get("z").getAsDouble()
+          jsonObject.get("x").getAsDouble(),
+          jsonObject.get("y").getAsDouble(),
+          jsonObject.get("z").getAsDouble()
       );
     }
 
@@ -471,7 +517,8 @@ public class SettingLibrary {
         double z = Double.parseDouble(parts[i]);
         return Vector3d.from(x, y, z);
       } catch (NumberFormatException e) {
-        throw new IllegalArgumentException("Int number " + i + ", could not be parsed into a double");
+        throw new IllegalArgumentException("Int number " + i + ", "
+            + "could not be parsed into a double");
       }
     }
   }
@@ -482,634 +529,634 @@ public class SettingLibrary {
 
   @Description("When disabled, blocks may not be changed")
   public static final SettingKey<Boolean> BUILD_PERMISSIONS = new BooleanSetting(
-          "build-permission",
-          true
+      "build-permission",
+      true
   );
 
 
   @Description("Deop the player upon entering")
   @NotImplemented
   public static final SettingKey<Boolean> DEOP_ON_ENTER = new BooleanSetting(
-          "deop-on-enter",
-          false
+      "deop-on-enter",
+      false
   );
 
   @Description("Enables all plugin functionality. Can only be set globally.")
   @NotImplemented
   public static final SettingKey<Boolean> ENABLE_PLUGIN = new BooleanSetting(
-          "enable-plugin",
-          true
+      "enable-plugin",
+      true
   );
 
   @Description("When disabled, blocks may not be broken")
   @Category(SettingKey.CategoryType.BLOCKS)
   public static final SettingKey<Boolean> BLOCK_BREAK = new StateSetting(
-          "block-break",
-          true,
-          BUILD_PERMISSIONS
+      "block-break",
+      true,
+      BUILD_PERMISSIONS
   );
 
   @Description("When disabled, blocks may not be placed")
   @Category(SettingKey.CategoryType.BLOCKS)
   public static final SettingKey<Boolean> BLOCK_PLACE = new StateSetting(
-          "block-place",
-          true,
-          BUILD_PERMISSIONS
+      "block-place",
+      true,
+      BUILD_PERMISSIONS
   );
 
   @Description("When disabled, blocks like farmland may not be trampled")
   @Category(SettingKey.CategoryType.BLOCKS)
   public static final SettingKey<Boolean> BLOCK_TRAMPLE = new StateSetting(
-          "block-trample",
-          true,
-          BUILD_PERMISSIONS
+      "block-trample",
+      true,
+      BUILD_PERMISSIONS
   );
 
   @Description("When disabled, players may not open chests")
   @Category(SettingKey.CategoryType.BLOCKS)
   public static final SettingKey<Boolean> CHEST_ACCESS = new StateSetting(
-          "chest-access",
-          true
+      "chest-access",
+      true
   );
 
   @Description("When disabled, players may not teleport by eating a chorus fruit")
   @NotImplemented
   public static final SettingKey<Boolean> CHORUS_FRUIT_TELEPORT = new StateSetting(
-          "chorus-fruit-teleport",
-          true
+      "chorus-fruit-teleport",
+      true
   );
 
   @Description("When disabled, creepers do not cause damage")
   public static final SettingKey<Boolean> CREEPER_EXPLOSION_DAMAGE = new StateSetting(
-          "creeper-explosion-damage",
-          true
+      "creeper-explosion-damage",
+      true
   );
 
   @Description("When disabled, creepers do not grief when they explode")
   public static final SettingKey<Boolean> CREEPER_EXPLOSION_GRIEF = new StateSetting(
-          "creeper-explosion-grief",
-          true
+      "creeper-explosion-grief",
+      true
   );
 
   @Description("When disabled, crops do not grow")
   @NotImplemented
   public static final SettingKey<Boolean> CROP_GROWTH = new StateSetting(
-          "crop-growth",
-          true
+      "crop-growth",
+      true
   );
 
   @Description("When disabled, animals are invincible")
   public static final SettingKey<Boolean> DAMAGE_ANIMALS = new StateSetting(
-          "damage-animals",
-          true
+      "damage-animals",
+      true
   );
 
   @Description("These entity types will not be allowed to spawn")
   public static final SettingKey<Set<EntityType>> DENY_SPAWN = new EntityTypeSetSetting(
-          "deny-spawn",
-          Sets.newHashSet()
+      "deny-spawn",
+      Sets.newHashSet()
   );
 
   @Description("Enables grief caused by the enderdragon")
   @NotImplemented
   public static final SettingKey<Boolean> ENDERDRAGON_GRIEF = new StateSetting(
-          "enderdragon-grief",
-          true
+      "enderdragon-grief",
+      true
   );
 
   @Description("When disabled, endermen do not grief blocks by picking them up")
   @NotImplemented
   public static final SettingKey<Boolean> ENDERMAN_GRIEF = new StateSetting(
-          "enderman-grief",
-          true
+      "enderman-grief",
+      true
   );
 
   @Description("When disabled, enderpearls may not be used for teleportation")
   public static final SettingKey<Boolean> ENDERPEARL_TELEPORT = new StateSetting(
-          "enderpearl-teleport",
-          true
+      "enderpearl-teleport",
+      true
   );
 
   @Description("When disabled, armor stands may not be broken")
   @NotImplemented
   public static final SettingKey<Boolean> ARMOR_STAND_DESTROY = new StateSetting(
-          "armor-stand-destroy",
-          true
+      "armor-stand-destroy",
+      true
   );
 
   @Description("When disabled, item frames may not be broken")
   @NotImplemented
   public static final SettingKey<Boolean> ITEM_FRAME_DESTROY = new StateSetting(
-          "item-frame-destroy",
-          true
+      "item-frame-destroy",
+      true
   );
 
   @Description("When disabled, paintings may not be broken")
   @NotImplemented
   public static final SettingKey<Boolean> PAINTING_DESTROY = new StateSetting(
-          "painting-destroy",
-          true
+      "painting-destroy",
+      true
   );
 
   @Description("Specify which type of movement is allowed by players to enter. "
-          + "Options: all, only_translation, only_teleportation, none")
+      + "Options: all, only_translation, only_teleportation, none")
   @NotImplemented
   public static final SettingKey<Movement> ENTRY = new EnumSetting<>(
-          "entry",
-          Movement.ALL,
-          Movement.class
+      "entry",
+      Movement.ALL,
+      Movement.class
   );
 
   @Description("The message that is sent to a player if they are barred from entry")
   @NotImplemented
   public static final SettingKey<Text> ENTRY_DENY_MESSAGE = new TextSetting(
-          "entry-deny-message",
-          Format.error("You are not allowed to go there")
+      "entry-deny-message",
+      Format.error("You are not allowed to go there")
   );
 
   @Description("When disabled, players may not receive damage from the environment")
   @NotImplemented
   public static final SettingKey<Boolean> EVP = new StateSetting(
-          "evp",
-          true
+      "evp",
+      true
   );
 
   @Description("Specify which type of movement is allowed by players to exit. "
-          + "Options: all, only_translation, only_teleportation, none")
+      + "Options: all, only_translation, only_teleportation, none")
   @NotImplemented
   public static final SettingKey<Movement> EXIT = new EnumSetting<>(
-          "exit",
-          Movement.ALL,
-          Movement.class
+      "exit",
+      Movement.ALL,
+      Movement.class
   );
 
   @Description("The message that is sent to the player if they are barred from exiting")
   @NotImplemented
   public static final SettingKey<Text> EXIT_DENY_MESSAGE = new TextSetting(
-          "exit-deny-message",
-          Format.error("You are not allowed to leave here")
+      "exit-deny-message",
+      Format.error("You are not allowed to leave here")
   );
 
   @Description("When disabled, experience points are never dropped")
   @NotImplemented
   public static final SettingKey<Boolean> EXP_DROPS = new StateSetting(
-          "exp-drops",
-          false
+      "exp-drops",
+      false
   );
 
   @Description("When disabled, players do not experience fall damage")
   @NotImplemented
   public static final SettingKey<Boolean> FALL_DAMAGE = new StateSetting(
-          "fall-damage",
-          false
+      "fall-damage",
+      false
   );
 
   @Description("The message to a player when they leave")
   @NotImplemented
   public static final SettingKey<Text> FAREWELL = new TextSetting(
-          "farewell",
-          Text.EMPTY
+      "farewell",
+      Text.EMPTY
   );
 
   @Description("The title that appears to a player when they leave")
   @NotImplemented
   public static final SettingKey<Text> FAREWELL_TITLE = new TextSetting(
-          "farewell-title",
-          Text.EMPTY
+      "farewell-title",
+      Text.EMPTY
   );
 
   @Description("The amount of food restored with the feed command")
   @NotImplemented
   public static final SettingKey<Integer> FEED_AMOUNT = new IntegerSetting(
-          "feed-amount",
-          0
+      "feed-amount",
+      0
   );
 
   @Description("The amount of time before the feed command is used again by a player")
   @NotImplemented
   public static final SettingKey<Integer> FEED_DELAY = new IntegerSetting(
-          "feed-delay",
-          0
+      "feed-delay",
+      0
   );
 
   // TODO write description
   @NotImplemented
   public static final SettingKey<Double> FEED_MIN_HUNGER = new DoubleSetting(
-          "feed-min-hunger",
-          0D
+      "feed-min-hunger",
+      0D
   );
 
   @Description("When disabled, firework does not cause damage")
   @Category(SettingKey.CategoryType.DAMAGE)
   @NotImplemented
   public static final SettingKey<Boolean> FIREWORK_DAMAGE = new StateSetting(
-          "firework-damage",
-          true
+      "firework-damage",
+      true
   );
 
   @Description("When disabled, fire does not spread")
   @NotImplemented
   public static final SettingKey<Boolean> FIRE_SPREAD = new StateSetting(
-          "fire-spread",
-          true
+      "fire-spread",
+      true
   );
 
   @Description("When disabled, frosted ice does not form")
   @Category(SettingKey.CategoryType.BLOCKS)
   @NotImplemented
   public static final SettingKey<Boolean> FROSTED_ICE_FORM = new StateSetting(
-          "frosted-ice-form",
-          true
+      "frosted-ice-form",
+      true
   );
 
   @Description("When disabled, frosted ice does not melt")
   @Category(SettingKey.CategoryType.BLOCKS)
   @NotImplemented
   public static final SettingKey<Boolean> FROSTED_ICE_MELT = new StateSetting(
-          "frosted-ice-melt",
-          true
+      "frosted-ice-melt",
+      true
   );
 
   @Description("The default gamemode of players")
   @NotImplemented
   public static final SettingKey<GameMode> GAME_MODE = new CatalogTypeSetting<>(
-          "game-mode",
-          GameModes.NOT_SET
+      "game-mode",
+      GameModes.NOT_SET
   );
 
   @Description("When disabled, ghasts do not shoot fireball")
   @NotImplemented
   public static final SettingKey<Boolean> GHAST_FIREBALL = new StateSetting(
-          "ghast-fireball",
-          true
+      "ghast-fireball",
+      true
   );
 
   @Description("When disabled, grass does not grow naturally")
   @Category(SettingKey.CategoryType.BLOCKS)
   @NotImplemented
   public static final SettingKey<Boolean> GRASS_GROWTH = new StateSetting(
-          "grass-growth",
-          true
+      "grass-growth",
+      true
   );
 
   @Description("The message to a player when they enter")
   @NotImplemented
   public static final SettingKey<Text> GREETING = new TextSetting(
-          "greeting",
-          Text.EMPTY
+      "greeting",
+      Text.EMPTY
   );
 
   @Description("The title that appears to a player when they enter")
   @NotImplemented
   public static final SettingKey<Text> GREETING_TITLE = new TextSetting(
-          "greeting-title",
-          Text.EMPTY
+      "greeting-title",
+      Text.EMPTY
   );
 
   @Description("The amount of health restored with the heal command")
   @NotImplemented
   public static final SettingKey<Integer> HEAL_AMOUNT = new IntegerSetting(
-          "heal-amount",
-          0
+      "heal-amount",
+      0
   );
 
   @Description("The time delay before a player can use the heal command again")
   @NotImplemented
   public static final SettingKey<Integer> HEAL_DELAY = new IntegerSetting(
-          "heal-delay",
-          0
+      "heal-delay",
+      0
   );
 
   // TODO write description
   @NotImplemented
   public static final SettingKey<Double> HEAL_MAX_HEALTH = new DoubleSetting(
-          "heal-max-health",
-          0D
+      "heal-max-health",
+      0D
   );
 
   // TODO write description
   @NotImplemented
   public static final SettingKey<Double> HEAL_MAX_HUNGER = new DoubleSetting(
-          "heal-max-hunger",
-          0D
+      "heal-max-hunger",
+      0D
   );
 
   // TODO write description
   @NotImplemented
   public static final SettingKey<Double> HEAL_MIN_HEALTH = new DoubleSetting(
-          "heal-min-health",
-          0D
+      "heal-min-health",
+      0D
   );
 
   @Description("When disabled, ice does not form naturally")
   @NotImplemented
   public static final SettingKey<Boolean> ICE_FORM = new BooleanSetting(
-          "ice-form",
-          true
+      "ice-form",
+      true
   );
 
   @Description("When disabled, players may not interact with any blocks")
   @Category(SettingKey.CategoryType.BLOCKS)
   @NotImplemented
   public static final SettingKey<Boolean> INTERACT = new BooleanSetting(
-          "interact",
-          true
+      "interact",
+      true
   );
 
   @Description("When enabled, players cannot take damage")
   @NotImplemented
   public static final SettingKey<Boolean> INVINCIBLE = new BooleanSetting(
-          "invincible",
-          false
+      "invincible",
+      false
   );
 
   @Description("When disabled, players cannot drop items")
   @NotImplemented
   public static final SettingKey<Boolean> ITEM_DROP = new BooleanSetting(
-          "item-drop",
-          true
+      "item-drop",
+      true
   );
 
   @Description("When disabled, players cannot pick up items")
   @NotImplemented
   public static final SettingKey<Boolean> ITEM_PICKUP = new BooleanSetting(
-          "item-pickup",
-          true
+      "item-pickup",
+      true
   );
 
   @Description("When disabled, lava does not cause fire")
   @NotImplemented
   public static final SettingKey<Boolean> LAVA_FIRE = new BooleanSetting(
-          "lava-fire",
-          true
+      "lava-fire",
+      true
   );
 
   @Description("When disabled, lava does not spread")
   @Category(SettingKey.CategoryType.BLOCKS)
   @NotImplemented
   public static final SettingKey<Boolean> LAVA_FLOW = new BooleanSetting(
-          "lava-flow",
-          true
+      "lava-flow",
+      true
   );
 
   @Description("When disabled, leaf will not decay naturally")
   @Category(SettingKey.CategoryType.BLOCKS)
   @NotImplemented
   public static final SettingKey<Boolean> LEAF_DECAY = new BooleanSetting(
-          "leaf-decay",
-          true
+      "leaf-decay",
+      true
   );
 
   @Description("When disabled, players cannot directly light fire")
   @Category(SettingKey.CategoryType.BLOCKS)
   @NotImplemented
   public static final SettingKey<Boolean> LIGHTER = new BooleanSetting(
-          "lighter",
-          true
+      "lighter",
+      true
   );
 
   @Description("When disabled, lightning cannot strike")
   @Category(SettingKey.CategoryType.BLOCKS)
   @NotImplemented
   public static final SettingKey<Boolean> LIGHTNING = new BooleanSetting(
-          "lightning",
-          true
+      "lightning",
+      true
   );
 
   @Description("When disabled, mobs cannot take damage")
   @Category(SettingKey.CategoryType.DAMAGE)
   @NotImplemented
   public static final SettingKey<Boolean> MOB_DAMAGE = new BooleanSetting(
-          "mob-damage",
-          true
+      "mob-damage",
+      true
   );
 
   @Description("When disabled, mobs cannot spawn")
   @NotImplemented
   public static final SettingKey<Boolean> MOB_SPAWNING = new BooleanSetting(
-          "mob-spawning",
-          true
+      "mob-spawning",
+      true
   );
 
   @Description("When disabled, mushrooms do not grow naturally")
   @NotImplemented
   public static final SettingKey<Boolean> MUSHROOM_GROWTH = new BooleanSetting(
-          "mushroom-growth",
-          true
+      "mushroom-growth",
+      true
   );
 
   @Description("When disabled, mycelium does not spread naturally")
   @NotImplemented
   public static final SettingKey<Boolean> MYCELIUM_SPREAD = new BooleanSetting(
-          "mycelium-spread",
-          true
+      "mycelium-spread",
+      true
   );
 
   @Description("When disabled, health does not regenerate naturally")
   @NotImplemented
   public static final SettingKey<Boolean> NATURAL_HEALTH_REGEN = new BooleanSetting(
-          "natural-health-regen",
-          true
+      "natural-health-regen",
+      true
   );
 
   @Description("When disabled, hunger does not drain naturally")
   @NotImplemented
   public static final SettingKey<Boolean> NATURAL_HUNGER_DRAIN = new BooleanSetting(
-          "natural-hunger-drain",
-          true
+      "natural-hunger-drain",
+      true
   );
 
   @Description("When enabled, players are notified when the enter")
   @NotImplemented
   public static final SettingKey<Boolean> NOTIFY_ENTER = new BooleanSetting(
-          "notify-enter",
-          false
+      "notify-enter",
+      false
   );
 
   @Description("When enabled, players are notified when they leave")
   @NotImplemented
   public static final SettingKey<Boolean> NOTIFY_LEAVE = new BooleanSetting(
-          "notify-leave",
-          false
+      "notify-leave",
+      false
   );
 
   // TODO write description
   @NotImplemented
   public static final SettingKey<Boolean> OTHER_EXPLOSION = new BooleanSetting(
-          "other-explosion",
-          true
+      "other-explosion",
+      true
   );
 
   @Description("When disabled, all events caused by player collision are cancelled")
   @NotImplemented
   public static final SettingKey<Boolean> PLAYER_COLLISION = new StateSetting(
-          "player-collision",
-          true
+      "player-collision",
+      true
   );
 
   @Description("When disabled, players cannot inflict damage on entities")
   @NotImplemented
   public static final SettingKey<Boolean> PVE = new StateSetting(
-          "pve",
-          true
+      "pve",
+      true
   );
 
   @Description("When disabled, players cannot inflict damage on other players")
   @NotImplemented
   public static final SettingKey<Boolean> PVP = new StateSetting(
-          "pvp",
-          true
+      "pvp",
+      true
   );
 
   @Description("When disabled, players cannot ride other entities")
   @NotImplemented
   public static final SettingKey<Boolean> RIDE = new StateSetting(
-          "ride",
-          true
+      "ride",
+      true
   );
 
   @Description("When disabled, players cannot sleep")
   @NotImplemented
   public static final SettingKey<Boolean> SLEEP = new StateSetting(
-          "sleep",
-          true
+      "sleep",
+      true
   );
 
   @Description("When disabled, snowmen do not make trails")
   @Category(SettingKey.CategoryType.BLOCKS)
   @NotImplemented
   public static final SettingKey<Boolean> SNOWMAN_TRAILS = new StateSetting(
-          "snowman-trails",
-          true
+      "snowman-trails",
+      true
   );
 
   @Description("When disabled, snow does not fall")
   @Category(SettingKey.CategoryType.BLOCKS)
   @NotImplemented
   public static final SettingKey<Boolean> SNOW_FALL = new StateSetting(
-          "snow-fall",
-          true
+      "snow-fall",
+      true
   );
 
   @Description("When disabled, snow does not melt")
   @Category(SettingKey.CategoryType.BLOCKS)
   @NotImplemented
   public static final SettingKey<Boolean> SNOW_MELT = new StateSetting(
-          "snow-melt",
-          true
+      "snow-melt",
+      true
   );
 
   // TODO write description
   @Category(SettingKey.CategoryType.BLOCKS)
   @NotImplemented
   public static final SettingKey<Boolean> SOIL_DRY = new StateSetting(
-          "soil-dry",
-          true
+      "soil-dry",
+      true
   );
 
   // TODO write description
   @NotImplemented
   public static final SettingKey<Vector3d> SPAWN = new Vector3DSetting(
-          "spawn",
-          Vector3d.ZERO
+      "spawn",
+      Vector3d.ZERO
   );
 
   @Description("When disabled, players may not teleport in or out")
   @NotImplemented
   public static final SettingKey<Boolean> TELEPORT = new StateSetting(
-          "teleport",
-          true
+      "teleport",
+      true
   );
 
   // TODO write description
   @NotImplemented
   public static final SettingKey<String> TIME_LOCK = new StringSetting(
-          "time-lock",
-          ""
+      "time-lock",
+      ""
   );
 
   @Description("When disabled, tnt may not be placed or activated")
   @NotImplemented
   public static final SettingKey<Boolean> FLAG_TNT = new StateSetting(
-          "tnt",
-          true
+      "tnt",
+      true
   );
 
   // TODO write description
   @NotImplemented
   public static final SettingKey<Boolean> USE = new StateSetting(
-          "use",
-          true
+      "use",
+      true
   );
 
   @Description("When disabled, players may not break vehicles")
   @NotImplemented
   public static final SettingKey<Boolean> VEHICLE_DESTROY = new StateSetting(
-          "vehicle-destroy",
-          true
+      "vehicle-destroy",
+      true
   );
 
   @Description("When disabled, players may not place vehicles")
   @NotImplemented
   public static final SettingKey<Boolean> VEHICLE_PLACE = new StateSetting(
-          "vehicle-place",
-          true
+      "vehicle-place",
+      true
   );
 
   @Description("When disabled, vines do not grow naturally")
   @NotImplemented
   public static final SettingKey<Boolean> VINE_GROWTH = new StateSetting(
-          "vine-growth",
-          true
+      "vine-growth",
+      true
   );
 
   @Description("When disabled, water cannot flow")
   @NotImplemented
   public static final SettingKey<Boolean> WATER_FLOW = new StateSetting(
-          "water-flow",
-          true
+      "water-flow",
+      true
   );
 
   @Description("When disabled, the wither does not cause any damage to players")
   @NotImplemented
   public static final SettingKey<Boolean> WITHER_DAMAGE = new StateSetting(
-          "wither-damage",
-          true
+      "wither-damage",
+      true
   );
 
   // TODO write description
   @NotImplemented
   public static final SettingKey<Boolean> OP_PERMISSIONS = new StateSetting(
-          "op-permissions",
-          true
+      "op-permissions",
+      true
   );
 
   @Description("The Data Source name of the SQL database to be used if SQL is the storage type")
   @NotImplemented
   public static final SettingKey<String> SQL_DSN = new StringSetting(
-          "sql-dsn",
-          "jdbc:mysql://localhost/nope"
+      "sql-dsn",
+      "jdbc:mysql://localhost/nope"
   );
 
   @Description("The password for the SQL database to be used if SQL is the storage type")
   @NotImplemented
   public static final SettingKey<String> SQL_PASSWORD = new StringSetting(
-          "sql-password",
-          "nope"
+      "sql-password",
+      "nope"
   );
 
   @Description("The table prefix to be placed before SQL tables if SQL is the storage type")
   @NotImplemented
   public static final SettingKey<String> SQL_TABLE_PREFIX = new StringSetting(
-          "sql-table-prefix",
-          "nope"
+      "sql-table-prefix",
+      "nope"
   );
 
   @Description("The username for the SQL database to be used if SQL is the storage type")
   @NotImplemented
   public static final SettingKey<String> SQL_USERNAME = new StringSetting(
-          "sql-username",
-          "nope"
+      "sql-username",
+      "nope"
   );
 
   enum StorageType {
@@ -1121,16 +1168,16 @@ public class SettingLibrary {
   @Description("The type of storage to persist Nope server state")
   @NotImplemented
   public static final SettingKey<StorageType> STORAGE_TYPE = new EnumSetting<>(
-          "storage-type",
-          StorageType.HOCON,
-          StorageType.class
+      "storage-type",
+      StorageType.HOCON,
+      StorageType.class
   );
 
   @Description("The type of item to be used as the Nope wand")
   @NotImplemented
   public static final SettingKey<ItemType> WAND_ITEM = new CatalogTypeSetting<>(
-          "wand-item",
-          ItemTypes.STICK
+      "wand-item",
+      ItemTypes.STICK
   );
 
 }

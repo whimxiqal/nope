@@ -28,9 +28,6 @@ package com.minecraftonline.nope.host;
 import com.flowpowered.math.vector.Vector3i;
 import com.minecraftonline.nope.setting.SettingKey;
 import com.minecraftonline.nope.setting.SettingLibrary;
-import com.minecraftonline.nope.setting.SettingValue;
-import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
@@ -105,7 +102,8 @@ public interface HostTree {
    * The name must be unique. This method fails if it is called with a name
    * which is already in use.
    *
-   * @param name      the unique name of this region, which cannot be formatted like a WorldHost name
+   * @param name      the unique name of this region,
+   *                  which cannot be formatted like a WorldHost name
    * @param worldUuid the uuid of the world in which this region resides
    * @param pos1      a point which defines this region
    * @param pos2      another point which defines this region
@@ -122,7 +120,7 @@ public interface HostTree {
                        final Vector3i pos1,
                        final Vector3i pos2,
                        int priority)
-          throws IllegalArgumentException;
+      throws IllegalArgumentException;
 
   /**
    * Remove a region from the given world. This method fails if it is called
@@ -173,9 +171,9 @@ public interface HostTree {
    * this location is inside a host, such as a Region or a World.
    * This method ignores targets.
    *
-   * @param key the setting key, obtained from the SettingLibrary
+   * @param key      the setting key, obtained from the SettingLibrary
    * @param location the location in the world to check for the setting
-   * @param <V> the type of value to retrieve
+   * @param <V>      the type of value to retrieve
    * @return the assigned value corresponding to this setting key
    * @see SettingLibrary
    */

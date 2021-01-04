@@ -15,12 +15,21 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.world.World;
 
 public class RegionMoveCommand extends LambdaCommandNode {
+
+  /**
+   * Default constructor.
+   *
+   * @param parent the parent node
+   */
   public RegionMoveCommand(CommandNode parent) {
-    super(parent, Permission.of("nope.region.edit.move"), Text.of("Allows the user to resize the region"), "move");
+    super(parent,
+        Permission.of("nope.region.edit.move"),
+        Text.of("Allows the user to resize the region"),
+        "move");
 
     addCommandElements(
-            NopeArguments.host(Text.of("host")),
-            NopeArguments.regionLocation(Text.of("selection"))
+        NopeArguments.host(Text.of("host")),
+        NopeArguments.regionLocation(Text.of("selection"))
     );
     setExecutor((src, args) -> {
       Host host = args.requireOne("host");
@@ -43,11 +52,11 @@ public class RegionMoveCommand extends LambdaCommandNode {
       try {
         VolumeHost removed = Nope.getInstance().getHostTree().removeRegion(host.getName());
         VolumeHost created = Nope.getInstance().getHostTree().addRegion(
-                host.getName(),
-                world.getUniqueId(),
-                min,
-                max,
-                host.getPriority()
+            host.getName(),
+            world.getUniqueId(),
+            min,
+            max,
+            host.getPriority()
         );
         created.putAll(removed.getAll());
 
@@ -58,11 +67,11 @@ public class RegionMoveCommand extends LambdaCommandNode {
 
       Nope.getInstance().getHostTree().save();
       src.sendMessage(Format.success(String.format(
-              "Moved region %s to (%d, %d, %d) <-> (%d, %d, %d) in world %s",
-              host.getName(),
-              min.getX(), min.getY(), min.getZ(),
-              max.getX(), max.getY(), max.getZ(),
-              world.getName()
+          "Moved region %s to (%d, %d, %d) <-> (%d, %d, %d) in world %s",
+          host.getName(),
+          min.getX(), min.getY(), min.getZ(),
+          max.getX(), max.getY(), max.getZ(),
+          world.getName()
       )));
 
       return CommandResult.success();

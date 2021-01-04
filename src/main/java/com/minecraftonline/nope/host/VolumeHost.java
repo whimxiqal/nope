@@ -38,10 +38,27 @@ public abstract class VolumeHost extends Host implements VolumeTree.Volume {
   private final int zmin;
   private final int zmax;
 
-  public VolumeHost(String name, int xmin, int xmax, int ymin, int ymax, int zmin, int zmax) {
+  /**
+   * Default constructor.
+   * @param name the name
+   * @param xmin the minimum x value, inclusive
+   * @param xmax the maximum x value, inclusive
+   * @param ymin the minimum y value, inclusive
+   * @param ymax the maximum y value, inclusive
+   * @param zmin the minimum z value, inclusive
+   * @param zmax the maximum z value, inclusive
+   */
+  public VolumeHost(String name,
+                    int xmin,
+                    int xmax,
+                    int ymin,
+                    int ymax,
+                    int zmin,
+                    int zmax) {
     super(name);
     if (xmin > xmax || ymin > ymax || zmin > zmax) {
-      throw new IllegalArgumentException("Minimum values must be less than or equal to maximum values");
+      throw new IllegalArgumentException("Minimum values must be less than "
+          + "or equal to maximum values");
     }
     this.xmin = xmin;
     this.xmax = xmax;

@@ -39,11 +39,11 @@ import java.util.stream.Collectors;
  * A data structure optimized to find any volumes which
  * contain a specific point in 3D space, where the Y dimension
  * is significantly smaller than X and Z.
- * <p>
- * We assume the regions are distributed evenly between all
+ *
+ * <p>We assume the regions are distributed evenly between all
  * dimensions between the maximum and minimum values.
- * <p>
- * Search in the following order:
+ *
+ * <p>Search in the following order:
  * XMIN -> ZMIN -> XMAX -> ZMAX -> ...
  * Then check Y values at the end
  */
@@ -68,6 +68,15 @@ public class VolumeTree<S, T extends VolumeTree.Volume> {
     construct();
   }
 
+  /**
+   * Get all volumes that contain this point in 3D space,
+   * including the boundary.
+   *
+   * @param x x value
+   * @param y y value
+   * @param z z value
+   * @return a list of volumes
+   */
   public List<T> containingVolumes(int x, int y, int z) {
     if (this.root == null) {
       throw new IllegalStateException("Root of VolumeTree is not initialized");
@@ -75,6 +84,15 @@ public class VolumeTree<S, T extends VolumeTree.Volume> {
     return root.findVolumes(x, y, z).stream().map(volumes::get).collect(Collectors.toList());
   }
 
+  /**
+   * Push a new volume into the tree.
+   * Currently, this reconstructs the entire tree because
+   * figuring out how to do it dynamically is too complicated.
+   *
+   * @param key    the key under which to store and retrieve this volume
+   * @param volume the volume
+   * @return the volume that was previously under the key, or null if none existed
+   */
   public T push(S key, T volume) {
     T replaced = volumes.put(key, volume);
     construct();
@@ -86,6 +104,12 @@ public class VolumeTree<S, T extends VolumeTree.Volume> {
     construct();
   }
 
+  /**
+   * Remove the key and volume associated with the key.
+   *
+   * @param key the key to remove from the tree
+   * @return the removed key, or null if none existed
+   */
   public T remove(S key) {
     T removed = volumes.remove(key);
     construct();
@@ -280,9 +304,9 @@ public class VolumeTree<S, T extends VolumeTree.Volume> {
      * @return true if intersects
      */
     default boolean intersects(Volume other) {
-      return (this.getMinX() <= other.getMaxX() && this.getMaxX() >= other.getMinX()) &&
-          (this.getMinY() <= other.getMaxY() && this.getMaxY() >= other.getMinY()) &&
-          (this.getMinZ() <= other.getMaxZ() && this.getMaxZ() >= other.getMinZ());
+      return (this.getMinX() <= other.getMaxX() && this.getMaxX() >= other.getMinX())
+          && (this.getMinY() <= other.getMaxY() && this.getMaxY() >= other.getMinY())
+          && (this.getMinZ() <= other.getMaxZ() && this.getMaxZ() >= other.getMinZ());
     }
 
   }
@@ -399,25 +423,29 @@ public class VolumeTree<S, T extends VolumeTree.Volume> {
     return 0;
   }
 
+  /**
+   * Send the tree to stdout. This should only be done
+   * for debugging and only with small trees.
+   */
   public void print() {
-    int xWidth = (0x1 << (getHeight()) + 2);
-    int yWidth = getHeight() * 3;
-    char[][] treeBoard = new char[xWidth][yWidth];
-    for (int x = 0; x < xWidth; x++) {
-      for (int y = 0; y < yWidth; y++) {
+    int widthX = (0x1 << (getHeight()) + 2);
+    int widthY = getHeight() * 3;
+    char[][] treeBoard = new char[widthX][widthY];
+    for (int x = 0; x < widthX; x++) {
+      for (int y = 0; y < widthY; y++) {
         treeBoard[x][y] = ' ';
       }
     }
-    print(treeBoard, root, xWidth / 2, 0, xWidth);
-    for (int y = 0; y < yWidth; y++) {
-      for (int x = 0; x < xWidth; x++) {
+    print(treeBoard, root, widthX / 2, 0, widthX);
+    for (int y = 0; y < widthY; y++) {
+      for (int x = 0; x < widthX; x++) {
         System.out.print(treeBoard[x][y]);
       }
       System.out.println();
     }
   }
 
-  private void print(char[][] board, Node node, int x, int y, int xWidth) {
+  private void print(char[][] board, Node node, int x, int y, int widthX) {
     if (node instanceof VolumeTree.EmptyNode) {
       board[x][y] = '[';
       board[x + 1][y] = ']';
@@ -438,21 +466,21 @@ public class VolumeTree<S, T extends VolumeTree.Volume> {
       for (char c : String.valueOf(divider).toCharArray()) {
         board[a++][y] = c;
       }
-      for (int i = x - xWidth / 8 + 1; i < x + xWidth / 8; i++) {
+      for (int i = x - widthX / 8 + 1; i < x + widthX / 8; i++) {
         if (i < x - 1 || i > a) {
           board[i][y] = '_';
         }
       }
-      board[x - xWidth / 8][y + 1] = '/';
-      board[x + xWidth / 8][y + 1] = '\\';
-      for (int i = x - xWidth / 4 + 2; i < x - xWidth / 8; i++) {
+      board[x - widthX / 8][y + 1] = '/';
+      board[x + widthX / 8][y + 1] = '\\';
+      for (int i = x - widthX / 4 + 2; i < x - widthX / 8; i++) {
         board[i][y + 1] = '_';
       }
-      for (int i = x + xWidth / 8 + 1; i < x + xWidth / 4; i++) {
+      for (int i = x + widthX / 8 + 1; i < x + widthX / 4; i++) {
         board[i][y + 1] = '_';
       }
-      print(board, ((DimensionDivider) node).left, x - xWidth / 4, y + 2, xWidth / 2);
-      print(board, ((DimensionDivider) node).right, x + xWidth / 4, y + 2, xWidth / 2);
+      print(board, ((DimensionDivider) node).left, x - widthX / 4, y + 2, widthX / 2);
+      print(board, ((DimensionDivider) node).right, x + widthX / 4, y + 2, widthX / 2);
     }
   }
 }
