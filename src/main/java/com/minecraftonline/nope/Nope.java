@@ -32,7 +32,7 @@ import com.minecraftonline.nope.key.NopeKeys;
 import com.minecraftonline.nope.key.regionwand.ImmutableRegionWandManipulator;
 import com.minecraftonline.nope.key.regionwand.RegionWandManipulator;
 import com.minecraftonline.nope.host.HostTreeImpl;
-import com.minecraftonline.nope.listener.SettingListeners;
+import com.minecraftonline.nope.listener.DynamicSettingListeners;
 import com.minecraftonline.nope.setting.SettingLibrary;
 import com.minecraftonline.nope.util.Extra;
 import org.slf4j.Logger;
@@ -48,7 +48,6 @@ import org.spongepowered.api.event.game.state.GamePreInitializationEvent;
 import org.spongepowered.api.event.game.state.GameStartedServerEvent;
 import org.spongepowered.api.event.game.state.GameStoppingServerEvent;
 import org.spongepowered.api.event.world.LoadWorldEvent;
-import org.spongepowered.api.plugin.Dependency;
 import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.service.permission.PermissionDescription;
@@ -145,7 +144,7 @@ public class Nope {
     Extra.printSplashscreen();
 
     hostTree.load(); // Need worlds to have loaded first.
-    SettingListeners.register();
+    DynamicSettingListeners.register();
 
     // Register entire Nope command tree
     commandTree = new NopeCommandTree();

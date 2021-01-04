@@ -153,16 +153,33 @@ public interface HostTree {
 
   /**
    * Find the value corresponding to this setting key dependent on whether
-   * this location is inside a host, such as a Region or a World.
+   * this location is inside a host, such as a Region or a World,
+   * and whether the subject is affected.
    * This is the most important function of the HostTree.
    *
-   * @param key      the setting, obtained from the SettingLibrary
+   * @param key      the setting key, obtained from the SettingLibrary
    * @param subject  the subject to check for the setting
    * @param location the location in the world to check for the setting
    * @param <V>      the type of value to retrieve
-   * @return the value corresponding to this setting
+   * @return the assigned value corresponding to this setting key
    * @see SettingLibrary
    */
-  <V> V lookup(final SettingKey<V> key, final Subject subject, final Location<World> location);
+  <V> V lookup(@Nonnull final SettingKey<V> key,
+               @Nonnull final Subject subject,
+               @Nonnull final Location<World> location);
+
+  /**
+   * Find the value corresponding to this setting key dependent on whether
+   * this location is inside a host, such as a Region or a World.
+   * This method ignores targets.
+   *
+   * @param key the setting key, obtained from the SettingLibrary
+   * @param location the location in the world to check for the setting
+   * @param <V> the type of value to retrieve
+   * @return the assigned value corresponding to this setting key
+   * @see SettingLibrary
+   */
+  <V> V lookupAnonymous(@Nonnull final SettingKey<V> key,
+                        @Nonnull final Location<World> location);
 
 }

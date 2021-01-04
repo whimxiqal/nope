@@ -31,7 +31,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.minecraftonline.nope.Nope;
-import com.minecraftonline.nope.listener.SettingListeners;
+import com.minecraftonline.nope.listener.DynamicSettingListeners;
 import com.minecraftonline.nope.setting.SettingKey;
 import com.minecraftonline.nope.setting.SettingLibrary;
 import com.minecraftonline.nope.setting.SettingValue;
@@ -52,7 +52,7 @@ import java.util.stream.Collectors;
 
 public class HostTreeImpl implements HostTree {
 
-  private GlobalHost globalHost = new GlobalHost();
+  private GlobalHost globalHost;
   private final HashMap<UUID, WorldHost> worldHosts = Maps.newHashMap();
 
   private final Map<String, UUID> regionToWorld = Maps.newHashMap();
@@ -63,14 +63,16 @@ public class HostTreeImpl implements HostTree {
   private final Function<String, String> nameConverter;
   private final String invalidHostNameRegex;
 
-  public HostTreeImpl(Storage storage,
-                      String globalHostName,
-                      Function<String, String> nameConverter,
-                      String invalidHostNameRegex) {
+  public HostTreeImpl(@Nonnull Storage storage,
+                      @Nonnull String globalHostName,
+                      @Nonnull Function<String, String> nameConverter,
+                      @Nonnull String invalidHostNameRegex) {
     this.storage = storage;
     this.globalHostName = globalHostName;
     this.nameConverter = nameConverter;
     this.invalidHostNameRegex = invalidHostNameRegex;
+
+    this.globalHost = new GlobalHost();
   }
 
   @Override
@@ -90,7 +92,6 @@ public class HostTreeImpl implements HostTree {
       this.globalHost = savedGlobalHost;
     }
 
-
     // Read WorldHosts
     storage.readWorldHosts(new WorldHostSerializer()).forEach(worldHost ->
             worldHosts.put(worldHost.getWorldUuid(), worldHost));
@@ -107,7 +108,7 @@ public class HostTreeImpl implements HostTree {
     worldHosts.values().forEach(worldHost ->
             storage.writeRegions(worldHost.regionTree.volumes(), new RegionSerializer()));
 
-    SettingListeners.register();
+    DynamicSettingListeners.register();
   }
 
   /**
@@ -508,10 +509,16 @@ public class HostTreeImpl implements HostTree {
   }
 
   @Override
-  public <V> V lookup(final SettingKey<V> key,
-                      final Subject subject,
-                      final Location<World> location) {
+  public <V> V lookup(@Nonnull final SettingKey<V> key,
+                      @Nonnull final Subject subject,
+                      @Nonnull final Location<World> location) {
     return lookupWithParentsAndTarget(key, subject, location, key.getDefaultData());
+  }
+
+  @Override
+  public <V> V lookupAnonymous(@Nonnull SettingKey<V> key,
+                               @Nonnull Location<World> location) {
+    return lookupWithParentsAndTarget(key, null, location, key.getDefaultData());
   }
 
   private <V> V lookupWithParentsAndTarget(final SettingKey<V> key,
@@ -555,7 +562,7 @@ public class HostTreeImpl implements HostTree {
         // This shouldn't happen because we previously found that this host has this setting
         throw new RuntimeException("Error retrieving setting value");
       }
-      if (value.get().getTarget().test(subject)) {
+      if (subject == null || value.get().getTarget().test(subject)) {
         return value.get().getData();
       }
     }

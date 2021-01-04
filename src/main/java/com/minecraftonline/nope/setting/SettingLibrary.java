@@ -50,19 +50,16 @@ import org.spongepowered.api.text.serializer.TextSerializers;
 
 import javax.annotation.Nonnull;
 import java.io.IOException;
-import java.lang.annotation.Annotation;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import java.lang.annotation.*;
 import java.lang.reflect.Modifier;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@SuppressWarnings("unused")
 public class SettingLibrary {
 
   private static final HashMap<String, SettingKey<?>> settingMap = Maps.newHashMap();
-  public static final String SET_SPLIT_REGEX = "( )*,?( )*";  //"(, )|[ ,]";
+  public static final String SET_SPLIT_REGEX = "(?<![ ,])(( )+|( *, *))(?![ ,])";  //"(, )|[ ,]";
 
   @Retention(RetentionPolicy.RUNTIME)
   @Target(ElementType.FIELD)
@@ -378,6 +375,7 @@ public class SettingLibrary {
     }
 
     @Override
+    @SuppressWarnings("UnstableApiUsage")
     public JsonElement dataToJsonGenerified(Set<String> value) {
       return new Gson().toJsonTree(value, NopeTypeTokens.STRING_SET_TOKEN.getType());
     }
@@ -419,15 +417,17 @@ public class SettingLibrary {
 
     @Override
     public Set<EntityType> parse(String s) throws IllegalArgumentException {
+      Nope.getInstance().getLogger().info("EntityType parsing string: " + s);
       return stringsToEntityTypes(Arrays.asList(s.split(SET_SPLIT_REGEX)));
     }
 
     private Set<EntityType> stringsToEntityTypes(Collection<String> strings) {
+      Nope.getInstance().getLogger().info("Split strings: " + String.join("|", strings));
       Set<EntityType> set = new HashSet<>();
       for (String s : strings) {
         final EntityType entityType = Sponge.getRegistry()
                 .getType(EntityType.class, s)
-                .orElseThrow(() -> new IllegalStateException("Unknown EntityType: " + s));
+                .orElseThrow(() -> new IllegalArgumentException("Unknown EntityType: " + s));
         set.add(entityType);
       }
       return set;
@@ -532,30 +532,20 @@ public class SettingLibrary {
           true
   );
 
-  // TODO write description
+  @Description("When disabled, players may not teleport by eating a chorus fruit")
   @NotImplemented
   public static final SettingKey<Boolean> CHORUS_FRUIT_TELEPORT = new StateSetting(
           "chorus-fruit-teleport",
           true
   );
 
-  @Description("When disabled, coral does not fade")
-  @Category(SettingKey.CategoryType.BLOCKS)
-  @NotImplemented
-  public static final SettingKey<Boolean> CORAL_FADE = new StateSetting(
-          "coral-fade",
-          true
-  );
-
   @Description("When disabled, creepers do not cause damage")
-  @NotImplemented
   public static final SettingKey<Boolean> CREEPER_EXPLOSION_DAMAGE = new StateSetting(
           "creeper-explosion-damage",
           true
   );
 
   @Description("When disabled, creepers do not grief when they explode")
-  @NotImplemented
   public static final SettingKey<Boolean> CREEPER_EXPLOSION_GRIEF = new StateSetting(
           "creeper-explosion-grief",
           true
@@ -569,23 +559,21 @@ public class SettingLibrary {
   );
 
   @Description("When disabled, animals are invincible")
-  @NotImplemented
   public static final SettingKey<Boolean> DAMAGE_ANIMALS = new StateSetting(
           "damage-animals",
           true
   );
 
   @Description("These entity types will not be allowed to spawn")
-  @NotImplemented
   public static final SettingKey<Set<EntityType>> DENY_SPAWN = new EntityTypeSetSetting(
           "deny-spawn",
           Sets.newHashSet()
   );
 
-  @Description("Enables block damage caused by the enderdragon")
+  @Description("Enables grief caused by the enderdragon")
   @NotImplemented
-  public static final SettingKey<Boolean> ENDERDRAGON_BLOCK_DAMAGE = new StateSetting(
-          "enderdragon-block-damage",
+  public static final SettingKey<Boolean> ENDERDRAGON_GRIEF = new StateSetting(
+          "enderdragon-grief",
           true
   );
 
@@ -597,9 +585,8 @@ public class SettingLibrary {
   );
 
   @Description("When disabled, enderpearls may not be used for teleportation")
-  @NotImplemented
-  public static final SettingKey<Boolean> ENDERPEARL = new StateSetting(
-          "enderpearl",
+  public static final SettingKey<Boolean> ENDERPEARL_TELEPORT = new StateSetting(
+          "enderpearl-teleport",
           true
   );
 
@@ -1029,9 +1016,9 @@ public class SettingLibrary {
 
   @Description("When disabled, players may not teleport in or out")
   @NotImplemented
-  public static final SettingKey<Vector3d> TELEPORT_LOCATION = new Vector3DSetting(
+  public static final SettingKey<Boolean> TELEPORT = new StateSetting(
           "teleport",
-          Vector3d.ZERO
+          true
   );
 
   // TODO write description

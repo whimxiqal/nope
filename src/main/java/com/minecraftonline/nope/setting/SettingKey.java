@@ -175,8 +175,8 @@ public abstract class SettingKey<T> {
    *
    * @return the generic class
    */
+  @SuppressWarnings("unchecked")
   public final Class<T> valueType() {
-    // TODO verify that this cast works. If it does, then just add @SuppressWarnings("unchecked").
     return (Class<T>) defaultData.getClass();
   }
 
