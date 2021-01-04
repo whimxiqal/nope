@@ -63,7 +63,7 @@ public abstract class Host {
   }
 
   /**
-   * Assign a value to a setting for this Host
+   * Assign a value to a setting for this Host.
    *
    * @param key   The setting
    * @param value The value to assign
@@ -78,7 +78,7 @@ public abstract class Host {
   }
 
   /**
-   * Assigns all the values in the map under the given settings
+   * Assigns all the values in the map under the given settings.
    *
    * @param settings all settings
    * @see SettingLibrary
@@ -131,8 +131,7 @@ public abstract class Host {
    * {@link SettingKey} from this host.
    *
    * @param key Key to remove the mapping for.
-   * @return The no longer associated {@link SettingValue}, or null,
-   * if nothing was removed.
+   * @return The no longer associated {@link SettingValue}, or null, if nothing was removed.
    */
   @Nullable
   public <A> SettingValue<A> remove(SettingKey<A> key) {
@@ -154,7 +153,7 @@ public abstract class Host {
    * @param spongeLocatable the locatable
    * @return true if within the host
    */
-  final boolean encompasses(Locatable spongeLocatable) {
+  public final boolean encompasses(Locatable spongeLocatable) {
     return encompasses(spongeLocatable.getLocation());
   }
 
@@ -164,7 +163,7 @@ public abstract class Host {
    * @param spongeLocation the location
    * @return true if within the host
    */
-  boolean encompasses(Location<World> spongeLocation) {
+  public boolean encompasses(Location<World> spongeLocation) {
     return true;
   }
 
@@ -172,8 +171,7 @@ public abstract class Host {
    * Get the UUID of the Sponge Minecraft
    * world to which this Host is associated.
    *
-   * @return the world's UUID, or null if the host is
-   * not associated with a world
+   * @return the world's UUID, or null if the host is not associated with a world
    */
   @Nullable
   public abstract UUID getWorldUuid();

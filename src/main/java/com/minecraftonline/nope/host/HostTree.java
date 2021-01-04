@@ -35,6 +35,7 @@ import org.spongepowered.api.world.World;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -140,6 +141,15 @@ public interface HostTree {
    * @return true if a region exists, false if not
    */
   boolean hasRegion(final String name);
+
+  /**
+   * Gets all the hosts which contain this location.
+   *
+   * @param location the location which to check
+   * @return a list of host containers
+   */
+  @Nonnull
+  List<Host> getContainingHosts(@Nonnull Location<World> location);
 
   /**
    * Check if this SettingKey has been assigned to any hosts in the host tree.

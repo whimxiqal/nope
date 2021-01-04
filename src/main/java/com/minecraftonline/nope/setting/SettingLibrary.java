@@ -100,9 +100,9 @@ public class SettingLibrary {
     // Empty
   }
 
-  enum Movement {
+  public enum Movement {
     ALL,
-    ONLY_TRANSLATION,
+    NOT_TELEPORTATION,
     ONLY_TELEPORTATION,
     NONE,
   }
@@ -370,7 +370,11 @@ public class SettingLibrary {
 
     @Override
     public E parse(String s) throws IllegalArgumentException {
-      return Enum.valueOf(enumClass, s);
+      try {
+        return Enum.valueOf(enumClass, s.toUpperCase());
+      } catch (IllegalArgumentException e) {
+        throw new IllegalArgumentException(s + " is not a valid " + enumClass.getName() + " type");
+      }
     }
 
     @Override
@@ -402,7 +406,7 @@ public class SettingLibrary {
     public C parse(String s) throws IllegalArgumentException {
       return Sponge.getRegistry()
           .getType(valueType(), s)
-          .orElseThrow(() -> new IllegalStateException("Invalid GameMode String. Got: " + s));
+          .orElseThrow(() -> new IllegalStateException("Invalid CatalogType String. Got: " + s));
     }
 
     @Override
@@ -541,13 +545,6 @@ public class SettingLibrary {
       false
   );
 
-  @Description("Enables all plugin functionality. Can only be set globally.")
-  @NotImplemented
-  public static final SettingKey<Boolean> ENABLE_PLUGIN = new BooleanSetting(
-      "enable-plugin",
-      true
-  );
-
   @Description("When disabled, blocks may not be broken")
   @Category(SettingKey.CategoryType.BLOCKS)
   public static final SettingKey<Boolean> BLOCK_BREAK = new StateSetting(
@@ -618,14 +615,12 @@ public class SettingLibrary {
   );
 
   @Description("Enables grief caused by the enderdragon")
-  @NotImplemented
   public static final SettingKey<Boolean> ENDERDRAGON_GRIEF = new StateSetting(
       "enderdragon-grief",
       true
   );
 
   @Description("When disabled, endermen do not grief blocks by picking them up")
-  @NotImplemented
   public static final SettingKey<Boolean> ENDERMAN_GRIEF = new StateSetting(
       "enderman-grief",
       true
@@ -638,21 +633,18 @@ public class SettingLibrary {
   );
 
   @Description("When disabled, armor stands may not be broken")
-  @NotImplemented
   public static final SettingKey<Boolean> ARMOR_STAND_DESTROY = new StateSetting(
       "armor-stand-destroy",
       true
   );
 
   @Description("When disabled, item frames may not be broken")
-  @NotImplemented
   public static final SettingKey<Boolean> ITEM_FRAME_DESTROY = new StateSetting(
       "item-frame-destroy",
       true
   );
 
   @Description("When disabled, paintings may not be broken")
-  @NotImplemented
   public static final SettingKey<Boolean> PAINTING_DESTROY = new StateSetting(
       "painting-destroy",
       true
@@ -660,7 +652,6 @@ public class SettingLibrary {
 
   @Description("Specify which type of movement is allowed by players to enter. "
       + "Options: all, only_translation, only_teleportation, none")
-  @NotImplemented
   public static final SettingKey<Movement> ENTRY = new EnumSetting<>(
       "entry",
       Movement.ALL,
@@ -683,7 +674,6 @@ public class SettingLibrary {
 
   @Description("Specify which type of movement is allowed by players to exit. "
       + "Options: all, only_translation, only_teleportation, none")
-  @NotImplemented
   public static final SettingKey<Movement> EXIT = new EnumSetting<>(
       "exit",
       Movement.ALL,

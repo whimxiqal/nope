@@ -26,6 +26,7 @@
 package com.minecraftonline.nope.host;
 
 import com.flowpowered.math.vector.Vector3i;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
@@ -205,7 +206,7 @@ public class HostTreeImpl implements HostTree {
     }
 
     @Override
-    boolean encompasses(Location<World> spongeLocation) {
+    public boolean encompasses(Location<World> spongeLocation) {
       return spongeLocation.getExtent().getUniqueId().equals(this.worldUuid);
     }
 
@@ -307,7 +308,7 @@ public class HostTreeImpl implements HostTree {
 
 
     @Override
-    boolean encompasses(Location<World> spongeLocation) {
+    public boolean encompasses(Location<World> spongeLocation) {
       return spongeLocation.getBlockX() >= getMinX()
           && spongeLocation.getBlockX() <= getMaxX()
           && spongeLocation.getBlockY() >= getMinY()
@@ -598,6 +599,24 @@ public class HostTreeImpl implements HostTree {
   @Override
   public boolean hasRegion(final String name) {
     return regionToWorld.containsKey(name);
+  }
+
+  @Nonnull
+  @Override
+  public List<Host> getContainingHosts(@Nonnull Location<World> location) {
+    List<Host> list = Lists.newLinkedList();
+    if (this.globalHost.encompasses(location)) {
+      list.add(this.globalHost);
+    }
+    this.worldHosts.values().forEach(worldHost -> {
+      if (worldHost.encompasses(location)) {
+        list.add(worldHost);
+      }
+      list.addAll(worldHost.regionTree.containingVolumes(location.getBlockX(),
+          location.getBlockY(),
+          location.getBlockZ()));
+    });
+    return list;
   }
 
   @Override

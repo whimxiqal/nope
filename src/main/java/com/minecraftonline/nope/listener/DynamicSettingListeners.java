@@ -29,6 +29,7 @@ import com.google.common.collect.Lists;
 import com.minecraftonline.nope.Nope;
 import com.minecraftonline.nope.setting.SettingKey;
 import com.minecraftonline.nope.setting.SettingLibrary;
+import com.minecraftonline.nope.setting.SettingValue;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.entity.EntityTypes;
@@ -39,6 +40,7 @@ import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.event.block.InteractBlockEvent;
 import org.spongepowered.api.event.cause.entity.damage.source.EntityDamageSource;
 import org.spongepowered.api.event.entity.DamageEntityEvent;
+import org.spongepowered.api.event.entity.InteractEntityEvent;
 import org.spongepowered.api.event.entity.MoveEntityEvent;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.service.permission.Subject;
@@ -52,6 +54,7 @@ import java.lang.annotation.Target;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -118,7 +121,7 @@ public class DynamicSettingListeners {
   }
 
   @DynamicSettingListener
-  public static SettingListener<ChangeBlockEvent> BUILD_PERMISSIONS_LISTENER =
+  static SettingListener<ChangeBlockEvent> BUILD_PERMISSIONS_LISTENER =
       new PlayerCancelConditionSettingListener<>(
           SettingLibrary.BUILD_PERMISSIONS,
           ChangeBlockEvent.class,
@@ -133,7 +136,7 @@ public class DynamicSettingListeners {
                           player))))));
 
   @DynamicSettingListener
-  public static SettingListener<ChangeBlockEvent.Break> BLOCK_BREAK_LISTENER =
+  static SettingListener<ChangeBlockEvent.Break> BLOCK_BREAK_LISTENER =
       new PlayerCancelConditionSettingListener<>(
           SettingLibrary.BLOCK_BREAK,
           ChangeBlockEvent.Break.class,
@@ -148,7 +151,7 @@ public class DynamicSettingListeners {
                           player))))));
 
   @DynamicSettingListener
-  public static SettingListener<ChangeBlockEvent.Place> BLOCK_PLACE_LISTENER =
+  static SettingListener<ChangeBlockEvent.Place> BLOCK_PLACE_LISTENER =
       new PlayerCancelConditionSettingListener<>(
           SettingLibrary.BLOCK_PLACE,
           ChangeBlockEvent.Place.class,
@@ -163,7 +166,7 @@ public class DynamicSettingListeners {
                           player))))));
 
   @DynamicSettingListener
-  public static SettingListener<ChangeBlockEvent> BLOCK_TRAMPLE =
+  static SettingListener<ChangeBlockEvent> BLOCK_TRAMPLE =
       new PlayerCancelConditionSettingListener<>(
           SettingLibrary.BLOCK_TRAMPLE,
           ChangeBlockEvent.class,
@@ -184,7 +187,7 @@ public class DynamicSettingListeners {
                       .getType().equals(BlockTypes.DIRT)));
 
   @DynamicSettingListener
-  public static SettingListener<InteractBlockEvent.Secondary> CHEST_ACCESS_LISTENER =
+  static SettingListener<InteractBlockEvent.Secondary> CHEST_ACCESS_LISTENER =
       new PlayerCancelConditionSettingListener<>(
           SettingLibrary.CHEST_ACCESS,
           InteractBlockEvent.Secondary.class,
@@ -220,7 +223,7 @@ public class DynamicSettingListeners {
           });
 
   @DynamicSettingListener
-  public static SettingListener<DamageEntityEvent> CREEPER_EXPLOSION_DAMAGE_LISTENER =
+  static SettingListener<DamageEntityEvent> CREEPER_EXPLOSION_DAMAGE_LISTENER =
       new CancelConditionSettingListener<>(
           SettingLibrary.CREEPER_EXPLOSION_DAMAGE,
           DamageEntityEvent.class,
@@ -237,7 +240,7 @@ public class DynamicSettingListeners {
                       event.getTargetEntity().getLocation())));
 
   @DynamicSettingListener
-  public static SettingListener<ChangeBlockEvent.Break> CREEPER_EXPLOSION_GRIEF_BLOCK_LISTENER =
+  static SettingListener<ChangeBlockEvent.Break> CREEPER_EXPLOSION_GRIEF_BLOCK_LISTENER =
       new CancelConditionSettingListener<>(
           SettingLibrary.CREEPER_EXPLOSION_GRIEF,
           ChangeBlockEvent.Break.class,
@@ -276,7 +279,7 @@ public class DynamicSettingListeners {
   // TODO add other listeners for other kinds of creeper grief
 
   @DynamicSettingListener
-  public static SettingListener<ChangeBlockEvent.Grow> CROP_GROWTH_LISTENER =
+  static SettingListener<ChangeBlockEvent.Grow> CROP_GROWTH_LISTENER =
       new CancelConditionSettingListener<>(
           SettingLibrary.CROP_GROWTH,
           ChangeBlockEvent.Grow.class,
@@ -294,7 +297,7 @@ public class DynamicSettingListeners {
                               null)))));
 
   @DynamicSettingListener
-  public static SettingListener<DamageEntityEvent> DAMAGE_ANIMALS_LISTENER =
+  static SettingListener<DamageEntityEvent> DAMAGE_ANIMALS_LISTENER =
       new CancelConditionSettingListener<>(
           SettingLibrary.DAMAGE_ANIMALS,
           DamageEntityEvent.class,
@@ -306,7 +309,7 @@ public class DynamicSettingListeners {
                   event.getTargetEntity().getLocation()));
 
   @DynamicSettingListener
-  public static SettingListener<SpawnEntityEvent> DENY_SPAWN_LISTENER =
+  static SettingListener<SpawnEntityEvent> DENY_SPAWN_LISTENER =
       new CancelConditionSettingListener<>(
           SettingLibrary.DENY_SPAWN,
           SpawnEntityEvent.class,
@@ -317,13 +320,19 @@ public class DynamicSettingListeners {
                   .contains(entity.getType())));
 
   @DynamicSettingListener
-  public static SettingListener<ChangeBlockEvent.Break> ENDERDRAGON_GRIEF_BLOCK_LISTENER =
+  static SettingListener<ChangeBlockEvent.Break> ENDERDRAGON_GRIEF_BLOCK_LISTENER =
       new EntityBreakConditionSettingListener(
           SettingLibrary.ENDERDRAGON_GRIEF,
           EntityTypes.ENDER_DRAGON);
 
   @DynamicSettingListener
-  public static SettingListener<MoveEntityEvent.Teleport> ENDERPEARL_TELEPORT_LISTENER =
+  static SettingListener<ChangeBlockEvent.Break> ENDERMAN_GRIEF_BLOCK_LISTENER =
+      new EntityBreakConditionSettingListener(
+          SettingLibrary.ENDERMAN_GRIEF,
+          EntityTypes.ENDERMAN);
+
+  @DynamicSettingListener
+  static SettingListener<MoveEntityEvent.Teleport> ENDERPEARL_TELEPORT_LISTENER =
       new PlayerCancelConditionSettingListener<>(
           SettingLibrary.ENDERPEARL_TELEPORT,
           MoveEntityEvent.Teleport.class,
@@ -339,4 +348,100 @@ public class DynamicSettingListeners {
                       player,
                       event.getToTransform().getLocation())));
 
+  @DynamicSettingListener
+  static SettingListener<InteractEntityEvent.Primary> ARMOR_STAND_DESTROY_LISTENER =
+      new PlayerCancelConditionSettingListener<>(
+          SettingLibrary.ARMOR_STAND_DESTROY,
+          InteractEntityEvent.Primary.class,
+          (event, player) -> event.getTargetEntity().getType().equals(EntityTypes.ARMOR_STAND)
+              &&
+              !Nope.getInstance().getHostTree().lookup(SettingLibrary.ARMOR_STAND_DESTROY,
+                  player,
+                  event.getTargetEntity().getLocation()));
+
+  @DynamicSettingListener
+  static SettingListener<InteractEntityEvent.Primary> ITEM_FRAME_DESTROY_LISTENER =
+      new PlayerCancelConditionSettingListener<>(
+          SettingLibrary.ITEM_FRAME_DESTROY,
+          InteractEntityEvent.Primary.class,
+          (event, player) -> event.getTargetEntity().getType().equals(EntityTypes.ITEM_FRAME)
+              &&
+              !Nope.getInstance().getHostTree().lookup(SettingLibrary.ITEM_FRAME_DESTROY,
+                  player,
+                  event.getTargetEntity().getLocation()));
+
+  @DynamicSettingListener
+  static SettingListener<InteractEntityEvent.Primary> PAINTING_DESTROY_LISTENER =
+      new PlayerCancelConditionSettingListener<>(
+          SettingLibrary.PAINTING_DESTROY,
+          InteractEntityEvent.Primary.class,
+          (event, player) -> event.getTargetEntity().getType().equals(EntityTypes.PAINTING)
+              &&
+              !Nope.getInstance().getHostTree().lookup(SettingLibrary.PAINTING_DESTROY,
+                  player,
+                  event.getTargetEntity().getLocation()));
+
+  @DynamicSettingListener
+  static SettingListener<MoveEntityEvent> ENTRY_LISTENER =
+      new PlayerCancelConditionSettingListener<>(
+          SettingLibrary.ENTRY,
+          MoveEntityEvent.class,
+          (event, player) -> Nope.getInstance()
+              .getHostTree()
+              .getContainingHosts(event.getToTransform().getLocation())
+              .stream()
+              .anyMatch(host -> {
+                if (host.encompasses(event.getFromTransform().getLocation())) {
+                  return false;
+                }
+                Optional<SettingValue<SettingLibrary.Movement>> movementOptional =
+                    host.get(SettingLibrary.ENTRY);
+                if (!movementOptional.isPresent()
+                    || !movementOptional.get().getTarget().test(player)) {
+                  return false;
+                }
+                SettingLibrary.Movement movement = movementOptional.get().getData();
+                switch (movement) {
+                  case ALL:
+                    return false;
+                  case NONE:
+                    return true;
+                  case NOT_TELEPORTATION:
+                    return event instanceof MoveEntityEvent.Teleport;
+                  default:
+                    return !(event instanceof MoveEntityEvent.Teleport);
+                }
+              }));
+
+  @DynamicSettingListener
+  static SettingListener<MoveEntityEvent> EXIT_LISTENER =
+      new PlayerCancelConditionSettingListener<>(
+          SettingLibrary.EXIT,
+          MoveEntityEvent.class,
+          (event, player) -> Nope.getInstance()
+              .getHostTree()
+              .getContainingHosts(event.getFromTransform().getLocation())
+              .stream()
+              .anyMatch(host -> {
+                if (host.encompasses(event.getToTransform().getLocation())) {
+                  return false;
+                }
+                Optional<SettingValue<SettingLibrary.Movement>> movementOptional =
+                    host.get(SettingLibrary.ENTRY);
+                if (!movementOptional.isPresent()
+                    || !movementOptional.get().getTarget().test(player)) {
+                  return false;
+                }
+                SettingLibrary.Movement movement = movementOptional.get().getData();
+                switch (movement) {
+                  case ALL:
+                    return false;
+                  case NONE:
+                    return true;
+                  case NOT_TELEPORTATION:
+                    return event instanceof MoveEntityEvent.Teleport;
+                  default:
+                    return !(event instanceof MoveEntityEvent.Teleport);
+                }
+              }));
 }

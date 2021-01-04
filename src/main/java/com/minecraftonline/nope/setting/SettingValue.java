@@ -27,14 +27,13 @@ package com.minecraftonline.nope.setting;
 
 import com.google.common.collect.Sets;
 import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 import com.minecraftonline.nope.host.Host;
 import com.minecraftonline.nope.util.NopeTypeTokens;
-import jdk.internal.jline.internal.Nullable;
 import lombok.Getter;
 import org.spongepowered.api.service.permission.Subject;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Predicate;
@@ -42,9 +41,9 @@ import java.util.function.Predicate;
 /**
  * The value component of a {@link Setting}.
  * A SettingValue is designed to be matched with a {@link SettingKey}
- * and placed into a {@link SettingMap} inside a {@link Host}
+ * and placed into a {@link SettingMap} inside a {@link Host}.
  *
- * @param <T>
+ * @param <T> the type of data to store
  */
 public class SettingValue<T> {
 
@@ -58,7 +57,7 @@ public class SettingValue<T> {
 
   /**
    * The targeted subject for the game behavior alteration made by
-   * the {@link #data} value respective to the {@link SettingKey}
+   * the {@link #data} value respective to the {@link SettingKey}.
    */
   @Getter
   private final Target target;
@@ -98,9 +97,9 @@ public class SettingValue<T> {
    */
   public static class Target extends HashSet<String> implements Predicate<Subject> {
 
-    private Target(@Nullable Set<String> permissionRequirements) {
-      if (permissionRequirements != null) {
-        this.addAll(permissionRequirements);
+    private Target(@Nullable Set<String> ignorePermissions) {
+      if (ignorePermissions != null) {
+        this.addAll(ignorePermissions);
       }
     }
 
@@ -108,6 +107,7 @@ public class SettingValue<T> {
       return new Gson().toJson(target);
     }
 
+    @SuppressWarnings("UnstableApiUsage")
     public static Target fromJson(String json) {
       return new Target(new Gson().fromJson(json, NopeTypeTokens.STRING_SET_TOKEN.getType()));
     }
@@ -116,7 +116,7 @@ public class SettingValue<T> {
       return new Target(Sets.newHashSet());
     }
 
-    public static Target hasAnyPermissionOf(String... permissions) {
+    public static Target hasNoPermissionsOf(String... permissions) {
       return new Target(Sets.newHashSet(permissions));
     }
 
@@ -128,8 +128,7 @@ public class SettingValue<T> {
      */
     @Override
     public boolean test(Subject subject) {
-      return this.isEmpty() ||
-              this.stream().anyMatch(subject::hasPermission);
+      return this.stream().noneMatch(subject::hasPermission);
     }
 
   }
