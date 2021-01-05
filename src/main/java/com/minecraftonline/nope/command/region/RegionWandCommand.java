@@ -47,12 +47,8 @@ import org.spongepowered.api.text.format.TextColors;
 import javax.annotation.Nonnull;
 
 public class RegionWandCommand extends CommandNode {
-  /**
-   * Default constructor.
-   *
-   * @param parent the parent node
-   */
-  public RegionWandCommand(CommandNode parent) {
+
+  RegionWandCommand(CommandNode parent) {
     super(parent,
         Permissions.CREATE_REGION,
         Text.of("Get a wand for easy creation of regions"),

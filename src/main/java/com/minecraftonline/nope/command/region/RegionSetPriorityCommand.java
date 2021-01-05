@@ -5,8 +5,7 @@ import com.minecraftonline.nope.arguments.NopeArguments;
 import com.minecraftonline.nope.command.common.CommandNode;
 import com.minecraftonline.nope.command.common.LambdaCommandNode;
 import com.minecraftonline.nope.host.Host;
-import com.minecraftonline.nope.listener.DynamicSettingListeners;
-import com.minecraftonline.nope.permission.Permission;
+import com.minecraftonline.nope.permission.Permissions;
 import com.minecraftonline.nope.util.Format;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.args.GenericArguments;
@@ -14,8 +13,11 @@ import org.spongepowered.api.text.Text;
 
 public class RegionSetPriorityCommand extends LambdaCommandNode {
 
-  public RegionSetPriorityCommand(CommandNode parent) {
-    super(parent, Permission.of("nope.region.edit.priority"), Text.of("Allows the user to set the priority of a region"), "setpriority");
+  RegionSetPriorityCommand(CommandNode parent) {
+    super(parent,
+        Permissions.EDIT_REGION,
+        Text.of("Allows the user to set the priority of a region"),
+        "setpriority");
 
     addCommandElements(
         GenericArguments.onlyOne(NopeArguments.host(Text.of("host"))),
@@ -36,7 +38,10 @@ public class RegionSetPriorityCommand extends LambdaCommandNode {
       }
 
       Nope.getInstance().getHostTree().save();
-      src.sendMessage(Format.success("Set priority of host " + host.getName() + ", to " + priority));
+      src.sendMessage(Format.success("Set priority of host ",
+          Format.note(host.getName()),
+          " to ",
+          Format.note(priority)));
 
       return CommandResult.success();
     });

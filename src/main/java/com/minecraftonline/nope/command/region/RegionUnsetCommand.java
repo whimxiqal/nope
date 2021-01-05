@@ -5,7 +5,6 @@ import com.minecraftonline.nope.arguments.NopeArguments;
 import com.minecraftonline.nope.command.common.CommandNode;
 import com.minecraftonline.nope.command.common.LambdaCommandNode;
 import com.minecraftonline.nope.host.Host;
-import com.minecraftonline.nope.permission.Permission;
 import com.minecraftonline.nope.permission.Permissions;
 import com.minecraftonline.nope.setting.SettingKey;
 import com.minecraftonline.nope.setting.SettingValue;
@@ -15,7 +14,8 @@ import org.spongepowered.api.command.args.GenericArguments;
 import org.spongepowered.api.text.Text;
 
 public class RegionUnsetCommand extends LambdaCommandNode {
-  public RegionUnsetCommand(CommandNode parent) {
+
+  RegionUnsetCommand(CommandNode parent) {
     super(parent,
             Permissions.EDIT_REGION,
             Text.of("Unset settings on a region"),

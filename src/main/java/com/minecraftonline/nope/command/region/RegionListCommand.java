@@ -42,12 +42,7 @@ import java.util.stream.Collectors;
 
 public class RegionListCommand extends LambdaCommandNode {
 
-  /**
-   * Default constructor.
-   *
-   * @param parent the parent command
-   */
-  public RegionListCommand(CommandNode parent) {
+  RegionListCommand(CommandNode parent) {
     super(parent,
         Permissions.LIST_REGIONS,
         Text.of("List the regions in the current world"),
@@ -72,7 +67,7 @@ public class RegionListCommand extends LambdaCommandNode {
               .map(host -> Text.of(Format.ACCENT, "> ", Format.note(Format.host(host))))
               .collect(Collectors.toList()))
           .title(Format.info("Regions"))
-          .padding(Text.of(Format.ACCENT, "="))
+          .padding(Format.note("="))
           .build()
           .sendTo(src);
       return CommandResult.success();

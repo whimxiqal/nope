@@ -25,5 +25,18 @@
 
 package com.minecraftonline.nope.listener;
 
-public class BlockListeners {
+import com.minecraftonline.nope.setting.SettingKey;
+import org.spongepowered.api.event.Event;
+import org.spongepowered.api.event.EventListener;
+
+import javax.annotation.Nonnull;
+import java.util.Collections;
+
+public class SingleSettingListener<E extends Event> extends SettingListener<E> {
+
+  public SingleSettingListener(@Nonnull SettingKey<?> key,
+                               @Nonnull Class<E> eventClass,
+                               @Nonnull EventListener<E> listener) {
+    super(Collections.singleton(key), eventClass, listener);
+  }
 }

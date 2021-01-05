@@ -34,6 +34,7 @@ import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.EventListener;
 
 import javax.annotation.Nonnull;
+import java.util.Collection;
 
 /**
  * A class to store information about how a SettingKey and SettingValue
@@ -46,16 +47,16 @@ import javax.annotation.Nonnull;
  */
 public class SettingListener<E extends Event> implements EventListener<E> {
 
-  private final SettingKey<?> key;
+  private final Collection<SettingKey<?>> keys;
   private final EventListener<E> listener;
   private final Class<E> eventClass;
 
   private boolean registered = false;
 
-  public SettingListener(@Nonnull SettingKey<?> key,
+  public SettingListener(@Nonnull Collection<SettingKey<?>> keys,
                          @Nonnull Class<E> eventClass,
                          @Nonnull EventListener<E> listener) {
-    this.key = key;
+    this.keys = keys;
     this.eventClass = eventClass;
     this.listener = listener;
   }
@@ -76,32 +77,20 @@ public class SettingListener<E extends Event> implements EventListener<E> {
     if (this.registered) {
       return;
     }
-    boolean assigned = false;
-    assigned = Nope.getInstance().getHostTree().isAssigned(key);
-    SettingKey<?> cur = key;
-    while (!assigned && cur.getParent().isPresent()) {
-      cur = cur.getParent().get();
-      assigned = Nope.getInstance().getHostTree().isAssigned(cur);
+    boolean assigned;
+    for (SettingKey<?> key : keys) {
+      assigned = Nope.getInstance().getHostTree().isAssigned(key);
+      SettingKey<?> cur = key;
+      while (!assigned && cur.getParent().isPresent()) {
+        cur = cur.getParent().get();
+        assigned = Nope.getInstance().getHostTree().isAssigned(cur);
+      }
+      if (key.hasUnnaturalDefault() || assigned) {
+        Sponge.getEventManager().registerListener(Nope.getInstance(), eventClass, listener);
+        this.registered = true;
+        return;
+      }
     }
-    if (key.hasUnnaturalDefault() || assigned) {
-      Sponge.getEventManager().registerListener(Nope.getInstance(), eventClass, listener);
-      this.registered = true;
-    }
   }
 
-  protected final SettingKey<?> getKey() {
-    return this.key;
-  }
-
-  protected final EventListener<E> getListener() {
-    return this.listener;
-  }
-
-  protected final Class<E> getEventClass() {
-    return this.eventClass;
-  }
-
-  public final boolean isRegistered() {
-    return this.registered;
-  }
 }

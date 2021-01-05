@@ -26,26 +26,38 @@
 package com.minecraftonline.nope.listener;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.minecraftonline.nope.Nope;
+import com.minecraftonline.nope.host.Host;
 import com.minecraftonline.nope.setting.SettingKey;
 import com.minecraftonline.nope.setting.SettingLibrary;
 import com.minecraftonline.nope.setting.SettingValue;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.BlockTypes;
+import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.entity.living.animal.Animal;
 import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.event.Cancellable;
 import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.event.block.InteractBlockEvent;
+import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.event.cause.entity.damage.DamageType;
+import org.spongepowered.api.event.cause.entity.damage.DamageTypes;
+import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
 import org.spongepowered.api.event.cause.entity.damage.source.EntityDamageSource;
 import org.spongepowered.api.event.entity.DamageEntityEvent;
+import org.spongepowered.api.event.entity.DestructEntityEvent;
+import org.spongepowered.api.event.entity.HarvestEntityEvent;
 import org.spongepowered.api.event.entity.InteractEntityEvent;
 import org.spongepowered.api.event.entity.MoveEntityEvent;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
+import org.spongepowered.api.event.item.inventory.DropItemEvent;
 import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.title.Title;
+import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.explosion.Explosion;
@@ -59,7 +71,8 @@ import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.BiPredicate;
+import java.util.Set;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -386,71 +399,174 @@ public class DynamicSettingListeners {
                   player,
                   event.getTargetEntity().getLocation()));
 
-  static BiPredicate<MoveEntityEvent, Player> thresholdHandler(SettingKey<SettingLibrary.Movement> dictator,
-                                                               Location<World> inside,
-                                                               Location<World> outside,
-                                                               SettingKey<Text> denyMessageKey) {
-    return (event, player) -> Nope.getInstance()
-        .getHostTree()
-        .getContainingHosts(inside)
-        .stream()
-        .anyMatch(host -> {
-          if (host.encompasses(outside)) {
-            return false;
-          }
-          Optional<SettingValue<SettingLibrary.Movement>> movementOptional =
-              host.get(dictator);
-          if (!movementOptional.isPresent()
-              || !movementOptional.get().getTarget().test(player)) {
-            return false;
-          }
-          SettingLibrary.Movement movement = movementOptional.get().getData();
-          boolean isCancelled = false;
-          switch (movement) {
-            case ALL:
-              /* isCancelled is false */
-              break;
+  static Consumer<MoveEntityEvent> thresholdHandler(
+      SettingKey<SettingLibrary.Movement> dictator,
+      Location<World> inside,
+      Location<World> outside,
+      SettingKey<Text> allowMessageKey,
+      SettingKey<Text> allowTitleKey,
+      SettingKey<Text> allowSubtitleKey,
+      SettingKey<Text> denyMessageKey) {
+    return (event) -> {
+      if (!(event.getCause().root() instanceof Player)) {
+        return;
+      }
+      Player player = (Player) event.getCause().root();
+      Nope.getInstance()
+          .getHostTree()
+          .getContainingHosts(inside)
+          .stream()
+          .filter(host -> !host.encompasses(outside))
+          .forEach(host -> {
+            Optional<SettingValue<SettingLibrary.Movement>> movementOptional =
+                host.get(dictator);
+            boolean shouldCancel;
+            if (!movementOptional.isPresent()
+                || !movementOptional.get().getTarget().test(player)) {
+              shouldCancel = false;
+            } else {
+              SettingLibrary.Movement movement = movementOptional.get().getData();
+              switch (movement) {
+                case ALL:
+                  shouldCancel = false;
+                  break;
+                // These other ones require a little more nuance. Implement in the future
 //            case NONE:
-//              isCancelled = true;
+//              shouldCancel = true;
 //              break;
 //            case NOT_TELEPORTATION:
-//              isCancelled = event instanceof MoveEntityEvent.Teleport;
+//              shouldCancel = event instanceof MoveEntityEvent.Teleport;
 //              break;
-            default:
-              isCancelled = !(event instanceof MoveEntityEvent.Teleport);
-              break;
-          }
-          if (isCancelled) {
-            Optional<SettingValue<Text>> message = host.get(denyMessageKey);
+                default:
+                  shouldCancel = !(event instanceof MoveEntityEvent.Teleport);
+                  break;
+              }
+            }
+            Optional<SettingValue<Text>> message;
+            if (shouldCancel) {
+              event.setCancelled(true);
+              message = host.get(denyMessageKey);
+            } else {
+              message = host.get(allowMessageKey);
+
+              boolean showTitle = false;
+              Title.Builder titleBuilder = Title.builder();
+              Optional<SettingValue<Text>> title = host.get(allowTitleKey);
+              Optional<SettingValue<Text>> subtitle = host.get(allowSubtitleKey);
+              if (title.isPresent() && title.get().getTarget().test(player)) {
+                showTitle = true;
+                titleBuilder.title(title.get().getData());
+              }
+              if (subtitle.isPresent() && subtitle.get().getTarget().test(player)) {
+                showTitle = true;
+                titleBuilder.subtitle(subtitle.get().getData());
+              }
+              if (showTitle) {
+                player.sendTitle(titleBuilder.build());
+              }
+            }
             if (message.isPresent() && message.get().getTarget().test(player)) {
               player.sendMessage(message.get().getData());
             }
-          }
-          return isCancelled;
-        });
+          });
+    };
   }
 
   @DynamicSettingListener
   static SettingListener<MoveEntityEvent> ENTRY_LISTENER =
-      new PlayerCancelConditionSettingListener<>(
-          SettingLibrary.ENTRY,
+      new SettingListener<>(
+          Lists.newArrayList(SettingLibrary.ENTRY,
+              SettingLibrary.GREETING,
+              SettingLibrary.GREETING_TITLE,
+              SettingLibrary.GREETING_SUBTITLE,
+              SettingLibrary.ENTRY_DENY_MESSAGE),
           MoveEntityEvent.class,
-          (event, player) ->
+          (event) ->
               thresholdHandler(SettingLibrary.ENTRY,
                   event.getToTransform().getLocation(),
                   event.getFromTransform().getLocation(),
+                  SettingLibrary.GREETING,
+                  SettingLibrary.GREETING_TITLE,
+                  SettingLibrary.GREETING_SUBTITLE,
                   SettingLibrary.ENTRY_DENY_MESSAGE)
-                  .test(event, player));
+                  .accept(event));
 
   @DynamicSettingListener
   static SettingListener<MoveEntityEvent> EXIT_LISTENER =
-      new PlayerCancelConditionSettingListener<>(
-          SettingLibrary.EXIT,
+      new SettingListener<>(
+          Lists.newArrayList(SettingLibrary.EXIT,
+              SettingLibrary.FAREWELL,
+              SettingLibrary.FAREWELL_TITLE,
+              SettingLibrary.FAREWELL_SUBTITLE,
+              SettingLibrary.EXIT_DENY_MESSAGE),
           MoveEntityEvent.class,
-          (event, player) ->
+          (event) ->
               thresholdHandler(SettingLibrary.EXIT,
                   event.getFromTransform().getLocation(),
                   event.getToTransform().getLocation(),
+                  SettingLibrary.FAREWELL,
+                  SettingLibrary.FAREWELL_TITLE,
+                  SettingLibrary.FAREWELL_SUBTITLE,
                   SettingLibrary.EXIT_DENY_MESSAGE)
-                  .test(event, player));
+                  .accept(event));
+
+  @DynamicSettingListener
+  static SettingListener<DamageEntityEvent> EVP_LISTENER =
+      new CancelConditionSettingListener<>(
+          SettingLibrary.EVP,
+          DamageEntityEvent.class,
+          event -> event.getCause()
+              .first(DamageSource.class)
+              .filter(damageSource -> Sets.newHashSet(
+                  DamageTypes.CONTACT.getId(),
+                  DamageTypes.DROWN.getId(),
+                  DamageTypes.FALL.getId(),
+                  DamageTypes.FIRE.getId(),
+                  DamageTypes.HUNGER.getId(),
+                  DamageTypes.MAGMA.getId(),
+                  DamageTypes.SUFFOCATE.getId()).contains(damageSource.getType().getId()))
+              .filter(damageSource -> event.getTargetEntity() instanceof Subject
+                  ? !Nope.getInstance().getHostTree().lookup(SettingLibrary.EVP,
+                  (Subject) event.getTargetEntity(),
+                  event.getTargetEntity().getLocation())
+                  : !Nope.getInstance().getHostTree().lookupAnonymous(SettingLibrary.EVP,
+                  event.getTargetEntity().getLocation()))
+              .isPresent());
+
+  @DynamicSettingListener
+  static SettingListener<DamageEntityEvent> FALL_DAMAGE_LISTENER =
+      new CancelConditionSettingListener<>(
+          SettingLibrary.FALL_DAMAGE,
+          DamageEntityEvent.class,
+          event -> event.getCause()
+              .first(DamageSource.class)
+              .filter(damageSource -> damageSource.getType().getId().equals(DamageTypes.FALL.getId()))
+              .filter(damageSource -> event.getTargetEntity() instanceof Subject
+                  ? !Nope.getInstance().getHostTree().lookup(SettingLibrary.FALL_DAMAGE,
+                  (Subject) event.getTargetEntity(),
+                  event.getTargetEntity().getLocation())
+                  : !Nope.getInstance().getHostTree().lookupAnonymous(SettingLibrary.FALL_DAMAGE,
+                  event.getTargetEntity().getLocation()))
+              .isPresent());
+
+  @DynamicSettingListener
+  static SettingListener<ChangeBlockEvent> FIRE_SPREAD_LISTENER =
+      new CancelConditionSettingListener<>(
+          SettingLibrary.FIRE_SPREAD,
+          ChangeBlockEvent.class,
+          event -> {
+            event.getTransactions().stream().filter(trans -> trans.getOriginal().getState().getType().equals(BlockTypes.WOOL))
+                .forEach(trans -> Nope.getInstance().getLogger().info("Source: " + event.getSource()));
+            return event.getSource() instanceof LocatableBlock
+                && ((LocatableBlock) event.getSource()).getBlockState().getType().equals(BlockTypes.FIRE)
+                && event.getTransactions()
+                .stream()
+                .anyMatch(trans -> !Nope.getInstance()
+                        .getHostTree()
+                        .lookupAnonymous(SettingLibrary.FIRE_SPREAD, trans.getFinal()
+                            .getLocation()
+                            .orElseThrow(() -> new RuntimeException("Could not get the "
+                                + "final block location during fire spread"))));
+          });
+
 }

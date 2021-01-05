@@ -43,6 +43,11 @@ import javax.annotation.Nonnull;
  */
 public final class ExampleCommand extends FunctionlessCommandNode {
 
+  /**
+   * Default constructor.
+   *
+   * @param parent parent node
+   */
   public ExampleCommand(@Nonnull CommandNode parent) {
     super(parent,
         Permission.of("node.command.example"),

@@ -32,8 +32,11 @@ public final class Permissions {
   private Permissions() {
   }
 
+
   // Command permissions
   public static final Permission COMMAND_ROOT = Permission.of("nope.command");
+
+  public static final Permission RELOAD = Permission.of("nope.command.reload");
 
   public static final Permission REGION = Permission.of("nope.command.region");
 
@@ -45,6 +48,6 @@ public final class Permissions {
 
   public static final Permission INFO_REGION = Permission.of("nope.command.region.info");
 
-  public static final Permission DELETE_REGIONS = Permission.of("nope.command.region.delete");
+  public static final Permission DELETE_REGION = Permission.of("nope.command.region.delete");
 
 }

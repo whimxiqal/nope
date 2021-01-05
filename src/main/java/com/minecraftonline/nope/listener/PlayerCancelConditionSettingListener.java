@@ -41,17 +41,17 @@ import java.util.function.BiPredicate;
  * @param <E> the event type for which to listen and cancel
  */
 class PlayerCancelConditionSettingListener<E extends Event & Cancellable>
-        extends PlayerRootSettingListener<E> {
+    extends PlayerRootSettingListener<E> {
 
   public PlayerCancelConditionSettingListener(@Nonnull SettingKey<?> key,
                                               @Nonnull Class<E> eventClass,
                                               BiPredicate<E, Player> canceler) {
     super(key,
-            eventClass,
-            (event, player) -> {
-              if (canceler.test(event, player)) {
-                event.setCancelled(true);
-              }
-            });
+        eventClass,
+        (event, player) -> {
+          if (canceler.test(event, player)) {
+            event.setCancelled(true);
+          }
+        });
   }
 }

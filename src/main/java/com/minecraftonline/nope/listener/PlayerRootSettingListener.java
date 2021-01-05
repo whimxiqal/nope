@@ -38,7 +38,7 @@ import java.util.function.BiConsumer;
  *
  * @param <E> the type of event for which to listen
  */
-class PlayerRootSettingListener<E extends Event> extends SettingListener<E> {
+class PlayerRootSettingListener<E extends Event> extends SingleSettingListener<E> {
   public PlayerRootSettingListener(@Nonnull SettingKey<?> key,
                                    @Nonnull Class<E> eventClass,
                                    BiConsumer<E, Player> handler) {

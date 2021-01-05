@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import com.minecraftonline.nope.command.common.CommandNode;
 import com.minecraftonline.nope.command.common.LambdaCommandNode;
 import com.minecraftonline.nope.permission.Permission;
+import com.minecraftonline.nope.permission.Permissions;
 import com.minecraftonline.nope.setting.SettingKey;
 import com.minecraftonline.nope.setting.SettingLibrary;
 import com.minecraftonline.nope.util.Format;
@@ -21,8 +22,12 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class ListSettingsCommand extends LambdaCommandNode {
-  public ListSettingsCommand(CommandNode parent) {
-    super(parent, Permission.of("nope.setting.list"), Text.of("Allows the user to list all the nope settings"), "list");
+
+  ListSettingsCommand(CommandNode parent) {
+    super(parent,
+        Permissions.COMMAND_ROOT,
+        Text.of("Allows the user to list all the nope settings"),
+        "list");
 
     addCommandElements(GenericArguments.optional(GenericArguments.integer(Text.of("pageNum"))));
 

@@ -605,7 +605,6 @@ public class SettingLibrary {
   );
 
   @Description("When disabled, crops do not grow")
-  @NotImplemented
   public static final SettingKey<Boolean> CROP_GROWTH = new StateSetting(
       "crop-growth",
       true
@@ -673,7 +672,6 @@ public class SettingLibrary {
   );
 
   @Description("When disabled, players may not receive damage from the environment")
-  @NotImplemented
   public static final SettingKey<Boolean> EVP = new StateSetting(
       "evp",
       true
@@ -700,45 +698,27 @@ public class SettingLibrary {
   );
 
   @Description("When disabled, players do not experience fall damage")
-  @NotImplemented
   public static final SettingKey<Boolean> FALL_DAMAGE = new StateSetting(
       "fall-damage",
       false
   );
 
   @Description("The message to a player when they leave")
-  @NotImplemented
   public static final SettingKey<Text> FAREWELL = new TextSetting(
       "farewell",
       Text.EMPTY
   );
 
   @Description("The title that appears to a player when they leave")
-  @NotImplemented
   public static final SettingKey<Text> FAREWELL_TITLE = new TextSetting(
       "farewell-title",
       Text.EMPTY
   );
 
-  @Description("The amount of food restored with the feed command")
-  @NotImplemented
-  public static final SettingKey<Integer> FEED_AMOUNT = new IntegerSetting(
-      "feed-amount",
-      0
-  );
-
-  @Description("The amount of time before the feed command is used again by a player")
-  @NotImplemented
-  public static final SettingKey<Integer> FEED_DELAY = new IntegerSetting(
-      "feed-delay",
-      0
-  );
-
-  // TODO write description
-  @NotImplemented
-  public static final SettingKey<Double> FEED_MIN_HUNGER = new DoubleSetting(
-      "feed-min-hunger",
-      0D
+  @Description("The subtitle that appears to a player when they leave")
+  public static final SettingKey<Text> FAREWELL_SUBTITLE = new TextSetting(
+      "farewell-subtitle",
+      Text.EMPTY
   );
 
   @Description("When disabled, firework does not cause damage")
@@ -750,7 +730,6 @@ public class SettingLibrary {
   );
 
   @Description("When disabled, fire does not spread")
-  @NotImplemented
   public static final SettingKey<Boolean> FIRE_SPREAD = new StateSetting(
       "fire-spread",
       true
@@ -795,16 +774,20 @@ public class SettingLibrary {
   );
 
   @Description("The message to a player when they enter")
-  @NotImplemented
   public static final SettingKey<Text> GREETING = new TextSetting(
       "greeting",
       Text.EMPTY
   );
 
   @Description("The title that appears to a player when they enter")
-  @NotImplemented
   public static final SettingKey<Text> GREETING_TITLE = new TextSetting(
       "greeting-title",
+      Text.EMPTY
+  );
+
+  @Description("The subtitle that appears to a player when they enter")
+  public static final SettingKey<Text> GREETING_SUBTITLE = new TextSetting(
+      "greeting-subtitle",
       Text.EMPTY
   );
 

@@ -36,11 +36,11 @@ import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.args.GenericArguments;
 import org.spongepowered.api.text.Text;
 
-public class RegionDeleteCommand extends LambdaCommandNode {
+public class RegionDestroyCommand extends LambdaCommandNode {
 
-  RegionDeleteCommand(CommandNode parent) {
+  RegionDestroyCommand(CommandNode parent) {
     super(parent,
-        Permissions.DELETE_REGIONS,
+        Permissions.DELETE_REGION,
         Text.of("Delete a given region"),
         "destroy", "remove");
     addCommandElements(GenericArguments.onlyOne(NopeArguments.host(Text.of("host"))));
@@ -56,7 +56,9 @@ public class RegionDeleteCommand extends LambdaCommandNode {
 
       Nope.getInstance().getHostTree().save();
       DynamicSettingListeners.register();
-      src.sendMessage(Format.success("Region " + Format.note(host.getName()) + " was successfully deleted."));
+      src.sendMessage(Format.success("Region ",
+          Format.note(host.getName()),
+          " was successfully deleted."));
 
       return CommandResult.empty();
     });

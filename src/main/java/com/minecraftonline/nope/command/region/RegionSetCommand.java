@@ -39,7 +39,8 @@ import org.spongepowered.api.command.args.GenericArguments;
 import org.spongepowered.api.text.Text;
 
 public class RegionSetCommand extends LambdaCommandNode {
-  public RegionSetCommand(CommandNode parent) {
+
+  RegionSetCommand(CommandNode parent) {
     super(parent,
             Permissions.EDIT_REGION,
             Text.of("Set setting on a region"),

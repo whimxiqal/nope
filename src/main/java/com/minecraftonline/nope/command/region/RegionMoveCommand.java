@@ -8,25 +8,17 @@ import com.minecraftonline.nope.command.common.CommandNode;
 import com.minecraftonline.nope.command.common.LambdaCommandNode;
 import com.minecraftonline.nope.host.Host;
 import com.minecraftonline.nope.host.VolumeHost;
-import com.minecraftonline.nope.listener.DynamicSettingListeners;
-import com.minecraftonline.nope.permission.Permission;
+import com.minecraftonline.nope.permission.Permissions;
 import com.minecraftonline.nope.util.Format;
 import org.spongepowered.api.command.CommandResult;
-import org.spongepowered.api.command.args.GenericArguments;
-import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.world.World;
 
 public class RegionMoveCommand extends LambdaCommandNode {
 
-  /**
-   * Default constructor.
-   *
-   * @param parent the parent node
-   */
-  public RegionMoveCommand(CommandNode parent) {
+  RegionMoveCommand(CommandNode parent) {
     super(parent,
-        Permission.of("nope.region.edit.move"),
+        Permissions.EDIT_REGION,
         Text.of("Allows the user to resize the region"),
         "move");
 

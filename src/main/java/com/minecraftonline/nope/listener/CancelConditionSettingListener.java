@@ -37,16 +37,16 @@ import java.util.function.Predicate;
  *
  * @param <E> the type of event to cancel
  */
-class CancelConditionSettingListener<E extends Event & Cancellable> extends SettingListener<E> {
+class CancelConditionSettingListener<E extends Event & Cancellable> extends SingleSettingListener<E> {
   public CancelConditionSettingListener(@Nonnull SettingKey<?> key,
                                         @Nonnull Class<E> eventClass,
                                         Predicate<E> canceler) {
     super(key,
-            eventClass,
-            event -> {
-              if (canceler.test(event)) {
-                event.setCancelled(true);
-              }
-            });
+        eventClass,
+        event -> {
+          if (canceler.test(event)) {
+            event.setCancelled(true);
+          }
+        });
   }
 }
