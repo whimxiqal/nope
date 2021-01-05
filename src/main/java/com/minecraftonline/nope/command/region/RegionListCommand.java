@@ -30,14 +30,23 @@ import com.minecraftonline.nope.command.common.LambdaCommandNode;
 import com.minecraftonline.nope.host.VolumeHost;
 import com.minecraftonline.nope.permission.Permissions;
 import com.minecraftonline.nope.util.Format;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.service.pagination.PaginationService;
 import org.spongepowered.api.text.Text;
 
 import java.util.Collection;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 public class RegionListCommand extends LambdaCommandNode {
+
+  /**
+   * Default constructor.
+   *
+   * @param parent the parent command
+   */
   public RegionListCommand(CommandNode parent) {
     super(parent,
         Permissions.LIST_REGIONS,
@@ -49,17 +58,25 @@ public class RegionListCommand extends LambdaCommandNode {
         src.sendMessage(Format.error("You must be a player to use this command!"));
         return CommandResult.empty();
       }
-      UUID worldUUID = ((Player) src).getWorld().getUniqueId();
-      Collection<VolumeHost> regions = Nope.getInstance().getHostTree().getRegions(worldUUID);
+      UUID worldUuid = ((Player) src).getWorld().getUniqueId();
+      Collection<VolumeHost> regions = Nope.getInstance().getHostTree().getRegions(worldUuid);
       src.sendMessage(Format.info("------ Regions ------"));
-      if (regions == null) {
+      if (regions.isEmpty()) {
         src.sendMessage(Format.info("No regions in this world"));
         return CommandResult.success();
       }
-      for (VolumeHost volumeHost : regions) {
-        src.sendMessage(Text.of(Format.ACCENT, "> ", Format.note(Format.host(volumeHost))));
-      }
+      Sponge.getServiceManager().provide(PaginationService.class)
+          .orElseThrow(() -> new IllegalStateException("No pagination service found!"))
+          .builder()
+          .contents(regions.stream()
+              .map(host -> Text.of(Format.ACCENT, "> ", Format.note(Format.host(host))))
+              .collect(Collectors.toList()))
+          .title(Format.info("Regions"))
+          .padding(Text.of(Format.ACCENT, "="))
+          .build()
+          .sendTo(src);
       return CommandResult.success();
     });
   }
+
 }

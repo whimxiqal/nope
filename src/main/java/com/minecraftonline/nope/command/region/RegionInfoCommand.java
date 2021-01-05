@@ -44,23 +44,20 @@ import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.world.World;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.stream.Collectors;
 
 public class RegionInfoCommand extends LambdaCommandNode {
-  public RegionInfoCommand(CommandNode parent) {
+
+  RegionInfoCommand(CommandNode parent) {
     super(parent,
-            Permissions.INFO_REGION,
-            Text.of("View detailed information about a region"),
-            "info",
-            "i");
+        Permissions.INFO_REGION,
+        Text.of("View detailed information about a region"),
+        "info",
+        "i");
 
     CommandElement regionElement = GenericArguments.onlyOne(NopeArguments.host(Text.of("region")));
     regionElement = GenericArguments.flags().flag("f", "-friendly").buildWith(regionElement);
@@ -68,7 +65,7 @@ public class RegionInfoCommand extends LambdaCommandNode {
     setExecutor((src, args) -> {
       Host host = args.requireOne(Text.of("region"));
 
-      boolean friendly = args.<Boolean>getOne(Text.of("f")).orElse(false);
+      final boolean friendly = args.<Boolean>getOne(Text.of("f")).orElse(false);
 
       src.sendMessage(Format.info("-- Info for region " + host.getName() + " --"));
 
@@ -76,7 +73,8 @@ public class RegionInfoCommand extends LambdaCommandNode {
         String worldName = Sponge.getServer()
             .getWorld(host.getWorldUuid())
             .map(World::getName)
-            .orElseThrow(() -> new RuntimeException("Sponge cannot find world with UUID: " + host.getWorldUuid()));
+            .orElseThrow(() -> new RuntimeException("Sponge cannot find world with UUID: "
+                + host.getWorldUuid()));
         src.sendMessage(Format.keyValue("world: ", worldName));
       }
 
@@ -87,8 +85,12 @@ public class RegionInfoCommand extends LambdaCommandNode {
       if (host instanceof VolumeHost) {
         VolumeHost volumeHost = (VolumeHost) host;
         // Volume regions only:
-        src.sendMessage(Format.keyValue("min: ", volumeHost.getMinX() + ", " + volumeHost.getMinY() + ", " + volumeHost.getMinZ()));
-        src.sendMessage(Format.keyValue("max: ", volumeHost.getMaxX() + ", " + volumeHost.getMaxY() + ", " + volumeHost.getMaxZ()));
+        src.sendMessage(Format.keyValue("min: ", volumeHost.getMinX()
+            + ", " + volumeHost.getMinY()
+            + ", " + volumeHost.getMinZ()));
+        src.sendMessage(Format.keyValue("max: ", volumeHost.getMaxX()
+            + ", " + volumeHost.getMaxY()
+            + ", " + volumeHost.getMaxZ()));
       }
 
       int regionPriority = host.getPriority();
@@ -108,8 +110,7 @@ public class RegionInfoCommand extends LambdaCommandNode {
             .async()
             .execute(sendMsg)
             .submit(Nope.getInstance());
-      }
-      else {
+      } else {
         sendMsg.run();
       }
 
@@ -120,8 +121,9 @@ public class RegionInfoCommand extends LambdaCommandNode {
   }
 
   /**
-   * Sends an info message to the command source about the given SettingMap
-   * @param map Map of settings to build text with
+   * Sends an info message to the command source about the given SettingMap.
+   *
+   * @param map      Map of settings to build text with
    * @param friendly Whether to convert uuids to usernames. If true this method <b>WILL BLOCK</b>
    * @return Text built text with information about the settings.
    */
@@ -136,7 +138,8 @@ public class RegionInfoCommand extends LambdaCommandNode {
 
       Text.Builder builder = Text.builder();
 
-      builder.append(Format.keyValue(key.getId() + ": value: ", key.dataToJson(value.getData()).toString()));
+      builder.append(Format.keyValue(key.getId() + ": value: ",
+          key.dataToJson(value.getData()).toString()));
 
       if (value.getTarget() != null) {
 //        SettingValue.Target target = value.getTarget();
@@ -173,9 +176,9 @@ public class RegionInfoCommand extends LambdaCommandNode {
 //            .append(Format.keyValue("players: ", String.join(",", players) + ")"))
 //            .append(Text.of(")"));
         builder.append(Text.of(" "))
-                .append(Format.keyValue(
-                        "permissions: ",
-                        String.join(", ", value.getTarget())));
+            .append(Format.keyValue(
+                "permissions: ",
+                String.join(", ", value.getTarget())));
       }
       lines.add(builder.build());
     }
@@ -188,7 +191,7 @@ public class RegionInfoCommand extends LambdaCommandNode {
   }
 
   /**
-   * Gets a gameprofile promise
+   * Gets a gameprofile promise.
    *
    * @param uuid UUID
    * @return CompletableFuture to obtain a gameprofile.

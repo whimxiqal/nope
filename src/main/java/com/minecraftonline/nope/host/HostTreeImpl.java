@@ -139,8 +139,6 @@ public class HostTreeImpl implements HostTree {
         Nope.getInstance().getLogger().error("Nope's Regions could not be written.", e);
       }
     });
-
-    DynamicSettingListeners.register();
   }
 
   /**
@@ -322,8 +320,11 @@ public class HostTreeImpl implements HostTree {
       if (priority < 0) {
         throw new IllegalArgumentException("Cannot set a negative priority");
       }
+      int prev = getPriority();
+      super.setPriority(priority);
       Optional<Region> intersection = findIntersectingRegionWithSamePriority(worldUuid, this);
       if (intersection.isPresent()) {
+        super.setPriority(priority);
         throw new IllegalArgumentException(String.format(
             "Cannot set priority of %s to %d, "
                 + "because region %s which this intersects has that priority",
@@ -435,33 +436,36 @@ public class HostTreeImpl implements HostTree {
      *
      * @param globalHost the host to store
      * @param serializer the serializer which holds the logic for serialization
-     * @throws IOException if there is an error connecting to the storage
+     * @throws IOException        if there is an error connecting to the storage
+     * @throws HostParseException if there is any error parsing an existing stored GlobalHost
      */
     void writeGlobalHost(GlobalHost globalHost,
                          Host.HostSerializer<GlobalHost> serializer)
-        throws IOException;
+        throws IOException, HostParseException;
 
     /**
      * Writes WorldHosts to storage.
      *
      * @param worldHosts the host to store
      * @param serializer the serializer which holds the logic for serialization
-     * @throws IOException if there is an error connecting to the storage
+     * @throws IOException        if there is an error connecting to the storage
+     * @throws HostParseException if there is any error parsing an existing stored WorldHost
      */
     void writeWorldHosts(Collection<WorldHost> worldHosts,
                          Host.HostSerializer<WorldHost> serializer)
-        throws IOException;
+        throws IOException, HostParseException;
 
     /**
      * Writes Regions to storage.
      *
      * @param regions    the host to store
      * @param serializer the serializer which holds the logic for serialization
-     * @throws IOException if there is an error connecting to the storage
+     * @throws IOException        if there is an error connecting to the storage
+     * @throws HostParseException if there is any error parsing an existing stored Region
      */
     void writeRegions(Collection<Region> regions,
                       Host.HostSerializer<Region> serializer)
-        throws IOException;
+        throws IOException, HostParseException;
 
     class HostParseException extends RuntimeException {
       public HostParseException(Throwable t) {
@@ -513,15 +517,15 @@ public class HostTreeImpl implements HostTree {
     return hosts;
   }
 
-  @Nullable
+  @Nonnull
   @Override
-  public Collection<VolumeHost> getRegions(final UUID worldUuid) {
+  public Collection<VolumeHost> getRegions(final UUID worldUuid) throws IllegalArgumentException {
     return Optional.ofNullable(getWorldHost(worldUuid)).map(worldHost ->
         worldHost.regionTree.volumes()
             .stream()
             .map(volume -> (VolumeHost) volume)
             .collect(Collectors.toList()))
-        .orElse(null);
+        .orElseThrow(() -> new IllegalArgumentException("Invalid world uuid: " + worldUuid));
   }
 
   @Nonnull
@@ -540,16 +544,17 @@ public class HostTreeImpl implements HostTree {
   private void addRegion(Region region) {
     if (Pattern.matches(invalidHostNameRegex, region.getName())) {
       throw new IllegalArgumentException(String.format(
-          "Region insertion failed because the name %s has the name format of a WorldHost",
+          "Region insertion failed because the format of name %s is not allowed",
           region.getName()));
     }
-    if (hasRegion(region.getName())) {
+    Region other = getRegion(region.getName());
+    if (other != null) {
       throw new IllegalArgumentException(String.format(
           "Region insertion failed because name %s already exists (in world \"%s\")",
           region.getName(),
           Sponge.getServer()
               .getAllWorldProperties()
-              .stream().filter(prop -> prop.getUniqueId().equals(region.getWorldUuid()))
+              .stream().filter(prop -> prop.getUniqueId().equals(other.getWorldUuid()))
               .findFirst().map(WorldProperties::getWorldName)
               .orElse("unknown")));
     }

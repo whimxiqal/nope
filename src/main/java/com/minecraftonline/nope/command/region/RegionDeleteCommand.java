@@ -29,6 +29,7 @@ import com.minecraftonline.nope.arguments.NopeArguments;
 import com.minecraftonline.nope.command.common.CommandNode;
 import com.minecraftonline.nope.command.common.LambdaCommandNode;
 import com.minecraftonline.nope.host.Host;
+import com.minecraftonline.nope.listener.DynamicSettingListeners;
 import com.minecraftonline.nope.permission.Permissions;
 import com.minecraftonline.nope.util.Format;
 import org.spongepowered.api.command.CommandResult;
@@ -36,12 +37,12 @@ import org.spongepowered.api.command.args.GenericArguments;
 import org.spongepowered.api.text.Text;
 
 public class RegionDeleteCommand extends LambdaCommandNode {
-  public RegionDeleteCommand(CommandNode parent) {
+
+  RegionDeleteCommand(CommandNode parent) {
     super(parent,
         Permissions.DELETE_REGIONS,
         Text.of("Delete a given region"),
-        "delete",
-        "remove");
+        "destroy", "remove");
     addCommandElements(GenericArguments.onlyOne(NopeArguments.host(Text.of("host"))));
     setExecutor((src, args) -> {
       Host host = args.requireOne("host");
@@ -53,7 +54,9 @@ public class RegionDeleteCommand extends LambdaCommandNode {
         return CommandResult.empty();
       }
 
-      src.sendMessage(Format.success("Region " + host.getName() + ", was successfully deleted."));
+      Nope.getInstance().getHostTree().save();
+      DynamicSettingListeners.register();
+      src.sendMessage(Format.success("Region " + Format.note(host.getName()) + " was successfully deleted."));
 
       return CommandResult.empty();
     });

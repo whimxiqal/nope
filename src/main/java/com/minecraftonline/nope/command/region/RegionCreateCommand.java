@@ -29,6 +29,8 @@ import com.minecraftonline.nope.RegionWandHandler;
 import com.minecraftonline.nope.arguments.NopeArguments;
 import com.minecraftonline.nope.command.common.CommandNode;
 import com.minecraftonline.nope.command.common.LambdaCommandNode;
+import com.minecraftonline.nope.host.Host;
+import com.minecraftonline.nope.listener.DynamicSettingListeners;
 import com.minecraftonline.nope.permission.Permissions;
 import com.minecraftonline.nope.util.Format;
 import org.spongepowered.api.command.CommandResult;
@@ -36,28 +38,36 @@ import org.spongepowered.api.command.args.GenericArguments;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
 
+import java.util.Comparator;
+
 public class RegionCreateCommand extends LambdaCommandNode {
-  public RegionCreateCommand(CommandNode parent) {
+
+  RegionCreateCommand(CommandNode parent) {
     super(parent,
         Permissions.CREATE_REGION,
         Text.of("Create a region with current selection and given name"),
         "create",
-        "c",
-        "new");
+        "c", "add");
     addCommandElements(
         GenericArguments.onlyOne(GenericArguments.string(Text.of("name"))),
-//        NopeArguments.regionLocation(Text.of("selection")),
-        GenericArguments.optional(GenericArguments.integer(Text.of("priority")), 0)
-    );
+        NopeArguments.regionLocation(Text.of("selection")),
+        GenericArguments.flags()
+            .valueFlag(GenericArguments.integer(Text.of("priority")), "p")
+            .buildWith(GenericArguments.none()));
     setExecutor((src, args) -> {
       if (!(src instanceof Player)) {
         return CommandResult.empty();
       }
+
       Player player = (Player) src;
       String name = args.requireOne(Text.of("name"));
-//      RegionWandHandler.Selection selection = args.requireOne(Text.of("selection"));
-      RegionWandHandler.Selection selection = Nope.getInstance().getRegionWandHandler().getSelectionMap().get(player);
-      int priority = args.requireOne("priority");
+      RegionWandHandler.Selection selection = args.requireOne(Text.of("selection"));
+      int priority = args.<Integer>getOne("priority").orElse(
+          Nope.getInstance()
+              .getHostTree()
+              .getContainingHosts(player.getLocation())
+              .stream().max(Comparator.comparingInt(Host::getPriority))
+              .map(host -> host.getPriority() + 1).orElse(0));
 
       try {
         Nope.getInstance().getHostTree().addRegion(
@@ -68,7 +78,9 @@ public class RegionCreateCommand extends LambdaCommandNode {
             priority
         );
         Nope.getInstance().getHostTree().save();
+        DynamicSettingListeners.register();
         src.sendMessage(Format.success("Successfully created region ", Format.note(name), "!"));
+        Nope.getInstance().getRegionWandHandler().getSelectionMap().remove(player);
       } catch (IllegalArgumentException e) {
         src.sendMessage(Format.error("Could not create region: " + e.getMessage()));
         return CommandResult.empty();

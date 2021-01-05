@@ -93,10 +93,11 @@ public interface HostTree {
    * Get all the region within the world of the given id.
    *
    * @param worldUuid the UUID of the world
-   * @return the associated Regions, or null if no world exists with that UUID
+   * @return the associated Regions
+   * @throws IllegalArgumentException if no world exists with that UUID
    */
-  @Nullable
-  Collection<VolumeHost> getRegions(final UUID worldUuid);
+  @Nonnull
+  Collection<VolumeHost> getRegions(final UUID worldUuid) throws IllegalArgumentException;
 
   /**
    * Add a region to the HostTree with the given parameters.

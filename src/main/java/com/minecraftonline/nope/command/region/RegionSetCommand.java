@@ -29,6 +29,7 @@ import com.minecraftonline.nope.arguments.NopeArguments;
 import com.minecraftonline.nope.command.common.CommandNode;
 import com.minecraftonline.nope.command.common.LambdaCommandNode;
 import com.minecraftonline.nope.host.Host;
+import com.minecraftonline.nope.listener.DynamicSettingListeners;
 import com.minecraftonline.nope.permission.Permissions;
 import com.minecraftonline.nope.setting.SettingKey;
 import com.minecraftonline.nope.setting.SettingValue;
@@ -61,6 +62,7 @@ public class RegionSetCommand extends LambdaCommandNode {
       }
 
       Nope.getInstance().getHostTree().save();
+      DynamicSettingListeners.register();
       src.sendMessage(Format.success("Successfully set setting " + settingKey.getId() + ", on region " + region.getName()));
 
       return CommandResult.success();

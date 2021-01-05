@@ -39,6 +39,7 @@ import com.minecraftonline.nope.util.Format;
 import com.minecraftonline.nope.util.NopeTypeTokens;
 import org.spongepowered.api.CatalogType;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.data.persistence.DataFormat;
 import org.spongepowered.api.data.persistence.DataFormats;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
@@ -102,9 +103,9 @@ public class SettingLibrary {
 
   public enum Movement {
     ALL,
-    NOT_TELEPORTATION,
+//    NOT_TELEPORTATION,
     ONLY_TELEPORTATION,
-    NONE,
+//    NONE,
   }
 
   /**
@@ -324,7 +325,7 @@ public class SettingLibrary {
       try {
         return new Gson().toJsonTree(DataFormats.JSON.write(data.toContainer()));
       } catch (IOException e) {
-        e.printStackTrace();
+        Nope.getInstance().getLogger().error("Could not serialize Text", e);
         return new Gson().toJsonTree("");
       }
     }
@@ -333,12 +334,12 @@ public class SettingLibrary {
     public Text dataFromJsonGenerified(JsonElement json) {
       try {
         return Sponge.getDataManager()
-            .deserialize(Text.class, DataFormats.JSON.read(json.toString()))
+            .deserialize(Text.class, DataFormats.JSON.read(json.getAsString()))
             .orElseThrow(() -> new RuntimeException(
                 "The json for Text cannot be serialized: "
                     + json.toString()));
-      } catch (IOException e) {
-        e.printStackTrace();
+      } catch (IllegalStateException | IOException e) {
+        Nope.getInstance().getLogger().error("Could not deserialize Text", e);
         return Text.EMPTY;
       }
     }
@@ -372,8 +373,16 @@ public class SettingLibrary {
     public E parse(String s) throws IllegalArgumentException {
       try {
         return Enum.valueOf(enumClass, s.toUpperCase());
-      } catch (IllegalArgumentException e) {
-        throw new IllegalArgumentException(s + " is not a valid " + enumClass.getName() + " type");
+      } catch (IllegalArgumentException ex) {
+        throw new IllegalArgumentException(s + " is not a valid "
+            + enumClass.getSimpleName()
+            + " type. "
+            + (
+            (enumClass.getEnumConstants().length < 5)
+                ? "Allowed types: "
+                + Arrays.stream(enumClass.getEnumConstants()).map(e ->
+                e.toString().toLowerCase()).collect(Collectors.joining(", "))
+                : ""));
       }
     }
 
@@ -650,8 +659,7 @@ public class SettingLibrary {
       true
   );
 
-  @Description("Specify which type of movement is allowed by players to enter. "
-      + "Options: all, only_translation, only_teleportation, none")
+  @Description("Specify which type of movement is allowed by players to enter")
   public static final SettingKey<Movement> ENTRY = new EnumSetting<>(
       "entry",
       Movement.ALL,
@@ -659,7 +667,6 @@ public class SettingLibrary {
   );
 
   @Description("The message that is sent to a player if they are barred from entry")
-  @NotImplemented
   public static final SettingKey<Text> ENTRY_DENY_MESSAGE = new TextSetting(
       "entry-deny-message",
       Format.error("You are not allowed to go there")
@@ -672,8 +679,7 @@ public class SettingLibrary {
       true
   );
 
-  @Description("Specify which type of movement is allowed by players to exit. "
-      + "Options: all, only_translation, only_teleportation, none")
+  @Description("Specify which type of movement is allowed by players to exit")
   public static final SettingKey<Movement> EXIT = new EnumSetting<>(
       "exit",
       Movement.ALL,
@@ -681,7 +687,6 @@ public class SettingLibrary {
   );
 
   @Description("The message that is sent to the player if they are barred from exiting")
-  @NotImplemented
   public static final SettingKey<Text> EXIT_DENY_MESSAGE = new TextSetting(
       "exit-deny-message",
       Format.error("You are not allowed to leave here")

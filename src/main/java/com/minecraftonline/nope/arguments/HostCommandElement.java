@@ -49,6 +49,12 @@ class HostCommandElement extends CommandElement {
     super(key);
   }
 
+  @Nonnull
+  @Override
+  public Text getUsage(CommandSource src) {
+    return Text.of("<region>");
+  }
+
   @Nullable
   @Override
   protected Host parseValue(CommandSource source, CommandArgs args) throws ArgumentParseException {

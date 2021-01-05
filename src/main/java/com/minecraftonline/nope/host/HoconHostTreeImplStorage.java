@@ -154,7 +154,7 @@ public class HoconHostTreeImplStorage implements HostTreeImpl.Storage {
   @SuppressWarnings("UnstableApiUsage")
   public void writeGlobalHost(GlobalHost globalHost,
                               Host.HostSerializer<GlobalHost> serializer)
-      throws IOException {
+      throws IOException, HostParseException {
     try (Connection connection = new Connection(loader)) {
       // write GlobalHost
       final ConfigurationNode node = connection.node.getNode(Nope.GLOBAL_HOST_NAME);
@@ -170,7 +170,7 @@ public class HoconHostTreeImplStorage implements HostTreeImpl.Storage {
   @SuppressWarnings("UnstableApiUsage")
   public void writeWorldHosts(Collection<WorldHost> worldHosts,
                               Host.HostSerializer<WorldHost> serializer)
-      throws IOException {
+      throws IOException, HostParseException {
 
     try (Connection connection = new Connection(loader)) {
       // write collection of WorldHosts
@@ -189,7 +189,7 @@ public class HoconHostTreeImplStorage implements HostTreeImpl.Storage {
   @SuppressWarnings("UnstableApiUsage")
   public void writeRegions(Collection<Region> regions,
                            Host.HostSerializer<Region> serializer)
-      throws IOException {
+      throws IOException, HostParseException {
 
     try (Connection connection = new Connection(loader)) {
       // write collection of regions

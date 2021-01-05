@@ -35,6 +35,7 @@ import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.entity.living.animal.Animal;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.event.Cancellable;
 import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.event.block.InteractBlockEvent;
@@ -44,6 +45,9 @@ import org.spongepowered.api.event.entity.InteractEntityEvent;
 import org.spongepowered.api.event.entity.MoveEntityEvent;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.service.permission.Subject;
+import org.spongepowered.api.text.Text;
+import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.explosion.Explosion;
 
 import javax.annotation.Nullable;
@@ -55,6 +59,7 @@ import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.BiPredicate;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -381,67 +386,71 @@ public class DynamicSettingListeners {
                   player,
                   event.getTargetEntity().getLocation()));
 
+  static BiPredicate<MoveEntityEvent, Player> thresholdHandler(SettingKey<SettingLibrary.Movement> dictator,
+                                                               Location<World> inside,
+                                                               Location<World> outside,
+                                                               SettingKey<Text> denyMessageKey) {
+    return (event, player) -> Nope.getInstance()
+        .getHostTree()
+        .getContainingHosts(inside)
+        .stream()
+        .anyMatch(host -> {
+          if (host.encompasses(outside)) {
+            return false;
+          }
+          Optional<SettingValue<SettingLibrary.Movement>> movementOptional =
+              host.get(dictator);
+          if (!movementOptional.isPresent()
+              || !movementOptional.get().getTarget().test(player)) {
+            return false;
+          }
+          SettingLibrary.Movement movement = movementOptional.get().getData();
+          boolean isCancelled = false;
+          switch (movement) {
+            case ALL:
+              /* isCancelled is false */
+              break;
+//            case NONE:
+//              isCancelled = true;
+//              break;
+//            case NOT_TELEPORTATION:
+//              isCancelled = event instanceof MoveEntityEvent.Teleport;
+//              break;
+            default:
+              isCancelled = !(event instanceof MoveEntityEvent.Teleport);
+              break;
+          }
+          if (isCancelled) {
+            Optional<SettingValue<Text>> message = host.get(denyMessageKey);
+            if (message.isPresent() && message.get().getTarget().test(player)) {
+              player.sendMessage(message.get().getData());
+            }
+          }
+          return isCancelled;
+        });
+  }
+
   @DynamicSettingListener
   static SettingListener<MoveEntityEvent> ENTRY_LISTENER =
       new PlayerCancelConditionSettingListener<>(
           SettingLibrary.ENTRY,
           MoveEntityEvent.class,
-          (event, player) -> Nope.getInstance()
-              .getHostTree()
-              .getContainingHosts(event.getToTransform().getLocation())
-              .stream()
-              .anyMatch(host -> {
-                if (host.encompasses(event.getFromTransform().getLocation())) {
-                  return false;
-                }
-                Optional<SettingValue<SettingLibrary.Movement>> movementOptional =
-                    host.get(SettingLibrary.ENTRY);
-                if (!movementOptional.isPresent()
-                    || !movementOptional.get().getTarget().test(player)) {
-                  return false;
-                }
-                SettingLibrary.Movement movement = movementOptional.get().getData();
-                switch (movement) {
-                  case ALL:
-                    return false;
-                  case NONE:
-                    return true;
-                  case NOT_TELEPORTATION:
-                    return event instanceof MoveEntityEvent.Teleport;
-                  default:
-                    return !(event instanceof MoveEntityEvent.Teleport);
-                }
-              }));
+          (event, player) ->
+              thresholdHandler(SettingLibrary.ENTRY,
+                  event.getToTransform().getLocation(),
+                  event.getFromTransform().getLocation(),
+                  SettingLibrary.ENTRY_DENY_MESSAGE)
+                  .test(event, player));
 
   @DynamicSettingListener
   static SettingListener<MoveEntityEvent> EXIT_LISTENER =
       new PlayerCancelConditionSettingListener<>(
           SettingLibrary.EXIT,
           MoveEntityEvent.class,
-          (event, player) -> Nope.getInstance()
-              .getHostTree()
-              .getContainingHosts(event.getFromTransform().getLocation())
-              .stream()
-              .anyMatch(host -> {
-                if (host.encompasses(event.getToTransform().getLocation())) {
-                  return false;
-                }
-                Optional<SettingValue<SettingLibrary.Movement>> movementOptional =
-                    host.get(SettingLibrary.ENTRY);
-                if (!movementOptional.isPresent()
-                    || !movementOptional.get().getTarget().test(player)) {
-                  return false;
-                }
-                SettingLibrary.Movement movement = movementOptional.get().getData();
-                switch (movement) {
-                  case ALL:
-                    return false;
-                  case NONE:
-                    return true;
-                  case NOT_TELEPORTATION:
-                    return event instanceof MoveEntityEvent.Teleport;
-                  default:
-                    return !(event instanceof MoveEntityEvent.Teleport);
-                }
-              }));
+          (event, player) ->
+              thresholdHandler(SettingLibrary.EXIT,
+                  event.getFromTransform().getLocation(),
+                  event.getToTransform().getLocation(),
+                  SettingLibrary.EXIT_DENY_MESSAGE)
+                  .test(event, player));
 }
