@@ -20,9 +20,10 @@ public class RegionSetPriorityCommand extends LambdaCommandNode {
         "setpriority");
 
     addCommandElements(
-        GenericArguments.onlyOne(NopeArguments.host(Text.of("host"))),
-        GenericArguments.integer(Text.of("priority"))
-    );
+        GenericArguments.flags()
+            .valueFlag(NopeArguments.host(Text.of("region")), "r", "-region")
+            .buildWith(GenericArguments.none()),
+        GenericArguments.integer(Text.of("priority")));
     setExecutor((src, args) -> {
       Host host = args.requireOne("host");
       int priority = args.requireOne("priority");

@@ -26,9 +26,7 @@ package com.minecraftonline.nope.arguments;
 
 import com.minecraftonline.nope.Nope;
 import com.minecraftonline.nope.host.Host;
-import com.minecraftonline.nope.host.HostTree;
-import com.minecraftonline.nope.host.VolumeHost;
-import org.spongepowered.api.Sponge;
+import com.minecraftonline.nope.util.Format;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.args.ArgumentParseException;
 import org.spongepowered.api.command.args.CommandArgs;
@@ -57,7 +55,7 @@ class HostCommandElement extends CommandElement {
 
   @Nullable
   @Override
-  protected Host parseValue(CommandSource source, CommandArgs args) throws ArgumentParseException {
+  protected Host parseValue(@Nonnull CommandSource source, CommandArgs args) throws ArgumentParseException {
     String hostName = args.next();
     Host host = Nope.getInstance().getHostTree().getHosts().get(hostName);
 
@@ -65,7 +63,7 @@ class HostCommandElement extends CommandElement {
       return host;
     }
 
-    throw new ArgumentParseException(Text.of("Region '" + hostName + "' does not exist!"),
+    throw new ArgumentParseException(Text.of("Region ", Format.note(hostName), " does not exist!"),
             hostName,
             hostName.length());
   }

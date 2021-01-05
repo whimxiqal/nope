@@ -43,6 +43,7 @@ public class SettingKeyCommandElement extends CommandElement {
                                @Nonnull CommandContext context) {
     final Predicate<String> startsWith = new StartsWithPredicate(args.nextIfPresent().orElse(""));
     return SettingLibrary.getAll().stream()
+        .filter(SettingKey::isImplemented)
         .map(SettingKey::getId)
         .filter(startsWith)
         .collect(Collectors.toList());

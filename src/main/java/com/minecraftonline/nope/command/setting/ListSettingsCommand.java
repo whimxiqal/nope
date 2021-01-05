@@ -101,11 +101,6 @@ public class ListSettingsCommand extends LambdaCommandNode {
     onHover.append(Format.keyValue("Type: ", key.valueType().getSimpleName()));
     onHover.append(Text.NEW_LINE);
 
-    if (key.getParent().isPresent()) {
-      onHover.append(Format.keyValue("Parent: ", key.getParent().get().getId()));
-      onHover.append(Text.NEW_LINE);
-    }
-
     onHover.append(Format.keyValue("Default value: ", key.getDefaultData().toString()));
 
     if (key.getDescription().isPresent()) {

@@ -36,42 +36,74 @@ import com.minecraftonline.nope.setting.SettingValue;
 import com.minecraftonline.nope.util.Format;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.args.GenericArguments;
+import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
+
+import java.util.Comparator;
+import java.util.List;
+import java.util.Optional;
 
 public class RegionSetCommand extends LambdaCommandNode {
 
   RegionSetCommand(CommandNode parent) {
     super(parent,
-            Permissions.EDIT_REGION,
-            Text.of("Set setting on a region"),
-            "set");
+        Permissions.EDIT_REGION,
+        Text.of("Set setting on a region"),
+        "set");
     addCommandElements(
-            NopeArguments.host(Text.of("region")),
-            NopeArguments.settingKey(Text.of("setting")),
-            GenericArguments.remainingJoinedStrings(Text.of("value"))
+        GenericArguments.flags()
+            .valueFlag(NopeArguments.host(Text.of("region")), "r", "-region")
+            .buildWith(GenericArguments.none()),
+        NopeArguments.settingKey(Text.of("setting")),
+        GenericArguments.remainingJoinedStrings(Text.of("value"))
     );
     setExecutor((src, args) -> {
-      Host region = args.requireOne("region");
       SettingKey<?> settingKey = args.requireOne("setting");
       String value = args.requireOne("value");
 
+      Optional<Host> hostOptional = args.getOne("region");
+      Host host;
+      if (!hostOptional.isPresent()) {
+        if (!(src instanceof Player)) {
+          src.sendMessage(Format.error("Can't infer region! "
+              + "Please specify the target region."));
+          return CommandResult.empty();
+        }
+        Player player = (Player) src;
+        List<Host> containing = Nope.getInstance()
+            .getHostTree()
+            .getContainingHosts(player.getLocation());
+        if (containing.isEmpty()) {
+          src.sendMessage(Format.error("Can't infer region! "
+              + "Please specify the target region."));
+          return CommandResult.empty();
+        }
+        host = containing.stream().max(Comparator.comparing(Host::getPriority)).get();
+      } else {
+        host = hostOptional.get();
+      }
+
       try {
-        addSetting(region, settingKey, value);
+        addSetting(host, settingKey, value);
       } catch (IllegalArgumentException e) {
-        src.sendMessage(Format.error("Invalid value: " + e.getMessage()));
+        src.sendMessage(Format.error("Invalid value: ",
+            Format.note(e.getMessage())));
         return CommandResult.empty();
       }
 
       Nope.getInstance().getHostTree().save();
       DynamicSettingListeners.register();
-      src.sendMessage(Format.success("Successfully set setting " + settingKey.getId() + ", on region " + region.getName()));
+      src.sendMessage(Format.success("Successfully set setting ",
+          Format.note(settingKey.getId()),
+          " on region ",
+          Format.note(host.getName())));
 
       return CommandResult.success();
     });
   }
 
   private <T> void addSetting(Host region, SettingKey<T> key, String s)
-          throws IllegalArgumentException {
+      throws IllegalArgumentException {
     T data = key.parse(s);
     region.put(key, SettingValue.of(data));
   }

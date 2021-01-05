@@ -59,7 +59,6 @@ public abstract class SettingKey<T> {
   String description = null;
   @Nonnull
   CategoryType category = CategoryType.MISC;
-  final SettingKey<T> parent;
   boolean implemented = true;
   boolean unnaturalDefault = false;
 
@@ -73,14 +72,9 @@ public abstract class SettingKey<T> {
     MISC,
   }
 
-  protected SettingKey(String id, T defaultData, SettingKey<T> parent) {
+  protected SettingKey(String id, T defaultData) {
     this.id = id;
     this.defaultData = defaultData;
-    this.parent = parent;
-  }
-
-  protected SettingKey(String id, T defaultData) {
-    this(id, defaultData, null);
   }
 
   /**
@@ -204,11 +198,6 @@ public abstract class SettingKey<T> {
   @Nonnull
   public final CategoryType getCategory() {
     return this.category;
-  }
-
-  @Nonnull
-  public final Optional<SettingKey<T>> getParent() {
-    return Optional.ofNullable(parent);
   }
 
   public final boolean isImplemented() {

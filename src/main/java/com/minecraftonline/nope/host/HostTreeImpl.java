@@ -32,7 +32,6 @@ import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.minecraftonline.nope.Nope;
-import com.minecraftonline.nope.listener.DynamicSettingListeners;
 import com.minecraftonline.nope.setting.SettingKey;
 import com.minecraftonline.nope.setting.SettingLibrary;
 import com.minecraftonline.nope.setting.SettingValue;
@@ -631,21 +630,8 @@ public class HostTreeImpl implements HostTree {
 
   @Override
   public <V> V lookup(@Nonnull final SettingKey<V> key,
-                      @Nonnull final Subject subject,
+                      @Nullable final Subject subject,
                       @Nonnull final Location<World> location) {
-    return lookupWithParentsAndTarget(key, subject, location, key.getDefaultData());
-  }
-
-  @Override
-  public <V> V lookupAnonymous(@Nonnull SettingKey<V> key,
-                               @Nonnull Location<World> location) {
-    return lookupWithParentsAndTarget(key, null, location, key.getDefaultData());
-  }
-
-  private <V> V lookupWithParentsAndTarget(final SettingKey<V> key,
-                                           final Subject subject,
-                                           final Location<World> location,
-                                           final V defaultData) {
     // Maximum priority queue (swapped int compare)
     Queue<Host> maximumHeap = new PriorityQueue<>((h1, h2) ->
         Integer.compare(h2.getPriority(), h1.getPriority()));
@@ -688,11 +674,13 @@ public class HostTreeImpl implements HostTree {
       }
     }
 
-    if (key.getParent().isPresent()) {
-      return lookupWithParentsAndTarget(key.getParent().get(), subject, location, defaultData);
-    } else {
-      return defaultData;
-    }
+    return key.getDefaultData();
+  }
+
+  @Override
+  public <V> V lookupAnonymous(@Nonnull SettingKey<V> key,
+                               @Nonnull Location<World> location) {
+    return lookup(key, null, location);
   }
 
 }
