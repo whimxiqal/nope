@@ -174,7 +174,7 @@ public interface HostTree {
    * @see SettingLibrary
    */
   <V> V lookup(@Nonnull final SettingKey<V> key,
-               @Nonnull final Subject subject,
+               @Nullable final Subject subject,
                @Nonnull final Location<World> location);
 
   /**

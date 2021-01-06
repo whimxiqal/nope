@@ -367,7 +367,7 @@ public class HostTreeImpl implements HostTree {
       UUID parent = Sponge.getServer()
           .getWorldProperties(json.getAsJsonObject().get("parent").getAsString())
           .map(WorldProperties::getUniqueId)
-          .orElseThrow(() -> new RuntimeException(String.format(
+          .orElseThrow(() -> new IllegalArgumentException(String.format(
               "This JSON element for a WorldHost is storing an invalid World name '%s': %s",
               json.getAsJsonObject().get("world"),
               json)));

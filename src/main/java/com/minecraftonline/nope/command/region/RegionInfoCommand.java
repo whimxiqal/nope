@@ -24,6 +24,7 @@
 
 package com.minecraftonline.nope.command.region;
 
+import com.google.common.collect.Lists;
 import com.minecraftonline.nope.Nope;
 import com.minecraftonline.nope.arguments.NopeArguments;
 import com.minecraftonline.nope.command.common.CommandNode;
@@ -40,13 +41,18 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.args.CommandElement;
 import org.spongepowered.api.command.args.GenericArguments;
+import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.profile.GameProfile;
+import org.spongepowered.api.service.pagination.PaginationService;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.world.World;
 
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
@@ -59,15 +65,36 @@ public class RegionInfoCommand extends LambdaCommandNode {
         "info",
         "i");
 
-    CommandElement regionElement = GenericArguments.onlyOne(NopeArguments.host(Text.of("region")));
+    CommandElement regionElement = GenericArguments.optional(NopeArguments.host(Text.of("region")));
     regionElement = GenericArguments.flags().flag("f", "-friendly").buildWith(regionElement);
     addCommandElements(regionElement);
     setExecutor((src, args) -> {
-      Host host = args.requireOne(Text.of("region"));
+
+      Optional<Host> hostOptional = args.getOne("region");
+      Host host;
+      if (!hostOptional.isPresent()) {
+        if (!(src instanceof Player)) {
+          src.sendMessage(Format.error("Can't infer region! "
+              + "Please specify the target region."));
+          return CommandResult.empty();
+        }
+        Player player = (Player) src;
+        List<Host> containing = Nope.getInstance()
+            .getHostTree()
+            .getContainingHosts(player.getLocation());
+        if (containing.isEmpty()) {
+          src.sendMessage(Format.error("Can't infer region! "
+              + "Please specify the target region."));
+          return CommandResult.empty();
+        }
+        host = containing.stream().max(Comparator.comparing(Host::getPriority)).get();
+      } else {
+        host = hostOptional.get();
+      }
 
       final boolean friendly = args.<Boolean>getOne(Text.of("f")).orElse(false);
 
-      src.sendMessage(Format.info("-- Info for region " + host.getName() + " --"));
+      List<Text> headerLines = Lists.newLinkedList();
 
       if (host.getWorldUuid() != null) {
         String worldName = Sponge.getServer()
@@ -75,35 +102,44 @@ public class RegionInfoCommand extends LambdaCommandNode {
             .map(World::getName)
             .orElseThrow(() -> new RuntimeException("Sponge cannot find world with UUID: "
                 + host.getWorldUuid()));
-        src.sendMessage(Format.keyValue("world: ", worldName));
+        headerLines.add(Format.keyValue("world: ", worldName));
       }
 
       if (host.getParent() != null) {
-        src.sendMessage(Format.keyValue("parent: ", Format.host(host.getParent())));
+        headerLines.add(Format.keyValue("parent: ", Format.host(host.getParent())));
       }
 
       if (host instanceof VolumeHost) {
         VolumeHost volumeHost = (VolumeHost) host;
         // Volume regions only:
-        src.sendMessage(Format.keyValue("min: ", volumeHost.getMinX()
+        headerLines.add(Format.keyValue("min: ", volumeHost.getMinX()
             + ", " + volumeHost.getMinY()
             + ", " + volumeHost.getMinZ()));
-        src.sendMessage(Format.keyValue("max: ", volumeHost.getMaxX()
+
+        headerLines.add(Format.keyValue("max: ", volumeHost.getMaxX()
             + ", " + volumeHost.getMaxY()
             + ", " + volumeHost.getMaxZ()));
       }
 
       int regionPriority = host.getPriority();
-      src.sendMessage(Format.keyValue("priority: ", String.valueOf(regionPriority)));
+      headerLines.add(Format.keyValue("priority: ", String.valueOf(regionPriority)));
+
+      headerLines.add(Format.note("   - Settings -"));
 
       SettingMap map = host.getAll();
 
-      Runnable sendMsg = () -> {
-        Text msg = buildMessage(map, friendly);
-        if (!msg.isEmpty()) {
-          src.sendMessage(msg);
-        }
-      };
+      Runnable sendMsg = () -> Sponge.getServiceManager()
+          .provide(PaginationService.class)
+          .orElseThrow(() -> new RuntimeException("PaginationService doesn't exist!"))
+          .builder()
+          .title(Format.info("Region Info: ", Format.note(host.getName())))
+          .header(headerLines.isEmpty()
+              ? Format.note("None")
+              : Text.joinWith(Text.NEW_LINE, headerLines))
+          .padding(Text.of(Format.ACCENT, "="))
+          .contents(buildSettingMapMessage(map, friendly))
+          .build()
+          .sendTo(src);
 
       if (friendly) {
         Sponge.getScheduler().createTaskBuilder()
@@ -127,7 +163,7 @@ public class RegionInfoCommand extends LambdaCommandNode {
    * @param friendly Whether to convert uuids to usernames. If true this method <b>WILL BLOCK</b>
    * @return Text built text with information about the settings.
    */
-  public static Text buildMessage(SettingMap map, boolean friendly) {
+  public static List<Text> buildSettingMapMessage(SettingMap map, boolean friendly) {
     Map<UUID, String> uuidUsernameMap = new HashMap<>();
 
     LinkedList<Text> lines = new LinkedList<>();
@@ -183,11 +219,7 @@ public class RegionInfoCommand extends LambdaCommandNode {
       lines.add(builder.build());
     }
 
-    if (!lines.isEmpty()) {
-      lines.addFirst(Text.of("- Settings -"));
-    }
-
-    return Text.joinWith(Text.NEW_LINE, lines);
+    return lines;
   }
 
   /**

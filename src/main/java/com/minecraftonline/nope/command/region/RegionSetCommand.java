@@ -35,6 +35,7 @@ import com.minecraftonline.nope.setting.SettingKey;
 import com.minecraftonline.nope.setting.SettingValue;
 import com.minecraftonline.nope.util.Format;
 import org.spongepowered.api.command.CommandResult;
+import org.spongepowered.api.command.args.ArgumentParseException;
 import org.spongepowered.api.command.args.GenericArguments;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
@@ -85,7 +86,7 @@ public class RegionSetCommand extends LambdaCommandNode {
 
       try {
         addSetting(host, settingKey, value);
-      } catch (IllegalArgumentException e) {
+      } catch (SettingKey.ParseSettingException e) {
         src.sendMessage(Format.error("Invalid value: ",
             Format.note(e.getMessage())));
         return CommandResult.empty();
@@ -103,7 +104,7 @@ public class RegionSetCommand extends LambdaCommandNode {
   }
 
   private <T> void addSetting(Host region, SettingKey<T> key, String s)
-      throws IllegalArgumentException {
+      throws SettingKey.ParseSettingException {
     T data = key.parse(s);
     region.put(key, SettingValue.of(data));
   }

@@ -203,9 +203,14 @@ public final class SettingLibrary {
       "firework-damage",
       true
   );
-  @Description("When disabled, fire does not spread")
-  public static final SettingKey<Boolean> FIRE_SPREAD = new StateSetting(
-      "fire-spread",
+  @Description("When disabled, fire is not started naturally")
+  public static final SettingKey<Boolean> FIRE_NATURAL_IGNITION = new StateSetting(
+      "fire-natural-ignition",
+      true
+  );
+  @Description("When disabled, fire does not spread or cause damage")
+  public static final SettingKey<Boolean> FIRE_EFFECT = new StateSetting(
+      "fire-effect",
       true
   );
   @Description("When disabled, frosted ice does not form")
@@ -222,12 +227,12 @@ public final class SettingLibrary {
   );
   @Description("The default gamemode of players")
   @NotImplemented
-  public static final SettingKey<GameMode> GAME_MODE = new CatalogTypeSetting<>(
+  public static final SettingKey<String> GAME_MODE = new CatalogTypeSetting<>(
       "game-mode",
-      GameModes.NOT_SET
+      GameModes.NOT_SET,
+      GameMode.class
   );
   @Description("When disabled, ghasts do not shoot fireballs")
-  @NotImplemented
   public static final SettingKey<Boolean> GHAST_FIREBALL = new StateSetting(
       "ghast-fireball",
       true
@@ -253,51 +258,24 @@ public final class SettingLibrary {
       "greeting-title",
       Text.EMPTY
   );
-  @Description("The amount of health restored with the heal command")
-  @NotImplemented
-  public static final SettingKey<Integer> HEAL_AMOUNT = new IntegerSetting(
-      "heal-amount",
-      0
-  );
-  @Description("The time delay before a player can use the heal command again")
-  @NotImplemented
-  public static final SettingKey<Integer> HEAL_DELAY = new IntegerSetting(
-      "heal-delay",
-      0
-  );
-  // TODO write description
-  @NotImplemented
-  public static final SettingKey<Double> HEAL_MAX_HEALTH = new DoubleSetting(
-      "heal-max-health",
-      0D
-  );
-  // TODO write description
-  @NotImplemented
-  public static final SettingKey<Double> HEAL_MAX_HUNGER = new DoubleSetting(
-      "heal-max-hunger",
-      0D
-  );
-  // TODO write description
-  @NotImplemented
-  public static final SettingKey<Double> HEAL_MIN_HEALTH = new DoubleSetting(
-      "heal-min-health",
-      0D
-  );
   @Description("When disabled, hostile creatures cannot inflict damage on players")
   @Category(SettingKey.CategoryType.DAMAGE)
   public static final SettingKey<Boolean> HVP = new StateSetting(
       "hvp",
       true
   );
-  @Description("When disabled, ice does not form naturally")
-  @NotImplemented
+  @Description("When disabled, ice does not form")
   public static final SettingKey<Boolean> ICE_FORM = new BooleanSetting(
       "ice-form",
       true
   );
+  @Description("When disabled, ice does not melt")
+  public static final SettingKey<Boolean> ICE_MELT = new BooleanSetting(
+      "ice-melt",
+      true
+  );
   @Description("When disabled, players may not interact with any blocks")
   @Category(SettingKey.CategoryType.BLOCKS)
-  @NotImplemented
   public static final SettingKey<Boolean> INTERACT = new BooleanSetting(
       "interact",
       true
@@ -310,20 +288,17 @@ public final class SettingLibrary {
   );
   @Description("When disabled, mobs cannot take damage")
   @Category(SettingKey.CategoryType.DAMAGE)
-  @NotImplemented
   public static final SettingKey<Boolean> INVINCIBLE_MOBS = new BooleanSetting(
       "invincible-mobs",
       true
   );
   @Description("When enabled, players cannot take damage")
   @Category(SettingKey.CategoryType.DAMAGE)
-  @NotImplemented
   public static final SettingKey<Boolean> INVINCIBLE_PLAYERS = new BooleanSetting(
       "invincible-players",
       false
   );
   @Description("When disabled, players cannot drop items")
-  @NotImplemented
   public static final SettingKey<Boolean> ITEM_DROP = new BooleanSetting(
       "item-drop",
       true
@@ -336,12 +311,6 @@ public final class SettingLibrary {
   @Description("When disabled, players cannot pick up items")
   public static final SettingKey<Boolean> ITEM_PICKUP = new StateSetting(
       "item-pickup",
-      true
-  );
-  @Description("When disabled, lava does not cause fire")
-  @NotImplemented
-  public static final SettingKey<Boolean> LAVA_FIRE = new BooleanSetting(
-      "lava-fire",
       true
   );
   @Description("When disabled, lava does not spread")
@@ -358,11 +327,11 @@ public final class SettingLibrary {
       "leaf-decay",
       true
   );
-  @Description("When disabled, players cannot directly light fire")
+  @Description("When disabled, players cannot light fire")
   @Category(SettingKey.CategoryType.BLOCKS)
   @NotImplemented
-  public static final SettingKey<Boolean> LIGHTER = new BooleanSetting(
-      "lighter",
+  public static final SettingKey<Boolean> FIRE_IGNITION = new BooleanSetting(
+      "fire-ignition",
       true
   );
   @Description("When disabled, lightning cannot strike")
@@ -530,12 +499,6 @@ public final class SettingLibrary {
       "teleport",
       true
   );
-  // TODO write description
-  @NotImplemented
-  public static final SettingKey<String> TIME_LOCK = new StringSetting(
-      "time-lock",
-      ""
-  );
   @Description("When disabled, tnt may not be placed or activated")
   @NotImplemented
   public static final SettingKey<Boolean> TNT = new StateSetting(
@@ -568,9 +531,10 @@ public final class SettingLibrary {
   );
   @Description("The type of item to be used as the Nope wand")
   @NotImplemented
-  public static final SettingKey<ItemType> WAND_ITEM = new CatalogTypeSetting<>(
+  public static final SettingKey<String> WAND_ITEM = new CatalogTypeSetting<>(
       "wand-item",
-      ItemTypes.STICK
+      ItemTypes.STICK,
+      ItemType.class
   );
   @Description("When disabled, water cannot flow")
   @NotImplemented
@@ -693,7 +657,15 @@ public final class SettingLibrary {
     JsonArray serializedSettings = element.getAsJsonArray();
     for (JsonElement serializedSetting : serializedSettings) {
       JsonObject object = serializedSetting.getAsJsonObject();
-      SettingKey<?> key = lookup(object.get("id").getAsString());
+      SettingKey<?> key;
+      try {
+        key = lookup(object.get("id").getAsString());
+      } catch (NoSuchElementException e) {
+        Nope.getInstance().getLogger().error("Invalid SettingKey id: "
+            + object.get("id")
+            + ". Is this old? Skipping...");
+        continue;
+      }
       SettingValue<Object> val = SettingValue.of(
           key.dataFromJson(object.get("value")),
           SettingValue.Target.fromJson(object.get("target").getAsString()));
@@ -704,9 +676,7 @@ public final class SettingLibrary {
 
   public enum Movement {
     ALL,
-    //    NOT_TELEPORTATION,
     ONLY_TELEPORTATION,
-//    NONE,
   }
 
   enum StorageType {
@@ -760,8 +730,22 @@ public final class SettingLibrary {
     }
 
     @Override
+    public Boolean parse(String data) throws ParseSettingException {
+      switch (data.toLowerCase()) {
+        case "true":
+        case "t":
+          return true;
+        case "false":
+        case "f":
+          return false;
+        default:
+          throw new ParseSettingException("Allowed values: t, true, f, false");
+      }
+    }
+
+    @Override
     public Optional<List<String>> getParsable() {
-      return Optional.of(Lists.newArrayList("true", "false"));
+      return Optional.of(Lists.newArrayList("true", "false", "t", "f"));
     }
   }
 
@@ -800,14 +784,14 @@ public final class SettingLibrary {
     }
 
     @Override
-    public Boolean parse(String s) throws IllegalArgumentException {
+    public Boolean parse(String s) throws ParseSettingException {
       switch (s.toLowerCase()) {
         case "allow":
           return true;
         case "deny":
           return false;
         default:
-          throw new IllegalArgumentException("Invalid state string. "
+          throw new ParseSettingException("Invalid state string. "
               + "Should be allow or deny. Was: " + s);
       }
     }
@@ -849,7 +833,7 @@ public final class SettingLibrary {
     }
 
     @Override
-    public Text parse(String s) throws IllegalArgumentException {
+    public Text parse(String s) throws ParseSettingException {
       return TextSerializers.FORMATTING_CODE.deserialize(s);
     }
   }
@@ -874,11 +858,11 @@ public final class SettingLibrary {
     }
 
     @Override
-    public E parse(String s) throws IllegalArgumentException {
+    public E parse(String s) throws ParseSettingException {
       try {
         return Enum.valueOf(enumClass, s.toUpperCase());
-      } catch (IllegalArgumentException ex) {
-        throw new IllegalArgumentException(s + " is not a valid "
+      } catch (ParseSettingException ex) {
+        throw new ParseSettingException(s + " is not a valid "
             + enumClass.getSimpleName()
             + " type. "
             + (
@@ -899,33 +883,28 @@ public final class SettingLibrary {
     }
   }
 
-  public static class CatalogTypeSetting<C extends CatalogType> extends SettingKey<C> {
-    public CatalogTypeSetting(String id, C defaultData) {
-      super(id, defaultData);
+  public static class CatalogTypeSetting<C extends CatalogType> extends SettingKey<String> {
+    private Class<C> clazz;
+
+    public CatalogTypeSetting(String id, C defaultData, Class<C> clazz) {
+      super(id, defaultData.getId());
+      this.clazz = clazz;
     }
 
     @Override
-    public JsonElement dataToJsonGenerified(C value) {
-      return new JsonPrimitive(cast(value).getId());
-    }
-
-    @Override
-    public C dataFromJsonGenerified(JsonElement jsonElement) {
-      final String s = jsonElement.getAsString();
-      return parse(s);
-    }
-
-    @Override
-    public C parse(String s) throws IllegalArgumentException {
-      return Sponge.getRegistry()
-          .getType(valueType(), s)
-          .orElseThrow(() -> new IllegalStateException("Invalid CatalogType String. Got: " + s));
+    public String parse(String id) throws ParseSettingException {
+      Sponge.getRegistry().getType(this.clazz, id).orElseThrow(() ->
+          new ParseSettingException("The given id "
+              + id
+              + " id not a valid "
+              + this.clazz.getSimpleName()));
+      return id;
     }
 
     @Override
     public Optional<List<String>> getParsable() {
       return Optional.of(Lists.newArrayList(Sponge.getRegistry()
-          .getAllOf(defaultData.getClass())
+          .getAllOf(this.clazz)
           .stream()
           .map(CatalogType::getName)
           .collect(Collectors.toList())));
@@ -951,7 +930,7 @@ public final class SettingLibrary {
     }
 
     @Override
-    public Set<String> parse(String s) throws IllegalArgumentException {
+    public Set<String> parse(String s) throws ParseSettingException {
       return Sets.newHashSet(s.split(SET_SPLIT_REGEX));
     }
   }
@@ -979,7 +958,7 @@ public final class SettingLibrary {
     }
 
     @Override
-    public Set<EntityType> parse(String s) throws IllegalArgumentException {
+    public Set<EntityType> parse(String s) throws ParseSettingException {
       Nope.getInstance().getLogger().info("EntityType parsing string: " + s);
       return stringsToEntityTypes(Arrays.asList(s.split(SET_SPLIT_REGEX)));
     }
@@ -990,7 +969,7 @@ public final class SettingLibrary {
       for (String s : strings) {
         final EntityType entityType = Sponge.getRegistry()
             .getType(EntityType.class, s)
-            .orElseThrow(() -> new IllegalArgumentException("Unknown EntityType: " + s));
+            .orElseThrow(() -> new ParseSettingException("Unknown EntityType: " + s));
         set.add(entityType);
       }
       return set;
@@ -1022,10 +1001,10 @@ public final class SettingLibrary {
     }
 
     @Override
-    public Vector3d parse(String s) throws IllegalArgumentException {
+    public Vector3d parse(String s) throws ParseSettingException {
       String[] parts = s.split(SET_SPLIT_REGEX, 3);
       if (parts.length != 3) {
-        throw new IllegalArgumentException("Expected 3 parts for Vector3d, got " + parts.length);
+        throw new ParseSettingException("Expected 3 parts for Vector3d, got " + parts.length);
       }
       int i = 0;
       try {
@@ -1034,7 +1013,7 @@ public final class SettingLibrary {
         double z = Double.parseDouble(parts[i]);
         return Vector3d.from(x, y, z);
       } catch (NumberFormatException e) {
-        throw new IllegalArgumentException("Int number " + i + ", "
+        throw new ParseSettingException("Int number " + i + ", "
             + "could not be parsed into a double");
       }
     }

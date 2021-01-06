@@ -137,10 +137,13 @@ public class HoconHostTreeImplStorage implements HostTreeImpl.Storage {
         final ConfigurationNode worldNode = connection.node.getNode(worldHost.getName(), WORLD_SUB_REGIONS_KEY);
 
         for (Map.Entry<Object, ? extends ConfigurationNode> entry : worldNode.getChildrenMap().entrySet()) {
-
-          final Region region = serializer.deserialize(entry.getValue()
-              .getValue(NopeTypeTokens.JSON_ELEMENT_TYPE_TOKEN));
-          regions.add(region);
+          try {
+            final Region region = serializer.deserialize(entry.getValue()
+                .getValue(NopeTypeTokens.JSON_ELEMENT_TYPE_TOKEN));
+            regions.add(region);
+          } catch (IllegalArgumentException e) {
+            Nope.getInstance().getLogger().error("Could not add region", e);
+          }
         }
       }
     } catch (ObjectMappingException e) {

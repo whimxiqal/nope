@@ -30,6 +30,7 @@ import com.minecraftonline.nope.setting.SettingLibrary;
 import com.minecraftonline.nope.setting.SettingValue;
 import com.minecraftonline.nope.util.Format;
 import org.apache.commons.lang3.mutable.MutableBoolean;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.data.type.HandTypes;
@@ -38,6 +39,7 @@ import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.block.InteractBlockEvent;
+import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
@@ -84,23 +86,23 @@ public class RegionWandHandler {
 
   private boolean isWand(ItemStack itemStack) {
     ItemStack wandItemStack = ItemStack.builder()
-        .itemType(Nope.getInstance().getHostTree()
-            .getGlobalHost()
-            .get(SettingLibrary.WAND_ITEM)
-            .map(SettingValue::getData)
-            .orElse(SettingLibrary.WAND_ITEM.getDefaultData()))
+        .itemType(Sponge.getRegistry()
+            .getType(ItemType.class, Nope.getInstance()
+                .getHostTree()
+                .getGlobalHost()
+                .get(SettingLibrary.WAND_ITEM)
+                .map(SettingValue::getData)
+                .orElse(SettingLibrary.WAND_ITEM.getDefaultData()))
+            .orElseThrow(() -> new IllegalStateException("Storing an illegal wand id")))
         .quantity(1)
         .build();
     if (!wandItemStack.getType().equals(itemStack.getType())) {
       return false;
     }
-    if (!itemStack.get(RegionWandManipulator.class)
+    return itemStack.get(RegionWandManipulator.class)
         .map(RegionWandManipulator::isWand)
         .map(Value::get)
-        .orElse(false)) {
-      return false;
-    }
-    return true;
+        .orElse(false);
   }
 
   public static class Selection {

@@ -41,7 +41,7 @@ import java.util.function.BiConsumer;
 class PlayerRootSettingListener<E extends Event> extends SingleSettingListener<E> {
   public PlayerRootSettingListener(@Nonnull SettingKey<?> key,
                                    @Nonnull Class<E> eventClass,
-                                   BiConsumer<E, Player> handler) {
+                                   @Nonnull BiConsumer<E, Player> handler) {
     super(key, eventClass, event -> {
       if (!(event.getCause().root() instanceof Player)) {
         return;

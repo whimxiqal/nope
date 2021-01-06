@@ -30,7 +30,9 @@ import com.minecraftonline.nope.command.common.CommandNode;
 import com.minecraftonline.nope.key.regionwand.RegionWandManipulator;
 import com.minecraftonline.nope.permission.Permissions;
 import com.minecraftonline.nope.setting.SettingLibrary;
+import com.minecraftonline.nope.setting.SettingValue;
 import com.minecraftonline.nope.util.Format;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.args.CommandContext;
@@ -64,23 +66,28 @@ public class RegionWandCommand extends CommandNode {
       return CommandResult.empty();
     }
     Player player = (Player) src;
-    Inventory inv = player.getInventory()
-        .query(QueryOperationTypes.INVENTORY_TYPE.of(MainPlayerInventory.class));
 
-    ItemType itemType = Nope.getInstance()
-        .getHostTree()
-        .lookup(SettingLibrary.WAND_ITEM, player, player.getLocation());
     ItemStack itemStack = ItemStack.builder()
-        .itemType(itemType)
-        .quantity(1).build();
+        .itemType(Sponge.getRegistry()
+            .getType(ItemType.class, Nope.getInstance()
+                .getHostTree()
+                .getGlobalHost()
+                .get(SettingLibrary.WAND_ITEM)
+                .map(SettingValue::getData)
+                .orElse(SettingLibrary.WAND_ITEM.getDefaultData()))
+            .orElseThrow(() -> new IllegalStateException("Storing an illegal wand id")))
+        .quantity(1)
+        .build();
 
     itemStack.offer(Keys.DISPLAY_NAME, Text.of(TextColors.AQUA,
         "Nope Wand"));
     itemStack.offer(Keys.ITEM_LORE, Lists.newArrayList(Text.of(TextColors.GRAY,
         "Select two corners of a region with left click and right click")));
 
-
     itemStack.offer(new RegionWandManipulator(true));
+
+    Inventory inv = player.getInventory()
+        .query(QueryOperationTypes.INVENTORY_TYPE.of(MainPlayerInventory.class));
     if (!inv.canFit(itemStack)) {
       player.sendMessage(Format.error("You have no room in your inventory! ",
           "Make way for the magic wand and try again"));

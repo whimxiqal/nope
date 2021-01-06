@@ -224,5 +224,12 @@ public abstract class SettingKey<T> {
   }
 
   public static class ParseSettingException extends IllegalArgumentException {
+    public ParseSettingException() {
+      super();
+    }
+
+    public ParseSettingException(String s) {
+      super(s);
+    }
   }
 }

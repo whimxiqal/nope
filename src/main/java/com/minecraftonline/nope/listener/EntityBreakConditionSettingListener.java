@@ -31,9 +31,11 @@ import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
 
+import javax.annotation.Nonnull;
+
 class EntityBreakConditionSettingListener extends CancelConditionSettingListener<ChangeBlockEvent.Break> {
-  public EntityBreakConditionSettingListener(SettingKey<Boolean> key,
-                                             EntityType entityType) {
+  public EntityBreakConditionSettingListener(@Nonnull SettingKey<Boolean> key,
+                                             @Nonnull EntityType entityType) {
     super(key,
             ChangeBlockEvent.Break.class,
             event -> event.getCause()

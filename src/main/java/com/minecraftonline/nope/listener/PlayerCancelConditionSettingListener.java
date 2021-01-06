@@ -45,7 +45,7 @@ class PlayerCancelConditionSettingListener<E extends Event & Cancellable>
 
   public PlayerCancelConditionSettingListener(@Nonnull SettingKey<?> key,
                                               @Nonnull Class<E> eventClass,
-                                              BiPredicate<E, Player> canceler) {
+                                              @Nonnull BiPredicate<E, Player> canceler) {
     super(key,
         eventClass,
         (event, player) -> {

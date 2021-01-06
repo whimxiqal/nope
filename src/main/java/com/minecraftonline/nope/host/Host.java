@@ -179,7 +179,7 @@ public abstract class Host {
   public interface HostSerializer<T extends Host> {
     JsonElement serialize(T host);
 
-    T deserialize(JsonElement json);
+    T deserialize(JsonElement json) throws IllegalArgumentException;
   }
 
 }

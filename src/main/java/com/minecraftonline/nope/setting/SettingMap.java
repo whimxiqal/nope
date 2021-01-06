@@ -95,7 +95,7 @@ public class SettingMap implements Map<SettingKey<?>, SettingValue<?>> {
   @Deprecated
   @Override
   public SettingValue<?> put(SettingKey<?> key, SettingValue<?> val) {
-    if (!key.getDefaultData().getClass().equals(val.getData().getClass())) {
+    if (!key.valueType().equals(val.getData().getClass())) {
       throw illegalArguments(key, val);
     }
     return data.put(key, val);

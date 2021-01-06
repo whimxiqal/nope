@@ -40,7 +40,7 @@ import java.util.function.Predicate;
 class CancelConditionSettingListener<E extends Event & Cancellable> extends SingleSettingListener<E> {
   public CancelConditionSettingListener(@Nonnull SettingKey<?> key,
                                         @Nonnull Class<E> eventClass,
-                                        Predicate<E> canceler) {
+                                        @Nonnull Predicate<E> canceler) {
     super(key,
         eventClass,
         event -> {
