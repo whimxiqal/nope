@@ -55,7 +55,6 @@ public class RegionListCommand extends LambdaCommandNode {
       }
       UUID worldUuid = ((Player) src).getWorld().getUniqueId();
       Collection<VolumeHost> regions = Nope.getInstance().getHostTree().getRegions(worldUuid);
-      src.sendMessage(Format.info("------ Regions ------"));
       if (regions.isEmpty()) {
         src.sendMessage(Format.info("No regions in this world"));
         return CommandResult.success();

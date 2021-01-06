@@ -9,7 +9,12 @@ import com.minecraftonline.nope.permission.Permissions;
 import com.minecraftonline.nope.util.Format;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.args.GenericArguments;
+import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
+
+import java.util.Comparator;
+import java.util.List;
+import java.util.Optional;
 
 public class RegionSetPriorityCommand extends LambdaCommandNode {
 
@@ -25,8 +30,29 @@ public class RegionSetPriorityCommand extends LambdaCommandNode {
             .buildWith(GenericArguments.none()),
         GenericArguments.integer(Text.of("priority")));
     setExecutor((src, args) -> {
-      Host host = args.requireOne("host");
       int priority = args.requireOne("priority");
+
+      Optional<Host> hostOptional = args.getOne("region");
+      Host host;
+      if (!hostOptional.isPresent()) {
+        if (!(src instanceof Player)) {
+          src.sendMessage(Format.error("Can't infer region! "
+                  + "Please specify the target region."));
+          return CommandResult.empty();
+        }
+        Player player = (Player) src;
+        List<Host> containing = Nope.getInstance()
+                .getHostTree()
+                .getContainingHosts(player.getLocation());
+        if (containing.isEmpty()) {
+          src.sendMessage(Format.error("Can't infer region! "
+                  + "Please specify the target region."));
+          return CommandResult.empty();
+        }
+        host = containing.stream().max(Comparator.comparing(Host::getPriority)).get();
+      } else {
+        host = hostOptional.get();
+      }
 
       try {
         host.setPriority(priority);

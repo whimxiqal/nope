@@ -50,10 +50,9 @@ public class RegionCreateCommand extends LambdaCommandNode {
         "c", "add");
     addCommandElements(
         GenericArguments.onlyOne(GenericArguments.string(Text.of("name"))),
-        NopeArguments.regionLocation(Text.of("selection")),
         GenericArguments.flags()
             .valueFlag(GenericArguments.integer(Text.of("priority")), "p")
-            .buildWith(GenericArguments.none()));
+            .buildWith(NopeArguments.regionLocation(Text.of("selection"))));
     setExecutor((src, args) -> {
       if (!(src instanceof Player)) {
         return CommandResult.empty();
@@ -70,6 +69,7 @@ public class RegionCreateCommand extends LambdaCommandNode {
               .map(host -> host.getPriority() + 1).orElse(0));
 
       try {
+        assert selection.getWorld() != null;
         Nope.getInstance().getHostTree().addRegion(
             name,
             selection.getWorld().getUniqueId(),

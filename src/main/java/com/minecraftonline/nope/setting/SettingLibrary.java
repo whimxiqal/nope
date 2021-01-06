@@ -334,8 +334,7 @@ public final class SettingLibrary {
       true
   );
   @Description("When disabled, players cannot pick up items")
-  @NotImplemented
-  public static final SettingKey<Boolean> ITEM_PICKUP = new BooleanSetting(
+  public static final SettingKey<Boolean> ITEM_PICKUP = new StateSetting(
       "item-pickup",
       true
   );
