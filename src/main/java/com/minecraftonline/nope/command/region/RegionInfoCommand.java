@@ -45,16 +45,12 @@ import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.service.pagination.PaginationService;
 import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.world.World;
 
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 public class RegionInfoCommand extends LambdaCommandNode {
 
@@ -124,9 +120,9 @@ public class RegionInfoCommand extends LambdaCommandNode {
       int regionPriority = host.getPriority();
       headerLines.add(Format.keyValue("priority: ", String.valueOf(regionPriority)));
 
-      headerLines.add(Format.note("   - Settings -"));
+      headerLines.add(Text.of(Text.NEW_LINE, TextColors.AQUA, "<< Settings >>"));
 
-      SettingMap map = host.getAll();
+      List<Text> contents = buildSettingMapMessage(host.getAll(), friendly);
 
       Runnable sendMsg = () -> Sponge.getServiceManager()
           .provide(PaginationService.class)
@@ -137,7 +133,9 @@ public class RegionInfoCommand extends LambdaCommandNode {
               ? Format.note("None")
               : Text.joinWith(Text.NEW_LINE, headerLines))
           .padding(Text.of(Format.ACCENT, "="))
-          .contents(buildSettingMapMessage(map, friendly))
+          .contents(contents.isEmpty()
+              ? Collections.singleton(Format.note("None"))
+              : contents)
           .build()
           .sendTo(src);
 
@@ -164,62 +162,7 @@ public class RegionInfoCommand extends LambdaCommandNode {
    * @return Text built text with information about the settings.
    */
   public static List<Text> buildSettingMapMessage(SettingMap map, boolean friendly) {
-    Map<UUID, String> uuidUsernameMap = new HashMap<>();
-
-    LinkedList<Text> lines = new LinkedList<>();
-
-    for (Setting<?> entry : map.entries()) {
-      SettingKey<?> key = entry.getKey();
-      SettingValue<?> value = entry.getValue();
-
-      Text.Builder builder = Text.builder();
-
-      builder.append(Format.keyValue(key.getId() + ": value: ",
-          key.dataToJson(value.getData()).toString()));
-
-      if (value.getTarget() != null) {
-//        SettingValue.Target target = value.getTarget();
-//
-//        builder.append(Text.of("("))
-//            .append(Format.keyValue("groups: ", String.join(",", target.getGroups())));
-//
-//        List<String> players;
-//
-//        if (friendly) {
-//          // Convert uuids to usernames
-//          players = new ArrayList<>();
-//          for (UUID uuid : target.getPlayers()) {
-//            String username = uuidUsernameMap.get(uuid);
-//            if (username != null) {
-//              players.add(username);
-//            }
-//            try {
-//              GameProfile profile = Sponge.getServer().getGameProfileManager().get(uuid).get();
-//              username = profile.getName().orElse("INVALID_UUID");
-//            } catch (InterruptedException | ExecutionException e) {
-//              Nope.getInstance().getLogger().error("Error converting uuids!", e);
-//            }
-//            uuidUsernameMap.put(uuid, username);
-//            players.add(username);
-//          }
-//        }
-//        else {
-//          players = target.getPlayers().stream()
-//              .map(UUID::toString)
-//              .collect(Collectors.toList());
-//        }
-//        builder.append(Text.of(" "))
-//            .append(Format.keyValue("players: ", String.join(",", players) + ")"))
-//            .append(Text.of(")"));
-        builder.append(Text.of(" "))
-            .append(Format.keyValue(
-                "permissions: ",
-                String.join(", ", value.getTarget())));
-      }
-      lines.add(builder.build());
-    }
-
-    return lines;
+    return map.entries().stream().map(Format::setting).collect(Collectors.toList());
   }
 
   /**

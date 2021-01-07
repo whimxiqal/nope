@@ -26,6 +26,8 @@ package com.minecraftonline.nope.util;
 
 import com.minecraftonline.nope.Nope;
 import com.minecraftonline.nope.host.Host;
+import com.minecraftonline.nope.setting.Setting;
+import com.minecraftonline.nope.setting.SettingKey;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.action.TextActions;
 import org.spongepowered.api.text.format.TextColor;
@@ -116,7 +118,7 @@ public final class Format {
   }
 
   public static Text subtleCommand(@Nonnull String text, @Nonnull String command, @Nullable Text hoverMessage) {
-    Text.Builder builder = Text.builder().append(Text.of(text))
+    Text.Builder builder = Text.builder().append(Text.of(Format.ACCENT, text))
         .onClick(TextActions.runCommand(command));
 
     if (hoverMessage != null) {
@@ -136,4 +138,54 @@ public final class Format {
         Text.of("Click for more details about this region")
     );
   }
+
+  public static Text settingKey(SettingKey<?> key, boolean verbose) {
+    Text.Builder builder = Text.builder();
+
+    Text.Builder idText = Text.builder().append(Text.of(Format.ACCENT, key.getId()));
+
+    Text.Builder onHover = Text.builder();
+
+    if (!key.isImplemented()) {
+      idText.style(TextStyles.STRIKETHROUGH);
+      onHover.append(Text.of(TextColors.RED, "Not implemented yet!"));
+      onHover.append(Text.NEW_LINE);
+    }
+
+    onHover.append(Format.keyValue("Type: ", key.valueType().getSimpleName()));
+    onHover.append(Text.NEW_LINE);
+
+    onHover.append(Format.keyValue("Default value: ", key.getDefaultData().toString()));
+
+    if (key.getDescription().isPresent()) {
+      onHover.append(Text.NEW_LINE).append(Text.NEW_LINE);
+      onHover.append(Text.of(TextColors.GRAY, key.getDescription().get()));
+    }
+
+    builder.onHover(TextActions.showText(onHover.build()));
+
+    builder.append(idText.build());
+    if (verbose) {
+      builder.append(Format.note(key.getDescription().orElse("No description")));
+    }
+
+    return builder.build();
+  }
+
+  public static <T> Text setting(Setting<T> setting) {
+    Text.Builder builder = Text.builder();
+
+    builder.append(Text.of(Format.settingKey(setting.getKey(), false),
+        " -> ",
+        Format.keyValue("value: ", setting.getKey().print(setting.getValue().getData()))));
+
+    if (setting.getValue().getTarget() != null) {
+      builder.append(Text.of(" "))
+          .append(Format.keyValue(
+              "permissions: ",
+              String.join(", ", setting.getValue().getTarget())));
+    }
+    return builder.build();
+  }
+
 }

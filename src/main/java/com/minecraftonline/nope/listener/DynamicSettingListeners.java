@@ -32,25 +32,29 @@ import com.minecraftonline.nope.setting.SettingKey;
 import com.minecraftonline.nope.setting.SettingLibrary;
 import com.minecraftonline.nope.setting.SettingValue;
 import com.minecraftonline.nope.util.Format;
+import net.minecraft.entity.monster.EntitySnowman;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.BlockTypes;
+import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.entity.living.Hostile;
 import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.entity.living.animal.Animal;
 import org.spongepowered.api.entity.living.monster.Ghast;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.entity.weather.Lightning;
 import org.spongepowered.api.event.Event;
+import org.spongepowered.api.event.action.LightningEvent;
+import org.spongepowered.api.event.action.SleepingEvent;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.event.block.InteractBlockEvent;
 import org.spongepowered.api.event.cause.entity.damage.DamageTypes;
 import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
 import org.spongepowered.api.event.cause.entity.damage.source.EntityDamageSource;
-import org.spongepowered.api.event.entity.DamageEntityEvent;
-import org.spongepowered.api.event.entity.InteractEntityEvent;
-import org.spongepowered.api.event.entity.MoveEntityEvent;
-import org.spongepowered.api.event.entity.SpawnEntityEvent;
+import org.spongepowered.api.event.data.ChangeDataHolderEvent;
+import org.spongepowered.api.event.entity.*;
 import org.spongepowered.api.event.item.inventory.ChangeInventoryEvent;
 import org.spongepowered.api.event.item.inventory.ClickInventoryEvent;
 import org.spongepowered.api.event.item.inventory.DropItemEvent;
@@ -71,6 +75,7 @@ import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -259,22 +264,20 @@ public final class DynamicSettingListeners {
                               ChangeBlockEvent.Grow.class,
                               null)))));
   @DynamicSettingListener
-  static final SettingListener<SpawnEntityEvent> DENY_SPAWN_LISTENER =
+  static final SettingListener<SpawnEntityEvent> DENIED_MOB_SPAWNS_LISTENER =
       new CancelConditionSettingListener<>(
-          SettingLibrary.DENY_SPAWN,
+          SettingLibrary.DENIED_MOB_SPAWNS,
           SpawnEntityEvent.class,
           event -> event.getEntities().stream().anyMatch(entity ->
               Nope.getInstance()
                   .getHostTree()
-                  .lookupAnonymous(SettingLibrary.DENY_SPAWN, entity.getLocation())
+                  .lookupAnonymous(SettingLibrary.DENIED_MOB_SPAWNS, entity.getLocation())
                   .contains(entity.getType())));
   @DynamicSettingListener
   static final SettingListener<ChangeBlockEvent.Break> ENDERDRAGON_GRIEF_BLOCK_LISTENER =
       new EntityBreakConditionSettingListener(
           SettingLibrary.ENDERDRAGON_GRIEF,
           EntityTypes.ENDER_DRAGON);
-
-  // TODO add other listeners for other kinds of creeper grief
   @DynamicSettingListener
   static final SettingListener<ChangeBlockEvent.Break> ENDERMAN_GRIEF_BLOCK_LISTENER =
       new EntityBreakConditionSettingListener(
@@ -329,13 +332,11 @@ public final class DynamicSettingListeners {
                   DamageTypes.HUNGER.getId(),
                   DamageTypes.MAGMA.getId(),
                   DamageTypes.SUFFOCATE.getId()).contains(damageSource.getType().getId()))
-              .filter(damageSource -> event.getTargetEntity() instanceof Subject
-                  ? !Nope.getInstance().getHostTree().lookup(SettingLibrary.EVP,
-                  (Subject) event.getTargetEntity(),
-                  event.getTargetEntity().getLocation())
-                  : !Nope.getInstance().getHostTree().lookupAnonymous(SettingLibrary.EVP,
-                  event.getTargetEntity().getLocation()))
-              .isPresent());
+              .isPresent()
+              && event.getTargetEntity() instanceof Player
+              && !Nope.getInstance().getHostTree().lookup(SettingLibrary.EVP,
+              (Player) event.getTargetEntity(),
+              event.getTargetEntity().getLocation()));
   @DynamicSettingListener
   static final SettingListener<MoveEntityEvent> EXIT_LISTENER =
       new SettingListener<>(
@@ -361,31 +362,20 @@ public final class DynamicSettingListeners {
           DamageEntityEvent.class,
           event -> event.getCause()
               .first(DamageSource.class)
-              .filter(damageSource -> damageSource.getType().getId().equals(DamageTypes.FALL.getId()))
-              .filter(damageSource -> event.getTargetEntity() instanceof Subject
-                  ? !Nope.getInstance().getHostTree().lookup(SettingLibrary.FALL_DAMAGE,
-                  (Subject) event.getTargetEntity(),
-                  event.getTargetEntity().getLocation())
-                  : !Nope.getInstance().getHostTree().lookupAnonymous(SettingLibrary.FALL_DAMAGE,
-                  event.getTargetEntity().getLocation()))
+              .filter(damageSource ->
+                  damageSource.getType().getId().equals(DamageTypes.FALL.getId()))
+              .filter(damageSource ->
+                  event.getTargetEntity() instanceof Subject
+                      ? !Nope.getInstance()
+                      .getHostTree()
+                      .lookup(SettingLibrary.FALL_DAMAGE,
+                          (Subject) event.getTargetEntity(),
+                          event.getTargetEntity().getLocation())
+                      : !Nope.getInstance()
+                      .getHostTree()
+                      .lookupAnonymous(SettingLibrary.FALL_DAMAGE,
+                          event.getTargetEntity().getLocation()))
               .isPresent());
-  @DynamicSettingListener
-  static final SettingListener<ChangeBlockEvent> FIRE_NATURAL_IGNITION_LISTENER =
-      new CancelConditionSettingListener<>(
-          SettingLibrary.FIRE_NATURAL_IGNITION,
-          ChangeBlockEvent.class,
-          event -> {
-            return !(event.getSource() instanceof Player)
-                && event.getTransactions()
-                .stream()
-                .anyMatch(trans -> trans.getFinal().getState().getType().equals(BlockTypes.FIRE)
-                    && !Nope.getInstance()
-                    .getHostTree()
-                    .lookupAnonymous(SettingLibrary.FIRE_NATURAL_IGNITION, trans.getFinal()
-                        .getLocation()
-                        .orElseThrow(() -> new RuntimeException("Could not get the "
-                            + "final block location during fire spread"))));
-          });
   @DynamicSettingListener
   static final SettingListener<ChangeBlockEvent> FIRE_EFFECT_LISTENER =
       new CancelConditionSettingListener<>(
@@ -401,8 +391,43 @@ public final class DynamicSettingListeners {
                   .getHostTree()
                   .lookupAnonymous(SettingLibrary.FIRE_EFFECT, trans.getFinal()
                       .getLocation()
-                      .orElseThrow(() -> new RuntimeException("Could not get the "
-                          + "final block location during fire spread")))));
+                      .orElseThrow(noLocation(SettingLibrary.FIRE_EFFECT,
+                          ChangeBlockEvent.class,
+                          null)))));
+  @DynamicSettingListener
+  static final SettingListener<ChangeBlockEvent> FIRE_IGNITION_LISTENER =
+      new CancelConditionSettingListener<>(
+          SettingLibrary.FIRE_IGNITION,
+          ChangeBlockEvent.class,
+          event -> event.getSource() instanceof Player
+              && event.getTransactions()
+              .stream()
+              .anyMatch(trans -> trans.getFinal().getState().getType().equals(BlockTypes.FIRE)
+                  && !Nope.getInstance()
+                  .getHostTree()
+                  .lookup(SettingLibrary.FIRE_IGNITION,
+                      (Player) event.getSource(),
+                      trans.getFinal()
+                          .getLocation()
+                          .orElseThrow(noLocation(SettingLibrary.FIRE_IGNITION,
+                              ChangeBlockEvent.class,
+                              (Player) event.getSource())))));
+  @DynamicSettingListener
+  static final SettingListener<ChangeBlockEvent> FIRE_NATURAL_IGNITION_LISTENER =
+      new CancelConditionSettingListener<>(
+          SettingLibrary.FIRE_NATURAL_IGNITION,
+          ChangeBlockEvent.class,
+          event -> !(event.getSource() instanceof Player)
+              && event.getTransactions()
+              .stream()
+              .anyMatch(trans -> trans.getFinal().getState().getType().equals(BlockTypes.FIRE)
+                  && !Nope.getInstance()
+                  .getHostTree()
+                  .lookupAnonymous(SettingLibrary.FIRE_NATURAL_IGNITION, trans.getFinal()
+                      .getLocation()
+                      .orElseThrow(noLocation(SettingLibrary.FIRE_NATURAL_IGNITION,
+                          ChangeBlockEvent.class,
+                          null)))));
   @DynamicSettingListener
   static final SettingListener<ChangeBlockEvent> FROSTED_ICE_FORM_LISTENER =
       new CancelConditionSettingListener<>(
@@ -478,10 +503,16 @@ public final class DynamicSettingListeners {
               .getHostTree()
               .lookup(SettingLibrary.INTERACT,
                   player,
-                  event.getTargetBlock().getLocation().orElseThrow(() ->
-                      new RuntimeException("Could not get block location "
-                          + "from InteractBlockEvent.Secondary during Interact "
-                          + "setting check."))));
+                  event.getTargetBlock()
+                      .getLocation()
+                      .orElseThrow(noLocation(SettingLibrary.INTERACT,
+                          InteractBlockEvent.Secondary.class,
+                          player)))
+              || !Nope.getInstance()
+              .getHostTree()
+              .lookup(SettingLibrary.INTERACT,
+                  player,
+                  player.getLocation()));
   @DynamicSettingListener
   static final SettingListener<DamageEntityEvent> INVINCIBLE_ANIMALS_LISTENER =
       new CancelConditionSettingListener<>(
@@ -563,6 +594,113 @@ public final class DynamicSettingListeners {
                   player,
                   event.getTargetEntity().getLocation()));
   @DynamicSettingListener
+  static final SettingListener<ChangeBlockEvent> LAVA_FLOW_LISTENER =
+      new SingleSettingListener<>(
+          SettingLibrary.LAVA_FLOW,
+          ChangeBlockEvent.class,
+          event ->
+              liquidFlowHandler(SettingLibrary.LAVA_FLOW, BlockTypes.FLOWING_LAVA)
+                  .accept(event));
+  @DynamicSettingListener
+  static final SettingListener<ChangeBlockEvent> LEAF_DECAY_2_LISTENER =
+      new CancelConditionSettingListener<>(
+          SettingLibrary.LEAF_DECAY,
+          ChangeBlockEvent.class,
+          simpleChangeBlockCanceler(SettingLibrary.LEAF_DECAY,
+              BlockTypes.LEAVES2,
+              BlockTypes.AIR));
+  @DynamicSettingListener
+  static final SettingListener<ChangeBlockEvent> LEAF_DECAY_LISTENER =
+      new CancelConditionSettingListener<>(
+          SettingLibrary.LEAF_DECAY,
+          ChangeBlockEvent.class,
+          simpleChangeBlockCanceler(SettingLibrary.LEAF_DECAY,
+              BlockTypes.LEAVES,
+              BlockTypes.AIR));
+  @DynamicSettingListener
+  static final SettingListener<SpawnEntityEvent> LIGHTNING_LISTENER =
+      new CancelConditionSettingListener<>(
+          SettingLibrary.LIGHTNING,
+          SpawnEntityEvent.class,
+          event -> event.getEntities().stream().anyMatch(spawned ->
+              spawned instanceof Lightning
+                  && !Nope.getInstance()
+                  .getHostTree()
+                  .lookupAnonymous(SettingLibrary.LIGHTNING,
+                      spawned.getLocation())));
+  @DynamicSettingListener
+  static final SettingListener<SpawnEntityEvent> MOB_SPAWN =
+      new CancelConditionSettingListener<>(
+          SettingLibrary.MOB_SPAWN,
+          SpawnEntityEvent.class,
+          event -> event.getEntities().stream().anyMatch(entity ->
+              (entity instanceof Living)
+                  && !(entity instanceof Player)
+                  && !Nope.getInstance()
+                  .getHostTree()
+                  .lookupAnonymous(SettingLibrary.MOB_SPAWN, entity.getLocation())));
+  @DynamicSettingListener
+  static final SettingListener<ChangeBlockEvent> MUSHROOM_GROWTH_BROWN_BLOCK_LISTENER =
+      new CancelConditionSettingListener<>(
+          SettingLibrary.MUSHROOM_GROWTH,
+          ChangeBlockEvent.class,
+          simpleChangeBlockCanceler(SettingLibrary.MUSHROOM_GROWTH,
+              BlockTypes.BROWN_MUSHROOM,
+              BlockTypes.BROWN_MUSHROOM_BLOCK));
+  @DynamicSettingListener
+  static final SettingListener<ChangeBlockEvent> MUSHROOM_GROWTH_BROWN_LISTENER =
+      new CancelConditionSettingListener<>(
+          SettingLibrary.MUSHROOM_GROWTH,
+          ChangeBlockEvent.class,
+          simpleChangeBlockCanceler(SettingLibrary.MUSHROOM_GROWTH,
+              BlockTypes.AIR,
+              BlockTypes.BROWN_MUSHROOM));
+  @DynamicSettingListener
+  static final SettingListener<ChangeBlockEvent> MUSHROOM_GROWTH_RED_BLOCK_LISTENER =
+      new CancelConditionSettingListener<>(
+          SettingLibrary.MUSHROOM_GROWTH,
+          ChangeBlockEvent.class,
+          simpleChangeBlockCanceler(SettingLibrary.MUSHROOM_GROWTH,
+              BlockTypes.RED_MUSHROOM,
+              BlockTypes.RED_MUSHROOM_BLOCK));
+  @DynamicSettingListener
+  static final SettingListener<ChangeBlockEvent> MUSHROOM_GROWTH_RED_LISTENER =
+      new CancelConditionSettingListener<>(
+          SettingLibrary.MUSHROOM_GROWTH,
+          ChangeBlockEvent.class,
+          simpleChangeBlockCanceler(SettingLibrary.MUSHROOM_GROWTH,
+              BlockTypes.AIR,
+              BlockTypes.RED_MUSHROOM));
+  @DynamicSettingListener
+  static final SettingListener<ChangeBlockEvent> MYCELIUM_SPREAD_LISTENER =
+      new CancelConditionSettingListener<>(
+          SettingLibrary.MYCELIUM_SPREAD,
+          ChangeBlockEvent.class,
+          simpleChangeBlockCanceler(SettingLibrary.MYCELIUM_SPREAD,
+              BlockTypes.DIRT,
+              BlockTypes.MYCELIUM));
+  @DynamicSettingListener
+  static final SettingListener<ChangeDataHolderEvent.ValueChange> NATURAL_HEALTH_REGEN =
+      new CancelConditionSettingListener<>(
+          SettingLibrary.NATURAL_HEALTH_REGEN,
+          ChangeDataHolderEvent.ValueChange.class,
+          event -> event.getSource() instanceof Player
+              && event.getTargetHolder() instanceof Player
+              && ((Player) event.getSource())
+              .getUniqueId()
+              .equals(((Player) event.getTargetHolder()).getUniqueId())
+              && event.getOriginalChanges()
+              .getSuccessfulData()
+              .stream()
+              .anyMatch(data -> data.getKey().equals(Keys.HEALTH))
+              && !Nope.getInstance()
+              .getHostTree()
+              .lookup(SettingLibrary.NATURAL_HEALTH_REGEN,
+                  event.getTargetHolder() instanceof Player
+                      ? (Player) event.getTargetHolder()
+                      : null,
+                  ((Player) event.getTargetHolder()).getLocation()));
+  @DynamicSettingListener
   static final SettingListener<InteractEntityEvent.Primary> PAINTING_DESTROY_LISTENER =
       new PlayerCancelConditionSettingListener<>(
           SettingLibrary.PAINTING_DESTROY,
@@ -572,6 +710,241 @@ public final class DynamicSettingListeners {
               !Nope.getInstance().getHostTree().lookup(SettingLibrary.PAINTING_DESTROY,
                   player,
                   event.getTargetEntity().getLocation()));
+  @DynamicSettingListener
+  static final SettingListener<CollideEntityEvent> PLAYER_COLLISION_LISTENER =
+      new PlayerCancelConditionSettingListener<>(
+          SettingLibrary.PLAYER_COLLISION,
+          CollideEntityEvent.class,
+          (event, player) -> event.getEntities()
+              .stream()
+              .anyMatch(other -> other instanceof Player
+                  &&
+                  (!Nope.getInstance().getHostTree().lookup(SettingLibrary.PLAYER_COLLISION,
+                      player,
+                      player.getLocation())
+                      || !Nope.getInstance().getHostTree().lookup(SettingLibrary.PLAYER_COLLISION,
+                      (Player) other,
+                      other.getLocation()))));
+  @DynamicSettingListener
+  static final SettingListener<DamageEntityEvent> PVA_LISTENER =
+      new CancelConditionSettingListener<>(
+          SettingLibrary.PVA,
+          DamageEntityEvent.class,
+          damageFromPlayerCanceller(SettingLibrary.PVA, Animal.class));
+  @DynamicSettingListener
+  static final SettingListener<DamageEntityEvent> PVH_LISTENER =
+      new CancelConditionSettingListener<>(
+          SettingLibrary.PVH,
+          DamageEntityEvent.class,
+          damageFromPlayerCanceller(SettingLibrary.PVH, Hostile.class));
+  @DynamicSettingListener
+  static final SettingListener<DamageEntityEvent> PVP_LISTENER =
+      new CancelConditionSettingListener<>(
+          SettingLibrary.PVH,
+          DamageEntityEvent.class,
+          damageFromPlayerCanceller(SettingLibrary.PVP, Player.class));
+  @DynamicSettingListener
+  static final SettingListener<RideEntityEvent.Mount> RIDE_LISTENER =
+      new PlayerCancelConditionSettingListener<>(
+          SettingLibrary.RIDE,
+          RideEntityEvent.Mount.class,
+          (event, player) -> !Nope.getInstance()
+              .getHostTree()
+              .lookup(SettingLibrary.RIDE,
+                  player,
+                  player.getLocation())
+              || !Nope.getInstance()
+              .getHostTree()
+              .lookupAnonymous(SettingLibrary.RIDE,
+                  event.getTargetEntity().getLocation()));
+  @DynamicSettingListener
+  static final SettingListener<SleepingEvent.Pre> SLEEP =
+      new PlayerCancelConditionSettingListener<>(
+          SettingLibrary.SLEEP,
+          SleepingEvent.Pre.class,
+          (event, player) -> (!Nope.getInstance().getHostTree()
+              .lookup(SettingLibrary.SLEEP,
+                  player,
+                  player.getLocation())
+              || !Nope.getInstance().getHostTree()
+              .lookupAnonymous(SettingLibrary.SLEEP,
+                  event.getBed()
+                      .getLocation()
+                      .orElseThrow(noLocation(SettingLibrary.SLEEP,
+                          SleepingEvent.Pre.class,
+                          player)))));
+  @DynamicSettingListener
+  static final SettingListener<ChangeBlockEvent> SNOWMAN_TRAIL_LISTENER =
+      new CancelConditionSettingListener<>(
+          SettingLibrary.SNOWMAN_TRAILS,
+          ChangeBlockEvent.class,
+          event -> event.getSource() instanceof EntitySnowman
+              && event.getTransactions().stream()
+              .anyMatch(trans -> trans.getFinal()
+                  .getState()
+                  .getType()
+                  .equals(BlockTypes.SNOW_LAYER)
+                  && !Nope.getInstance()
+                  .getHostTree()
+                  .lookupAnonymous(SettingLibrary.SNOWMAN_TRAILS,
+                      trans.getFinal()
+                          .getLocation()
+                          .orElseThrow(noLocation(SettingLibrary.SNOWMAN_TRAILS,
+                              ChangeBlockEvent.class,
+                              null)))));
+  @DynamicSettingListener
+  static final SettingListener<ChangeBlockEvent> SNOW_ACCUMULATION_LISTENER =
+      new CancelConditionSettingListener<>(
+          SettingLibrary.SNOW_ACCUMULATION,
+          ChangeBlockEvent.class,
+          event -> !(event.getSource() instanceof Entity)
+              && simpleChangeBlockCanceler(SettingLibrary.SNOW_ACCUMULATION,
+              BlockTypes.AIR,
+              BlockTypes.SNOW_LAYER).test(event));
+  @DynamicSettingListener
+  static final SettingListener<ChangeBlockEvent> SNOW_MELT_LISTENER =
+      new CancelConditionSettingListener<>(
+          SettingLibrary.SNOW_MELT,
+          ChangeBlockEvent.class,
+          event -> !(event.getSource() instanceof Entity)
+              && simpleChangeBlockCanceler(SettingLibrary.SNOW_MELT,
+              BlockTypes.SNOW_LAYER,
+              BlockTypes.AIR).test(event));
+  @DynamicSettingListener
+  static final SettingListener<InteractEntityEvent.Secondary> TNT_CART_IGNITION_LISTENER =
+      new PlayerCancelConditionSettingListener<>(
+          SettingLibrary.TNT_IGNITION,
+          InteractEntityEvent.Secondary.class,
+          (event, player) -> event.getTargetEntity()
+              .getType()
+              .equals(EntityTypes.TNT_MINECART)
+              && !Nope.getInstance()
+              .getHostTree()
+              .lookup(SettingLibrary.TNT_IGNITION,
+                  player,
+                  event.getTargetEntity().getLocation()));
+  @DynamicSettingListener
+  static final SettingListener<SpawnEntityEvent> TNT_CART_PLACEMENT_LISTENER =
+      new PlayerCancelConditionSettingListener<>(
+          SettingLibrary.TNT_PLACEMENT,
+          SpawnEntityEvent.class,
+          (event, player) -> event.getEntities()
+              .stream()
+              .anyMatch(entity ->
+                  entity.getType().equals(EntityTypes.TNT_MINECART)
+                      && !Nope.getInstance()
+                      .getHostTree()
+                      .lookup(SettingLibrary.TNT_PLACEMENT,
+                          player,
+                          entity.getLocation())));
+  @DynamicSettingListener
+  static final SettingListener<InteractBlockEvent.Secondary> TNT_IGNITION_LISTENER =
+      new PlayerCancelConditionSettingListener<>(
+          SettingLibrary.TNT_IGNITION,
+          InteractBlockEvent.Secondary.class,
+          (event, player) -> event.getTargetBlock()
+              .getState()
+              .getType()
+              .equals(BlockTypes.TNT)
+              && !Nope.getInstance()
+              .getHostTree()
+              .lookup(SettingLibrary.TNT_IGNITION,
+                  player,
+                  event.getTargetBlock()
+                      .getLocation()
+                      .orElseThrow(noLocation(SettingLibrary.TNT_IGNITION,
+                          ChangeBlockEvent.Place.class,
+                          player))));
+  @DynamicSettingListener
+  static final SettingListener<ChangeBlockEvent.Place> TNT_PLACEMENT_LISTENER =
+      new PlayerCancelConditionSettingListener<>(
+          SettingLibrary.TNT_PLACEMENT,
+          ChangeBlockEvent.Place.class,
+          (event, player) -> event.getTransactions()
+              .stream()
+              .anyMatch(trans -> trans.getFinal()
+                  .getState()
+                  .getType()
+                  .equals(BlockTypes.TNT)
+                  && !Nope.getInstance()
+                  .getHostTree()
+                  .lookup(SettingLibrary.TNT_PLACEMENT,
+                      player,
+                      trans.getFinal()
+                          .getLocation()
+                          .orElseThrow(noLocation(SettingLibrary.TNT_PLACEMENT,
+                              ChangeBlockEvent.Place.class,
+                              player)))));
+  @DynamicSettingListener
+  static final SettingListener<ChangeBlockEvent> VINE_GROWTH_LISTENER =
+      new CancelConditionSettingListener<>(
+          SettingLibrary.VINE_GROWTH,
+          ChangeBlockEvent.class,
+          simpleChangeBlockCanceler(SettingLibrary.VINE_GROWTH,
+              BlockTypes.AIR,
+              BlockTypes.VINE));
+  @DynamicSettingListener
+  static final SettingListener<ChangeBlockEvent> WATER_FLOW_LISTENER =
+      new SingleSettingListener<>(
+          SettingLibrary.WATER_FLOW,
+          ChangeBlockEvent.class,
+          event ->
+              liquidFlowHandler(SettingLibrary.WATER_FLOW, BlockTypes.FLOWING_WATER)
+                  .accept(event));
+  private static Set<EntityType> VEHICLES = Sets.newHashSet(EntityTypes.BOAT,
+      EntityTypes.CHESTED_MINECART,
+      EntityTypes.COMMANDBLOCK_MINECART,
+      EntityTypes.FURNACE_MINECART,
+      EntityTypes.HOPPER_MINECART,
+      EntityTypes.MOB_SPAWNER_MINECART,
+      EntityTypes.RIDEABLE_MINECART,
+      EntityTypes.TNT_MINECART);
+  @DynamicSettingListener
+  static final SettingListener<InteractEntityEvent.Primary> VEHICLE_DESTROY_LISTENER =
+      new PlayerCancelConditionSettingListener<>(
+          SettingLibrary.VEHICLE_DESTROY,
+          InteractEntityEvent.Primary.class,
+          (event, player) -> VEHICLES.contains(event.getTargetEntity().getType())
+              &&
+              (!Nope.getInstance().getHostTree().lookup(SettingLibrary.VEHICLE_DESTROY,
+                  player,
+                  player.getLocation())
+                  || !Nope.getInstance().getHostTree().lookup(SettingLibrary.VEHICLE_DESTROY,
+                  player,
+                  event.getTargetEntity().getLocation())));
+  @DynamicSettingListener
+  static final SettingListener<SpawnEntityEvent> VEHICLE_PLACE_LISTENER =
+      new PlayerCancelConditionSettingListener<>(
+          SettingLibrary.VEHICLE_PLACE,
+          SpawnEntityEvent.class,
+          (event, player) -> event.getEntities().stream().anyMatch(spawned ->
+              VEHICLES.contains(spawned.getType())
+                  &&
+                  (!Nope.getInstance().getHostTree().lookup(SettingLibrary.VEHICLE_PLACE,
+                      player,
+                      player.getLocation())
+                      || !Nope.getInstance().getHostTree().lookup(SettingLibrary.VEHICLE_PLACE,
+                      player,
+                      spawned.getLocation()))));
+
+  private static Consumer<ChangeBlockEvent> liquidFlowHandler(SettingKey<Boolean> key,
+                                                              BlockType flowingType) {
+    return event -> event.getTransactions().stream()
+        .filter(trans ->
+            trans.getOriginal().getState().getType().equals(BlockTypes.AIR))
+        .filter(trans ->
+            trans.getFinal().getState().getType().equals(flowingType))
+        .forEach(trans ->
+            trans.setValid((event.getSource() instanceof Player)
+                || Nope.getInstance()
+                .getHostTree()
+                .lookupAnonymous(key,
+                    trans.getFinal()
+                        .getLocation()
+                        .orElseThrow(noLocation(key,
+                            ChangeBlockEvent.class,
+                            null)))));
+  }
 
   /**
    * Get all {@link SettingListener}s in the class that are
@@ -579,7 +952,7 @@ public final class DynamicSettingListeners {
    * to register it using its {@link SettingListener#registerIfNecessary()}
    * method.
    */
-  public static final void register() {
+  public static void register() {
     Arrays.stream(DynamicSettingListeners.class.getDeclaredFields())
         .filter(field -> Modifier.isStatic(field.getModifiers()))
         .filter(field -> SettingListener.class.isAssignableFrom(field.getType()))
@@ -594,9 +967,9 @@ public final class DynamicSettingListeners {
         });
   }
 
-  private static final Supplier<RuntimeException> noLocation(SettingKey<?> key,
-                                                             Class<? extends Event> eventClass,
-                                                             @Nullable Player player) {
+  private static Supplier<RuntimeException> noLocation(SettingKey<?> key,
+                                                       Class<? extends Event> eventClass,
+                                                       @Nullable Player player) {
     return () -> new RuntimeException(String.format(
         "The relevant location for the dynamic event listener for "
             + "Setting Key %s and event class %s could not be found.",
@@ -605,7 +978,7 @@ public final class DynamicSettingListeners {
         +
         (player == null
             ? ""
-            : String.format(" The player is %s at location (%d, %d, %d) in %s",
+            : String.format(" The player is %s at position (%d, %d, %d) in world %s",
             player.getName(),
             player.getLocation().getBlockX(),
             player.getLocation().getBlockY(),
@@ -623,7 +996,26 @@ public final class DynamicSettingListeners {
         .collect(Collectors.joining(", ")));
   }
 
-  static final Consumer<MoveEntityEvent> thresholdHandler(
+  private static Predicate<DamageEntityEvent> damageFromPlayerCanceller(
+      SettingKey<Boolean> key,
+      Class<? extends Entity> recipientClass) {
+    return (event) -> recipientClass.isInstance(event.getTargetEntity())
+        && event.getCause()
+        .first(EntityDamageSource.class)
+        .filter(damageSource -> damageSource.getSource() instanceof Player)
+        .filter(damageSource -> !Nope.getInstance()
+            .getHostTree()
+            .lookup(key,
+                (Player) damageSource.getSource(),
+                damageSource.getSource().getLocation())
+            || !Nope.getInstance()
+            .getHostTree()
+            .lookupAnonymous(key,
+                event.getTargetEntity().getLocation()))
+        .isPresent();
+  }
+
+  private static Consumer<MoveEntityEvent> thresholdHandler(
       SettingKey<SettingLibrary.Movement> dictator,
       Location<World> inside,
       Location<World> outside,
@@ -696,9 +1088,9 @@ public final class DynamicSettingListeners {
     };
   }
 
-  static final Predicate<ChangeBlockEvent> simpleChangeBlockCanceler(SettingKey<Boolean> key,
-                                                                     BlockType first,
-                                                                     BlockType last) {
+  private static Predicate<ChangeBlockEvent> simpleChangeBlockCanceler(SettingKey<Boolean> key,
+                                                                       BlockType first,
+                                                                       BlockType last) {
     return event -> event.getTransactions().stream()
         .filter(trans ->
             trans.getOriginal().getState().getType().equals(first))
@@ -707,10 +1099,9 @@ public final class DynamicSettingListeners {
         .anyMatch(trans -> !Nope.getInstance()
             .getHostTree()
             .lookupAnonymous(key,
-                trans.getFinal().getLocation().orElseThrow(() ->
-                    new RuntimeException("Could not get the final block"
-                        + "location during ChangeBlockEvent for key: "
-                        + key.getId()))));
+                trans.getFinal().getLocation().orElseThrow(noLocation(key,
+                    ChangeBlockEvent.class,
+                    null))));
   }
 
   @Retention(RetentionPolicy.RUNTIME)

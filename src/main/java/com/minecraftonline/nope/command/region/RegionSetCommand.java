@@ -86,6 +86,11 @@ public class RegionSetCommand extends LambdaCommandNode {
 
       try {
         addSetting(host, settingKey, value);
+        if (!host.getName().equals(Nope.getInstance().getHostTree().getGlobalHost().getName())
+            && settingKey.isGlobal()) {
+          src.sendMessage(Format.warn("This setting may only ",
+              "work when applied globally"));
+        }
       } catch (SettingKey.ParseSettingException e) {
         src.sendMessage(Format.error("Invalid value: ",
             Format.note(e.getMessage())));
@@ -94,10 +99,10 @@ public class RegionSetCommand extends LambdaCommandNode {
 
       Nope.getInstance().getHostTree().save();
       DynamicSettingListeners.register();
-      src.sendMessage(Format.success("Successfully set setting ",
-          Format.note(settingKey.getId()),
+      src.sendMessage(Format.success("Set setting ",
+          Format.settingKey(settingKey, false),
           " on region ",
-          Format.note(host.getName())));
+          Format.host(host)));
 
       return CommandResult.success();
     });

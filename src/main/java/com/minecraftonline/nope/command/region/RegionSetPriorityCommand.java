@@ -66,7 +66,7 @@ public class RegionSetPriorityCommand extends LambdaCommandNode {
 
       Nope.getInstance().getHostTree().save();
       src.sendMessage(Format.success("Set priority of host ",
-          Format.note(host.getName()),
+          Format.host(host),
           " to ",
           Format.note(priority)));
 

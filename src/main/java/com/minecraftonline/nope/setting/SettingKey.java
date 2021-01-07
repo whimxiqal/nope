@@ -27,6 +27,7 @@ package com.minecraftonline.nope.setting;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
+import org.spongepowered.api.text.Text;
 
 import javax.annotation.Nonnull;
 import java.util.List;
@@ -61,6 +62,7 @@ public abstract class SettingKey<T> {
   CategoryType category = CategoryType.MISC;
   boolean implemented = true;
   boolean unnaturalDefault = false;
+  boolean global = false;
 
   /**
    * Type of {@link SettingKey} for ordering purposes.
@@ -142,6 +144,21 @@ public abstract class SettingKey<T> {
   }
 
   /**
+   * Create a readable String version of the data.
+   *
+   * @param data the data to print
+   * @return data in a readable form
+   */
+  @Nonnull
+  public Text print(T data) {
+    JsonElement asJson = dataToJson(data);
+    if (asJson.isJsonPrimitive() && asJson.getAsJsonPrimitive().isString()) {
+      return Text.of(asJson.getAsString());
+    }
+    return Text.of(asJson.toString());
+  }
+
+  /**
    * Parse some data in some custom format.
    * Used for dealing with data from in-game usages of
    * declaring data.
@@ -183,9 +200,9 @@ public abstract class SettingKey<T> {
   public final T cast(Object object) {
     if (!valueType().isInstance(object)) {
       throw new IllegalArgumentException(String.format(
-              "input %s must be of type %s",
-              object.getClass().getName(),
-              valueType().getName()));
+          "input %s must be of type %s",
+          object.getClass().getName(),
+          valueType().getName()));
     }
     return valueType().cast(object);
   }
@@ -202,6 +219,10 @@ public abstract class SettingKey<T> {
 
   public final boolean isImplemented() {
     return implemented;
+  }
+
+  public final boolean isGlobal() {
+    return global;
   }
 
   public final boolean hasUnnaturalDefault() {

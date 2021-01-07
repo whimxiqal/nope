@@ -60,11 +60,15 @@ public class RegionUnsetCommand extends LambdaCommandNode {
       SettingValue<?> settingValue = host.remove(settingKey);
 
       if (settingValue == null) {
-        src.sendMessage(Format.error(settingKey.getId() + " is not assigned on this host!"));
+        src.sendMessage(Format.error(Format.settingKey(settingKey, false),
+            " is not assigned on this host!"));
         return CommandResult.empty();
       }
       Nope.getInstance().getHostTree().save();
-      src.sendMessage(Format.success("Unset " + settingKey.getId() + " on this host"));
+      src.sendMessage(Format.success("Unset ",
+          Format.settingKey(settingKey, false),
+          " on region ",
+          Format.host(host)));
 
       return CommandResult.empty();
     });

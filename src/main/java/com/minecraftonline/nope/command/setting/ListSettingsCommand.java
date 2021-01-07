@@ -58,7 +58,7 @@ public class ListSettingsCommand extends LambdaCommandNode {
           if (!keys.get(i).getCategory().equals(keys.get(i - 1).getCategory())) {
             contents.add(Text.of(TextColors.AQUA, keys.get(i).getCategory().name().toUpperCase()));
           }
-          contents.add(textOf(keys.get(i)));
+          contents.add(Format.settingKey(keys.get(i), true));
         }
 
         pagination.builder()
@@ -85,35 +85,4 @@ public class ListSettingsCommand extends LambdaCommandNode {
     });
   }
 
-  private Text textOf(SettingKey<?> key) {
-    Text.Builder builder = Text.builder();
-
-    Text.Builder idText = Text.builder().append(Text.of(TextColors.GREEN, key.getId()));
-
-    Text.Builder onHover = Text.builder();
-
-    if (!key.isImplemented()) {
-      idText.style(TextStyles.STRIKETHROUGH);
-      onHover.append(Text.of(TextColors.RED, "Not implemented yet!"));
-      onHover.append(Text.NEW_LINE);
-    }
-
-    onHover.append(Format.keyValue("Type: ", key.valueType().getSimpleName()));
-    onHover.append(Text.NEW_LINE);
-
-    onHover.append(Format.keyValue("Default value: ", key.getDefaultData().toString()));
-
-    if (key.getDescription().isPresent()) {
-      onHover.append(Text.NEW_LINE).append(Text.NEW_LINE);
-      onHover.append(Text.of(TextColors.GRAY, key.getDescription().get()));
-    }
-
-    builder.onHover(TextActions.showText(onHover.build()));
-
-    builder.append(idText.build());
-    builder.append(Text.of(TextColors.WHITE, " - "
-        + key.getDescription().orElse(key.getDescription().orElse("No description"))));
-
-    return builder.build();
-  }
 }
