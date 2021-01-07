@@ -24,10 +24,13 @@
 
 package com.minecraftonline.nope.util;
 
+import com.google.common.collect.Lists;
 import com.minecraftonline.nope.Nope;
 import com.minecraftonline.nope.host.Host;
 import com.minecraftonline.nope.setting.Setting;
 import com.minecraftonline.nope.setting.SettingKey;
+import com.minecraftonline.nope.setting.SettingValue;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.action.TextActions;
 import org.spongepowered.api.text.format.TextColor;
@@ -38,6 +41,10 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
 
 public final class Format {
 
@@ -172,20 +179,43 @@ public final class Format {
     return builder.build();
   }
 
-  public static <T> Text setting(Setting<T> setting) {
-    Text.Builder builder = Text.builder();
+  public static <T> CompletableFuture<List<Text>> setting(Setting<T> setting) {
+    return CompletableFuture.supplyAsync(() -> {
+      List<Text> list = Lists.newLinkedList();
+      list.add(Text.of(Format.settingKey(setting.getKey(), false),
+          " -> ",
+          Format.keyValue("value: ", setting.getKey().print(setting.getValue().getData()))));
 
-    builder.append(Text.of(Format.settingKey(setting.getKey(), false),
-        " -> ",
-        Format.keyValue("value: ", setting.getKey().print(setting.getValue().getData()))));
-
-    if (setting.getValue().getTarget() != null) {
-      builder.append(Text.of(" "))
-          .append(Format.keyValue(
-              "permissions: ",
-              String.join(", ", setting.getValue().getTarget())));
-    }
-    return builder.build();
+      if (setting.getValue().getTarget() != null) {
+        SettingValue.Target target = setting.getValue().getTarget();
+        if (!target.getUsers().isEmpty()) {
+          list.add(Text.of(TextColors.GREEN,
+              " > ",
+              Format.keyValue(target.hasWhitelist() ? "Whitelist: " : "Blacklist: ",
+                  target.getUsers()
+                      .stream()
+                      .map(uuid -> {
+                        try {
+                          return Sponge.getServer().getGameProfileManager()
+                              .get(uuid)
+                              .get().getName().orElseThrow(() ->
+                                  new RuntimeException("Failed to get user profile name "
+                                      + "for UUID: " + uuid.toString()));
+                        } catch (InterruptedException | ExecutionException e) {
+                          e.printStackTrace();
+                          return "";
+                        }
+                      })
+                      .filter(s -> !s.isEmpty())
+                      .collect(Collectors.joining(", ")))));
+        }
+        target.forEach((permission, value) ->
+            list.add(Text.of(TextColors.GREEN,
+                " > ",
+                Format.keyValue(permission + " ", String.valueOf(value)))));
+      }
+      return list;
+    });
   }
 
 }

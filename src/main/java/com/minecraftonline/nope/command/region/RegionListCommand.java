@@ -45,24 +45,17 @@ public class RegionListCommand extends LambdaCommandNode {
   RegionListCommand(CommandNode parent) {
     super(parent,
         Permissions.LIST_REGIONS,
-        Text.of("List the regions in the current world"),
+        Text.of("List all registered regions"),
         "list",
         "l");
     setExecutor((src, args) -> {
-      if (!(src instanceof Player)) {
-        src.sendMessage(Format.error("You must be a player to use this command!"));
-        return CommandResult.empty();
-      }
-      UUID worldUuid = ((Player) src).getWorld().getUniqueId();
-      Collection<VolumeHost> regions = Nope.getInstance().getHostTree().getRegions(worldUuid);
-      if (regions.isEmpty()) {
-        src.sendMessage(Format.info("No regions in this world"));
-        return CommandResult.success();
-      }
       Sponge.getServiceManager().provide(PaginationService.class)
           .orElseThrow(() -> new IllegalStateException("No pagination service found!"))
           .builder()
-          .contents(regions.stream()
+          .contents(Nope.getInstance().getHostTree()
+              .getHosts()
+              .values()
+              .stream()
               .map(host -> Text.of(Format.ACCENT, "> ", Format.note(Format.host(host))))
               .collect(Collectors.toList()))
           .title(Format.info("Regions"))

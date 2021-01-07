@@ -638,7 +638,7 @@ public final class SettingLibrary {
       try {
         val = SettingValue.of(
             key.dataFromJson(object.get("value")),
-            SettingValue.Target.fromJson(object.get("target").getAsString()));
+            SettingValue.Target.fromJson(object.get("target")));
       } catch (SettingKey.ParseSettingException e) {
         Nope.getInstance().getLogger().error("Invalid SettingKey value: "
             + object.get("value")

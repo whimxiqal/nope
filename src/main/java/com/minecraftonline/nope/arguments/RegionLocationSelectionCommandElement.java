@@ -38,7 +38,10 @@ public class RegionLocationSelectionCommandElement extends CommandElement {
     if (!args.hasNext()) {
       if (source instanceof Player) {
         Player player = (Player) source;
-        RegionWandHandler.Selection selection = Nope.getInstance().getRegionWandHandler().getSelectionMap().get(player);
+        RegionWandHandler.Selection selection = Nope.getInstance()
+            .getRegionWandHandler()
+            .getSelectionMap()
+            .get(player);
         if (selection == null || !selection.isComplete()) {
           throw new ArgumentParseException(Format.error("Make a selection first using the ",
               Format.command(
@@ -72,6 +75,32 @@ public class RegionLocationSelectionCommandElement extends CommandElement {
 
     Vector3i min = vector3i.parseValue(source, args);
     Vector3i max = vector3i.parseValue(source, args);
+
+    for (Vector3i vec : new Vector3i[]{min, max}) {
+      for (int pos : new int[]{vec.getX(), vec.getZ()}) {
+        if (pos < -Nope.WORLD_RADIUS) {
+          throw new ArgumentParseException(Text.of("Value " + pos + " is too small!"),
+              String.valueOf(pos),
+              0);
+        }
+        if (pos > Nope.WORLD_RADIUS) {
+          throw new ArgumentParseException(Text.of("Value " + pos + " is too large!"),
+              String.valueOf(pos),
+              0);
+        }
+      }
+      if (vec.getY() < -Nope.WORLD_HEIGHT) {
+        throw new ArgumentParseException(Text.of("Value " + vec.getY() + " is too small!"),
+            String.valueOf(vec.getY()),
+            0);
+      }
+      if (vec.getY() > Nope.WORLD_HEIGHT) {
+        throw new ArgumentParseException(Text.of("Value " + vec.getY() + " is too large!"),
+            String.valueOf(vec.getY()),
+            0);
+      }
+    }
+
     return new RegionWandHandler.Selection(world, min, max);
   }
 

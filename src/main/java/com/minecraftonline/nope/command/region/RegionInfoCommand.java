@@ -50,7 +50,9 @@ import org.spongepowered.api.world.World;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class RegionInfoCommand extends LambdaCommandNode {
 
@@ -66,26 +68,9 @@ public class RegionInfoCommand extends LambdaCommandNode {
     addCommandElements(regionElement);
     setExecutor((src, args) -> {
 
-      Optional<Host> hostOptional = args.getOne("region");
-      Host host;
-      if (!hostOptional.isPresent()) {
-        if (!(src instanceof Player)) {
-          src.sendMessage(Format.error("Can't infer region! "
-              + "Please specify the target region."));
-          return CommandResult.empty();
-        }
-        Player player = (Player) src;
-        List<Host> containing = Nope.getInstance()
-            .getHostTree()
-            .getContainingHosts(player.getLocation());
-        if (containing.isEmpty()) {
-          src.sendMessage(Format.error("Can't infer region! "
-              + "Please specify the target region."));
-          return CommandResult.empty();
-        }
-        host = containing.stream().max(Comparator.comparing(Host::getPriority)).get();
-      } else {
-        host = hostOptional.get();
+      Host host = args.<Host>getOne("region").orElse(RegionCommand.inferHost(src).orElse(null));
+      if (host == null) {
+        return CommandResult.empty();
       }
 
       final boolean friendly = args.<Boolean>getOne(Text.of("f")).orElse(false);
@@ -122,47 +107,41 @@ public class RegionInfoCommand extends LambdaCommandNode {
 
       headerLines.add(Text.of(Text.NEW_LINE, TextColors.AQUA, "<< Settings >>"));
 
-      List<Text> contents = buildSettingMapMessage(host.getAll(), friendly);
+      Sponge.getScheduler().createTaskBuilder()
+          .async()
+          .execute(() -> {
+            List<Text> contents = host.getAll().entries()
+                .stream()
+                .flatMap(setting -> {
+                  try {
+                    return Format.setting(setting).get().stream();
+                  } catch (InterruptedException | ExecutionException e) {
+                    e.printStackTrace();
+                    return Stream.empty();
+                  }
+                })
+                .collect(Collectors.toList());
 
-      Runnable sendMsg = () -> Sponge.getServiceManager()
-          .provide(PaginationService.class)
-          .orElseThrow(() -> new RuntimeException("PaginationService doesn't exist!"))
-          .builder()
-          .title(Format.info("Region Info: ", Format.note(host.getName())))
-          .header(headerLines.isEmpty()
-              ? Format.note("None")
-              : Text.joinWith(Text.NEW_LINE, headerLines))
-          .padding(Text.of(Format.ACCENT, "="))
-          .contents(contents.isEmpty()
-              ? Collections.singleton(Format.note("None"))
-              : contents)
-          .build()
-          .sendTo(src);
-
-      if (friendly) {
-        Sponge.getScheduler().createTaskBuilder()
-            .async()
-            .execute(sendMsg)
-            .submit(Nope.getInstance());
-      } else {
-        sendMsg.run();
-      }
+            Sponge.getServiceManager()
+                .provide(PaginationService.class)
+                .orElseThrow(() -> new RuntimeException("PaginationService doesn't exist!"))
+                .builder()
+                .title(Format.info("Region Info: ", Format.note(host.getName())))
+                .header(headerLines.isEmpty()
+                    ? Format.note("None")
+                    : Text.joinWith(Text.NEW_LINE, headerLines))
+                .padding(Text.of(Format.ACCENT, "="))
+                .contents(contents.isEmpty()
+                    ? Collections.singleton(Format.note("None"))
+                    : contents)
+                .build()
+                .sendTo(src);
+          }).submit(Nope.getInstance());
 
       // Send the message when we have converted uuids.
 
       return CommandResult.success();
     });
-  }
-
-  /**
-   * Sends an info message to the command source about the given SettingMap.
-   *
-   * @param map      Map of settings to build text with
-   * @param friendly Whether to convert uuids to usernames. If true this method <b>WILL BLOCK</b>
-   * @return Text built text with information about the settings.
-   */
-  public static List<Text> buildSettingMapMessage(SettingMap map, boolean friendly) {
-    return map.entries().stream().map(Format::setting).collect(Collectors.toList());
   }
 
   /**

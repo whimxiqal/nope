@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2020 MinecraftOnline
+ * Copyright (c) 2021 MinecraftOnline
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,35 +20,23 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
+ *
  */
 
-package com.minecraftonline.nope.permission;
+package com.minecraftonline.nope.command.region;
 
-/**
- * Enumeration of all {@link Permission}s.
- */
-public final class Permissions {
+import com.minecraftonline.nope.command.common.CommandNode;
+import com.minecraftonline.nope.command.common.FunctionlessCommandNode;
+import com.minecraftonline.nope.permission.Permissions;
+import org.spongepowered.api.text.Text;
 
-  private Permissions() {
+class RegionTargetAddCommand extends FunctionlessCommandNode {
+  public RegionTargetAddCommand(CommandNode parent) {
+    super(parent,
+        Permissions.EDIT_REGION,
+        Text.of("Add specifiers for a setting to target a player"),
+        "add");
+    addChildren(new RegionTargetAddPermissionCommand(this),
+        new RegionTargetAddPlayerCommand(this));
   }
-
-
-  public static final Permission COMMAND_ROOT = Permission.of("nope.command");
-
-  public static final Permission RELOAD = Permission.of("nope.command.reload");
-
-  public static final Permission REGION = Permission.of("nope.command.region");
-
-  public static final Permission CREATE_REGION = Permission.of("nope.command.region.create");
-
-  public static final Permission EDIT_REGION = Permission.of("nope.command.region.edit");
-
-  public static final Permission LIST_REGIONS = Permission.of("nope.command.region.list");
-
-  public static final Permission INFO_REGION = Permission.of("nope.command.region.info");
-
-  public static final Permission DELETE_REGION = Permission.of("nope.command.region.delete");
-
-  public static final Permission UNAFFECTED = Permission.of("nope.unaffected");
-
 }

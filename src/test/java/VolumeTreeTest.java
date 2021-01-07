@@ -25,6 +25,7 @@
 
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import com.minecraftonline.nope.structures.Volume;
 import com.minecraftonline.nope.structures.VolumeTree;
 import lombok.Data;
 import org.junit.jupiter.api.Test;
@@ -52,7 +53,7 @@ public class VolumeTreeTest {
   boolean DEBUG = false;
 
   @Data
-  static class TestVolume implements VolumeTree.Volume {
+  static class TestVolume implements Volume {
 
     final int xmin;
     final int xmax;
@@ -101,14 +102,14 @@ public class VolumeTreeTest {
     }
   }
 
-  private char[][] constructBoard(Collection<? extends VolumeTree.Volume> volumes, int xSize, int ySize) {
+  private char[][] constructBoard(Collection<? extends Volume> volumes, int xSize, int ySize) {
     char[][] board = new char[xSize][ySize];
     for (int x = 0; x < xSize; x++) {
       for (int y = 0; y < ySize; y++) {
         board[x][y] = '0';
       }
     }
-    for (VolumeTree.Volume volume : volumes) {
+    for (Volume volume : volumes) {
       for (int x = volume.getMinX(); x <= volume.getMaxX(); x++) {
         for (int z = volume.getMinZ(); z <= volume.getMaxZ(); z++) {
           if (board[x][z] == '9' || board[x][z] == '+') {
@@ -138,7 +139,7 @@ public class VolumeTreeTest {
     }
   }
 
-  private int[][][] findAnswers(Collection<? extends VolumeTree.Volume> volumes, int xSize, int ySize, int zSize) {
+  private int[][][] findAnswers(Collection<? extends Volume> volumes, int xSize, int ySize, int zSize) {
     int[][][] answers = new int[xSize][ySize][zSize];
     for (int z = 0; z < zSize; z++) {
       for (int y = 0; y < ySize; y++) {
@@ -147,7 +148,7 @@ public class VolumeTreeTest {
         }
       }
     }
-    for (VolumeTree.Volume v : volumes) {
+    for (Volume v : volumes) {
       for (int z = v.getMinZ(); z <= v.getMaxZ(); z++) {
         for (int y = v.getMinY(); y <= v.getMaxY(); y++) {
           for (int x = v.getMinX(); x <= v.getMaxX(); x++) {
@@ -164,14 +165,14 @@ public class VolumeTreeTest {
     for (int z = 0; z < zSize; z++) {
       for (int y = 0; y < ySize; y++) {
         for (int x = 0; x < xSize; x++) {
-          solutions[x][y][z] = tree.containingVolumes(x, y, z).size();
+          solutions[x][y][z] = tree.containersOf(x, y, z).size();
         }
       }
     }
     return solutions;
   }
 
-  private void checkAnswers(Collection<? extends VolumeTree.Volume> volumes,
+  private void checkAnswers(Collection<? extends Volume> volumes,
                             VolumeTree<?, ?> tree,
                             int boardSizeX, int boardSizeY, int boardSizeZ,
                             boolean print) throws RuntimeException {
@@ -206,7 +207,7 @@ public class VolumeTreeTest {
   public void testRandom() {
     Random random = new Random();
 
-    Map<Integer, VolumeTree.Volume> regions = Maps.newHashMap();
+    Map<Integer, Volume> regions = Maps.newHashMap();
 
     int xLocation;
     int yLocation;
@@ -238,7 +239,7 @@ public class VolumeTreeTest {
     }
 
     // Now actually testing
-    VolumeTree<Integer, VolumeTree.Volume> tree = new VolumeTree<>();
+    VolumeTree<Integer, Volume> tree = new VolumeTree<>();
     long constructionElapse = System.currentTimeMillis();
     tree.pushAll(regions);
     constructionElapse = System.currentTimeMillis() - constructionElapse;
@@ -269,7 +270,7 @@ public class VolumeTreeTest {
 
     long traditionalElapse = System.currentTimeMillis();
     for (int i = 0; i < TEST_POINT_COUNT; i++) {
-      for (VolumeTree.Volume volume : regions.values()) {
+      for (Volume volume : regions.values()) {
         if (volume.contains(xpoints[i], ypoints[i], zpoints[i])) {
           answers.get(i).add(String.format("{[%d, %d], [%d, %d], [%d, %d]}",
                   volume.getMinX(),
@@ -286,7 +287,7 @@ public class VolumeTreeTest {
     long treeElapse = System.currentTimeMillis();
     for (int i = 0; i < TEST_POINT_COUNT; i++) {
       Set<String> dump = solutions.get(i);
-      tree.containingVolumes(xpoints[i], ypoints[i], zpoints[i])
+      tree.containersOf(xpoints[i], ypoints[i], zpoints[i])
               .stream()
               .map(volume ->
                       String.format("{[%d, %d], [%d, %d], [%d, %d]}",
@@ -330,11 +331,11 @@ public class VolumeTreeTest {
 
   @Test
   public void test2Nesting() {
-    Map<Integer, VolumeTree.Volume> map = Maps.newHashMap();
+    Map<Integer, Volume> map = Maps.newHashMap();
     map.put(0, new TestVolume(2, 2, 2, 2, 2, 2));
     map.put(1, new TestVolume(1, 3, 1, 3, 1, 3));
 
-    VolumeTree<Integer, VolumeTree.Volume> tree = new VolumeTree<>();
+    VolumeTree<Integer, Volume> tree = new VolumeTree<>();
     tree.pushAll(map);
 
     checkAnswers(map.values(), tree, 4, 4, 4, false);
@@ -343,12 +344,12 @@ public class VolumeTreeTest {
   @Test
   public void testZigurat() {
     int height = 100;
-    Map<Integer, VolumeTree.Volume> map = Maps.newHashMap();
+    Map<Integer, Volume> map = Maps.newHashMap();
     for (int i = 0; i < height; i++) {
       map.put(i, new TestVolume(height - i, height + i, 0, 0, i, i));
     }
 
-    VolumeTree<Integer, VolumeTree.Volume> tree = new VolumeTree<>();
+    VolumeTree<Integer, Volume> tree = new VolumeTree<>();
     tree.pushAll(map);
 
     checkAnswers(map.values(), tree, height * 2, 1, height, false);
@@ -370,7 +371,7 @@ public class VolumeTreeTest {
                                     int borderSpacing,
                                     boolean print) {
 
-    Map<Integer, VolumeTree.Volume> map = Maps.newHashMap();
+    Map<Integer, Volume> map = Maps.newHashMap();
 
     for (int z = 0; z < countZ; z++) {
       for (int y = 0; y < countY; y++) {
@@ -387,7 +388,7 @@ public class VolumeTreeTest {
       }
     }
 
-    VolumeTree<Integer, VolumeTree.Volume> tree = new VolumeTree<>();
+    VolumeTree<Integer, Volume> tree = new VolumeTree<>();
     tree.pushAll(map);
 
     int boardSizeX = countX * (size + spacing) - spacing + borderSpacing * 2;

@@ -32,6 +32,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 
+import javax.annotation.Nonnull;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -47,87 +48,66 @@ import java.util.stream.Collectors;
  * XMIN -> ZMIN -> XMAX -> ZMAX -> ...
  * Then check Y values at the end
  */
-public class VolumeTree<S, T extends VolumeTree.Volume> {
+public class VolumeTree<S, T extends Volume> implements VolumeCollection<S, T> {
 
-  enum Dimension {
-    X, Z
-  }
-
-  enum Comparison {
-    MIN, MAX
-  }
-
-  private final HashMap<S, T> volumes = Maps.newHashMap();
-  private Node root = null;
+  protected final HashMap<S, T> volumes = Maps.newHashMap();
+  protected Node root = null;
   @Getter
-  private int height = 0;
+  protected int height = 0;
   @Getter
-  private int size = 0;
+  protected int size = 0;
 
   public VolumeTree() {
     construct();
   }
 
-  /**
-   * Get all volumes that contain this point in 3D space,
-   * including the boundary.
-   *
-   * @param x x value
-   * @param y y value
-   * @param z z value
-   * @return a list of volumes
-   */
-  public List<T> containingVolumes(int x, int y, int z) {
+  @Nonnull
+  @Override
+  public Collection<T> containersOf(int x, int y, int z) {
     if (this.root == null) {
       throw new IllegalStateException("Root of VolumeTree is not initialized");
     }
     return root.findVolumes(x, y, z).stream().map(volumes::get).collect(Collectors.toList());
   }
 
-  /**
-   * Push a new volume into the tree.
-   * Currently, this reconstructs the entire tree because
-   * figuring out how to do it dynamically is too complicated.
-   *
-   * @param key    the key under which to store and retrieve this volume
-   * @param volume the volume
-   * @return the volume that was previously under the key, or null if none existed
-   */
+  @Override
   public T push(S key, T volume) {
     T replaced = volumes.put(key, volume);
     construct();
     return replaced;
   }
 
+  @Override
   public void pushAll(Map<S, T> map) {
     volumes.putAll(map);
     construct();
   }
 
-  /**
-   * Remove the key and volume associated with the key.
-   *
-   * @param key the key to remove from the tree
-   * @return the removed key, or null if none existed
-   */
+  @Override
   public T remove(S key) {
     T removed = volumes.remove(key);
     construct();
     return removed;
   }
 
+  @Nonnull
+  @Override
   public Set<S> keySet() {
     return volumes.keySet();
   }
 
+  @Override
   public T get(S key) {
     return volumes.get(key);
   }
 
+  @Nonnull
+  @Override
   public Collection<T> volumes() {
     return volumes.values();
   }
 
+  @Override
   public boolean containsKey(S key) {
     return volumes.containsKey(key);
   }
@@ -138,7 +118,7 @@ public class VolumeTree<S, T extends VolumeTree.Volume> {
     size = calculateSize(root);
   }
 
-  private Node construct(Dimension dimension,
+  protected final Node construct(Dimension dimension,
                          Comparison comparison,
                          List<S> keys,
                          int unchangedCount) {
@@ -234,88 +214,11 @@ public class VolumeTree<S, T extends VolumeTree.Volume> {
 
   }
 
-  public interface Volume {
-
-    /**
-     * Get minimum X value, inclusive.
-     *
-     * @return x min
-     */
-    int getMinX();
-
-    /**
-     * Get maximum X value, inclusive.
-     *
-     * @return x max
-     */
-    int getMaxX();
-
-    /**
-     * Get minimum Y value, inclusive.
-     *
-     * @return y min
-     */
-    int getMinY();
-
-    /**
-     * Get maximum Y value, inclusive.
-     *
-     * @return y max
-     */
-    int getMaxY();
-
-    /**
-     * Get minimum Z value, inclusive.
-     *
-     * @return z min
-     */
-    int getMinZ();
-
-    /**
-     * Get maximum Z value, inclusive.
-     *
-     * @return z max
-     */
-    int getMaxZ();
-
-    /**
-     * Check if this volume contains a point, given three
-     * cartesian coordinates.
-     *
-     * @param x x value
-     * @param y y value
-     * @param z z value
-     * @return true if the point is contained
-     */
-    default boolean contains(int x, int y, int z) {
-      return x >= this.getMinX()
-          && x <= this.getMaxX()
-          && y >= this.getMinY()
-          && y <= this.getMaxY()
-          && z >= this.getMinZ()
-          && z <= this.getMaxZ();
-    }
-
-    /**
-     * Check if this volume intersects with another volume
-     * or shares a face.
-     *
-     * @param other another volume
-     * @return true if intersects
-     */
-    default boolean intersects(Volume other) {
-      return (this.getMinX() <= other.getMaxX() && this.getMaxX() >= other.getMinX())
-          && (this.getMinY() <= other.getMaxY() && this.getMaxY() >= other.getMinY())
-          && (this.getMinZ() <= other.getMaxZ() && this.getMaxZ() >= other.getMinZ());
-    }
-
-  }
-
-  private abstract class Node {
+  protected abstract class Node {
     abstract Set<S> findVolumes(int x, int y, int z);
   }
 
-  private class EmptyNode extends Node {
+  protected class EmptyNode extends Node {
     @Override
     Set<S> findVolumes(int x, int y, int z) {
       return Sets.newHashSet();
@@ -324,13 +227,13 @@ public class VolumeTree<S, T extends VolumeTree.Volume> {
 
   @EqualsAndHashCode(callSuper = false)
   @Data
-  private abstract class DimensionDivider extends Node {
+  protected abstract class DimensionDivider extends Node {
     protected final int divider;
     protected final Node left;
     protected final Node right;
   }
 
-  private class DimensionDividerXMin extends DimensionDivider {
+  protected class DimensionDividerXMin extends DimensionDivider {
     public DimensionDividerXMin(int divider, Node left, Node right) {
       super(divider, left, right);
     }
@@ -345,7 +248,7 @@ public class VolumeTree<S, T extends VolumeTree.Volume> {
     }
   }
 
-  private class DimensionDividerXMax extends DimensionDivider {
+  protected class DimensionDividerXMax extends DimensionDivider {
     public DimensionDividerXMax(int divider, Node left, Node right) {
       super(divider, left, right);
     }
@@ -360,7 +263,7 @@ public class VolumeTree<S, T extends VolumeTree.Volume> {
     }
   }
 
-  private class DimensionDividerZMin extends DimensionDivider {
+  protected class DimensionDividerZMin extends DimensionDivider {
     public DimensionDividerZMin(int divider, Node left, Node right) {
       super(divider, left, right);
     }
@@ -375,7 +278,7 @@ public class VolumeTree<S, T extends VolumeTree.Volume> {
     }
   }
 
-  private class DimensionDividerZMax extends DimensionDivider {
+  protected class DimensionDividerZMax extends DimensionDivider {
     public DimensionDividerZMax(int divider, Node left, Node right) {
       super(divider, left, right);
     }
@@ -390,7 +293,7 @@ public class VolumeTree<S, T extends VolumeTree.Volume> {
     }
   }
 
-  private class ViabilityLeaf extends Node {
+  protected class ViabilityLeaf extends Node {
 
     final Set<S> viable = Sets.newHashSet();
 
@@ -406,7 +309,7 @@ public class VolumeTree<S, T extends VolumeTree.Volume> {
     }
   }
 
-  private int calculateHeight(Node node) {
+  protected int calculateHeight(Node node) {
     if (node instanceof VolumeTree.DimensionDivider) {
       return 1 + Math.max(
           calculateHeight(((DimensionDivider) node).left),
@@ -415,7 +318,7 @@ public class VolumeTree<S, T extends VolumeTree.Volume> {
     return 0;
   }
 
-  private int calculateSize(Node node) {
+  protected int calculateSize(Node node) {
     if (node instanceof VolumeTree.DimensionDivider) {
       return 1 + calculateSize(((DimensionDivider) node).left)
           + calculateSize(((DimensionDivider) node).right);

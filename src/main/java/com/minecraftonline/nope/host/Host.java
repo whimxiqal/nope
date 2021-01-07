@@ -29,6 +29,7 @@ import com.google.gson.JsonElement;
 import com.minecraftonline.nope.setting.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.world.Locatable;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
@@ -43,19 +44,47 @@ import java.util.UUID;
  */
 public abstract class Host {
 
+  public static String nameToContextKey(String name) {
+    return "nope.host." + name;
+  }
+
+  public static String contextKeyToName(String key) throws IllegalArgumentException {
+    try {
+      return key.split(".")[2];
+    } catch (IndexOutOfBoundsException e) {
+      throw new IllegalArgumentException("Cannot parse context key name");
+    }
+  }
+
+  public static boolean isContextKey(String key) {
+    String[] tokens = key.split(".");
+    return tokens.length == 3 && tokens[0].equals("nope") && tokens[1].equals("host");
+  }
+
+  @Getter
+  private final String name;
+  private final SettingMap settings = new SettingMap();
+  @Getter
+  private final Context context;
   @Setter
   @Getter
   private Host parent;
   @Setter
   @Getter
   private int priority;
-  @Getter
-  private final String name;
-  private final SettingMap settings = new SettingMap();
 
+  /**
+   * Default constructor.
+   *
+   * @param name     the name for this host; best practice is to have it
+   *                 be unique
+   * @param priority the priority level for this host for identifying
+   *                 conflicting settings
+   */
   public Host(String name, int priority) {
     this.name = name;
     this.priority = priority;
+    this.context = new Context(nameToContextKey(name), "true");
   }
 
   public Host(String name) {

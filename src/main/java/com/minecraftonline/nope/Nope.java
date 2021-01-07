@@ -26,6 +26,7 @@ package com.minecraftonline.nope;
 
 import com.google.inject.Inject;
 import com.minecraftonline.nope.command.common.NopeCommandTree;
+import com.minecraftonline.nope.context.RegionContextCalculator;
 import com.minecraftonline.nope.host.HoconHostTreeImplStorage;
 import com.minecraftonline.nope.host.HostTree;
 import com.minecraftonline.nope.key.NopeKeys;
@@ -61,6 +62,8 @@ import java.nio.file.Path;
 @Plugin(id = "nope")
 public class Nope {
 
+  public static final int WORLD_RADIUS = 100000;
+  public static final int WORLD_HEIGHT = 256;
   public static String REPO_URL = "https://gitlab.com/minecraftonline/nope/";
   public static final String GLOBAL_HOST_NAME = "!global";
   private static Nope instance;
@@ -107,8 +110,8 @@ public class Nope {
     hostTree = new HostTreeImpl(
         new HoconHostTreeImplStorage(),
         Nope.GLOBAL_HOST_NAME,
-        s -> "!world-" + s,
-        "!.*");
+        s -> "_world-" + s,
+        "[a-zA-Z0-9\\-\\.][a-zA-Z0-9_\\-\\.]*");
 
     NopeKeys.REGION_WAND = Key.builder()
         .type(TypeTokens.BOOLEAN_VALUE_TOKEN)
@@ -136,7 +139,6 @@ public class Nope {
     });
 
     Sponge.getEventManager().registerListeners(this, regionWandHandler);
-    //FlagListeners.registerAll();
   }
 
   @Listener
@@ -145,6 +147,10 @@ public class Nope {
 
     hostTree.load(); // Need worlds to have loaded first.
     DynamicSettingListeners.register();
+    Sponge.getServiceManager()
+        .provide(PermissionService.class)
+        .ifPresent(service ->
+            service.registerContextCalculator(new RegionContextCalculator()));
 
     // Register entire Nope command tree
     commandTree = new NopeCommandTree();

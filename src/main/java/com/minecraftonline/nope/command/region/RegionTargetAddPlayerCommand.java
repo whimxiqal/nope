@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2020 MinecraftOnline
+ * Copyright (c) 2021 MinecraftOnline
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,6 +20,7 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
+ *
  */
 
 package com.minecraftonline.nope.command.region;
@@ -29,71 +30,67 @@ import com.minecraftonline.nope.arguments.NopeArguments;
 import com.minecraftonline.nope.command.common.CommandNode;
 import com.minecraftonline.nope.command.common.LambdaCommandNode;
 import com.minecraftonline.nope.host.Host;
-import com.minecraftonline.nope.listener.DynamicSettingListeners;
 import com.minecraftonline.nope.permission.Permissions;
 import com.minecraftonline.nope.setting.SettingKey;
 import com.minecraftonline.nope.setting.SettingValue;
 import com.minecraftonline.nope.util.Format;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandResult;
-import org.spongepowered.api.command.args.ArgumentParseException;
 import org.spongepowered.api.command.args.GenericArguments;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.text.Text;
 
-import java.util.Comparator;
-import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.ExecutionException;
 
-public class RegionSetCommand extends LambdaCommandNode {
-
-  RegionSetCommand(CommandNode parent) {
+class RegionTargetAddPlayerCommand extends LambdaCommandNode {
+  public RegionTargetAddPlayerCommand(CommandNode parent) {
     super(parent,
         Permissions.EDIT_REGION,
-        Text.of("Set setting on a region"),
-        "set");
-    addCommandElements(
-        GenericArguments.flags()
+        Text.of("Add a user to the whitelist or blacklist"),
+        "player");
+    addCommandElements(GenericArguments.flags()
             .valueFlag(NopeArguments.host(Text.of("region")), "r", "-region")
             .buildWith(GenericArguments.none()),
         NopeArguments.settingKey(Text.of("setting")),
-        GenericArguments.remainingJoinedStrings(Text.of("value"))
-    );
+        GenericArguments.string(Text.of("player")));
     setExecutor((src, args) -> {
-      SettingKey<?> settingKey = args.requireOne("setting");
-      String value = args.requireOne("value");
-
       Host host = args.<Host>getOne("region").orElse(RegionCommand.inferHost(src).orElse(null));
       if (host == null) {
         return CommandResult.empty();
       }
+      SettingKey<Object> key = args.requireOne("setting");
 
-      try {
-        addSetting(host, settingKey, value);
-        if (!host.getName().equals(Nope.getInstance().getHostTree().getGlobalHost().getName())
-            && settingKey.isGlobal()) {
-          src.sendMessage(Format.warn("This setting may only ",
-              "work when applied globally"));
-        }
-      } catch (SettingKey.ParseSettingException e) {
-        src.sendMessage(Format.error("Invalid value: ",
-            Format.note(e.getMessage())));
+      Optional<SettingValue<Object>> value = host.get(key);
+      if (!value.isPresent()) {
+        src.sendMessage(Format.error("The setting ",
+            Format.settingKey(key, false),
+            " is not set on region ",
+            Format.host(host)));
         return CommandResult.empty();
       }
 
-      Nope.getInstance().getHostTree().save();
-      DynamicSettingListeners.register();
-      src.sendMessage(Format.success("Set setting ",
-          Format.settingKey(settingKey, false),
-          " on region ",
-          Format.host(host)));
-
+      Sponge.getScheduler().createTaskBuilder()
+          .async()
+          .execute(() -> {
+            GameProfile profile = null;
+            try {
+              profile = Sponge.getServer().getGameProfileManager()
+                  .get(args.<String>requireOne("player"))
+                  .get();
+            } catch (InterruptedException | ExecutionException e) {
+              e.printStackTrace();
+            }
+            value.get().getTarget().add(profile.getUniqueId());
+            src.sendMessage(Format.success("Added player ",
+                Format.note(profile.getName()),
+                " to setting ",
+                Format.settingKey(key, false)));
+          })
+          .submit(Nope.getInstance());
       return CommandResult.success();
     });
   }
-
-  private <T> void addSetting(Host region, SettingKey<T> key, String s)
-      throws SettingKey.ParseSettingException {
-    T data = key.parse(s);
-    region.put(key, SettingValue.of(data));
-  }
 }
+

@@ -35,6 +35,7 @@ import com.minecraftonline.nope.Nope;
 import com.minecraftonline.nope.setting.SettingKey;
 import com.minecraftonline.nope.setting.SettingLibrary;
 import com.minecraftonline.nope.setting.SettingValue;
+import com.minecraftonline.nope.structures.HashQueueVolumeTree;
 import com.minecraftonline.nope.structures.VolumeTree;
 
 import java.io.IOException;
@@ -45,8 +46,10 @@ import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import lombok.AccessLevel;
 import lombok.Getter;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
@@ -63,16 +66,16 @@ public class HostTreeImpl implements HostTree {
 
   private final String globalHostName;
   private final Function<String, String> nameConverter;
-  private final String invalidHostNameRegex;
+  private final String hostNameRegex;
 
   public HostTreeImpl(@Nonnull Storage storage,
                       @Nonnull String globalHostName,
                       @Nonnull Function<String, String> nameConverter,
-                      @Nonnull String invalidHostNameRegex) {
+                      @Nonnull String hostNameRegex) {
     this.storage = storage;
     this.globalHostName = globalHostName;
     this.nameConverter = nameConverter;
-    this.invalidHostNameRegex = invalidHostNameRegex;
+    this.hostNameRegex = hostNameRegex;
 
     this.globalHost = new GlobalHost();
   }
@@ -133,7 +136,7 @@ public class HostTreeImpl implements HostTree {
 
     worldHosts.values().forEach(worldHost -> {
       try {
-        storage.writeRegions(worldHost.regionTree.volumes(), new RegionSerializer());
+        storage.writeRegions(worldHost.getRegionTree().volumes(), new RegionSerializer());
       } catch (IOException e) {
         Nope.getInstance().getLogger().error("Nope's Regions could not be written.", e);
       }
@@ -194,7 +197,8 @@ public class HostTreeImpl implements HostTree {
 
     @Getter
     private final UUID worldUuid;
-    private final VolumeTree<String, Region> regionTree = new VolumeTree<>();
+    @Getter(AccessLevel.PACKAGE)
+    private final VolumeTree<String, Region> regionTree = new HashQueueVolumeTree<>();
 
     WorldHost(String name, UUID worldUuid) {
       super(name, -1);
@@ -501,7 +505,7 @@ public class HostTreeImpl implements HostTree {
     if (worldUuid == null) {
       return null;
     }
-    return worldHosts.get(worldUuid).regionTree.get(name);
+    return worldHosts.get(worldUuid).getRegionTree().get(name);
   }
 
   @Nonnull
@@ -511,7 +515,7 @@ public class HostTreeImpl implements HostTree {
     hosts.put(this.globalHost.getName(), this.globalHost);
     this.worldHosts.values().forEach(worldHost -> {
       hosts.put(worldHost.getName(), worldHost);
-      worldHost.regionTree.volumes().forEach(region -> hosts.put(region.getName(), region));
+      worldHost.getRegionTree().volumes().forEach(region -> hosts.put(region.getName(), region));
     });
     return hosts;
   }
@@ -520,7 +524,7 @@ public class HostTreeImpl implements HostTree {
   @Override
   public Collection<VolumeHost> getRegions(final UUID worldUuid) throws IllegalArgumentException {
     return Optional.ofNullable(getWorldHost(worldUuid)).map(worldHost ->
-        worldHost.regionTree.volumes()
+        worldHost.getRegionTree().volumes()
             .stream()
             .map(volume -> (VolumeHost) volume)
             .collect(Collectors.toList()))
@@ -541,7 +545,7 @@ public class HostTreeImpl implements HostTree {
   }
 
   private void addRegion(Region region) {
-    if (Pattern.matches(invalidHostNameRegex, region.getName())) {
+    if (!Pattern.matches(hostNameRegex, region.getName())) {
       throw new IllegalArgumentException(String.format(
           "Region insertion failed because the format of name %s is not allowed",
           region.getName()));
@@ -571,14 +575,14 @@ public class HostTreeImpl implements HostTree {
           region.getPriority()));
     }
     worldHosts.get(region.getWorldUuid())
-        .regionTree
+        .getRegionTree()
         .push(region.getName(), region);  // Should return null
     regionToWorld.put(region.getName(), region.getWorldUuid());
   }
 
   private Optional<Region> findIntersectingRegionWithSamePriority(final UUID worldUuid,
                                                                   final Region region) {
-    return worldHosts.get(worldUuid).regionTree
+    return worldHosts.get(worldUuid).getRegionTree()
         .volumes()
         .stream()
         .filter(other -> other != region
@@ -597,7 +601,7 @@ public class HostTreeImpl implements HostTree {
     }
     WorldHost worldHost = worldHosts.get(regionToWorld.get(name));
     regionToWorld.remove(name);
-    return worldHost.regionTree.remove(name);
+    return Objects.requireNonNull(worldHost.getRegionTree().remove(name));
   }
 
   @Override
@@ -616,7 +620,7 @@ public class HostTreeImpl implements HostTree {
       if (worldHost.encompasses(location)) {
         list.add(worldHost);
       }
-      list.addAll(worldHost.regionTree.containingVolumes(location.getBlockX(),
+      list.addAll(worldHost.getRegionTree().containersOf(location.getBlockX(),
           location.getBlockY(),
           location.getBlockZ()));
     });
@@ -630,7 +634,7 @@ public class HostTreeImpl implements HostTree {
 
   @Override
   public <V> V lookup(@Nonnull final SettingKey<V> key,
-                      @Nullable final Subject subject,
+                      @Nullable final User user,
                       @Nonnull final Location<World> location) {
     // Maximum priority queue (swapped int compare)
     Queue<Host> maximumHeap = new PriorityQueue<>((h1, h2) ->
@@ -652,24 +656,25 @@ public class HostTreeImpl implements HostTree {
       }
 
       // add regions
-      worldHost.get().regionTree
-          .containingVolumes(location.getBlockX(),
+      worldHost.get().getRegionTree()
+          .containersOf(location.getBlockX(),
               location.getBlockY(),
               location.getBlockZ())
           .stream().filter(host -> host.has(key))
           .forEach(maximumHeap::add);
     }
 
-    Host dictator = maximumHeap.peek();
+    Host dictator;
     Optional<SettingValue<V>> value;
 
-    if (dictator != null) {
+    while (maximumHeap.peek() != null) {
+      dictator = maximumHeap.remove();
       value = dictator.get(key);
       if (!value.isPresent()) {
         // This shouldn't happen because we previously found that this host has this setting
         throw new RuntimeException("Error retrieving setting value");
       }
-      if (subject == null || value.get().getTarget().test(subject)) {
+      if (user == null || value.get().getTarget().test(user)) {
         return value.get().getData();
       }
     }

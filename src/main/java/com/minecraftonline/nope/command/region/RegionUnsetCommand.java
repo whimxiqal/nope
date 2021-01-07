@@ -35,26 +35,9 @@ public class RegionUnsetCommand extends LambdaCommandNode {
     setExecutor((src, args) -> {
       SettingKey<?> settingKey = args.requireOne(Text.of("setting"));
 
-      Optional<Host> hostOptional = args.getOne("region");
-      Host host;
-      if (!hostOptional.isPresent()) {
-        if (!(src instanceof Player)) {
-          src.sendMessage(Format.error("Can't infer region! "
-              + "Please specify the target region."));
-          return CommandResult.empty();
-        }
-        Player player = (Player) src;
-        List<Host> containing = Nope.getInstance()
-            .getHostTree()
-            .getContainingHosts(player.getLocation());
-        if (containing.isEmpty()) {
-          src.sendMessage(Format.error("Can't infer region! "
-              + "Please specify the target region."));
-          return CommandResult.empty();
-        }
-        host = containing.stream().max(Comparator.comparing(Host::getPriority)).get();
-      } else {
-        host = hostOptional.get();
+      Host host = args.<Host>getOne("region").orElse(RegionCommand.inferHost(src).orElse(null));
+      if (host == null) {
+        return CommandResult.empty();
       }
 
       SettingValue<?> settingValue = host.remove(settingKey);

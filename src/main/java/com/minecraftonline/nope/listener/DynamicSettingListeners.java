@@ -44,6 +44,7 @@ import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.entity.living.animal.Animal;
 import org.spongepowered.api.entity.living.monster.Ghast;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.entity.weather.Lightning;
 import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.action.LightningEvent;
@@ -204,11 +205,11 @@ public final class DynamicSettingListeners {
               .map(damage -> damage.getSource().getType().equals(EntityTypes.CREEPER))
               .orElse(false)
               &&
-              (!(event.getTargetEntity() instanceof Subject)
+              (!(event.getTargetEntity() instanceof User)
                   ||
                   !Nope.getInstance().getHostTree().lookup(
                       SettingLibrary.CREEPER_EXPLOSION_DAMAGE,
-                      (Subject) event.getTargetEntity(),
+                      (User) event.getTargetEntity(),
                       event.getTargetEntity().getLocation())));
   @DynamicSettingListener
   static final SettingListener<ChangeBlockEvent.Break> CREEPER_EXPLOSION_GRIEF_BLOCK_LISTENER =
@@ -365,11 +366,11 @@ public final class DynamicSettingListeners {
               .filter(damageSource ->
                   damageSource.getType().getId().equals(DamageTypes.FALL.getId()))
               .filter(damageSource ->
-                  event.getTargetEntity() instanceof Subject
+                  event.getTargetEntity() instanceof User
                       ? !Nope.getInstance()
                       .getHostTree()
                       .lookup(SettingLibrary.FALL_DAMAGE,
-                          (Subject) event.getTargetEntity(),
+                          (User) event.getTargetEntity(),
                           event.getTargetEntity().getLocation())
                       : !Nope.getInstance()
                       .getHostTree()
@@ -471,9 +472,9 @@ public final class DynamicSettingListeners {
           event -> event.getCause()
               .first(Entity.class)
               .filter(entity -> entity instanceof Hostile)
-              .filter(damageSource -> event.getTargetEntity() instanceof Subject
+              .filter(damageSource -> event.getTargetEntity() instanceof User
                   ? !Nope.getInstance().getHostTree().lookup(SettingLibrary.EVP,
-                  (Subject) event.getTargetEntity(),
+                  (User) event.getTargetEntity(),
                   event.getTargetEntity().getLocation())
                   : !Nope.getInstance().getHostTree().lookupAnonymous(SettingLibrary.EVP,
                   event.getTargetEntity().getLocation()))

@@ -25,9 +25,9 @@
 
 package com.minecraftonline.nope.host;
 
-import com.minecraftonline.nope.structures.VolumeTree;
+import com.minecraftonline.nope.structures.Volume;
 
-public abstract class VolumeHost extends Host implements VolumeTree.Volume {
+public abstract class VolumeHost extends Host implements Volume {
 
   private final int xmin;
   private final int xmax;

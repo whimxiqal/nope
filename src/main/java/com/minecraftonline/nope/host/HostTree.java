@@ -28,6 +28,7 @@ package com.minecraftonline.nope.host;
 import com.flowpowered.math.vector.Vector3i;
 import com.minecraftonline.nope.setting.SettingKey;
 import com.minecraftonline.nope.setting.SettingLibrary;
+import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
@@ -167,14 +168,14 @@ public interface HostTree {
    * This is the most important function of the HostTree.
    *
    * @param key      the setting key, obtained from the SettingLibrary
-   * @param subject  the subject to check for the setting
+   * @param user     the subject to check for the setting
    * @param location the location in the world to check for the setting
    * @param <V>      the type of value to retrieve
    * @return the assigned value corresponding to this setting key
    * @see SettingLibrary
    */
   <V> V lookup(@Nonnull final SettingKey<V> key,
-               @Nullable final Subject subject,
+               @Nullable final User user,
                @Nonnull final Location<World> location);
 
   /**

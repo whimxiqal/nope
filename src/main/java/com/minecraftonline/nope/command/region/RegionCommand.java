@@ -24,10 +24,20 @@
 
 package com.minecraftonline.nope.command.region;
 
+import com.minecraftonline.nope.Nope;
 import com.minecraftonline.nope.command.common.CommandNode;
 import com.minecraftonline.nope.command.common.FunctionlessCommandNode;
+import com.minecraftonline.nope.host.Host;
 import com.minecraftonline.nope.permission.Permissions;
+import com.minecraftonline.nope.util.Format;
+import org.spongepowered.api.command.CommandResult;
+import org.spongepowered.api.command.CommandSource;
+import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
+
+import java.util.Comparator;
+import java.util.List;
+import java.util.Optional;
 
 public class RegionCommand extends FunctionlessCommandNode {
   public RegionCommand(CommandNode parent) {
@@ -36,17 +46,33 @@ public class RegionCommand extends FunctionlessCommandNode {
         Text.of("Alter Nope regions"),
         "region",
         "rg");
-    addChildren(new RegionWandCommand(this));
     addChildren(new RegionCreateCommand(this));
-    addChildren(new RegionListCommand(this));
     addChildren(new RegionDestroyCommand(this));
     addChildren(new RegionInfoCommand(this));
-    addChildren(new RegionSetCommand(this));
-    //addChildren(new TargetSetParentCommand(this, "owners", Settings.REGION_OWNERS));
-    //addChildren(new TargetSetParentCommand(this, "members", Settings.REGION_MEMBERS));
-    addChildren(new RegionUnsetCommand(this));
+    addChildren(new RegionListCommand(this));
     addChildren(new RegionMoveCommand(this));
+    addChildren(new RegionSetCommand(this));
     addChildren(new RegionSetPriorityCommand(this));
+    addChildren(new RegionTargetCommand(this));
+    addChildren(new RegionUnsetCommand(this));
+    addChildren(new RegionWandCommand(this));
+  }
 
+  static Optional<Host> inferHost(CommandSource src) {
+    if (!(src instanceof Player)) {
+      src.sendMessage(Format.error("Can't infer region! "
+          + "Please specify the target region."));
+      return Optional.empty();
+    }
+    Player player = (Player) src;
+    List<Host> containing = Nope.getInstance()
+        .getHostTree()
+        .getContainingHosts(player.getLocation());
+    if (containing.isEmpty()) {
+      src.sendMessage(Format.error("Can't infer region! "
+          + "Please specify the target region."));
+      return Optional.empty();
+    }
+    return containing.stream().max(Comparator.comparing(Host::getPriority));
   }
 }

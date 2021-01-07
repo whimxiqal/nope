@@ -25,17 +25,19 @@
 
 package com.minecraftonline.nope.setting;
 
+import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.minecraftonline.nope.Nope;
 import com.minecraftonline.nope.host.Host;
-import com.minecraftonline.nope.util.NopeTypeTokens;
+import com.minecraftonline.nope.permission.Permissions;
 import lombok.Getter;
-import org.spongepowered.api.service.permission.Subject;
+import org.spongepowered.api.entity.living.player.User;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Predicate;
 
 /**
@@ -62,6 +64,11 @@ public class SettingValue<T> {
   @Getter
   private final Target target;
 
+  private SettingValue(@Nonnull T data, @Nonnull Target target) {
+    this.data = data;
+    this.target = target;
+  }
+
   /**
    * Static factory. The target is set to null.
    *
@@ -85,52 +92,190 @@ public class SettingValue<T> {
     return new SettingValue<>(data, target);
   }
 
-  private SettingValue(@Nonnull T data, @Nonnull Target target) {
-    this.data = data;
-    this.target = target;
-  }
-
-
   /**
-   * A class to manage the entities to which an instance of
+   * A class to manage the subjects to which an instance of
    * a {@link Setting} applies.
    */
-  public static class Target extends HashSet<String> implements Predicate<Subject> {
+  public static class Target extends HashMap<String, Boolean> implements Predicate<User> {
 
-    private Target(@Nullable Set<String> ignorePermissions) {
-      if (ignorePermissions != null) {
-        this.addAll(ignorePermissions);
-      }
+    private Set<UUID> users = Sets.newHashSet();
+    private boolean whitelist = true;
+
+    private Target() {
     }
 
-    public static String toJson(Target target) {
-      return new Gson().toJson(target);
+    public static JsonElement toJson(Target target) {
+      Map<String, Object> map = Maps.newHashMap();
+      if (!target.isEmpty()) {
+        Map<String, Boolean> permissions = Maps.newHashMap();
+        permissions.putAll(target);
+        map.put("permissions", permissions);
+      }
+      if (!target.users.isEmpty()) {
+        Set<String> users = Sets.newHashSet();
+        target.users.stream().map(UUID::toString).forEach(users::add);
+        if (target.whitelist) {
+          map.put("whitelist", users);
+        } else {
+          map.put("blacklist", users);
+        }
+      }
+      return new Gson().toJsonTree(map);
     }
 
     @SuppressWarnings("UnstableApiUsage")
-    public static Target fromJson(String json) {
-      return new Target(new Gson().fromJson(json, NopeTypeTokens.STRING_SET_TOKEN.getType()));
+    public static Target fromJson(JsonElement json) {
+      if (json == null) {
+        return new Target();
+      }
+      Target target = new Target();
+      JsonObject map = json.getAsJsonObject();
+      if (map.has("permissions")) {
+        for (Map.Entry<String, JsonElement> entry : map.get("permissions").getAsJsonObject().entrySet()) {
+          target.put(entry.getKey(), entry.getValue().getAsBoolean());
+        }
+      }
+      boolean hasUsers = false;
+      if (map.has("whitelist")) {
+        target.whitelist = true;
+        hasUsers = true;
+      }
+      if (map.has("blacklist")) {
+        target.whitelist = false;
+        hasUsers = true;
+      }
+      if (hasUsers) {
+        for (JsonElement elem : map.get(target.whitelist ? "whitelist" : "blacklist").getAsJsonArray()) {
+          target.users.add(UUID.fromString(elem.getAsString()));
+        }
+      }
+      return target;
     }
 
+    /**
+     * Creates a new target that simply targets everyone.
+     *
+     * @return the new target
+     */
     public static Target all() {
-      return new Target(Sets.newHashSet());
+      return new Target();
     }
 
-    public static Target hasNoPermissionsOf(String... permissions) {
-      return new Target(Sets.newHashSet(permissions));
+    /**
+     * Creates a new target of whitelisted user ids.
+     *
+     * @param collection the user ids
+     * @return the new target
+     */
+    public static Target whitelisted(Collection<UUID> collection) {
+      Target target = new Target();
+      target.users.addAll(collection);
+      target.whitelist = true;
+      return target;
+    }
+
+    /**
+     * Creates a new target of blacklisted user ids.
+     *
+     * @param collection the user ids
+     * @return the new target
+     */
+    public static Target blacklisted(Collection<UUID> collection) {
+      Target target = new Target();
+      target.users.addAll(collection);
+      target.whitelist = false;
+      return target;
+    }
+
+    /**
+     * Add a user to the list of whitelisted
+     * or blacklisted users.
+     *
+     * @param user the id of a user
+     * @return whether this user has been added
+     */
+    public boolean add(UUID user) {
+      return this.users.add(user);
+    }
+
+    /**
+     * Enable the whitelist on this Target.
+     * If previously using blacklist, all users
+     * are cleared.
+     *
+     * @return false if it was already using whitelist
+     */
+    public boolean setWhitelist() {
+      if (whitelist) {
+        return false;
+      } else {
+        this.users.clear();
+        this.whitelist = true;
+        return true;
+      }
+    }
+
+    /**
+     * Check if this Target is already using whitelist.
+     *
+     * @return true if whitelist is enabled
+     */
+    public boolean hasWhitelist() {
+      return whitelist;
+    }
+
+    /**
+     * Enable the blacklist on this Target.
+     * If previously using whitelist, all users
+     * are cleared.
+     *
+     * @return false if it was already using blacklist
+     */
+    public boolean setBlacklist() {
+      if (whitelist) {
+        this.users.clear();
+        this.whitelist = false;
+        return true;
+      } else {
+        return false;
+      }
+    }
+
+    /**
+     * Check if this Target is already using blacklist.
+     *
+     * @return true if blacklist is enabled
+     */
+    public boolean hasBlacklist() {
+      return !whitelist;
     }
 
     /**
      * Decide whether this subject is targeted.
      *
-     * @param subject the permission subject
+     * @param user the permission subject
      * @return true if the subject is targeted
      */
     @Override
-    public boolean test(Subject subject) {
-      return this.stream().noneMatch(subject::hasPermission);
+    public boolean test(User user) {
+      if (user.hasPermission(Permissions.UNAFFECTED.get())) {
+        return false;
+      }
+      if (!users.isEmpty()) {
+        if (whitelist && !users.contains(user.getUniqueId())) {
+          return false;
+        }
+        if (!whitelist && users.contains(user.getUniqueId())) {
+          return false;
+        }
+      }
+      return this.entrySet().stream().allMatch(entry ->
+          user.hasPermission(entry.getKey()) == entry.getValue());
     }
 
+    public Set<UUID> getUsers() {
+      return Sets.newHashSet(this.users);
+    }
   }
 
 }
