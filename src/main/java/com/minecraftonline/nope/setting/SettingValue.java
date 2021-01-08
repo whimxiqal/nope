@@ -34,6 +34,7 @@ import com.minecraftonline.nope.Nope;
 import com.minecraftonline.nope.host.Host;
 import com.minecraftonline.nope.permission.Permissions;
 import lombok.Getter;
+import lombok.Setter;
 import org.spongepowered.api.entity.living.player.User;
 
 import javax.annotation.Nonnull;
@@ -100,6 +101,8 @@ public class SettingValue<T> {
 
     private Set<UUID> users = Sets.newHashSet();
     private boolean whitelist = true;
+    @Getter @Setter
+    private boolean forceAffect = false;
 
     private Target() {
     }
@@ -119,6 +122,9 @@ public class SettingValue<T> {
         } else {
           map.put("blacklist", users);
         }
+      }
+      if (target.isForceAffect()) {
+        map.put("force_affect", true);
       }
       return new Gson().toJsonTree(map);
     }
@@ -148,6 +154,9 @@ public class SettingValue<T> {
         for (JsonElement elem : map.get(target.whitelist ? "whitelist" : "blacklist").getAsJsonArray()) {
           target.users.add(UUID.fromString(elem.getAsString()));
         }
+      }
+      if (map.has("force_affect")) {
+        target.setForceAffect(map.get("force_affect").getAsBoolean());
       }
       return target;
     }
@@ -268,7 +277,7 @@ public class SettingValue<T> {
      */
     @Override
     public boolean test(User user) {
-      if (user.hasPermission(Permissions.UNAFFECTED.get())) {
+      if (!forceAffect && user.hasPermission(Permissions.UNAFFECTED.get())) {
         return false;
       }
       if (!users.isEmpty()) {

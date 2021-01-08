@@ -26,6 +26,7 @@ package com.minecraftonline.nope.command.common;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.minecraftonline.nope.permission.Permission;
 import org.spongepowered.api.command.args.CommandElement;
 import org.spongepowered.api.command.args.GenericArguments;
@@ -37,9 +38,11 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.SortedMap;
 import java.util.stream.Collectors;
 
 public abstract class CommandNode implements CommandExecutor {
@@ -105,6 +108,7 @@ public abstract class CommandNode implements CommandExecutor {
     builder.arguments(this.commandElements.toArray(new CommandElement[0]))
         .children(this.children
             .stream()
+            .sorted(Comparator.comparing(node -> node.getPrimaryAlias()))
             .collect(Collectors.toMap(CommandNode::getAliases, CommandNode::build)))
         .description(this.description)
         .childArgumentParseExceptionFallback(false) // Stops too many argument error messages due to falling back to help subcommand

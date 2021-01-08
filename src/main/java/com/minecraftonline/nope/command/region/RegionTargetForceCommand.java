@@ -42,27 +42,30 @@ import org.spongepowered.api.text.Text;
 import java.util.Map;
 import java.util.Optional;
 
-class RegionTargetTypeCommand extends LambdaCommandNode {
-  public RegionTargetTypeCommand(CommandNode parent) {
+/**
+ * The permission UNAFFECTED in {@link com.minecraftonline.nope.permission.Permissions}
+ * is given to high ranking players who should not be affected by Nope.
+ * A setting can bypass this passthrough feature by setting "force affect"
+ * on a Target to simulate the motion that the affecting of a player is being forced.
+ */
+public class RegionTargetForceCommand extends LambdaCommandNode {
+  public RegionTargetForceCommand(CommandNode parent) {
     super(parent,
-        Permissions.COMMAND_REGION_EDIT,
-        Text.of("Set how a setting targets specific players in this region"),
-        "type");
-    Map<String, Boolean> choices = Maps.newHashMap();
-    choices.put("whitelist", true);
-    choices.put("blacklist", false);
+        Permissions.UNAFFECTED,
+        Text.of("Toggle whether the "
+            + Permissions.UNAFFECTED.get()
+            + " permission is respected on this setting"),
+        "force");
     addCommandElements(GenericArguments.flags()
             .valueFlag(NopeArguments.host(Text.of("region")), "r", "-region")
             .buildWith(GenericArguments.none()),
-        NopeArguments.settingKey(Text.of("setting")),
-        GenericArguments.choices(Text.of("type"), choices));
+        NopeArguments.settingKey(Text.of("setting")));
     setExecutor((src, args) -> {
       Host host = args.<Host>getOne("region").orElse(RegionCommand.inferHost(src).orElse(null));
       if (host == null) {
         return CommandResult.empty();
       }
       SettingKey<Object> key = args.requireOne("setting");
-      boolean whitelist = args.requireOne("type");
 
       Optional<SettingValue<Object>> value = host.get(key);
       if (!value.isPresent()) {
@@ -73,25 +76,23 @@ class RegionTargetTypeCommand extends LambdaCommandNode {
         return CommandResult.empty();
       }
 
-      boolean changed;
-      if (whitelist) {
-        changed = value.get().getTarget().setWhitelist();
-      } else {
-        changed = value.get().getTarget().setBlacklist();
-      }
+      value.get().getTarget().setForceAffect(!value.get().getTarget().isForceAffect());
 
-      if (changed) {
+      if (value.get().getTarget().isForceAffect()) {
         src.sendMessage(Format.success("The setting ",
             Format.settingKey(key, false),
-            " was changed"));
-        Nope.getInstance().saveState();
-        return CommandResult.success();
+            " now bypasses the ",
+            Format.note(Permissions.UNAFFECTED.get()),
+            " permission"));
       } else {
-        src.sendMessage(Format.warn("The setting ",
+        src.sendMessage(Format.success("The setting ",
             Format.settingKey(key, false),
-            " already has that type!"));
-        return CommandResult.empty();
+            " now does not bypass the ",
+            Format.note(Permissions.UNAFFECTED.get()),
+            " permission"));
       }
+      Nope.getInstance().saveState();
+      return CommandResult.success();
     });
   }
 }

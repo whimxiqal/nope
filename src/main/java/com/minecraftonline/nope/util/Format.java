@@ -27,6 +27,7 @@ package com.minecraftonline.nope.util;
 import com.google.common.collect.Lists;
 import com.minecraftonline.nope.Nope;
 import com.minecraftonline.nope.host.Host;
+import com.minecraftonline.nope.permission.Permissions;
 import com.minecraftonline.nope.setting.Setting;
 import com.minecraftonline.nope.setting.SettingKey;
 import com.minecraftonline.nope.setting.SettingValue;
@@ -159,10 +160,10 @@ public final class Format {
       onHover.append(Text.NEW_LINE);
     }
 
-    onHover.append(Format.keyValue("Type: ", key.valueType().getSimpleName()));
+    onHover.append(Format.keyValue("Type:", key.valueType().getSimpleName()));
     onHover.append(Text.NEW_LINE);
 
-    onHover.append(Format.keyValue("Default value: ", key.getDefaultData().toString()));
+    onHover.append(Format.keyValue("Default value:", key.getDefaultData().toString()));
 
     if (key.getDescription().isPresent()) {
       onHover.append(Text.NEW_LINE).append(Text.NEW_LINE);
@@ -173,6 +174,7 @@ public final class Format {
 
     builder.append(idText.build());
     if (verbose) {
+      builder.append(Text.of(" "));
       builder.append(Format.note(key.getDescription().orElse("No description")));
     }
 
@@ -184,14 +186,14 @@ public final class Format {
       List<Text> list = Lists.newLinkedList();
       list.add(Text.of(Format.settingKey(setting.getKey(), false),
           " -> ",
-          Format.keyValue("value: ", setting.getKey().print(setting.getValue().getData()))));
+          Format.keyValue("value:", setting.getKey().print(setting.getValue().getData()))));
 
       if (setting.getValue().getTarget() != null) {
         SettingValue.Target target = setting.getValue().getTarget();
         if (!target.getUsers().isEmpty()) {
           list.add(Text.of(TextColors.GREEN,
               " > ",
-              Format.keyValue(target.hasWhitelist() ? "Whitelist: " : "Blacklist: ",
+              Format.keyValue(target.hasWhitelist() ? "Whitelist:" : "Blacklist:",
                   target.getUsers()
                       .stream()
                       .map(uuid -> {
@@ -212,7 +214,15 @@ public final class Format {
         target.forEach((permission, value) ->
             list.add(Text.of(TextColors.GREEN,
                 " > ",
-                Format.keyValue(permission + " ", String.valueOf(value)))));
+                Format.keyValue(permission + ":", String.valueOf(value)))));
+        if (target.isForceAffect()) {
+          list.add(Text.of(TextColors.GREEN,
+              " > ",
+              Format.hover("FORCE AFFECT",
+                  "When affect is forced, players with the "
+                      + Permissions.UNAFFECTED.get()
+                      + " permission may still be targeted")));
+        }
       }
       return list;
     });

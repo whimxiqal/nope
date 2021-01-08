@@ -55,6 +55,7 @@ import org.spongepowered.api.event.block.InteractBlockEvent;
 import org.spongepowered.api.event.cause.entity.damage.DamageTypes;
 import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
 import org.spongepowered.api.event.cause.entity.damage.source.EntityDamageSource;
+import org.spongepowered.api.event.cause.entity.damage.source.IndirectEntityDamageSource;
 import org.spongepowered.api.event.data.ChangeDataHolderEvent;
 import org.spongepowered.api.event.entity.*;
 import org.spongepowered.api.event.item.inventory.ChangeInventoryEvent;
@@ -90,15 +91,26 @@ import java.util.stream.Collectors;
 public final class DynamicSettingListeners {
 
   @DynamicSettingListener
-  static final SettingListener<InteractEntityEvent.Primary> ARMOR_STAND_DESTROY_LISTENER =
-      new PlayerCancelConditionSettingListener<>(
+  static final SettingListener<AttackEntityEvent> ARMOR_STAND_ATTACK_LISTENER =
+      new CancelConditionSettingListener<>(
           SettingLibrary.ARMOR_STAND_DESTROY,
-          InteractEntityEvent.Primary.class,
-          (event, player) -> event.getTargetEntity().getType().equals(EntityTypes.ARMOR_STAND)
-              &&
-              !Nope.getInstance().getHostTree().lookup(SettingLibrary.ARMOR_STAND_DESTROY,
-                  player,
-                  event.getTargetEntity().getLocation()));
+          AttackEntityEvent.class,
+          event -> event.getTargetEntity().getType().equals(EntityTypes.ARMOR_STAND)
+              && (
+              event.getCause().first(EntityDamageSource.class)
+                  .filter(damageSource -> damageSource.getSource() instanceof Player)
+                  .filter(damageSource -> !Nope.getInstance().getHostTree()
+                      .lookup(SettingLibrary.ARMOR_STAND_DESTROY,
+                          (Player) damageSource.getSource(),
+                          damageSource.getSource().getLocation()))
+                  .isPresent()
+                  || event.getCause().first(IndirectEntityDamageSource.class)
+                  .filter(damageSource -> damageSource.getIndirectSource() instanceof Player)
+                  .filter(damageSource -> !Nope.getInstance().getHostTree()
+                      .lookup(SettingLibrary.ARMOR_STAND_DESTROY,
+                          (Player) damageSource.getIndirectSource(),
+                          damageSource.getIndirectSource().getLocation()))
+                  .isPresent()));
   @DynamicSettingListener
   static final SettingListener<ChangeBlockEvent.Break> BLOCK_BREAK_LISTENER =
       new PlayerCancelConditionSettingListener<>(
@@ -554,15 +566,26 @@ public final class DynamicSettingListeners {
                   player,
                   player.getLocation()));
   @DynamicSettingListener
-  static final SettingListener<InteractEntityEvent.Primary> ITEM_FRAME_DESTROY_LISTENER =
-      new PlayerCancelConditionSettingListener<>(
+  static final SettingListener<AttackEntityEvent> ITEM_FRAME_ATTACK_LISTENER =
+      new CancelConditionSettingListener<>(
           SettingLibrary.ITEM_FRAME_DESTROY,
-          InteractEntityEvent.Primary.class,
-          (event, player) -> event.getTargetEntity().getType().equals(EntityTypes.ITEM_FRAME)
-              &&
-              !Nope.getInstance().getHostTree().lookup(SettingLibrary.ITEM_FRAME_DESTROY,
-                  player,
-                  event.getTargetEntity().getLocation()));
+          AttackEntityEvent.class,
+          event -> event.getTargetEntity().getType().equals(EntityTypes.ITEM_FRAME)
+              && (
+              event.getCause().first(EntityDamageSource.class)
+                  .filter(damageSource -> damageSource.getSource() instanceof Player)
+                  .filter(damageSource -> !Nope.getInstance().getHostTree()
+                      .lookup(SettingLibrary.ITEM_FRAME_DESTROY,
+                          (Player) damageSource.getSource(),
+                          damageSource.getSource().getLocation()))
+                  .isPresent()
+                  || event.getCause().first(IndirectEntityDamageSource.class)
+                  .filter(damageSource -> damageSource.getIndirectSource() instanceof Player)
+                  .filter(damageSource -> !Nope.getInstance().getHostTree()
+                      .lookup(SettingLibrary.ITEM_FRAME_DESTROY,
+                          (Player) damageSource.getIndirectSource(),
+                          damageSource.getIndirectSource().getLocation()))
+                  .isPresent()));
   @DynamicSettingListener
   static final SettingListener<ChangeInventoryEvent.Pickup.Pre> ITEM_PICKUP_LISTENER =
       new PlayerCancelConditionSettingListener<>(
@@ -669,15 +692,26 @@ public final class DynamicSettingListeners {
                       : null,
                   ((Player) event.getTargetHolder()).getLocation()));
   @DynamicSettingListener
-  static final SettingListener<InteractEntityEvent.Primary> PAINTING_DESTROY_LISTENER =
-      new PlayerCancelConditionSettingListener<>(
+  static final SettingListener<AttackEntityEvent> PAINTING_DESTROY_ATTACK_LISTENER =
+      new CancelConditionSettingListener<>(
           SettingLibrary.PAINTING_DESTROY,
-          InteractEntityEvent.Primary.class,
-          (event, player) -> event.getTargetEntity().getType().equals(EntityTypes.PAINTING)
-              &&
-              !Nope.getInstance().getHostTree().lookup(SettingLibrary.PAINTING_DESTROY,
-                  player,
-                  event.getTargetEntity().getLocation()));
+          AttackEntityEvent.class,
+          event -> event.getTargetEntity().getType().equals(EntityTypes.PAINTING)
+              && (
+              event.getCause().first(EntityDamageSource.class)
+                  .filter(damageSource -> damageSource.getSource() instanceof Player)
+                  .filter(damageSource -> !Nope.getInstance().getHostTree()
+                      .lookup(SettingLibrary.PAINTING_DESTROY,
+                          (Player) damageSource.getSource(),
+                          damageSource.getSource().getLocation()))
+                  .isPresent()
+                  || event.getCause().first(IndirectEntityDamageSource.class)
+                  .filter(damageSource -> damageSource.getIndirectSource() instanceof Player)
+                  .filter(damageSource -> !Nope.getInstance().getHostTree()
+                      .lookup(SettingLibrary.PAINTING_DESTROY,
+                          (Player) damageSource.getIndirectSource(),
+                          damageSource.getIndirectSource().getLocation()))
+                  .isPresent()));
   @DynamicSettingListener
   static final SettingListener<CollideEntityEvent> PLAYER_COLLISION_LISTENER =
       new PlayerCancelConditionSettingListener<>(

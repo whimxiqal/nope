@@ -32,6 +32,7 @@ import com.minecraftonline.nope.setting.SettingValue;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.EventListener;
+import org.spongepowered.api.event.Order;
 
 import javax.annotation.Nonnull;
 import java.util.Collection;
@@ -81,7 +82,10 @@ public class SettingListener<E extends Event> implements EventListener<E> {
     for (SettingKey<?> key : keys) {
       assigned = Nope.getInstance().getHostTree().isAssigned(key);
       if (key.hasUnnaturalDefault() || assigned) {
-        Sponge.getEventManager().registerListener(Nope.getInstance(), eventClass, listener);
+        Sponge.getEventManager().registerListener(Nope.getInstance(),
+            eventClass,
+            Order.FIRST,
+            listener);
         this.registered = true;
         return;
       }

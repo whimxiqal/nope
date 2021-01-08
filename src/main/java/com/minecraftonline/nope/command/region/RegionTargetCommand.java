@@ -37,6 +37,7 @@ class RegionTargetCommand extends FunctionlessCommandNode {
         Text.of("Make changes to how a region targets players"),
         "target");
     addChildren(new RegionTargetAddCommand(this),
+        new RegionTargetForceCommand(this),
         new RegionTargetRemoveCommand(this),
         new RegionTargetTypeCommand(this));
   }
