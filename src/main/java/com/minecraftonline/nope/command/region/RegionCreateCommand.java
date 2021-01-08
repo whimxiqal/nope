@@ -81,7 +81,7 @@ public class RegionCreateCommand extends LambdaCommandNode {
         Nope.getInstance().saveState();
         DynamicSettingListeners.register();
         src.sendMessage(Format.success("Successfully created region ", Format.note(name), "!"));
-        Nope.getInstance().getRegionWandHandler().getSelectionMap().remove(player);
+        Nope.getInstance().getRegionWandHandler().getSelectionMap().remove(player.getUniqueId());
       } catch (IllegalArgumentException e) {
         src.sendMessage(Format.error("Could not create region: " + e.getMessage()));
         return CommandResult.empty();

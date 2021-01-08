@@ -98,11 +98,12 @@ import org.spongepowered.api.world.World;
 import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 public class RegionWandHandler {
-  private final Map<Player, Selection> selectionMap = new HashMap<>();
+  private final Map<UUID, Selection> selectionMap = new HashMap<>();
 
-  public Map<Player, Selection> getSelectionMap() {
+  public Map<UUID, Selection> getSelectionMap() {
     return selectionMap;
   }
 
@@ -118,20 +119,23 @@ public class RegionWandHandler {
       return false; // click in the air
     }
     MutableBoolean mutableBoolean = new MutableBoolean(false);
-    event.getCause().first(Player.class).ifPresent(player -> player.getItemInHand(HandTypes.MAIN_HAND).filter(this::isWand).ifPresent(wand -> {
-      mutableBoolean.setTrue();
-      selectionMap.compute(player, (k, v) -> {
-        if (v == null) {
-          v = new Selection();
-        }
-        if (event instanceof InteractBlockEvent.Primary) {
-          v.setPos1(block.getLocation().get(), player); // left click
-        } else if (event instanceof InteractBlockEvent.Secondary) {
-          v.setPos2(block.getLocation().get(), player); // right click
-        }
-        return v;
-      });
-    }));
+    event.getCause().first(Player.class).ifPresent(player ->
+        player.getItemInHand(HandTypes.MAIN_HAND)
+            .filter(this::isWand)
+            .ifPresent(wand -> {
+              mutableBoolean.setTrue();
+              selectionMap.compute(player.getUniqueId(), (k, v) -> {
+                if (v == null) {
+                  v = new Selection();
+                }
+                if (event instanceof InteractBlockEvent.Primary) {
+                  v.setPos1(block.getLocation().get(), player); // left click
+                } else if (event instanceof InteractBlockEvent.Secondary) {
+                  v.setPos2(block.getLocation().get(), player); // right click
+                }
+                return v;
+              });
+            }));
     return mutableBoolean.booleanValue();
   }
 

@@ -57,7 +57,7 @@ public abstract class Host {
   }
 
   public static boolean isContextKey(String key) {
-    String[] tokens = key.split(".");
+    String[] tokens = key.split("\\.");
     return tokens.length == 3 && tokens[0].equals("nope") && tokens[1].equals("host");
   }
 
@@ -82,9 +82,9 @@ public abstract class Host {
    *                 conflicting settings
    */
   public Host(String name, int priority) {
-    this.name = name;
+    this.name = name.toLowerCase();
     this.priority = priority;
-    this.context = new Context(nameToContextKey(name), "true");
+    this.context = new Context(nameToContextKey(this.name), "true");
   }
 
   public Host(String name) {

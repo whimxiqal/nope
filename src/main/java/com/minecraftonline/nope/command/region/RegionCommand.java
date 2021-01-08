@@ -52,10 +52,13 @@ public class RegionCommand extends FunctionlessCommandNode {
     addChildren(new RegionInfoCommand(this));
     addChildren(new RegionListCommand(this));
     addChildren(new RegionMoveCommand(this));
+    addChildren(new RegionPosition1Command(this));
+    addChildren(new RegionPosition2Command(this));
     addChildren(new RegionSetCommand(this));
     addChildren(new RegionSetPriorityCommand(this));
     addChildren(new RegionShowCommand(this));
     addChildren(new RegionTargetCommand(this));
+    addChildren(new RegionTeleportCommand(this));
     addChildren(new RegionUnsetCommand(this));
     addChildren(new RegionWandCommand(this));
   }

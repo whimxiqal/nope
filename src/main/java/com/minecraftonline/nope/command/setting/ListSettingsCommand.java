@@ -43,6 +43,7 @@ public class ListSettingsCommand extends LambdaCommandNode {
       if (keys.size() > 0) {
 
         contents.add(Text.of(TextColors.AQUA, keys.get(0).getCategory().name().toUpperCase()));
+        contents.add(Format.settingKey(keys.get(0), true));
         for (int i = 1; i < keys.size(); i++) {
           if (!keys.get(i).getCategory().equals(keys.get(i - 1).getCategory())) {
             contents.add(Text.of(TextColors.AQUA, keys.get(i).getCategory().name().toUpperCase()));

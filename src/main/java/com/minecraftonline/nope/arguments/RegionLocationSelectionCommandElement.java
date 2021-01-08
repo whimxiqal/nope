@@ -41,7 +41,7 @@ public class RegionLocationSelectionCommandElement extends CommandElement {
         RegionWandHandler.Selection selection = Nope.getInstance()
             .getRegionWandHandler()
             .getSelectionMap()
-            .get(player);
+            .get(player.getUniqueId());
         if (selection == null || !selection.isComplete()) {
           throw new ArgumentParseException(Format.error("Make a selection first using the ",
               Format.command(

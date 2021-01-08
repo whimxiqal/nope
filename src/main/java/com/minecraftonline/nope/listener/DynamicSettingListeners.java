@@ -39,19 +39,23 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.EntityTypes;
+import org.spongepowered.api.entity.hanging.ItemFrame;
+import org.spongepowered.api.entity.hanging.Painting;
 import org.spongepowered.api.entity.living.Agent;
+import org.spongepowered.api.entity.living.ArmorStand;
 import org.spongepowered.api.entity.living.Hostile;
-import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.entity.living.animal.Animal;
+import org.spongepowered.api.entity.living.monster.Creeper;
 import org.spongepowered.api.entity.living.monster.Ghast;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.entity.weather.Lightning;
 import org.spongepowered.api.event.Event;
-import org.spongepowered.api.event.action.LightningEvent;
 import org.spongepowered.api.event.action.SleepingEvent;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.event.block.InteractBlockEvent;
+import org.spongepowered.api.event.cause.EventContextKey;
+import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.damage.DamageTypes;
 import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
 import org.spongepowered.api.event.cause.entity.damage.source.EntityDamageSource;
@@ -61,7 +65,6 @@ import org.spongepowered.api.event.entity.*;
 import org.spongepowered.api.event.item.inventory.ChangeInventoryEvent;
 import org.spongepowered.api.event.item.inventory.ClickInventoryEvent;
 import org.spongepowered.api.event.item.inventory.DropItemEvent;
-import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.title.Title;
 import org.spongepowered.api.world.LocatableBlock;
@@ -95,22 +98,7 @@ public final class DynamicSettingListeners {
       new CancelConditionSettingListener<>(
           SettingLibrary.ARMOR_STAND_DESTROY,
           AttackEntityEvent.class,
-          event -> event.getTargetEntity().getType().equals(EntityTypes.ARMOR_STAND)
-              && (
-              event.getCause().first(EntityDamageSource.class)
-                  .filter(damageSource -> damageSource.getSource() instanceof Player)
-                  .filter(damageSource -> !Nope.getInstance().getHostTree()
-                      .lookup(SettingLibrary.ARMOR_STAND_DESTROY,
-                          (Player) damageSource.getSource(),
-                          damageSource.getSource().getLocation()))
-                  .isPresent()
-                  || event.getCause().first(IndirectEntityDamageSource.class)
-                  .filter(damageSource -> damageSource.getIndirectSource() instanceof Player)
-                  .filter(damageSource -> !Nope.getInstance().getHostTree()
-                      .lookup(SettingLibrary.ARMOR_STAND_DESTROY,
-                          (Player) damageSource.getIndirectSource(),
-                          damageSource.getIndirectSource().getLocation()))
-                  .isPresent()));
+          entityVersusEntityCanceller(SettingLibrary.ARMOR_STAND_DESTROY, Player.class, ArmorStand.class));
   @DynamicSettingListener
   static final SettingListener<ChangeBlockEvent.Break> BLOCK_BREAK_LISTENER =
       new PlayerCancelConditionSettingListener<>(
@@ -199,17 +187,7 @@ public final class DynamicSettingListeners {
       new CancelConditionSettingListener<>(
           SettingLibrary.CREEPER_EXPLOSION_DAMAGE,
           DamageEntityEvent.class,
-          event -> event.getCause()
-              .first(EntityDamageSource.class)
-              .map(damage -> damage.getSource().getType().equals(EntityTypes.CREEPER))
-              .orElse(false)
-              &&
-              (!(event.getTargetEntity() instanceof User)
-                  ||
-                  !Nope.getInstance().getHostTree().lookup(
-                      SettingLibrary.CREEPER_EXPLOSION_DAMAGE,
-                      (User) event.getTargetEntity(),
-                      event.getTargetEntity().getLocation())));
+          entityVersusEntityCanceller(SettingLibrary.CREEPER_EXPLOSION_DAMAGE, Creeper.class, Entity.class));
   @DynamicSettingListener
   static final SettingListener<ChangeBlockEvent.Break> CREEPER_EXPLOSION_GRIEF_BLOCK_LISTENER =
       new CancelConditionSettingListener<>(
@@ -458,16 +436,7 @@ public final class DynamicSettingListeners {
       new CancelConditionSettingListener<>(
           SettingLibrary.HVP,
           DamageEntityEvent.class,
-          event -> event.getCause()
-              .first(Entity.class)
-              .filter(entity -> entity instanceof Hostile)
-              .filter(damageSource -> event.getTargetEntity() instanceof User
-                  ? !Nope.getInstance().getHostTree().lookup(SettingLibrary.EVP,
-                  (User) event.getTargetEntity(),
-                  event.getTargetEntity().getLocation())
-                  : !Nope.getInstance().getHostTree().lookupAnonymous(SettingLibrary.EVP,
-                  event.getTargetEntity().getLocation()))
-              .isPresent());
+          entityVersusEntityCanceller(SettingLibrary.HVP, Hostile.class, Player.class));
   @DynamicSettingListener
   static final SettingListener<ChangeBlockEvent> ICE_FORM_LISTENER =
       new CancelConditionSettingListener<>(
@@ -519,7 +488,7 @@ public final class DynamicSettingListeners {
       new CancelConditionSettingListener<>(
           SettingLibrary.INVINCIBLE_MOBS,
           DamageEntityEvent.class,
-          event -> event.getTargetEntity() instanceof Living
+          event -> event.getTargetEntity() instanceof Agent
               && !(event.getTargetEntity() instanceof Player)
               && Nope.getInstance()
               .getHostTree()
@@ -570,22 +539,9 @@ public final class DynamicSettingListeners {
       new CancelConditionSettingListener<>(
           SettingLibrary.ITEM_FRAME_DESTROY,
           AttackEntityEvent.class,
-          event -> event.getTargetEntity().getType().equals(EntityTypes.ITEM_FRAME)
-              && (
-              event.getCause().first(EntityDamageSource.class)
-                  .filter(damageSource -> damageSource.getSource() instanceof Player)
-                  .filter(damageSource -> !Nope.getInstance().getHostTree()
-                      .lookup(SettingLibrary.ITEM_FRAME_DESTROY,
-                          (Player) damageSource.getSource(),
-                          damageSource.getSource().getLocation()))
-                  .isPresent()
-                  || event.getCause().first(IndirectEntityDamageSource.class)
-                  .filter(damageSource -> damageSource.getIndirectSource() instanceof Player)
-                  .filter(damageSource -> !Nope.getInstance().getHostTree()
-                      .lookup(SettingLibrary.ITEM_FRAME_DESTROY,
-                          (Player) damageSource.getIndirectSource(),
-                          damageSource.getIndirectSource().getLocation()))
-                  .isPresent()));
+          entityVersusEntityCanceller(SettingLibrary.ITEM_FRAME_DESTROY,
+              Player.class,
+              ItemFrame.class));
   @DynamicSettingListener
   static final SettingListener<ChangeInventoryEvent.Pickup.Pre> ITEM_PICKUP_LISTENER =
       new PlayerCancelConditionSettingListener<>(
@@ -696,22 +652,9 @@ public final class DynamicSettingListeners {
       new CancelConditionSettingListener<>(
           SettingLibrary.PAINTING_DESTROY,
           AttackEntityEvent.class,
-          event -> event.getTargetEntity().getType().equals(EntityTypes.PAINTING)
-              && (
-              event.getCause().first(EntityDamageSource.class)
-                  .filter(damageSource -> damageSource.getSource() instanceof Player)
-                  .filter(damageSource -> !Nope.getInstance().getHostTree()
-                      .lookup(SettingLibrary.PAINTING_DESTROY,
-                          (Player) damageSource.getSource(),
-                          damageSource.getSource().getLocation()))
-                  .isPresent()
-                  || event.getCause().first(IndirectEntityDamageSource.class)
-                  .filter(damageSource -> damageSource.getIndirectSource() instanceof Player)
-                  .filter(damageSource -> !Nope.getInstance().getHostTree()
-                      .lookup(SettingLibrary.PAINTING_DESTROY,
-                          (Player) damageSource.getIndirectSource(),
-                          damageSource.getIndirectSource().getLocation()))
-                  .isPresent()));
+          entityVersusEntityCanceller(SettingLibrary.PAINTING_DESTROY,
+              Player.class,
+              Painting.class));
   @DynamicSettingListener
   static final SettingListener<CollideEntityEvent> PLAYER_COLLISION_LISTENER =
       new PlayerCancelConditionSettingListener<>(
@@ -732,19 +675,19 @@ public final class DynamicSettingListeners {
       new CancelConditionSettingListener<>(
           SettingLibrary.PVA,
           DamageEntityEvent.class,
-          damageFromPlayerCanceller(SettingLibrary.PVA, Animal.class));
+          entityVersusEntityCanceller(SettingLibrary.PVA, Player.class, Animal.class));
   @DynamicSettingListener
   static final SettingListener<DamageEntityEvent> PVH_LISTENER =
       new CancelConditionSettingListener<>(
           SettingLibrary.PVH,
           DamageEntityEvent.class,
-          damageFromPlayerCanceller(SettingLibrary.PVH, Hostile.class));
+          entityVersusEntityCanceller(SettingLibrary.PVH, Player.class, Hostile.class));
   @DynamicSettingListener
   static final SettingListener<DamageEntityEvent> PVP_LISTENER =
       new CancelConditionSettingListener<>(
           SettingLibrary.PVH,
           DamageEntityEvent.class,
-          damageFromPlayerCanceller(SettingLibrary.PVP, Player.class));
+          entityVersusEntityCanceller(SettingLibrary.PVP, Player.class, Player.class));
   @DynamicSettingListener
   static final SettingListener<RideEntityEvent.Mount> RIDE_LISTENER =
       new PlayerCancelConditionSettingListener<>(
@@ -886,8 +829,28 @@ public final class DynamicSettingListeners {
                   event.getTargetBlock()
                       .getLocation()
                       .orElseThrow(noLocation(SettingLibrary.TNT_IGNITION,
-                          ChangeBlockEvent.Place.class,
+                          InteractBlockEvent.Secondary.class,
                           player))));
+  @DynamicSettingListener
+  static final SettingListener<ConstructEntityEvent.Post> TNT_SPAWN_LISTENER =
+      new SingleSettingListener<>(
+          SettingLibrary.TNT_IGNITION,
+          ConstructEntityEvent.Post.class,
+          (event) -> {
+            if (event.getTargetEntity().getType().equals(EntityTypes.PRIMED_TNT)) {
+              if (!Nope.getInstance().getHostTree().lookup(SettingLibrary.TNT_IGNITION,
+                  event.getCause().first(User.class).orElseGet(() -> {
+                        if (event.getContext().get(EventContextKeys.OWNER).isPresent()) {
+                          return event.getContext().get(EventContextKeys.OWNER).get();
+                        }
+                        return null;
+                      }
+                  ),
+                  event.getTargetEntity().getLocation())) {
+                event.getTargetEntity().remove();
+              }
+            }
+          });
   @DynamicSettingListener
   static final SettingListener<ChangeBlockEvent.Place> TNT_PLACEMENT_LISTENER =
       new PlayerCancelConditionSettingListener<>(
@@ -1037,23 +1000,46 @@ public final class DynamicSettingListeners {
         .collect(Collectors.joining(", ")));
   }
 
-  private static Predicate<DamageEntityEvent> damageFromPlayerCanceller(
+  private static <T extends TargetEntityEvent> Predicate<T> entityVersusEntityCanceller(
       SettingKey<Boolean> key,
-      Class<? extends Entity> recipientClass) {
-    return (event) -> recipientClass.isInstance(event.getTargetEntity())
-        && event.getCause()
-        .first(EntityDamageSource.class)
-        .filter(damageSource -> damageSource.getSource() instanceof Player)
-        .filter(damageSource -> !Nope.getInstance()
-            .getHostTree()
-            .lookup(key,
-                (Player) damageSource.getSource(),
-                damageSource.getSource().getLocation())
-            || !Nope.getInstance()
-            .getHostTree()
-            .lookupAnonymous(key,
-                event.getTargetEntity().getLocation()))
-        .isPresent();
+      Class<? extends Entity> sourceClass,
+      Class<? extends Entity> sinkClass) {
+    return (event) -> {
+      if (!sinkClass.isInstance(event.getTargetEntity())) {
+        return false;
+      }
+      Entity sink = sinkClass.cast(event.getTargetEntity());
+      Entity source = event.getCause().first(EntityDamageSource.class)
+          .map(EntityDamageSource::getSource)
+          .filter(sourceClass::isInstance)
+          .orElse(event.getCause().first(IndirectEntityDamageSource.class)
+              .map(IndirectEntityDamageSource::getIndirectSource)
+              .filter(sourceClass::isInstance)
+              .orElse(null));
+      if (source == null) {
+        return false;
+      }
+      return !Nope.getInstance()
+          .getHostTree()
+          .lookup(key,
+              (source instanceof Player)
+                  ? (Player) source
+                  :
+                  (sink instanceof Player)
+                      ? (Player) sink
+                      : null,
+              source.getLocation())
+          || !Nope.getInstance()
+          .getHostTree()
+          .lookup(key,
+              (sink instanceof Player)
+                  ? (Player) sink
+                  :
+                  (source instanceof Player)
+                      ? (Player) source
+                      : null,
+              sink.getLocation());
+    };
   }
 
   private static Consumer<MoveEntityEvent> thresholdHandler(

@@ -39,7 +39,6 @@ import com.minecraftonline.nope.util.Format;
 import com.minecraftonline.nope.util.NopeTypeTokens;
 import org.spongepowered.api.CatalogType;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.data.persistence.DataFormat;
 import org.spongepowered.api.data.persistence.DataFormats;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
@@ -206,7 +205,8 @@ public final class SettingLibrary {
       "firework-damage",
       true
   );
-  @Description("When disabled, fire does not spread or cause damage")
+  @Description("When disabled, fire does not spread or cause block damage")
+  @Category(SettingKey.CategoryType.BLOCKS)
   public static final SettingKey<Boolean> FIRE_EFFECT = new StateSetting(
       "fire-effect",
       true
@@ -494,6 +494,11 @@ public final class SettingLibrary {
       "storage-type",
       StorageType.HOCON,
       StorageType.class
+  );
+  @Description("The designated point of access to the region via teleport")
+  public static final SettingKey<Vector3d> TELEPORT_LOCATION = new Vector3dSetting(
+      "teleport-location",
+      Vector3d.ZERO
   );
   @Description("When disabled, tnt may not be activated")
   public static final SettingKey<Boolean> TNT_IGNITION = new StateSetting(
@@ -1002,8 +1007,8 @@ public final class SettingLibrary {
     }
   }
 
-  public static class Vector3DSetting extends SettingKey<Vector3d> {
-    public Vector3DSetting(String id, Vector3d defaultValue) {
+  public static class Vector3dSetting extends SettingKey<Vector3d> {
+    public Vector3dSetting(String id, Vector3d defaultValue) {
       super(id, defaultValue);
     }
 
@@ -1037,11 +1042,25 @@ public final class SettingLibrary {
         double x = Double.parseDouble(parts[i++]);
         double y = Double.parseDouble(parts[i++]);
         double z = Double.parseDouble(parts[i]);
+        if (Math.max(Math.abs(x), Math.abs(z)) > Nope.WORLD_RADIUS
+            || Math.abs(y) > Nope.WORLD_HEIGHT) {
+          throw new ParseSettingException("The magnitudes of these numbers are too high!");
+        }
         return Vector3d.from(x, y, z);
       } catch (NumberFormatException e) {
-        throw new ParseSettingException("Int number " + i + ", "
+        throw new ParseSettingException("Value at position " + i + ", "
             + "could not be parsed into a double");
       }
+    }
+
+    @Nonnull
+    @Override
+    public Text print(Vector3d data) {
+      return Text.of(Format.keyValue("x:", String.valueOf(data.getX())),
+          ", ",
+          Format.keyValue("y:", String.valueOf(data.getY())),
+          ", ",
+          Format.keyValue("z:", String.valueOf(data.getZ())));
     }
   }
 

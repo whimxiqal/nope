@@ -501,11 +501,11 @@ public class HostTreeImpl implements HostTree {
   @Nullable
   @Override
   public Region getRegion(final String name) {
-    UUID worldUuid = regionToWorld.get(name);
+    UUID worldUuid = regionToWorld.get(name.toLowerCase());
     if (worldUuid == null) {
       return null;
     }
-    return worldHosts.get(worldUuid).getRegionTree().get(name);
+    return worldHosts.get(worldUuid).getRegionTree().get(name.toLowerCase());
   }
 
   @Nonnull
@@ -594,19 +594,19 @@ public class HostTreeImpl implements HostTree {
   @Nonnull
   @Override
   public Region removeRegion(final String name) {
-    if (!hasRegion(name)) {
+    if (!hasRegion(name.toLowerCase())) {
       throw new IllegalArgumentException(String.format(
           "Region deletion failed because name %s does not exist",
-          name));
+          name.toLowerCase()));
     }
-    WorldHost worldHost = worldHosts.get(regionToWorld.get(name));
-    regionToWorld.remove(name);
-    return Objects.requireNonNull(worldHost.getRegionTree().remove(name));
+    WorldHost worldHost = worldHosts.get(regionToWorld.get(name.toLowerCase()));
+    regionToWorld.remove(name.toLowerCase());
+    return Objects.requireNonNull(worldHost.getRegionTree().remove(name.toLowerCase()));
   }
 
   @Override
   public boolean hasRegion(final String name) {
-    return regionToWorld.containsKey(name);
+    return regionToWorld.containsKey(name.toLowerCase());
   }
 
   @Nonnull
