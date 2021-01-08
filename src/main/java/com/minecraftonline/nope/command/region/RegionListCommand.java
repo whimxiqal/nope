@@ -27,6 +27,7 @@ package com.minecraftonline.nope.command.region;
 import com.minecraftonline.nope.Nope;
 import com.minecraftonline.nope.command.common.CommandNode;
 import com.minecraftonline.nope.command.common.LambdaCommandNode;
+import com.minecraftonline.nope.host.Host;
 import com.minecraftonline.nope.permission.Permissions;
 import com.minecraftonline.nope.util.Format;
 import org.spongepowered.api.Sponge;
@@ -34,6 +35,7 @@ import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.service.pagination.PaginationService;
 import org.spongepowered.api.text.Text;
 
+import java.util.Comparator;
 import java.util.stream.Collectors;
 
 public class RegionListCommand extends LambdaCommandNode {
@@ -52,6 +54,7 @@ public class RegionListCommand extends LambdaCommandNode {
               .getHosts()
               .values()
               .stream()
+              .sorted(Comparator.comparing(Host::getName))
               .map(host -> Text.of(Format.ACCENT, "> ", Format.note(Format.host(host))))
               .collect(Collectors.toList()))
           .title(Format.info("Regions"))

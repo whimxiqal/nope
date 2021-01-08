@@ -239,9 +239,8 @@ public class HostTreeImpl implements HostTree {
           .getWorldProperties(json.getAsJsonObject().get("world").getAsString())
           .map(WorldProperties::getUniqueId)
           .orElseThrow(() -> new RuntimeException(String.format(
-              "This JSON element for a WorldHost is storing an invalid World name '%s': %s",
-              json.getAsJsonObject().get("world"),
-              json))));
+              "This JSON element for a WorldHost is storing an invalid World name '%s'",
+              json.getAsJsonObject().get("world")))));
 
       // Settings
       host.putAll(SettingLibrary.deserializeSettingAssignments(json));
