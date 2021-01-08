@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2020 MinecraftOnline
+ * Copyright (c) 2021 MinecraftOnline
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,46 +20,43 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
+ *
  */
 
 package com.minecraftonline.nope.command.region;
 
-import com.minecraftonline.nope.Nope;
+import com.minecraftonline.nope.arguments.NopeArguments;
+import com.minecraftonline.nope.arguments.TemplateCommandElement;
 import com.minecraftonline.nope.command.common.CommandNode;
 import com.minecraftonline.nope.command.common.LambdaCommandNode;
+import com.minecraftonline.nope.host.Host;
 import com.minecraftonline.nope.permission.Permissions;
 import com.minecraftonline.nope.util.Format;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandResult;
-import org.spongepowered.api.service.pagination.PaginationService;
+import org.spongepowered.api.command.args.GenericArguments;
 import org.spongepowered.api.text.Text;
 
-import java.util.stream.Collectors;
-
-public class RegionListCommand extends LambdaCommandNode {
-
-  RegionListCommand(CommandNode parent) {
+public class RegionApplyCommand extends LambdaCommandNode {
+  public RegionApplyCommand(CommandNode parent) {
     super(parent,
-        Permissions.COMMAND_REGION_LIST,
-        Text.of("List all registered regions"),
-        "list",
-        "l");
+        Permissions.COMMAND_REGION_EDIT,
+        Text.of("Apply a template of settings to a region"),
+        "apply");
+    addCommandElements(
+        GenericArguments.flags()
+            .valueFlag(NopeArguments.host(Text.of("region")), "r", "-region")
+            .buildWith(GenericArguments.none()),
+        new TemplateCommandElement(Text.of("template"))
+    );
     setExecutor((src, args) -> {
-      Sponge.getServiceManager().provide(PaginationService.class)
-          .orElseThrow(() -> new IllegalStateException("No pagination service found!"))
-          .builder()
-          .contents(Nope.getInstance().getHostTree()
-              .getHosts()
-              .values()
-              .stream()
-              .map(host -> Text.of(Format.ACCENT, "> ", Format.note(Format.host(host))))
-              .collect(Collectors.toList()))
-          .title(Format.info("Regions"))
-          .padding(Format.note("="))
-          .build()
-          .sendTo(src);
+      Host host = args.<Host>getOne("region").orElse(RegionCommand.inferHost(src).orElse(null));
+      if (host == null) {
+        return CommandResult.empty();
+      }
+      host.putAll(args.requireOne("template"));
+      src.sendMessage(Format.success("Applied a template to host ",
+          Format.host(host)));
       return CommandResult.success();
     });
   }
-
 }

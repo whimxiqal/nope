@@ -15,7 +15,7 @@ public class SettingCommand extends FunctionlessCommandNode {
    */
   public SettingCommand(CommandNode parent) {
     super(parent,
-        Permissions.COMMAND_ROOT,
+        null,
         Text.of("Configure Nope settings"),
         "setting");
     addChildren(new ListSettingsCommand(this));

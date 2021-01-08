@@ -194,8 +194,18 @@ public class SettingValue<T> {
      * @param user the id of a user
      * @return whether this user has been added
      */
-    public boolean add(UUID user) {
+    public boolean addUser(UUID user) {
       return this.users.add(user);
+    }
+
+    /**
+     * Checks if a user is currently targeted.
+     *
+     * @param user the user's id
+     * @return whether this user is targeted
+     */
+    public boolean hasUser(UUID user) {
+      return this.users.contains(user);
     }
 
     /**
@@ -275,6 +285,16 @@ public class SettingValue<T> {
 
     public Set<UUID> getUsers() {
       return Sets.newHashSet(this.users);
+    }
+
+    /**
+     * Return a targeted user.
+     *
+     * @param uniqueId the user id
+     * @return whether this id was removed
+     */
+    public boolean removePlayer(UUID uniqueId) {
+      return this.users.remove(uniqueId);
     }
   }
 

@@ -52,7 +52,7 @@ public class RegionWandCommand extends CommandNode {
 
   RegionWandCommand(CommandNode parent) {
     super(parent,
-        Permissions.CREATE_REGION,
+        Permissions.COMMAND_REGION_CREATE,
         Text.of("Get a wand for easy creation of regions"),
         "wand",
         "w");

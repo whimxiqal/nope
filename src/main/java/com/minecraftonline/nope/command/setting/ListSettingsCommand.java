@@ -3,7 +3,6 @@ package com.minecraftonline.nope.command.setting;
 import com.google.common.collect.Lists;
 import com.minecraftonline.nope.command.common.CommandNode;
 import com.minecraftonline.nope.command.common.LambdaCommandNode;
-import com.minecraftonline.nope.permission.Permission;
 import com.minecraftonline.nope.permission.Permissions;
 import com.minecraftonline.nope.setting.SettingKey;
 import com.minecraftonline.nope.setting.SettingLibrary;
@@ -13,9 +12,7 @@ import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.args.GenericArguments;
 import org.spongepowered.api.service.pagination.PaginationService;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.action.TextActions;
 import org.spongepowered.api.text.format.TextColors;
-import org.spongepowered.api.text.format.TextStyles;
 
 import java.util.Comparator;
 import java.util.List;
@@ -25,7 +22,7 @@ public class ListSettingsCommand extends LambdaCommandNode {
 
   ListSettingsCommand(CommandNode parent) {
     super(parent,
-        Permissions.COMMAND_ROOT,
+        Permissions.COMMAND_SETTING,
         Text.of("Allows the user to list all the nope settings"),
         "list");
 
@@ -34,14 +31,6 @@ public class ListSettingsCommand extends LambdaCommandNode {
     setExecutor((src, args) -> {
       PaginationService pagination = Sponge.getServiceManager().provide(PaginationService.class)
           .orElseThrow(() -> new RuntimeException("PaginationService unavailable."));
-
-//      Map<SettingKey.CategoryType, List<SettingKey<?>>> groups = Maps.newHashMap();
-//      List<SettingKey.CategoryType> categoryTypes = Lists.newArrayList(SettingKey.CategoryType.values());
-//      categoryTypes.sort(Comparator.comparing(SettingKey.CategoryType::name));
-//
-//      categoryTypes.stream().forEach(type -> groups.put(type, Lists.newLinkedList()));
-//      SettingLibrary.getAll().forEach(key -> groups.get(key.getCategory()).add(key));
-//      groups.values().forEach(list -> list.sort(Comparator.comparing(SettingKey::getId)));
 
       List<SettingKey<?>> keys = SettingLibrary.getAll()
           .stream()

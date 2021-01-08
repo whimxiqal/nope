@@ -45,7 +45,8 @@ public class HashQueueVolumeTree<S, T extends Volume> extends VolumeTree<S, T> {
 
   private final Multimap<Query, S> cache = Multimaps.synchronizedSetMultimap(HashMultimap.create());
   private final Queue<Query> history = new ConcurrentLinkedQueue<>();
-  private static final int CACHE_SIZE = 10000;
+  private static final int CACHE_MEMORY = 1 << 22;  // 8 MB
+  private static final int CACHE_SIZE = CACHE_MEMORY / ((16 * 2) + (4 * 3) * 2);
 
   public HashQueueVolumeTree() {
     super();
@@ -71,6 +72,10 @@ public class HashQueueVolumeTree<S, T extends Volume> extends VolumeTree<S, T> {
     return keys.stream().map(volumes::get).collect(Collectors.toList());
   }
 
+  public int getCacheSize() {
+    return history.size();
+  }
+
   @Override
   public T push(S key, T volume) {
     cache.clear();
@@ -94,7 +99,7 @@ public class HashQueueVolumeTree<S, T extends Volume> extends VolumeTree<S, T> {
 
   private void trim() {
     if (history.size() > CACHE_SIZE) {
-      history.remove();
+      cache.removeAll(history.remove());
     }
   }
 

@@ -11,18 +11,13 @@ import com.minecraftonline.nope.setting.SettingValue;
 import com.minecraftonline.nope.util.Format;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.args.GenericArguments;
-import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
-
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
 
 public class RegionUnsetCommand extends LambdaCommandNode {
 
   RegionUnsetCommand(CommandNode parent) {
     super(parent,
-        Permissions.EDIT_REGION,
+        Permissions.COMMAND_REGION_EDIT,
         Text.of("Unset settings on a region"),
         "unset");
 
@@ -47,7 +42,7 @@ public class RegionUnsetCommand extends LambdaCommandNode {
             " is not assigned on this host!"));
         return CommandResult.empty();
       }
-      Nope.getInstance().getHostTree().save();
+      Nope.getInstance().saveState();
       src.sendMessage(Format.success("Unset ",
           Format.settingKey(settingKey, false),
           " on region ",

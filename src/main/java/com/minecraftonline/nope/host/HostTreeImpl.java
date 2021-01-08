@@ -193,11 +193,11 @@ public class HostTreeImpl implements HostTree {
   /**
    * Class for managing the few WorldHosts in this HostTree.
    */
-  class WorldHost extends Host {
+  public class WorldHost extends Host {
 
     @Getter
     private final UUID worldUuid;
-    @Getter(AccessLevel.PACKAGE)
+    @Getter(AccessLevel.PUBLIC)
     private final VolumeTree<String, Region> regionTree = new HashQueueVolumeTree<>();
 
     WorldHost(String name, UUID worldUuid) {

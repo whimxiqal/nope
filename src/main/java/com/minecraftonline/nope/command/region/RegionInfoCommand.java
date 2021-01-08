@@ -32,16 +32,11 @@ import com.minecraftonline.nope.command.common.LambdaCommandNode;
 import com.minecraftonline.nope.host.Host;
 import com.minecraftonline.nope.host.VolumeHost;
 import com.minecraftonline.nope.permission.Permissions;
-import com.minecraftonline.nope.setting.Setting;
-import com.minecraftonline.nope.setting.SettingKey;
-import com.minecraftonline.nope.setting.SettingMap;
-import com.minecraftonline.nope.setting.SettingValue;
 import com.minecraftonline.nope.util.Format;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.args.CommandElement;
 import org.spongepowered.api.command.args.GenericArguments;
-import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.service.pagination.PaginationService;
 import org.spongepowered.api.text.Text;
@@ -58,7 +53,7 @@ public class RegionInfoCommand extends LambdaCommandNode {
 
   RegionInfoCommand(CommandNode parent) {
     super(parent,
-        Permissions.INFO_REGION,
+        Permissions.COMMAND_REGION_INFO,
         Text.of("View detailed information about a region"),
         "info",
         "i");
@@ -104,14 +99,15 @@ public class RegionInfoCommand extends LambdaCommandNode {
 
       int regionPriority = host.getPriority();
       headerLines.add(Format.keyValue("priority: ", String.valueOf(regionPriority)));
-
-      headerLines.add(Text.of(Text.NEW_LINE, TextColors.AQUA, "<< Settings >>"));
+      headerLines.add(Text.of(""));  // line separator
+      headerLines.add(Text.of(TextColors.AQUA, "<< Settings >>"));
 
       Sponge.getScheduler().createTaskBuilder()
           .async()
           .execute(() -> {
             List<Text> contents = host.getAll().entries()
                 .stream()
+                .sorted(Comparator.comparing(setting -> setting.getKey().getId()))
                 .flatMap(setting -> {
                   try {
                     return Format.setting(setting).get().stream();

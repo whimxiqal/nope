@@ -1,6 +1,6 @@
 package com.minecraftonline.nope.util;
 
-import com.minecraftonline.nope.CollisionHandler;
+import com.minecraftonline.nope.bridge.collision.CollisionHandler;
 import com.minecraftonline.nope.Nope;
 import com.minecraftonline.nope.bridge.collision.ScorePlayerTeamBridge;
 import com.minecraftonline.nope.bridge.collision.ServerScoreboardBridge;

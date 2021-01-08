@@ -40,7 +40,7 @@ public class RegionDestroyCommand extends LambdaCommandNode {
 
   RegionDestroyCommand(CommandNode parent) {
     super(parent,
-        Permissions.DELETE_REGION,
+        Permissions.COMMAND_REGION_DELETE,
         Text.of("Delete a given region"),
         "destroy", "remove");
     addCommandElements(GenericArguments.onlyOne(NopeArguments.host(Text.of("host"))));
@@ -54,7 +54,7 @@ public class RegionDestroyCommand extends LambdaCommandNode {
         return CommandResult.empty();
       }
 
-      Nope.getInstance().getHostTree().save();
+      Nope.getInstance().saveState();
       DynamicSettingListeners.register();
       src.sendMessage(Format.success("Region ",
           Format.note(host.getName()),

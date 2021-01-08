@@ -33,10 +33,11 @@ import org.spongepowered.api.text.Text;
 class RegionTargetCommand extends FunctionlessCommandNode {
   public RegionTargetCommand(CommandNode parent) {
     super(parent,
-        Permissions.EDIT_REGION,
+        Permissions.COMMAND_REGION_EDIT,
         Text.of("Make changes to how a region targets players"),
         "target");
-    addChildren(new RegionTargetTypeCommand(this),
-        new RegionTargetAddCommand(this));
+    addChildren(new RegionTargetAddCommand(this),
+        new RegionTargetRemoveCommand(this),
+        new RegionTargetTypeCommand(this));
   }
 }

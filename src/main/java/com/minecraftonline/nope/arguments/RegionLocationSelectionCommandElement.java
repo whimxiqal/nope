@@ -2,7 +2,7 @@ package com.minecraftonline.nope.arguments;
 
 import com.flowpowered.math.vector.Vector3i;
 import com.minecraftonline.nope.Nope;
-import com.minecraftonline.nope.RegionWandHandler;
+import com.minecraftonline.nope.key.regionwand.RegionWandHandler;
 import com.minecraftonline.nope.util.Format;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandSource;

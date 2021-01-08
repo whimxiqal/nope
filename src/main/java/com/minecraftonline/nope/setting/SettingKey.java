@@ -69,9 +69,10 @@ public abstract class SettingKey<T> {
    */
   public enum CategoryType {
     BLOCKS,
-    MOVEMENT,
     DAMAGE,
+    ENTITY,
     MISC,
+    MOVEMENT,
   }
 
   protected SettingKey(String id, T defaultData) {

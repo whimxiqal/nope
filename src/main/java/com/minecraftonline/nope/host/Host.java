@@ -50,7 +50,7 @@ public abstract class Host {
 
   public static String contextKeyToName(String key) throws IllegalArgumentException {
     try {
-      return key.split(".")[2];
+      return key.split("\\.")[2];
     } catch (IndexOutOfBoundsException e) {
       throw new IllegalArgumentException("Cannot parse context key name");
     }

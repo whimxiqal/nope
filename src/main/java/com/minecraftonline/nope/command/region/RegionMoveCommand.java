@@ -2,7 +2,7 @@ package com.minecraftonline.nope.command.region;
 
 import com.flowpowered.math.vector.Vector3i;
 import com.minecraftonline.nope.Nope;
-import com.minecraftonline.nope.RegionWandHandler;
+import com.minecraftonline.nope.key.regionwand.RegionWandHandler;
 import com.minecraftonline.nope.arguments.NopeArguments;
 import com.minecraftonline.nope.command.common.CommandNode;
 import com.minecraftonline.nope.command.common.LambdaCommandNode;
@@ -18,7 +18,7 @@ public class RegionMoveCommand extends LambdaCommandNode {
 
   RegionMoveCommand(CommandNode parent) {
     super(parent,
-        Permissions.EDIT_REGION,
+        Permissions.COMMAND_REGION_EDIT,
         Text.of("Allows the user to resize the region"),
         "move");
 
@@ -60,7 +60,7 @@ public class RegionMoveCommand extends LambdaCommandNode {
         return CommandResult.empty();
       }
 
-      Nope.getInstance().getHostTree().save();
+      Nope.getInstance().saveState();
       src.sendMessage(Format.success(String.format(
           "Moved region %s to (%d, %d, %d) <-> (%d, %d, %d) in world %s",
           host.getName(),

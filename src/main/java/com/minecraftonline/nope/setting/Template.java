@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2020 MinecraftOnline
+ * Copyright (c) 2021 MinecraftOnline
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,26 +20,56 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
+ *
  */
 
-package com.minecraftonline.nope.permission;
+package com.minecraftonline.nope.setting;
 
-/**
- * Enumeration of all {@link Permission}s.
- */
-public final class Permissions {
+import lombok.Getter;
 
-  public static final Permission COMMAND_REGION_CREATE = Permission.of("nope.command.region.create");
-  public static final Permission COMMAND_REGION_DELETE = Permission.of("nope.command.region.delete");
-  public static final Permission COMMAND_REGION_EDIT = Permission.of("nope.command.region.edit");
-  public static final Permission COMMAND_REGION_INFO = Permission.of("nope.command.region.info");
-  public static final Permission COMMAND_REGION_LIST = Permission.of("nope.command.region.list");
-  public static final Permission COMMAND_REGION_SHOW = Permission.of("nope.command.region.show");
-  public static final Permission COMMAND_RELOAD = Permission.of("nope.command.reload");
-  public static final Permission COMMAND_SETTING = Permission.of("nope.command.setting");
-  public static final Permission UNAFFECTED = Permission.of("nope.unaffected");
+import java.util.Map;
+import java.util.function.Supplier;
 
-  private Permissions() {
+public class Template implements Map.Entry<String, SettingMap> {
+
+  @Getter
+  private String name;
+  private Supplier<SettingMap> supplier;
+
+  public Template(String name, Supplier<SettingMap> supplier) {
+    this.name = name;
+    this.supplier = supplier;
   }
 
+  @Override
+  public int hashCode() {
+    return this.name.hashCode();
+  }
+
+  @Override
+  public String getKey() {
+    return this.name;
+  }
+
+  @Override
+  public SettingMap getValue() {
+    return this.supplier.get();
+  }
+
+  @Override
+  public SettingMap setValue(SettingMap value) {
+    SettingMap prev = this.supplier.get();
+    this.supplier = () -> value;
+    return prev;
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    return obj instanceof Template && this.name.equals(((Template) obj).name);
+  }
+
+  @Override
+  public String toString() {
+    return name;
+  }
 }

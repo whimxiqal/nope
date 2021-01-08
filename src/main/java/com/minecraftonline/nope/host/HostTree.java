@@ -29,7 +29,6 @@ import com.flowpowered.math.vector.Vector3i;
 import com.minecraftonline.nope.setting.SettingKey;
 import com.minecraftonline.nope.setting.SettingLibrary;
 import org.spongepowered.api.entity.living.player.User;
-import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 
@@ -49,12 +48,12 @@ public interface HostTree {
   /**
    * Load all data from some specified storage.
    */
-  void load();
+  void load() throws Exception;
 
   /**
    * Save all data to some specified storage.
    */
-  void save();
+  void save() throws Exception;
 
   /**
    * Get the GlobalHost.

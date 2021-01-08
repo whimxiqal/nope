@@ -25,6 +25,7 @@
 
 package com.minecraftonline.nope.command.region;
 
+import com.minecraftonline.nope.Nope;
 import com.minecraftonline.nope.arguments.NopeArguments;
 import com.minecraftonline.nope.command.common.CommandNode;
 import com.minecraftonline.nope.command.common.LambdaCommandNode;
@@ -42,7 +43,7 @@ import java.util.Optional;
 class RegionTargetAddPermissionCommand extends LambdaCommandNode {
   public RegionTargetAddPermissionCommand(CommandNode parent) {
     super(parent,
-        Permissions.EDIT_REGION,
+        Permissions.COMMAND_REGION_EDIT,
         Text.of("Add a permission requirement to a setting"),
         "permission", "perm");
     addCommandElements(GenericArguments.flags()
@@ -69,6 +70,7 @@ class RegionTargetAddPermissionCommand extends LambdaCommandNode {
 
       String permission = args.requireOne("permission");
       value.get().getTarget().put(permission, args.requireOne("value"));
+      Nope.getInstance().saveState();
       src.sendMessage(Format.success("Added permission ",
           Format.note(permission),
           " to setting ",

@@ -83,7 +83,7 @@ public final class Format {
   }
 
   public static Text keyValue(String key, Text value) {
-    return Text.of(Format.ACCENT, key, Format.note(value));
+    return Text.of(Format.ACCENT, key, " ", Format.note(value));
   }
 
   public static Text hover(String label, String onHover) {

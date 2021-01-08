@@ -9,18 +9,13 @@ import com.minecraftonline.nope.permission.Permissions;
 import com.minecraftonline.nope.util.Format;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.args.GenericArguments;
-import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
-
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
 
 public class RegionSetPriorityCommand extends LambdaCommandNode {
 
   RegionSetPriorityCommand(CommandNode parent) {
     super(parent,
-        Permissions.EDIT_REGION,
+        Permissions.COMMAND_REGION_EDIT,
         Text.of("Allows the user to set the priority of a region"),
         "setpriority");
 
@@ -47,7 +42,7 @@ public class RegionSetPriorityCommand extends LambdaCommandNode {
         return CommandResult.empty();
       }
 
-      Nope.getInstance().getHostTree().save();
+      Nope.getInstance().saveState();
       src.sendMessage(Format.success("Set priority of host ",
           Format.host(host),
           " to ",

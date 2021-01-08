@@ -37,7 +37,6 @@ import com.minecraftonline.nope.util.Format;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.args.GenericArguments;
-import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.text.Text;
 
@@ -47,7 +46,7 @@ import java.util.concurrent.ExecutionException;
 class RegionTargetAddPlayerCommand extends LambdaCommandNode {
   public RegionTargetAddPlayerCommand(CommandNode parent) {
     super(parent,
-        Permissions.EDIT_REGION,
+        Permissions.COMMAND_REGION_EDIT,
         Text.of("Add a user to the whitelist or blacklist"),
         "player");
     addCommandElements(GenericArguments.flags()
@@ -82,11 +81,22 @@ class RegionTargetAddPlayerCommand extends LambdaCommandNode {
             } catch (InterruptedException | ExecutionException e) {
               e.printStackTrace();
             }
-            value.get().getTarget().add(profile.getUniqueId());
-            src.sendMessage(Format.success("Added player ",
-                Format.note(profile.getName()),
-                " to setting ",
-                Format.settingKey(key, false)));
+            if (profile == null) {
+              src.sendMessage(Format.error("That player cannot be found!"));
+              return;
+            }
+            if (value.get().getTarget().addUser(profile.getUniqueId())) {
+              Nope.getInstance().saveState();
+              src.sendMessage(Format.success("Added player ",
+                  Format.note(profile.getName().orElse("unknown")),
+                  " to setting ",
+                  Format.settingKey(key, false)));
+            } else {
+              src.sendMessage(Format.error("The player ",
+                  Format.note(profile.getName().orElse("unknown")),
+                  " is already targeted on setting ",
+                  Format.settingKey(key, false)));
+            }
           })
           .submit(Nope.getInstance());
       return CommandResult.success();

@@ -42,10 +42,11 @@ import java.util.Optional;
 public class RegionCommand extends FunctionlessCommandNode {
   public RegionCommand(CommandNode parent) {
     super(parent,
-        Permissions.REGION,
+        null,
         Text.of("Alter Nope regions"),
         "region",
         "rg");
+    addChildren(new RegionApplyCommand(this));
     addChildren(new RegionCreateCommand(this));
     addChildren(new RegionDestroyCommand(this));
     addChildren(new RegionInfoCommand(this));
@@ -53,6 +54,7 @@ public class RegionCommand extends FunctionlessCommandNode {
     addChildren(new RegionMoveCommand(this));
     addChildren(new RegionSetCommand(this));
     addChildren(new RegionSetPriorityCommand(this));
+    addChildren(new RegionShowCommand(this));
     addChildren(new RegionTargetCommand(this));
     addChildren(new RegionUnsetCommand(this));
     addChildren(new RegionWandCommand(this));

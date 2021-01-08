@@ -25,7 +25,7 @@
 package com.minecraftonline.nope.command.region;
 
 import com.minecraftonline.nope.Nope;
-import com.minecraftonline.nope.RegionWandHandler;
+import com.minecraftonline.nope.key.regionwand.RegionWandHandler;
 import com.minecraftonline.nope.arguments.NopeArguments;
 import com.minecraftonline.nope.command.common.CommandNode;
 import com.minecraftonline.nope.command.common.LambdaCommandNode;
@@ -44,15 +44,16 @@ public class RegionCreateCommand extends LambdaCommandNode {
 
   RegionCreateCommand(CommandNode parent) {
     super(parent,
-        Permissions.CREATE_REGION,
+        Permissions.COMMAND_REGION_CREATE,
         Text.of("Create a region with current selection and given name"),
         "create",
         "c", "add");
     addCommandElements(
         GenericArguments.onlyOne(GenericArguments.string(Text.of("name"))),
+        NopeArguments.regionLocation(Text.of("selection")),
         GenericArguments.flags()
             .valueFlag(GenericArguments.integer(Text.of("priority")), "p")
-            .buildWith(NopeArguments.regionLocation(Text.of("selection"))));
+            .buildWith(GenericArguments.none()));
     setExecutor((src, args) -> {
       if (!(src instanceof Player)) {
         return CommandResult.empty();
@@ -77,7 +78,7 @@ public class RegionCreateCommand extends LambdaCommandNode {
             selection.getMax(),
             priority
         );
-        Nope.getInstance().getHostTree().save();
+        Nope.getInstance().saveState();
         DynamicSettingListeners.register();
         src.sendMessage(Format.success("Successfully created region ", Format.note(name), "!"));
         Nope.getInstance().getRegionWandHandler().getSelectionMap().remove(player);

@@ -26,6 +26,7 @@
 package com.minecraftonline.nope.command.region;
 
 import com.google.common.collect.Maps;
+import com.minecraftonline.nope.Nope;
 import com.minecraftonline.nope.arguments.NopeArguments;
 import com.minecraftonline.nope.command.common.CommandNode;
 import com.minecraftonline.nope.command.common.LambdaCommandNode;
@@ -44,7 +45,7 @@ import java.util.Optional;
 class RegionTargetTypeCommand extends LambdaCommandNode {
   public RegionTargetTypeCommand(CommandNode parent) {
     super(parent,
-        Permissions.EDIT_REGION,
+        Permissions.COMMAND_REGION_EDIT,
         Text.of("Set how this region will target individual players"),
         "type");
     Map<String, Boolean> choices = Maps.newHashMap();
@@ -83,12 +84,14 @@ class RegionTargetTypeCommand extends LambdaCommandNode {
         src.sendMessage(Format.success("The setting ",
             Format.settingKey(key, false),
             " was changed"));
+        Nope.getInstance().saveState();
+        return CommandResult.success();
       } else {
         src.sendMessage(Format.warn("The setting ",
             Format.settingKey(key, false),
             " already has that type!"));
+        return CommandResult.empty();
       }
-      return CommandResult.success();
     });
   }
 }

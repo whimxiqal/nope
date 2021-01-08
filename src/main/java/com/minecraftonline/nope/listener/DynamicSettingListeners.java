@@ -39,6 +39,7 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.EntityTypes;
+import org.spongepowered.api.entity.living.Agent;
 import org.spongepowered.api.entity.living.Hostile;
 import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.entity.living.animal.Animal;
@@ -147,20 +148,6 @@ public final class DynamicSettingListeners {
                       .getState()
                       .getType().equals(BlockTypes.DIRT)));
   @DynamicSettingListener
-  static final SettingListener<ChangeBlockEvent> BUILD_PERMISSIONS_LISTENER =
-      new PlayerCancelConditionSettingListener<>(
-          SettingLibrary.BUILD_PERMISSIONS,
-          ChangeBlockEvent.class,
-          (event, player) -> event.getTransactions().stream().anyMatch(transaction ->
-              !Nope.getInstance().getHostTree().lookup(
-                  SettingLibrary.BUILD_PERMISSIONS,
-                  player,
-                  transaction.getOriginal().getLocation().orElse(transaction.getFinal()
-                      .getLocation()
-                      .orElseThrow(noLocation(SettingLibrary.BUILD_PERMISSIONS,
-                          ChangeBlockEvent.class,
-                          player))))));
-  @DynamicSettingListener
   static final SettingListener<InteractBlockEvent.Secondary> CHEST_ACCESS_LISTENER =
       new PlayerCancelConditionSettingListener<>(
           SettingLibrary.CHEST_ACCESS,
@@ -265,16 +252,6 @@ public final class DynamicSettingListeners {
                               ChangeBlockEvent.Grow.class,
                               null)))));
   @DynamicSettingListener
-  static final SettingListener<SpawnEntityEvent> DENIED_MOB_SPAWNS_LISTENER =
-      new CancelConditionSettingListener<>(
-          SettingLibrary.DENIED_MOB_SPAWNS,
-          SpawnEntityEvent.class,
-          event -> event.getEntities().stream().anyMatch(entity ->
-              Nope.getInstance()
-                  .getHostTree()
-                  .lookupAnonymous(SettingLibrary.DENIED_MOB_SPAWNS, entity.getLocation())
-                  .contains(entity.getType())));
-  @DynamicSettingListener
   static final SettingListener<ChangeBlockEvent.Break> ENDERDRAGON_GRIEF_BLOCK_LISTENER =
       new EntityBreakConditionSettingListener(
           SettingLibrary.ENDERDRAGON_GRIEF,
@@ -326,13 +303,13 @@ public final class DynamicSettingListeners {
           event -> event.getCause()
               .first(DamageSource.class)
               .filter(damageSource -> Sets.newHashSet(
-                  DamageTypes.CONTACT.getId(),
-                  DamageTypes.DROWN.getId(),
-                  DamageTypes.FALL.getId(),
-                  DamageTypes.FIRE.getId(),
-                  DamageTypes.HUNGER.getId(),
-                  DamageTypes.MAGMA.getId(),
-                  DamageTypes.SUFFOCATE.getId()).contains(damageSource.getType().getId()))
+                  DamageTypes.CONTACT,
+                  DamageTypes.DROWN,
+                  DamageTypes.FALL,
+                  DamageTypes.FIRE,
+                  DamageTypes.HUNGER,
+                  DamageTypes.MAGMA,
+                  DamageTypes.SUFFOCATE).contains(damageSource.getType()))
               .isPresent()
               && event.getTargetEntity() instanceof Player
               && !Nope.getInstance().getHostTree().lookup(SettingLibrary.EVP,
@@ -520,7 +497,7 @@ public final class DynamicSettingListeners {
           SettingLibrary.INVINCIBLE_ANIMALS,
           DamageEntityEvent.class,
           event -> event.getTargetEntity() instanceof Animal
-              && !Nope.getInstance()
+              && Nope.getInstance()
               .getHostTree()
               .lookupAnonymous(
                   SettingLibrary.INVINCIBLE_ANIMALS,
@@ -532,7 +509,7 @@ public final class DynamicSettingListeners {
           DamageEntityEvent.class,
           event -> event.getTargetEntity() instanceof Living
               && !(event.getTargetEntity() instanceof Player)
-              && !Nope.getInstance()
+              && Nope.getInstance()
               .getHostTree()
               .lookupAnonymous(
                   SettingLibrary.INVINCIBLE_MOBS,
@@ -543,10 +520,11 @@ public final class DynamicSettingListeners {
           SettingLibrary.INVINCIBLE_PLAYERS,
           DamageEntityEvent.class,
           event -> event.getTargetEntity() instanceof Player
-              && !Nope.getInstance()
+              && Nope.getInstance()
               .getHostTree()
-              .lookupAnonymous(
+              .lookup(
                   SettingLibrary.INVINCIBLE_PLAYERS,
+                  (Player) event.getTargetEntity(),
                   event.getTargetEntity().getLocation()));
   @DynamicSettingListener
   static final SettingListener<ClickInventoryEvent.Creative> ITEM_DROP_CREATIVE_LISTENER =
@@ -629,17 +607,6 @@ public final class DynamicSettingListeners {
                   .getHostTree()
                   .lookupAnonymous(SettingLibrary.LIGHTNING,
                       spawned.getLocation())));
-  @DynamicSettingListener
-  static final SettingListener<SpawnEntityEvent> MOB_SPAWN =
-      new CancelConditionSettingListener<>(
-          SettingLibrary.MOB_SPAWN,
-          SpawnEntityEvent.class,
-          event -> event.getEntities().stream().anyMatch(entity ->
-              (entity instanceof Living)
-                  && !(entity instanceof Player)
-                  && !Nope.getInstance()
-                  .getHostTree()
-                  .lookupAnonymous(SettingLibrary.MOB_SPAWN, entity.getLocation())));
   @DynamicSettingListener
   static final SettingListener<ChangeBlockEvent> MUSHROOM_GROWTH_BROWN_BLOCK_LISTENER =
       new CancelConditionSettingListener<>(
@@ -812,6 +779,37 @@ public final class DynamicSettingListeners {
               BlockTypes.SNOW_LAYER,
               BlockTypes.AIR).test(event));
   @DynamicSettingListener
+  static final SettingListener<SpawnEntityEvent> SPAWN_ANIMAL_LISTENER =
+      new CancelConditionSettingListener<>(
+          SettingLibrary.SPAWN_ANIMAL,
+          SpawnEntityEvent.class,
+          event -> event.getEntities().stream().anyMatch(entity ->
+              (entity instanceof Animal)
+                  && !Nope.getInstance()
+                  .getHostTree()
+                  .lookupAnonymous(SettingLibrary.SPAWN_ANIMAL, entity.getLocation())));
+  @DynamicSettingListener
+  static final SettingListener<SpawnEntityEvent> SPAWN_HOSTILE_LISTENER =
+      new CancelConditionSettingListener<>(
+          SettingLibrary.SPAWN_HOSTILE,
+          SpawnEntityEvent.class,
+          event -> event.getEntities().stream().anyMatch(entity ->
+              (entity instanceof Hostile)
+                  && !Nope.getInstance()
+                  .getHostTree()
+                  .lookupAnonymous(SettingLibrary.SPAWN_HOSTILE, entity.getLocation())));
+  @DynamicSettingListener
+  static final SettingListener<SpawnEntityEvent> SPAWN_MOB_LISTENER =
+      new CancelConditionSettingListener<>(
+          SettingLibrary.SPAWN_MOB,
+          SpawnEntityEvent.class,
+          event -> event.getEntities().stream().anyMatch(entity ->
+              (entity instanceof Agent)
+                  && !(entity instanceof Player)
+                  && !Nope.getInstance()
+                  .getHostTree()
+                  .lookupAnonymous(SettingLibrary.SPAWN_MOB, entity.getLocation())));
+  @DynamicSettingListener
   static final SettingListener<InteractEntityEvent.Secondary> TNT_CART_IGNITION_LISTENER =
       new PlayerCancelConditionSettingListener<>(
           SettingLibrary.TNT_IGNITION,
@@ -877,6 +875,16 @@ public final class DynamicSettingListeners {
                               ChangeBlockEvent.Place.class,
                               player)))));
   @DynamicSettingListener
+  static final SettingListener<SpawnEntityEvent> UNSPAWNABLE_MOBS_LISTENER =
+      new CancelConditionSettingListener<>(
+          SettingLibrary.UNSPAWNABLE_MOBS,
+          SpawnEntityEvent.class,
+          event -> event.getEntities().stream().anyMatch(entity ->
+              Nope.getInstance()
+                  .getHostTree()
+                  .lookupAnonymous(SettingLibrary.UNSPAWNABLE_MOBS, entity.getLocation())
+                  .contains(entity.getType())));
+  @DynamicSettingListener
   static final SettingListener<ChangeBlockEvent> VINE_GROWTH_LISTENER =
       new CancelConditionSettingListener<>(
           SettingLibrary.VINE_GROWTH,
@@ -931,8 +939,6 @@ public final class DynamicSettingListeners {
   private static Consumer<ChangeBlockEvent> liquidFlowHandler(SettingKey<Boolean> key,
                                                               BlockType flowingType) {
     return event -> event.getTransactions().stream()
-        .filter(trans ->
-            trans.getOriginal().getState().getType().equals(BlockTypes.AIR))
         .filter(trans ->
             trans.getFinal().getState().getType().equals(flowingType))
         .forEach(trans ->

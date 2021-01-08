@@ -41,7 +41,7 @@ public class Setting<T> implements Map.Entry<SettingKey<T>, SettingValue<T>> {
   private SettingValue<T> value;
 
   /**
-   * Static factory. The value is set to null.
+   * Basic static factory. The value is set to null.
    *
    * @param key the key object
    * @param <X> the type of raw data stored
