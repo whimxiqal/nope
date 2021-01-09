@@ -27,6 +27,7 @@ package com.minecraftonline.nope.setting;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
+import lombok.Getter;
 import org.spongepowered.api.text.Text;
 
 import javax.annotation.Nonnull;
@@ -63,6 +64,7 @@ public abstract class SettingKey<T> {
   boolean implemented = true;
   boolean unnaturalDefault = false;
   boolean global = false;
+  boolean playerRestrictive = false;
 
   /**
    * Type of {@link SettingKey} for ordering purposes.
@@ -228,6 +230,10 @@ public abstract class SettingKey<T> {
 
   public final boolean hasUnnaturalDefault() {
     return unnaturalDefault;
+  }
+
+  public final boolean isPlayerRestrictive() {
+    return playerRestrictive;
   }
 
   @Override

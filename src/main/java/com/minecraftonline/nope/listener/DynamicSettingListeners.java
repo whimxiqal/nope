@@ -656,20 +656,19 @@ public final class DynamicSettingListeners {
               Player.class,
               Painting.class));
   @DynamicSettingListener
-  static final SettingListener<CollideEntityEvent> PLAYER_COLLISION_LISTENER =
+  static final SettingListener<MoveEntityEvent> PLAYER_COLLISION_LISTENER =
       new PlayerCancelConditionSettingListener<>(
           SettingLibrary.PLAYER_COLLISION,
-          CollideEntityEvent.class,
-          (event, player) -> event.getEntities()
-              .stream()
-              .anyMatch(other -> other instanceof Player
-                  &&
-                  (!Nope.getInstance().getHostTree().lookup(SettingLibrary.PLAYER_COLLISION,
-                      player,
-                      player.getLocation())
-                      || !Nope.getInstance().getHostTree().lookup(SettingLibrary.PLAYER_COLLISION,
-                      (Player) other,
-                      other.getLocation()))));
+          MoveEntityEvent.class,
+          (event, player) -> !event.getTargetEntity().equals(player)
+              && event.getTargetEntity() instanceof Player
+              &&
+              (!Nope.getInstance().getHostTree().lookup(SettingLibrary.PLAYER_COLLISION,
+                  player,
+                  player.getLocation())
+                  || !Nope.getInstance().getHostTree().lookup(SettingLibrary.PLAYER_COLLISION,
+                  (Player) event.getTargetEntity(),
+                  event.getTargetEntity().getLocation())));
   @DynamicSettingListener
   static final SettingListener<DamageEntityEvent> PVA_LISTENER =
       new CancelConditionSettingListener<>(
@@ -1065,7 +1064,7 @@ public final class DynamicSettingListeners {
                 host.get(dictator);
             boolean shouldCancel;
             if (!movementOptional.isPresent()
-                || !movementOptional.get().getTarget().test(player)) {
+                || !movementOptional.get().getTarget().test(dictator, player)) {
               shouldCancel = false;
             } else {
               SettingLibrary.Movement movement = movementOptional.get().getData();
@@ -1096,11 +1095,11 @@ public final class DynamicSettingListeners {
               Title.Builder titleBuilder = Title.builder();
               Optional<SettingValue<Text>> title = host.get(allowTitleKey);
               Optional<SettingValue<Text>> subtitle = host.get(allowSubtitleKey);
-              if (title.isPresent() && title.get().getTarget().test(player)) {
+              if (title.isPresent() && title.get().getTarget().test(dictator, player)) {
                 showTitle = true;
                 titleBuilder.title(title.get().getData());
               }
-              if (subtitle.isPresent() && subtitle.get().getTarget().test(player)) {
+              if (subtitle.isPresent() && subtitle.get().getTarget().test(dictator, player)) {
                 showTitle = true;
                 titleBuilder.subtitle(subtitle.get().getData());
               }
@@ -1108,7 +1107,7 @@ public final class DynamicSettingListeners {
                 player.sendTitle(titleBuilder.build());
               }
             }
-            if (message.isPresent() && message.get().getTarget().test(player)) {
+            if (message.isPresent() && message.get().getTarget().test(dictator, player)) {
               player.sendMessage(message.get().getData());
             }
           });

@@ -170,6 +170,8 @@ public final class Format {
       onHover.append(Text.of(TextColors.GRAY, key.getDescription().get()));
     }
 
+    onHover.append(Format.keyValue("Restrictive:", String.valueOf(key.isPlayerRestrictive())));
+
     builder.onHover(TextActions.showText(onHover.build()));
 
     builder.append(idText.build());
@@ -220,7 +222,7 @@ public final class Format {
               " > ",
               Format.hover("FORCE AFFECT",
                   "When affect is forced, players with the "
-                      + Permissions.UNAFFECTED.get()
+                      + Permissions.UNRESTRICTED.get()
                       + " permission may still be targeted")));
         }
       }

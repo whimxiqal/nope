@@ -38,7 +38,7 @@ public final class Permissions {
   public static final Permission COMMAND_REGION_TELEPORT = Permission.of("nope.command.region.teleport");
   public static final Permission COMMAND_RELOAD = Permission.of("nope.command.reload");
   public static final Permission COMMAND_SETTING = Permission.of("nope.command.setting");
-  public static final Permission UNAFFECTED = Permission.of("nope.unaffected");
+  public static final Permission UNRESTRICTED = Permission.of("nope.unrestricted");
 
   private Permissions() {
   }

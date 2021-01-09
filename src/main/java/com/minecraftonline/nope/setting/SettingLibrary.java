@@ -60,36 +60,42 @@ public final class SettingLibrary {
 
   @Description("When disabled, armor stands may not be broken")
   @Category(SettingKey.CategoryType.ENTITY)
+  @PlayerRestrictive
   public static final SettingKey<Boolean> ARMOR_STAND_DESTROY = new StateSetting(
       "armor-stand-destroy",
       true
   );
   @Description("When disabled, blocks may not be broken")
   @Category(SettingKey.CategoryType.BLOCKS)
+  @PlayerRestrictive
   public static final SettingKey<Boolean> BLOCK_BREAK = new StateSetting(
       "block-break",
       true
   );
   @Description("When disabled, blocks may not be placed")
   @Category(SettingKey.CategoryType.BLOCKS)
+  @PlayerRestrictive
   public static final SettingKey<Boolean> BLOCK_PLACE = new StateSetting(
       "block-place",
       true
   );
   @Description("When disabled, blocks like farmland may not be trampled")
   @Category(SettingKey.CategoryType.BLOCKS)
+  @PlayerRestrictive
   public static final SettingKey<Boolean> BLOCK_TRAMPLE = new StateSetting(
       "block-trample",
       true
   );
   @Description("When disabled, players may not open chests")
   @Category(SettingKey.CategoryType.BLOCKS)
+  @PlayerRestrictive
   public static final SettingKey<Boolean> CHEST_ACCESS = new StateSetting(
       "chest-access",
       true
   );
   @Description("When disabled, players may not teleport by eating a chorus fruit")
   @NotImplemented
+  @PlayerRestrictive
   public static final SettingKey<Boolean> CHORUS_FRUIT_TELEPORT = new StateSetting(
       "chorus-fruit-teleport",
       true
@@ -108,18 +114,21 @@ public final class SettingLibrary {
   );
   @Description("When disabled, crops do not grow")
   @Category(SettingKey.CategoryType.BLOCKS)
+  @PlayerRestrictive
   public static final SettingKey<Boolean> CROP_GROWTH = new BooleanSetting(
       "crop-growth",
       true
   );
   @Description("Deop the player upon entering")
   @NotImplemented
+  @PlayerRestrictive
   public static final SettingKey<Boolean> DEOP_ON_ENTER = new BooleanSetting(
       "deop-on-enter",
       false
   );
   @Description("When disabled, experience points are never dropped")
   @NotImplemented
+  @PlayerRestrictive
   public static final SettingKey<Boolean> DROP_EXP = new BooleanSetting(
       "drop-exp",
       false
@@ -138,12 +147,14 @@ public final class SettingLibrary {
   );
   @Description("When disabled, enderpearls may not be used for teleportation")
   @Category(SettingKey.CategoryType.MOVEMENT)
+  @PlayerRestrictive
   public static final SettingKey<Boolean> ENDERPEARL_TELEPORT = new StateSetting(
       "enderpearl-teleport",
       true
   );
   @Description("Specify which type of movement is allowed by players to enter")
   @Category(SettingKey.CategoryType.MOVEMENT)
+  @PlayerRestrictive
   public static final SettingKey<Movement> ENTRY = new EnumSetting<>(
       "entry",
       Movement.ALL,
@@ -157,12 +168,14 @@ public final class SettingLibrary {
   );
   @Description("When disabled, the environment cannot inflict damage on players")
   @Category(SettingKey.CategoryType.DAMAGE)
+  @PlayerRestrictive
   public static final SettingKey<Boolean> EVP = new StateSetting(
       "evp",
       true
   );
   @Description("Specify which type of movement is allowed by players to exit")
   @Category(SettingKey.CategoryType.MOVEMENT)
+  @PlayerRestrictive
   public static final SettingKey<Movement> EXIT = new EnumSetting<>(
       "exit",
       Movement.ALL,
@@ -213,6 +226,7 @@ public final class SettingLibrary {
   );
   @Description("When disabled, players cannot light fire")
   @Category(SettingKey.CategoryType.BLOCKS)
+  @PlayerRestrictive
   public static final SettingKey<Boolean> FIRE_IGNITION = new StateSetting(
       "fire-ignition",
       true
@@ -249,6 +263,7 @@ public final class SettingLibrary {
   );
   @Description("When disabled, grass does not grow naturally")
   @Category(SettingKey.CategoryType.BLOCKS)
+  @PlayerRestrictive
   public static final SettingKey<Boolean> GRASS_GROWTH = new StateSetting(
       "grass-growth",
       true
@@ -291,6 +306,7 @@ public final class SettingLibrary {
   );
   @Description("When disabled, players may not interact with any blocks")
   @Category(SettingKey.CategoryType.BLOCKS)
+  @PlayerRestrictive
   public static final SettingKey<Boolean> INTERACT = new StateSetting(
       "interact",
       true
@@ -314,17 +330,20 @@ public final class SettingLibrary {
       false
   );
   @Description("When disabled, players cannot drop items")
+  @PlayerRestrictive
   public static final SettingKey<Boolean> ITEM_DROP = new BooleanSetting(
       "item-drop",
       true
   );
   @Description("When disabled, item frames may not be broken")
   @Category(SettingKey.CategoryType.ENTITY)
+  @PlayerRestrictive
   public static final SettingKey<Boolean> ITEM_FRAME_DESTROY = new StateSetting(
       "item-frame-destroy",
       true
   );
   @Description("When disabled, players cannot pick up items")
+  @PlayerRestrictive
   public static final SettingKey<Boolean> ITEM_PICKUP = new StateSetting(
       "item-pickup",
       true
@@ -349,6 +368,7 @@ public final class SettingLibrary {
   );
   @Description("When disabled, mushrooms do not grow")
   @Category(SettingKey.CategoryType.BLOCKS)
+  @PlayerRestrictive
   public static final SettingKey<Boolean> MUSHROOM_GROWTH = new BooleanSetting(
       "mushroom-growth",
       true
@@ -360,6 +380,7 @@ public final class SettingLibrary {
       true
   );
   @Description("When disabled, health does not regenerate naturally")
+  @PlayerRestrictive
   public static final SettingKey<Boolean> NATURAL_HEALTH_REGEN = new BooleanSetting(
       "natural-health-regen",
       true
@@ -384,6 +405,7 @@ public final class SettingLibrary {
   );
   @Description("When disabled, paintings may not be broken")
   @Category(SettingKey.CategoryType.ENTITY)
+  @PlayerRestrictive
   public static final SettingKey<Boolean> PAINTING_DESTROY = new StateSetting(
       "painting-destroy",
       true
@@ -396,29 +418,34 @@ public final class SettingLibrary {
   );
   @Description("When disabled, players cannot inflict damage on animals")
   @Category(SettingKey.CategoryType.DAMAGE)
+  @PlayerRestrictive
   public static final SettingKey<Boolean> PVA = new StateSetting(
       "pva",
       true
   );
   @Description("When disabled, players cannot inflict damage on hostile creatures")
   @Category(SettingKey.CategoryType.DAMAGE)
+  @PlayerRestrictive
   public static final SettingKey<Boolean> PVH = new StateSetting(
       "pvh",
       true
   );
   @Description("When disabled, players cannot inflict damage on other players")
   @Category(SettingKey.CategoryType.DAMAGE)
+  @PlayerRestrictive
   public static final SettingKey<Boolean> PVP = new StateSetting(
       "pvp",
       true
   );
   @Description("When disabled, players cannot ride other entities")
   @Category(SettingKey.CategoryType.ENTITY)
+  @PlayerRestrictive
   public static final SettingKey<Boolean> RIDE = new StateSetting(
       "ride",
       true
   );
   @Description("When disabled, players cannot sleep")
+  @PlayerRestrictive
   public static final SettingKey<Boolean> SLEEP = new StateSetting(
       "sleep",
       true
@@ -443,18 +470,21 @@ public final class SettingLibrary {
   );
   @Description("When disabled, mobs cannot spawn")
   @Category(SettingKey.CategoryType.ENTITY)
+  @PlayerRestrictive
   public static final SettingKey<Boolean> SPAWN_ANIMAL = new BooleanSetting(
       "spawn-animal",
       true
   );
   @Description("When disabled, mobs cannot spawn")
   @Category(SettingKey.CategoryType.ENTITY)
+  @PlayerRestrictive
   public static final SettingKey<Boolean> SPAWN_HOSTILE = new BooleanSetting(
       "spawn-hostile",
       true
   );
   @Description("When disabled, mobs cannot spawn")
   @Category(SettingKey.CategoryType.ENTITY)
+  @PlayerRestrictive
   public static final SettingKey<Boolean> SPAWN_MOB = new BooleanSetting(
       "spawn-mob",
       true
@@ -507,24 +537,28 @@ public final class SettingLibrary {
   );
   @Description("When disabled, tnt may not be placed")
   @Category(SettingKey.CategoryType.BLOCKS)
+  @PlayerRestrictive
   public static final SettingKey<Boolean> TNT_PLACEMENT = new StateSetting(
       "tnt-placement",
       true
   );
   @Description("These entity types will not be allowed to spawn")
   @Category(SettingKey.CategoryType.ENTITY)
+  @PlayerRestrictive
   public static final SettingKey<Set<EntityType>> UNSPAWNABLE_MOBS = new EntityTypeSetSetting(
       "unspawnable-mobs",
       Sets.newHashSet()
   );
   @Description("When disabled, players may not break vehicles")
   @Category(SettingKey.CategoryType.ENTITY)
+  @PlayerRestrictive
   public static final SettingKey<Boolean> VEHICLE_DESTROY = new StateSetting(
       "vehicle-destroy",
       true
   );
   @Description("When disabled, players may not place vehicles")
   @Category(SettingKey.CategoryType.ENTITY)
+  @PlayerRestrictive
   public static final SettingKey<Boolean> VEHICLE_PLACE = new StateSetting(
       "vehicle-place",
       true
@@ -612,6 +646,8 @@ public final class SettingLibrary {
                 key.implemented = false;
               } else if (annotation instanceof UnnaturalDefault) {
                 key.unnaturalDefault = true;
+              } else if (annotation instanceof PlayerRestrictive) {
+                key.playerRestrictive = true;
               }
             }
           } catch (IllegalAccessException e) {
@@ -640,6 +676,8 @@ public final class SettingLibrary {
       // This does not deserialize:
       setting.getKey().getDescription().ifPresent(description ->
           elem.put("description", description));
+      // This does not deserialize
+      elem.put("restricted", setting.getKey().isPlayerRestrictive());
       elem.put("value", setting.getKey().dataToJson(setting.getValue().getData()));
       elem.put("target", SettingValue.Target.toJson(setting.getValue().getTarget()));
       settingList.add(elem);
@@ -735,6 +773,12 @@ public final class SettingLibrary {
   @Retention(RetentionPolicy.RUNTIME)
   @Target(ElementType.FIELD)
   public @interface NotImplemented {
+    // Empty
+  }
+
+  @Retention(RetentionPolicy.RUNTIME)
+  @Target(ElementType.FIELD)
+  public @interface PlayerRestrictive {
     // Empty
   }
 
