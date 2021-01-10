@@ -1071,7 +1071,7 @@ public final class DynamicSettingListeners {
                 host.get(dictator);
             boolean shouldCancel;
             if (!movementOptional.isPresent()
-                || !movementOptional.get().getTarget().test(player)) {
+                || !movementOptional.get().getTarget().test(dictator, player)) {
               shouldCancel = false;
             } else {
               SettingLibrary.Movement movement = movementOptional.get().getData();
@@ -1095,6 +1095,9 @@ public final class DynamicSettingListeners {
             if (shouldCancel) {
               event.setCancelled(true);
               message = host.get(denyMessageKey);
+              if (message.isPresent() && message.get().getTarget().test(denyMessageKey, player)) {
+                player.sendMessage(message.get().getData());
+              }
             } else {
               message = host.get(allowMessageKey);
 
@@ -1102,21 +1105,22 @@ public final class DynamicSettingListeners {
               Title.Builder titleBuilder = Title.builder();
               Optional<SettingValue<Text>> title = host.get(allowTitleKey);
               Optional<SettingValue<Text>> subtitle = host.get(allowSubtitleKey);
-              if (title.isPresent() && title.get().getTarget().test(player)) {
+              if (title.isPresent() && title.get().getTarget().test(allowTitleKey, player)) {
                 showTitle = true;
                 titleBuilder.title(title.get().getData());
               }
-              if (subtitle.isPresent() && subtitle.get().getTarget().test(player)) {
+              if (subtitle.isPresent() && subtitle.get().getTarget().test(allowSubtitleKey, player)) {
                 showTitle = true;
                 titleBuilder.subtitle(subtitle.get().getData());
               }
               if (showTitle) {
                 player.sendTitle(titleBuilder.build());
               }
+              if (message.isPresent() && message.get().getTarget().test(allowMessageKey, player)) {
+                player.sendMessage(message.get().getData());
+              }
             }
-            if (message.isPresent() && message.get().getTarget().test(player)) {
-              player.sendMessage(message.get().getData());
-            }
+
           });
     };
   }

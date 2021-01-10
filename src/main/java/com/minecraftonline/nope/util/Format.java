@@ -147,7 +147,7 @@ public final class Format {
     );
   }
 
-  public static Text settingKey(SettingKey<?> key, boolean verbose) {
+  public static <T> Text settingKey(SettingKey<T> key, boolean verbose) {
     Text.Builder builder = Text.builder();
 
     Text.Builder idText = Text.builder().append(Text.of(Format.ACCENT, key.getId()));
@@ -163,14 +163,15 @@ public final class Format {
     onHover.append(Format.keyValue("Type:", key.valueType().getSimpleName()));
     onHover.append(Text.NEW_LINE);
 
-    onHover.append(Format.keyValue("Default value:", key.getDefaultData().toString()));
+    onHover.append(Format.keyValue("Default value:", key.print(key.getDefaultData())));
+    onHover.append(Text.NEW_LINE);
+
+    onHover.append(Format.keyValue("Restrictive:", String.valueOf(key.isPlayerRestrictive())));
 
     if (key.getDescription().isPresent()) {
       onHover.append(Text.NEW_LINE).append(Text.NEW_LINE);
       onHover.append(Text.of(TextColors.GRAY, key.getDescription().get()));
     }
-
-    onHover.append(Format.keyValue("Restrictive:", String.valueOf(key.isPlayerRestrictive())));
 
     builder.onHover(TextActions.showText(onHover.build()));
 
@@ -187,8 +188,7 @@ public final class Format {
     return CompletableFuture.supplyAsync(() -> {
       List<Text> list = Lists.newLinkedList();
       list.add(Text.of(Format.settingKey(setting.getKey(), false),
-          " -> ",
-          Format.keyValue("value:", setting.getKey().print(setting.getValue().getData()))));
+          Format.note(" = ", setting.getKey().print(setting.getValue().getData()))));
 
       if (setting.getValue().getTarget() != null) {
         SettingValue.Target target = setting.getValue().getTarget();

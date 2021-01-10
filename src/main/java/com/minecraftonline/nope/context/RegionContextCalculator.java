@@ -34,6 +34,7 @@ import org.spongepowered.api.service.context.Contextual;
 import org.spongepowered.api.service.permission.Subject;
 
 import javax.annotation.Nonnull;
+import java.util.Optional;
 import java.util.Set;
 
 public class RegionContextCalculator implements ContextCalculator<Subject> {
@@ -53,15 +54,9 @@ public class RegionContextCalculator implements ContextCalculator<Subject> {
     if (!(target instanceof Player)) {
       return false;
     }
-    if (!Host.isContextKey(context.getKey())) {
-      return false;
-    }
-    Host host = Nope.getInstance().getHostTree()
-        .getHosts()
-        .get(Host.contextKeyToName(context.getKey()));
-    if (host == null) {
-      return false;
-    }
-    return host.encompasses((Player) target);
+    return Host.contextKeyToName(context.getKey())
+        .flatMap(name -> Optional.of(Nope.getInstance().getHostTree().getHosts().get(name)))
+        .filter(host -> host.encompasses((Player) target))
+        .isPresent();
   }
 }

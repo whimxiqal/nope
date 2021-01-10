@@ -48,17 +48,18 @@ public abstract class Host {
     return "nope.host." + name;
   }
 
-  public static String contextKeyToName(String key) throws IllegalArgumentException {
-    try {
-      return key.split("\\.")[2];
-    } catch (IndexOutOfBoundsException e) {
-      throw new IllegalArgumentException("Cannot parse context key name");
+  public static Optional<String> contextKeyToName(String key) throws IllegalArgumentException {
+    if (!isContextKey(key)) {
+      return Optional.empty();
     }
+    return Optional.of(key.substring(10));
   }
 
   public static boolean isContextKey(String key) {
-    String[] tokens = key.split("\\.");
-    return tokens.length == 3 && tokens[0].equals("nope") && tokens[1].equals("host");
+    if (key == null || key.length() < 11) {
+      return false;
+    }
+    return key.substring(0, 10).equals("nope.host.");
   }
 
   @Getter
