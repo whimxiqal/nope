@@ -673,7 +673,7 @@ public class HostTreeImpl implements HostTree {
         // This shouldn't happen because we previously found that this host has this setting
         throw new RuntimeException("Error retrieving setting value");
       }
-      if (user == null || value.get().getTarget().test(user)) {
+      if (user == null || value.get().getTarget().test(key, user)) {
         return value.get().getData();
       }
     }

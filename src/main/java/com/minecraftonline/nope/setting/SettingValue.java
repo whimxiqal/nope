@@ -30,7 +30,6 @@ import com.google.common.collect.Sets;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.minecraftonline.nope.Nope;
 import com.minecraftonline.nope.host.Host;
 import com.minecraftonline.nope.permission.Permissions;
 import lombok.Getter;
@@ -39,6 +38,7 @@ import org.spongepowered.api.entity.living.player.User;
 
 import javax.annotation.Nonnull;
 import java.util.*;
+import java.util.function.BiPredicate;
 import java.util.function.Predicate;
 
 /**
@@ -97,7 +97,8 @@ public class SettingValue<T> {
    * A class to manage the subjects to which an instance of
    * a {@link Setting} applies.
    */
-  public static class Target extends HashMap<String, Boolean> implements Predicate<User> {
+  public static class Target extends HashMap<String, Boolean>
+      implements BiPredicate<SettingKey<?>, User> {
 
     private Set<UUID> users = Sets.newHashSet();
     private boolean whitelist = true;
@@ -276,9 +277,11 @@ public class SettingValue<T> {
      * @return true if the subject is targeted
      */
     @Override
-    public boolean test(User user) {
-      if (!forceAffect && user.hasPermission(Permissions.UNAFFECTED.get())) {
-        return false;
+    public boolean test(SettingKey<?> key, User user) {
+      if (key.isPlayerRestrictive()) {
+        if (!forceAffect && user.hasPermission(Permissions.UNRESTRICTED.get())) {
+          return false;
+        }
       }
       if (!users.isEmpty()) {
         if (whitelist && !users.contains(user.getUniqueId())) {

@@ -25,7 +25,6 @@
 
 package com.minecraftonline.nope.command.region;
 
-import com.google.common.collect.Maps;
 import com.minecraftonline.nope.Nope;
 import com.minecraftonline.nope.arguments.NopeArguments;
 import com.minecraftonline.nope.command.common.CommandNode;
@@ -39,7 +38,6 @@ import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.args.GenericArguments;
 import org.spongepowered.api.text.Text;
 
-import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -51,9 +49,9 @@ import java.util.Optional;
 public class RegionTargetForceCommand extends LambdaCommandNode {
   public RegionTargetForceCommand(CommandNode parent) {
     super(parent,
-        Permissions.UNAFFECTED,
+        Permissions.COMMAND_REGION_EDIT,
         Text.of("Toggle whether the "
-            + Permissions.UNAFFECTED.get()
+            + Permissions.UNRESTRICTED.get()
             + " permission is respected on this setting"),
         "force");
     addCommandElements(GenericArguments.flags()
@@ -66,6 +64,12 @@ public class RegionTargetForceCommand extends LambdaCommandNode {
         return CommandResult.empty();
       }
       SettingKey<Object> key = args.requireOne("setting");
+
+      if (!key.isPlayerRestrictive()) {
+        src.sendMessage(Format.error("This setting is not restrictive in nature towards players, ",
+            "so unrestricted players are already affected by this setting"));
+        return CommandResult.empty();
+      }
 
       Optional<SettingValue<Object>> value = host.get(key);
       if (!value.isPresent()) {
@@ -82,13 +86,13 @@ public class RegionTargetForceCommand extends LambdaCommandNode {
         src.sendMessage(Format.success("The setting ",
             Format.settingKey(key, false),
             " now bypasses the ",
-            Format.note(Permissions.UNAFFECTED.get()),
+            Format.note(Permissions.UNRESTRICTED.get()),
             " permission"));
       } else {
         src.sendMessage(Format.success("The setting ",
             Format.settingKey(key, false),
             " now does not bypass the ",
-            Format.note(Permissions.UNAFFECTED.get()),
+            Format.note(Permissions.UNRESTRICTED.get()),
             " permission"));
       }
       Nope.getInstance().saveState();
