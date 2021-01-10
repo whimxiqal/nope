@@ -30,26 +30,27 @@ import org.spongepowered.api.entity.living.player.Player;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.UUID;
 
 /**
  * A handler to disable and re-enable collision for players.
  */
 public class CollisionHandler {
-  private final Set<Player> disabledCollision = new HashSet<>();
+  private final Set<UUID> disabledCollision = new HashSet<>();
 
   public void disableCollision(Player player) {
-    if (disabledCollision.add(player)) {
+    if (disabledCollision.add(player.getUniqueId())) {
       CollisionUtil.disableCollision(player);
     }
   }
 
   public void enableCollision(Player player) {
-    if (disabledCollision.remove(player)) {
+    if (disabledCollision.remove(player.getUniqueId())) {
       CollisionUtil.enableCollision(player);
     }
   }
 
   public boolean isCollisionDisabled(Player player) {
-    return this.disabledCollision.contains(player);
+    return this.disabledCollision.contains(player.getUniqueId());
   }
 }

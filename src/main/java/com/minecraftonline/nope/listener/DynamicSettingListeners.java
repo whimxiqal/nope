@@ -656,20 +656,26 @@ public final class DynamicSettingListeners {
               Player.class,
               Painting.class));
   @DynamicSettingListener
-  static final SettingListener<CollideEntityEvent> PLAYER_COLLISION_LISTENER =
-      new PlayerCancelConditionSettingListener<>(
+  static final SettingListener<MoveEntityEvent> PLAYER_COLLISION_LISTENER =
+      new SingleSettingListener<>(
           SettingLibrary.PLAYER_COLLISION,
-          CollideEntityEvent.class,
-          (event, player) -> event.getEntities()
-              .stream()
-              .anyMatch(other -> other instanceof Player
-                  &&
-                  (!Nope.getInstance().getHostTree().lookup(SettingLibrary.PLAYER_COLLISION,
-                      player,
-                      player.getLocation())
-                      || !Nope.getInstance().getHostTree().lookup(SettingLibrary.PLAYER_COLLISION,
-                      (Player) other,
-                      other.getLocation()))));
+          MoveEntityEvent.class,
+          event -> {
+            if (!(event.getTargetEntity() instanceof Player)) {
+              return;
+            }
+            if (Nope.getInstance().getHostTree().lookup(SettingLibrary.PLAYER_COLLISION,
+                (Player) event.getTargetEntity(),
+                event.getTargetEntity().getLocation())) {
+              Nope.getInstance()
+                  .getCollisionHandler()
+                  .enableCollision((Player) event.getTargetEntity());
+            } else {
+              Nope.getInstance()
+                  .getCollisionHandler()
+                  .disableCollision((Player) event.getTargetEntity());
+            }
+          });
   @DynamicSettingListener
   static final SettingListener<DamageEntityEvent> PVA_LISTENER =
       new CancelConditionSettingListener<>(

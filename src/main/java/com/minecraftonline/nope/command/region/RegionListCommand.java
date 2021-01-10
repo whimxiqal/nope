@@ -32,10 +32,12 @@ import com.minecraftonline.nope.permission.Permissions;
 import com.minecraftonline.nope.util.Format;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandResult;
+import org.spongepowered.api.command.args.GenericArguments;
 import org.spongepowered.api.service.pagination.PaginationService;
 import org.spongepowered.api.text.Text;
 
 import java.util.Comparator;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class RegionListCommand extends LambdaCommandNode {
@@ -46,6 +48,7 @@ public class RegionListCommand extends LambdaCommandNode {
         Text.of("List all registered regions"),
         "list",
         "l");
+    addCommandElements(GenericArguments.optional(GenericArguments.string(Text.of("regex"))));
     setExecutor((src, args) -> {
       Sponge.getServiceManager().provide(PaginationService.class)
           .orElseThrow(() -> new IllegalStateException("No pagination service found!"))
@@ -54,6 +57,8 @@ public class RegionListCommand extends LambdaCommandNode {
               .getHosts()
               .values()
               .stream()
+              .filter(name -> !args.hasAny("regex")
+                  || Pattern.compile(args.requireOne("regex")).matcher(name.getName()).find())
               .sorted(Comparator.comparing(Host::getName))
               .map(host -> Text.of(Format.ACCENT, "> ", Format.note(Format.host(host))))
               .collect(Collectors.toList()))
