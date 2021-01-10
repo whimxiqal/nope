@@ -28,16 +28,15 @@ package com.minecraftonline.nope.host;
 import com.flowpowered.math.vector.Vector3i;
 import com.minecraftonline.nope.setting.SettingKey;
 import com.minecraftonline.nope.setting.SettingLibrary;
-import org.spongepowered.api.entity.living.player.User;
-import org.spongepowered.api.world.Location;
-import org.spongepowered.api.world.World;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import org.spongepowered.api.entity.living.player.User;
+import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.World;
 
 /**
  * A generic interface for all Host interaction. Generally, in the
@@ -97,6 +96,7 @@ public interface HostTree {
    * @throws IllegalArgumentException if no world exists with that UUID
    */
   @Nonnull
+  @SuppressWarnings("unused")
   Collection<VolumeHost> getRegions(final UUID worldUuid) throws IllegalArgumentException;
 
   /**

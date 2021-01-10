@@ -241,7 +241,7 @@ public class VolumeTreeTest {
     // Now actually testing
     VolumeTree<Integer, Volume> tree = new VolumeTree<>();
     long constructionElapse = System.currentTimeMillis();
-    tree.pushAll(regions);
+    tree.addAll(regions);
     constructionElapse = System.currentTimeMillis() - constructionElapse;
 
     // Get answers (should take a long time, comparatively) and solution
@@ -326,7 +326,7 @@ public class VolumeTreeTest {
     }
 
     System.out.println("Statistics:");
-    System.out.printf("Height: %d, Size: %d\n", tree.getHeight(), tree.getSize());
+    System.out.printf("Height: %d, Size: %d\n", tree.getHeight(), tree.size());
   }
 
   @Test
@@ -336,7 +336,7 @@ public class VolumeTreeTest {
     map.put(1, new TestVolume(1, 3, 1, 3, 1, 3));
 
     VolumeTree<Integer, Volume> tree = new VolumeTree<>();
-    tree.pushAll(map);
+    tree.addAll(map);
 
     checkAnswers(map.values(), tree, 4, 4, 4, false);
   }
@@ -350,7 +350,7 @@ public class VolumeTreeTest {
     }
 
     VolumeTree<Integer, Volume> tree = new VolumeTree<>();
-    tree.pushAll(map);
+    tree.addAll(map);
 
     checkAnswers(map.values(), tree, height * 2, 1, height, false);
   }
@@ -389,7 +389,7 @@ public class VolumeTreeTest {
     }
 
     VolumeTree<Integer, Volume> tree = new VolumeTree<>();
-    tree.pushAll(map);
+    tree.addAll(map);
 
     int boardSizeX = countX * (size + spacing) - spacing + borderSpacing * 2;
     int boardSizeY = countY * (size + spacing) - spacing + borderSpacing * 2;

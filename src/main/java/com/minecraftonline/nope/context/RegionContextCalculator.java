@@ -51,6 +51,7 @@ public class RegionContextCalculator implements ContextCalculator<Subject> {
 
   @Override
   public boolean matches(@Nonnull Context context, @Nonnull Subject target) {
+    Nope.getInstance().getLogger().info("Matching?");
     if (!(target instanceof Player)) {
       return false;
     }

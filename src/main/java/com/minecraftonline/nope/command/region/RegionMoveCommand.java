@@ -31,7 +31,7 @@ public class RegionMoveCommand extends LambdaCommandNode {
       RegionWandHandler.Selection selection = args.requireOne("selection");
 
       if (!(host instanceof VolumeHost)) {
-        src.sendMessage(Format.error("You can only move volume regions!"));
+        src.sendMessage(Format.error("You can only move volumetric regions!"));
         return CommandResult.empty();
       }
 

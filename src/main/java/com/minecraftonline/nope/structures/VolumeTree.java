@@ -28,13 +28,17 @@ package com.minecraftonline.nope.structures;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+import javax.annotation.Nonnull;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
-
-import javax.annotation.Nonnull;
-import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * A data structure optimized to find any volumes which
@@ -48,7 +52,7 @@ import java.util.stream.Collectors;
  * XMIN -> ZMIN -> XMAX -> ZMAX -> ...
  * Then check Y values at the end
  */
-public class VolumeTree<S, T extends Volume> implements VolumeCollection<S, T> {
+public class VolumeTree<S, T extends Volume> implements VolumeMap<S, T> {
 
   protected final HashMap<S, T> volumes = Maps.newHashMap();
   protected Node root = null;
@@ -70,15 +74,29 @@ public class VolumeTree<S, T extends Volume> implements VolumeCollection<S, T> {
     return root.findVolumes(x, y, z).stream().map(volumes::get).collect(Collectors.toList());
   }
 
+  /**
+   * Add a single volume. Use {@link #addAll(Map)} to add
+   * multiple volumes, as it is much more efficient.
+   *
+   * @param key    the key under which to store and retrieve this volume
+   * @param volume the volume
+   * @return the replaced volume, or null if none previously existed
+   */
   @Override
-  public T push(S key, T volume) {
+  public T add(S key, T volume) {
     T replaced = volumes.put(key, volume);
     construct();
     return replaced;
   }
 
+  /**
+   * Much faster way to add many volumes than using
+   * {@link #add(Object, Volume)}.
+   *
+   * @param map the keys and volumes
+   */
   @Override
-  public void pushAll(Map<S, T> map) {
+  public void addAll(Map<S, T> map) {
     volumes.putAll(map);
     construct();
   }
@@ -112,6 +130,11 @@ public class VolumeTree<S, T extends Volume> implements VolumeCollection<S, T> {
     return volumes.containsKey(key);
   }
 
+  @Override
+  public int size() {
+    return size;
+  }
+
   private void construct() {
     root = construct(Dimension.X, Comparison.MIN, Lists.newLinkedList(volumes.keySet()), 0);
     height = calculateHeight(root);
@@ -119,9 +142,9 @@ public class VolumeTree<S, T extends Volume> implements VolumeCollection<S, T> {
   }
 
   protected final Node construct(Dimension dimension,
-                         Comparison comparison,
-                         List<S> keys,
-                         int unchangedCount) {
+                                 Comparison comparison,
+                                 List<S> keys,
+                                 int unchangedCount) {
     int count = keys.size();
 
     if (count == 0) {
@@ -146,7 +169,10 @@ public class VolumeTree<S, T extends Volume> implements VolumeCollection<S, T> {
 
         /* X MIN */
         keys.sort(Comparator.comparing(key -> volumes.get(key).getMinX()));
-        while (divIndex > 0 && volumes.get(keys.get(divIndex)).getMinX() == volumes.get(keys.get(divIndex - 1)).getMinX()) {
+        while (divIndex > 0 && (
+            volumes.get(keys.get(divIndex)).getMinX()
+                == volumes.get(keys.get(divIndex - 1)).getMinX())
+        ) {
           divIndex--;
         }
         divider = volumes.get(keys.get(divIndex)).getMinX();
@@ -162,7 +188,10 @@ public class VolumeTree<S, T extends Volume> implements VolumeCollection<S, T> {
 
         /* X MAX */
         keys.sort(Comparator.comparing(key -> volumes.get(key).getMaxX()));
-        while (divIndex < count - 1 && volumes.get(keys.get(divIndex)).getMaxX() == volumes.get(keys.get(divIndex - 1)).getMaxX()) {
+        while (divIndex < count - 1 && (
+            volumes.get(keys.get(divIndex)).getMaxX()
+                == volumes.get(keys.get(divIndex - 1)).getMaxX())
+        ) {
           divIndex++;
         }
         divider = volumes.get(keys.get(divIndex - 1)).getMaxX();
@@ -180,7 +209,10 @@ public class VolumeTree<S, T extends Volume> implements VolumeCollection<S, T> {
 
         /* Z MIN */
         keys.sort(Comparator.comparing(key -> volumes.get(key).getMinZ()));
-        while (divIndex > 0 && volumes.get(keys.get(divIndex)).getMinZ() == volumes.get(keys.get(divIndex - 1)).getMinZ()) {
+        while (divIndex > 0 && (
+            volumes.get(keys.get(divIndex)).getMinZ()
+                == volumes.get(keys.get(divIndex - 1)).getMinZ())
+        ) {
           divIndex--;
         }
         divider = volumes.get(keys.get(divIndex)).getMinZ();
@@ -196,7 +228,10 @@ public class VolumeTree<S, T extends Volume> implements VolumeCollection<S, T> {
 
         /* Z MAX */
         keys.sort(Comparator.comparing(key -> volumes.get(key).getMaxZ()));
-        while (divIndex < count - 1 && volumes.get(keys.get(divIndex)).getMaxZ() == volumes.get(keys.get(divIndex - 1)).getMaxZ()) {
+        while (divIndex < count - 1 && (
+            volumes.get(keys.get(divIndex)).getMaxZ()
+                == volumes.get(keys.get(divIndex - 1)).getMaxZ())
+        ) {
           divIndex++;
         }
         divider = volumes.get(keys.get(divIndex - 1)).getMaxZ();
@@ -212,6 +247,92 @@ public class VolumeTree<S, T extends Volume> implements VolumeCollection<S, T> {
     }
 
 
+  }
+
+  protected int calculateHeight(Node node) {
+    if (node instanceof VolumeTree.DimensionDivider) {
+      return 1 + Math.max(
+          calculateHeight(((DimensionDivider) node).left),
+          calculateHeight(((DimensionDivider) node).right));
+    }
+    return 0;
+  }
+
+  protected int calculateSize(Node node) {
+    if (node instanceof VolumeTree.DimensionDivider) {
+      return 1 + calculateSize(((DimensionDivider) node).left)
+          + calculateSize(((DimensionDivider) node).right);
+    }
+    return 0;
+  }
+
+  /**
+   * Send the tree to stdout. This should only be done
+   * for debugging and only with small trees.
+   */
+  public void print() {
+    int widthX = (0x1 << (getHeight()) + 2);
+    int widthY = getHeight() * 3;
+    char[][] treeBoard = new char[widthX][widthY];
+    for (int x = 0; x < widthX; x++) {
+      for (int y = 0; y < widthY; y++) {
+        treeBoard[x][y] = ' ';
+      }
+    }
+    print(treeBoard, root, widthX / 2, 0, widthX);
+    for (int y = 0; y < widthY; y++) {
+      for (int x = 0; x < widthX; x++) {
+        System.out.print(treeBoard[x][y]);
+      }
+      System.out.println();
+    }
+  }
+
+  private void print(char[][] board, Node node, int x, int y, int widthX) {
+    if (node instanceof VolumeTree.EmptyNode) {
+      board[x][y] = '[';
+      board[x + 1][y] = ']';
+      return;
+    }
+    if (node instanceof VolumeTree.ViabilityLeaf) {
+      for (S key : ((ViabilityLeaf) node).viable) {
+        for (char c : key.toString().toCharArray()) {
+          board[x++][y] = c;
+        }
+        board[x++][y] = ',';
+      }
+      return;
+    }
+    if (node instanceof VolumeTree.DimensionDivider) {
+      int divider = ((DimensionDivider) node).divider;
+      int a = x;
+      for (char c : String.valueOf(divider).toCharArray()) {
+        board[a++][y] = c;
+      }
+      for (int i = x - widthX / 8 + 1; i < x + widthX / 8; i++) {
+        if (i < x - 1 || i > a) {
+          board[i][y] = '_';
+        }
+      }
+      board[x - widthX / 8][y + 1] = '/';
+      board[x + widthX / 8][y + 1] = '\\';
+      for (int i = x - widthX / 4 + 2; i < x - widthX / 8; i++) {
+        board[i][y + 1] = '_';
+      }
+      for (int i = x + widthX / 8 + 1; i < x + widthX / 4; i++) {
+        board[i][y + 1] = '_';
+      }
+      print(board, ((DimensionDivider) node).left, x - widthX / 4, y + 2, widthX / 2);
+      print(board, ((DimensionDivider) node).right, x + widthX / 4, y + 2, widthX / 2);
+    }
+  }
+
+  enum Dimension {
+    X, Z
+  }
+
+  enum Comparison {
+    MIN, MAX
   }
 
   protected abstract class Node {
@@ -309,81 +430,4 @@ public class VolumeTree<S, T extends Volume> implements VolumeCollection<S, T> {
     }
   }
 
-  protected int calculateHeight(Node node) {
-    if (node instanceof VolumeTree.DimensionDivider) {
-      return 1 + Math.max(
-          calculateHeight(((DimensionDivider) node).left),
-          calculateHeight(((DimensionDivider) node).right));
-    }
-    return 0;
-  }
-
-  protected int calculateSize(Node node) {
-    if (node instanceof VolumeTree.DimensionDivider) {
-      return 1 + calculateSize(((DimensionDivider) node).left)
-          + calculateSize(((DimensionDivider) node).right);
-    }
-    return 0;
-  }
-
-  /**
-   * Send the tree to stdout. This should only be done
-   * for debugging and only with small trees.
-   */
-  public void print() {
-    int widthX = (0x1 << (getHeight()) + 2);
-    int widthY = getHeight() * 3;
-    char[][] treeBoard = new char[widthX][widthY];
-    for (int x = 0; x < widthX; x++) {
-      for (int y = 0; y < widthY; y++) {
-        treeBoard[x][y] = ' ';
-      }
-    }
-    print(treeBoard, root, widthX / 2, 0, widthX);
-    for (int y = 0; y < widthY; y++) {
-      for (int x = 0; x < widthX; x++) {
-        System.out.print(treeBoard[x][y]);
-      }
-      System.out.println();
-    }
-  }
-
-  private void print(char[][] board, Node node, int x, int y, int widthX) {
-    if (node instanceof VolumeTree.EmptyNode) {
-      board[x][y] = '[';
-      board[x + 1][y] = ']';
-      return;
-    }
-    if (node instanceof VolumeTree.ViabilityLeaf) {
-      for (S key : ((ViabilityLeaf) node).viable) {
-        for (char c : key.toString().toCharArray()) {
-          board[x++][y] = c;
-        }
-        board[x++][y] = ',';
-      }
-      return;
-    }
-    if (node instanceof VolumeTree.DimensionDivider) {
-      int divider = ((DimensionDivider) node).divider;
-      int a = x;
-      for (char c : String.valueOf(divider).toCharArray()) {
-        board[a++][y] = c;
-      }
-      for (int i = x - widthX / 8 + 1; i < x + widthX / 8; i++) {
-        if (i < x - 1 || i > a) {
-          board[i][y] = '_';
-        }
-      }
-      board[x - widthX / 8][y + 1] = '/';
-      board[x + widthX / 8][y + 1] = '\\';
-      for (int i = x - widthX / 4 + 2; i < x - widthX / 8; i++) {
-        board[i][y + 1] = '_';
-      }
-      for (int i = x + widthX / 8 + 1; i < x + widthX / 4; i++) {
-        board[i][y + 1] = '_';
-      }
-      print(board, ((DimensionDivider) node).left, x - widthX / 4, y + 2, widthX / 2);
-      print(board, ((DimensionDivider) node).right, x + widthX / 4, y + 2, widthX / 2);
-    }
-  }
 }

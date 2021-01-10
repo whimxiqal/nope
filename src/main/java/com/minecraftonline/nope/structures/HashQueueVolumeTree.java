@@ -36,7 +36,8 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.stream.Collectors;
 
 /**
- * A class to further optimize lookup time.
+ * An extension of {@link VolumeTree} with cached queries to
+ * optimize lookup time.
  *
  * @param <S> the volume key type
  * @param <T> the volume type
@@ -45,11 +46,11 @@ public class HashQueueVolumeTree<S, T extends Volume> extends VolumeTree<S, T> {
 
   private final Multimap<Query, S> cache = Multimaps.synchronizedSetMultimap(HashMultimap.create());
   private final Queue<Query> history = new ConcurrentLinkedQueue<>();
-  private static final int CACHE_MEMORY = 1 << 22;  // 8 MB
-  private static final int CACHE_SIZE = CACHE_MEMORY / ((16 * 2) + (4 * 3) * 2);
+  private final int size;
 
-  public HashQueueVolumeTree() {
+  public HashQueueVolumeTree(int size) {
     super();
+    this.size = size;
   }
 
   @Nonnull
@@ -77,17 +78,17 @@ public class HashQueueVolumeTree<S, T extends Volume> extends VolumeTree<S, T> {
   }
 
   @Override
-  public T push(S key, T volume) {
+  public T add(S key, T volume) {
     cache.clear();
     history.clear();
-    return super.push(key, volume);
+    return super.add(key, volume);
   }
 
   @Override
-  public void pushAll(Map<S, T> map) {
+  public void addAll(Map<S, T> map) {
     cache.clear();
     history.clear();
-    super.pushAll(map);
+    super.addAll(map);
   }
 
   @Override
@@ -98,7 +99,7 @@ public class HashQueueVolumeTree<S, T extends Volume> extends VolumeTree<S, T> {
   }
 
   private void trim() {
-    if (history.size() > CACHE_SIZE) {
+    if (history.size() > size) {
       cache.removeAll(history.remove());
     }
   }

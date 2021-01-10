@@ -86,6 +86,14 @@ public final class SettingLibrary {
       "block-trample",
       true
   );
+  @Description("The quantity of block locations to cache for each world. "
+      + "Total memory is roughly this multiplied by 56 bytes, "
+      + "multiplied by the number of worlds. Set 0 to disable caching.")
+  @Global
+  public static final SettingKey<Integer> CACHE_SIZE = new PositiveIntegerSetting(
+      "cache-size",
+      75000
+  );
   @Description("When disabled, players may not open chests")
   @Category(SettingKey.CategoryType.BLOCKS)
   @PlayerRestrictive
@@ -818,9 +826,32 @@ public final class SettingLibrary {
     }
   }
 
-  public static class IntegerSetting extends SettingKey<Integer> {
-    public IntegerSetting(String id, Integer defaultValue) {
+  public static class PositiveIntegerSetting extends SettingKey<Integer> {
+    public PositiveIntegerSetting(String id, Integer defaultValue) {
       super(id, defaultValue);
+    }
+
+    @Override
+    public Integer dataFromJsonGenerified(JsonElement json) throws ParseSettingException {
+      int integer = json.getAsInt();
+      if (integer < 0) {
+        throw new ParseSettingException("Data must be a positive integer");
+      }
+      return integer;
+    }
+
+    @Override
+    public Integer parse(String data) throws ParseSettingException {
+      int integer;
+      try {
+        integer = Integer.parseInt(data);
+      } catch (NumberFormatException e) {
+        throw new ParseSettingException("Data must be an integer");
+      }
+      if (integer < 0) {
+        throw new ParseSettingException("Data must be a positive integer");
+      }
+      return integer;
     }
   }
 

@@ -146,6 +146,19 @@ public abstract class Host {
   }
 
   /**
+   * Get the data associated on this host, regardless of the
+   * {@link com.minecraftonline.nope.setting.SettingValue.Target}.
+   *
+   * @param key the key for which to search
+   * @param <A> the type of data to retrieve
+   * @return the data
+   */
+  @Nonnull
+  public <A> A getData(SettingKey<A> key) {
+    return this.get(key).map(SettingValue::getData).orElse(key.getDefaultData());
+  }
+
+  /**
    * Check if a setting is assigned for this Host.
    *
    * @param setting the setting to check for existence

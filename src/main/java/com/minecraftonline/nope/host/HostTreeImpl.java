@@ -37,24 +37,35 @@ import com.minecraftonline.nope.setting.SettingLibrary;
 import com.minecraftonline.nope.setting.SettingValue;
 import com.minecraftonline.nope.structures.HashQueueVolumeTree;
 import com.minecraftonline.nope.structures.VolumeTree;
-
 import java.io.IOException;
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.PriorityQueue;
+import java.util.Queue;
+import java.util.UUID;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-
 import lombok.AccessLevel;
 import lombok.Getter;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.User;
-import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.storage.WorldProperties;
 
+/**
+ * Implementation of HostTree making distinctions between
+ * a GlobalHost, a WorldHost, and a Region (VolumeHost).
+ * @see Host
+ * @see VolumeHost
+ */
 public class HostTreeImpl implements HostTree {
 
   private GlobalHost globalHost;
@@ -65,17 +76,26 @@ public class HostTreeImpl implements HostTree {
   private final Storage storage;
 
   private final String globalHostName;
-  private final Function<String, String> nameConverter;
-  private final String hostNameRegex;
+  private final Function<String, String> worldNameConverter;
+  private final String regionNameRegex;
 
+  /**
+   * Default constructor.
+   *
+   * @param storage            the type of storage to handle IO
+   * @param globalHostName     the name given to the global host
+   * @param worldNameConverter the converter with which to create the world host names
+   * @param regionNameRegex    the allowed regex for added regions, which should ensure
+   *                           no conflicts with global or world hosts
+   */
   public HostTreeImpl(@Nonnull Storage storage,
                       @Nonnull String globalHostName,
-                      @Nonnull Function<String, String> nameConverter,
-                      @Nonnull String hostNameRegex) {
+                      @Nonnull Function<String, String> worldNameConverter,
+                      @Nonnull String regionNameRegex) {
     this.storage = storage;
     this.globalHostName = globalHostName;
-    this.nameConverter = nameConverter;
-    this.hostNameRegex = hostNameRegex;
+    this.worldNameConverter = worldNameConverter;
+    this.regionNameRegex = regionNameRegex;
 
     this.globalHost = new GlobalHost();
   }
@@ -183,7 +203,7 @@ public class HostTreeImpl implements HostTree {
   private WorldHost newWorldHost(UUID worldUuid) {
     return new WorldHost(Sponge.getServer()
         .getWorldProperties(worldUuid)
-        .map(prop -> nameConverter.apply(prop.getWorldName()))
+        .map(prop -> worldNameConverter.apply(prop.getWorldName()))
         .orElseThrow(() -> new RuntimeException(String.format(
             "The worldUuid %s does not correspond to a Sponge world)",
             worldUuid.toString()))),
@@ -198,10 +218,19 @@ public class HostTreeImpl implements HostTree {
     @Getter
     private final UUID worldUuid;
     @Getter(AccessLevel.PUBLIC)
-    private final VolumeTree<String, Region> regionTree = new HashQueueVolumeTree<>();
+    private final VolumeTree<String, Region> regionTree;
 
     WorldHost(String name, UUID worldUuid) {
       super(name, -1);
+      int cacheSize = globalHost.getData(SettingLibrary.CACHE_SIZE);
+      if (cacheSize < 0) {
+        throw new RuntimeException("The cache size must be greater than 0");
+      } else if (cacheSize == 0) {
+        this.regionTree = new VolumeTree<>();
+      } else {
+        this.regionTree = new HashQueueVolumeTree<>(cacheSize);
+      }
+
       this.worldUuid = worldUuid;
       setParent(globalHost);
     }
@@ -326,7 +355,7 @@ public class HostTreeImpl implements HostTree {
       super.setPriority(priority);
       Optional<Region> intersection = findIntersectingRegionWithSamePriority(worldUuid, this);
       if (intersection.isPresent()) {
-        super.setPriority(priority);
+        super.setPriority(prev);
         throw new IllegalArgumentException(String.format(
             "Cannot set priority of %s to %d, "
                 + "because region %s which this intersects has that priority",
@@ -544,7 +573,7 @@ public class HostTreeImpl implements HostTree {
   }
 
   private void addRegion(Region region) {
-    if (!Pattern.matches(hostNameRegex, region.getName())) {
+    if (!Pattern.matches(regionNameRegex, region.getName())) {
       throw new IllegalArgumentException(String.format(
           "Region insertion failed because the format of name %s is not allowed",
           region.getName()));
@@ -575,7 +604,7 @@ public class HostTreeImpl implements HostTree {
     }
     worldHosts.get(region.getWorldUuid())
         .getRegionTree()
-        .push(region.getName(), region);  // Should return null
+        .add(region.getName(), region);  // Should return null
     regionToWorld.put(region.getName(), region.getWorldUuid());
   }
 

@@ -25,18 +25,23 @@
 
 package com.minecraftonline.nope.structures;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
-public interface VolumeCollection<S, T extends Volume> {
+/**
+ * The data structure for holding information about 3D volumes.
+ *
+ * @param <S> the type of key with which to store the volumes
+ * @param <T> the type of volume
+ */
+public interface VolumeMap<S, T extends Volume> {
 
   /**
    * Get all volumes that contain this point in 3D space,
-   * including the boundary.
+   * including the boundaries of the volumes.
    *
    * @param x x value
    * @param y y value
@@ -47,7 +52,7 @@ public interface VolumeCollection<S, T extends Volume> {
   Collection<T> containersOf(int x, int y, int z);
 
   /**
-   * Push a new volume into the tree.
+   * Add a new volume into the structure.
    * Currently, this reconstructs the entire tree because
    * figuring out how to do it dynamically is too complicated.
    *
@@ -56,9 +61,15 @@ public interface VolumeCollection<S, T extends Volume> {
    * @return the volume that was previously under the key, or null if none existed
    */
   @Nullable
-  T push(S key, T volume);
+  T add(S key, T volume);
 
-  void pushAll(Map<S, T> map);
+  /**
+   * Add many volumes into the structure.
+   *
+   * @param map the keys and volumes
+   * @see #add(Object, Volume)
+   */
+  void addAll(Map<S, T> map);
 
   /**
    * Remove the key and volume associated with the key.
@@ -69,25 +80,46 @@ public interface VolumeCollection<S, T extends Volume> {
   @Nullable
   T remove(S key);
 
+  /**
+   * As in {@link Map#keySet()}.
+   *
+   * @return all keys
+   */
   @Nonnull
+  @SuppressWarnings("unused")
   Set<S> keySet();
 
+  /**
+   * As in {@link Map#get(Object)}.
+   *
+   * @param key the key with which to retrieve a volume
+   * @return the volume, or null if none exists
+   */
   @Nullable
   T get(S key);
 
+  /**
+   * Return all volumes stored in the structure.
+   *
+   * @return all volumes
+   */
   @Nonnull
   Collection<T> volumes();
 
+  /**
+   * Check if the structure contains a mapping with this key.
+   *
+   * @param key the key to check
+   * @return true if contains, false if not
+   */
+  @SuppressWarnings("unused")
   boolean containsKey(S key);
 
-  int getSize();
-
-  public enum Dimension {
-    X, Z
-  }
-
-  public enum Comparison {
-    MIN, MAX
-  }
+  /**
+   * Return the number of stored volumes.
+   *
+   * @return how many volumes
+   */
+  int size();
 
 }
