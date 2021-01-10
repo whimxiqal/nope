@@ -39,7 +39,10 @@ import com.minecraftonline.nope.structures.HashQueueVolumeTree;
 import com.minecraftonline.nope.structures.VolumeTree;
 import java.io.IOException;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -664,39 +667,50 @@ public class HostTreeImpl implements HostTree {
   public <V> V lookup(@Nonnull final SettingKey<V> key,
                       @Nullable final User user,
                       @Nonnull final Location<World> location) {
-    // Maximum priority queue (swapped int compare)
-    Queue<Host> maximumHeap = new PriorityQueue<>((h1, h2) ->
-        Integer.compare(h2.getPriority(), h1.getPriority()));
+    /* Collect all hosts */
+    Collection<Host> hosts = new LinkedList<>();
 
-    // add global
+    /* Add global */
     if (globalHost.has(key)) {
-      maximumHeap.add(globalHost);
+      hosts.add(globalHost);
     }
 
-    // add world
+    /* Add world */
     Optional<WorldHost> worldHost = worldHosts.values()
         .stream()
         .filter(host -> host.encompasses(location))
         .findAny();
     if (worldHost.isPresent()) {
       if (worldHost.get().has(key)) {
-        maximumHeap.add(worldHost.get());
+        hosts.add(worldHost.get());
       }
 
-      // add regions
+      /* Add regions */
       worldHost.get().getRegionTree()
           .containersOf(location.getBlockX(),
               location.getBlockY(),
               location.getBlockZ())
           .stream().filter(host -> host.has(key))
-          .forEach(maximumHeap::add);
+          .forEach(hosts::add);
+    }
+
+    /* Choose a data structure that will optimize searching for highest priority matching */
+    Queue<Host> hostQueue;
+    Comparator<Host> descending = (h1, h2) -> Integer.compare(h2.getPriority(), h1.getPriority());
+    /*  */
+    if (hosts.size() > 10) {
+      hostQueue = new PriorityQueue<>(hosts.size(), descending);
+      hostQueue.addAll(hosts);
+    } else {
+      hostQueue = new LinkedList<>(hosts);
+      ((LinkedList<Host>) hostQueue).sort(descending);
     }
 
     Host dictator;
     Optional<SettingValue<V>> value;
 
-    while (maximumHeap.peek() != null) {
-      dictator = maximumHeap.remove();
+    while (hostQueue.peek() != null) {
+      dictator = hostQueue.remove();
       value = dictator.get(key);
       if (!value.isPresent()) {
         // This shouldn't happen because we previously found that this host has this setting

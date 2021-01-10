@@ -41,7 +41,6 @@ import org.spongepowered.api.command.args.GenericArguments;
 import org.spongepowered.api.effect.particle.ParticleEffect;
 import org.spongepowered.api.effect.particle.ParticleTypes;
 import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.text.Text;
 
 import java.util.Random;
@@ -53,9 +52,7 @@ public class RegionShowCommand extends LambdaCommandNode {
         Text.of("Graphically display the region in the world"),
         "show",
         "see");
-    addCommandElements(GenericArguments.flags()
-        .valueFlag(NopeArguments.host(Text.of("region")), "r", "-region")
-        .buildWith(GenericArguments.none()));
+    addCommandElements(GenericArguments.optional(NopeArguments.host(Text.of("region"))));
     setExecutor((src, args) -> {
       if (!(src instanceof Player)) {
         src.sendMessage(Format.error("You must be a player to send this command!"));
@@ -65,6 +62,7 @@ public class RegionShowCommand extends LambdaCommandNode {
       Player player = (Player) src;
       Host host = args.<Host>getOne("region").orElse(RegionCommand.inferHost(src).orElse(null));
       if (host == null) {
+        player.sendMessage(Format.error("We couldn't find that host!"));
         return CommandResult.empty();
       }
       if (!(host instanceof VolumeHost)) {
