@@ -93,7 +93,7 @@ public class PlayerMovementHandler {
                   false,
                   cancelled -> {
                     if (cancelled) {
-                      player.setLocationSafely(getPreviousLocation(uuid));
+                      player.setLocation(getPreviousLocation(uuid));
                     } else {
                       positions.put(uuid, player.getLocation().getBlockPosition());
                       worldLocations.put(uuid, player.getLocation().getExtent().getUniqueId());
@@ -150,6 +150,8 @@ public class PlayerMovementHandler {
     Text message;
     Text title;
     Text subtitle;
+    boolean canMessage = messageTime.get(player.getUniqueId())
+        + MESSAGE_COOLDOWN_MILLISECONDS < System.currentTimeMillis();
 
     /* Exiting */
     for (int i = exiting.size() - 1; i >= 0; i--) {
@@ -165,19 +167,13 @@ public class PlayerMovementHandler {
         title = exiting.get(i).getData(SettingLibrary.FAREWELL_TITLE, player);
         subtitle = exiting.get(i).getData(SettingLibrary.FAREWELL_SUBTITLE, player);
       }
-      if (!message.isEmpty()) {
-        if (messageTime.get(player.getUniqueId()) + MESSAGE_COOLDOWN_MILLISECONDS
-            < System.currentTimeMillis()) {
-          player.sendMessage(message);
-          messaged = true;
-        }
+      if (!message.isEmpty() && canMessage) {
+        player.sendMessage(message);
+        messaged = true;
       }
-      if (!title.isEmpty() || !subtitle.isEmpty()) {
-        if (messageTime.get(player.getUniqueId()) + MESSAGE_COOLDOWN_MILLISECONDS
-            < System.currentTimeMillis()) {
-          player.sendTitle(Title.builder().title(title).subtitle(subtitle).build());
-          messaged = true;
-        }
+      if ((!title.isEmpty() || !subtitle.isEmpty()) && canMessage) {
+        player.sendTitle(Title.builder().title(title).subtitle(subtitle).build());
+        messaged = true;
       }
     }
 
@@ -195,23 +191,17 @@ public class PlayerMovementHandler {
         title = entering.get(i).getData(SettingLibrary.GREETING_TITLE, player);
         subtitle = entering.get(i).getData(SettingLibrary.GREETING_SUBTITLE, player);
       }
-      if (!message.isEmpty()) {
-        if (messageTime.get(player.getUniqueId()) + MESSAGE_COOLDOWN_MILLISECONDS
-            < System.currentTimeMillis()) {
-          player.sendMessage(message);
-          messaged = true;
-        }
+      if (!message.isEmpty() && canMessage) {
+        player.sendMessage(message);
+        messaged = true;
       }
-      if (!title.isEmpty() || !subtitle.isEmpty()) {
-        if (messageTime.get(player.getUniqueId()) + MESSAGE_COOLDOWN_MILLISECONDS
-            < System.currentTimeMillis()) {
-          player.sendTitle(Title.builder().title(title).subtitle(subtitle).build());
-          messaged = true;
-        }
+      if ((!title.isEmpty() || !subtitle.isEmpty()) && canMessage) {
+        player.sendTitle(Title.builder().title(title).subtitle(subtitle).build());
+        messaged = true;
       }
     }
 
-    /* Update message time (for reduced spamming */
+    /* Update message time (for reduced spamming) */
     if (messaged) {
       messageTime.put(player.getUniqueId(), System.currentTimeMillis());
     }

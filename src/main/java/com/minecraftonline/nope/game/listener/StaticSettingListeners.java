@@ -43,23 +43,11 @@ public final class StaticSettingListeners {
 
   @Listener
   public void onMove(MoveEntityEvent.Position event, @Root Player player) {
-    DynamicSettingListeners.printEvent(event);
     Nope.getInstance().getPlayerMovementHandler().tryPassThreshold(
         player,
         event.getFromTransform().getLocation(),
         event.getToTransform().getLocation(),
         true,
-        event::setCancelled
-    );
-  }
-
-  @Listener
-  public void onMove(MoveEntityEvent.Teleport event, @Root Player player) {
-    Nope.getInstance().getPlayerMovementHandler().tryPassThreshold(
-        player,
-        event.getFromTransform().getLocation(),
-        event.getToTransform().getLocation(),
-        false,
         event::setCancelled
     );
   }

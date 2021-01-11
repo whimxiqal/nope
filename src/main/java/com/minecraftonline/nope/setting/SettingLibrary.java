@@ -206,7 +206,7 @@ public final class SettingLibrary {
   @Category(SettingKey.CategoryType.MOVEMENT)
   public static final SettingKey<Text> EXIT_DENY_MESSAGE = new TextSetting(
       "exit-deny-message",
-      Format.error("You are not allowed to leave here")
+      Text.of(TextColors.RED, "You are not allowed to leave here")
   );
   @Description("The title that is sent to a player if they are barred from exiting")
   @Category(SettingKey.CategoryType.MOVEMENT)
