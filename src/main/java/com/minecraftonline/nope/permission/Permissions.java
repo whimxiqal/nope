@@ -29,22 +29,18 @@ package com.minecraftonline.nope.permission;
  */
 public final class Permissions {
 
+  public static final Permission COMMAND_REGION_CREATE = Permission.of("nope.command.region.create");
+  public static final Permission COMMAND_REGION_DELETE = Permission.of("nope.command.region.delete");
+  public static final Permission COMMAND_REGION_EDIT = Permission.of("nope.command.region.edit");
+  public static final Permission COMMAND_REGION_INFO = Permission.of("nope.command.region.info");
+  public static final Permission COMMAND_REGION_LIST = Permission.of("nope.command.region.list");
+  public static final Permission COMMAND_REGION_SHOW = Permission.of("nope.command.region.show");
+  public static final Permission COMMAND_REGION_TELEPORT = Permission.of("nope.command.region.teleport");
+  public static final Permission COMMAND_RELOAD = Permission.of("nope.command.reload");
+  public static final Permission COMMAND_SETTING = Permission.of("nope.command.setting");
+  public static final Permission UNRESTRICTED = Permission.of("nope.unrestricted");
+
   private Permissions() {
   }
-
-  // Command permissions
-  public static final Permission COMMAND_ROOT = Permission.of("nope.command");
-
-  public static final Permission REGION = Permission.of("nope.command.region");
-
-  public static final Permission CREATE_REGION = Permission.of("nope.command.region.create");
-
-  public static final Permission EDIT_REGION = Permission.of("nope.command.region.edit");
-
-  public static final Permission LIST_REGIONS = Permission.of("nope.command.region.list");
-
-  public static final Permission INFO_REGION = Permission.of("nope.command.region.info");
-
-  public static final Permission DELETE_REGIONS = Permission.of("nope.command.region.delete");
 
 }

@@ -24,7 +24,14 @@
 
 package com.minecraftonline.nope.util;
 
+import com.google.common.collect.Lists;
 import com.minecraftonline.nope.Nope;
+import com.minecraftonline.nope.host.Host;
+import com.minecraftonline.nope.permission.Permissions;
+import com.minecraftonline.nope.setting.Setting;
+import com.minecraftonline.nope.setting.SettingKey;
+import com.minecraftonline.nope.setting.SettingValue;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.action.TextActions;
 import org.spongepowered.api.text.format.TextColor;
@@ -35,6 +42,10 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
 
 public final class Format {
 
@@ -69,7 +80,11 @@ public final class Format {
   }
 
   public static Text keyValue(String key, String value) {
-    return Text.of(Format.ACCENT, key, Format.note(value));
+    return keyValue(key, Text.of(value));
+  }
+
+  public static Text keyValue(String key, Text value) {
+    return Text.of(Format.ACCENT, key, " ", Format.note(value));
   }
 
   public static Text hover(String label, String onHover) {
@@ -108,6 +123,111 @@ public final class Format {
           Format.note(command))));
     }
     return builder.build();
+  }
+
+  public static Text subtleCommand(@Nonnull String text, @Nonnull String command, @Nullable Text hoverMessage) {
+    Text.Builder builder = Text.builder().append(Text.of(Format.ACCENT, text))
+        .onClick(TextActions.runCommand(command));
+
+    if (hoverMessage != null) {
+      builder.onHover(TextActions.showText(Text.of(
+          hoverMessage,
+          hoverMessage.isEmpty() ? Text.EMPTY : "\n",
+          Format.note(command))));
+    }
+    return builder.build();
+  }
+
+  public static Text host(@Nonnull Host host) {
+    String name = host.getName();
+    return Format.subtleCommand(
+        name,
+        "/nope rg info " + name,
+        Text.of("Click for more details about this region")
+    );
+  }
+
+  public static <T> Text settingKey(SettingKey<T> key, boolean verbose) {
+    Text.Builder builder = Text.builder();
+
+    Text.Builder idText = Text.builder().append(Text.of(Format.ACCENT, key.getId()));
+
+    Text.Builder onHover = Text.builder();
+
+    if (!key.isImplemented()) {
+      idText.style(TextStyles.STRIKETHROUGH);
+      onHover.append(Text.of(TextColors.RED, "Not implemented yet!"));
+      onHover.append(Text.NEW_LINE);
+    }
+
+    onHover.append(Format.keyValue("Type:", key.valueType().getSimpleName()));
+    onHover.append(Text.NEW_LINE);
+
+    onHover.append(Format.keyValue("Default value:", key.print(key.getDefaultData())));
+    onHover.append(Text.NEW_LINE);
+
+    onHover.append(Format.keyValue("Restrictive:", String.valueOf(key.isPlayerRestrictive())));
+
+    if (key.getDescription().isPresent()) {
+      onHover.append(Text.NEW_LINE).append(Text.NEW_LINE);
+      onHover.append(Text.of(TextColors.GRAY, key.getDescription().get()));
+    }
+
+    builder.onHover(TextActions.showText(onHover.build()));
+
+    builder.append(idText.build());
+    if (verbose) {
+      builder.append(Text.of(" "));
+      builder.append(Format.note(key.getDescription().orElse("No description")));
+    }
+
+    return builder.build();
+  }
+
+  public static <T> CompletableFuture<List<Text>> setting(Setting<T> setting) {
+    return CompletableFuture.supplyAsync(() -> {
+      List<Text> list = Lists.newLinkedList();
+      list.add(Text.of(Format.settingKey(setting.getKey(), false),
+          Format.note(" = ", setting.getKey().print(setting.getValue().getData()))));
+
+      if (setting.getValue().getTarget() != null) {
+        SettingValue.Target target = setting.getValue().getTarget();
+        if (!target.getUsers().isEmpty()) {
+          list.add(Text.of(TextColors.GREEN,
+              " > ",
+              Format.keyValue(target.hasWhitelist() ? "Whitelist:" : "Blacklist:",
+                  target.getUsers()
+                      .stream()
+                      .map(uuid -> {
+                        try {
+                          return Sponge.getServer().getGameProfileManager()
+                              .get(uuid)
+                              .get().getName().orElseThrow(() ->
+                                  new RuntimeException("Failed to get user profile name "
+                                      + "for UUID: " + uuid.toString()));
+                        } catch (InterruptedException | ExecutionException e) {
+                          e.printStackTrace();
+                          return "";
+                        }
+                      })
+                      .filter(s -> !s.isEmpty())
+                      .collect(Collectors.joining(", ")))));
+        }
+        target.forEach((permission, value) ->
+            list.add(Text.of(TextColors.GREEN,
+                " > ",
+                Format.keyValue(permission + ":", String.valueOf(value)))));
+        if (target.isForceAffect()) {
+          list.add(Text.of(TextColors.GREEN,
+              " > ",
+              Format.hover("FORCE AFFECT",
+                  "When affect is forced, players with the "
+                      + Permissions.UNRESTRICTED.get()
+                      + " permission may still be targeted")));
+        }
+      }
+      return list;
+    });
   }
 
 }

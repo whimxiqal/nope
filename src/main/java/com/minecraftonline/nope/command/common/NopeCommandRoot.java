@@ -25,16 +25,17 @@
 package com.minecraftonline.nope.command.common;
 
 import com.minecraftonline.nope.Nope;
-import com.minecraftonline.nope.command.ExampleCommand;
+import com.minecraftonline.nope.command.ReloadCommand;
 import com.minecraftonline.nope.command.region.RegionCommand;
 import com.minecraftonline.nope.command.setting.SettingCommand;
-import com.minecraftonline.nope.permission.Permissions;
+import com.minecraftonline.nope.host.Host;
+import com.minecraftonline.nope.host.HostTreeImpl;
+import com.minecraftonline.nope.structures.HashQueueVolumeTree;
 import com.minecraftonline.nope.util.Format;
-import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.args.CommandContext;
-import org.spongepowered.api.command.args.GenericArguments;
+import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.text.format.TextStyles;
@@ -43,20 +44,20 @@ import javax.annotation.Nonnull;
 
 public class NopeCommandRoot extends CommandNode {
 
-  public NopeCommandRoot() {
+  NopeCommandRoot() {
     super(null,
-        Permissions.COMMAND_ROOT,
+        null,
         Text.of("The base command for all commands pertaining to Nope"),
         "nope");
     addCommandElements();
-    addChildren(new ExampleCommand(this));
     addChildren(new RegionCommand(this));
     addChildren(new SettingCommand(this));
+    addChildren(new ReloadCommand(this));
   }
 
   @Nonnull
   @Override
-  public CommandResult execute(CommandSource src, CommandContext args) throws CommandException {
+  public CommandResult execute(CommandSource src, CommandContext args) {
     src.sendMessage(Text.of(Format.note("==========================")));
     src.sendMessage(Text.of(
         Format.THEME, TextStyles.BOLD, String.format(
@@ -87,6 +88,19 @@ public class NopeCommandRoot extends CommandNode {
             Text.EMPTY),
         " ",
         "command."));
+    if (src instanceof Player) {
+      Host worldHost = Nope.getInstance()
+          .getHostTree()
+          .getWorldHost(((Player) src).getLocation().getExtent().getUniqueId());
+      if (worldHost instanceof HostTreeImpl.WorldHost) {
+        if (((HostTreeImpl.WorldHost) worldHost).getRegionTree() instanceof HashQueueVolumeTree) {
+          src.sendMessage(Text.of("Cache size: ",
+              Format.note(
+                  ((HashQueueVolumeTree<?, ?>) ((HostTreeImpl.WorldHost) worldHost).getRegionTree())
+                  .getCacheSize())));
+        }
+      }
+    }
     return CommandResult.success();
   }
 

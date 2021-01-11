@@ -24,33 +24,35 @@
 
 package com.minecraftonline.nope.command.region;
 
+import com.google.common.collect.Lists;
 import com.minecraftonline.nope.Nope;
 import com.minecraftonline.nope.command.common.CommandNode;
-import com.minecraftonline.nope.control.Settings;
-import com.minecraftonline.nope.key.NopeKeys;
 import com.minecraftonline.nope.key.regionwand.RegionWandManipulator;
 import com.minecraftonline.nope.permission.Permissions;
+import com.minecraftonline.nope.setting.SettingLibrary;
+import com.minecraftonline.nope.setting.SettingValue;
 import com.minecraftonline.nope.util.Format;
-import com.sk89q.worldedit.blocks.BaseItemStack;
-import com.sk89q.worldedit.blocks.ItemType;
-import com.sk89q.worldedit.sponge.SpongeWorldEdit;
-import org.spongepowered.api.command.CommandException;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.args.CommandContext;
+import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.entity.MainPlayerInventory;
 import org.spongepowered.api.item.inventory.query.QueryOperationTypes;
 import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.format.TextColors;
 
 import javax.annotation.Nonnull;
 
 public class RegionWandCommand extends CommandNode {
-  public RegionWandCommand(CommandNode parent) {
+
+  RegionWandCommand(CommandNode parent) {
     super(parent,
-        Permissions.CREATE_REGION,
+        Permissions.COMMAND_REGION_CREATE,
         Text.of("Get a wand for easy creation of regions"),
         "wand",
         "w");
@@ -64,21 +66,36 @@ public class RegionWandCommand extends CommandNode {
       return CommandResult.empty();
     }
     Player player = (Player) src;
-    Inventory inv = player.getInventory().query(QueryOperationTypes.INVENTORY_TYPE.of(MainPlayerInventory.class));
 
-    ItemType itemType = Nope.getInstance()
-        .getGlobalHost()
-        .getSettingValue(Settings.WAND_ITEM)
-        .orElse(Settings.WAND_ITEM.getDefaultValue());
+    ItemStack itemStack = ItemStack.builder()
+        .itemType(Sponge.getRegistry()
+            .getType(ItemType.class, Nope.getInstance()
+                .getHostTree()
+                .getGlobalHost()
+                .get(SettingLibrary.WAND_ITEM)
+                .map(SettingValue::getData)
+                .orElse(SettingLibrary.WAND_ITEM.getDefaultData()))
+            .orElseThrow(() -> new IllegalStateException("Storing an illegal wand id")))
+        .quantity(1)
+        .build();
 
-    ItemStack itemStack = SpongeWorldEdit.toSpongeItemStack(new BaseItemStack(itemType.getID(), 1));
+    itemStack.offer(Keys.DISPLAY_NAME, Text.of(TextColors.AQUA,
+        "Nope Wand"));
+    itemStack.offer(Keys.ITEM_LORE, Lists.newArrayList(Text.of(TextColors.GRAY,
+        "Select two corners of a region with left click and right click")));
+
     itemStack.offer(new RegionWandManipulator(true));
+
+    Inventory inv = player.getInventory()
+        .query(QueryOperationTypes.INVENTORY_TYPE.of(MainPlayerInventory.class));
     if (!inv.canFit(itemStack)) {
-      player.sendMessage(Format.error("You have no room in your inventory, make way for the magic wand and try again"));
+      player.sendMessage(Format.error("You have no room in your inventory! ",
+          "Make way for the magic wand and try again"));
       return CommandResult.empty();
     }
     inv.offer(itemStack);
-    player.sendMessage(Format.info("Left click for first position, right click for second position"));
+    player.sendMessage(Format.info("Left click for first position; "
+        + "right click for second position"));
     return CommandResult.success();
   }
 }

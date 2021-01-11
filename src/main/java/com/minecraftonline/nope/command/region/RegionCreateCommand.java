@@ -25,12 +25,12 @@
 package com.minecraftonline.nope.command.region;
 
 import com.minecraftonline.nope.Nope;
-import com.minecraftonline.nope.RegionWandHandler;
+import com.minecraftonline.nope.key.regionwand.RegionWandHandler;
+import com.minecraftonline.nope.arguments.NopeArguments;
 import com.minecraftonline.nope.command.common.CommandNode;
 import com.minecraftonline.nope.command.common.LambdaCommandNode;
-import com.minecraftonline.nope.control.Region;
-import com.minecraftonline.nope.control.RegularRegion;
-import com.minecraftonline.nope.control.WorldHost;
+import com.minecraftonline.nope.host.Host;
+import com.minecraftonline.nope.game.listener.DynamicSettingListeners;
 import com.minecraftonline.nope.permission.Permissions;
 import com.minecraftonline.nope.util.Format;
 import org.spongepowered.api.command.CommandResult;
@@ -38,41 +38,54 @@ import org.spongepowered.api.command.args.GenericArguments;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
 
+import java.util.Comparator;
+
 public class RegionCreateCommand extends LambdaCommandNode {
-  public RegionCreateCommand(CommandNode parent) {
+
+  RegionCreateCommand(CommandNode parent) {
     super(parent,
-        Permissions.CREATE_REGION,
+        Permissions.COMMAND_REGION_CREATE,
         Text.of("Create a region with current selection and given name"),
         "create",
-        "c",
-        "new");
-    addCommandElements(GenericArguments.onlyOne(GenericArguments.string(Text.of("name"))));
+        "c", "add");
+    addCommandElements(
+        GenericArguments.onlyOne(GenericArguments.string(Text.of("name"))),
+        NopeArguments.regionLocation(Text.of("selection")),
+        GenericArguments.flags()
+            .valueFlag(GenericArguments.integer(Text.of("priority")), "p")
+            .buildWith(GenericArguments.none()));
     setExecutor((src, args) -> {
-      String name = (String) args.getOne(Text.of("name")).get();
       if (!(src instanceof Player)) {
-        src.sendMessage(Format.error("You must execute this command as a player"));
         return CommandResult.empty();
       }
-      Player player = (Player)src;
-      RegionWandHandler.Selection selection = Nope.getInstance().getRegionWandHandler().getSelectionMap().get(player);
-      if (selection == null || !selection.isComplete()) {
-        player.sendMessage(Format.error(
-            Text.of("Make a selection first using the "),
-            Format.command(
-                "wand",
-                "nope region wand",
-                Text.of("Get a region wand"))));
+
+      Player player = (Player) src;
+      String name = args.requireOne(Text.of("name"));
+      RegionWandHandler.Selection selection = args.requireOne(Text.of("selection"));
+      int priority = args.<Integer>getOne("priority").orElse(
+          Nope.getInstance()
+              .getHostTree()
+              .getContainingHosts(player.getLocation())
+              .stream().max(Comparator.comparingInt(Host::getPriority))
+              .map(host -> host.getPriority() + 1).orElse(0));
+
+      try {
+        assert selection.getWorld() != null;
+        Nope.getInstance().getHostTree().addRegion(
+            name,
+            selection.getWorld().getUniqueId(),
+            selection.getMin(),
+            selection.getMax(),
+            priority
+        );
+        Nope.getInstance().saveState();
+        DynamicSettingListeners.register();
+        src.sendMessage(Format.success("Successfully created region ", Format.note(name), "!"));
+        Nope.getInstance().getRegionWandHandler().getSelectionMap().remove(player.getUniqueId());
+      } catch (IllegalArgumentException e) {
+        src.sendMessage(Format.error("Could not create region: " + e.getMessage()));
         return CommandResult.empty();
       }
-      WorldHost worldHost = Nope.getInstance().getGlobalHost().getWorld(selection.getWorld());
-      if (worldHost.getRegions().get(name) != null) {
-        player.sendMessage(Format.error("There is already a region with the name '" + name + "'"));
-        return CommandResult.empty();
-      }
-      Region region = new RegularRegion(selection.getWorld(), selection.getPos1(), selection.getPos2());
-      worldHost.addRegion(name, region);
-      Nope.getInstance().getRegionConfigManager().onRegionCreate(worldHost, name, region);
-      player.sendMessage(Format.success("Region '" + name + "' successfully created"));
       return CommandResult.success();
     });
   }

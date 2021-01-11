@@ -24,30 +24,60 @@
 
 package com.minecraftonline.nope.command.region;
 
+import com.minecraftonline.nope.Nope;
 import com.minecraftonline.nope.command.common.CommandNode;
 import com.minecraftonline.nope.command.common.FunctionlessCommandNode;
-import com.minecraftonline.nope.command.region.targetset.TargetSetParentCommand;
-import com.minecraftonline.nope.control.Settings;
+import com.minecraftonline.nope.host.Host;
 import com.minecraftonline.nope.permission.Permissions;
+import com.minecraftonline.nope.util.Format;
+import org.spongepowered.api.command.CommandResult;
+import org.spongepowered.api.command.CommandSource;
+import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
+
+import java.util.Comparator;
+import java.util.List;
+import java.util.Optional;
 
 public class RegionCommand extends FunctionlessCommandNode {
   public RegionCommand(CommandNode parent) {
     super(parent,
-        Permissions.REGION,
+        null,
         Text.of("Alter Nope regions"),
         "region",
         "rg");
-    addChildren(new RegionWandCommand(this));
+    addChildren(new RegionApplyCommand(this));
     addChildren(new RegionCreateCommand(this));
-    addChildren(new ListRegionsCommand(this));
-    addChildren(new DeleteRegionCommand(this));
+    addChildren(new RegionDestroyCommand(this));
     addChildren(new RegionInfoCommand(this));
-    addChildren(new RegionFlagCommand(this));
-    addChildren(new TargetSetParentCommand(this, "owners", Settings.REGION_OWNERS));
-    addChildren(new TargetSetParentCommand(this, "members", Settings.REGION_MEMBERS));
-    addChildren(new RegionRemoveFlagCommand(this));
+    addChildren(new RegionListCommand(this));
     addChildren(new RegionMoveCommand(this));
+    addChildren(new RegionPosition1Command(this));
+    addChildren(new RegionPosition2Command(this));
+    addChildren(new RegionSetCommand(this));
     addChildren(new RegionSetPriorityCommand(this));
+    addChildren(new RegionShowCommand(this));
+    addChildren(new RegionTargetCommand(this));
+    addChildren(new RegionTeleportCommand(this));
+    addChildren(new RegionUnsetCommand(this));
+    addChildren(new RegionWandCommand(this));
+  }
+
+  static Optional<Host> inferHost(CommandSource src) {
+    if (!(src instanceof Player)) {
+      src.sendMessage(Format.error("Can't infer region! "
+          + "Please specify the target region."));
+      return Optional.empty();
+    }
+    Player player = (Player) src;
+    List<Host> containing = Nope.getInstance()
+        .getHostTree()
+        .getContainingHosts(player.getLocation());
+    if (containing.isEmpty()) {
+      src.sendMessage(Format.error("Can't infer region! "
+          + "Please specify the target region."));
+      return Optional.empty();
+    }
+    return containing.stream().max(Comparator.comparing(Host::getPriority));
   }
 }

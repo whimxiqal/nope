@@ -30,19 +30,27 @@ import org.spongepowered.api.text.Text;
 public class NopeArguments {
 
   /**
-   * Creates a region command element, that returns a <b>{@link RegionWrapper}<\b>
+   * Creates a region command element, that returns a <b>{@link com.minecraftonline.nope.host.Host}<\b>
    * @param key Key to use
    * @return CommandElement
    */
-  public static CommandElement regionWrapper(Text key) {
-    return new RegionCommandElement(key);
+  public static CommandElement host(Text key) {
+    return new HostCommandElement(key);
   }
 
   public static CommandElement flagValueWrapper(Text key) {
-    return new FlagValueCommandElement(key);
+    return new SettingDataCommandElement(key);
   }
 
   public static CommandElement playerOrPlayerUUID(Text key) {
     return new PlayerOrPlayerUUID(key);
+  }
+
+  public static CommandElement settingKey(Text key) {
+    return new SettingKeyCommandElement(key);
+  }
+
+  public static CommandElement regionLocation(Text key) {
+    return new RegionLocationSelectionCommandElement(key);
   }
 }

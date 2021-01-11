@@ -1,6 +1,6 @@
 package com.minecraftonline.nope.util;
 
-import com.minecraftonline.nope.CollisionHandler;
+import com.minecraftonline.nope.bridge.collision.CollisionHandler;
 import com.minecraftonline.nope.Nope;
 import com.minecraftonline.nope.bridge.collision.ScorePlayerTeamBridge;
 import com.minecraftonline.nope.bridge.collision.ServerScoreboardBridge;
@@ -30,8 +30,10 @@ public class CollisionUtil {
   public static final int REMOVE_PLAYER_FROM_TEAM = 4;
 
   public static ScorePlayerTeam makeWithNoCollision(ScorePlayerTeam scorePlayerTeam) {
-    ScorePlayerTeam team = new ScorePlayerTeam(((ScorePlayerTeamBridge)scorePlayerTeam).nope$getScoreboard(), scorePlayerTeam.getName());
-    ((ScorePlayerTeamBridge)team).nope$fromWithNewCollisionRule(scorePlayerTeam, Team.CollisionRule.NEVER);
+    ScorePlayerTeam team = new ScorePlayerTeam(
+        ((ScorePlayerTeamBridge) scorePlayerTeam).nope$getScoreboard(),
+        scorePlayerTeam.getName());
+    ((ScorePlayerTeamBridge) team).nope$fromWithNewCollisionRule(scorePlayerTeam, Team.CollisionRule.NEVER);
     return team;
   }
 
@@ -39,11 +41,12 @@ public class CollisionUtil {
    * Adds players from the given list who should not have collision,
    * and adds them to a dummy scoreboard that stops their collision.
    *
-   * @param team Dummy team with no collision
+   * @param team    Dummy team with no collision
    * @param players Players of which only disabled collision players
    *                get added to the dummy scoreboard
    */
-  public static void addDisabledCollisionPlayersToTeam(ScorePlayerTeam team, List<EntityPlayerMP> players) {
+  public static void addDisabledCollisionPlayersToTeam(ScorePlayerTeam team,
+                                                       List<EntityPlayerMP> players) {
     // Tell client about this new fancy collision disabling scoreboard
     SPacketTeams disabledCollisionTeamCreatePacket = new SPacketTeams(team, CREATE_SCOREBOARD);
 
@@ -56,12 +59,15 @@ public class CollisionUtil {
       entityPlayerMP.connection.sendPacket(disabledCollisionTeamCreatePacket);
 
       // Tell client that they just got added to this totally real team
-      SPacketTeams addPlayerPacket = new SPacketTeams(team, Collections.singletonList(entityPlayerMP.getName()), CollisionUtil.ADD_PLAYER_TO_SCOREBOARD);
+      SPacketTeams addPlayerPacket = new SPacketTeams(team,
+          Collections.singletonList(entityPlayerMP.getName()),
+          CollisionUtil.ADD_PLAYER_TO_SCOREBOARD);
       entityPlayerMP.connection.sendPacket(addPlayerPacket);
     }
   }
 
-  public static void updateDisabledCollisionPlayers(ScorePlayerTeam currentTeam, List<EntityPlayerMP> players) {
+  public static void updateDisabledCollisionPlayers(ScorePlayerTeam currentTeam,
+                                                    List<EntityPlayerMP> players) {
     if (currentTeam.getCollisionRule() != Team.CollisionRule.ALWAYS) {
       return; // Scoreboard has modified collision rules, do not change anything.
     }
@@ -86,9 +92,10 @@ public class CollisionUtil {
    * get their new one with collision disabled.
    *
    * @param dummyNoCollisionTeam The dummy collision
-   * @param players Players to remove the dummy collision scoreboard from.
+   * @param players              Players to remove the dummy collision scoreboard from.
    */
-  public static void removeDummyTeam(ScorePlayerTeam dummyNoCollisionTeam, List<EntityPlayerMP> players) {
+  public static void removeDummyTeam(ScorePlayerTeam dummyNoCollisionTeam,
+                                     List<EntityPlayerMP> players) {
     SPacketTeams packet = new SPacketTeams(dummyNoCollisionTeam, REMOVE_TEAM);
     for (EntityPlayerMP entityPlayerMP : players) {
       entityPlayerMP.connection.sendPacket(packet);
@@ -99,12 +106,15 @@ public class CollisionUtil {
     EntityPlayerMP entityPlayerMP = (EntityPlayerMP) player;
     Team team = entityPlayerMP.getTeam();
     if (team == null) {
-      ServerScoreboardBridge scoreboardBridge = (ServerScoreboardBridge) Sponge.getServer().getServerScoreboard().get();
+      ServerScoreboardBridge scoreboardBridge = (ServerScoreboardBridge) Sponge.getServer()
+          .getServerScoreboard()
+          .get();
 
-      addDisabledCollisionPlayersToTeam(scoreboardBridge.nope$getDummyNoCollisionTeam(), Collections.singletonList(entityPlayerMP));
-    }
-    else {
-      updateDisabledCollisionPlayers((ScorePlayerTeam) team, Collections.singletonList(entityPlayerMP));
+      addDisabledCollisionPlayersToTeam(scoreboardBridge.nope$getDummyNoCollisionTeam(),
+          Collections.singletonList(entityPlayerMP));
+    } else {
+      updateDisabledCollisionPlayers((ScorePlayerTeam) team,
+          Collections.singletonList(entityPlayerMP));
     }
   }
 
@@ -113,10 +123,12 @@ public class CollisionUtil {
     Team team = entityPlayerMP.getTeam();
     if (team == null) {
       // Remove the dummy team
-      ServerScoreboardBridge scoreboardBridge = (ServerScoreboardBridge) Sponge.getServer().getServerScoreboard().get();
-      removeDummyTeam(scoreboardBridge.nope$getDummyNoCollisionTeam(), Collections.singletonList(entityPlayerMP));
-    }
-    else {
+      ServerScoreboardBridge scoreboardBridge = (ServerScoreboardBridge) Sponge.getServer()
+          .getServerScoreboard()
+          .get();
+      removeDummyTeam(scoreboardBridge.nope$getDummyNoCollisionTeam(),
+          Collections.singletonList(entityPlayerMP));
+    } else {
       // Send them the real team.
       SPacketTeams packet = new SPacketTeams((ScorePlayerTeam) team, UPDATE_SCOREBOARD);
       entityPlayerMP.connection.sendPacket(packet);
@@ -127,7 +139,7 @@ public class CollisionUtil {
     return usernames.stream()
         .map(name -> Sponge.getServer().getPlayer(name).orElse(null))
         .filter(Objects::nonNull)
-        .map(player -> (EntityPlayerMP)player)
+        .map(player -> (EntityPlayerMP) player)
         .collect(Collectors.toList());
   }
 }

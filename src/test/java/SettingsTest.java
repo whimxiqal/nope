@@ -22,8 +22,8 @@
  * SOFTWARE.
  */
 
-import com.minecraftonline.nope.control.Settings;
-import org.junit.Test;
+import com.minecraftonline.nope.setting.SettingLibrary;
+import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -34,8 +34,8 @@ public class SettingsTest {
   @Test
   public void checkUnique() {
     try {
-      Settings.load();
-    } catch (Settings.SettingNotUniqueException e) {
+      SettingLibrary.initialize();
+    } catch (IllegalStateException e) {
       fail(e.getMessage());
     }
   }

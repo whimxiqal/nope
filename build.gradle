@@ -26,7 +26,7 @@ plugins {
 apply plugin: 'net.minecraftforge.gradle'
 apply plugin: 'org.spongepowered.mixin'
 
-apply from: 'settingDescription.gradle'
+//apply from: 'settingDescription.gradle'
 
 compileJava.options.encoding = 'UTF-8'
 
@@ -38,10 +38,10 @@ sourceSets {
 
 archivesBaseName = 'nope'
 group = 'com.minecraftonline'
-version = '0.2.7'
+version = '0.0.0'
 description = "A region protection plugin"
 
-ext.spongeVersion = '7.2.0'
+ext.spongeVersion = '7.3.0'
 
 sponge.plugin.meta {
   authors = ['PietElite', 'tyhdefu', '14mRh4X0r']
@@ -61,19 +61,26 @@ dependencies {
     implementation "org.spongepowered:spongeapi:${spongeVersion}"
     annotationProcessor "org.spongepowered:spongeapi:${spongeVersion}"
 
-    compile 'org.spongepowered:spongecommon:1.12.2-7.3.0:dev'
-
     implementation("net.minecraftforge.gradle:ForgeGradle:3.0.185")
 
     compile 'org.spongepowered:mixin:0.8.1-SNAPSHOT'
     annotationProcessor "org.spongepowered:mixin:0.8.1-SNAPSHOT:processor"
 
-    implementation 'com.sk89q.worldedit:worldedit-core:6.1.4-SNAPSHOT'
-    implementation 'com.sk89q.worldedit:worldedit-sponge:6.1.7-SNAPSHOT'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.3.1'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.3.1'
+
+//    implementation 'com.sk89q.worldedit:worldedit-core:6.1.4-SNAPSHOT'
+//    implementation 'com.sk89q.worldedit:worldedit-sponge:6.1.7-SNAPSHOT'
 
     compile files('libs/craftbook-api-extra22.26-original.jar')
 
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.6.0'
+
+    compileOnly 'org.projectlombok:lombok:1.18.16'
+    annotationProcessor 'org.projectlombok:lombok:1.18.16'
+
+    testCompileOnly 'org.projectlombok:lombok:1.18.16'
+    testAnnotationProcessor 'org.projectlombok:lombok:1.18.16'
 }
 
 minecraft {

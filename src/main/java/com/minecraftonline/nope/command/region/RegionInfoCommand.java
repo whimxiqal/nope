@@ -27,16 +27,10 @@ package com.minecraftonline.nope.command.region;
 import com.google.common.collect.Lists;
 import com.minecraftonline.nope.Nope;
 import com.minecraftonline.nope.arguments.NopeArguments;
-import com.minecraftonline.nope.arguments.RegionWrapper;
 import com.minecraftonline.nope.command.common.CommandNode;
 import com.minecraftonline.nope.command.common.LambdaCommandNode;
-import com.minecraftonline.nope.control.GlobalRegion;
-import com.minecraftonline.nope.control.Region;
-import com.minecraftonline.nope.control.Setting;
-import com.minecraftonline.nope.control.Settings;
-import com.minecraftonline.nope.control.flags.Flag;
-import com.minecraftonline.nope.control.target.Target;
-import com.minecraftonline.nope.control.target.TargetSet;
+import com.minecraftonline.nope.host.Host;
+import com.minecraftonline.nope.host.VolumeHost;
 import com.minecraftonline.nope.permission.Permissions;
 import com.minecraftonline.nope.util.Format;
 import org.spongepowered.api.Sponge;
@@ -44,148 +38,111 @@ import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.args.CommandElement;
 import org.spongepowered.api.command.args.GenericArguments;
 import org.spongepowered.api.profile.GameProfile;
+import org.spongepowered.api.service.pagination.PaginationService;
 import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.format.TextColors;
+import org.spongepowered.api.world.World;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class RegionInfoCommand extends LambdaCommandNode {
-  public RegionInfoCommand(CommandNode parent) {
+
+  RegionInfoCommand(CommandNode parent) {
     super(parent,
-        Permissions.INFO_REGION,
+        Permissions.COMMAND_REGION_INFO,
         Text.of("View detailed information about a region"),
         "info",
         "i");
 
-    CommandElement regionElement = GenericArguments.onlyOne(NopeArguments.regionWrapper(Text.of("region")));
+    CommandElement regionElement = GenericArguments.optional(NopeArguments.host(Text.of("region")));
     regionElement = GenericArguments.flags().flag("f", "-friendly").buildWith(regionElement);
     addCommandElements(regionElement);
     setExecutor((src, args) -> {
-      RegionWrapper regionWrapper = args.<RegionWrapper>getOne(Text.of("region")).get();
-      boolean friendly = args.<Boolean>getOne(Text.of("f")).orElse(false);
 
-      Region region = regionWrapper.getRegion();
-      boolean isGlobal = region instanceof GlobalRegion;
-      src.sendMessage(Format.info("-- Info for region " + regionWrapper.getRegionName() + " --"));
-
-      if (!isGlobal) {
-        // Non global regions only:
-        src.sendMessage(Format.keyValue("min: ", region.getSettingValue(Settings.REGION_MIN).get().toString()));
-        src.sendMessage(Format.keyValue("max: ", region.getSettingValue(Settings.REGION_MAX).get().toString()));
+      Host host = args.<Host>getOne("region").orElse(RegionCommand.inferHost(src).orElse(null));
+      if (host == null) {
+        return CommandResult.empty();
       }
 
-      CompletableFuture<String> ownersFuture = serializeTargetSet(region.getSettingValue(Settings.REGION_OWNERS).orElse(new TargetSet()), friendly);
-      CompletableFuture<String> membersFuture = serializeTargetSet(region.getSettingValue(Settings.REGION_MEMBERS).orElse(new TargetSet()), friendly);
+      final boolean friendly = args.<Boolean>getOne(Text.of("f")).orElse(false);
 
-      String regionPriority = region.getSettingValue(Settings.REGION_PRIORITY).orElse(0).toString();
+      List<Text> headerLines = Lists.newLinkedList();
 
-      // Flags
-//      StringBuilder builder = new StringBuilder("{ ");
-//      for (Map.Entry<Setting<?>, ?> settingEntry : regionWrapper.getRegion().getSettingMap().entrySet()) {
-//        if (!(settingEntry.getValue() instanceof Flag)) {
-//          continue; // Only look at flags
-//        }
-//        Flag<?> flag = (Flag<?>) settingEntry.getValue();
-//        Flag<?> defaultValue = (Flag<?>) settingEntry.getKey().getDefaultValue();
-//
-//        String settingName = settingEntry.getKey().getName();
-//        builder.append(settingName).append(": ").append(serializeFlag(defaultValue, flag)).append(", ");
-//        if (flag.getGroup() != Flag.TargetGroup.ALL) {
-//          builder.append(settingName).append("-group: ").append(flag.getGroup().toString().toLowerCase()).append(", ");
-//        }
-//      }
-//      // Delete last comma
-//      builder.deleteCharAt(builder.length() - 2).append("}");
+      if (host.getWorldUuid() != null) {
+        String worldName = Sponge.getServer()
+            .getWorld(host.getWorldUuid())
+            .map(World::getName)
+            .orElseThrow(() -> new RuntimeException("Sponge cannot find world with UUID: "
+                + host.getWorldUuid()));
+        headerLines.add(Format.keyValue("world: ", worldName));
+      }
 
-      List<String> flags = Lists.newLinkedList();
-      String flagsDescription = regionWrapper.getRegion().getSettingMap().entrySet().stream()
-          .filter(settingEntry -> settingEntry.getValue() instanceof Flag)
-          .map(settingEntry -> {
-            Flag<?> flag = (Flag<?>) settingEntry.getValue();
-            Flag<?> defaultValue = (Flag<?>) settingEntry.getKey().getDefaultValue();
+      if (host.getParent() != null) {
+        headerLines.add(Format.keyValue("parent: ", Format.host(host.getParent())));
+      }
 
-            return settingEntry.getKey().getName() + ": " + serializeFlag(defaultValue, flag)
-                + ((flag.getGroup() != Flag.TargetGroup.ALL)
-                    ? " -group: " + flag.getGroup().toString().toLowerCase()
-                    : "");
-          }).collect(Collectors.joining(", "));
+      if (host instanceof VolumeHost) {
+        VolumeHost volumeHost = (VolumeHost) host;
+        // Volume regions only:
+        headerLines.add(Format.keyValue("min: ", volumeHost.getMinX()
+            + ", " + volumeHost.getMinY()
+            + ", " + volumeHost.getMinZ()));
+
+        headerLines.add(Format.keyValue("max: ", volumeHost.getMaxX()
+            + ", " + volumeHost.getMaxY()
+            + ", " + volumeHost.getMaxZ()));
+      }
+
+      int regionPriority = host.getPriority();
+      headerLines.add(Format.keyValue("priority: ", String.valueOf(regionPriority)));
+      headerLines.add(Text.of(""));  // line separator
+      headerLines.add(Text.of(TextColors.AQUA, "<< Settings >>"));
+
+      Sponge.getScheduler().createTaskBuilder()
+          .async()
+          .execute(() -> {
+            List<Text> contents = host.getAll().entries()
+                .stream()
+                .sorted(Comparator.comparing(setting -> setting.getKey().getId()))
+                .flatMap(setting -> {
+                  try {
+                    return Format.setting(setting).get().stream();
+                  } catch (InterruptedException | ExecutionException e) {
+                    e.printStackTrace();
+                    return Stream.empty();
+                  }
+                })
+                .collect(Collectors.toList());
+
+            Sponge.getServiceManager()
+                .provide(PaginationService.class)
+                .orElseThrow(() -> new RuntimeException("PaginationService doesn't exist!"))
+                .builder()
+                .title(Format.info("Region Info: ", Format.note(host.getName())))
+                .header(headerLines.isEmpty()
+                    ? Format.note("None")
+                    : Text.joinWith(Text.NEW_LINE, headerLines))
+                .padding(Text.of(Format.ACCENT, "="))
+                .contents(contents.isEmpty()
+                    ? Collections.singleton(Format.note("None"))
+                    : contents)
+                .build()
+                .sendTo(src);
+          }).submit(Nope.getInstance());
 
       // Send the message when we have converted uuids.
-
-      ownersFuture.whenComplete((owners, t) -> {
-        src.sendMessage(Format.keyValue("owners: ", owners));
-        membersFuture.whenComplete((members, e) -> {
-          src.sendMessage(Format.keyValue("members: ", members));
-          src.sendMessage(Format.keyValue("priority: ", regionPriority));
-          src.sendMessage(Format.keyValue("flags: ", flagsDescription));
-        });
-      });
 
       return CommandResult.success();
     });
   }
 
-  @SuppressWarnings("unchecked")
-  private static <T> String serializeFlag(Flag<T> defaultValue, Flag<?> value) {
-    return defaultValue.serialize((Flag<T>) value);
-  }
-
-  private static CompletableFuture<String> serializeTargetSet(TargetSet targetSet, boolean convertUUIDs) {
-    StringBuilder builder = new StringBuilder("{ ");
-    Set<UUID> toConvert = new HashSet<>();
-
-    for (Map.Entry<Target.TargetType, Target> entry : targetSet.getTargets().entries()) {
-      switch (entry.getKey()) {
-        case PLAYER: {
-          builder.append("p:");
-          if (convertUUIDs) {
-            toConvert.add(UUID.fromString(entry.getValue().serialize()));
-          }
-          break;
-        }
-        case GROUP: {
-          builder.append("g:");
-          break;
-        }
-        default: {
-          throw new IllegalStateException("Missed an enum!");
-        }
-      }
-      builder.append(entry.getValue().serialize()).append(",");
-    }
-    // Remove trailing comma, add closing bracket.
-    builder.deleteCharAt(builder.length() - 1).append(" }");
-
-    return CompletableFuture.supplyAsync(() -> {
-      for (UUID uuid : toConvert) {
-        try {
-          Optional<String> name = getProfile(uuid).get().getName();
-          if (name.isPresent()) {
-            String uuidStr = uuid.toString();
-            int start = builder.indexOf(uuidStr);
-            // Replace uuid with name
-            builder.replace(start, start + uuidStr.length(), name.get());
-          }
-          else {
-            Nope.getInstance().getLogger().warn("GameProfile for uuid: " + uuid + " had no username!");
-          }
-        } catch (InterruptedException | ExecutionException e) {
-          Nope.getInstance().getLogger().warn("Failed to get GameProfile for uuid: " + uuid);
-        }
-      }
-      return builder.toString();
-    });
-  }
-
   /**
-   * Gets a gameprofile promise
+   * Gets a gameprofile promise.
+   *
    * @param uuid UUID
    * @return CompletableFuture to obtain a gameprofile.
    */

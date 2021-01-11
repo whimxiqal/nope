@@ -25,17 +25,23 @@
 package com.minecraftonline.nope;
 
 import com.google.inject.Inject;
+import com.minecraftonline.nope.bridge.collision.CollisionHandler;
 import com.minecraftonline.nope.command.common.NopeCommandTree;
-import com.minecraftonline.nope.config.ConfigManager;
-import com.minecraftonline.nope.config.configurate.GlobalConfigurateConfigManager;
-import com.minecraftonline.nope.config.configurate.hocon.HoconGlobalConfigurateConfigManager;
-import com.minecraftonline.nope.control.GlobalHost;
-import com.minecraftonline.nope.control.Settings;
+import com.minecraftonline.nope.context.RegionContextCalculator;
+import com.minecraftonline.nope.game.listener.StaticSettingListeners;
+import com.minecraftonline.nope.game.movement.PlayerMovementHandler;
+import com.minecraftonline.nope.host.HoconHostTreeImplStorage;
+import com.minecraftonline.nope.host.HostTree;
 import com.minecraftonline.nope.key.NopeKeys;
+import com.minecraftonline.nope.key.regionwand.RegionWandHandler;
 import com.minecraftonline.nope.key.regionwand.ImmutableRegionWandManipulator;
 import com.minecraftonline.nope.key.regionwand.RegionWandManipulator;
-import com.minecraftonline.nope.listener.flag.FlagListeners;
+import com.minecraftonline.nope.host.HostTreeImpl;
+import com.minecraftonline.nope.game.listener.DynamicSettingListeners;
+import com.minecraftonline.nope.setting.SettingLibrary;
 import com.minecraftonline.nope.util.Extra;
+import lombok.Getter;
+import lombok.Setter;
 import org.slf4j.Logger;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.config.ConfigDir;
@@ -49,63 +55,65 @@ import org.spongepowered.api.event.game.state.GamePreInitializationEvent;
 import org.spongepowered.api.event.game.state.GameStartedServerEvent;
 import org.spongepowered.api.event.game.state.GameStoppingServerEvent;
 import org.spongepowered.api.event.world.LoadWorldEvent;
-import org.spongepowered.api.plugin.Dependency;
 import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.plugin.PluginContainer;
-import org.spongepowered.api.service.permission.PermissionDescription;
 import org.spongepowered.api.service.permission.PermissionService;
-import org.spongepowered.api.service.permission.Subject;
-import org.spongepowered.api.text.Text;
 import org.spongepowered.api.util.TypeTokens;
 
 import java.nio.file.Path;
 
-@Plugin(id = "nope", dependencies = @Dependency(id = "worldedit"))
+@Plugin(id = "nope")
 public class Nope {
 
+  public static final String GLOBAL_HOST_NAME = "_global";
+  public static final int WORLD_HEIGHT = 256;
+  public static final int WORLD_RADIUS = 100000;
   public static String REPO_URL = "https://gitlab.com/minecraftonline/nope/";
+  @Getter
   private static Nope instance;
-
-  // Injections
-
+  NopeCommandTree commandTree;
   @Inject
+  @Getter
   private Logger logger;
-
   @Inject
+  @Getter
   private PluginContainer pluginContainer;
-
   @Inject
+  @Getter
   @ConfigDir(sharedRoot = false)
   private Path configDir;
-
-  // Custom fields
-
-  NopeCommandTree commandTree;
-
-  private GlobalConfigurateConfigManager globalConfigManager;
-  private ConfigManager regionConfigManager;
-
-  private GlobalHost globalHost = new GlobalHost();
-
+  @Getter
+  private HostTree hostTree;
+  @Getter
   private RegionWandHandler regionWandHandler;
+  @Getter
   private CollisionHandler collisionHandler;
-  private CacheHandler cacheHandler;
-
-  private PermissionDescription overridePermission;
+  @Getter
+  private PlayerMovementHandler playerMovementHandler;
+  @Getter
+  @Setter
+  private boolean valid = true;
 
   @Listener
   public void onPreInitialize(GamePreInitializationEvent event) {
     instance = this;
-    Settings.load();
-    Extra.printSplashscreen();
-
-    // Load config
-    globalConfigManager = new HoconGlobalConfigurateConfigManager(configDir);
+    SettingLibrary.initialize();
+    if (configDir.toFile().mkdirs()) {
+      logger.info("Created directories for Nope configuration");
+    }
   }
 
   @Listener
   public void onInit(GameInitializationEvent event) {
-    onLoad();
+    regionWandHandler = new RegionWandHandler();
+    collisionHandler = new CollisionHandler();
+    playerMovementHandler = new PlayerMovementHandler();
+
+    hostTree = new HostTreeImpl(
+        new HoconHostTreeImplStorage(),
+        Nope.GLOBAL_HOST_NAME,
+        s -> "_world-" + s,
+        "[a-zA-Z0-9\\-\\.][a-zA-Z0-9_\\-\\.]*");
 
     NopeKeys.REGION_WAND = Key.builder()
         .type(TypeTokens.BOOLEAN_VALUE_TOKEN)
@@ -122,94 +130,65 @@ public class Nope {
         .name("Nope region wand")
         .build();
 
-    Sponge.getServiceManager().getRegistration(PermissionService.class).ifPresent(registration -> {
-      PermissionService service = registration.getProvider();
-
-      this.overridePermission = service.newDescriptionBuilder(this)
-          .id("nope.region.override")
-          .description(Text.of("Overrides any region flags that prevent you doing things."))
-          .assign(PermissionDescription.ROLE_ADMIN, true)
-          .register();
-    });
-
     Sponge.getEventManager().registerListeners(this, regionWandHandler);
-    FlagListeners.registerAll();
-  }
-
-  public void onLoad() {
-    globalConfigManager.loadAll();
-    globalConfigManager.fillSettings(globalHost);
-    this.regionConfigManager = globalConfigManager;
-    regionWandHandler = new RegionWandHandler();
-    collisionHandler = new CollisionHandler();
-    cacheHandler = new CacheHandler();
   }
 
   @Listener
   public void onServerStart(GameStartedServerEvent event) {
+    Extra.printSplashscreen();
+    loadState();
+
+    DynamicSettingListeners.register();
+    StaticSettingListeners.register();
+    playerMovementHandler.register();
+
+    Sponge.getServiceManager()
+        .provide(PermissionService.class)
+        .ifPresent(service ->
+            service.registerContextCalculator(new RegionContextCalculator()));
 
     // Register entire Nope command tree
     commandTree = new NopeCommandTree();
     commandTree.register();
 
+  }
 
+  @Listener
+  public void onWorldLoad(LoadWorldEvent event) {
+    // TODO load additional worlds.
   }
 
   @Listener
   public void onServerStopping(GameStoppingServerEvent event) {
-    globalConfigManager.saveAll();
+    saveState();
   }
 
   @Listener
-  public void onLoadWorld(LoadWorldEvent event) {
-    globalHost.addWorldIfNotPresent(event.getTargetWorld());
+  public void reload(GameReloadEvent event) {
+    // Do not add anything else here or you will break the /nope reload command.
+    loadState();
   }
 
-  @Listener
-  public void reload(GameReloadEvent e) {
-    this.globalConfigManager.saveAll();
-    globalConfigManager = new HoconGlobalConfigurateConfigManager(configDir);
-    // Also reset globalConfigManager, because thats not done in onLoad()
-    onLoad();
+  public void saveState() {
+    try {
+      if (isValid()) {
+        hostTree.save();
+      }
+    } catch (Exception e) {
+      setValid(false);
+      e.printStackTrace();
+    }
   }
 
-  public static Nope getInstance() {
-    return instance;
+  public void loadState() {
+    try {
+      if (isValid()) {
+        hostTree.load();
+      }
+    } catch (Exception e) {
+      setValid(false);
+      e.printStackTrace();
+    }
   }
 
-  public Logger getLogger() {
-    return logger;
-  }
-
-  public GlobalConfigurateConfigManager getGlobalConfigManager() {
-    return globalConfigManager;
-  }
-
-  public PluginContainer getPluginContainer() {
-    return pluginContainer;
-  }
-
-  public GlobalHost getGlobalHost() {
-    return globalHost;
-  }
-
-  public RegionWandHandler getRegionWandHandler() {
-    return regionWandHandler;
-  }
-
-  public CollisionHandler getCollisionHandler() {
-    return collisionHandler;
-  }
-
-  public CacheHandler getCacheHandler() {
-    return cacheHandler;
-  }
-
-  public ConfigManager getRegionConfigManager() {
-    return regionConfigManager;
-  }
-
-  public boolean canOverrideRegion(Subject subject) {
-    return subject.hasPermission(this.overridePermission.getId());
-  }
 }

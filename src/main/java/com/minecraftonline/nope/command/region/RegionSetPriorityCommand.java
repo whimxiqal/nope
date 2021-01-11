@@ -1,31 +1,53 @@
 package com.minecraftonline.nope.command.region;
 
+import com.minecraftonline.nope.Nope;
 import com.minecraftonline.nope.arguments.NopeArguments;
-import com.minecraftonline.nope.arguments.RegionWrapper;
 import com.minecraftonline.nope.command.common.CommandNode;
 import com.minecraftonline.nope.command.common.LambdaCommandNode;
-import com.minecraftonline.nope.control.Region;
-import com.minecraftonline.nope.control.Settings;
-import com.minecraftonline.nope.permission.Permission;
+import com.minecraftonline.nope.host.Host;
+import com.minecraftonline.nope.permission.Permissions;
 import com.minecraftonline.nope.util.Format;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.args.GenericArguments;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
 
 public class RegionSetPriorityCommand extends LambdaCommandNode {
 
-  public RegionSetPriorityCommand(CommandNode parent) {
-    super(parent, Permission.of("nope.region.edit.priority"), Text.of("Allows the user to set the priority of a region"), "setpriority");
+  RegionSetPriorityCommand(CommandNode parent) {
+    super(parent,
+        Permissions.COMMAND_REGION_EDIT,
+        Text.of("Allows the user to set the priority of a region"),
+        "setpriority");
 
-    addCommandElements(GenericArguments.onlyOne(NopeArguments.regionWrapper(Text.of("region"))), GenericArguments.integer(Text.of("priority")));
+    addCommandElements(
+        GenericArguments.flags()
+            .valueFlag(NopeArguments.host(Text.of("region")), "r", "-region")
+            .buildWith(GenericArguments.none()),
+        GenericArguments.integer(Text.of("priority")));
     setExecutor((src, args) -> {
-      RegionWrapper regionWrapper = args.<RegionWrapper>getOne(Text.of("region")).get();
-      Region region = regionWrapper.getRegion();
-      int priority = args.<Integer>getOne(Text.of("priority")).get();
+      int priority = args.requireOne("priority");
 
-      region.set(Settings.REGION_PRIORITY, priority);
-      src.sendMessage(Text.of(TextColors.GREEN, "Successfully set priority on region '" + regionWrapper.getRegionName()));
+      Host host = args.<Host>getOne("region").orElse(RegionCommand.inferHost(src).orElse(null));
+      if (host == null) {
+        return CommandResult.empty();
+      }
+
+      try {
+        host.setPriority(priority);
+      } catch (UnsupportedOperationException e) {
+        src.sendMessage(Format.error("This host does not support having its priority set!"));
+        return CommandResult.empty();
+      } catch (IllegalArgumentException e) {
+        src.sendMessage(Format.error(e.getMessage()));
+        return CommandResult.empty();
+      }
+
+      Nope.getInstance().saveState();
+      src.sendMessage(Format.success("Set priority of host ",
+          Format.host(host),
+          " to ",
+          Format.note(priority)));
+
       return CommandResult.success();
     });
   }
