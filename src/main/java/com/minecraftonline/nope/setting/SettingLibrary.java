@@ -46,6 +46,7 @@ import org.spongepowered.api.entity.living.player.gamemode.GameModes;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.text.serializer.TextSerializers;
 
 import javax.annotation.Nonnull;
@@ -172,7 +173,19 @@ public final class SettingLibrary {
   @Category(SettingKey.CategoryType.MOVEMENT)
   public static final SettingKey<Text> ENTRY_DENY_MESSAGE = new TextSetting(
       "entry-deny-message",
-      Format.error("You are not allowed to go there")
+      Text.of(TextColors.RED, "You are not allowed to go there")
+  );
+  @Description("The title that is sent to a player if they are barred from entry")
+  @Category(SettingKey.CategoryType.MOVEMENT)
+  public static final SettingKey<Text> ENTRY_DENY_TITLE = new TextSetting(
+      "entry-deny-title",
+      Text.EMPTY
+  );
+  @Description("The subtitle that is sent to a player if they are barred from entry")
+  @Category(SettingKey.CategoryType.MOVEMENT)
+  public static final SettingKey<Text> ENTRY_DENY_SUBTITLE = new TextSetting(
+      "entry-deny-subtitle",
+      Text.EMPTY
   );
   @Description("When disabled, the environment cannot inflict damage on players")
   @Category(SettingKey.CategoryType.DAMAGE)
@@ -194,6 +207,18 @@ public final class SettingLibrary {
   public static final SettingKey<Text> EXIT_DENY_MESSAGE = new TextSetting(
       "exit-deny-message",
       Format.error("You are not allowed to leave here")
+  );
+  @Description("The title that is sent to a player if they are barred from exiting")
+  @Category(SettingKey.CategoryType.MOVEMENT)
+  public static final SettingKey<Text> EXIT_DENY_TITLE = new TextSetting(
+      "exit-deny-title",
+      Text.EMPTY
+  );
+  @Description("The subtitle that is sent to a player if they are barred from exiting")
+  @Category(SettingKey.CategoryType.MOVEMENT)
+  public static final SettingKey<Text> EXIT_DENY_SUBTITLE = new TextSetting(
+      "exit-deny-subtitle",
+      Text.EMPTY
   );
   @Description("When disabled, players do not experience fall damage")
   @Category(SettingKey.CategoryType.DAMAGE)
@@ -741,7 +766,8 @@ public final class SettingLibrary {
 
   public enum Movement {
     ALL,
-    ONLY_TELEPORTATION,
+    UNNATURAL,
+    NONE
   }
 
   public enum StorageType {

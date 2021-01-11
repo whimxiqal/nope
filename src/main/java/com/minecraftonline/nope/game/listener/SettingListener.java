@@ -23,7 +23,7 @@
  *
  */
 
-package com.minecraftonline.nope.listener;
+package com.minecraftonline.nope.game.listener;
 
 import com.minecraftonline.nope.Nope;
 import com.minecraftonline.nope.setting.Setting;
@@ -46,7 +46,7 @@ import java.util.Collection;
  * @see SettingKey
  * @see SettingValue
  */
-public class SettingListener<E extends Event> implements EventListener<E> {
+class SettingListener<E extends Event> implements EventListener<E> {
 
   private final Collection<SettingKey<?>> keys;
   private final EventListener<E> listener;

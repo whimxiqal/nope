@@ -28,6 +28,8 @@ import com.google.inject.Inject;
 import com.minecraftonline.nope.bridge.collision.CollisionHandler;
 import com.minecraftonline.nope.command.common.NopeCommandTree;
 import com.minecraftonline.nope.context.RegionContextCalculator;
+import com.minecraftonline.nope.game.listener.StaticSettingListeners;
+import com.minecraftonline.nope.game.movement.PlayerMovementHandler;
 import com.minecraftonline.nope.host.HoconHostTreeImplStorage;
 import com.minecraftonline.nope.host.HostTree;
 import com.minecraftonline.nope.key.NopeKeys;
@@ -35,7 +37,7 @@ import com.minecraftonline.nope.key.regionwand.RegionWandHandler;
 import com.minecraftonline.nope.key.regionwand.ImmutableRegionWandManipulator;
 import com.minecraftonline.nope.key.regionwand.RegionWandManipulator;
 import com.minecraftonline.nope.host.HostTreeImpl;
-import com.minecraftonline.nope.listener.DynamicSettingListeners;
+import com.minecraftonline.nope.game.listener.DynamicSettingListeners;
 import com.minecraftonline.nope.setting.SettingLibrary;
 import com.minecraftonline.nope.util.Extra;
 import lombok.Getter;
@@ -87,6 +89,8 @@ public class Nope {
   @Getter
   private CollisionHandler collisionHandler;
   @Getter
+  private PlayerMovementHandler playerMovementHandler;
+  @Getter
   @Setter
   private boolean valid = true;
 
@@ -103,6 +107,7 @@ public class Nope {
   public void onInit(GameInitializationEvent event) {
     regionWandHandler = new RegionWandHandler();
     collisionHandler = new CollisionHandler();
+    playerMovementHandler = new PlayerMovementHandler();
 
     hostTree = new HostTreeImpl(
         new HoconHostTreeImplStorage(),
@@ -132,7 +137,11 @@ public class Nope {
   public void onServerStart(GameStartedServerEvent event) {
     Extra.printSplashscreen();
     loadState();
+
     DynamicSettingListeners.register();
+    StaticSettingListeners.register();
+    playerMovementHandler.register();
+
     Sponge.getServiceManager()
         .provide(PermissionService.class)
         .ifPresent(service ->

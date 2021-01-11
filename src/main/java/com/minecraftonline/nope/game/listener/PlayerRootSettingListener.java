@@ -23,30 +23,31 @@
  *
  */
 
-package com.minecraftonline.nope.listener;
+package com.minecraftonline.nope.game.listener;
 
 import com.minecraftonline.nope.setting.SettingKey;
-import org.spongepowered.api.event.Cancellable;
+import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Event;
 
 import javax.annotation.Nonnull;
-import java.util.function.Predicate;
+import java.util.function.BiConsumer;
 
 /**
- * An accessibility class for cancelling events.
+ * An accessibility class for handling events where a player is
+ * the root cause.
  *
- * @param <E> the type of event to cancel
+ * @param <E> the type of event for which to listen
  */
-class CancelConditionSettingListener<E extends Event & Cancellable> extends SingleSettingListener<E> {
-  public CancelConditionSettingListener(@Nonnull SettingKey<?> key,
-                                        @Nonnull Class<E> eventClass,
-                                        @Nonnull Predicate<E> canceler) {
-    super(key,
-        eventClass,
-        event -> {
-          if (canceler.test(event)) {
-            event.setCancelled(true);
-          }
-        });
+class PlayerRootSettingListener<E extends Event> extends SingleSettingListener<E> {
+  public PlayerRootSettingListener(@Nonnull SettingKey<?> key,
+                                   @Nonnull Class<E> eventClass,
+                                   @Nonnull BiConsumer<E, Player> handler) {
+    super(key, eventClass, event -> {
+      if (!(event.getCause().root() instanceof Player)) {
+        return;
+      }
+      handler.accept(event, (Player) event.getCause().root());
+    });
   }
+
 }

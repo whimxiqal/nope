@@ -26,9 +26,14 @@
 package com.minecraftonline.nope.host;
 
 import com.google.gson.JsonElement;
-import com.minecraftonline.nope.setting.*;
+import com.minecraftonline.nope.setting.Setting;
+import com.minecraftonline.nope.setting.SettingKey;
+import com.minecraftonline.nope.setting.SettingLibrary;
+import com.minecraftonline.nope.setting.SettingMap;
+import com.minecraftonline.nope.setting.SettingValue;
 import lombok.Getter;
 import lombok.Setter;
+import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.world.Locatable;
 import org.spongepowered.api.world.Location;
@@ -159,6 +164,21 @@ public abstract class Host {
   }
 
   /**
+   * Get the data associated on this host.
+   *
+   * @param key    the key for which to search
+   * @param player the player to test for targeting
+   * @param <A>    the type of data to retrieve
+   * @return the data
+   */
+  public <A> A getData(SettingKey<A> key, Player player) {
+    return this.get(key)
+        .filter(value -> value.getTarget().test(key, player))
+        .map(SettingValue::getData)
+        .orElse(key.getDefaultData());
+  }
+
+  /**
    * Check if a setting is assigned for this Host.
    *
    * @param setting the setting to check for existence
@@ -218,6 +238,11 @@ public abstract class Host {
    */
   @Nullable
   public abstract UUID getWorldUuid();
+
+  @Override
+  public int hashCode() {
+    return name.hashCode();
+  }
 
   public interface HostSerializer<T extends Host> {
     JsonElement serialize(T host);

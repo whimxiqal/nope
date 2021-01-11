@@ -23,14 +23,13 @@
  *
  */
 
-package com.minecraftonline.nope.listener;
+package com.minecraftonline.nope.game.listener;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.minecraftonline.nope.Nope;
 import com.minecraftonline.nope.setting.SettingKey;
 import com.minecraftonline.nope.setting.SettingLibrary;
-import com.minecraftonline.nope.setting.SettingValue;
 import com.minecraftonline.nope.util.Format;
 import net.minecraft.entity.monster.EntitySnowman;
 import org.spongepowered.api.block.BlockType;
@@ -54,7 +53,6 @@ import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.action.SleepingEvent;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.event.block.InteractBlockEvent;
-import org.spongepowered.api.event.cause.EventContextKey;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.damage.DamageTypes;
 import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
@@ -65,11 +63,7 @@ import org.spongepowered.api.event.entity.*;
 import org.spongepowered.api.event.item.inventory.ChangeInventoryEvent;
 import org.spongepowered.api.event.item.inventory.ClickInventoryEvent;
 import org.spongepowered.api.event.item.inventory.DropItemEvent;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.title.Title;
 import org.spongepowered.api.world.LocatableBlock;
-import org.spongepowered.api.world.Location;
-import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.explosion.Explosion;
 
 import javax.annotation.Nullable;
@@ -80,7 +74,6 @@ import java.lang.annotation.Target;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -92,6 +85,9 @@ import java.util.stream.Collectors;
  */
 @SuppressWarnings("unused")
 public final class DynamicSettingListeners {
+
+  private DynamicSettingListeners() {
+  }
 
   @DynamicSettingListener
   static final SettingListener<AttackEntityEvent> ARMOR_STAND_ATTACK_LISTENER =
@@ -267,24 +263,7 @@ public final class DynamicSettingListeners {
                   !Nope.getInstance().getHostTree().lookup(SettingLibrary.ENDERPEARL_TELEPORT,
                       player,
                       event.getToTransform().getLocation())));
-  @DynamicSettingListener
-  static final SettingListener<MoveEntityEvent> ENTRY_LISTENER =
-      new SettingListener<>(
-          Lists.newArrayList(SettingLibrary.ENTRY,
-              SettingLibrary.GREETING,
-              SettingLibrary.GREETING_TITLE,
-              SettingLibrary.GREETING_SUBTITLE,
-              SettingLibrary.ENTRY_DENY_MESSAGE),
-          MoveEntityEvent.class,
-          (event) ->
-              thresholdHandler(SettingLibrary.ENTRY,
-                  event.getToTransform().getLocation(),
-                  event.getFromTransform().getLocation(),
-                  SettingLibrary.GREETING,
-                  SettingLibrary.GREETING_TITLE,
-                  SettingLibrary.GREETING_SUBTITLE,
-                  SettingLibrary.ENTRY_DENY_MESSAGE)
-                  .accept(event));
+
   @DynamicSettingListener
   static final SettingListener<DamageEntityEvent> EVP_LISTENER =
       new CancelConditionSettingListener<>(
@@ -305,24 +284,7 @@ public final class DynamicSettingListeners {
               && !Nope.getInstance().getHostTree().lookup(SettingLibrary.EVP,
               (Player) event.getTargetEntity(),
               event.getTargetEntity().getLocation()));
-  @DynamicSettingListener
-  static final SettingListener<MoveEntityEvent> EXIT_LISTENER =
-      new SettingListener<>(
-          Lists.newArrayList(SettingLibrary.EXIT,
-              SettingLibrary.FAREWELL,
-              SettingLibrary.FAREWELL_TITLE,
-              SettingLibrary.FAREWELL_SUBTITLE,
-              SettingLibrary.EXIT_DENY_MESSAGE),
-          MoveEntityEvent.class,
-          (event) ->
-              thresholdHandler(SettingLibrary.EXIT,
-                  event.getFromTransform().getLocation(),
-                  event.getToTransform().getLocation(),
-                  SettingLibrary.FAREWELL,
-                  SettingLibrary.FAREWELL_TITLE,
-                  SettingLibrary.FAREWELL_SUBTITLE,
-                  SettingLibrary.EXIT_DENY_MESSAGE)
-                  .accept(event));
+
   @DynamicSettingListener
   static final SettingListener<DamageEntityEvent> FALL_DAMAGE_LISTENER =
       new CancelConditionSettingListener<>(
@@ -996,7 +958,7 @@ public final class DynamicSettingListeners {
             player.getLocation().getExtent().getName())));
   }
 
-  private static void printEvent(Event event) {
+  static void printEvent(Event event) {
     Nope.getInstance().getLogger().info("Event... (" + event.getClass().getSimpleName() + ")");
     Nope.getInstance().getLogger().info("Source: " + event.getSource().toString());
     event.getCause().forEach(o -> Nope.getInstance().getLogger().info("Cause: " + o.toString()));
@@ -1045,83 +1007,6 @@ public final class DynamicSettingListeners {
                       ? (Player) source
                       : null,
               sink.getLocation());
-    };
-  }
-
-  private static Consumer<MoveEntityEvent> thresholdHandler(
-      SettingKey<SettingLibrary.Movement> dictator,
-      Location<World> inside,
-      Location<World> outside,
-      SettingKey<Text> allowMessageKey,
-      SettingKey<Text> allowTitleKey,
-      SettingKey<Text> allowSubtitleKey,
-      SettingKey<Text> denyMessageKey) {
-    return (event) -> {
-      if (!(event.getCause().root() instanceof Player)) {
-        return;
-      }
-      Player player = (Player) event.getCause().root();
-      Nope.getInstance()
-          .getHostTree()
-          .getContainingHosts(inside)
-          .stream()
-          .filter(host -> !host.encompasses(outside))
-          .forEach(host -> {
-            Optional<SettingValue<SettingLibrary.Movement>> movementOptional =
-                host.get(dictator);
-            boolean shouldCancel;
-            if (!movementOptional.isPresent()
-                || !movementOptional.get().getTarget().test(dictator, player)) {
-              shouldCancel = false;
-            } else {
-              SettingLibrary.Movement movement = movementOptional.get().getData();
-              switch (movement) {
-                case ALL:
-                  shouldCancel = false;
-                  break;
-                // These other ones require a little more nuance. Implement in the future
-//            case NONE:
-//              shouldCancel = true;
-//              break;
-//            case NOT_TELEPORTATION:
-//              shouldCancel = event instanceof MoveEntityEvent.Teleport;
-//              break;
-                default:
-                  shouldCancel = !(event instanceof MoveEntityEvent.Teleport);
-                  break;
-              }
-            }
-            Optional<SettingValue<Text>> message;
-            if (shouldCancel) {
-              event.setCancelled(true);
-              message = host.get(denyMessageKey);
-              if (message.isPresent() && message.get().getTarget().test(denyMessageKey, player)) {
-                player.sendMessage(message.get().getData());
-              }
-            } else {
-              message = host.get(allowMessageKey);
-
-              boolean showTitle = false;
-              Title.Builder titleBuilder = Title.builder();
-              Optional<SettingValue<Text>> title = host.get(allowTitleKey);
-              Optional<SettingValue<Text>> subtitle = host.get(allowSubtitleKey);
-              if (title.isPresent() && title.get().getTarget().test(allowTitleKey, player)) {
-                showTitle = true;
-                titleBuilder.title(title.get().getData());
-              }
-              if (subtitle.isPresent() && subtitle.get().getTarget().test(allowSubtitleKey, player)) {
-                showTitle = true;
-                titleBuilder.subtitle(subtitle.get().getData());
-              }
-              if (showTitle) {
-                player.sendTitle(titleBuilder.build());
-              }
-              if (message.isPresent() && message.get().getTarget().test(allowMessageKey, player)) {
-                player.sendMessage(message.get().getData());
-              }
-            }
-
-          });
     };
   }
 

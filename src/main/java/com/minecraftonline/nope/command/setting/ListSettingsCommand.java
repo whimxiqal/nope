@@ -16,6 +16,7 @@ import org.spongepowered.api.text.format.TextColors;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class ListSettingsCommand extends LambdaCommandNode {
@@ -25,15 +26,15 @@ public class ListSettingsCommand extends LambdaCommandNode {
         Permissions.COMMAND_SETTING,
         Text.of("Allows the user to list all the nope settings"),
         "list");
-
-    addCommandElements(GenericArguments.optional(GenericArguments.integer(Text.of("pageNum"))));
-
+    addCommandElements(GenericArguments.optional(GenericArguments.string(Text.of("regex"))));
     setExecutor((src, args) -> {
       PaginationService pagination = Sponge.getServiceManager().provide(PaginationService.class)
           .orElseThrow(() -> new RuntimeException("PaginationService unavailable."));
 
       List<SettingKey<?>> keys = SettingLibrary.getAll()
           .stream()
+          .filter(key -> !args.hasAny("regex")
+              || Pattern.compile(args.requireOne("regex")).matcher(key.getId()).find())
           .sorted(Comparator
               .comparing((SettingKey<?> key) -> key.getCategory().name())
               .thenComparing(SettingKey::getId))
@@ -60,18 +61,6 @@ public class ListSettingsCommand extends LambdaCommandNode {
       }
 
       return CommandResult.success();
-//      // Reduce given page by one.
-//      int page = args.<Integer>getOne("pageNum").map(i -> i - 1).orElse(0);
-//      NopePagination pagination = NopePaginations.SETTING_PAGINATION.getOrCreatePagination();
-//
-//      if (page < 0 || page >= pagination.pagesLength()) {
-//        src.sendMessage(Format.error("Invalid page number, expected between 1-" + pagination.pagesLength()));
-//        return CommandResult.success();
-//      }
-//
-//      pagination.showPage(src, page);
-//
-//      return CommandResult.success();
     });
   }
 

@@ -23,7 +23,7 @@
  *
  */
 
-package com.minecraftonline.nope.listener;
+package com.minecraftonline.nope.game.listener;
 
 import com.minecraftonline.nope.setting.SettingKey;
 import org.spongepowered.api.event.Event;
@@ -32,7 +32,7 @@ import org.spongepowered.api.event.EventListener;
 import javax.annotation.Nonnull;
 import java.util.Collections;
 
-public class SingleSettingListener<E extends Event> extends SettingListener<E> {
+class SingleSettingListener<E extends Event> extends SettingListener<E> {
 
   public SingleSettingListener(@Nonnull SettingKey<?> key,
                                @Nonnull Class<E> eventClass,

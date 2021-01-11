@@ -23,7 +23,7 @@
  *
  */
 
-package com.minecraftonline.nope.listener;
+package com.minecraftonline.nope.game.listener;
 
 import com.minecraftonline.nope.Nope;
 import com.minecraftonline.nope.setting.SettingKey;
