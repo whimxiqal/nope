@@ -51,9 +51,6 @@ public class TemplateCommandElement extends CommandElement {
   @Override
   protected SettingMap parseValue(@Nonnull CommandSource source, CommandArgs args)
       throws ArgumentParseException {
-    if (!args.hasNext()) {
-      return null;
-    }
     String name = args.next();
     SettingMap template = Templates.get(name);
     if (template == null) {

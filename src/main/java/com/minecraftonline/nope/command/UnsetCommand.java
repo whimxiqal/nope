@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2020 MinecraftOnline
+ * Copyright (c) 2021 MinecraftOnline
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,45 +20,58 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
+ *
  */
 
-package com.minecraftonline.nope.command.region;
+package com.minecraftonline.nope.command;
 
 import com.minecraftonline.nope.Nope;
 import com.minecraftonline.nope.arguments.NopeArguments;
 import com.minecraftonline.nope.command.common.CommandNode;
 import com.minecraftonline.nope.command.common.LambdaCommandNode;
 import com.minecraftonline.nope.host.Host;
-import com.minecraftonline.nope.game.listener.DynamicSettingListeners;
 import com.minecraftonline.nope.permission.Permissions;
+import com.minecraftonline.nope.setting.SettingKey;
+import com.minecraftonline.nope.setting.SettingValue;
 import com.minecraftonline.nope.util.Format;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.args.GenericArguments;
 import org.spongepowered.api.text.Text;
 
-public class RegionDestroyCommand extends LambdaCommandNode {
+public class UnsetCommand extends LambdaCommandNode {
 
-  RegionDestroyCommand(CommandNode parent) {
+  UnsetCommand(CommandNode parent) {
     super(parent,
-        Permissions.COMMAND_REGION_DELETE,
-        Text.of("Delete a given region"),
-        "destroy", "remove");
-    addCommandElements(GenericArguments.onlyOne(NopeArguments.host(Text.of("host"))));
-    setExecutor((src, args) -> {
-      Host host = args.requireOne("host");
+        Permissions.COMMAND_REGION_EDIT,
+        Text.of("Unset settings on a region"),
+        "unset");
 
-      try {
-        Nope.getInstance().getHostTree().removeRegion(host.getName());
-      } catch (IllegalArgumentException e) {
-        src.sendMessage(Format.error("This region cannot be deleted!"));
+    addCommandElements(
+        GenericArguments.flags()
+            .valueFlag(NopeArguments.host(Text.of("region")), "r", "-region")
+            .buildWith(GenericArguments.none()),
+        GenericArguments.onlyOne(NopeArguments.settingKey(Text.of("setting"))));
+
+    setExecutor((src, args) -> {
+      SettingKey<?> settingKey = args.requireOne(Text.of("setting"));
+
+      Host host = args.<Host>getOne("region").orElse(NopeCommandRoot.inferHost(src).orElse(null));
+      if (host == null) {
         return CommandResult.empty();
       }
 
+      SettingValue<?> settingValue = host.remove(settingKey);
+
+      if (settingValue == null) {
+        src.sendMessage(Format.error(Format.settingKey(settingKey, false),
+            " is not assigned on this host!"));
+        return CommandResult.empty();
+      }
       Nope.getInstance().saveState();
-      DynamicSettingListeners.register();
-      src.sendMessage(Format.success("Region ",
-          Format.note(host.getName()),
-          " was successfully deleted."));
+      src.sendMessage(Format.success("Unset ",
+          Format.settingKey(settingKey, false),
+          " on region ",
+          Format.host(host)));
 
       return CommandResult.empty();
     });

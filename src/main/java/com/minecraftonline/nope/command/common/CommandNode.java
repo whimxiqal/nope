@@ -28,6 +28,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.minecraftonline.nope.permission.Permission;
+import lombok.Getter;
 import org.spongepowered.api.command.args.CommandElement;
 import org.spongepowered.api.command.args.GenericArguments;
 import org.spongepowered.api.command.spec.CommandExecutor;
@@ -47,12 +48,20 @@ import java.util.stream.Collectors;
 
 public abstract class CommandNode implements CommandExecutor {
 
+  @Getter
   private final CommandNode parent;
+  @Getter
+  @Nullable
   private final Permission permission;
+  @Getter
+  @Nullable
   private final Text description;
+  @Getter
   private final List<String> aliases;
   private final List<CommandNode> children;
   private final List<CommandElement> commandElements = new ArrayList<>();
+  @Getter
+  private Text comment;
 
   /**
    * A helpful constructor which easily allows for addition of
@@ -121,29 +130,9 @@ public abstract class CommandNode implements CommandExecutor {
 
   // Getters and Setters
 
-  @Nullable
-  public final CommandNode getParent() {
-    return parent;
-  }
-
-  @Nonnull
-  public final Optional<Permission> getPermission() {
-    return Optional.ofNullable(permission);
-  }
-
-  @Nonnull
-  public final Text getDescription() {
-    return description;
-  }
-
   @Nonnull
   public final String getPrimaryAlias() {
     return aliases.get(0);
-  }
-
-  @Nonnull
-  public final List<String> getAliases() {
-    return aliases;
   }
 
   /**
@@ -166,9 +155,8 @@ public abstract class CommandNode implements CommandExecutor {
     this.children.addAll(Arrays.stream(children).filter(Objects::nonNull).collect(Collectors.toList()));
   }
 
-  @Nonnull
-  public final List<CommandElement> getCommandElements() {
-    return this.commandElements;
+  public void setComment(Text comment) {
+    this.comment = comment;
   }
 
   protected final void addCommandElements(@Nonnull CommandElement... commandElement) {

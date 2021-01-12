@@ -23,7 +23,32 @@
  *
  */
 
-package com.minecraftonline.nope.command.region;
+/*
+ * MIT License
+ *
+ * Copyright (c) 2021 MinecraftOnline
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ *
+ */
+
+package com.minecraftonline.nope.command;
 
 import com.flowpowered.math.vector.Vector3d;
 import com.google.common.collect.Lists;
@@ -47,8 +72,11 @@ import org.spongepowered.api.world.World;
 import java.util.Optional;
 import java.util.Random;
 
-public class RegionTeleportCommand extends LambdaCommandNode {
-  public RegionTeleportCommand(CommandNode parent) {
+class TeleportCommand extends LambdaCommandNode {
+
+  private static final int MAX_TELEPORT_TRIES = 64;
+
+  public TeleportCommand(CommandNode parent) {
     super(parent,
         Permissions.COMMAND_REGION_TELEPORT,
         Text.of("Teleport to a region"),
@@ -96,10 +124,9 @@ public class RegionTeleportCommand extends LambdaCommandNode {
       VolumeHost volumeHost = (VolumeHost) host;
 
       Sponge.getScheduler().createTaskBuilder()
-          .async()
           .execute(() -> {
             Random random = new Random();
-            for (int i = 0; i < 128; i++) {
+            for (int i = 0; i < MAX_TELEPORT_TRIES; i++) {
               if (player.setLocationSafely(new Location<>(world.get(),
                   random.nextInt(volumeHost.getMaxX() + 1 - volumeHost.getMinX()) + volumeHost.getMinX(),
                   random.nextInt(volumeHost.getMaxY() + 1 - volumeHost.getMinY()) + volumeHost.getMinY(),

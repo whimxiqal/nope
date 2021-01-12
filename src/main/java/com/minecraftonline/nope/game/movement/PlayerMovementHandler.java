@@ -30,7 +30,9 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.minecraftonline.nope.Nope;
 import com.minecraftonline.nope.host.Host;
+import com.minecraftonline.nope.host.VolumeHost;
 import com.minecraftonline.nope.setting.SettingLibrary;
+import com.minecraftonline.nope.util.EffectsUtil;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
@@ -59,6 +61,8 @@ public class PlayerMovementHandler {
   private Map<UUID, UUID> tasks = Maps.newConcurrentMap();
   private Map<UUID, Long> messageTime = Maps.newConcurrentMap();
 
+  private Set<UUID> viewers = Sets.newHashSet();
+
   public void register() {
     Sponge.getEventManager().registerListeners(Nope.getInstance(), this);
   }
@@ -69,6 +73,18 @@ public class PlayerMovementHandler {
         .orElseThrow(() ->
             new RuntimeException("World could not be found in Movement Handler")),
         positions.get(playerUuid));
+  }
+
+  public boolean addHostViewer(UUID playerUuid) {
+    return viewers.add(playerUuid);
+  }
+
+  public boolean isHostViewer(UUID playerUuid) {
+    return viewers.contains(playerUuid);
+  }
+
+  public boolean removeHostViewer(UUID playerUuid) {
+    return viewers.remove(playerUuid);
   }
 
   @Listener
@@ -139,6 +155,12 @@ public class PlayerMovementHandler {
     exiting.removeAll(unchanged);
     entering.removeAll(unchanged);
 
+    /* Call it quits if we aren't moving anywhere special */
+    if (exiting.isEmpty() && entering.isEmpty()) {
+      canceller.accept(false);
+      return;
+    }
+
     exiting.sort(Comparator.comparing(Host::getPriority));
     entering.sort(Comparator.comparing(Host::getPriority));
 
@@ -175,6 +197,10 @@ public class PlayerMovementHandler {
         player.sendTitle(Title.builder().title(title).subtitle(subtitle).build());
         messaged = true;
       }
+
+      if (exiting.get(i) instanceof VolumeHost && isHostViewer(player.getUniqueId())) {
+        EffectsUtil.showVolume((VolumeHost) exiting.get(i), player, 5);
+      }
     }
 
     /* Entering */
@@ -198,6 +224,10 @@ public class PlayerMovementHandler {
       if ((!title.isEmpty() || !subtitle.isEmpty()) && canMessage) {
         player.sendTitle(Title.builder().title(title).subtitle(subtitle).build());
         messaged = true;
+      }
+
+      if (entering.get(i) instanceof VolumeHost && isHostViewer(player.getUniqueId())) {
+        EffectsUtil.showVolume((VolumeHost) entering.get(i), player, 5);
       }
     }
 

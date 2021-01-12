@@ -35,7 +35,9 @@ import org.spongepowered.api.command.args.CommandContext;
 import org.spongepowered.api.command.spec.CommandExecutor;
 import org.spongepowered.api.service.pagination.PaginationList;
 import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.action.TextActions;
 import org.spongepowered.api.text.format.TextColors;
+import org.spongepowered.api.text.format.TextStyles;
 
 import javax.annotation.Nonnull;
 import java.util.Objects;
@@ -72,7 +74,8 @@ public abstract class CommandTree {
 
     @Nonnull
     @Override
-    public CommandResult execute(CommandSource src, CommandContext args) throws CommandException {
+    public CommandResult execute(@Nonnull CommandSource src,
+                                 @Nonnull CommandContext args) throws CommandException {
       CommandNode parent = this.getParent();
       if (parent == null) {
         throw new CommandException(Text.of("You cannot run the help command without a parent"));
@@ -88,21 +91,28 @@ public abstract class CommandTree {
               " ",
               TextColors.GRAY,
               parent.build().getUsage(src),
-              "\n",
+              Text.NEW_LINE,
+              parent.getComment() == null
+                  ? Text.EMPTY
+                  : Text.of(parent.getComment(), Text.NEW_LINE),
               TextColors.LIGHT_PURPLE, "Description:",
               " ",
               TextColors.YELLOW, parent.getDescription()))
           .contents(parent.getChildren().stream()
-              .filter(command ->
-                  command.getPermission()
-                      .map(perm -> src.hasPermission(perm.get()))
-                      .orElse(true))
-              .map(command -> Format.note(
-                  TextColors.AQUA, Format.hover(
-                      command.getAliases().get(0),
-                      "Aliases: " + String.join(", ", command.getAliases())),
-                  " ",
-                  TextColors.WHITE, command.getDescription()))
+              .filter(command -> command.getPermission() == null
+                  || src.hasPermission(command.getPermission().get()))
+              .map(command -> Text.builder()
+                  .append(
+                      Text.of(
+                          TextColors.AQUA, TextStyles.ITALIC,
+                          command.getAliases().get(0),
+                          " ",
+                          TextColors.WHITE, TextStyles.RESET, command.getDescription()))
+                  .onHover(TextActions.showText(Text.of(Format.note("Click to run command"),
+                      Text.NEW_LINE,
+                      Format.note("Aliases: " + String.join(", ", command.getAliases())))))
+                  .onClick(TextActions.suggestCommand("/" + command.getFullCommand()))
+                  .build())
               .collect(Collectors.toList()))
           .padding(Format.note("="))
           .build()

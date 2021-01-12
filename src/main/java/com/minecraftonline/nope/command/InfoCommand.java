@@ -1,6 +1,31 @@
 /*
  * MIT License
  *
+ * Copyright (c) 2021 MinecraftOnline
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ *
+ */
+
+/*
+ * MIT License
+ *
  * Copyright (c) 2020 MinecraftOnline
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -22,7 +47,7 @@
  * SOFTWARE.
  */
 
-package com.minecraftonline.nope.command.region;
+package com.minecraftonline.nope.command;
 
 import com.google.common.collect.Lists;
 import com.minecraftonline.nope.Nope;
@@ -40,6 +65,7 @@ import org.spongepowered.api.command.args.GenericArguments;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.service.pagination.PaginationService;
 import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.action.TextActions;
 import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.world.World;
 
@@ -49,9 +75,9 @@ import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class RegionInfoCommand extends LambdaCommandNode {
+public class InfoCommand extends LambdaCommandNode {
 
-  RegionInfoCommand(CommandNode parent) {
+  InfoCommand(CommandNode parent) {
     super(parent,
         Permissions.COMMAND_REGION_INFO,
         Text.of("View detailed information about a region"),
@@ -63,7 +89,7 @@ public class RegionInfoCommand extends LambdaCommandNode {
     addCommandElements(regionElement);
     setExecutor((src, args) -> {
 
-      Host host = args.<Host>getOne("region").orElse(RegionCommand.inferHost(src).orElse(null));
+      Host host = args.<Host>getOne("region").orElse(NopeCommandRoot.inferHost(src).orElse(null));
       if (host == null) {
         return CommandResult.empty();
       }
@@ -100,7 +126,7 @@ public class RegionInfoCommand extends LambdaCommandNode {
       int regionPriority = host.getPriority();
       headerLines.add(Format.keyValue("priority: ", String.valueOf(regionPriority)));
       headerLines.add(Text.of(""));  // line separator
-      headerLines.add(Text.of(TextColors.AQUA, "<< Settings >>"));
+      headerLines.add(Text.of(TextColors.AQUA, "<< Settings >> ", Format.note("Click to unset")));
 
       Sponge.getScheduler().createTaskBuilder()
           .async()
@@ -110,7 +136,13 @@ public class RegionInfoCommand extends LambdaCommandNode {
                 .sorted(Comparator.comparing(setting -> setting.getKey().getId()))
                 .flatMap(setting -> {
                   try {
-                    return Format.setting(setting).get().stream();
+                    return Format.setting(setting).get().stream()
+                        .map(text -> Text.builder().append(text)
+                            .onClick(TextActions.suggestCommand(
+                                String.format("/nope unset -r %s %s",
+                                    host.getName(),
+                                    setting.getKey())))
+                            .build());
                   } catch (InterruptedException | ExecutionException e) {
                     e.printStackTrace();
                     return Stream.empty();
