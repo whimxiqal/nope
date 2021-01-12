@@ -27,6 +27,7 @@ package com.minecraftonline.nope.command.common;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.minecraftonline.nope.Nope;
 import com.minecraftonline.nope.permission.Permission;
 import lombok.Getter;
 import org.spongepowered.api.command.args.CommandElement;
@@ -44,6 +45,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.SortedMap;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 public abstract class CommandNode implements CommandExecutor {
@@ -57,11 +59,10 @@ public abstract class CommandNode implements CommandExecutor {
   @Nullable
   private final Text description;
   @Getter
-  private final List<String> aliases;
-  private final List<CommandNode> children;
+  private final List<String> aliases = Lists.newArrayList();
+  private final List<CommandNode> children = Lists.newArrayList();
   private final List<CommandElement> commandElements = new ArrayList<>();
-  @Getter
-  private Text comment;
+  private Supplier<Text> comment = () -> null;
 
   /**
    * A helpful constructor which easily allows for addition of
@@ -103,9 +104,7 @@ public abstract class CommandNode implements CommandExecutor {
     this.parent = parent;
     this.permission = permission;
     this.description = description;
-    this.aliases = Lists.newArrayList();
     this.aliases.add(primaryAlias);
-    this.children = Lists.newArrayList();
     if (addHelp) {
       this.children.add(new CommandTree.HelpCommandNode(this));
     }
@@ -152,17 +151,24 @@ public abstract class CommandNode implements CommandExecutor {
   }
 
   protected final void addChildren(@Nonnull CommandNode... children) {
-    this.children.addAll(Arrays.stream(children).filter(Objects::nonNull).collect(Collectors.toList()));
+    this.children.addAll(Arrays.stream(children)
+        .filter(Objects::nonNull)
+        .collect(Collectors.toList()));
   }
 
-  public void setComment(Text comment) {
+  public void setComment(@Nonnull Supplier<Text> comment) {
     this.comment = comment;
+  }
+
+  @Nullable
+  public Text getComment() {
+    return this.comment.get();
   }
 
   protected final void addCommandElements(@Nonnull CommandElement... commandElement) {
     Objects.requireNonNull(commandElement);
-    for (int i = 0; i < commandElement.length; i++) {
-      this.commandElements.add(Objects.requireNonNull(commandElement[i]));
+    for (CommandElement element : commandElement) {
+      this.commandElements.add(Objects.requireNonNull(element));
     }
   }
 
@@ -178,7 +184,7 @@ public abstract class CommandNode implements CommandExecutor {
       command.insert(0, cur.parent.getPrimaryAlias() + " ");
       cur = cur.parent;
     }
-    return command.toString();
+    return "/" + command.toString();
   }
 
 }

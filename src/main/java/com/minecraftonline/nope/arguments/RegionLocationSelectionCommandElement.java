@@ -2,6 +2,7 @@ package com.minecraftonline.nope.arguments;
 
 import com.flowpowered.math.vector.Vector3i;
 import com.minecraftonline.nope.Nope;
+import com.minecraftonline.nope.command.WandCommand;
 import com.minecraftonline.nope.key.regionwand.RegionWandHandler;
 import com.minecraftonline.nope.util.Format;
 import org.spongepowered.api.Sponge;
@@ -46,7 +47,11 @@ public class RegionLocationSelectionCommandElement extends CommandElement {
           throw new ArgumentParseException(Format.error("Make a selection first using the ",
               Format.command(
                   "wand",
-                  "/nope region wand",
+                  Nope.getInstance().getCommandTree()
+                      .findNode(WandCommand.class)
+                      .orElseThrow(() ->
+                          new RuntimeException("Wand command is not present in the Nope command tree!"))
+                      .getFullCommand(),
                   Text.of("Get a region wand"))), "", 0);
         }
         return selection;

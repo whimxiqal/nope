@@ -71,6 +71,7 @@ public class Nope {
   public static String REPO_URL = "https://gitlab.com/minecraftonline/nope/";
   @Getter
   private static Nope instance;
+  @Getter
   NopeCommandTree commandTree;
   @Inject
   @Getter
@@ -165,7 +166,6 @@ public class Nope {
 
   @Listener
   public void reload(GameReloadEvent event) {
-    // Do not add anything else here or you will break the /nope reload command.
     loadState();
   }
 

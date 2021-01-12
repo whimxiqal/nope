@@ -41,6 +41,8 @@ import org.spongepowered.api.text.format.TextStyles;
 
 import javax.annotation.Nonnull;
 import java.util.Objects;
+import java.util.Optional;
+import java.util.Stack;
 import java.util.stream.Collectors;
 
 public abstract class CommandTree {
@@ -58,6 +60,24 @@ public abstract class CommandTree {
 
   public void register() {
     Sponge.getCommandManager().register(Nope.getInstance(), root().build(), root().getAliases());
+  }
+
+  @Nonnull
+  public Optional<CommandNode> findNode(Class<? extends CommandNode> commandType) {
+    Stack<CommandNode> nextUp = new Stack<>();
+    if (root == null) {
+      throw new IllegalStateException("The root of the Nope tree cannot be null!");
+    }
+    nextUp.add(root);
+    CommandNode current;
+    while (!nextUp.isEmpty()) {
+      current = nextUp.pop();
+      if (commandType.isInstance(current)) {
+        return Optional.of(current);
+      }
+      nextUp.addAll(current.getChildren());
+    }
+    return Optional.empty();
   }
 
   static class HelpCommandNode extends CommandNode implements CommandExecutor {
@@ -111,7 +131,7 @@ public abstract class CommandTree {
                   .onHover(TextActions.showText(Text.of(Format.note("Click to run command"),
                       Text.NEW_LINE,
                       Format.note("Aliases: " + String.join(", ", command.getAliases())))))
-                  .onClick(TextActions.suggestCommand("/" + command.getFullCommand()))
+                  .onClick(TextActions.suggestCommand(command.getFullCommand()))
                   .build())
               .collect(Collectors.toList()))
           .padding(Format.note("="))

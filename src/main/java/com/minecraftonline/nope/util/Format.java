@@ -26,6 +26,7 @@ package com.minecraftonline.nope.util;
 
 import com.google.common.collect.Lists;
 import com.minecraftonline.nope.Nope;
+import com.minecraftonline.nope.command.InfoCommand;
 import com.minecraftonline.nope.host.Host;
 import com.minecraftonline.nope.permission.Permissions;
 import com.minecraftonline.nope.setting.Setting;
@@ -142,7 +143,12 @@ public final class Format {
     String name = host.getName();
     return Format.subtleCommand(
         name,
-        "/nope rg info " + name,
+        Nope.getInstance()
+            .getCommandTree()
+            .findNode(InfoCommand.class)
+            .orElseThrow(() ->
+                new RuntimeException("Info command is not part of the command tree"))
+            + name,
         Text.of("Click for more details about this region")
     );
   }

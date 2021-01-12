@@ -139,7 +139,12 @@ public class InfoCommand extends LambdaCommandNode {
                     return Format.setting(setting).get().stream()
                         .map(text -> Text.builder().append(text)
                             .onClick(TextActions.suggestCommand(
-                                String.format("/nope unset -r %s %s",
+                                Nope.getInstance().getCommandTree()
+                                    .findNode(UnsetCommand.class)
+                                    .orElseThrow(() ->
+                                        new RuntimeException("UnsetCommand is not set in Nope command tree!"))
+                                    .getFullCommand()
+                                    + String.format(" -r %s %s",
                                     host.getName(),
                                     setting.getKey())))
                             .build());

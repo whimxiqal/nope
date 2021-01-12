@@ -653,7 +653,7 @@ public final class DynamicSettingListeners {
   @DynamicSettingListener
   static final SettingListener<DamageEntityEvent> PVP_LISTENER =
       new CancelConditionSettingListener<>(
-          SettingLibrary.PVH,
+          SettingLibrary.PVP,
           DamageEntityEvent.class,
           entityVersusEntityCanceller(SettingLibrary.PVP, Player.class, Player.class));
   @DynamicSettingListener

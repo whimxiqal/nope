@@ -67,9 +67,13 @@ public class Position2Command extends LambdaCommandNode {
         Permissions.COMMAND_REGION_CREATE,
         Text.of("Set position 2 of the nope selection"),
         "pos2");
-    setComment(Format.note("You can also use the /nope wand")
+    setComment(() -> Format.note("You can also use the nope wand")
         .toBuilder()
-        .onClick(TextActions.suggestCommand("/nope wand"))
+        .onClick(TextActions.suggestCommand(Nope.getInstance().getCommandTree()
+            .findNode(WandCommand.class)
+            .orElseThrow(() ->
+                new RuntimeException("Wand command is not present in the Nope command tree!"))
+            .getFullCommand()))
         .build());
     setExecutor((src, args) -> {
       if (!(src instanceof Player)) {

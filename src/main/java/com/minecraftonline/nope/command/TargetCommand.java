@@ -62,7 +62,7 @@ class TargetCommand extends FunctionlessCommandNode {
         Permissions.COMMAND_REGION_EDIT,
         Text.of("Make changes to how a region targets players"),
         "target");
-    setComment(Format.note("Anyone without added permission requirements will "
+    setComment(() -> Format.note("Anyone without added permission requirements will "
         + "not be affected by this region's setting. "
         + "In addition, specifically added players will be either the only ones affected "
         + "or the only ones not affected, dependent on whether this target type is a "

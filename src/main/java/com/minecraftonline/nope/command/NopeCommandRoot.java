@@ -75,7 +75,6 @@ public class NopeCommandRoot extends CommandNode {
         null,
         Text.of("All commands pertaining to Nope"),
         "nope");
-    addCommandElements();
     addChildren(new ApplyCommand(this));
     addChildren(new CreateCommand(this));
     addChildren(new DestroyCommand(this));
@@ -126,7 +125,7 @@ public class NopeCommandRoot extends CommandNode {
         " ",
         Format.command(
             "help",
-            "/nope help",
+            this.getFullCommand(),
             Text.EMPTY),
         " ",
         "command."));

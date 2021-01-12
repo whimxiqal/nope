@@ -77,7 +77,7 @@ class TargetAddPermissionCommand extends LambdaCommandNode {
         NopeArguments.settingKey(Text.of("setting")),
         GenericArguments.string(Text.of("permission")),
         GenericArguments.bool(Text.of("value")));
-    setComment(Format.note("Players without the designated permission requirement will "
+    setComment(() -> Format.note("Players without the designated permission requirement will "
         + "not be affected by this region's setting"));
     setExecutor((src, args) -> {
       Host host = args.<Host>getOne("region").orElse(NopeCommandRoot.inferHost(src).orElse(null));
