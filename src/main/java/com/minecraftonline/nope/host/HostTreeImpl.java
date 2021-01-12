@@ -37,6 +37,7 @@ import com.minecraftonline.nope.setting.SettingLibrary;
 import com.minecraftonline.nope.setting.SettingValue;
 import com.minecraftonline.nope.structures.HashQueueVolumeTree;
 import com.minecraftonline.nope.structures.VolumeTree;
+
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
@@ -55,6 +56,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+
 import lombok.AccessLevel;
 import lombok.Getter;
 import org.spongepowered.api.Sponge;
@@ -66,6 +68,7 @@ import org.spongepowered.api.world.storage.WorldProperties;
 /**
  * Implementation of HostTree making distinctions between
  * a GlobalHost, a WorldHost, and a Region (VolumeHost).
+ *
  * @see Host
  * @see VolumeHost
  */
@@ -667,6 +670,24 @@ public class HostTreeImpl implements HostTree {
   public <V> V lookup(@Nonnull final SettingKey<V> key,
                       @Nullable final User user,
                       @Nonnull final Location<World> location) {
+    Host dictator = lookupDictator(key, user, location);
+    if (dictator == null) {
+      return key.getDefaultData();
+    } else {
+      return dictator.get(key).orElseThrow(() ->
+          new RuntimeException("There was an error looking up a Nope setting key")).getData();
+    }
+  }
+
+  @Override
+  public <V> V lookupAnonymous(@Nonnull SettingKey<V> key,
+                               @Nonnull Location<World> location) {
+    return lookup(key, null, location);
+  }
+
+  @Nullable
+  @Override
+  public Host lookupDictator(@Nonnull SettingKey<?> key, @Nullable User user, @Nonnull Location<World> location) {
     /* Collect all hosts */
     Collection<Host> hosts = new LinkedList<>();
 
@@ -707,27 +728,24 @@ public class HostTreeImpl implements HostTree {
     }
 
     Host dictator;
-    Optional<SettingValue<V>> value;
 
     while (hostQueue.peek() != null) {
       dictator = hostQueue.remove();
-      value = dictator.get(key);
-      if (!value.isPresent()) {
+      if (!dictator.get(key).isPresent()) {
         // This shouldn't happen because we previously found that this host has this setting
         throw new RuntimeException("Error retrieving setting value");
       }
-      if (user == null || value.get().getTarget().test(key, user)) {
-        return value.get().getData();
+      if (user == null || dictator.get(key).get().getTarget().test(key, user)) {
+        return dictator;
       }
     }
 
-    return key.getDefaultData();
+    return null;
   }
 
+  @Nullable
   @Override
-  public <V> V lookupAnonymous(@Nonnull SettingKey<V> key,
-                               @Nonnull Location<World> location) {
-    return lookup(key, null, location);
+  public Host lookupDictatorAnonymous(@Nonnull SettingKey<?> key, @Nullable User user, @Nonnull Location<World> location) {
+    return lookupDictator(key, null, location);
   }
-
 }

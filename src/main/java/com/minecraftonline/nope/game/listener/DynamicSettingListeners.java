@@ -28,6 +28,7 @@ package com.minecraftonline.nope.game.listener;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.minecraftonline.nope.Nope;
+import com.minecraftonline.nope.host.Host;
 import com.minecraftonline.nope.setting.SettingKey;
 import com.minecraftonline.nope.setting.SettingLibrary;
 import com.minecraftonline.nope.util.Format;
@@ -53,6 +54,7 @@ import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.action.SleepingEvent;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.event.block.InteractBlockEvent;
+import org.spongepowered.api.event.block.NotifyNeighborBlockEvent;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.damage.DamageTypes;
 import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
@@ -64,6 +66,8 @@ import org.spongepowered.api.event.item.inventory.ChangeInventoryEvent;
 import org.spongepowered.api.event.item.inventory.ClickInventoryEvent;
 import org.spongepowered.api.event.item.inventory.DropItemEvent;
 import org.spongepowered.api.world.LocatableBlock;
+import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.explosion.Explosion;
 
 import javax.annotation.Nullable;
@@ -656,6 +660,43 @@ public final class DynamicSettingListeners {
           SettingLibrary.PVP,
           DamageEntityEvent.class,
           entityVersusEntityCanceller(SettingLibrary.PVP, Player.class, Player.class));
+//  @DynamicSettingListener
+//  static final SettingListener<NotifyNeighborBlockEvent> BLOCK_PROPAGATE_LISTENER =
+//      new SettingListener<NotifyNeighborBlockEvent>(
+//          Lists.newArrayList(SettingLibrary.BLOCK_PROPAGATE_ACROSS,
+//              SettingLibrary.BLOCK_PROPAGATE_WITHIN),
+//          NotifyNeighborBlockEvent.class,
+//          event -> {
+//            Player player = event.getCause().first(Player.class).orElse(null);
+//            Location<World> notifier = event.getCause().first(LocatableBlock.class)
+//                .orElseThrow(() ->
+//                    new RuntimeException("A NotifyNeighborBlockEvent needs a block cause"))
+//                .getLocation();
+//            event.filterDirections(direction -> {
+//              Location<World> recipient = notifier.add(direction.asBlockOffset());
+//              Host fromAcross = Nope.getInstance().getHostTree()
+//                  .lookupDictator(SettingLibrary.BLOCK_PROPAGATE_ACROSS, player, notifier);
+//              boolean fromAcrossData = fromAcross == null
+//                  ? SettingLibrary.BLOCK_PROPAGATE_ACROSS.getDefaultData()
+//                  : fromAcross.getData(SettingLibrary.BLOCK_PROPAGATE_ACROSS, player);
+//              Host toAcross = Nope.getInstance().getHostTree()
+//                  .lookupDictator(SettingLibrary.BLOCK_PROPAGATE_ACROSS, player, recipient);
+//              boolean toAcrossData = toAcross == null
+//                  ? SettingLibrary.BLOCK_PROPAGATE_ACROSS.getDefaultData()
+//                  : toAcross.getData(SettingLibrary.BLOCK_PROPAGATE_ACROSS, player);
+//              Host fromWithin = Nope.getInstance().getHostTree()
+//                  .lookupDictator(SettingLibrary.BLOCK_PROPAGATE_WITHIN, player, notifier);
+//              boolean fromWithinData = fromWithin == null
+//                  ? SettingLibrary.BLOCK_PROPAGATE_WITHIN.getDefaultData()
+//                  : fromWithin.getData(SettingLibrary.BLOCK_PROPAGATE_WITHIN, player);
+//              Host toWithin = Nope.getInstance().getHostTree()
+//                  .lookupDictator(SettingLibrary.BLOCK_PROPAGATE_WITHIN, player, recipient);
+//              boolean toWithinData = toWithin == null
+//                  ? SettingLibrary.BLOCK_PROPAGATE_WITHIN.getDefaultData()
+//                  : toWithin.getData(SettingLibrary.BLOCK_PROPAGATE_WITHIN, player);
+//            });
+//          }
+//      );
   @DynamicSettingListener
   static final SettingListener<RideEntityEvent.Mount> RIDE_LISTENER =
       new PlayerCancelConditionSettingListener<>(

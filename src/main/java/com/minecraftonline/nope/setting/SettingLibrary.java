@@ -80,6 +80,20 @@ public final class SettingLibrary {
       "block-place",
       true
   );
+  @Description("When disabled, block updates will not affect others across the region boundary")
+  @Category(SettingKey.CategoryType.BLOCKS)
+  @NotImplemented
+  public static final SettingKey<Boolean> BLOCK_PROPAGATE_ACROSS = new BooleanSetting(
+      "block-propagate-across",
+      true
+  );
+  @Description("When disabled, block updates will not affect others within the region")
+  @Category(SettingKey.CategoryType.BLOCKS)
+  @NotImplemented
+  public static final SettingKey<Boolean> BLOCK_PROPAGATE_WITHIN = new BooleanSetting(
+      "block-propagate-within",
+      true
+  );
   @Description("When disabled, blocks like farmland may not be trampled")
   @Category(SettingKey.CategoryType.BLOCKS)
   @PlayerRestrictive
@@ -175,16 +189,16 @@ public final class SettingLibrary {
       "entry-deny-message",
       Text.of(TextColors.RED, "You are not allowed to go there")
   );
-  @Description("The title that is sent to a player if they are barred from entry")
-  @Category(SettingKey.CategoryType.MOVEMENT)
-  public static final SettingKey<Text> ENTRY_DENY_TITLE = new TextSetting(
-      "entry-deny-title",
-      Text.EMPTY
-  );
   @Description("The subtitle that is sent to a player if they are barred from entry")
   @Category(SettingKey.CategoryType.MOVEMENT)
   public static final SettingKey<Text> ENTRY_DENY_SUBTITLE = new TextSetting(
       "entry-deny-subtitle",
+      Text.EMPTY
+  );
+  @Description("The title that is sent to a player if they are barred from entry")
+  @Category(SettingKey.CategoryType.MOVEMENT)
+  public static final SettingKey<Text> ENTRY_DENY_TITLE = new TextSetting(
+      "entry-deny-title",
       Text.EMPTY
   );
   @Description("When disabled, the environment cannot inflict damage on players")
@@ -208,16 +222,16 @@ public final class SettingLibrary {
       "exit-deny-message",
       Text.of(TextColors.RED, "You are not allowed to leave here")
   );
-  @Description("The title that is sent to a player if they are barred from exiting")
-  @Category(SettingKey.CategoryType.MOVEMENT)
-  public static final SettingKey<Text> EXIT_DENY_TITLE = new TextSetting(
-      "exit-deny-title",
-      Text.EMPTY
-  );
   @Description("The subtitle that is sent to a player if they are barred from exiting")
   @Category(SettingKey.CategoryType.MOVEMENT)
   public static final SettingKey<Text> EXIT_DENY_SUBTITLE = new TextSetting(
       "exit-deny-subtitle",
+      Text.EMPTY
+  );
+  @Description("The title that is sent to a player if they are barred from exiting")
+  @Category(SettingKey.CategoryType.MOVEMENT)
+  public static final SettingKey<Text> EXIT_DENY_TITLE = new TextSetting(
+      "exit-deny-title",
       Text.EMPTY
   );
   @Description("When disabled, players do not experience fall damage")

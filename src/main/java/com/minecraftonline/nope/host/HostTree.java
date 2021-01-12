@@ -28,12 +28,14 @@ package com.minecraftonline.nope.host;
 import com.flowpowered.math.vector.Vector3i;
 import com.minecraftonline.nope.setting.SettingKey;
 import com.minecraftonline.nope.setting.SettingLibrary;
+
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
@@ -190,5 +192,35 @@ public interface HostTree {
    */
   <V> V lookupAnonymous(@Nonnull final SettingKey<V> key,
                         @Nonnull final Location<World> location);
+
+  /**
+   * Find the appropriate host corresponding to this setting key dependent on whether
+   * this location is inside the host, such as a Region or a World,
+   * and whether the subject is affected.
+   *
+   * @param key      the setting key, obtained from the SettingLibrary
+   * @param user     the subject to check for the setting
+   * @param location the location in the world to check for the setting
+   * @return the relevant host, or null if no host dictates this setting
+   */
+  @Nullable
+  Host lookupDictator(@Nonnull final SettingKey<?> key,
+                      @Nullable final User user,
+                      @Nonnull final Location<World> location);
+
+  /**
+   * Find the host corresponding to this setting key dependent on whether
+   * this location is inside a host, such as a Region or a World.
+   * This method ignores targets.
+   *
+   * @param key      the setting key, obtained from the SettingLibrary
+   * @param location the location in the world to check for the setting
+   * @return the relevant host, or null if no host dictates this setting
+   * @see SettingLibrary
+   */
+  @Nullable
+  Host lookupDictatorAnonymous(@Nonnull final SettingKey<?> key,
+                               @Nullable final User user,
+                               @Nonnull final Location<World> location);
 
 }
