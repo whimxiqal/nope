@@ -59,7 +59,7 @@ public class PlayerMovementHandler {
   private Map<UUID, Vector3i> positions = Maps.newConcurrentMap();
   private Map<UUID, UUID> worldLocations = Maps.newConcurrentMap();
   private Map<UUID, UUID> tasks = Maps.newConcurrentMap();
-  private Map<UUID, Long> messageTime = Maps.newConcurrentMap();
+  private Map<UUID, Long> visualsTimer = Maps.newConcurrentMap();
 
   private Set<UUID> viewers = Sets.newHashSet();
 
@@ -119,7 +119,7 @@ public class PlayerMovementHandler {
             .getUniqueId());
 
     /* Messaging time cache */
-    messageTime.put(uuid, System.currentTimeMillis());
+    visualsTimer.put(uuid, System.currentTimeMillis());
   }
 
   @Listener
@@ -136,7 +136,7 @@ public class PlayerMovementHandler {
     Sponge.getScheduler().getTaskById(taskUuid).ifPresent(Task::cancel);
 
     /* Messaging time cache */
-    messageTime.remove(event.getTargetEntity().getUniqueId());
+    visualsTimer.remove(event.getTargetEntity().getUniqueId());
   }
 
   public void tryPassThreshold(Player player,
@@ -165,14 +165,14 @@ public class PlayerMovementHandler {
     entering.sort(Comparator.comparing(Host::getPriority));
 
     boolean cancel = false;
-    boolean messaged = false;
+    boolean visual = false;
 
     /* Find applicable values for exiting or entering */
     SettingLibrary.Movement movementData;
     Text message;
     Text title;
     Text subtitle;
-    boolean canMessage = messageTime.get(player.getUniqueId())
+    boolean expired = visualsTimer.get(player.getUniqueId())
         + MESSAGE_COOLDOWN_MILLISECONDS < System.currentTimeMillis();
 
     /* Exiting */
@@ -189,17 +189,18 @@ public class PlayerMovementHandler {
         title = exiting.get(i).getData(SettingLibrary.FAREWELL_TITLE, player);
         subtitle = exiting.get(i).getData(SettingLibrary.FAREWELL_SUBTITLE, player);
       }
-      if (!message.isEmpty() && canMessage) {
+      if (!message.isEmpty() && expired) {
         player.sendMessage(message);
-        messaged = true;
+        visual = true;
       }
-      if ((!title.isEmpty() || !subtitle.isEmpty()) && canMessage) {
+      if ((!title.isEmpty() || !subtitle.isEmpty()) && expired) {
         player.sendTitle(Title.builder().title(title).subtitle(subtitle).build());
-        messaged = true;
+        visual = true;
       }
 
-      if (exiting.get(i) instanceof VolumeHost && isHostViewer(player.getUniqueId())) {
+      if (exiting.get(i) instanceof VolumeHost && isHostViewer(player.getUniqueId()) && expired) {
         EffectsUtil.showVolume((VolumeHost) exiting.get(i), player, 5);
+        visual = true;
       }
     }
 
@@ -217,23 +218,24 @@ public class PlayerMovementHandler {
         title = entering.get(i).getData(SettingLibrary.GREETING_TITLE, player);
         subtitle = entering.get(i).getData(SettingLibrary.GREETING_SUBTITLE, player);
       }
-      if (!message.isEmpty() && canMessage) {
+      if (!message.isEmpty() && expired) {
         player.sendMessage(message);
-        messaged = true;
+        visual = true;
       }
-      if ((!title.isEmpty() || !subtitle.isEmpty()) && canMessage) {
+      if ((!title.isEmpty() || !subtitle.isEmpty()) && expired) {
         player.sendTitle(Title.builder().title(title).subtitle(subtitle).build());
-        messaged = true;
+        visual = true;
       }
 
-      if (entering.get(i) instanceof VolumeHost && isHostViewer(player.getUniqueId())) {
+      if (entering.get(i) instanceof VolumeHost && isHostViewer(player.getUniqueId()) && expired) {
         EffectsUtil.showVolume((VolumeHost) entering.get(i), player, 5);
+        visual = true;
       }
     }
 
     /* Update message time (for reduced spamming) */
-    if (messaged) {
-      messageTime.put(player.getUniqueId(), System.currentTimeMillis());
+    if (visual) {
+      visualsTimer.put(player.getUniqueId(), System.currentTimeMillis());
     }
 
     /* Perform cancellation behavior */
