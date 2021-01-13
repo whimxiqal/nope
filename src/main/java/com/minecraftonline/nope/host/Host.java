@@ -244,6 +244,11 @@ public abstract class Host {
     return name.hashCode();
   }
 
+  @Override
+  public boolean equals(Object obj) {
+    return obj instanceof Host && ((Host) obj).getName().equals(this.getName());
+  }
+
   public interface HostSerializer<T extends Host> {
     JsonElement serialize(T host);
 

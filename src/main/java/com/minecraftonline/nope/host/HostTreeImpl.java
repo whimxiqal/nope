@@ -689,11 +689,11 @@ public class HostTreeImpl implements HostTree {
   @Override
   public Host lookupDictator(@Nonnull SettingKey<?> key, @Nullable User user, @Nonnull Location<World> location) {
     /* Collect all hosts */
-    Collection<Host> hosts = new LinkedList<>();
+    LinkedList<Host> hosts = new LinkedList<>();
 
     /* Add global */
     if (globalHost.has(key)) {
-      hosts.add(globalHost);
+      hosts.addFirst(globalHost);
     }
 
     /* Add world */
@@ -703,7 +703,7 @@ public class HostTreeImpl implements HostTree {
         .findAny();
     if (worldHost.isPresent()) {
       if (worldHost.get().has(key)) {
-        hosts.add(worldHost.get());
+        hosts.addFirst(worldHost.get());
       }
 
       /* Add regions */
@@ -712,7 +712,7 @@ public class HostTreeImpl implements HostTree {
               location.getBlockY(),
               location.getBlockZ())
           .stream().filter(host -> host.has(key))
-          .forEach(hosts::add);
+          .forEach(hosts::addFirst);
     }
 
     /* Choose a data structure that will optimize searching for highest priority matching */

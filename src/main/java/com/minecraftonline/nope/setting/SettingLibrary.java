@@ -82,14 +82,12 @@ public final class SettingLibrary {
   );
   @Description("When disabled, block updates will not affect others across the region boundary")
   @Category(SettingKey.CategoryType.BLOCKS)
-  @NotImplemented
   public static final SettingKey<Boolean> BLOCK_PROPAGATE_ACROSS = new BooleanSetting(
       "block-propagate-across",
       true
   );
   @Description("When disabled, block updates will not affect others within the region")
   @Category(SettingKey.CategoryType.BLOCKS)
-  @NotImplemented
   public static final SettingKey<Boolean> BLOCK_PROPAGATE_WITHIN = new BooleanSetting(
       "block-propagate-within",
       true

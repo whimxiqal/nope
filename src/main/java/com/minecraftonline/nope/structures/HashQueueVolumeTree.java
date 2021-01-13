@@ -25,9 +25,7 @@
 
 package com.minecraftonline.nope.structures;
 
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.Multimap;
-import com.google.common.collect.Multimaps;
+import com.google.common.collect.Maps;
 import lombok.Data;
 
 import javax.annotation.Nonnull;
@@ -44,7 +42,7 @@ import java.util.stream.Collectors;
  */
 public class HashQueueVolumeTree<S, T extends Volume> extends VolumeTree<S, T> {
 
-  private final Multimap<Query, S> cache = Multimaps.synchronizedSetMultimap(HashMultimap.create());
+  private final Map<Query, Set<S>> cache = Maps.newConcurrentMap();
   private final Queue<Query> history = new ConcurrentLinkedQueue<>();
   private final int size;
 
@@ -56,9 +54,6 @@ public class HashQueueVolumeTree<S, T extends Volume> extends VolumeTree<S, T> {
   @Nonnull
   @Override
   public Collection<T> containersOf(int x, int y, int z) {
-    if (this.root == null) {
-      throw new IllegalStateException("Root of VolumeTree is not initialized");
-    }
     Query query = Query.of(x, y, z);
     if (cache.containsKey(query)) {
       return cache.get(query)
@@ -66,8 +61,8 @@ public class HashQueueVolumeTree<S, T extends Volume> extends VolumeTree<S, T> {
           .map(volumes::get)
           .collect(Collectors.toList());
     }
-    Collection<S> keys = root.findVolumes(x, y, z);
-    cache.putAll(query, keys);
+    Set<S> keys = root.findVolumes(x, y, z);
+    cache.put(query, keys);
     history.add(query);
     trim();
     return keys.stream().map(volumes::get).collect(Collectors.toList());
@@ -100,7 +95,7 @@ public class HashQueueVolumeTree<S, T extends Volume> extends VolumeTree<S, T> {
 
   private void trim() {
     if (history.size() > size) {
-      cache.removeAll(history.remove());
+      cache.remove(history.remove());
     }
   }
 
@@ -109,5 +104,25 @@ public class HashQueueVolumeTree<S, T extends Volume> extends VolumeTree<S, T> {
     private final int posX;
     private final int posY;
     private final int posZ;
+
+    @Override
+    public boolean equals(Object other) {
+      if (other == null || getClass() != other.getClass()) {
+        return false;
+      }
+
+      return (this.posX == ((Query) other).posX)
+          && (this.posY == ((Query) other).posY)
+          && (this.posZ == ((Query) other).posZ);
+    }
+
+    @Override
+    public int hashCode() {
+      int result = posX ^ (posX >>> 16);
+      result = 31 * result + (posY ^ (posY >>> 16));
+      result = 31 * result + (posZ ^ (posZ >>> 16));
+      return result;
+    }
+
   }
 }
