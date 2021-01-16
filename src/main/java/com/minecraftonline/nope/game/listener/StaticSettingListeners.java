@@ -31,6 +31,7 @@ import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.entity.MoveEntityEvent;
 import org.spongepowered.api.event.filter.cause.Root;
+import org.spongepowered.api.event.network.ClientConnectionEvent;
 
 public final class StaticSettingListeners {
 
@@ -50,6 +51,11 @@ public final class StaticSettingListeners {
         true,
         event::setCancelled
     );
+  }
+
+  @Listener
+  public void onLeave(ClientConnectionEvent.Disconnect event) {
+    Nope.getInstance().getCollisionHandler().loggedOut(event.getTargetEntity());
   }
 
 }
