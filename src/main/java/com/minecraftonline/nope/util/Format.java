@@ -148,7 +148,7 @@ public final class Format {
             .findNode(InfoCommand.class)
             .orElseThrow(() ->
                 new RuntimeException("Info command is not part of the command tree"))
-            + name,
+            .getFullCommand() + " " + name,
         Text.of("Click for more details about this region")
     );
   }

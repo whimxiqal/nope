@@ -50,6 +50,10 @@ public class CollisionHandler {
     }
   }
 
+  public void loggedOut(Player player) {
+    disabledCollision.remove(player.getUniqueId());
+  }
+
   public boolean isCollisionDisabled(Player player) {
     return this.disabledCollision.contains(player.getUniqueId());
   }
