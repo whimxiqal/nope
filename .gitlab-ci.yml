@@ -9,7 +9,6 @@ build:
   before_script:
     - export GRADLE_USER_HOME=`pwd`/.gradle
   script: 
-    - chmod +x ./gradlew
     - ./gradlew -Dorg.gradle.daemon=false build
   artifacts:
     paths:
