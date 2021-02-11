@@ -56,7 +56,7 @@ class HostCommandElement extends CommandElement {
   @Nullable
   @Override
   protected Host parseValue(@Nonnull CommandSource source, CommandArgs args) throws ArgumentParseException {
-    String hostName = args.next();
+    String hostName = args.next().toLowerCase();
     Host host = Nope.getInstance().getHostTree().getHosts().get(hostName);
 
     if (host != null) {

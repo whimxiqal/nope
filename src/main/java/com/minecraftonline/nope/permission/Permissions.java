@@ -30,7 +30,7 @@ package com.minecraftonline.nope.permission;
 public final class Permissions {
 
   public static final Permission COMMAND_REGION_CREATE = Permission.of("nope.command.region.create");
-  public static final Permission COMMAND_REGION_DELETE = Permission.of("nope.command.region.delete");
+  public static final Permission COMMAND_REGION_DESTROY = Permission.of("nope.command.region.destroy");
   public static final Permission COMMAND_REGION_EDIT = Permission.of("nope.command.region.edit");
   public static final Permission COMMAND_REGION_INFO = Permission.of("nope.command.region.info");
   public static final Permission COMMAND_REGION_LIST = Permission.of("nope.command.region.list");

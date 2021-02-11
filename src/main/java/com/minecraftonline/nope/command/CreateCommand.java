@@ -50,6 +50,7 @@
 package com.minecraftonline.nope.command;
 
 import com.minecraftonline.nope.Nope;
+import com.minecraftonline.nope.host.VolumeHost;
 import com.minecraftonline.nope.key.regionwand.RegionWandHandler;
 import com.minecraftonline.nope.arguments.NopeArguments;
 import com.minecraftonline.nope.command.common.CommandNode;
@@ -96,7 +97,7 @@ public class CreateCommand extends LambdaCommandNode {
 
       try {
         assert selection.getWorld() != null;
-        Nope.getInstance().getHostTree().addRegion(
+        VolumeHost region = Nope.getInstance().getHostTree().addRegion(
             name,
             selection.getWorld().getUniqueId(),
             selection.getMin(),
@@ -105,7 +106,7 @@ public class CreateCommand extends LambdaCommandNode {
         );
         Nope.getInstance().saveState();
         DynamicSettingListeners.register();
-        src.sendMessage(Format.success("Successfully created region ", Format.note(name), "!"));
+        src.sendMessage(Format.success("Successfully created region ", Format.note(region.getName()), "!"));
         Nope.getInstance().getRegionWandHandler().getSelectionMap().remove(player.getUniqueId());
       } catch (IllegalArgumentException e) {
         src.sendMessage(Format.error("Could not create region: " + e.getMessage()));

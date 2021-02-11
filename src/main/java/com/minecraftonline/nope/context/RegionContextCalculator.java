@@ -30,7 +30,6 @@ import com.minecraftonline.nope.host.Host;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.service.context.ContextCalculator;
-import org.spongepowered.api.service.context.Contextual;
 import org.spongepowered.api.service.permission.Subject;
 
 import javax.annotation.Nonnull;

@@ -65,8 +65,8 @@ public class DestroyCommand extends LambdaCommandNode {
 
   DestroyCommand(CommandNode parent) {
     super(parent,
-        Permissions.COMMAND_REGION_DELETE,
-        Text.of("Delete a given region"),
+        Permissions.COMMAND_REGION_DESTROY,
+        Text.of("Destroy a given region"),
         "destroy", "remove");
     addCommandElements(GenericArguments.onlyOne(NopeArguments.host(Text.of("host"))));
     setExecutor((src, args) -> {
@@ -75,7 +75,7 @@ public class DestroyCommand extends LambdaCommandNode {
       try {
         Nope.getInstance().getHostTree().removeRegion(host.getName());
       } catch (IllegalArgumentException e) {
-        src.sendMessage(Format.error("This region cannot be deleted!"));
+        src.sendMessage(Format.error("This region cannot be destroyed!"));
         return CommandResult.empty();
       }
 
@@ -83,7 +83,7 @@ public class DestroyCommand extends LambdaCommandNode {
       DynamicSettingListeners.register();
       src.sendMessage(Format.success("Region ",
           Format.note(host.getName()),
-          " was successfully deleted."));
+          " was successfully destroyed."));
 
       return CommandResult.empty();
     });
