@@ -34,13 +34,11 @@ import com.google.gson.JsonObject;
 import com.minecraftonline.nope.Nope;
 import com.minecraftonline.nope.setting.SettingKey;
 import com.minecraftonline.nope.setting.SettingLibrary;
-import com.minecraftonline.nope.setting.SettingValue;
 import com.minecraftonline.nope.structures.HashQueueVolumeTree;
 import com.minecraftonline.nope.structures.VolumeTree;
 
 import java.io.IOException;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -67,7 +65,7 @@ import org.spongepowered.api.world.storage.WorldProperties;
 
 /**
  * Implementation of HostTree making distinctions between
- * a GlobalHost, a WorldHost, and a Region (VolumeHost).
+ * a GlobalHost, a WorldHost, and a Zone (VolumeHost).
  *
  * @see Host
  * @see VolumeHost
@@ -77,13 +75,13 @@ public class HostTreeImpl implements HostTree {
   private GlobalHost globalHost;
   private final HashMap<UUID, WorldHost> worldHosts = Maps.newHashMap();
 
-  private final Map<String, UUID> regionToWorld = Maps.newHashMap();
+  private final Map<String, UUID> zoneToWorld = Maps.newHashMap();
 
   private final Storage storage;
 
   private final String globalHostName;
   private final Function<String, String> worldNameConverter;
-  private final String regionNameRegex;
+  private final String zoneNameRegex;
 
   /**
    * Default constructor.
@@ -91,17 +89,17 @@ public class HostTreeImpl implements HostTree {
    * @param storage            the type of storage to handle IO
    * @param globalHostName     the name given to the global host
    * @param worldNameConverter the converter with which to create the world host names
-   * @param regionNameRegex    the allowed regex for added regions, which should ensure
+   * @param zoneNameRegex    the allowed regex for added zones, which should ensure
    *                           no conflicts with global or world hosts
    */
   public HostTreeImpl(@Nonnull Storage storage,
                       @Nonnull String globalHostName,
                       @Nonnull Function<String, String> worldNameConverter,
-                      @Nonnull String regionNameRegex) {
+                      @Nonnull String zoneNameRegex) {
     this.storage = storage;
     this.globalHostName = globalHostName;
     this.worldNameConverter = worldNameConverter;
-    this.regionNameRegex = regionNameRegex;
+    this.zoneNameRegex = zoneNameRegex;
 
     this.globalHost = new GlobalHost();
   }
@@ -137,11 +135,11 @@ public class HostTreeImpl implements HostTree {
       Nope.getInstance().getLogger().error("Nope's WorldHosts could not be read.", e);
     }
 
-    // Read Regions
+    // Read Zones
     try {
-      storage.readRegions(worldHosts.values(), new RegionSerializer()).forEach(this::addRegion);
+      storage.readZones(worldHosts.values(), new ZoneSerializer()).forEach(this::addZone);
     } catch (IOException e) {
-      Nope.getInstance().getLogger().error("Nope's Regions could not be read.", e);
+      Nope.getInstance().getLogger().error("Nope's Zones could not be read.", e);
     }
 
   }
@@ -162,9 +160,9 @@ public class HostTreeImpl implements HostTree {
 
     worldHosts.values().forEach(worldHost -> {
       try {
-        storage.writeRegions(worldHost.getRegionTree().volumes(), new RegionSerializer());
+        storage.writeZones(worldHost.getZoneTree().volumes(), new ZoneSerializer());
       } catch (IOException e) {
-        Nope.getInstance().getLogger().error("Nope's Regions could not be written.", e);
+        Nope.getInstance().getLogger().error("Nope's Zones could not be written.", e);
       }
     });
   }
@@ -224,7 +222,7 @@ public class HostTreeImpl implements HostTree {
     @Getter
     private final UUID worldUuid;
     @Getter(AccessLevel.PUBLIC)
-    private final VolumeTree<String, Region> regionTree;
+    private final VolumeTree<String, Zone> zoneTree;
 
     WorldHost(String name, UUID worldUuid) {
       super(name, -1);
@@ -232,9 +230,9 @@ public class HostTreeImpl implements HostTree {
       if (cacheSize < 0) {
         throw new RuntimeException("The cache size must be greater than 0");
       } else if (cacheSize == 0) {
-        this.regionTree = new VolumeTree<>();
+        this.zoneTree = new VolumeTree<>();
       } else {
-        this.regionTree = new HashQueueVolumeTree<>(cacheSize);
+        this.zoneTree = new HashQueueVolumeTree<>(cacheSize);
       }
 
       this.worldUuid = worldUuid;
@@ -280,19 +278,19 @@ public class HostTreeImpl implements HostTree {
       // Settings
       host.putAll(SettingLibrary.deserializeSettingAssignments(json));
 
-      // No regions are put here because they must be added manually when deserializing the regions
+      // No zones are put here because they must be added manually when deserializing the zones
 
       return host;
     }
   }
 
   /**
-   * An object representing a three dimensional Nope Region in a Minecraft world.
-   * The Region stores data about its location and extent in three dimensional
+   * An object representing a three dimensional Nope Zone in a Minecraft world.
+   * The Zone stores data about its location and extent in three dimensional
    * space and it stores com.minecraftonline.nope.setting.Setting data for handling
    * and manipulating Sponge events based in its specific configuration.
    */
-  public class Region extends VolumeHost {
+  public class Zone extends VolumeHost {
 
     @Getter
     private final UUID worldUuid;
@@ -308,14 +306,14 @@ public class HostTreeImpl implements HostTree {
      * @param zmin start point of z range, inclusive
      * @param zmax end point of z range, inclusive
      */
-    public Region(UUID worldUuid,
-                  String name,
-                  int xmin,
-                  int xmax,
-                  int ymin,
-                  int ymax,
-                  int zmin,
-                  int zmax) {
+    public Zone(UUID worldUuid,
+                String name,
+                int xmin,
+                int xmax,
+                int ymin,
+                int ymax,
+                int zmin,
+                int zmax) {
       super(name, xmin, xmax, ymin, ymax, zmin, zmax);
       this.worldUuid = worldUuid;
       if (!worldHosts.containsKey(worldUuid)) {
@@ -328,10 +326,10 @@ public class HostTreeImpl implements HostTree {
      * Convenient constructor.
      *
      * @param name unique identifier
-     * @param pos1 a point to bound this region
-     * @param pos2 another point to bound this region
+     * @param pos1 a point to bound this zone
+     * @param pos2 another point to bound this zone
      */
-    public Region(UUID worldUuid, String name, Vector3i pos1, Vector3i pos2) {
+    public Zone(UUID worldUuid, String name, Vector3i pos1, Vector3i pos2) {
       this(worldUuid, name,
           Math.min(pos1.getX(), pos2.getX()),
           Math.max(pos1.getX(), pos2.getX()),
@@ -359,12 +357,12 @@ public class HostTreeImpl implements HostTree {
       }
       int prev = getPriority();
       super.setPriority(priority);
-      Optional<Region> intersection = findIntersectingRegionWithSamePriority(worldUuid, this);
+      Optional<Zone> intersection = findIntersectingZoneWithSamePriority(worldUuid, this);
       if (intersection.isPresent()) {
         super.setPriority(prev);
         throw new IllegalArgumentException(String.format(
             "Cannot set priority of %s to %d, "
-                + "because region %s which this intersects has that priority",
+                + "because zone %s which this intersects has that priority",
             getName(),
             priority,
             intersection.get().getName()
@@ -373,10 +371,10 @@ public class HostTreeImpl implements HostTree {
     }
   }
 
-  public class RegionSerializer implements Host.HostSerializer<Region> {
+  public class ZoneSerializer implements Host.HostSerializer<Zone> {
 
     @Override
-    public JsonElement serialize(Region host) {
+    public JsonElement serialize(Zone host) {
       Map<String, Object> serializedHost = Maps.newHashMap();
       serializedHost.put("name", host.getName());
       serializedHost.put("settings", SettingLibrary.serializeSettingAssignments(host.getAll()));
@@ -384,7 +382,7 @@ public class HostTreeImpl implements HostTree {
           .getWorldProperties(((WorldHost) host.getParent()).worldUuid)
           .map(WorldProperties::getWorldName)
           .orElseThrow(() -> new RuntimeException(String.format(
-              "Region's parent WorldHost has invalid parent world UUID: %s",
+              "Zone's parent WorldHost has invalid parent world UUID: %s",
               ((WorldHost) host.getParent()).worldUuid.toString()))));
       serializedHost.put("priority", host.getPriority());
       Map<String, Integer> volume = Maps.newHashMap();
@@ -400,7 +398,7 @@ public class HostTreeImpl implements HostTree {
     }
 
     @Override
-    public Region deserialize(JsonElement json) {
+    public Zone deserialize(JsonElement json) {
       String name = json.getAsJsonObject().get("name").getAsString();
       UUID parent = Sponge.getServer()
           .getWorldProperties(json.getAsJsonObject().get("parent").getAsString())
@@ -416,7 +414,7 @@ public class HostTreeImpl implements HostTree {
       int ymax = volume.get("ymax").getAsInt();
       int zmin = volume.get("zmin").getAsInt();
       int zmax = volume.get("zmax").getAsInt();
-      Region host = new Region(parent, name, xmin, xmax, ymin, ymax, zmin, zmax);
+      Zone host = new Zone(parent, name, xmin, xmax, ymin, ymax, zmin, zmax);
 
       host.setPriority(json.getAsJsonObject().get("priority").getAsInt());
 
@@ -455,17 +453,17 @@ public class HostTreeImpl implements HostTree {
         throws IOException, HostParseException;
 
     /**
-     * Reads all Regions in storage.
+     * Reads all Zones in storage.
      *
-     * @param parents    all parents of these Regions so that the Regions
+     * @param parents    all parents of these Zones so that the Zones
      *                   are given the correct parents
      * @param serializer the serializer which holds the logic for serialization
-     * @return any Regions in storage
+     * @return any Zones in storage
      * @throws IOException        if there is an error connecting to the storage
-     * @throws HostParseException if there is any error parsing an existing stored Region
+     * @throws HostParseException if there is any error parsing an existing stored Zone
      */
-    Collection<Region> readRegions(Collection<WorldHost> parents,
-                                   Host.HostSerializer<Region> serializer)
+    Collection<Zone> readZones(Collection<WorldHost> parents,
+                               Host.HostSerializer<Zone> serializer)
         throws IOException, HostParseException;
 
     /**
@@ -493,15 +491,15 @@ public class HostTreeImpl implements HostTree {
         throws IOException, HostParseException;
 
     /**
-     * Writes Regions to storage.
+     * Writes Zones to storage.
      *
-     * @param regions    the host to store
+     * @param zones    the host to store
      * @param serializer the serializer which holds the logic for serialization
      * @throws IOException        if there is an error connecting to the storage
-     * @throws HostParseException if there is any error parsing an existing stored Region
+     * @throws HostParseException if there is any error parsing an existing stored Zone
      */
-    void writeRegions(Collection<Region> regions,
-                      Host.HostSerializer<Region> serializer)
+    void writeZones(Collection<Zone> zones,
+                    Host.HostSerializer<Zone> serializer)
         throws IOException, HostParseException;
 
     class HostParseException extends RuntimeException {
@@ -534,12 +532,12 @@ public class HostTreeImpl implements HostTree {
 
   @Nullable
   @Override
-  public Region getRegion(final String name) {
-    UUID worldUuid = regionToWorld.get(name.toLowerCase());
+  public Zone getZone(final String name) {
+    UUID worldUuid = zoneToWorld.get(name.toLowerCase());
     if (worldUuid == null) {
       return null;
     }
-    return worldHosts.get(worldUuid).getRegionTree().get(name.toLowerCase());
+    return worldHosts.get(worldUuid).getZoneTree().get(name.toLowerCase());
   }
 
   @Nonnull
@@ -549,16 +547,16 @@ public class HostTreeImpl implements HostTree {
     hosts.put(this.globalHost.getName(), this.globalHost);
     this.worldHosts.values().forEach(worldHost -> {
       hosts.put(worldHost.getName(), worldHost);
-      worldHost.getRegionTree().volumes().forEach(region -> hosts.put(region.getName(), region));
+      worldHost.getZoneTree().volumes().forEach(zone -> hosts.put(zone.getName(), zone));
     });
     return hosts;
   }
 
   @Nonnull
   @Override
-  public Collection<VolumeHost> getRegions(final UUID worldUuid) throws IllegalArgumentException {
+  public Collection<VolumeHost> getZones(final UUID worldUuid) throws IllegalArgumentException {
     return Optional.ofNullable(getWorldHost(worldUuid)).map(worldHost ->
-        worldHost.getRegionTree().volumes()
+        worldHost.getZoneTree().volumes()
             .stream()
             .map(volume -> (VolumeHost) volume)
             .collect(Collectors.toList()))
@@ -567,28 +565,28 @@ public class HostTreeImpl implements HostTree {
 
   @Nonnull
   @Override
-  public Region addRegion(final String name,
-                          final UUID worldUuid,
-                          final Vector3i pos1,
-                          final Vector3i pos2,
-                          int priority) {
-    Region region = new Region(worldUuid, name, pos1, pos2);
-    region.setPriority(priority);
-    this.addRegion(region);
-    return region;
+  public Zone addZone(final String name,
+                      final UUID worldUuid,
+                      final Vector3i pos1,
+                      final Vector3i pos2,
+                      int priority) {
+    Zone zone = new Zone(worldUuid, name, pos1, pos2);
+    zone.setPriority(priority);
+    this.addZone(zone);
+    return zone;
   }
 
-  private void addRegion(Region region) {
-    if (!Pattern.matches(regionNameRegex, region.getName())) {
+  private void addZone(Zone zone) {
+    if (!Pattern.matches(zoneNameRegex, zone.getName())) {
       throw new IllegalArgumentException(String.format(
-          "Region insertion failed because the format of name %s is not allowed",
-          region.getName()));
+          "Zone insertion failed because the format of name %s is not allowed",
+          zone.getName()));
     }
-    Region other = getRegion(region.getName());
+    Zone other = getZone(zone.getName());
     if (other != null) {
       throw new IllegalArgumentException(String.format(
-          "Region insertion failed because name %s already exists (in world \"%s\")",
-          region.getName(),
+          "Zone insertion failed because name %s already exists (in world \"%s\")",
+          zone.getName(),
           Sponge.getServer()
               .getAllWorldProperties()
               .stream().filter(prop -> prop.getUniqueId().equals(other.getWorldUuid()))
@@ -596,51 +594,51 @@ public class HostTreeImpl implements HostTree {
               .orElse("unknown")));
     }
 
-    Optional<Region> intersection = findIntersectingRegionWithSamePriority(
-        region.getWorldUuid(),
-        region);
+    Optional<Zone> intersection = findIntersectingZoneWithSamePriority(
+        zone.getWorldUuid(),
+        zone);
 
     if (intersection.isPresent()) {
       throw new IllegalArgumentException(String.format(
-          "Region insertion failed because the new region %s"
-              + " and region %s have the same priority level: %d",
-          region.getName(),
+          "Zone insertion failed because the new zone %s"
+              + " and zone %s have the same priority level: %d",
+          zone.getName(),
           intersection.get().getName(),
-          region.getPriority()));
+          zone.getPriority()));
     }
-    worldHosts.get(region.getWorldUuid())
-        .getRegionTree()
-        .add(region.getName(), region);  // Should return null
-    regionToWorld.put(region.getName(), region.getWorldUuid());
+    worldHosts.get(zone.getWorldUuid())
+        .getZoneTree()
+        .add(zone.getName(), zone);  // Should return null
+    zoneToWorld.put(zone.getName(), zone.getWorldUuid());
   }
 
-  private Optional<Region> findIntersectingRegionWithSamePriority(final UUID worldUuid,
-                                                                  final Region region) {
-    return worldHosts.get(worldUuid).getRegionTree()
+  private Optional<Zone> findIntersectingZoneWithSamePriority(final UUID worldUuid,
+                                                              final Zone zone) {
+    return worldHosts.get(worldUuid).getZoneTree()
         .volumes()
         .stream()
-        .filter(other -> other != region
-            && region.intersects(other)
-            && region.getPriority() == other.getPriority())
+        .filter(other -> other != zone
+            && zone.intersects(other)
+            && zone.getPriority() == other.getPriority())
         .findAny();
   }
 
   @Nonnull
   @Override
-  public Region removeRegion(final String name) {
-    if (!hasRegion(name.toLowerCase())) {
+  public Zone removeZone(final String name) {
+    if (!hasZone(name.toLowerCase())) {
       throw new IllegalArgumentException(String.format(
-          "Region deletion failed because name %s does not exist",
+          "Zone deletion failed because name %s does not exist",
           name.toLowerCase()));
     }
-    WorldHost worldHost = worldHosts.get(regionToWorld.get(name.toLowerCase()));
-    regionToWorld.remove(name.toLowerCase());
-    return Objects.requireNonNull(worldHost.getRegionTree().remove(name.toLowerCase()));
+    WorldHost worldHost = worldHosts.get(zoneToWorld.get(name.toLowerCase()));
+    zoneToWorld.remove(name.toLowerCase());
+    return Objects.requireNonNull(worldHost.getZoneTree().remove(name.toLowerCase()));
   }
 
   @Override
-  public boolean hasRegion(final String name) {
-    return regionToWorld.containsKey(name.toLowerCase());
+  public boolean hasZone(final String name) {
+    return zoneToWorld.containsKey(name.toLowerCase());
   }
 
   @Nonnull
@@ -654,7 +652,7 @@ public class HostTreeImpl implements HostTree {
       if (worldHost.encompasses(location)) {
         list.add(worldHost);
       }
-      list.addAll(worldHost.getRegionTree().containersOf(location.getBlockX(),
+      list.addAll(worldHost.getZoneTree().containersOf(location.getBlockX(),
           location.getBlockY(),
           location.getBlockZ()));
     });
@@ -706,8 +704,8 @@ public class HostTreeImpl implements HostTree {
         hosts.addFirst(worldHost.get());
       }
 
-      /* Add regions */
-      worldHost.get().getRegionTree()
+      /* Add zones */
+      worldHost.get().getZoneTree()
           .containersOf(location.getBlockX(),
               location.getBlockY(),
               location.getBlockZ())

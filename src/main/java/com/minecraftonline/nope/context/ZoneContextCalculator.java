@@ -36,7 +36,7 @@ import javax.annotation.Nonnull;
 import java.util.Optional;
 import java.util.Set;
 
-public class RegionContextCalculator implements ContextCalculator<Subject> {
+public class ZoneContextCalculator implements ContextCalculator<Subject> {
 
   @Override
   public void accumulateContexts(@Nonnull Subject target, @Nonnull Set<Context> accumulator) {

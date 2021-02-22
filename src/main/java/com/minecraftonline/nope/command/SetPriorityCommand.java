@@ -40,19 +40,19 @@ public class SetPriorityCommand extends LambdaCommandNode {
 
   SetPriorityCommand(CommandNode parent) {
     super(parent,
-        Permissions.COMMAND_REGION_EDIT,
-        Text.of("Allows the user to set the priority of a region"),
+        Permissions.COMMAND_EDIT,
+        Text.of("Allows the user to set the priority of a zone"),
         "setpriority");
 
     addCommandElements(
         GenericArguments.flags()
-            .valueFlag(NopeArguments.host(Text.of("region")), "r", "-region")
+            .valueFlag(NopeArguments.host(Text.of("zone")), "z", "-zone")
             .buildWith(GenericArguments.none()),
         GenericArguments.integer(Text.of("priority")));
     setExecutor((src, args) -> {
       int priority = args.requireOne("priority");
 
-      Host host = args.<Host>getOne("region").orElse(NopeCommandRoot.inferHost(src).orElse(null));
+      Host host = args.<Host>getOne("zone").orElse(NopeCommandRoot.inferHost(src).orElse(null));
       if (host == null) {
         return CommandResult.empty();
       }

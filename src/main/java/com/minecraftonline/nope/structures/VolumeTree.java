@@ -45,7 +45,7 @@ import lombok.Getter;
  * contain a specific point in 3D space, where the Y dimension
  * is significantly smaller than X and Z.
  *
- * <p>We assume the regions are distributed evenly between all
+ * <p>We assume the zones are distributed evenly between all
  * dimensions between the maximum and minimum values.
  *
  * <p>Search in the following order:

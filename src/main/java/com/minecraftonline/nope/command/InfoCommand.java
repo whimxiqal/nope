@@ -79,17 +79,17 @@ public class InfoCommand extends LambdaCommandNode {
 
   InfoCommand(CommandNode parent) {
     super(parent,
-        Permissions.COMMAND_REGION_INFO,
-        Text.of("View detailed information about a region"),
+        Permissions.COMMAND_INFO,
+        Text.of("View detailed information about a zone"),
         "info",
         "i");
 
-    CommandElement regionElement = GenericArguments.optional(NopeArguments.host(Text.of("region")));
-    regionElement = GenericArguments.flags().flag("f", "-friendly").buildWith(regionElement);
-    addCommandElements(regionElement);
+    CommandElement zoneElement = GenericArguments.optional(NopeArguments.host(Text.of("zone")));
+    zoneElement = GenericArguments.flags().flag("f", "-friendly").buildWith(zoneElement);
+    addCommandElements(zoneElement);
     setExecutor((src, args) -> {
 
-      Host host = args.<Host>getOne("region").orElse(NopeCommandRoot.inferHost(src).orElse(null));
+      Host host = args.<Host>getOne("zone").orElse(NopeCommandRoot.inferHost(src).orElse(null));
       if (host == null) {
         return CommandResult.empty();
       }
@@ -113,7 +113,7 @@ public class InfoCommand extends LambdaCommandNode {
 
       if (host instanceof VolumeHost) {
         VolumeHost volumeHost = (VolumeHost) host;
-        // Volume regions only:
+        // Volume zones only:
         headerLines.add(Format.keyValue("min: ", volumeHost.getMinX()
             + ", " + volumeHost.getMinY()
             + ", " + volumeHost.getMinZ()));
@@ -123,8 +123,8 @@ public class InfoCommand extends LambdaCommandNode {
             + ", " + volumeHost.getMaxZ()));
       }
 
-      int regionPriority = host.getPriority();
-      headerLines.add(Format.keyValue("priority: ", String.valueOf(regionPriority)));
+      int zonePriority = host.getPriority();
+      headerLines.add(Format.keyValue("priority: ", String.valueOf(zonePriority)));
       headerLines.add(Text.of(""));  // line separator
       headerLines.add(Text.of(TextColors.AQUA, "<< Settings >> ", Format.note("Click to unset")));
 
@@ -159,7 +159,7 @@ public class InfoCommand extends LambdaCommandNode {
                 .provide(PaginationService.class)
                 .orElseThrow(() -> new RuntimeException("PaginationService doesn't exist!"))
                 .builder()
-                .title(Format.info("Region Info: ", Format.note(host.getName())))
+                .title(Format.info("Zone Info: ", Format.note(host.getName())))
                 .header(headerLines.isEmpty()
                     ? Format.note("None")
                     : Text.joinWith(Text.NEW_LINE, headerLines))

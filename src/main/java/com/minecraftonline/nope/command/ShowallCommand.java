@@ -64,8 +64,8 @@ import org.spongepowered.api.text.format.TextColors;
 public class ShowallCommand extends LambdaCommandNode {
   public ShowallCommand(CommandNode parent) {
     super(parent,
-        Permission.of(Permissions.COMMAND_REGION_SHOW.get()),
-        Text.of("Graphically display any region during motion"),
+        Permission.of(Permissions.COMMAND_SHOW.get()),
+        Text.of("Graphically display any zone during motion"),
         "showall");
     setExecutor((src, args) -> {
       if (!(src instanceof Player)) {
@@ -76,11 +76,11 @@ public class ShowallCommand extends LambdaCommandNode {
       Player player = (Player) src;
       if (Nope.getInstance().getPlayerMovementHandler().isHostViewer(player.getUniqueId())) {
         Nope.getInstance().getPlayerMovementHandler().removeHostViewer(player.getUniqueId());
-        player.sendMessage(Format.success("Region display has been ",
+        player.sendMessage(Format.success("Zone display has been ",
             Text.of(TextColors.RED, "disabled")));
       } else {
         Nope.getInstance().getPlayerMovementHandler().addHostViewer(player.getUniqueId());
-        player.sendMessage(Format.success("Region display has been ",
+        player.sendMessage(Format.success("Zone display has been ",
             Text.of(TextColors.BLUE, "enabled")));
       }
       return CommandResult.success();

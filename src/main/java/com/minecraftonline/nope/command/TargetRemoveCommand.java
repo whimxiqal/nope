@@ -58,7 +58,7 @@ import org.spongepowered.api.text.Text;
 public class TargetRemoveCommand extends FunctionlessCommandNode {
   public TargetRemoveCommand(CommandNode parent) {
     super(parent,
-        Permissions.COMMAND_REGION_EDIT,
+        Permissions.COMMAND_EDIT,
         Text.of("Remove specifiers for a setting to target a player"),
         "remove");
     addChildren(new TargetRemovePermissionCommand(this),

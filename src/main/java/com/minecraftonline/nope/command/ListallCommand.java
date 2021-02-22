@@ -69,8 +69,8 @@ public class ListallCommand extends LambdaCommandNode {
 
   ListallCommand(CommandNode parent) {
     super(parent,
-        Permissions.COMMAND_REGION_LIST,
-        Text.of("List all regions"),
+        Permissions.COMMAND_LIST,
+        Text.of("List all zones"),
         "listall");
     addCommandElements(GenericArguments.optional(GenericArguments.string(Text.of("regex"))));
     setExecutor((src, args) -> {
@@ -86,7 +86,7 @@ public class ListallCommand extends LambdaCommandNode {
               .sorted(Comparator.comparing(Host::getName))
               .map(host -> Text.of(Format.ACCENT, "> ", Format.note(Format.host(host))))
               .collect(Collectors.toList()))
-          .title(Format.info("All Regions"))
+          .title(Format.info("All Zones"))
           .padding(Format.note("="))
           .build()
           .sendTo(src);

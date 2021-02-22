@@ -149,7 +149,7 @@ public final class Format {
             .orElseThrow(() ->
                 new RuntimeException("Info command is not part of the command tree"))
             .getFullCommand() + " " + name,
-        Text.of("Click for more details about this region")
+        Text.of("Click for more details about this zone")
     );
   }
 

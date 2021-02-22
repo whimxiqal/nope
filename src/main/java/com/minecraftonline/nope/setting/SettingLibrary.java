@@ -80,13 +80,13 @@ public final class SettingLibrary {
       "block-place",
       true
   );
-  @Description("When disabled, block updates will not affect others across the region boundary")
+  @Description("When disabled, block updates will not affect others across the zone boundary")
   @Category(SettingKey.CategoryType.BLOCKS)
   public static final SettingKey<Boolean> BLOCK_PROPAGATE_ACROSS = new BooleanSetting(
       "block-propagate-across",
       true
   );
-  @Description("When disabled, block updates will not affect others within the region")
+  @Description("When disabled, block updates will not affect others within the zone")
   @Category(SettingKey.CategoryType.BLOCKS)
   public static final SettingKey<Boolean> BLOCK_PROPAGATE_WITHIN = new BooleanSetting(
       "block-propagate-within",
@@ -570,7 +570,7 @@ public final class SettingLibrary {
       StorageType.HOCON,
       StorageType.class
   );
-  @Description("The designated point of access to the region via teleport")
+  @Description("The designated point of access to the zone via teleport")
   public static final SettingKey<Vector3d> TELEPORT_LOCATION = new Vector3dSetting(
       "teleport-location",
       Vector3d.ZERO

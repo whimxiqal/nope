@@ -27,15 +27,15 @@ package com.minecraftonline.nope;
 import com.google.inject.Inject;
 import com.minecraftonline.nope.bridge.collision.CollisionHandler;
 import com.minecraftonline.nope.command.common.NopeCommandTree;
-import com.minecraftonline.nope.context.RegionContextCalculator;
+import com.minecraftonline.nope.context.ZoneContextCalculator;
 import com.minecraftonline.nope.game.listener.StaticSettingListeners;
 import com.minecraftonline.nope.game.movement.PlayerMovementHandler;
 import com.minecraftonline.nope.host.HoconHostTreeImplStorage;
 import com.minecraftonline.nope.host.HostTree;
 import com.minecraftonline.nope.key.NopeKeys;
-import com.minecraftonline.nope.key.regionwand.RegionWandHandler;
-import com.minecraftonline.nope.key.regionwand.ImmutableRegionWandManipulator;
-import com.minecraftonline.nope.key.regionwand.RegionWandManipulator;
+import com.minecraftonline.nope.key.zonewand.ZoneWandHandler;
+import com.minecraftonline.nope.key.zonewand.ImmutableZoneWandManipulator;
+import com.minecraftonline.nope.key.zonewand.ZoneWandManipulator;
 import com.minecraftonline.nope.host.HostTreeImpl;
 import com.minecraftonline.nope.game.listener.DynamicSettingListeners;
 import com.minecraftonline.nope.setting.SettingLibrary;
@@ -86,7 +86,7 @@ public class Nope {
   @Getter
   private HostTree hostTree;
   @Getter
-  private RegionWandHandler regionWandHandler;
+  private ZoneWandHandler zoneWandHandler;
   @Getter
   private CollisionHandler collisionHandler;
   @Getter
@@ -106,7 +106,7 @@ public class Nope {
 
   @Listener
   public void onInit(GameInitializationEvent event) {
-    regionWandHandler = new RegionWandHandler();
+    zoneWandHandler = new ZoneWandHandler();
     collisionHandler = new CollisionHandler();
     playerMovementHandler = new PlayerMovementHandler();
 
@@ -116,22 +116,22 @@ public class Nope {
         s -> "_world-" + s,
         "[a-zA-Z0-9\\-\\.][a-zA-Z0-9_\\-\\.]*");
 
-    NopeKeys.REGION_WAND = Key.builder()
+    NopeKeys.ZONE_WAND = Key.builder()
         .type(TypeTokens.BOOLEAN_VALUE_TOKEN)
-        .id("noperegionwand")
-        .name("Nope region wand")
-        .query(DataQuery.of("noperegionwand"))
+        .id("nopezonewand")
+        .name("Nope zone wand")
+        .query(DataQuery.of("nopezonewand"))
         .build();
 
     DataRegistration.builder()
-        .dataClass(RegionWandManipulator.class)
-        .immutableClass(ImmutableRegionWandManipulator.class)
-        .builder(new RegionWandManipulator.Builder())
-        .id("nope-region-wand")
-        .name("Nope region wand")
+        .dataClass(ZoneWandManipulator.class)
+        .immutableClass(ImmutableZoneWandManipulator.class)
+        .builder(new ZoneWandManipulator.Builder())
+        .id("nope-zone-wand")
+        .name("Nope zone wand")
         .build();
 
-    Sponge.getEventManager().registerListeners(this, regionWandHandler);
+    Sponge.getEventManager().registerListeners(this, zoneWandHandler);
   }
 
   @Listener
@@ -146,7 +146,7 @@ public class Nope {
     Sponge.getServiceManager()
         .provide(PermissionService.class)
         .ifPresent(service ->
-            service.registerContextCalculator(new RegionContextCalculator()));
+            service.registerContextCalculator(new ZoneContextCalculator()));
 
     // Register entire Nope command tree
     commandTree = new NopeCommandTree();

@@ -135,10 +135,10 @@ public class NopeCommandRoot extends CommandNode {
 //          .getHostTree()
 //          .getWorldHost(((Player) src).getLocation().getExtent().getUniqueId());
 //      if (worldHost instanceof HostTreeImpl.WorldHost) {
-//        if (((HostTreeImpl.WorldHost) worldHost).getRegionTree() instanceof HashQueueVolumeTree) {
+//        if (((HostTreeImpl.WorldHost) worldHost).getZoneTree() instanceof HashQueueVolumeTree) {
 //          src.sendMessage(Text.of("Cache size: ",
 //              Format.note(
-//                  ((HashQueueVolumeTree<?, ?>) ((HostTreeImpl.WorldHost) worldHost).getRegionTree())
+//                  ((HashQueueVolumeTree<?, ?>) ((HostTreeImpl.WorldHost) worldHost).getZoneTree())
 //                  .getCacheSize())));
 //        }
 //      }
@@ -148,8 +148,8 @@ public class NopeCommandRoot extends CommandNode {
 
   static Optional<Host> inferHost(CommandSource src) {
     if (!(src instanceof Player)) {
-      src.sendMessage(Format.error("Can't infer region! "
-          + "Please specify the target region."));
+      src.sendMessage(Format.error("Can't infer zone! "
+          + "Please specify the target zone."));
       return Optional.empty();
     }
     Player player = (Player) src;
@@ -157,8 +157,8 @@ public class NopeCommandRoot extends CommandNode {
         .getHostTree()
         .getContainingHosts(player.getLocation());
     if (containing.isEmpty()) {
-      src.sendMessage(Format.error("Can't infer region! "
-          + "Please specify the target region."));
+      src.sendMessage(Format.error("Can't infer zone! "
+          + "Please specify the target zone."));
       return Optional.empty();
     }
     return containing.stream().max(Comparator.comparing(Host::getPriority));

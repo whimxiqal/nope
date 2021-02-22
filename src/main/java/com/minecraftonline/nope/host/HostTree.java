@@ -74,13 +74,13 @@ public interface HostTree {
   Host getWorldHost(final UUID worldUuid);
 
   /**
-   * Get the Region associated with this Region.
+   * Get the Zone associated with this Zone.
    *
-   * @param name the name of the region
-   * @return the associated region, or null if none exists
+   * @param name the name of the zone
+   * @return the associated zone, or null if none exists
    */
   @Nullable
-  VolumeHost getRegion(final String name);
+  VolumeHost getZone(final String name);
 
   /**
    * Get a map of all hosts keyed by their unique names.
@@ -91,59 +91,59 @@ public interface HostTree {
   Map<String, Host> getHosts();
 
   /**
-   * Get all the region within the world of the given id.
+   * Get all the zone within the world of the given id.
    *
    * @param worldUuid the UUID of the world
-   * @return the associated Regions
+   * @return the associated Zones
    * @throws IllegalArgumentException if no world exists with that UUID
    */
   @Nonnull
   @SuppressWarnings("unused")
-  Collection<VolumeHost> getRegions(final UUID worldUuid) throws IllegalArgumentException;
+  Collection<VolumeHost> getZones(final UUID worldUuid) throws IllegalArgumentException;
 
   /**
-   * Add a region to the HostTree with the given parameters.
+   * Add a zone to the HostTree with the given parameters.
    * The name must be unique. This method fails if it is called with a name
    * which is already in use.
    *
-   * @param name      the unique name of this region,
+   * @param name      the unique name of this zone,
    *                  which cannot be formatted like a WorldHost name
-   * @param worldUuid the uuid of the world in which this region resides
-   * @param pos1      a point which defines this region
-   * @param pos2      another point which defines this region
+   * @param worldUuid the uuid of the world in which this zone resides
+   * @param pos1      a point which defines this zone
+   * @param pos2      another point which defines this zone
    * @param priority  a priority level. The higher the priority, the larger the precedence.
-   *                  Two intersecting regions may not have the same priority level.
-   * @return the created region
+   *                  Two intersecting zones may not have the same priority level.
+   * @return the created zone
    * @throws IllegalArgumentException if the inputs will lead to an invalid HostTree state,
    *                                  like if the name is not unique or the priority is the same
-   *                                  as an overlapping region
+   *                                  as an overlapping zone
    */
   @Nonnull
-  VolumeHost addRegion(final String name,
-                       final UUID worldUuid,
-                       final Vector3i pos1,
-                       final Vector3i pos2,
-                       int priority)
+  VolumeHost addZone(final String name,
+                     final UUID worldUuid,
+                     final Vector3i pos1,
+                     final Vector3i pos2,
+                     int priority)
       throws IllegalArgumentException;
 
   /**
-   * Remove a region from the given world. This method fails if it is called
+   * Remove a zone from the given world. This method fails if it is called
    * with a name which is not in use.
    *
-   * @param name the name of the region which to remove
-   * @return the removed region
+   * @param name the name of the zone which to remove
+   * @return the removed zone
    * @throws IllegalArgumentException If this host cannot be removed or does not exist
    */
   @Nonnull
-  VolumeHost removeRegion(final String name) throws IllegalArgumentException;
+  VolumeHost removeZone(final String name) throws IllegalArgumentException;
 
   /**
-   * Check if a given world has a region called a given name.
+   * Check if a given world has a zone called a given name.
    *
-   * @param name the name of the region for which to check
-   * @return true if a region exists, false if not
+   * @param name the name of the zone for which to check
+   * @return true if a zone exists, false if not
    */
-  boolean hasRegion(final String name);
+  boolean hasZone(final String name);
 
   /**
    * Gets all the hosts which contain this location.
@@ -164,7 +164,7 @@ public interface HostTree {
 
   /**
    * Find the value corresponding to this setting key dependent on whether
-   * this location is inside a host, such as a Region or a World,
+   * this location is inside a host, such as a Zone or a World,
    * and whether the subject is affected.
    * This is the most important function of the HostTree.
    *
@@ -181,7 +181,7 @@ public interface HostTree {
 
   /**
    * Find the value corresponding to this setting key dependent on whether
-   * this location is inside a host, such as a Region or a World.
+   * this location is inside a host, such as a Zone or a World.
    * This method ignores targets.
    *
    * @param key      the setting key, obtained from the SettingLibrary
@@ -195,7 +195,7 @@ public interface HostTree {
 
   /**
    * Find the appropriate host corresponding to this setting key dependent on whether
-   * this location is inside the host, such as a Region or a World,
+   * this location is inside the host, such as a Zone or a World,
    * and whether the subject is affected.
    *
    * @param key      the setting key, obtained from the SettingLibrary
@@ -210,7 +210,7 @@ public interface HostTree {
 
   /**
    * Find the host corresponding to this setting key dependent on whether
-   * this location is inside a host, such as a Region or a World.
+   * this location is inside a host, such as a Zone or a World.
    * This method ignores targets.
    *
    * @param key      the setting key, obtained from the SettingLibrary

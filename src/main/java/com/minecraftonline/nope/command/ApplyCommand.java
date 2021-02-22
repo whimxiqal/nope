@@ -64,17 +64,17 @@ import org.spongepowered.api.text.Text;
 public class ApplyCommand extends LambdaCommandNode {
   public ApplyCommand(CommandNode parent) {
     super(parent,
-        Permissions.COMMAND_REGION_EDIT,
-        Text.of("Apply a template of settings to a region"),
+        Permissions.COMMAND_EDIT,
+        Text.of("Apply a template of settings to a zone"),
         "apply");
     addCommandElements(
         GenericArguments.flags()
-            .valueFlag(NopeArguments.host(Text.of("region")), "r", "-region")
+            .valueFlag(NopeArguments.host(Text.of("zone")), "z", "-zone")
             .buildWith(GenericArguments.none()),
         new TemplateCommandElement(Text.of("template"))
     );
     setExecutor((src, args) -> {
-      Host host = args.<Host>getOne("region").orElse(NopeCommandRoot.inferHost(src).orElse(null));
+      Host host = args.<Host>getOne("zone").orElse(NopeCommandRoot.inferHost(src).orElse(null));
       if (host == null) {
         return CommandResult.empty();
       }

@@ -31,7 +31,7 @@ import java.util.Objects;
 /**
  * A class to manage all configurable components of the entire plugin.
  * This includes global configurations and, arguably more importantly,
- * the settings involving custom defined volumes (Regions) in a World.
+ * the settings involving custom defined volumes (Zones) in a World.
  *
  * @param <T> the type of value stored
  */

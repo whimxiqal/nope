@@ -50,8 +50,6 @@
 
 package com.minecraftonline.nope.command;
 
-import com.flowpowered.math.vector.Vector3d;
-import com.minecraftonline.nope.Nope;
 import com.minecraftonline.nope.arguments.NopeArguments;
 import com.minecraftonline.nope.command.common.CommandNode;
 import com.minecraftonline.nope.command.common.LambdaCommandNode;
@@ -61,24 +59,19 @@ import com.minecraftonline.nope.permission.Permission;
 import com.minecraftonline.nope.permission.Permissions;
 import com.minecraftonline.nope.util.EffectsUtil;
 import com.minecraftonline.nope.util.Format;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.args.GenericArguments;
-import org.spongepowered.api.effect.particle.ParticleEffect;
-import org.spongepowered.api.effect.particle.ParticleTypes;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
-
-import java.util.Random;
 
 public class ShowCommand extends LambdaCommandNode {
 
   public ShowCommand(CommandNode parent) {
     super(parent,
-        Permission.of(Permissions.COMMAND_REGION_SHOW.get()),
-        Text.of("Graphically display the region in the world"),
+        Permission.of(Permissions.COMMAND_SHOW.get()),
+        Text.of("Graphically display the zone in the world"),
         "show");
-    addCommandElements(GenericArguments.optional(NopeArguments.host(Text.of("region"))));
+    addCommandElements(GenericArguments.optional(NopeArguments.host(Text.of("zone"))));
     setExecutor((src, args) -> {
       if (!(src instanceof Player)) {
         src.sendMessage(Format.error("You must be a player to send this command!"));
@@ -86,17 +79,17 @@ public class ShowCommand extends LambdaCommandNode {
       }
 
       Player player = (Player) src;
-      Host host = args.<Host>getOne("region").orElse(NopeCommandRoot.inferHost(src).orElse(null));
+      Host host = args.<Host>getOne("zone").orElse(NopeCommandRoot.inferHost(src).orElse(null));
       if (host == null) {
         player.sendMessage(Format.error("We couldn't find that host!"));
         return CommandResult.empty();
       }
       if (!(host instanceof VolumeHost)) {
-        src.sendMessage(Format.error("You must pick a volume region!"));
+        src.sendMessage(Format.error("You must pick a volume zone!"));
         return CommandResult.empty();
       }
       VolumeHost volumeHost = (VolumeHost) host;
-      src.sendMessage(Format.success("Showing nearby borders of region ", Format.host(host)));
+      src.sendMessage(Format.success("Showing nearby borders of zone ", Format.host(host)));
       EffectsUtil.showVolume(volumeHost, player, 12);
       return CommandResult.success();
     });

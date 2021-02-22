@@ -1,6 +1,6 @@
 # Nope
 
-A region protection plugin, based on LionsArea and WorldGuard.
+A volume protection plugin, based on LionsArea and WorldGuard.
 
 ## Contributing
 

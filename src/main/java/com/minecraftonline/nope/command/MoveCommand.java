@@ -27,7 +27,7 @@ package com.minecraftonline.nope.command;
 
 import com.flowpowered.math.vector.Vector3i;
 import com.minecraftonline.nope.Nope;
-import com.minecraftonline.nope.key.regionwand.RegionWandHandler;
+import com.minecraftonline.nope.key.zonewand.ZoneWandHandler;
 import com.minecraftonline.nope.arguments.NopeArguments;
 import com.minecraftonline.nope.command.common.CommandNode;
 import com.minecraftonline.nope.command.common.LambdaCommandNode;
@@ -43,20 +43,20 @@ public class MoveCommand extends LambdaCommandNode {
 
   MoveCommand(CommandNode parent) {
     super(parent,
-        Permissions.COMMAND_REGION_EDIT,
-        Text.of("Redefine the boundaries of a region"),
+        Permissions.COMMAND_EDIT,
+        Text.of("Redefine the boundaries of a zone"),
         "move");
 
     addCommandElements(
         NopeArguments.host(Text.of("host")),
-        NopeArguments.regionLocation(Text.of("selection"))
+        NopeArguments.zoneLocation(Text.of("selection"))
     );
     setExecutor((src, args) -> {
       Host host = args.requireOne("host");
-      RegionWandHandler.Selection selection = args.requireOne("selection");
+      ZoneWandHandler.Selection selection = args.requireOne("selection");
 
       if (!(host instanceof VolumeHost)) {
-        src.sendMessage(Format.error("You can only move volumetric regions!"));
+        src.sendMessage(Format.error("You can only move volumetric zones!"));
         return CommandResult.empty();
       }
 
@@ -70,8 +70,8 @@ public class MoveCommand extends LambdaCommandNode {
       }
 
       try {
-        VolumeHost removed = Nope.getInstance().getHostTree().removeRegion(host.getName());
-        VolumeHost created = Nope.getInstance().getHostTree().addRegion(
+        VolumeHost removed = Nope.getInstance().getHostTree().removeZone(host.getName());
+        VolumeHost created = Nope.getInstance().getHostTree().addZone(
             host.getName(),
             world.getUniqueId(),
             min,
@@ -81,13 +81,13 @@ public class MoveCommand extends LambdaCommandNode {
         created.putAll(removed.getAll());
 
       } catch (IllegalArgumentException e) {
-        src.sendMessage(Format.error("Could not move region: " + e.getMessage()));
+        src.sendMessage(Format.error("Could not move zone: " + e.getMessage()));
         return CommandResult.empty();
       }
 
       Nope.getInstance().saveState();
       src.sendMessage(Format.success(String.format(
-          "Moved region %s to (%d, %d, %d) <-> (%d, %d, %d) in world %s",
+          "Moved zone %s to (%d, %d, %d) <-> (%d, %d, %d) in world %s",
           host.getName(),
           min.getX(), min.getY(), min.getZ(),
           max.getX(), max.getY(), max.getZ(),

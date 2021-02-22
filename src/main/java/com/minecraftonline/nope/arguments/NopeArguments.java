@@ -30,7 +30,8 @@ import org.spongepowered.api.text.Text;
 public class NopeArguments {
 
   /**
-   * Creates a region command element, that returns a <b>{@link com.minecraftonline.nope.host.Host}<\b>
+   * Creates a zone command element, that returns a
+   * <b>{@link com.minecraftonline.nope.host.Host}<\b>
    * @param key Key to use
    * @return CommandElement
    */
@@ -50,7 +51,7 @@ public class NopeArguments {
     return new SettingKeyCommandElement(key);
   }
 
-  public static CommandElement regionLocation(Text key) {
-    return new RegionLocationSelectionCommandElement(key);
+  public static CommandElement zoneLocation(Text key) {
+    return new ZoneLocationSelectionCommandElement(key);
   }
 }

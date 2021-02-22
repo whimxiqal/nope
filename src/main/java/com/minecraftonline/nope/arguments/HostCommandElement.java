@@ -50,7 +50,7 @@ class HostCommandElement extends CommandElement {
   @Nonnull
   @Override
   public Text getUsage(CommandSource src) {
-    return Text.of("<region>");
+    return Text.of("<zone>");
   }
 
   @Nullable
@@ -63,7 +63,7 @@ class HostCommandElement extends CommandElement {
       return host;
     }
 
-    throw new ArgumentParseException(Text.of("Region ", Format.note(hostName), " does not exist!"),
+    throw new ArgumentParseException(Text.of("Zone ", Format.note(hostName), " does not exist!"),
             hostName,
             hostName.length());
   }

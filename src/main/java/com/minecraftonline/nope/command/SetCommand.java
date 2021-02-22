@@ -67,12 +67,12 @@ public class SetCommand extends LambdaCommandNode {
 
   SetCommand(CommandNode parent) {
     super(parent,
-        Permissions.COMMAND_REGION_EDIT,
-        Text.of("Set setting on a region"),
+        Permissions.COMMAND_EDIT,
+        Text.of("Set setting on a zone"),
         "set");
     addCommandElements(
         GenericArguments.flags()
-            .valueFlag(NopeArguments.host(Text.of("region")), "r", "-region")
+            .valueFlag(NopeArguments.host(Text.of("zone")), "z", "-zone")
             .buildWith(GenericArguments.none()),
         NopeArguments.settingKey(Text.of("setting")),
         GenericArguments.remainingJoinedStrings(Text.of("value"))
@@ -81,7 +81,7 @@ public class SetCommand extends LambdaCommandNode {
       SettingKey<?> settingKey = args.requireOne("setting");
       String value = args.requireOne("value");
 
-      Host host = args.<Host>getOne("region").orElse(NopeCommandRoot.inferHost(src).orElse(null));
+      Host host = args.<Host>getOne("zone").orElse(NopeCommandRoot.inferHost(src).orElse(null));
       if (host == null) {
         return CommandResult.empty();
       }
@@ -103,16 +103,16 @@ public class SetCommand extends LambdaCommandNode {
       DynamicSettingListeners.register();
       src.sendMessage(Format.success("Set setting ",
           Format.settingKey(settingKey, false),
-          " on region ",
+          " on zone ",
           Format.host(host)));
 
       return CommandResult.success();
     });
   }
 
-  private <T> void addSetting(Host region, SettingKey<T> key, String s)
+  private <T> void addSetting(Host zone, SettingKey<T> key, String s)
       throws SettingKey.ParseSettingException {
     T data = key.parse(s);
-    region.put(key, SettingValue.of(data));
+    zone.put(key, SettingValue.of(data));
   }
 }

@@ -22,25 +22,28 @@
  * SOFTWARE.
  */
 
-package com.minecraftonline.nope.permission;
+package com.minecraftonline.nope.key.zonewand;
 
-/**
- * Enumeration of all {@link Permission}s.
- */
-public final class Permissions {
+import com.minecraftonline.nope.key.NopeKeys;
+import org.spongepowered.api.data.manipulator.immutable.common.AbstractImmutableBooleanData;
+import org.spongepowered.api.data.value.immutable.ImmutableValue;
 
-  public static final Permission COMMAND_CREATE = Permission.of("nope.command.create");
-  public static final Permission COMMAND_DESTROY = Permission.of("nope.command.destroy");
-  public static final Permission COMMAND_EDIT = Permission.of("nope.command.edit");
-  public static final Permission COMMAND_INFO = Permission.of("nope.command.info");
-  public static final Permission COMMAND_LIST = Permission.of("nope.command.list");
-  public static final Permission COMMAND_SHOW = Permission.of("nope.command.show");
-  public static final Permission COMMAND_TELEPORT = Permission.of("nope.command.teleport");
-  public static final Permission COMMAND_RELOAD = Permission.of("nope.command.reload");
-  public static final Permission COMMAND_SETTING = Permission.of("nope.command.setting");
-  public static final Permission UNRESTRICTED = Permission.of("nope.unrestricted");
-
-  private Permissions() {
+public class ImmutableZoneWandManipulator extends AbstractImmutableBooleanData<ImmutableZoneWandManipulator, ZoneWandManipulator> {
+  public ImmutableZoneWandManipulator(boolean value) {
+    super(NopeKeys.ZONE_WAND, value,  false);
   }
 
+  public ImmutableValue<Boolean> isWand() {
+    return this.getValueGetter();
+  }
+
+  @Override
+  public ZoneWandManipulator asMutable() {
+    return new ZoneWandManipulator(getValue());
+  }
+
+  @Override
+  public int getContentVersion() {
+    return 0;
+  }
 }

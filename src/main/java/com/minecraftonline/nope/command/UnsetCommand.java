@@ -42,20 +42,20 @@ public class UnsetCommand extends LambdaCommandNode {
 
   UnsetCommand(CommandNode parent) {
     super(parent,
-        Permissions.COMMAND_REGION_EDIT,
-        Text.of("Unset settings on a region"),
+        Permissions.COMMAND_EDIT,
+        Text.of("Unset settings on a zone"),
         "unset");
 
     addCommandElements(
         GenericArguments.flags()
-            .valueFlag(NopeArguments.host(Text.of("region")), "r", "-region")
+            .valueFlag(NopeArguments.host(Text.of("zone")), "z", "-zone")
             .buildWith(GenericArguments.none()),
         GenericArguments.onlyOne(NopeArguments.settingKey(Text.of("setting"))));
 
     setExecutor((src, args) -> {
       SettingKey<?> settingKey = args.requireOne(Text.of("setting"));
 
-      Host host = args.<Host>getOne("region").orElse(NopeCommandRoot.inferHost(src).orElse(null));
+      Host host = args.<Host>getOne("zone").orElse(NopeCommandRoot.inferHost(src).orElse(null));
       if (host == null) {
         return CommandResult.empty();
       }
@@ -70,7 +70,7 @@ public class UnsetCommand extends LambdaCommandNode {
       Nope.getInstance().saveState();
       src.sendMessage(Format.success("Unset ",
           Format.settingKey(settingKey, false),
-          " on region ",
+          " on zone ",
           Format.host(host)));
 
       return CommandResult.empty();

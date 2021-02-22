@@ -59,11 +59,11 @@ import org.spongepowered.api.text.Text;
 class TargetCommand extends FunctionlessCommandNode {
   public TargetCommand(CommandNode parent) {
     super(parent,
-        Permissions.COMMAND_REGION_EDIT,
-        Text.of("Make changes to how a region targets players"),
+        Permissions.COMMAND_EDIT,
+        Text.of("Make changes to how a zone targets players"),
         "target");
     setComment(() -> Format.note("Anyone without added permission requirements will "
-        + "not be affected by this region's setting. "
+        + "not be affected by this zone's setting. "
         + "In addition, specifically added players will be either the only ones affected "
         + "or the only ones not affected, dependent on whether this target type is a "
         + "whitelist or a blacklist"));

@@ -70,19 +70,19 @@ import java.util.Optional;
 class TargetTypeCommand extends LambdaCommandNode {
   public TargetTypeCommand(CommandNode parent) {
     super(parent,
-        Permissions.COMMAND_REGION_EDIT,
-        Text.of("Set how a setting targets specific players in this region"),
+        Permissions.COMMAND_EDIT,
+        Text.of("Set how a setting targets specific players in this zone"),
         "type");
     Map<String, Boolean> choices = Maps.newHashMap();
     choices.put("whitelist", true);
     choices.put("blacklist", false);
     addCommandElements(GenericArguments.flags()
-            .valueFlag(NopeArguments.host(Text.of("region")), "r", "-region")
+            .valueFlag(NopeArguments.host(Text.of("zone")), "z", "-zone")
             .buildWith(GenericArguments.none()),
         NopeArguments.settingKey(Text.of("setting")),
         GenericArguments.choices(Text.of("type"), choices));
     setExecutor((src, args) -> {
-      Host host = args.<Host>getOne("region").orElse(NopeCommandRoot.inferHost(src).orElse(null));
+      Host host = args.<Host>getOne("zone").orElse(NopeCommandRoot.inferHost(src).orElse(null));
       if (host == null) {
         return CommandResult.empty();
       }
@@ -93,7 +93,7 @@ class TargetTypeCommand extends LambdaCommandNode {
       if (!value.isPresent()) {
         src.sendMessage(Format.error("The setting ",
             Format.settingKey(key, false),
-            " is not set on region ",
+            " is not set on zone ",
             Format.host(host)));
         return CommandResult.empty();
       }

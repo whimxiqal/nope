@@ -51,7 +51,6 @@
 package com.minecraftonline.nope.command;
 
 import com.flowpowered.math.vector.Vector3d;
-import com.google.common.collect.Lists;
 import com.minecraftonline.nope.Nope;
 import com.minecraftonline.nope.arguments.NopeArguments;
 import com.minecraftonline.nope.command.common.CommandNode;
@@ -78,11 +77,11 @@ class TeleportCommand extends LambdaCommandNode {
 
   public TeleportCommand(CommandNode parent) {
     super(parent,
-        Permissions.COMMAND_REGION_TELEPORT,
-        Text.of("Teleport to a region"),
+        Permissions.COMMAND_TELEPORT,
+        Text.of("Teleport to a zone"),
         "teleport",
         "tp");
-    addCommandElements(NopeArguments.host(Text.of("region")));
+    addCommandElements(NopeArguments.host(Text.of("zone")));
     setExecutor((src, args) -> {
       if (!(src instanceof Player)) {
         src.sendMessage(Format.error("You must be in game to teleport"));
@@ -90,11 +89,11 @@ class TeleportCommand extends LambdaCommandNode {
       }
 
       Player player = (Player) src;
-      Host host = args.requireOne("region");
+      Host host = args.requireOne("zone");
       Optional<World> world = Optional.ofNullable(host.getWorldUuid())
           .flatMap(uuid -> Sponge.getServer().getWorld(uuid));
       if (!world.isPresent()) {
-        src.sendMessage(Format.error("The world of that region's teleport "
+        src.sendMessage(Format.error("The world of that zone's teleport "
             + "location could not be found"));
         return CommandResult.empty();
       }
@@ -104,8 +103,8 @@ class TeleportCommand extends LambdaCommandNode {
         SettingValue<Vector3d> value = host.get(SettingLibrary.TELEPORT_LOCATION).get();
         location = new Location<>(world.get(), value.getData());
         if (!host.encompasses(location)) {
-          src.sendMessage(Format.error("The stored teleport location for this region "
-              + "is not within the region"));
+          src.sendMessage(Format.error("The stored teleport location for this zone "
+              + "is not within the zone"));
           return CommandResult.empty();
         }
         if (player.setLocationSafely(location)) {
@@ -131,7 +130,7 @@ class TeleportCommand extends LambdaCommandNode {
                   random.nextInt(volumeHost.getMaxX() + 1 - volumeHost.getMinX()) + volumeHost.getMinX(),
                   random.nextInt(volumeHost.getMaxY() + 1 - volumeHost.getMinY()) + volumeHost.getMinY(),
                   random.nextInt(volumeHost.getMaxZ() + 1 - volumeHost.getMinZ()) + volumeHost.getMinZ()))) {
-                src.sendMessage(Format.success("Teleported to a random location inside region ",
+                src.sendMessage(Format.success("Teleported to a random location inside zone ",
                     Format.host(host)));
                 return;
               }

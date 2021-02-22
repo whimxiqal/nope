@@ -70,8 +70,8 @@ public class ListCommand extends LambdaCommandNode {
 
   ListCommand(CommandNode parent) {
     super(parent,
-        Permissions.COMMAND_REGION_LIST,
-        Text.of("List any currently occupied regions"),
+        Permissions.COMMAND_LIST,
+        Text.of("List any currently occupied zones"),
         "list",
         "l");
     setExecutor((src, args) -> {
@@ -94,7 +94,7 @@ public class ListCommand extends LambdaCommandNode {
                       Format.note(host.getPriority()), Format.ACCENT, " > ",
                       Format.note(Format.host(host)))))
               .collect(Collectors.toList()))
-              .title(Format.info("Occupied Regions"))
+              .title(Format.info("Occupied Zones"))
               .padding(Format.note("="))
               .build()
               .sendTo(src);

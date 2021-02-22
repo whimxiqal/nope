@@ -74,17 +74,17 @@ import java.util.Optional;
 public class TargetForceCommand extends LambdaCommandNode {
   public TargetForceCommand(CommandNode parent) {
     super(parent,
-        Permissions.COMMAND_REGION_EDIT,
+        Permissions.COMMAND_EDIT,
         Text.of("Toggle whether the "
             + Permissions.UNRESTRICTED.get()
             + " permission is respected on this setting"),
         "force");
     addCommandElements(GenericArguments.flags()
-            .valueFlag(NopeArguments.host(Text.of("region")), "r", "-region")
+            .valueFlag(NopeArguments.host(Text.of("zone")), "z", "-zone")
             .buildWith(GenericArguments.none()),
         NopeArguments.settingKey(Text.of("setting")));
     setExecutor((src, args) -> {
-      Host host = args.<Host>getOne("region").orElse(NopeCommandRoot.inferHost(src).orElse(null));
+      Host host = args.<Host>getOne("zone").orElse(NopeCommandRoot.inferHost(src).orElse(null));
       if (host == null) {
         return CommandResult.empty();
       }
@@ -100,7 +100,7 @@ public class TargetForceCommand extends LambdaCommandNode {
       if (!value.isPresent()) {
         src.sendMessage(Format.error("The setting ",
             Format.settingKey(key, false),
-            " is not set on region ",
+            " is not set on zone ",
             Format.host(host)));
         return CommandResult.empty();
       }

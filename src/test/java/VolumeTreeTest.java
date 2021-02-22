@@ -38,17 +38,17 @@ public class VolumeTreeTest {
   int WORLD_Y_WIDTH = 256;
   int WORLD_Z_WIDTH = 10000;
 
-  int REGION_MIN_X_WIDTH = 10;
-  int REGION_MIN_Y_WIDTH = 10;
-  int REGION_MIN_Z_WIDTH = 10;
+  int ZONE_MIN_X_WIDTH = 10;
+  int ZONE_MIN_Y_WIDTH = 10;
+  int ZONE_MIN_Z_WIDTH = 10;
 
-  int REGION_MAX_X_WIDTH = 100;
-  int REGION_MAX_Y_WIDTH = 100;
-  int REGION_MAX_Z_WIDTH = 100;
+  int ZONE_MAX_X_WIDTH = 100;
+  int ZONE_MAX_Y_WIDTH = 100;
+  int ZONE_MAX_Z_WIDTH = 100;
 
   int TEST_POINT_COUNT = 10000;
 
-  int REGION_COUNT = 1000;
+  int ZONE_COUNT = 1000;
 
   boolean DEBUG = false;
 
@@ -196,8 +196,8 @@ public class VolumeTreeTest {
       }
     }
     if (print) tree.print();
-    System.out.printf("Successfully identified regions: %d\n", succeeded);
-    System.out.printf("Failed identified regions: %d\n", failed);
+    System.out.printf("Successfully identified zones: %d\n", succeeded);
+    System.out.printf("Failed identified zones: %d\n", failed);
     if (failed > 0) {
       throw new RuntimeException("Answers != Solutions");
     }
@@ -207,7 +207,7 @@ public class VolumeTreeTest {
   public void testRandom() {
     Random random = new Random();
 
-    Map<Integer, Volume> regions = Maps.newHashMap();
+    Map<Integer, Volume> zones = Maps.newHashMap();
 
     int xLocation;
     int yLocation;
@@ -215,22 +215,22 @@ public class VolumeTreeTest {
     int xSize;
     int ySize;
     int zSize;
-    for (Integer i = 0; i < REGION_COUNT; i++) {
-      xLocation = random.nextInt(WORLD_X_WIDTH - REGION_MAX_X_WIDTH + 1);
-      yLocation = random.nextInt(WORLD_Y_WIDTH - REGION_MAX_Y_WIDTH + 1);
-      zLocation = random.nextInt(WORLD_Z_WIDTH - REGION_MAX_Z_WIDTH + 1);
-      xSize = random.nextInt(REGION_MAX_X_WIDTH - REGION_MIN_X_WIDTH + 1) + REGION_MIN_X_WIDTH;
-      ySize = random.nextInt(REGION_MAX_Y_WIDTH - REGION_MIN_Y_WIDTH + 1) + REGION_MIN_Y_WIDTH;
-      zSize = random.nextInt(REGION_MAX_Z_WIDTH - REGION_MIN_Z_WIDTH + 1) + REGION_MIN_Z_WIDTH;
+    for (Integer i = 0; i < ZONE_COUNT; i++) {
+      xLocation = random.nextInt(WORLD_X_WIDTH - ZONE_MAX_X_WIDTH + 1);
+      yLocation = random.nextInt(WORLD_Y_WIDTH - ZONE_MAX_Y_WIDTH + 1);
+      zLocation = random.nextInt(WORLD_Z_WIDTH - ZONE_MAX_Z_WIDTH + 1);
+      xSize = random.nextInt(ZONE_MAX_X_WIDTH - ZONE_MIN_X_WIDTH + 1) + ZONE_MIN_X_WIDTH;
+      ySize = random.nextInt(ZONE_MAX_Y_WIDTH - ZONE_MIN_Y_WIDTH + 1) + ZONE_MIN_Y_WIDTH;
+      zSize = random.nextInt(ZONE_MAX_Z_WIDTH - ZONE_MIN_Z_WIDTH + 1) + ZONE_MIN_Z_WIDTH;
 
-      regions.put(i, new TestVolume(
+      zones.put(i, new TestVolume(
               xLocation, xLocation + xSize - 1,
               yLocation, yLocation + ySize - 1,
               zLocation, zLocation + zSize - 1));
     }
 
     // Build board
-    char[][] board = constructBoard(regions.values(), WORLD_X_WIDTH, WORLD_Z_WIDTH);
+    char[][] board = constructBoard(zones.values(), WORLD_X_WIDTH, WORLD_Z_WIDTH);
 
     // print board
     if (DEBUG) {
@@ -241,7 +241,7 @@ public class VolumeTreeTest {
     // Now actually testing
     VolumeTree<Integer, Volume> tree = new VolumeTree<>();
     long constructionElapse = System.currentTimeMillis();
-    tree.addAll(regions);
+    tree.addAll(zones);
     constructionElapse = System.currentTimeMillis() - constructionElapse;
 
     // Get answers (should take a long time, comparatively) and solution
@@ -264,13 +264,13 @@ public class VolumeTreeTest {
     }
 
     if (DEBUG) {
-      System.out.println("Print board with special regions");
+      System.out.println("Print board with special zones");
       printBoard(board, WORLD_X_WIDTH, WORLD_Z_WIDTH);
     }
 
     long traditionalElapse = System.currentTimeMillis();
     for (int i = 0; i < TEST_POINT_COUNT; i++) {
-      for (Volume volume : regions.values()) {
+      for (Volume volume : zones.values()) {
         if (volume.contains(xpoints[i], ypoints[i], zpoints[i])) {
           answers.get(i).add(String.format("{[%d, %d], [%d, %d], [%d, %d]}",
                   volume.getMinX(),
@@ -319,8 +319,8 @@ public class VolumeTreeTest {
         succeeded++;
       }
     }
-    System.out.printf("Successfully identified regions: %d\n", succeeded);
-    System.out.printf("Failed identified regions: %d\n", failed);
+    System.out.printf("Successfully identified zones: %d\n", succeeded);
+    System.out.printf("Failed identified zones: %d\n", failed);
     if (failed > 0) {
       throw new RuntimeException("See above for incorrect point calculations");
     }

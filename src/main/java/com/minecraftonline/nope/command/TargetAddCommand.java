@@ -58,7 +58,7 @@ import org.spongepowered.api.text.Text;
 class TargetAddCommand extends FunctionlessCommandNode {
   public TargetAddCommand(CommandNode parent) {
     super(parent,
-        Permissions.COMMAND_REGION_EDIT,
+        Permissions.COMMAND_EDIT,
         Text.of("Add requirements for a setting to target a player"),
         "add");
     addChildren(new TargetAddPermissionCommand(this),

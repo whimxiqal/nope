@@ -71,16 +71,16 @@ import java.util.concurrent.ExecutionException;
 class TargetAddPlayerCommand extends LambdaCommandNode {
   public TargetAddPlayerCommand(CommandNode parent) {
     super(parent,
-        Permissions.COMMAND_REGION_EDIT,
+        Permissions.COMMAND_EDIT,
         Text.of("Add a user to the whitelist or blacklist"),
         "player");
     addCommandElements(GenericArguments.flags()
-            .valueFlag(NopeArguments.host(Text.of("region")), "r", "-region")
+            .valueFlag(NopeArguments.host(Text.of("zone")), "z", "-zone")
             .buildWith(GenericArguments.none()),
         NopeArguments.settingKey(Text.of("setting")),
         GenericArguments.string(Text.of("player")));
     setExecutor((src, args) -> {
-      Host host = args.<Host>getOne("region").orElse(NopeCommandRoot.inferHost(src).orElse(null));
+      Host host = args.<Host>getOne("zone").orElse(NopeCommandRoot.inferHost(src).orElse(null));
       if (host == null) {
         return CommandResult.empty();
       }
@@ -90,7 +90,7 @@ class TargetAddPlayerCommand extends LambdaCommandNode {
       if (!value.isPresent()) {
         src.sendMessage(Format.error("The setting ",
             Format.settingKey(key, false),
-            " is not set on region ",
+            " is not set on zone ",
             Format.host(host)));
         return CommandResult.empty();
       }

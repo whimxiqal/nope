@@ -51,7 +51,7 @@ package com.minecraftonline.nope.command;
 
 import com.minecraftonline.nope.Nope;
 import com.minecraftonline.nope.host.VolumeHost;
-import com.minecraftonline.nope.key.regionwand.RegionWandHandler;
+import com.minecraftonline.nope.key.zonewand.ZoneWandHandler;
 import com.minecraftonline.nope.arguments.NopeArguments;
 import com.minecraftonline.nope.command.common.CommandNode;
 import com.minecraftonline.nope.command.common.LambdaCommandNode;
@@ -70,13 +70,13 @@ public class CreateCommand extends LambdaCommandNode {
 
   CreateCommand(CommandNode parent) {
     super(parent,
-        Permissions.COMMAND_REGION_CREATE,
-        Text.of("Create a region with current selection and given name"),
+        Permissions.COMMAND_CREATE,
+        Text.of("Create a zone with current selection and given name"),
         "create",
         "c", "add");
     addCommandElements(
         GenericArguments.onlyOne(GenericArguments.string(Text.of("name"))),
-        NopeArguments.regionLocation(Text.of("selection")),
+        NopeArguments.zoneLocation(Text.of("selection")),
         GenericArguments.flags()
             .valueFlag(GenericArguments.integer(Text.of("priority")), "p")
             .buildWith(GenericArguments.none()));
@@ -87,7 +87,7 @@ public class CreateCommand extends LambdaCommandNode {
 
       Player player = (Player) src;
       String name = args.requireOne(Text.of("name"));
-      RegionWandHandler.Selection selection = args.requireOne(Text.of("selection"));
+      ZoneWandHandler.Selection selection = args.requireOne(Text.of("selection"));
       int priority = args.<Integer>getOne("priority").orElse(
           Nope.getInstance()
               .getHostTree()
@@ -97,7 +97,7 @@ public class CreateCommand extends LambdaCommandNode {
 
       try {
         assert selection.getWorld() != null;
-        VolumeHost region = Nope.getInstance().getHostTree().addRegion(
+        VolumeHost zone = Nope.getInstance().getHostTree().addZone(
             name,
             selection.getWorld().getUniqueId(),
             selection.getMin(),
@@ -106,10 +106,10 @@ public class CreateCommand extends LambdaCommandNode {
         );
         Nope.getInstance().saveState();
         DynamicSettingListeners.register();
-        src.sendMessage(Format.success("Successfully created region ", Format.note(region.getName()), "!"));
-        Nope.getInstance().getRegionWandHandler().getSelectionMap().remove(player.getUniqueId());
+        src.sendMessage(Format.success("Successfully created zone ", Format.note(zone.getName()), "!"));
+        Nope.getInstance().getZoneWandHandler().getSelectionMap().remove(player.getUniqueId());
       } catch (IllegalArgumentException e) {
-        src.sendMessage(Format.error("Could not create region: " + e.getMessage()));
+        src.sendMessage(Format.error("Could not create zone: " + e.getMessage()));
         return CommandResult.empty();
       }
       return CommandResult.success();

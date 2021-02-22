@@ -30,7 +30,6 @@ import com.minecraftonline.nope.Nope;
 import com.minecraftonline.nope.config.configurate.serializer.JsonElementSerializer;
 import com.minecraftonline.nope.host.HostTreeImpl.GlobalHost;
 import com.minecraftonline.nope.host.HostTreeImpl.WorldHost;
-import com.minecraftonline.nope.host.HostTreeImpl.Region;
 import com.minecraftonline.nope.util.NopeTypeTokens;
 
 import java.io.Closeable;
@@ -51,8 +50,8 @@ import ninja.leaping.configurate.objectmapping.serialize.TypeSerializerCollectio
 
 public class HoconHostTreeImplStorage implements HostTreeImpl.Storage {
 
-  private static final String REGION_CONFIG_FILENAME = "regions.conf";
-  private static final String WORLD_SUB_REGIONS_KEY = "sub-regions";
+  private static final String ZONE_CONFIG_FILENAME = "zones.conf";
+  private static final String WORLD_SUB_ZONES_KEY = "sub-zones";
   private final HoconConfigurationLoader loader;
 
   /**
@@ -67,18 +66,18 @@ public class HoconHostTreeImplStorage implements HostTreeImpl.Storage {
     ConfigurationOptions options = ConfigurationOptions.defaults()
         .withSerializers(typeSerializerCollection);
 
-    Path regionConfig = Nope.getInstance().getConfigDir().resolve(REGION_CONFIG_FILENAME);
+    Path zoneConfig = Nope.getInstance().getConfigDir().resolve(ZONE_CONFIG_FILENAME);
     try {
-      if (regionConfig.toFile().createNewFile()) {
+      if (zoneConfig.toFile().createNewFile()) {
         Nope.getInstance().getLogger().info("No config file found. New config file created.");
       }
     } catch (IOException e) {
-      throw new RuntimeException("Region config file was not found but could not be created.");
+      throw new RuntimeException("Zone config file was not found but could not be created.");
     }
 
     this.loader = HoconConfigurationLoader.builder()
         .setDefaultOptions(options)
-        .setPath(regionConfig)
+        .setPath(zoneConfig)
         .build();
   }
 
@@ -112,7 +111,7 @@ public class HoconHostTreeImplStorage implements HostTreeImpl.Storage {
           .filter(entry ->
               !entry.getKey().toString().equals(Nope.GLOBAL_HOST_NAME))
           .map(entry -> {
-            // Assume all other top level nodes are world regions.
+            // Assume all other top level nodes are world zones.
             try {
               return serializer.deserialize(entry.getValue()
                   .getValue(NopeTypeTokens.JSON_ELEMENT_TYPE_TOKEN));
@@ -126,31 +125,31 @@ public class HoconHostTreeImplStorage implements HostTreeImpl.Storage {
 
   @Override
   @SuppressWarnings("UnstableApiUsage")
-  public Collection<Region> readRegions(Collection<WorldHost> parents,
-                                        Host.HostSerializer<Region> serializer)
+  public Collection<HostTreeImpl.Zone> readZones(Collection<WorldHost> parents,
+                                                 Host.HostSerializer<HostTreeImpl.Zone> serializer)
       throws IOException, HostParseException {
 
-    List<Region> regions = new ArrayList<>();
+    List<HostTreeImpl.Zone> zones = new ArrayList<>();
     try (Connection connection = new Connection(loader)) {
-      // return collection of regions
+      // return collection of zones
       for (WorldHost worldHost : parents) {
-        final ConfigurationNode worldNode = connection.node.getNode(worldHost.getName(), WORLD_SUB_REGIONS_KEY);
+        final ConfigurationNode worldNode = connection.node.getNode(worldHost.getName(), WORLD_SUB_ZONES_KEY);
 
         for (Map.Entry<Object, ? extends ConfigurationNode> entry : worldNode.getChildrenMap().entrySet()) {
           try {
-            final Region region = serializer.deserialize(entry.getValue()
+            final HostTreeImpl.Zone zone = serializer.deserialize(entry.getValue()
                 .getValue(NopeTypeTokens.JSON_ELEMENT_TYPE_TOKEN));
-            regions.add(region);
+            zones.add(zone);
           } catch (IllegalArgumentException e) {
-            Nope.getInstance().getLogger().error("Could not add region", e);
+            Nope.getInstance().getLogger().error("Could not add zone", e);
           }
         }
       }
     } catch (ObjectMappingException e) {
       throw new HostParseException("ObjectMappingException when trying "
-          + "to read Region Host node", e);
+          + "to read Zone Host node", e);
     }
-    return regions;
+    return zones;
   }
 
   @Override
@@ -190,29 +189,29 @@ public class HoconHostTreeImplStorage implements HostTreeImpl.Storage {
 
   @Override
   @SuppressWarnings("UnstableApiUsage")
-  public void writeRegions(Collection<Region> regions,
-                           Host.HostSerializer<Region> serializer)
+  public void writeZones(Collection<HostTreeImpl.Zone> zones,
+                         Host.HostSerializer<HostTreeImpl.Zone> serializer)
       throws IOException, HostParseException {
 
     try (Connection connection = new Connection(loader)) {
-      // write collection of regions
-      Set<String> worlds = regions.stream().map(region ->
-          region.getParent().getName()).collect(Collectors.toSet());
+      // write collection of zones
+      Set<String> worlds = zones.stream().map(zone ->
+          zone.getParent().getName()).collect(Collectors.toSet());
       for (String world : worlds) {
-        final ConfigurationNode node = connection.node.getNode(world, WORLD_SUB_REGIONS_KEY);
-        node.setValue(null); // Blank it to stop deleted regions/settings from reappearing
+        final ConfigurationNode node = connection.node.getNode(world, WORLD_SUB_ZONES_KEY);
+        node.setValue(null); // Blank it to stop deleted zones/settings from reappearing
       }
-      for (Region region : regions) {
-        final String worldName = region.getParent().getName();
+      for (HostTreeImpl.Zone zone : zones) {
+        final String worldName = zone.getParent().getName();
         worlds.add(worldName);
         final ConfigurationNode node = connection.node.getNode(worldName,
-            WORLD_SUB_REGIONS_KEY,
-            region.getName());
+            WORLD_SUB_ZONES_KEY,
+            zone.getName());
 
-        node.setValue(NopeTypeTokens.JSON_ELEMENT_TYPE_TOKEN, serializer.serialize(region));
+        node.setValue(NopeTypeTokens.JSON_ELEMENT_TYPE_TOKEN, serializer.serialize(zone));
       }
     } catch (ObjectMappingException e) {
-      throw new HostParseException("Error saving config after writing regions", e);
+      throw new HostParseException("Error saving config after writing zones", e);
     }
   }
 

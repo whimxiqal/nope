@@ -68,16 +68,16 @@ import java.util.Optional;
 class TargetRemovePermissionCommand extends LambdaCommandNode {
   public TargetRemovePermissionCommand(CommandNode parent) {
     super(parent,
-        Permissions.COMMAND_REGION_EDIT,
+        Permissions.COMMAND_EDIT,
         Text.of("Remove a permission requirement to a setting"),
         "permission", "perm");
     addCommandElements(GenericArguments.flags()
-            .valueFlag(NopeArguments.host(Text.of("region")), "r", "-region")
+            .valueFlag(NopeArguments.host(Text.of("zone")), "z", "-zone")
             .buildWith(GenericArguments.none()),
         NopeArguments.settingKey(Text.of("setting")),
         GenericArguments.string(Text.of("permission")));
     setExecutor((src, args) -> {
-      Host host = args.<Host>getOne("region").orElse(NopeCommandRoot.inferHost(src).orElse(null));
+      Host host = args.<Host>getOne("zone").orElse(NopeCommandRoot.inferHost(src).orElse(null));
       if (host == null) {
         return CommandResult.empty();
       }
@@ -87,7 +87,7 @@ class TargetRemovePermissionCommand extends LambdaCommandNode {
       if (!value.isPresent()) {
         src.sendMessage(Format.error("The setting ",
             Format.settingKey(key, false),
-            " is not set on region ",
+            " is not set on zone ",
             Format.host(host)));
         return CommandResult.empty();
       }

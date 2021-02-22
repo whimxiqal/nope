@@ -72,11 +72,11 @@
  * SOFTWARE.
  */
 
-package com.minecraftonline.nope.key.regionwand;
+package com.minecraftonline.nope.key.zonewand;
 
 import com.flowpowered.math.vector.Vector3i;
 import com.minecraftonline.nope.Nope;
-import com.minecraftonline.nope.key.regionwand.RegionWandManipulator;
+import com.minecraftonline.nope.permission.Permissions;
 import com.minecraftonline.nope.setting.SettingLibrary;
 import com.minecraftonline.nope.setting.SettingValue;
 import com.minecraftonline.nope.util.Format;
@@ -100,7 +100,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-public class RegionWandHandler {
+public class ZoneWandHandler {
   private final Map<UUID, Selection> selectionMap = new HashMap<>();
 
   public Map<UUID, Selection> getSelectionMap() {
@@ -123,6 +123,10 @@ public class RegionWandHandler {
         player.getItemInHand(HandTypes.MAIN_HAND)
             .filter(this::isWand)
             .ifPresent(wand -> {
+              if (!player.hasPermission(Permissions.COMMAND_CREATE.get())) {
+                player.setItemInHand(HandTypes.MAIN_HAND, ItemStack.empty());
+                player.sendMessage(Format.error("You don't have permission to use this!"));
+              }
               mutableBoolean.setTrue();
               selectionMap.compute(player.getUniqueId(), (k, v) -> {
                 if (v == null) {
@@ -154,8 +158,8 @@ public class RegionWandHandler {
     if (!wandItemStack.getType().equals(itemStack.getType())) {
       return false;
     }
-    return itemStack.get(RegionWandManipulator.class)
-        .map(RegionWandManipulator::isWand)
+    return itemStack.get(ZoneWandManipulator.class)
+        .map(ZoneWandManipulator::isWand)
         .map(Value::get)
         .orElse(false);
   }

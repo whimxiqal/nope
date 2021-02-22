@@ -3,7 +3,7 @@ package com.minecraftonline.nope.arguments;
 import com.flowpowered.math.vector.Vector3i;
 import com.minecraftonline.nope.Nope;
 import com.minecraftonline.nope.command.WandCommand;
-import com.minecraftonline.nope.key.regionwand.RegionWandHandler;
+import com.minecraftonline.nope.key.zonewand.ZoneWandHandler;
 import com.minecraftonline.nope.util.Format;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandSource;
@@ -20,10 +20,10 @@ import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.List;
 
-public class RegionLocationSelectionCommandElement extends CommandElement {
+public class ZoneLocationSelectionCommandElement extends CommandElement {
   private final Vector3iCommandElement vector3i = new Vector3iCommandElement(Text.of("vector3i"));
 
-  protected RegionLocationSelectionCommandElement(@Nullable Text key) {
+  protected ZoneLocationSelectionCommandElement(@Nullable Text key) {
     super(key);
   }
 
@@ -35,12 +35,12 @@ public class RegionLocationSelectionCommandElement extends CommandElement {
 
   @Nullable
   @Override
-  protected RegionWandHandler.Selection parseValue(CommandSource source, CommandArgs args) throws ArgumentParseException {
+  protected ZoneWandHandler.Selection parseValue(CommandSource source, CommandArgs args) throws ArgumentParseException {
     if (!args.hasNext()) {
       if (source instanceof Player) {
         Player player = (Player) source;
-        RegionWandHandler.Selection selection = Nope.getInstance()
-            .getRegionWandHandler()
+        ZoneWandHandler.Selection selection = Nope.getInstance()
+            .getZoneWandHandler()
             .getSelectionMap()
             .get(player.getUniqueId());
         if (selection == null || !selection.isComplete()) {
@@ -52,7 +52,7 @@ public class RegionLocationSelectionCommandElement extends CommandElement {
                       .orElseThrow(() ->
                           new RuntimeException("Wand command is not present in the Nope command tree!"))
                       .getFullCommand(),
-                  Text.of("Get a region wand"))), "", 0);
+                  Text.of("Get a zone wand"))), "", 0);
         }
         return selection;
       } else {
@@ -106,7 +106,7 @@ public class RegionLocationSelectionCommandElement extends CommandElement {
       }
     }
 
-    return new RegionWandHandler.Selection(world, min, max);
+    return new ZoneWandHandler.Selection(world, min, max);
   }
 
   @Override

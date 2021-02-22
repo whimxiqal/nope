@@ -31,5 +31,5 @@ public class NopeKeys {
   /*
   Applied to wands to differ them from regular items.
    */
-  public static Key<Value<Boolean>> REGION_WAND;
+  public static Key<Value<Boolean>> ZONE_WAND;
 }

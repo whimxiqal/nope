@@ -53,7 +53,7 @@ package com.minecraftonline.nope.command;
 import com.minecraftonline.nope.Nope;
 import com.minecraftonline.nope.command.common.CommandNode;
 import com.minecraftonline.nope.command.common.LambdaCommandNode;
-import com.minecraftonline.nope.key.regionwand.RegionWandHandler;
+import com.minecraftonline.nope.key.zonewand.ZoneWandHandler;
 import com.minecraftonline.nope.permission.Permissions;
 import com.minecraftonline.nope.util.Format;
 import org.spongepowered.api.command.CommandResult;
@@ -64,7 +64,7 @@ import org.spongepowered.api.text.action.TextActions;
 public class Position2Command extends LambdaCommandNode {
   public Position2Command(CommandNode parent) {
     super(parent,
-        Permissions.COMMAND_REGION_CREATE,
+        Permissions.COMMAND_CREATE,
         Text.of("Set position 2 of the nope selection"),
         "pos2");
     setComment(() -> Format.note("You can also use the nope wand")
@@ -83,12 +83,12 @@ public class Position2Command extends LambdaCommandNode {
 
       Player player = (Player) src;
       Nope.getInstance()
-          .getRegionWandHandler()
+          .getZoneWandHandler()
           .getSelectionMap()
-          .putIfAbsent(player.getUniqueId(), new RegionWandHandler.Selection());
+          .putIfAbsent(player.getUniqueId(), new ZoneWandHandler.Selection());
 
       Nope.getInstance()
-          .getRegionWandHandler()
+          .getZoneWandHandler()
           .getSelectionMap()
           .get(player.getUniqueId()).setPos2(player.getLocation(), player);
 

@@ -52,7 +52,7 @@ package com.minecraftonline.nope.command;
 import com.google.common.collect.Lists;
 import com.minecraftonline.nope.Nope;
 import com.minecraftonline.nope.command.common.CommandNode;
-import com.minecraftonline.nope.key.regionwand.RegionWandManipulator;
+import com.minecraftonline.nope.key.zonewand.ZoneWandManipulator;
 import com.minecraftonline.nope.permission.Permissions;
 import com.minecraftonline.nope.setting.SettingLibrary;
 import com.minecraftonline.nope.setting.SettingValue;
@@ -77,8 +77,8 @@ public class WandCommand extends CommandNode {
 
   WandCommand(CommandNode parent) {
     super(parent,
-        Permissions.COMMAND_REGION_CREATE,
-        Text.of("Get a wand for easy creation of regions"),
+        Permissions.COMMAND_CREATE,
+        Text.of("Get a wand for easy creation of zones"),
         "wand",
         "w");
   }
@@ -105,11 +105,11 @@ public class WandCommand extends CommandNode {
         .build();
 
     itemStack.offer(Keys.DISPLAY_NAME, Text.of(TextColors.AQUA,
-        "Nope Wand"));
+        "Nope Zone Wand"));
     itemStack.offer(Keys.ITEM_LORE, Lists.newArrayList(Text.of(TextColors.GRAY,
-        "Select two corners of a region with left click and right click")));
+        "Select two corners of a zone with left click and right click")));
 
-    itemStack.offer(new RegionWandManipulator(true));
+    itemStack.offer(new ZoneWandManipulator(true));
 
     Inventory inv = player.getInventory()
         .query(QueryOperationTypes.INVENTORY_TYPE.of(MainPlayerInventory.class));
