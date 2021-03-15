@@ -354,7 +354,7 @@ public final class DynamicSettingListeners {
       new CancelConditionSettingListener<>(
           SettingLibrary.FIRE_NATURAL_IGNITION,
           ChangeBlockEvent.class,
-          event -> !(event.getSource() instanceof Player)
+          event -> !(event.getSource() instanceof Player || event.getContext().get(EventContextKeys.PLUGIN).isPresent())
               && event.getTransactions()
               .stream()
               .anyMatch(trans -> trans.getFinal().getState().getType().equals(BlockTypes.FIRE)
