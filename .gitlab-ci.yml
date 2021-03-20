@@ -1,8 +1,14 @@
 image: java:8
 
+cache:
+  paths:
+    - .gradle/wrapper
+    - .gradle/caches
+
 build:
-  script: 
-    - chmod +x ./gradlew
+  before_script:
+    - export GRADLE_USER_HOME=`pwd`/.gradle
+  script:
     - ./gradlew -Dorg.gradle.daemon=false build
   artifacts:
     paths:

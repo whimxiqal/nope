@@ -35,6 +35,7 @@ import com.minecraftonline.nope.util.Format;
 import net.minecraft.entity.monster.EntitySnowman;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.BlockTypes;
+import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityType;
@@ -353,7 +354,7 @@ public final class DynamicSettingListeners {
       new CancelConditionSettingListener<>(
           SettingLibrary.FIRE_NATURAL_IGNITION,
           ChangeBlockEvent.class,
-          event -> !(event.getSource() instanceof Player)
+          event -> !(event.getSource() instanceof Player || event.getContext().get(EventContextKeys.PLUGIN).isPresent())
               && event.getTransactions()
               .stream()
               .anyMatch(trans -> trans.getFinal().getState().getType().equals(BlockTypes.FIRE)
@@ -955,6 +956,7 @@ public final class DynamicSettingListeners {
   private static Consumer<ChangeBlockEvent> liquidFlowHandler(SettingKey<Boolean> key,
                                                               BlockType flowingType) {
     return event -> event.getTransactions().stream()
+        .filter(Transaction::isValid)
         .filter(trans ->
             trans.getFinal().getState().getType().equals(flowingType))
         .forEach(trans ->
