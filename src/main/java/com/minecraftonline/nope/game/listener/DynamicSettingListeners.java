@@ -46,7 +46,6 @@ import org.spongepowered.api.entity.living.Agent;
 import org.spongepowered.api.entity.living.ArmorStand;
 import org.spongepowered.api.entity.living.Hostile;
 import org.spongepowered.api.entity.living.animal.Animal;
-import org.spongepowered.api.entity.living.monster.Creeper;
 import org.spongepowered.api.entity.living.monster.Ghast;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
@@ -66,6 +65,7 @@ import org.spongepowered.api.event.entity.*;
 import org.spongepowered.api.event.item.inventory.ChangeInventoryEvent;
 import org.spongepowered.api.event.item.inventory.ClickInventoryEvent;
 import org.spongepowered.api.event.item.inventory.DropItemEvent;
+import org.spongepowered.api.event.world.ExplosionEvent;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.api.world.Location;
@@ -95,6 +95,27 @@ public final class DynamicSettingListeners {
 
   private DynamicSettingListeners() {
   }
+
+  public static List<BlockType> CHEST_TYPES = Lists.newArrayList(
+      BlockTypes.CHEST,
+      BlockTypes.ENDER_CHEST,
+      BlockTypes.TRAPPED_CHEST,
+      BlockTypes.BLACK_SHULKER_BOX,
+      BlockTypes.BLUE_SHULKER_BOX,
+      BlockTypes.BROWN_SHULKER_BOX,
+      BlockTypes.CYAN_SHULKER_BOX,
+      BlockTypes.GRAY_SHULKER_BOX,
+      BlockTypes.GREEN_SHULKER_BOX,
+      BlockTypes.LIGHT_BLUE_SHULKER_BOX,
+      BlockTypes.LIME_SHULKER_BOX,
+      BlockTypes.MAGENTA_SHULKER_BOX,
+      BlockTypes.ORANGE_SHULKER_BOX,
+      BlockTypes.PINK_SHULKER_BOX,
+      BlockTypes.PURPLE_SHULKER_BOX,
+      BlockTypes.RED_SHULKER_BOX,
+      BlockTypes.SILVER_SHULKER_BOX,
+      BlockTypes.WHITE_SHULKER_BOX,
+      BlockTypes.YELLOW_SHULKER_BOX);
 
   @DynamicSettingListener
   static final SettingListener<AttackEntityEvent> ARMOR_STAND_ATTACK_LISTENER =
@@ -155,77 +176,88 @@ public final class DynamicSettingListeners {
       new PlayerRootCancelConditionSettingListener<>(
           SettingLibrary.CHEST_ACCESS,
           InteractBlockEvent.Secondary.class,
-          (event, player) -> {
-            List<BlockType> chests = Lists.newArrayList(
-                BlockTypes.CHEST,
-                BlockTypes.ENDER_CHEST,
-                BlockTypes.TRAPPED_CHEST,
-                BlockTypes.BLACK_SHULKER_BOX,
-                BlockTypes.BLUE_SHULKER_BOX,
-                BlockTypes.BROWN_SHULKER_BOX,
-                BlockTypes.CYAN_SHULKER_BOX,
-                BlockTypes.GRAY_SHULKER_BOX,
-                BlockTypes.GREEN_SHULKER_BOX,
-                BlockTypes.LIGHT_BLUE_SHULKER_BOX,
-                BlockTypes.LIME_SHULKER_BOX,
-                BlockTypes.MAGENTA_SHULKER_BOX,
-                BlockTypes.ORANGE_SHULKER_BOX,
-                BlockTypes.PINK_SHULKER_BOX,
-                BlockTypes.PURPLE_SHULKER_BOX,
-                BlockTypes.RED_SHULKER_BOX,
-                BlockTypes.SILVER_SHULKER_BOX,
-                BlockTypes.WHITE_SHULKER_BOX,
-                BlockTypes.YELLOW_SHULKER_BOX);
-            return chests.contains(event.getTargetBlock().getState().getType())
-                &&
-                !Nope.getInstance().getHostTree().lookup(SettingLibrary.CHEST_ACCESS,
-                    player,
-                    event.getTargetBlock().getLocation()
-                        .orElseThrow(noLocation(SettingLibrary.CHEST_ACCESS,
-                            InteractBlockEvent.Secondary.class,
-                            player)));
-          });
+          (event, player) -> CHEST_TYPES.contains(event.getTargetBlock().getState().getType())
+              &&
+              !Nope.getInstance().getHostTree().lookup(SettingLibrary.CHEST_ACCESS,
+                  player,
+                  event.getTargetBlock().getLocation()
+                      .orElseThrow(noLocation(SettingLibrary.CHEST_ACCESS,
+                          InteractBlockEvent.Secondary.class,
+                          player))));
   @DynamicSettingListener
-  static final SettingListener<DamageEntityEvent> CREEPER_EXPLOSION_DAMAGE_LISTENER =
-      new CancelConditionSettingListener<>(
+  static final SettingListener<ExplosionEvent.Pre> CREEPER_EXPLOSION_DAMAGE_LISTENER =
+      new SingleSettingListener<>(
           SettingLibrary.CREEPER_EXPLOSION_DAMAGE,
-          DamageEntityEvent.class,
-          entityVersusEntityCanceller(SettingLibrary.CREEPER_EXPLOSION_DAMAGE, Creeper.class, Entity.class));
-  @DynamicSettingListener
-  static final SettingListener<ChangeBlockEvent.Break> CREEPER_EXPLOSION_GRIEF_BLOCK_LISTENER =
-      new CancelConditionSettingListener<>(
-          SettingLibrary.CREEPER_EXPLOSION_GRIEF,
-          ChangeBlockEvent.Break.class,
+          ExplosionEvent.Pre.class,
           event -> {
-            Explosion explosion;
-            if (!(event.getCause().root() instanceof Explosion)) {
-              return false;
-            }
-            explosion = (Explosion) event.getCause().root();
+            Explosion explosion = event.getExplosion();
             if (!explosion.getSourceExplosive()
                 .filter(explosive -> explosive.getType().equals(EntityTypes.CREEPER))
                 .isPresent()) {
-              return false;
+              return;
             }
-            return !Nope.getInstance()
+            if (!Nope.getInstance().getHostTree().lookupAnonymous(
+                SettingLibrary.CREEPER_EXPLOSION_DAMAGE,
+                explosion.getLocation())) {
+              // Disable entity damage if explosion occurs in safe zone
+              event.setExplosion(Explosion.builder().from(explosion).shouldDamageEntities(false).build());
+            } else {
+              // Disable entity damage if any nearby entities are in safe zone
+              for (Entity nearby : explosion.getLocation()
+                  .getExtent()
+                  .getNearbyEntities(
+                      explosion.getLocation().getPosition(),
+                      explosion.getRadius())) {
+                if (!Nope.getInstance().getHostTree().lookupAnonymous(
+                    SettingLibrary.CREEPER_EXPLOSION_DAMAGE,
+                    nearby.getLocation())) {
+                  event.setExplosion(Explosion.builder().from(explosion).shouldDamageEntities(false).build());
+                  return;
+                }
+              }
+            }
+          }
+      );
+  @DynamicSettingListener
+  static final SettingListener<ChangeBlockEvent.Break> CREEPER_EXPLOSION_GRIEF_BLOCK_LISTENER =
+      new SingleSettingListener<>(
+          SettingLibrary.CREEPER_EXPLOSION_GRIEF,
+          ChangeBlockEvent.Break.class,
+          event -> {
+            if (!(event.getCause().root() instanceof Explosion)) {
+              return;
+            }
+            Explosion explosion = (Explosion) event.getCause().root();
+            if (!explosion.getSourceExplosive()
+                .filter(explosive -> explosive.getType().equals(EntityTypes.CREEPER))
+                .isPresent()) {
+              return;
+            }
+            if (!Nope.getInstance()
                 .getHostTree()
                 .lookupAnonymous(SettingLibrary.CREEPER_EXPLOSION_GRIEF,
-                    explosion.getLocation())
-                ||
-                event.getTransactions().stream().anyMatch(transaction ->
-                    !Nope.getInstance().getHostTree().lookupAnonymous(
-                        SettingLibrary.CREEPER_EXPLOSION_GRIEF,
-                        transaction.getOriginal().getLocation().orElseThrow(noLocation(
-                            SettingLibrary.CREEPER_EXPLOSION_GRIEF,
-                            ChangeBlockEvent.Break.class,
-                            null)))
-                        ||
-                        !Nope.getInstance().getHostTree().lookupAnonymous(
-                            SettingLibrary.CREEPER_EXPLOSION_GRIEF,
-                            transaction.getFinal().getLocation().orElseThrow(noLocation(
-                                SettingLibrary.CREEPER_EXPLOSION_GRIEF,
-                                ChangeBlockEvent.Break.class,
-                                null))));
+                    explosion.getLocation())) {
+              event.setCancelled(true);
+              return;
+            }
+            event.getTransactions().stream().filter(Transaction::isValid).forEach(transaction -> {
+              if (
+                  !Nope.getInstance().getHostTree().lookupAnonymous(
+                      SettingLibrary.CREEPER_EXPLOSION_GRIEF,
+                      transaction.getOriginal().getLocation().orElseThrow(noLocation(
+                          SettingLibrary.CREEPER_EXPLOSION_GRIEF,
+                          ChangeBlockEvent.Break.class,
+                          null)))
+                      ||
+                      !Nope.getInstance().getHostTree().lookupAnonymous(
+                          SettingLibrary.CREEPER_EXPLOSION_GRIEF,
+                          transaction.getFinal().getLocation().orElseThrow(noLocation(
+                              SettingLibrary.CREEPER_EXPLOSION_GRIEF,
+                              ChangeBlockEvent.Break.class,
+                              null)))) {
+                transaction.setValid(false);
+              }
+            });
           });
   @DynamicSettingListener
   static final SettingListener<ChangeBlockEvent.Grow> CROP_GROWTH_LISTENER =

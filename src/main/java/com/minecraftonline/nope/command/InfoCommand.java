@@ -144,7 +144,7 @@ public class InfoCommand extends LambdaCommandNode {
                                     .orElseThrow(() ->
                                         new RuntimeException("UnsetCommand is not set in Nope command tree!"))
                                     .getFullCommand()
-                                    + String.format(" -r %s %s",
+                                    + String.format(" -z %s %s",
                                     host.getName(),
                                     setting.getKey())))
                             .build());
