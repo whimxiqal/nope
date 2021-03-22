@@ -35,14 +35,24 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import com.minecraftonline.nope.Nope;
+import com.minecraftonline.nope.update.SettingUpdates;
 import com.minecraftonline.nope.util.Format;
 import com.minecraftonline.nope.util.NopeTypeTokens;
 import org.spongepowered.api.CatalogType;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.persistence.DataFormats;
+import org.spongepowered.api.entity.EnderCrystal;
 import org.spongepowered.api.entity.EntityType;
+import org.spongepowered.api.entity.explosive.Explosive;
+import org.spongepowered.api.entity.explosive.PrimedTNT;
+import org.spongepowered.api.entity.living.monster.Creeper;
+import org.spongepowered.api.entity.living.monster.Wither;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.entity.living.player.gamemode.GameModes;
+import org.spongepowered.api.entity.projectile.Firework;
+import org.spongepowered.api.entity.projectile.explosive.WitherSkull;
+import org.spongepowered.api.entity.projectile.explosive.fireball.LargeFireball;
+import org.spongepowered.api.entity.vehicle.minecart.TNTMinecart;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.text.Text;
@@ -123,15 +133,17 @@ public final class SettingLibrary {
   );
   @Description("When disabled, creepers do not cause damage")
   @Category(SettingKey.CategoryType.DAMAGE)
-  public static final SettingKey<Boolean> CREEPER_EXPLOSION_DAMAGE = new BooleanSetting(
-      "creeper-explosion-damage",
-      true
+  public static final SettingKey<Set<ExplosiveEnum>> EXPLOSION_DAMAGE_BLACKLIST = new EnumSetSetting<>(
+      "explosion-damage-blacklist",
+      new HashSet<>(),
+      ExplosiveEnum.class
   );
   @Description("When disabled, creepers do not grief when they explode")
   @Category(SettingKey.CategoryType.BLOCKS)
-  public static final SettingKey<Boolean> CREEPER_EXPLOSION_GRIEF = new BooleanSetting(
-      "creeper-explosion-grief",
-      true
+  public static final SettingKey<Set<ExplosiveEnum>> EXPLOSION_BLOCK_GRIEF_BLACKLIST = new EnumSetSetting<>(
+      "explosion-block-grief-blacklist",
+      new HashSet<>(),
+      ExplosiveEnum.class
   );
   @Description("When disabled, crops do not grow")
   @Category(SettingKey.CategoryType.BLOCKS)
@@ -677,22 +689,22 @@ public final class SettingLibrary {
         .forEach(field -> {
           try {
             SettingKey<?> key = (SettingKey<?>) field.get(null);
-            if (settingMap.put(key.id, key) != null) {
-              throw new IllegalStateException("SettingKeys may not have the same id: " + key.id);
+            if (settingMap.put(key.getId(), key) != null) {
+              throw new IllegalStateException("SettingKeys may not have the same id: " + key.getId());
             }
             for (Annotation annotation : field.getAnnotations()) {
               if (annotation instanceof Description) {
-                key.description = ((Description) annotation).value();
+                key.setDescription(((Description) annotation).value());
               } else if (annotation instanceof Category) {
-                key.category = ((Category) annotation).value();
+                key.setCategory(((Category) annotation).value());
               } else if (annotation instanceof Global) {
-                key.global = true;
+                key.setGlobal(true);
               } else if (annotation instanceof NotImplemented) {
-                key.implemented = false;
+                key.setImplemented(false);
               } else if (annotation instanceof UnnaturalDefault) {
-                key.unnaturalDefault = true;
+                key.setUnnaturalDefault(true);
               } else if (annotation instanceof PlayerRestrictive) {
-                key.playerRestrictive = true;
+                key.setPlayerRestrictive(true);
               }
             }
           } catch (IllegalAccessException e) {
@@ -708,7 +720,7 @@ public final class SettingLibrary {
   /**
    * Send a SettingMap to a JsonElement to be saved elsewhere
    * so that it can be restored later using
-   * {@link #deserializeSettingAssignments(JsonElement)}.
+   * {@link #deserializeSettingAssignments(JsonElement, String)} )}.
    *
    * @param map the map of settings
    * @return the finished json element
@@ -719,8 +731,9 @@ public final class SettingLibrary {
       Map<String, Object> elem = Maps.newHashMap();
       elem.put("id", setting.getKey().getId());
       // This does not deserialize:
-      setting.getKey().getDescription().ifPresent(description ->
-          elem.put("description", description));
+      if (setting.getKey().getDescription() != null) {
+          elem.put("description", setting.getKey().getDescription());
+      }
       // This does not deserialize
       elem.put("restricted", setting.getKey().isPlayerRestrictive());
       elem.put("value", setting.getKey().dataToJson(setting.getValue().getData()));
@@ -738,7 +751,7 @@ public final class SettingLibrary {
    * @return the restored SettingMap
    */
   @SuppressWarnings("unchecked")
-  public static SettingMap deserializeSettingAssignments(JsonElement json) {
+  public static SettingMap deserializeSettingAssignments(JsonElement json, String hostName) {
     JsonElement element = json.getAsJsonObject().get("settings");
     SettingMap map = new SettingMap();
 
@@ -754,9 +767,21 @@ public final class SettingLibrary {
       try {
         key = lookup(object.get("id").getAsString());
       } catch (NoSuchElementException e) {
-        Nope.getInstance().getLogger().error("Invalid SettingKey id: "
-            + object.get("id")
-            + ". Is this old? Skipping...");
+        Optional<? extends Setting<?>> updated = SettingUpdates.convertSetting(
+            object.get("id").getAsString(),
+            object.get("value"),
+            object.get("target"));
+        if (updated.isPresent()) {
+          Nope.getInstance().getLogger().warn("Old SettingKey id: "
+              + object.get("id")
+              + ". This was replaced with the a new Setting with SettingKey: "
+              + updated.get().getKey().getId());
+          map.put(updated.get());
+        } else {
+          Nope.getInstance().getLogger().error("Invalid SettingKey id: "
+              + object.get("id")
+              + ". Is this old? Skipping...");
+        }
         continue;
       }
 
@@ -766,7 +791,9 @@ public final class SettingLibrary {
             key.dataFromJson(object.get("value")),
             SettingValue.Target.fromJson(object.get("target")));
       } catch (SettingKey.ParseSettingException e) {
-        Nope.getInstance().getLogger().error("Invalid SettingKey value: "
+        Nope.getInstance().getLogger().error("Host: "
+            + hostName
+            + ", Invalid SettingKey value: "
             + object.get("value")
             + ". Is this old? Skipping...");
         continue;
@@ -783,9 +810,30 @@ public final class SettingLibrary {
   }
 
   public enum StorageType {
-    MariaDB,
-    SQLite,
+    MARIADB,
+    SQLITE,
     HOCON
+  }
+
+  public enum ExplosiveEnum {
+    CREEPER(Creeper.class),
+    ENDERCRYSTAL(EnderCrystal.class),
+    FIREWORK(Firework.class),
+    LARGEFIREBALL(LargeFireball.class),
+    PRIMEDTNT(PrimedTNT.class),
+    TNTMINECART(TNTMinecart.class),
+    WITHER(Wither.class),
+    WITHERSKULL(WitherSkull.class);
+
+    private final Class<? extends Explosive> wrapped;
+
+    ExplosiveEnum(Class<? extends Explosive> wrapped) {
+      this.wrapped = wrapped;
+    }
+
+    public Class<? extends Explosive> getExplosive() {
+      return wrapped;
+    }
   }
 
   @Retention(RetentionPolicy.RUNTIME)
@@ -984,7 +1032,7 @@ public final class SettingLibrary {
 
   public static class EnumSetting<E extends Enum<E>> extends SettingKey<E> {
 
-    private Class<E> enumClass;
+    private final Class<E> enumClass;
 
     protected EnumSetting(String id, E defaultData, Class<E> enumClass) {
       super(id, defaultData);
@@ -1010,7 +1058,7 @@ public final class SettingLibrary {
             + enumClass.getSimpleName()
             + " type. "
             + (
-            (enumClass.getEnumConstants().length < 5)
+            (enumClass.getEnumConstants().length <= 8)
                 ? "Allowed types: "
                 + Arrays.stream(enumClass.getEnumConstants()).map(e ->
                 e.toString().toLowerCase()).collect(Collectors.joining(", "))
@@ -1027,8 +1075,60 @@ public final class SettingLibrary {
     }
   }
 
+  public static class EnumSetSetting<E extends Enum<E>> extends SettingKey<Set<E>> {
+    private final Class<E> enumClass;
+
+    public EnumSetSetting(String id, Set<E> defaultValue, Class<E> enumClass) {
+      super(id, defaultValue);
+      this.enumClass = enumClass;
+    }
+
+    @Override
+    @SuppressWarnings("UnstableApiUsage")
+    public JsonElement dataToJsonGenerified(Set<E> value) {
+      return new Gson().toJsonTree(value, NopeTypeTokens.STRING_SET_TOKEN.getType());
+    }
+
+    @Override
+    public Set<E> dataFromJsonGenerified(JsonElement jsonElement) {
+      final Set<E> set = new HashSet<>();
+      jsonElement.getAsJsonArray().forEach(element ->
+          set.add(Enum.valueOf(enumClass, element.getAsString().toUpperCase())));
+      return set;
+    }
+
+    @Override
+    public Set<E> parse(String s) throws ParseSettingException {
+      Set<E> set = new HashSet<>();
+      for (String token : s.split(SET_SPLIT_REGEX)) {
+        try {
+          set.add(Enum.valueOf(enumClass, token.toUpperCase()));
+        } catch (IllegalArgumentException ex) {
+          throw new ParseSettingException(token + " is not a valid "
+              + enumClass.getSimpleName()
+              + " type. "
+              + (
+              (enumClass.getEnumConstants().length <= 8)
+                  ? "Allowed types: "
+                  + Arrays.stream(enumClass.getEnumConstants()).map(e ->
+                  e.toString().toLowerCase()).collect(Collectors.joining(", "))
+                  : ""));
+        }
+      }
+      return set;
+    }
+
+    @Nonnull
+    @Override
+    public Text print(Set<E> data) {
+      return Text.of("[",
+          data.stream().map(enu -> enu.name().toLowerCase()).collect(Collectors.joining(", ")),
+          "]");
+    }
+  }
+
   public static class CatalogTypeSetting<C extends CatalogType> extends SettingKey<String> {
-    private Class<C> clazz;
+    private final Class<C> clazz;
 
     public CatalogTypeSetting(String id, C defaultData, Class<C> clazz) {
       super(id, defaultData.getId());
@@ -1052,30 +1152,6 @@ public final class SettingLibrary {
           .stream()
           .map(CatalogType::getName)
           .collect(Collectors.toList())));
-    }
-  }
-
-  public static class StringSetSetting extends SettingKey<Set<String>> {
-    public StringSetSetting(String id, Set<String> defaultValue) {
-      super(id, defaultValue);
-    }
-
-    @Override
-    @SuppressWarnings("UnstableApiUsage")
-    public JsonElement dataToJsonGenerified(Set<String> value) {
-      return new Gson().toJsonTree(value, NopeTypeTokens.STRING_SET_TOKEN.getType());
-    }
-
-    @Override
-    public Set<String> dataFromJsonGenerified(JsonElement jsonElement) {
-      final Set<String> set = new HashSet<>();
-      jsonElement.getAsJsonArray().forEach(element -> set.add(element.getAsString()));
-      return set;
-    }
-
-    @Override
-    public Set<String> parse(String s) throws ParseSettingException {
-      return Sets.newHashSet(s.split(SET_SPLIT_REGEX));
     }
   }
 

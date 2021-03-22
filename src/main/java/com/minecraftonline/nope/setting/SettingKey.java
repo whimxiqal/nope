@@ -28,9 +28,11 @@ package com.minecraftonline.nope.setting;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import lombok.Getter;
+import lombok.Setter;
 import org.spongepowered.api.text.Text;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Optional;
 
@@ -50,21 +52,36 @@ public abstract class SettingKey<T> {
   /**
    * The global unique identifier for this key.
    */
-  final String id;
+  @Getter
+  private final String id;
 
   /**
    * The default data of a setting keyed with this object.
    * This is what determines the behavior associated with this key
    * if the user does not specify something different.
    */
-  final T defaultData;
-  String description = null;
+  @Getter
+  private final T defaultData;
+  @Getter
+  @Setter
+  @Nullable
+  private String description = null;
+  @Getter
+  @Setter
   @Nonnull
-  CategoryType category = CategoryType.MISC;
-  boolean implemented = true;
-  boolean unnaturalDefault = false;
-  boolean global = false;
-  boolean playerRestrictive = false;
+  private CategoryType category = CategoryType.MISC;
+  @Getter
+  @Setter
+  private boolean implemented = true;
+  @Getter
+  @Setter
+  private boolean unnaturalDefault = false;
+  @Getter
+  @Setter
+  private boolean global = false;
+  @Getter
+  @Setter
+  private boolean playerRestrictive = false;
 
   /**
    * Type of {@link SettingKey} for ordering purposes.
@@ -80,26 +97,6 @@ public abstract class SettingKey<T> {
   protected SettingKey(String id, T defaultData) {
     this.id = id;
     this.defaultData = defaultData;
-  }
-
-  /**
-   * The global unique identifier for this key.
-   *
-   * @return the identifier
-   */
-  public final String getId() {
-    return this.id;
-  }
-
-  /**
-   * The default data of a setting keyed with this object.
-   * This is what determines the behavior associated with this key
-   * if the user does not specify something different.
-   *
-   * @return the default data
-   */
-  public final T getDefaultData() {
-    return this.defaultData;
   }
 
   /**
@@ -208,32 +205,6 @@ public abstract class SettingKey<T> {
           valueType().getName()));
     }
     return valueType().cast(object);
-  }
-
-  @Nonnull
-  public final Optional<String> getDescription() {
-    return Optional.ofNullable(description);
-  }
-
-  @Nonnull
-  public final CategoryType getCategory() {
-    return this.category;
-  }
-
-  public final boolean isImplemented() {
-    return implemented;
-  }
-
-  public final boolean isGlobal() {
-    return global;
-  }
-
-  public final boolean hasUnnaturalDefault() {
-    return unnaturalDefault;
-  }
-
-  public final boolean isPlayerRestrictive() {
-    return playerRestrictive;
   }
 
   @Override

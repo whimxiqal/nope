@@ -81,7 +81,7 @@ class SettingListener<E extends Event> implements EventListener<E> {
     boolean assigned;
     for (SettingKey<?> key : keys) {
       assigned = Nope.getInstance().getHostTree().isAssigned(key);
-      if (key.hasUnnaturalDefault() || assigned) {
+      if (key.isUnnaturalDefault() || assigned) {
         Sponge.getEventManager().registerListener(Nope.getInstance(),
             eventClass,
             Order.FIRST,

@@ -40,6 +40,7 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.EntityTypes;
+import org.spongepowered.api.entity.explosive.Explosive;
 import org.spongepowered.api.entity.hanging.ItemFrame;
 import org.spongepowered.api.entity.hanging.Painting;
 import org.spongepowered.api.entity.living.Agent;
@@ -93,30 +94,6 @@ import java.util.stream.Collectors;
 @SuppressWarnings("unused")
 public final class DynamicSettingListeners {
 
-  private DynamicSettingListeners() {
-  }
-
-  public static List<BlockType> CHEST_TYPES = Lists.newArrayList(
-      BlockTypes.CHEST,
-      BlockTypes.ENDER_CHEST,
-      BlockTypes.TRAPPED_CHEST,
-      BlockTypes.BLACK_SHULKER_BOX,
-      BlockTypes.BLUE_SHULKER_BOX,
-      BlockTypes.BROWN_SHULKER_BOX,
-      BlockTypes.CYAN_SHULKER_BOX,
-      BlockTypes.GRAY_SHULKER_BOX,
-      BlockTypes.GREEN_SHULKER_BOX,
-      BlockTypes.LIGHT_BLUE_SHULKER_BOX,
-      BlockTypes.LIME_SHULKER_BOX,
-      BlockTypes.MAGENTA_SHULKER_BOX,
-      BlockTypes.ORANGE_SHULKER_BOX,
-      BlockTypes.PINK_SHULKER_BOX,
-      BlockTypes.PURPLE_SHULKER_BOX,
-      BlockTypes.RED_SHULKER_BOX,
-      BlockTypes.SILVER_SHULKER_BOX,
-      BlockTypes.WHITE_SHULKER_BOX,
-      BlockTypes.YELLOW_SHULKER_BOX);
-
   @DynamicSettingListener
   static final SettingListener<AttackEntityEvent> ARMOR_STAND_ATTACK_LISTENER =
       new CancelConditionSettingListener<>(
@@ -152,6 +129,44 @@ public final class DynamicSettingListeners {
                           ChangeBlockEvent.Place.class,
                           player))))));
   @DynamicSettingListener
+  static final SettingListener<NotifyNeighborBlockEvent> BLOCK_PROPAGATE_LISTENER =
+      new SettingListener<>(
+          Lists.newArrayList(SettingLibrary.BLOCK_PROPAGATE_ACROSS,
+              SettingLibrary.BLOCK_PROPAGATE_WITHIN),
+          NotifyNeighborBlockEvent.class,
+          event -> {
+            Player player = event.getCause().first(Player.class).orElse(null);
+            Location<World> notifier = event.getCause().first(LocatableBlock.class)
+                .orElseThrow(() ->
+                    new RuntimeException("A NotifyNeighborBlockEvent needs a block cause"))
+                .getLocation();
+            Predicate<Direction> directionsFilter = (direction -> {
+              Location<World> recipient = notifier.add(direction.asBlockOffset());
+              Host fromAcross = Nope.getInstance().getHostTree()
+                  .lookupDictator(SettingLibrary.BLOCK_PROPAGATE_ACROSS, player, notifier);
+              boolean fromAcrossData = fromAcross == null
+                  ? SettingLibrary.BLOCK_PROPAGATE_ACROSS.getDefaultData()
+                  : fromAcross.getData(SettingLibrary.BLOCK_PROPAGATE_ACROSS, player);
+              Host toAcross = Nope.getInstance().getHostTree()
+                  .lookupDictator(SettingLibrary.BLOCK_PROPAGATE_ACROSS, player, recipient);
+              boolean toAcrossData = toAcross == null
+                  ? SettingLibrary.BLOCK_PROPAGATE_ACROSS.getDefaultData()
+                  : toAcross.getData(SettingLibrary.BLOCK_PROPAGATE_ACROSS, player);
+              Host fromWithin = Nope.getInstance().getHostTree()
+                  .lookupDictator(SettingLibrary.BLOCK_PROPAGATE_WITHIN, player, notifier);
+              boolean fromWithinData = fromWithin == null
+                  ? SettingLibrary.BLOCK_PROPAGATE_WITHIN.getDefaultData()
+                  : fromWithin.getData(SettingLibrary.BLOCK_PROPAGATE_WITHIN, player);
+              Host toWithin = Nope.getInstance().getHostTree()
+                  .lookupDictator(SettingLibrary.BLOCK_PROPAGATE_WITHIN, player, recipient);
+
+              return (!(Objects.equals(fromAcross, toAcross)) && (!fromAcrossData || !toAcrossData))
+                  || (Objects.equals(fromWithin, toWithin) && (!fromWithinData));
+            });
+            event.getNeighbors().keySet().removeIf(directionsFilter);
+          }
+      );
+  @DynamicSettingListener
   static final SettingListener<ChangeBlockEvent> BLOCK_TRAMPLE =
       new PlayerCauseCancelConditionSettingListener<>(
           SettingLibrary.BLOCK_TRAMPLE,
@@ -171,94 +186,6 @@ public final class DynamicSettingListeners {
                   transaction.getFinal()
                       .getState()
                       .getType().equals(BlockTypes.DIRT)));
-  @DynamicSettingListener
-  static final SettingListener<InteractBlockEvent.Secondary> CHEST_ACCESS_LISTENER =
-      new PlayerRootCancelConditionSettingListener<>(
-          SettingLibrary.CHEST_ACCESS,
-          InteractBlockEvent.Secondary.class,
-          (event, player) -> CHEST_TYPES.contains(event.getTargetBlock().getState().getType())
-              &&
-              !Nope.getInstance().getHostTree().lookup(SettingLibrary.CHEST_ACCESS,
-                  player,
-                  event.getTargetBlock().getLocation()
-                      .orElseThrow(noLocation(SettingLibrary.CHEST_ACCESS,
-                          InteractBlockEvent.Secondary.class,
-                          player))));
-  @DynamicSettingListener
-  static final SettingListener<ExplosionEvent.Pre> CREEPER_EXPLOSION_DAMAGE_LISTENER =
-      new SingleSettingListener<>(
-          SettingLibrary.CREEPER_EXPLOSION_DAMAGE,
-          ExplosionEvent.Pre.class,
-          event -> {
-            Explosion explosion = event.getExplosion();
-            if (!explosion.getSourceExplosive()
-                .filter(explosive -> explosive.getType().equals(EntityTypes.CREEPER))
-                .isPresent()) {
-              return;
-            }
-            if (!Nope.getInstance().getHostTree().lookupAnonymous(
-                SettingLibrary.CREEPER_EXPLOSION_DAMAGE,
-                explosion.getLocation())) {
-              // Disable entity damage if explosion occurs in safe zone
-              event.setExplosion(Explosion.builder().from(explosion).shouldDamageEntities(false).build());
-            } else {
-              // Disable entity damage if any nearby entities are in safe zone
-              for (Entity nearby : explosion.getLocation()
-                  .getExtent()
-                  .getNearbyEntities(
-                      explosion.getLocation().getPosition(),
-                      explosion.getRadius())) {
-                if (!Nope.getInstance().getHostTree().lookupAnonymous(
-                    SettingLibrary.CREEPER_EXPLOSION_DAMAGE,
-                    nearby.getLocation())) {
-                  event.setExplosion(Explosion.builder().from(explosion).shouldDamageEntities(false).build());
-                  return;
-                }
-              }
-            }
-          }
-      );
-  @DynamicSettingListener
-  static final SettingListener<ChangeBlockEvent.Break> CREEPER_EXPLOSION_GRIEF_BLOCK_LISTENER =
-      new SingleSettingListener<>(
-          SettingLibrary.CREEPER_EXPLOSION_GRIEF,
-          ChangeBlockEvent.Break.class,
-          event -> {
-            if (!(event.getCause().root() instanceof Explosion)) {
-              return;
-            }
-            Explosion explosion = (Explosion) event.getCause().root();
-            if (!explosion.getSourceExplosive()
-                .filter(explosive -> explosive.getType().equals(EntityTypes.CREEPER))
-                .isPresent()) {
-              return;
-            }
-            if (!Nope.getInstance()
-                .getHostTree()
-                .lookupAnonymous(SettingLibrary.CREEPER_EXPLOSION_GRIEF,
-                    explosion.getLocation())) {
-              event.setCancelled(true);
-              return;
-            }
-            event.getTransactions().stream().filter(Transaction::isValid).forEach(transaction -> {
-              if (
-                  !Nope.getInstance().getHostTree().lookupAnonymous(
-                      SettingLibrary.CREEPER_EXPLOSION_GRIEF,
-                      transaction.getOriginal().getLocation().orElseThrow(noLocation(
-                          SettingLibrary.CREEPER_EXPLOSION_GRIEF,
-                          ChangeBlockEvent.Break.class,
-                          null)))
-                      ||
-                      !Nope.getInstance().getHostTree().lookupAnonymous(
-                          SettingLibrary.CREEPER_EXPLOSION_GRIEF,
-                          transaction.getFinal().getLocation().orElseThrow(noLocation(
-                              SettingLibrary.CREEPER_EXPLOSION_GRIEF,
-                              ChangeBlockEvent.Break.class,
-                              null)))) {
-                transaction.setValid(false);
-              }
-            });
-          });
   @DynamicSettingListener
   static final SettingListener<ChangeBlockEvent.Grow> CROP_GROWTH_LISTENER =
       new CancelConditionSettingListener<>(
@@ -302,7 +229,6 @@ public final class DynamicSettingListeners {
                   !Nope.getInstance().getHostTree().lookup(SettingLibrary.ENDERPEARL_TELEPORT,
                       player,
                       event.getToTransform().getLocation())));
-
   @DynamicSettingListener
   static final SettingListener<DamageEntityEvent> EVP_LISTENER =
       new CancelConditionSettingListener<>(
@@ -323,7 +249,133 @@ public final class DynamicSettingListeners {
               && !Nope.getInstance().getHostTree().lookup(SettingLibrary.EVP,
               (Player) event.getTargetEntity(),
               event.getTargetEntity().getLocation()));
-
+  @DynamicSettingListener
+  static final SettingListener<ExplosionEvent.Pre> EXPLOSION_DAMAGE_LISTENER =
+      new SingleSettingListener<>(
+          SettingLibrary.EXPLOSION_DAMAGE_BLACKLIST,
+          ExplosionEvent.Pre.class,
+          event -> {
+            Explosion explosion = event.getExplosion();
+            if (!explosion.getSourceExplosive().isPresent()) {
+              return;
+            }
+            Explosive cause = explosion.getSourceExplosive().get();
+            if (Nope.getInstance().getHostTree().lookupAnonymous(
+                SettingLibrary.EXPLOSION_DAMAGE_BLACKLIST,
+                explosion.getLocation()).stream().anyMatch(enu -> enu.getExplosive().isInstance(cause))) {
+              // Disable entity damage if explosion occurs in safe zone
+              event.setExplosion(Explosion.builder().from(explosion).shouldDamageEntities(false).build());
+            } else {
+              // Disable entity damage if any nearby entities are in safe zone
+              for (Entity nearby : explosion.getLocation()
+                  .getExtent()
+                  .getNearbyEntities(
+                      explosion.getLocation().getPosition(),
+                      explosion.getRadius())) {
+                if (Nope.getInstance().getHostTree().lookupAnonymous(
+                    SettingLibrary.EXPLOSION_DAMAGE_BLACKLIST,
+                    nearby.getLocation()).stream().anyMatch(enu -> enu.getExplosive().isInstance(cause))) {
+                  event.setExplosion(Explosion.builder().from(explosion).shouldDamageEntities(false).build());
+                  return;
+                }
+              }
+            }
+          }
+      );
+  /**
+   * This listener ideally would implement the explosion grief setting. The benefit
+   * to use this one is that the blocks that break will only be blocks within
+   * Zones that don't have grief disabled. That way, an explosion could happen outside
+   * of a Zone with grief disabled and blocks outside the Zone would break but not blocks
+   * inside the Zone. The problem is that by disabling transactions, somoe blocks that
+   * are dependent on other blocks, like redstone wires, fully break off before the game
+   * identifies that it was part of a prior transaction so items get duplicated.
+   * So, until a better fix is found, this is disabled (No annotation).
+   */
+  static final SettingListener<ChangeBlockEvent.Break> EXPLOSION_GRIEF_TRANSACTION_LISTENER =
+      new SingleSettingListener<>(
+          SettingLibrary.EXPLOSION_BLOCK_GRIEF_BLACKLIST,
+          ChangeBlockEvent.Break.class,
+          event -> {
+            if (!(event.getCause().root() instanceof Explosion)) {
+              return;
+            }
+            Explosion explosion = (Explosion) event.getCause().root();
+            if (!explosion.getSourceExplosive().isPresent()) {
+              return;
+            }
+            Explosive cause = explosion.getSourceExplosive().get();
+            if (Nope.getInstance().getHostTree()
+                .lookupAnonymous(SettingLibrary.EXPLOSION_BLOCK_GRIEF_BLACKLIST, explosion.getLocation())
+                .stream()
+                .anyMatch(enu -> enu.getExplosive().isInstance(cause))) {
+              event.setCancelled(true);
+              return;
+            }
+            event.getTransactions().stream().filter(Transaction::isValid).forEach(transaction -> {
+              if (
+                  Nope.getInstance().getHostTree()
+                      .lookupAnonymous(SettingLibrary.EXPLOSION_BLOCK_GRIEF_BLACKLIST, transaction.getOriginal()
+                          .getLocation()
+                          .orElseThrow(noLocation(
+                              SettingLibrary.EXPLOSION_BLOCK_GRIEF_BLACKLIST,
+                              ChangeBlockEvent.Break.class,
+                              null)))
+                      .stream()
+                      .anyMatch(enu -> enu.getExplosive().isInstance(cause))
+                      ||
+                      Nope.getInstance().getHostTree()
+                          .lookupAnonymous(SettingLibrary.EXPLOSION_BLOCK_GRIEF_BLACKLIST, transaction.getFinal()
+                              .getLocation()
+                              .orElseThrow(noLocation(
+                                  SettingLibrary.EXPLOSION_BLOCK_GRIEF_BLACKLIST,
+                                  ChangeBlockEvent.Break.class,
+                                  null)))
+                          .stream()
+                          .anyMatch(enu -> enu.getExplosive().isInstance(cause))) {
+                transaction.setValid(false);
+              }
+            });
+          });
+  @DynamicSettingListener
+  static final SettingListener<ExplosionEvent.Pre> EXPLOSION_BLOCK_GRIEF_LISTENER =
+      new SingleSettingListener<>(
+          SettingLibrary.EXPLOSION_BLOCK_GRIEF_BLACKLIST,
+          ExplosionEvent.Pre.class,
+          event -> {
+            Explosion explosion = event.getExplosion();
+            if (!explosion.getSourceExplosive().isPresent()) {
+              return;
+            }
+            Explosive cause = explosion.getSourceExplosive().get();
+            if (Nope.getInstance().getHostTree().lookupAnonymous(
+                SettingLibrary.EXPLOSION_BLOCK_GRIEF_BLACKLIST,
+                explosion.getLocation()).stream().anyMatch(enu -> enu.getExplosive().isInstance(cause))) {
+              // Disable entity damage if explosion occurs in safe zone
+              event.setExplosion(Explosion.builder().from(explosion).shouldBreakBlocks(false).build());
+            } else {
+              // Disable entity damage if any nearby entities are in safe zone
+              int locX = explosion.getLocation().getBlockX();
+              int locY = explosion.getLocation().getBlockY();
+              int locZ = explosion.getLocation().getBlockZ();
+              int radius = (int) Math.ceil(explosion.getRadius());
+              for (int x = locX - radius; x <= locX + radius; x++) {
+                for (int y = locY - radius; y <= locY + radius; y++) {
+                  for (int z = locZ - radius; z <= locZ + radius; z++) {
+                    if (Nope.getInstance().getHostTree().lookupAnonymous(
+                        SettingLibrary.EXPLOSION_BLOCK_GRIEF_BLACKLIST,
+                        new Location<>(explosion.getWorld(), x, y, z))
+                        .stream()
+                        .anyMatch(enu -> enu.getExplosive().isInstance(cause))) {
+                      event.setExplosion(Explosion.builder().from(explosion).shouldBreakBlocks(false).build());
+                      return;
+                    }
+                  }
+                }
+              }
+            }
+          }
+      );
   @DynamicSettingListener
   static final SettingListener<DamageEntityEvent> FALL_DAMAGE_LISTENER =
       new CancelConditionSettingListener<>(
@@ -696,51 +748,6 @@ public final class DynamicSettingListeners {
           DamageEntityEvent.class,
           entityVersusEntityCanceller(SettingLibrary.PVP, Player.class, Player.class));
   @DynamicSettingListener
-  static final SettingListener<NotifyNeighborBlockEvent> BLOCK_PROPAGATE_LISTENER =
-      new SettingListener<>(
-          Lists.newArrayList(SettingLibrary.BLOCK_PROPAGATE_ACROSS,
-              SettingLibrary.BLOCK_PROPAGATE_WITHIN),
-          NotifyNeighborBlockEvent.class,
-          event -> {
-            Player player = event.getCause().first(Player.class).orElse(null);
-            Location<World> notifier = event.getCause().first(LocatableBlock.class)
-                .orElseThrow(() ->
-                    new RuntimeException("A NotifyNeighborBlockEvent needs a block cause"))
-                .getLocation();
-            Predicate<Direction> directionsFilter = (direction -> {
-              Location<World> recipient = notifier.add(direction.asBlockOffset());
-              Host fromAcross = Nope.getInstance().getHostTree()
-                  .lookupDictator(SettingLibrary.BLOCK_PROPAGATE_ACROSS, player, notifier);
-              boolean fromAcrossData = fromAcross == null
-                  ? SettingLibrary.BLOCK_PROPAGATE_ACROSS.getDefaultData()
-                  : fromAcross.getData(SettingLibrary.BLOCK_PROPAGATE_ACROSS, player);
-              Host toAcross = Nope.getInstance().getHostTree()
-                  .lookupDictator(SettingLibrary.BLOCK_PROPAGATE_ACROSS, player, recipient);
-              boolean toAcrossData = toAcross == null
-                  ? SettingLibrary.BLOCK_PROPAGATE_ACROSS.getDefaultData()
-                  : toAcross.getData(SettingLibrary.BLOCK_PROPAGATE_ACROSS, player);
-              Host fromWithin = Nope.getInstance().getHostTree()
-                  .lookupDictator(SettingLibrary.BLOCK_PROPAGATE_WITHIN, player, notifier);
-              boolean fromWithinData = fromWithin == null
-                  ? SettingLibrary.BLOCK_PROPAGATE_WITHIN.getDefaultData()
-                  : fromWithin.getData(SettingLibrary.BLOCK_PROPAGATE_WITHIN, player);
-              Host toWithin = Nope.getInstance().getHostTree()
-                  .lookupDictator(SettingLibrary.BLOCK_PROPAGATE_WITHIN, player, recipient);
-//              boolean toWithinData = toWithin == null
-//                  ? SettingLibrary.BLOCK_PROPAGATE_WITHIN.getDefaultData()
-//                  : toWithin.getData(SettingLibrary.BLOCK_PROPAGATE_WITHIN, player);
-//              Nope.getInstance().getLogger().info("From Across: " + (fromAcross == null ? "null" : fromAcross.getName()));
-//              Nope.getInstance().getLogger().info("To Across  : " + (toAcross == null ? "null" : toAcross.getName()));
-//              Nope.getInstance().getLogger().info("From Within: " + (fromWithin == null ? "null" : fromWithin.getName()));
-//              Nope.getInstance().getLogger().info("To Within  : " + (toWithin == null ? "null" : toWithin.getName()));
-
-              return (!(Objects.equals(fromAcross, toAcross)) && (!fromAcrossData || !toAcrossData))
-                  || (Objects.equals(fromWithin, toWithin) && (!fromWithinData));
-            });
-            event.getNeighbors().keySet().removeIf(directionsFilter);
-          }
-      );
-  @DynamicSettingListener
   static final SettingListener<RideEntityEvent.Mount> RIDE_LISTENER =
       new PlayerRootCancelConditionSettingListener<>(
           SettingLibrary.RIDE,
@@ -884,26 +891,6 @@ public final class DynamicSettingListeners {
                           InteractBlockEvent.Secondary.class,
                           player))));
   @DynamicSettingListener
-  static final SettingListener<ConstructEntityEvent.Post> TNT_SPAWN_LISTENER =
-      new SingleSettingListener<>(
-          SettingLibrary.TNT_IGNITION,
-          ConstructEntityEvent.Post.class,
-          (event) -> {
-            if (event.getTargetEntity().getType().equals(EntityTypes.PRIMED_TNT)) {
-              if (!Nope.getInstance().getHostTree().lookup(SettingLibrary.TNT_IGNITION,
-                  event.getCause().first(User.class).orElseGet(() -> {
-                        if (event.getContext().get(EventContextKeys.OWNER).isPresent()) {
-                          return event.getContext().get(EventContextKeys.OWNER).get();
-                        }
-                        return null;
-                      }
-                  ),
-                  event.getTargetEntity().getLocation())) {
-                event.getTargetEntity().remove();
-              }
-            }
-          });
-  @DynamicSettingListener
   static final SettingListener<ChangeBlockEvent.Place> TNT_PLACEMENT_LISTENER =
       new PlayerRootCancelConditionSettingListener<>(
           SettingLibrary.TNT_PLACEMENT,
@@ -923,6 +910,26 @@ public final class DynamicSettingListeners {
                           .orElseThrow(noLocation(SettingLibrary.TNT_PLACEMENT,
                               ChangeBlockEvent.Place.class,
                               player)))));
+  @DynamicSettingListener
+  static final SettingListener<ConstructEntityEvent.Post> TNT_SPAWN_LISTENER =
+      new SingleSettingListener<>(
+          SettingLibrary.TNT_IGNITION,
+          ConstructEntityEvent.Post.class,
+          (event) -> {
+            if (event.getTargetEntity().getType().equals(EntityTypes.PRIMED_TNT)) {
+              if (!Nope.getInstance().getHostTree().lookup(SettingLibrary.TNT_IGNITION,
+                  event.getCause().first(User.class).orElseGet(() -> {
+                        if (event.getContext().get(EventContextKeys.OWNER).isPresent()) {
+                          return event.getContext().get(EventContextKeys.OWNER).get();
+                        }
+                        return null;
+                      }
+                  ),
+                  event.getTargetEntity().getLocation())) {
+                event.getTargetEntity().remove();
+              }
+            }
+          });
   @DynamicSettingListener
   static final SettingListener<SpawnEntityEvent> UNSPAWNABLE_MOBS_LISTENER =
       new CancelConditionSettingListener<>(
@@ -949,7 +956,40 @@ public final class DynamicSettingListeners {
           event ->
               liquidFlowHandler(SettingLibrary.WATER_FLOW, BlockTypes.FLOWING_WATER)
                   .accept(event));
-  private static Set<EntityType> VEHICLES = Sets.newHashSet(EntityTypes.BOAT,
+  public static List<BlockType> CHEST_TYPES = Lists.newArrayList(
+      BlockTypes.CHEST,
+      BlockTypes.ENDER_CHEST,
+      BlockTypes.TRAPPED_CHEST,
+      BlockTypes.BLACK_SHULKER_BOX,
+      BlockTypes.BLUE_SHULKER_BOX,
+      BlockTypes.BROWN_SHULKER_BOX,
+      BlockTypes.CYAN_SHULKER_BOX,
+      BlockTypes.GRAY_SHULKER_BOX,
+      BlockTypes.GREEN_SHULKER_BOX,
+      BlockTypes.LIGHT_BLUE_SHULKER_BOX,
+      BlockTypes.LIME_SHULKER_BOX,
+      BlockTypes.MAGENTA_SHULKER_BOX,
+      BlockTypes.ORANGE_SHULKER_BOX,
+      BlockTypes.PINK_SHULKER_BOX,
+      BlockTypes.PURPLE_SHULKER_BOX,
+      BlockTypes.RED_SHULKER_BOX,
+      BlockTypes.SILVER_SHULKER_BOX,
+      BlockTypes.WHITE_SHULKER_BOX,
+      BlockTypes.YELLOW_SHULKER_BOX);
+  @DynamicSettingListener
+  static final SettingListener<InteractBlockEvent.Secondary> CHEST_ACCESS_LISTENER =
+      new PlayerRootCancelConditionSettingListener<>(
+          SettingLibrary.CHEST_ACCESS,
+          InteractBlockEvent.Secondary.class,
+          (event, player) -> CHEST_TYPES.contains(event.getTargetBlock().getState().getType())
+              &&
+              !Nope.getInstance().getHostTree().lookup(SettingLibrary.CHEST_ACCESS,
+                  player,
+                  event.getTargetBlock().getLocation()
+                      .orElseThrow(noLocation(SettingLibrary.CHEST_ACCESS,
+                          InteractBlockEvent.Secondary.class,
+                          player))));
+  private static final Set<EntityType> VEHICLES = Sets.newHashSet(EntityTypes.BOAT,
       EntityTypes.CHESTED_MINECART,
       EntityTypes.COMMANDBLOCK_MINECART,
       EntityTypes.FURNACE_MINECART,
@@ -984,6 +1024,9 @@ public final class DynamicSettingListeners {
                       || !Nope.getInstance().getHostTree().lookup(SettingLibrary.VEHICLE_PLACE,
                       player,
                       spawned.getLocation()))));
+
+  private DynamicSettingListeners() {
+  }
 
   private static Consumer<ChangeBlockEvent> liquidFlowHandler(SettingKey<Boolean> key,
                                                               BlockType flowingType) {

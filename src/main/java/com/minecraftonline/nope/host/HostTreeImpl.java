@@ -199,7 +199,7 @@ public class HostTreeImpl implements HostTree {
     @Override
     public GlobalHost deserialize(JsonElement json) {
       GlobalHost host = new GlobalHost();
-      host.putAll(SettingLibrary.deserializeSettingAssignments(json));
+      host.putAll(SettingLibrary.deserializeSettingAssignments(json, host.getName()));
       return host;
     }
   }
@@ -276,7 +276,7 @@ public class HostTreeImpl implements HostTree {
               json.getAsJsonObject().get("world")))));
 
       // Settings
-      host.putAll(SettingLibrary.deserializeSettingAssignments(json));
+      host.putAll(SettingLibrary.deserializeSettingAssignments(json, host.getName()));
 
       // No zones are put here because they must be added manually when deserializing the zones
 
@@ -419,7 +419,7 @@ public class HostTreeImpl implements HostTree {
       host.setPriority(json.getAsJsonObject().get("priority").getAsInt());
 
       // Settings
-      host.putAll(SettingLibrary.deserializeSettingAssignments(json));
+      host.putAll(SettingLibrary.deserializeSettingAssignments(json, host.getName()));
       return host;
     }
   }

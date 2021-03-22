@@ -174,9 +174,9 @@ public final class Format {
 
     onHover.append(Format.keyValue("Restrictive:", String.valueOf(key.isPlayerRestrictive())));
 
-    if (key.getDescription().isPresent()) {
+    if (key.getDescription() != null) {
       onHover.append(Text.NEW_LINE).append(Text.NEW_LINE);
-      onHover.append(Text.of(TextColors.GRAY, key.getDescription().get()));
+      onHover.append(Text.of(TextColors.GRAY, key.getDescription()));
     }
 
     builder.onHover(TextActions.showText(onHover.build()));
@@ -184,7 +184,7 @@ public final class Format {
     builder.append(idText.build());
     if (verbose) {
       builder.append(Text.of(" "));
-      builder.append(Format.note(key.getDescription().orElse("No description")));
+      builder.append(Format.note(key.getDescription() == null ? "No description" : key.getDescription()));
     }
 
     return builder.build();
