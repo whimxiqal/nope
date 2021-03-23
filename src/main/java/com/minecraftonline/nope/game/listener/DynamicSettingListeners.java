@@ -1107,58 +1107,14 @@ public final class DynamicSettingListeners {
                       || !Nope.getInstance().getHostTree().lookup(SettingLibrary.VEHICLE_PLACE,
                       player,
                       spawned.getLocation()))));
+  @DynamicSettingListener
+  static final SettingListener<ChangeBlockEvent.Break> ZOMBIE_GRIEF_BLOCK_LISTENER =
+      new EntityBreakConditionSettingListener(
+          SettingLibrary.ZOMBIE_GRIEF,
+          EntityTypes.ZOMBIE);
 
   private DynamicSettingListeners() {
   }
-
-//  private static void liquidFlowHandler(ChangeBlockEvent event,
-//                                        SettingKey<Boolean> flowKey,
-//                                        SettingKey<Boolean> griefKey,
-//                                        BlockType flowingType) {
-//    for (Transaction<BlockSnapshot> transaction : event.getTransactions()) {
-//      // Check if already invalid
-//      if (!transaction.isValid()) continue;
-//
-////      if (flowingType.equals(transaction.getFinal().getState().getType())) {
-////        Nope.getInstance().getLogger().info("Original: " + transaction.getOriginal().getState().getType());
-////        Nope.getInstance().getLogger().info("Orig Loc: " + transaction.getOriginal().getLocation().get());
-////        Nope.getInstance().getLogger().info("Final: " + transaction.getFinal().getState().getType());
-////        Nope.getInstance().getLogger().info("F Loc: " + transaction.getFinal().getLocation().get());
-////        found = true;
-////      }
-//
-//      // Check if it's not the given liquid
-//      if (!flowingType.equals(transaction.getFinal().getState().getType())) continue;
-//
-//      // Check flow key on final of transaction
-//      if (!Nope.getInstance()
-//          .getHostTree()
-//          .lookupAnonymous(flowKey,
-//              transaction.getFinal()
-//                  .getLocation()
-//                  .orElseThrow(noLocation(flowKey,
-//                      ChangeBlockEvent.class,
-//                      null)))) {
-//        transaction.setValid(false);
-//        continue;
-//      }
-//
-//      // Check grief key on original of transaction if its not air (could be grief)
-//      if ((event instanceof ChangeBlockEvent.Break)
-//          &&
-//          !Nope.getInstance()
-//              .getHostTree()
-//              .lookupAnonymous(griefKey,
-//                  transaction.getOriginal()
-//                      .getLocation()
-//                      .orElseThrow(noLocation(griefKey,
-//                          ChangeBlockEvent.class,
-//                          null)))) {
-//        transaction.setValid(false);
-//        continue;
-//      }
-//    }
-//  }
 
   /**
    * Get all {@link SettingListener}s in the class that are

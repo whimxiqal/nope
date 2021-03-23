@@ -657,6 +657,12 @@ public final class SettingLibrary {
       "water-grief",
       true
   );
+  @Description("When disabled, zombies cannot break blocks")
+  @Category(SettingKey.CategoryType.BLOCKS)
+  public static final SettingKey<Boolean> ZOMBIE_GRIEF = new BooleanSetting(
+      "zombie-grief",
+      true
+  );
   private static final String SET_SPLIT_REGEX = "(?<![ ,])(( )+|( *, *))(?![ ,])";  //"(, )|[ ,]";
   private static final HashMap<String, SettingKey<?>> settingMap = Maps.newHashMap();
 
