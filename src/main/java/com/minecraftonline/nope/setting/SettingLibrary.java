@@ -131,19 +131,11 @@ public final class SettingLibrary {
       "chorus-fruit-teleport",
       true
   );
-  @Description("When disabled, creepers do not cause damage")
-  @Category(SettingKey.CategoryType.DAMAGE)
-  public static final SettingKey<Set<ExplosiveEnum>> EXPLOSION_DAMAGE_BLACKLIST = new EnumSetSetting<>(
-      "explosion-damage-blacklist",
-      new HashSet<>(),
-      ExplosiveEnum.class
-  );
-  @Description("When disabled, creepers do not grief when they explode")
+  @Description("When disabled, concrete powder does not solidify into concrete")
   @Category(SettingKey.CategoryType.BLOCKS)
-  public static final SettingKey<Set<ExplosiveEnum>> EXPLOSION_BLOCK_GRIEF_BLACKLIST = new EnumSetSetting<>(
-      "explosion-block-grief-blacklist",
-      new HashSet<>(),
-      ExplosiveEnum.class
+  public static final SettingKey<Boolean> CONCRETE_SOLIDIFICATION = new BooleanSetting(
+      "concrete-solidification",
+      true
   );
   @Description("When disabled, crops do not grow")
   @Category(SettingKey.CategoryType.BLOCKS)
@@ -243,6 +235,20 @@ public final class SettingLibrary {
   public static final SettingKey<Text> EXIT_DENY_TITLE = new TextSetting(
       "exit-deny-title",
       Text.EMPTY
+  );
+  @Description("When disabled, creepers do not grief blocks when they explode")
+  @Category(SettingKey.CategoryType.BLOCKS)
+  public static final SettingKey<Set<ExplosiveEnum>> EXPLOSION_GRIEF_BLACKLIST = new EnumSetSetting<>(
+      "explosion-block-grief-blacklist",
+      new HashSet<>(),
+      ExplosiveEnum.class
+  );
+  @Description("When disabled, creepers do not cause damage")
+  @Category(SettingKey.CategoryType.DAMAGE)
+  public static final SettingKey<Set<ExplosiveEnum>> EXPLOSION_DAMAGE_BLACKLIST = new EnumSetSetting<>(
+      "explosion-damage-blacklist",
+      new HashSet<>(),
+      ExplosiveEnum.class
   );
   @Description("When disabled, players do not experience fall damage")
   @Category(SettingKey.CategoryType.DAMAGE)
@@ -409,6 +415,12 @@ public final class SettingLibrary {
   @Category(SettingKey.CategoryType.BLOCKS)
   public static final SettingKey<Boolean> LAVA_FLOW = new BooleanSetting(
       "lava-flow",
+      true
+  );
+  @Description("When disabled, lava does not break blocks")
+  @Category(SettingKey.CategoryType.BLOCKS)
+  public static final SettingKey<Boolean> LAVA_GRIEF = new BooleanSetting(
+      "lava-grief",
       true
   );
   @Description("When disabled, leaf will not decay naturally")
@@ -637,6 +649,12 @@ public final class SettingLibrary {
   @Category(SettingKey.CategoryType.BLOCKS)
   public static final SettingKey<Boolean> WATER_FLOW = new BooleanSetting(
       "water-flow",
+      true
+  );
+  @Description("When disabled, water cannot break blocks")
+  @Category(SettingKey.CategoryType.BLOCKS)
+  public static final SettingKey<Boolean> WATER_GRIEF = new BooleanSetting(
+      "water-grief",
       true
   );
   private static final String SET_SPLIT_REGEX = "(?<![ ,])(( )+|( *, *))(?![ ,])";  //"(, )|[ ,]";

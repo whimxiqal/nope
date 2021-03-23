@@ -72,10 +72,10 @@ public class SettingUpdates {
           true
       ), value -> {
         if (value.getData()) {
-          return Setting.of(SettingLibrary.EXPLOSION_BLOCK_GRIEF_BLACKLIST,
+          return Setting.of(SettingLibrary.EXPLOSION_GRIEF_BLACKLIST,
               SettingValue.of(new HashSet<>(), value.getTarget()));
         } else {
-          return Setting.of(SettingLibrary.EXPLOSION_BLOCK_GRIEF_BLACKLIST,
+          return Setting.of(SettingLibrary.EXPLOSION_GRIEF_BLACKLIST,
               SettingValue.of(new HashSet<>(Collections.singleton(SettingLibrary.ExplosiveEnum.CREEPER)),
                   value.getTarget()));
         }

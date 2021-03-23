@@ -33,6 +33,7 @@ import com.minecraftonline.nope.setting.SettingKey;
 import com.minecraftonline.nope.setting.SettingLibrary;
 import com.minecraftonline.nope.util.Format;
 import net.minecraft.entity.monster.EntitySnowman;
+import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.data.Transaction;
@@ -83,7 +84,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
-import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -187,6 +187,24 @@ public final class DynamicSettingListeners {
                       .getState()
                       .getType().equals(BlockTypes.DIRT)));
   @DynamicSettingListener
+  static final SettingListener<ChangeBlockEvent> CONCRETE_SOLIDIFICATION_LISTENER =
+      new SingleSettingListener<>(
+          SettingLibrary.CONCRETE_SOLIDIFICATION,
+          ChangeBlockEvent.class,
+          event -> event.getTransactions().forEach(transaction -> {
+            if (transaction.getOriginal().getState().getType().equals(BlockTypes.CONCRETE_POWDER)
+                && transaction.getFinal().getState().getType().equals(BlockTypes.CONCRETE)) {
+              if (!Nope.getInstance().getHostTree()
+                  .lookupAnonymous(SettingLibrary.CONCRETE_SOLIDIFICATION,
+                      transaction.getFinal().getLocation()
+                          .orElseThrow(noLocation(SettingLibrary.CONCRETE_SOLIDIFICATION,
+                              ChangeBlockEvent.class,
+                              null)))) {
+                transaction.setValid(false);
+              }
+            }
+          }));
+  @DynamicSettingListener
   static final SettingListener<ChangeBlockEvent.Grow> CROP_GROWTH_LISTENER =
       new CancelConditionSettingListener<>(
           SettingLibrary.CROP_GROWTH,
@@ -287,14 +305,14 @@ public final class DynamicSettingListeners {
    * to use this one is that the blocks that break will only be blocks within
    * Zones that don't have grief disabled. That way, an explosion could happen outside
    * of a Zone with grief disabled and blocks outside the Zone would break but not blocks
-   * inside the Zone. The problem is that by disabling transactions, somoe blocks that
+   * inside the Zone. The problem is that by disabling transactions, some blocks that
    * are dependent on other blocks, like redstone wires, fully break off before the game
    * identifies that it was part of a prior transaction so items get duplicated.
    * So, until a better fix is found, this is disabled (No annotation).
    */
   static final SettingListener<ChangeBlockEvent.Break> EXPLOSION_GRIEF_TRANSACTION_LISTENER =
       new SingleSettingListener<>(
-          SettingLibrary.EXPLOSION_BLOCK_GRIEF_BLACKLIST,
+          SettingLibrary.EXPLOSION_GRIEF_BLACKLIST,
           ChangeBlockEvent.Break.class,
           event -> {
             if (!(event.getCause().root() instanceof Explosion)) {
@@ -306,7 +324,7 @@ public final class DynamicSettingListeners {
             }
             Explosive cause = explosion.getSourceExplosive().get();
             if (Nope.getInstance().getHostTree()
-                .lookupAnonymous(SettingLibrary.EXPLOSION_BLOCK_GRIEF_BLACKLIST, explosion.getLocation())
+                .lookupAnonymous(SettingLibrary.EXPLOSION_GRIEF_BLACKLIST, explosion.getLocation())
                 .stream()
                 .anyMatch(enu -> enu.getExplosive().isInstance(cause))) {
               event.setCancelled(true);
@@ -315,20 +333,20 @@ public final class DynamicSettingListeners {
             event.getTransactions().stream().filter(Transaction::isValid).forEach(transaction -> {
               if (
                   Nope.getInstance().getHostTree()
-                      .lookupAnonymous(SettingLibrary.EXPLOSION_BLOCK_GRIEF_BLACKLIST, transaction.getOriginal()
+                      .lookupAnonymous(SettingLibrary.EXPLOSION_GRIEF_BLACKLIST, transaction.getOriginal()
                           .getLocation()
                           .orElseThrow(noLocation(
-                              SettingLibrary.EXPLOSION_BLOCK_GRIEF_BLACKLIST,
+                              SettingLibrary.EXPLOSION_GRIEF_BLACKLIST,
                               ChangeBlockEvent.Break.class,
                               null)))
                       .stream()
                       .anyMatch(enu -> enu.getExplosive().isInstance(cause))
                       ||
                       Nope.getInstance().getHostTree()
-                          .lookupAnonymous(SettingLibrary.EXPLOSION_BLOCK_GRIEF_BLACKLIST, transaction.getFinal()
+                          .lookupAnonymous(SettingLibrary.EXPLOSION_GRIEF_BLACKLIST, transaction.getFinal()
                               .getLocation()
                               .orElseThrow(noLocation(
-                                  SettingLibrary.EXPLOSION_BLOCK_GRIEF_BLACKLIST,
+                                  SettingLibrary.EXPLOSION_GRIEF_BLACKLIST,
                                   ChangeBlockEvent.Break.class,
                                   null)))
                           .stream()
@@ -338,9 +356,9 @@ public final class DynamicSettingListeners {
             });
           });
   @DynamicSettingListener
-  static final SettingListener<ExplosionEvent.Pre> EXPLOSION_BLOCK_GRIEF_LISTENER =
+  static final SettingListener<ExplosionEvent.Pre> EXPLOSION_GRIEF_LISTENER =
       new SingleSettingListener<>(
-          SettingLibrary.EXPLOSION_BLOCK_GRIEF_BLACKLIST,
+          SettingLibrary.EXPLOSION_GRIEF_BLACKLIST,
           ExplosionEvent.Pre.class,
           event -> {
             Explosion explosion = event.getExplosion();
@@ -349,7 +367,7 @@ public final class DynamicSettingListeners {
             }
             Explosive cause = explosion.getSourceExplosive().get();
             if (Nope.getInstance().getHostTree().lookupAnonymous(
-                SettingLibrary.EXPLOSION_BLOCK_GRIEF_BLACKLIST,
+                SettingLibrary.EXPLOSION_GRIEF_BLACKLIST,
                 explosion.getLocation()).stream().anyMatch(enu -> enu.getExplosive().isInstance(cause))) {
               // Disable entity damage if explosion occurs in safe zone
               event.setExplosion(Explosion.builder().from(explosion).shouldBreakBlocks(false).build());
@@ -363,7 +381,7 @@ public final class DynamicSettingListeners {
                 for (int y = locY - radius; y <= locY + radius; y++) {
                   for (int z = locZ - radius; z <= locZ + radius; z++) {
                     if (Nope.getInstance().getHostTree().lookupAnonymous(
-                        SettingLibrary.EXPLOSION_BLOCK_GRIEF_BLACKLIST,
+                        SettingLibrary.EXPLOSION_GRIEF_BLACKLIST,
                         new Location<>(explosion.getWorld(), x, y, z))
                         .stream()
                         .anyMatch(enu -> enu.getExplosive().isInstance(cause))) {
@@ -609,9 +627,41 @@ public final class DynamicSettingListeners {
       new SingleSettingListener<>(
           SettingLibrary.LAVA_FLOW,
           ChangeBlockEvent.class,
-          event ->
-              liquidFlowHandler(SettingLibrary.LAVA_FLOW, BlockTypes.FLOWING_LAVA)
-                  .accept(event));
+          event -> {
+            for (Transaction<BlockSnapshot> transaction : event.getTransactions()) {
+              if (transaction.isValid()) {
+                if (transaction.getFinal().getState().getType().equals(BlockTypes.FLOWING_LAVA)) {
+                  if (!Nope.getInstance().getHostTree().lookupAnonymous(SettingLibrary.LAVA_FLOW,
+                      transaction.getFinal().getLocation().orElseThrow(noLocation(SettingLibrary.LAVA_FLOW,
+                          ChangeBlockEvent.class,
+                          null)))) {
+                    transaction.setValid(false);
+                  }
+                }
+              }
+            }
+          });
+  @DynamicSettingListener
+  static final SettingListener<ChangeBlockEvent.Break> LAVA_FLOW_GRIEF_LISTENER =
+      new SingleSettingListener<>(
+          SettingLibrary.LAVA_GRIEF,
+          ChangeBlockEvent.Break.class,
+          event -> event.getCause().first(LocatableBlock.class).ifPresent(block -> {
+            if (block.getBlockState().getType().equals(BlockTypes.LAVA)
+                || block.getBlockState().getType().equals(BlockTypes.FLOWING_LAVA)) {
+              event.getTransactions().forEach(transaction -> {
+                if (!transaction.isValid()) return;
+                if (!Nope.getInstance().getHostTree().lookupAnonymous(SettingLibrary.LAVA_GRIEF,
+                    transaction.getFinal().getLocation().orElseThrow(noLocation(
+                        SettingLibrary.LAVA_GRIEF,
+                        ChangeBlockEvent.Break.class,
+                        null)))) {
+                  transaction.setValid(false);
+                }
+              });
+            }
+          })
+      );
   @DynamicSettingListener
   static final SettingListener<ChangeBlockEvent> LEAF_DECAY_2_LISTENER =
       new CancelConditionSettingListener<>(
@@ -953,10 +1003,43 @@ public final class DynamicSettingListeners {
       new SingleSettingListener<>(
           SettingLibrary.WATER_FLOW,
           ChangeBlockEvent.class,
-          event ->
-              liquidFlowHandler(SettingLibrary.WATER_FLOW, BlockTypes.FLOWING_WATER)
-                  .accept(event));
-  public static List<BlockType> CHEST_TYPES = Lists.newArrayList(
+          event -> {
+            if (event.getSource() instanceof Player) return;  // Player caused - player likely placed this (not flow)
+            for (Transaction<BlockSnapshot> transaction : event.getTransactions()) {
+              if (transaction.isValid()) {
+                if (transaction.getFinal().getState().getType().equals(BlockTypes.FLOWING_WATER)) {
+                  if (!Nope.getInstance().getHostTree().lookupAnonymous(SettingLibrary.WATER_FLOW,
+                      transaction.getFinal().getLocation().orElseThrow(noLocation(SettingLibrary.WATER_FLOW,
+                          ChangeBlockEvent.class,
+                          null)))) {
+                    transaction.setValid(false);
+                  }
+                }
+              }
+            }
+          });
+  @DynamicSettingListener
+  static final SettingListener<ChangeBlockEvent.Break> WATER_FLOW_GRIEF_LISTENER =
+      new SingleSettingListener<>(
+          SettingLibrary.WATER_GRIEF,
+          ChangeBlockEvent.Break.class,
+          event -> event.getCause().first(LocatableBlock.class).ifPresent(block -> {
+            if (block.getBlockState().getType().equals(BlockTypes.WATER)
+                || block.getBlockState().getType().equals(BlockTypes.FLOWING_WATER)) {
+              event.getTransactions().forEach(transaction -> {
+                if (!transaction.isValid()) return;
+                if (!Nope.getInstance().getHostTree().lookupAnonymous(SettingLibrary.WATER_GRIEF,
+                    transaction.getFinal().getLocation().orElseThrow(noLocation(
+                        SettingLibrary.WATER_GRIEF,
+                        ChangeBlockEvent.Break.class,
+                        null)))) {
+                  transaction.setValid(false);
+                }
+              });
+            }
+          })
+      );
+  private static final List<BlockType> CHEST_TYPES = Lists.newArrayList(
       BlockTypes.CHEST,
       BlockTypes.ENDER_CHEST,
       BlockTypes.TRAPPED_CHEST,
@@ -1028,23 +1111,54 @@ public final class DynamicSettingListeners {
   private DynamicSettingListeners() {
   }
 
-  private static Consumer<ChangeBlockEvent> liquidFlowHandler(SettingKey<Boolean> key,
-                                                              BlockType flowingType) {
-    return event -> event.getTransactions().stream()
-        .filter(Transaction::isValid)
-        .filter(trans ->
-            trans.getFinal().getState().getType().equals(flowingType))
-        .forEach(trans ->
-            trans.setValid((event.getSource() instanceof Player)
-                || Nope.getInstance()
-                .getHostTree()
-                .lookupAnonymous(key,
-                    trans.getFinal()
-                        .getLocation()
-                        .orElseThrow(noLocation(key,
-                            ChangeBlockEvent.class,
-                            null)))));
-  }
+//  private static void liquidFlowHandler(ChangeBlockEvent event,
+//                                        SettingKey<Boolean> flowKey,
+//                                        SettingKey<Boolean> griefKey,
+//                                        BlockType flowingType) {
+//    for (Transaction<BlockSnapshot> transaction : event.getTransactions()) {
+//      // Check if already invalid
+//      if (!transaction.isValid()) continue;
+//
+////      if (flowingType.equals(transaction.getFinal().getState().getType())) {
+////        Nope.getInstance().getLogger().info("Original: " + transaction.getOriginal().getState().getType());
+////        Nope.getInstance().getLogger().info("Orig Loc: " + transaction.getOriginal().getLocation().get());
+////        Nope.getInstance().getLogger().info("Final: " + transaction.getFinal().getState().getType());
+////        Nope.getInstance().getLogger().info("F Loc: " + transaction.getFinal().getLocation().get());
+////        found = true;
+////      }
+//
+//      // Check if it's not the given liquid
+//      if (!flowingType.equals(transaction.getFinal().getState().getType())) continue;
+//
+//      // Check flow key on final of transaction
+//      if (!Nope.getInstance()
+//          .getHostTree()
+//          .lookupAnonymous(flowKey,
+//              transaction.getFinal()
+//                  .getLocation()
+//                  .orElseThrow(noLocation(flowKey,
+//                      ChangeBlockEvent.class,
+//                      null)))) {
+//        transaction.setValid(false);
+//        continue;
+//      }
+//
+//      // Check grief key on original of transaction if its not air (could be grief)
+//      if ((event instanceof ChangeBlockEvent.Break)
+//          &&
+//          !Nope.getInstance()
+//              .getHostTree()
+//              .lookupAnonymous(griefKey,
+//                  transaction.getOriginal()
+//                      .getLocation()
+//                      .orElseThrow(noLocation(griefKey,
+//                          ChangeBlockEvent.class,
+//                          null)))) {
+//        transaction.setValid(false);
+//        continue;
+//      }
+//    }
+//  }
 
   /**
    * Get all {@link SettingListener}s in the class that are
