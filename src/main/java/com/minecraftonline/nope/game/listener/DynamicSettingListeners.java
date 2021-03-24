@@ -31,6 +31,7 @@ import com.minecraftonline.nope.Nope;
 import com.minecraftonline.nope.host.Host;
 import com.minecraftonline.nope.setting.SettingKey;
 import com.minecraftonline.nope.setting.SettingLibrary;
+import com.minecraftonline.nope.util.Extra;
 import com.minecraftonline.nope.util.Format;
 import net.minecraft.entity.monster.EntitySnowman;
 import org.spongepowered.api.block.BlockSnapshot;
@@ -74,7 +75,6 @@ import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.explosion.Explosion;
 
-import javax.annotation.Nullable;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -85,7 +85,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.Predicate;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 /**
@@ -111,7 +110,7 @@ public final class DynamicSettingListeners {
                   player,
                   transaction.getOriginal().getLocation().orElse(transaction.getFinal()
                       .getLocation()
-                      .orElseThrow(noLocation(SettingLibrary.BLOCK_BREAK,
+                      .orElseThrow(Extra.noLocation(SettingLibrary.BLOCK_BREAK,
                           ChangeBlockEvent.Break.class,
                           player))))));
   @DynamicSettingListener
@@ -125,7 +124,7 @@ public final class DynamicSettingListeners {
                   player,
                   transaction.getOriginal().getLocation().orElse(transaction.getFinal()
                       .getLocation()
-                      .orElseThrow(noLocation(SettingLibrary.BLOCK_PLACE,
+                      .orElseThrow(Extra.noLocation(SettingLibrary.BLOCK_PLACE,
                           ChangeBlockEvent.Place.class,
                           player))))));
   @DynamicSettingListener
@@ -197,7 +196,7 @@ public final class DynamicSettingListeners {
               if (!Nope.getInstance().getHostTree()
                   .lookupAnonymous(SettingLibrary.CONCRETE_SOLIDIFICATION,
                       transaction.getFinal().getLocation()
-                          .orElseThrow(noLocation(SettingLibrary.CONCRETE_SOLIDIFICATION,
+                          .orElseThrow(Extra.noLocation(SettingLibrary.CONCRETE_SOLIDIFICATION,
                               ChangeBlockEvent.class,
                               null)))) {
                 transaction.setValid(false);
@@ -212,13 +211,13 @@ public final class DynamicSettingListeners {
           event -> event.getTransactions().stream().anyMatch(transaction ->
               !Nope.getInstance().getHostTree().lookupAnonymous(SettingLibrary.CROP_GROWTH,
                   transaction.getOriginal().getLocation()
-                      .orElseThrow(noLocation(SettingLibrary.CROP_GROWTH,
+                      .orElseThrow(Extra.noLocation(SettingLibrary.CROP_GROWTH,
                           ChangeBlockEvent.Grow.class,
                           null)))
                   ||
                   !Nope.getInstance().getHostTree().lookupAnonymous(SettingLibrary.CROP_GROWTH,
                       transaction.getFinal().getLocation()
-                          .orElseThrow(noLocation(SettingLibrary.CROP_GROWTH,
+                          .orElseThrow(Extra.noLocation(SettingLibrary.CROP_GROWTH,
                               ChangeBlockEvent.Grow.class,
                               null)))));
   @DynamicSettingListener
@@ -335,7 +334,7 @@ public final class DynamicSettingListeners {
                   Nope.getInstance().getHostTree()
                       .lookupAnonymous(SettingLibrary.EXPLOSION_GRIEF_BLACKLIST, transaction.getOriginal()
                           .getLocation()
-                          .orElseThrow(noLocation(
+                          .orElseThrow(Extra.noLocation(
                               SettingLibrary.EXPLOSION_GRIEF_BLACKLIST,
                               ChangeBlockEvent.Break.class,
                               null)))
@@ -345,7 +344,7 @@ public final class DynamicSettingListeners {
                       Nope.getInstance().getHostTree()
                           .lookupAnonymous(SettingLibrary.EXPLOSION_GRIEF_BLACKLIST, transaction.getFinal()
                               .getLocation()
-                              .orElseThrow(noLocation(
+                              .orElseThrow(Extra.noLocation(
                                   SettingLibrary.EXPLOSION_GRIEF_BLACKLIST,
                                   ChangeBlockEvent.Break.class,
                                   null)))
@@ -430,7 +429,7 @@ public final class DynamicSettingListeners {
                   .getHostTree()
                   .lookupAnonymous(SettingLibrary.FIRE_EFFECT, trans.getFinal()
                       .getLocation()
-                      .orElseThrow(noLocation(SettingLibrary.FIRE_EFFECT,
+                      .orElseThrow(Extra.noLocation(SettingLibrary.FIRE_EFFECT,
                           ChangeBlockEvent.class,
                           null)))));
   @DynamicSettingListener
@@ -448,7 +447,7 @@ public final class DynamicSettingListeners {
                       (Player) event.getSource(),
                       trans.getFinal()
                           .getLocation()
-                          .orElseThrow(noLocation(SettingLibrary.FIRE_IGNITION,
+                          .orElseThrow(Extra.noLocation(SettingLibrary.FIRE_IGNITION,
                               ChangeBlockEvent.class,
                               (Player) event.getSource())))));
   @DynamicSettingListener
@@ -464,7 +463,7 @@ public final class DynamicSettingListeners {
                   .getHostTree()
                   .lookupAnonymous(SettingLibrary.FIRE_NATURAL_IGNITION, trans.getFinal()
                       .getLocation()
-                      .orElseThrow(noLocation(SettingLibrary.FIRE_NATURAL_IGNITION,
+                      .orElseThrow(Extra.noLocation(SettingLibrary.FIRE_NATURAL_IGNITION,
                           ChangeBlockEvent.class,
                           null)))));
   @DynamicSettingListener
@@ -535,7 +534,7 @@ public final class DynamicSettingListeners {
                   player,
                   event.getTargetBlock()
                       .getLocation()
-                      .orElseThrow(noLocation(SettingLibrary.INTERACT,
+                      .orElseThrow(Extra.noLocation(SettingLibrary.INTERACT,
                           InteractBlockEvent.Secondary.class,
                           player)))
               || !Nope.getInstance()
@@ -632,7 +631,7 @@ public final class DynamicSettingListeners {
               if (transaction.isValid()) {
                 if (transaction.getFinal().getState().getType().equals(BlockTypes.FLOWING_LAVA)) {
                   if (!Nope.getInstance().getHostTree().lookupAnonymous(SettingLibrary.LAVA_FLOW,
-                      transaction.getFinal().getLocation().orElseThrow(noLocation(SettingLibrary.LAVA_FLOW,
+                      transaction.getFinal().getLocation().orElseThrow(Extra.noLocation(SettingLibrary.LAVA_FLOW,
                           ChangeBlockEvent.class,
                           null)))) {
                     transaction.setValid(false);
@@ -652,7 +651,7 @@ public final class DynamicSettingListeners {
               event.getTransactions().forEach(transaction -> {
                 if (!transaction.isValid()) return;
                 if (!Nope.getInstance().getHostTree().lookupAnonymous(SettingLibrary.LAVA_GRIEF,
-                    transaction.getFinal().getLocation().orElseThrow(noLocation(
+                    transaction.getFinal().getLocation().orElseThrow(Extra.noLocation(
                         SettingLibrary.LAVA_GRIEF,
                         ChangeBlockEvent.Break.class,
                         null)))) {
@@ -824,7 +823,7 @@ public final class DynamicSettingListeners {
               .lookupAnonymous(SettingLibrary.SLEEP,
                   event.getBed()
                       .getLocation()
-                      .orElseThrow(noLocation(SettingLibrary.SLEEP,
+                      .orElseThrow(Extra.noLocation(SettingLibrary.SLEEP,
                           SleepingEvent.Pre.class,
                           player)))));
   @DynamicSettingListener
@@ -843,7 +842,7 @@ public final class DynamicSettingListeners {
                   .lookupAnonymous(SettingLibrary.SNOWMAN_TRAILS,
                       trans.getFinal()
                           .getLocation()
-                          .orElseThrow(noLocation(SettingLibrary.SNOWMAN_TRAILS,
+                          .orElseThrow(Extra.noLocation(SettingLibrary.SNOWMAN_TRAILS,
                               ChangeBlockEvent.class,
                               null)))));
   @DynamicSettingListener
@@ -937,7 +936,7 @@ public final class DynamicSettingListeners {
                   player,
                   event.getTargetBlock()
                       .getLocation()
-                      .orElseThrow(noLocation(SettingLibrary.TNT_IGNITION,
+                      .orElseThrow(Extra.noLocation(SettingLibrary.TNT_IGNITION,
                           InteractBlockEvent.Secondary.class,
                           player))));
   @DynamicSettingListener
@@ -957,7 +956,7 @@ public final class DynamicSettingListeners {
                       player,
                       trans.getFinal()
                           .getLocation()
-                          .orElseThrow(noLocation(SettingLibrary.TNT_PLACEMENT,
+                          .orElseThrow(Extra.noLocation(SettingLibrary.TNT_PLACEMENT,
                               ChangeBlockEvent.Place.class,
                               player)))));
   @DynamicSettingListener
@@ -1009,7 +1008,7 @@ public final class DynamicSettingListeners {
               if (transaction.isValid()) {
                 if (transaction.getFinal().getState().getType().equals(BlockTypes.FLOWING_WATER)) {
                   if (!Nope.getInstance().getHostTree().lookupAnonymous(SettingLibrary.WATER_FLOW,
-                      transaction.getFinal().getLocation().orElseThrow(noLocation(SettingLibrary.WATER_FLOW,
+                      transaction.getFinal().getLocation().orElseThrow(Extra.noLocation(SettingLibrary.WATER_FLOW,
                           ChangeBlockEvent.class,
                           null)))) {
                     transaction.setValid(false);
@@ -1029,7 +1028,7 @@ public final class DynamicSettingListeners {
               event.getTransactions().forEach(transaction -> {
                 if (!transaction.isValid()) return;
                 if (!Nope.getInstance().getHostTree().lookupAnonymous(SettingLibrary.WATER_GRIEF,
-                    transaction.getFinal().getLocation().orElseThrow(noLocation(
+                    transaction.getFinal().getLocation().orElseThrow(Extra.noLocation(
                         SettingLibrary.WATER_GRIEF,
                         ChangeBlockEvent.Break.class,
                         null)))) {
@@ -1069,7 +1068,7 @@ public final class DynamicSettingListeners {
               !Nope.getInstance().getHostTree().lookup(SettingLibrary.CHEST_ACCESS,
                   player,
                   event.getTargetBlock().getLocation()
-                      .orElseThrow(noLocation(SettingLibrary.CHEST_ACCESS,
+                      .orElseThrow(Extra.noLocation(SettingLibrary.CHEST_ACCESS,
                           InteractBlockEvent.Secondary.class,
                           player))));
   private static final Set<EntityType> VEHICLES = Sets.newHashSet(EntityTypes.BOAT,
@@ -1137,25 +1136,6 @@ public final class DynamicSettingListeners {
         });
   }
 
-  private static Supplier<RuntimeException> noLocation(SettingKey<?> key,
-                                                       Class<? extends Event> eventClass,
-                                                       @Nullable Player player) {
-    return () -> new RuntimeException(String.format(
-        "The relevant location for the dynamic event listener for "
-            + "Setting Key %s and event class %s could not be found.",
-        key.getId(),
-        eventClass.getName())
-        +
-        (player == null
-            ? ""
-            : String.format(" The player is %s at position (%d, %d, %d) in world %s",
-            player.getName(),
-            player.getLocation().getBlockX(),
-            player.getLocation().getBlockY(),
-            player.getLocation().getBlockZ(),
-            player.getLocation().getExtent().getName())));
-  }
-
   static void printEvent(Event event) {
     Nope.getInstance().getLogger().info("Event... (" + event.getClass().getSimpleName() + ")");
     Nope.getInstance().getLogger().info("Source: " + event.getSource().toString());
@@ -1219,7 +1199,7 @@ public final class DynamicSettingListeners {
         .anyMatch(trans -> !Nope.getInstance()
             .getHostTree()
             .lookupAnonymous(key,
-                trans.getFinal().getLocation().orElseThrow(noLocation(key,
+                trans.getFinal().getLocation().orElseThrow(Extra.noLocation(key,
                     ChangeBlockEvent.class,
                     null))));
   }

@@ -76,14 +76,14 @@ public final class SettingLibrary {
       "armor-stand-destroy",
       true
   );
-  @Description("When disabled, blocks may not be broken")
+  @Description("When disabled, blocks may not be broken by players")
   @Category(SettingKey.CategoryType.BLOCKS)
   @PlayerRestrictive
   public static final SettingKey<Boolean> BLOCK_BREAK = new StateSetting(
       "block-break",
       true
   );
-  @Description("When disabled, blocks may not be placed")
+  @Description("When disabled, blocks may not be placed by players")
   @Category(SettingKey.CategoryType.BLOCKS)
   @PlayerRestrictive
   public static final SettingKey<Boolean> BLOCK_PLACE = new StateSetting(
@@ -663,6 +663,12 @@ public final class SettingLibrary {
       "zombie-grief",
       true
   );
+  @Description("The plugins that cannot break restrictive setting rules")
+  @Category(SettingKey.CategoryType.MISC)
+  public static final SettingKey<Set<String>> RESTRICTED_PLUGINS = new StringSetSetting(
+      "restricted-plugins",
+      new HashSet<>()
+  );
   private static final String SET_SPLIT_REGEX = "(?<![ ,])(( )+|( *, *))(?![ ,])";  //"(, )|[ ,]";
   private static final HashMap<String, SettingKey<?>> settingMap = Maps.newHashMap();
 
@@ -756,7 +762,7 @@ public final class SettingLibrary {
       elem.put("id", setting.getKey().getId());
       // This does not deserialize:
       if (setting.getKey().getDescription() != null) {
-          elem.put("description", setting.getKey().getDescription());
+        elem.put("description", setting.getKey().getDescription());
       }
       // This does not deserialize
       elem.put("restricted", setting.getKey().isPlayerRestrictive());
@@ -1096,6 +1102,31 @@ public final class SettingLibrary {
           .map(E::toString)
           .map(String::toLowerCase)
           .collect(Collectors.toList()));
+    }
+  }
+
+  public static class StringSetSetting extends SettingKey<Set<String>> {
+
+    public StringSetSetting(String id, Set<String> defaultValue) {
+      super(id, defaultValue);
+    }
+
+    @Override
+    @SuppressWarnings("UnstableApiUsage")
+    public JsonElement dataToJsonGenerified(Set<String> value) {
+      return new Gson().toJsonTree(value, NopeTypeTokens.STRING_SET_TOKEN.getType());
+    }
+
+    @Override
+    public Set<String> dataFromJsonGenerified(JsonElement jsonElement) {
+      final Set<String> set = new HashSet<>();
+      jsonElement.getAsJsonArray().forEach(element -> set.add(element.getAsString()));
+      return set;
+    }
+
+    @Override
+    public Set<String> parse(String s) throws ParseSettingException {
+      return new HashSet<>(Arrays.asList(s.split(SET_SPLIT_REGEX)));
     }
   }
 

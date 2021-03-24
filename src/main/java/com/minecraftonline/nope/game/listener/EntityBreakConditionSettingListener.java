@@ -27,6 +27,8 @@ package com.minecraftonline.nope.game.listener;
 
 import com.minecraftonline.nope.Nope;
 import com.minecraftonline.nope.setting.SettingKey;
+import com.minecraftonline.nope.util.Extra;
+import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
@@ -37,12 +39,27 @@ class EntityBreakConditionSettingListener extends CancelConditionSettingListener
   public EntityBreakConditionSettingListener(@Nonnull SettingKey<Boolean> key,
                                              @Nonnull EntityType entityType) {
     super(key,
-            ChangeBlockEvent.Break.class,
-            event -> event.getCause()
-                    .allOf(Entity.class)
-                    .stream()
-                    .anyMatch(entity -> entity.getType().equals(entityType)
-                            &&
-                            !Nope.getInstance().getHostTree().lookupAnonymous(key, entity.getLocation())));
+        ChangeBlockEvent.Break.class,
+        event -> {
+          for (Entity entity : event.getCause().allOf(Entity.class)) {
+            if (entity.getType().equals(entityType)) {
+              if (!Nope.getInstance().getHostTree().lookupAnonymous(key, entity.getLocation())) {
+                return true;
+              }
+              event.getTransactions()
+                  .stream()
+                  .filter(Transaction::isValid)
+                  .forEach(transaction ->
+                      transaction.setValid(Nope.getInstance()
+                          .getHostTree()
+                          .lookupAnonymous(key, transaction.getFinal()
+                              .getLocation()
+                              .orElseThrow(Extra.noLocation(key,
+                                  ChangeBlockEvent.Break.class,
+                                  null)))));
+            }
+          }
+          return false;
+        });
   }
 }

@@ -76,6 +76,7 @@ public class NopeCommandRoot extends CommandNode {
         Text.of("All commands pertaining to Nope"),
         "nope");
     addChildren(new ApplyCommand(this));
+    addChildren(new ClearCommand(this));
     addChildren(new CreateCommand(this));
     addChildren(new DestroyCommand(this));
     addChildren(new InfoCommand(this));
@@ -98,7 +99,7 @@ public class NopeCommandRoot extends CommandNode {
 
   @Nonnull
   @Override
-  public CommandResult execute(CommandSource src, CommandContext args) {
+  public CommandResult execute(CommandSource src, @Nonnull CommandContext args) {
     src.sendMessage(Text.of(Format.note("==========================")));
     src.sendMessage(Text.of(
         Format.THEME, TextStyles.BOLD, String.format(
@@ -130,20 +131,25 @@ public class NopeCommandRoot extends CommandNode {
         " ",
         "command."));
     // Cache Size Info (testing)
-//    if (src instanceof Player) {
-//      Host worldHost = Nope.getInstance()
-//          .getHostTree()
-//          .getWorldHost(((Player) src).getLocation().getExtent().getUniqueId());
-//      if (worldHost instanceof HostTreeImpl.WorldHost) {
-//        if (((HostTreeImpl.WorldHost) worldHost).getZoneTree() instanceof HashQueueVolumeTree) {
-//          src.sendMessage(Text.of("Cache size: ",
-//              Format.note(
-//                  ((HashQueueVolumeTree<?, ?>) ((HostTreeImpl.WorldHost) worldHost).getZoneTree())
-//                  .getCacheSize())));
-//        }
-//      }
-//    }
+
+//    showCacheSize(src);
     return CommandResult.success();
+  }
+
+  void showCacheSize(CommandSource src) {
+    if (src instanceof Player) {
+      Host worldHost = Nope.getInstance()
+          .getHostTree()
+          .getWorldHost(((Player) src).getLocation().getExtent().getUniqueId());
+      if (worldHost instanceof HostTreeImpl.WorldHost) {
+        if (((HostTreeImpl.WorldHost) worldHost).getZoneTree() instanceof HashQueueVolumeTree) {
+          src.sendMessage(Text.of("Cache size: ",
+              Format.note(
+                  ((HashQueueVolumeTree<?, ?>) ((HostTreeImpl.WorldHost) worldHost).getZoneTree())
+                      .getCacheSize())));
+        }
+      }
+    }
   }
 
   static Optional<Host> inferHost(CommandSource src) {

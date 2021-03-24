@@ -24,9 +24,16 @@
 
 package com.minecraftonline.nope.util;
 
+import com.minecraftonline.nope.Nope;
+import com.minecraftonline.nope.setting.SettingKey;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.event.Event;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
+
+import javax.annotation.Nullable;
+import java.util.function.Supplier;
 
 public final class Extra {
 
@@ -80,7 +87,9 @@ public final class Extra {
     builder.append(Text.of(TextColors.WHITE, "|____/   "));
     builder.append(Text.of(TextColors.WHITE, "|      "));
     builder.append(Text.of(TextColors.AQUA, "      v",
-            Sponge.getPluginManager().getPlugin("nope").get().getVersion().orElse("0.0.0")));
+        Nope.getInstance()
+            .getPluginContainer()
+            .getVersion().orElse("0.0.0")));
     Sponge.getServer().getConsole().sendMessage(builder.build());
 
     // Line 6
@@ -110,4 +119,22 @@ public final class Extra {
 
   }
 
+  public static Supplier<RuntimeException> noLocation(SettingKey<?> key,
+                                                      Class<? extends Event> eventClass,
+                                                      @Nullable Player player) {
+    return () -> new RuntimeException(String.format(
+        "The relevant location for the dynamic event listener for "
+            + "Setting Key %s and event class %s could not be found.",
+        key.getId(),
+        eventClass.getName())
+        +
+        (player == null
+            ? ""
+            : String.format(" The player is %s at position (%d, %d, %d) in world %s",
+            player.getName(),
+            player.getLocation().getBlockX(),
+            player.getLocation().getBlockY(),
+            player.getLocation().getBlockZ(),
+            player.getLocation().getExtent().getName())));
+  }
 }

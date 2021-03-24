@@ -54,65 +54,34 @@ import com.minecraftonline.nope.arguments.NopeArguments;
 import com.minecraftonline.nope.command.common.CommandNode;
 import com.minecraftonline.nope.command.common.LambdaCommandNode;
 import com.minecraftonline.nope.host.Host;
-import com.minecraftonline.nope.game.listener.DynamicSettingListeners;
 import com.minecraftonline.nope.permission.Permissions;
-import com.minecraftonline.nope.setting.SettingKey;
-import com.minecraftonline.nope.setting.SettingValue;
 import com.minecraftonline.nope.util.Format;
 import org.spongepowered.api.command.CommandResult;
-import org.spongepowered.api.command.args.GenericArguments;
 import org.spongepowered.api.text.Text;
 
-public class SetCommand extends LambdaCommandNode {
+public class ClearCommand extends LambdaCommandNode {
 
-  SetCommand(CommandNode parent) {
+  ClearCommand(CommandNode parent) {
     super(parent,
         Permissions.COMMAND_EDIT,
-        Text.of("Set setting on a host"),
-        "set");
+        Text.of("Clear all settings on a host"),
+        "clear");
     addCommandElements(
-        GenericArguments.flags()
-            .valueFlag(NopeArguments.host(Text.of("zone")), "z", "-zone")
-            .buildWith(GenericArguments.none()),
-        NopeArguments.settingKey(Text.of("setting")),
-        GenericArguments.remainingJoinedStrings(Text.of("value"))
+        NopeArguments.host(Text.of("zone"))
     );
     setExecutor((src, args) -> {
-      SettingKey<?> settingKey = args.requireOne("setting");
-      String value = args.requireOne("value");
 
       Host host = args.<Host>getOne("zone").orElse(NopeCommandRoot.inferHost(src).orElse(null));
       if (host == null) {
         return CommandResult.empty();
       }
 
-      try {
-        addSetting(host, settingKey, value);
-        if (!host.getName().equals(Nope.getInstance().getHostTree().getGlobalHost().getName())
-            && settingKey.isGlobal()) {
-          src.sendMessage(Format.warn("This setting may only ",
-              "work when applied globally"));
-        }
-      } catch (SettingKey.ParseSettingException e) {
-        src.sendMessage(Format.error("Invalid value: ",
-            Format.note(e.getMessage())));
-        return CommandResult.empty();
-      }
-
+      host.clear();
       Nope.getInstance().saveState();
-      DynamicSettingListeners.register();
-      src.sendMessage(Format.success("Set setting ",
-          Format.settingKey(settingKey, false),
-          " on zone ",
+      src.sendMessage(Format.success("Cleared settings on zone ",
           Format.host(host)));
 
       return CommandResult.success();
     });
-  }
-
-  private <T> void addSetting(Host zone, SettingKey<T> key, String s)
-      throws SettingKey.ParseSettingException {
-    T data = key.parse(s);
-    zone.put(key, SettingValue.of(data));
   }
 }

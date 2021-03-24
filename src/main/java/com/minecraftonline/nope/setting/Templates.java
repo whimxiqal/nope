@@ -27,18 +27,39 @@ package com.minecraftonline.nope.setting;
 
 import com.google.common.collect.Sets;
 
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Objects;
-import java.util.Set;
 import java.util.stream.Collectors;
 
+@SuppressWarnings("unused")
 public final class Templates {
 
+  public static Template NATURAL_PROTECTIONS = new Template("natural-protections", () -> {
+    SettingMap map = new SettingMap();
+    map.put(Setting.of(SettingLibrary.ENDERDRAGON_GRIEF, SettingValue.of(false)));
+    map.put(Setting.of(SettingLibrary.ENDERMAN_GRIEF, SettingValue.of(false)));
+    map.put(Setting.of(SettingLibrary.EXPLOSION_GRIEF_BLACKLIST, SettingValue.of(Sets.newHashSet(SettingLibrary.ExplosiveEnum.values()))));
+    map.put(Setting.of(SettingLibrary.LAVA_GRIEF, SettingValue.of(false)));
+    map.put(Setting.of(SettingLibrary.WATER_GRIEF, SettingValue.of(false)));
+    map.put(Setting.of(SettingLibrary.ZOMBIE_GRIEF, SettingValue.of(false)));
+    return map;
+  });
+
+  public static Template PLAYER_PROTECTIONS = new Template("player-protections", () -> {
+    SettingMap map = new SettingMap();
+    map.put(Setting.of(SettingLibrary.ARMOR_STAND_DESTROY, SettingValue.of(false)));
+    map.put(Setting.of(SettingLibrary.BLOCK_BREAK, SettingValue.of(false)));
+    map.put(Setting.of(SettingLibrary.BLOCK_PLACE, SettingValue.of(false)));
+    map.put(Setting.of(SettingLibrary.INTERACT, SettingValue.of(false)));
+    map.put(Setting.of(SettingLibrary.ITEM_FRAME_DESTROY, SettingValue.of(false)));
+    map.put(Setting.of(SettingLibrary.PAINTING_DESTROY, SettingValue.of(false)));
+    map.put(Setting.of(SettingLibrary.VEHICLE_DESTROY, SettingValue.of(false)));
+    map.put(Setting.of(SettingLibrary.VEHICLE_PLACE, SettingValue.of(false)));
+    return map;
+  });
   private Templates() {
   }
 
@@ -61,18 +82,5 @@ public final class Templates {
   public static SettingMap get(String name) throws NoSuchElementException {
     return getMap().get(name);
   }
-
-  public static Template PROTECTIONS = new Template("protections", () -> {
-    SettingMap map = new SettingMap();
-    map.put(Setting.of(SettingLibrary.ARMOR_STAND_DESTROY, SettingValue.of(false)));
-    map.put(Setting.of(SettingLibrary.BLOCK_BREAK, SettingValue.of(false)));
-    map.put(Setting.of(SettingLibrary.BLOCK_PLACE, SettingValue.of(false)));
-    map.put(Setting.of(SettingLibrary.INTERACT, SettingValue.of(false)));
-    map.put(Setting.of(SettingLibrary.ITEM_FRAME_DESTROY, SettingValue.of(false)));
-    map.put(Setting.of(SettingLibrary.PAINTING_DESTROY, SettingValue.of(false)));
-    map.put(Setting.of(SettingLibrary.VEHICLE_DESTROY, SettingValue.of(false)));
-    map.put(Setting.of(SettingLibrary.VEHICLE_PLACE, SettingValue.of(false)));
-    return map;
-  });
 
 }

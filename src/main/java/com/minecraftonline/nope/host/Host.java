@@ -64,7 +64,7 @@ public abstract class Host {
     if (key == null || key.length() < 11) {
       return false;
     }
-    return key.substring(0, 10).equals("nope.host.");
+    return key.startsWith("nope.host.");
   }
 
   @Getter
@@ -204,7 +204,7 @@ public abstract class Host {
   /**
    * Clears all the {@link Setting} assignments.
    */
-  void clear() {
+  public void clear() {
     this.settings.clear();
   }
 
