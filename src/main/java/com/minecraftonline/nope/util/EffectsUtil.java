@@ -26,14 +26,12 @@
 package com.minecraftonline.nope.util;
 
 import com.flowpowered.math.vector.Vector3d;
-import com.flowpowered.math.vector.Vector3i;
 import com.minecraftonline.nope.Nope;
 import com.minecraftonline.nope.structures.Volume;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.effect.particle.ParticleEffect;
 import org.spongepowered.api.effect.particle.ParticleTypes;
 import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.world.World;
 
 import java.util.Random;
 
@@ -47,21 +45,40 @@ public class EffectsUtil {
    * @param proximity the distance away from the viewing location to show
    */
   public static void showVolume(Volume volume, Player player, int proximity) {
-    int[][] pos = new int[][]{
+    final int[][] volumePos = new int[][]{
         {volume.getMinX(), volume.getMinY(), volume.getMinZ()},
         {volume.getMaxX(), volume.getMaxY(), volume.getMaxZ()}
     };
-    int particleCount = 4;
-    double portion = 1.0 / particleCount;
-    int proximitySquared = proximity * proximity;
-    Random random = new Random();
-    for (int i = 0; i < 3; i++) {
-      for (int j = 0; j < 2; j++) {
-        for (int a = pos[0][(i + 1) % 3]; a <= pos[1][(i + 1) % 3]; a++) {
-          for (int b = pos[0][(i + 2) % 3]; b <= pos[1][(i + 2) % 3]; b++) {
+    final int[][] playerPos = new int[][]{
+        {
+            player.getLocation().getBlockX() - proximity,
+            player.getLocation().getBlockY() - proximity,
+            player.getLocation().getBlockZ() - proximity
+        },
+        {
+            player.getLocation().getBlockX() + proximity,
+            player.getLocation().getBlockY() + proximity,
+            player.getLocation().getBlockZ() + proximity
+        }
+    };
+    final int particleCount = 4;
+    final double portion = 1.0 / particleCount;
+    final int proximitySquared = proximity * proximity;
+    final Random random = new Random();
+    final double[] vals = new double[3];
+    for (int i = 0; i < 3; i++) {    // chooses which dimension is constant for illumination of one face
+      for (int j = 0; j < 2; j++) {  // chooses between the min and max value of the dimension
+        for (int a = Math.max(volumePos[0][(i + 1) % 3], playerPos[0][(i + 1) % 3]);
+             a <= Math.min(volumePos[1][(i + 1) % 3], playerPos[1][(i + 1) %3]);
+             a++) {    // chooses one dimension along the constant face
+          for (int b = Math.max(volumePos[0][(i + 2) % 3], playerPos[0][(i + 2) % 3]);
+               b <= Math.min(volumePos[1][(i + 2) % 3], playerPos[1][(i + 2) % 3]);
+               b++) {  // chooses the other dimension along the constant face
             for (int q = 0; q < particleCount; q++) {
               // normal axis dim value, next lateral axis dim value, next lateral axis dim value
-              double[] vals = {pos[j][i] + j, a + portion * q, b + portion * q};
+              vals[0] = volumePos[j][i] + j;
+              vals[1] = a + portion * q;
+              vals[2] = b + portion * q;
               Vector3d particleLocation = new Vector3d(vals[(3 - i) % 3], vals[(4 - i) % 3], vals[(5 - i) % 3]);
               if (particleLocation.distanceSquared(player.getLocation().getPosition()) < proximitySquared) {
                 Sponge.getScheduler().createTaskBuilder()

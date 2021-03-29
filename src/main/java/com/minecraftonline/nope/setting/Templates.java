@@ -37,18 +37,22 @@ import java.util.stream.Collectors;
 @SuppressWarnings("unused")
 public final class Templates {
 
-  public static Template NATURAL_PROTECTIONS = new Template("natural-protections", () -> {
+  public static Template DEFAULT_PROTECTIONS = new Template("default-protections", () -> {
     SettingMap map = new SettingMap();
     map.put(Setting.of(SettingLibrary.ENDERDRAGON_GRIEF, SettingValue.of(false)));
     map.put(Setting.of(SettingLibrary.ENDERMAN_GRIEF, SettingValue.of(false)));
     map.put(Setting.of(SettingLibrary.EXPLOSION_GRIEF_BLACKLIST, SettingValue.of(Sets.newHashSet(SettingLibrary.ExplosiveEnum.values()))));
+    map.put(Setting.of(SettingLibrary.FIRE_EFFECT, SettingValue.of(false)));
+    map.put(Setting.of(SettingLibrary.FIRE_IGNITION, SettingValue.of(false)));
     map.put(Setting.of(SettingLibrary.LAVA_GRIEF, SettingValue.of(false)));
+    map.put(Setting.of(SettingLibrary.TNT_IGNITION, SettingValue.of(false)));
+    map.put(Setting.of(SettingLibrary.TNT_PLACEMENT, SettingValue.of(false)));
     map.put(Setting.of(SettingLibrary.WATER_GRIEF, SettingValue.of(false)));
     map.put(Setting.of(SettingLibrary.ZOMBIE_GRIEF, SettingValue.of(false)));
     return map;
   });
 
-  public static Template PLAYER_PROTECTIONS = new Template("player-protections", () -> {
+  public static Template MALICIOUS_PROTECTIONS = new Template("malicious-protections", () -> {
     SettingMap map = new SettingMap();
     map.put(Setting.of(SettingLibrary.ARMOR_STAND_DESTROY, SettingValue.of(false)));
     map.put(Setting.of(SettingLibrary.BLOCK_BREAK, SettingValue.of(false)));
@@ -60,6 +64,7 @@ public final class Templates {
     map.put(Setting.of(SettingLibrary.VEHICLE_PLACE, SettingValue.of(false)));
     return map;
   });
+
   private Templates() {
   }
 

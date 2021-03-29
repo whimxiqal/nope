@@ -93,6 +93,7 @@ public class SettingUpdates {
    * the appropriate converter if it exists
    * method.
    */
+  @SuppressWarnings("unchecked")
   public static <T> Optional<? extends Setting<?>> convertSetting(String oldSettingId,
                                                         JsonElement oldSettingValue,
                                                         JsonElement oldSettingTarget) {

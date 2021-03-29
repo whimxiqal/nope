@@ -34,6 +34,7 @@ import com.minecraftonline.nope.host.VolumeHost;
 import com.minecraftonline.nope.setting.SettingLibrary;
 import com.minecraftonline.nope.util.EffectsUtil;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.network.ClientConnectionEvent;
@@ -48,6 +49,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
@@ -56,12 +58,12 @@ public class PlayerMovementHandler {
   private static final long POLL_INTERVAL_MILLISECONDS = 250;
   private static final long MESSAGE_COOLDOWN_MILLISECONDS = 1000;
 
-  private Map<UUID, Vector3i> positions = Maps.newConcurrentMap();
-  private Map<UUID, UUID> worldLocations = Maps.newConcurrentMap();
-  private Map<UUID, UUID> tasks = Maps.newConcurrentMap();
-  private Map<UUID, Long> visualsTimer = Maps.newConcurrentMap();
+  private final Map<UUID, Vector3i> positions = Maps.newConcurrentMap();
+  private final Map<UUID, UUID> worldLocations = Maps.newConcurrentMap();
+  private final Map<UUID, UUID> tasks = Maps.newConcurrentMap();
+  private final Map<UUID, Long> visualsTimer = Maps.newConcurrentMap();
 
-  private Set<UUID> viewers = Sets.newHashSet();
+  private final Set<UUID> viewers = ConcurrentHashMap.newKeySet();
 
   public void register() {
     Sponge.getEventManager().registerListeners(Nope.getInstance(), this);
@@ -72,7 +74,7 @@ public class PlayerMovementHandler {
         .getWorld(worldLocations.get(playerUuid))
         .orElseThrow(() ->
             new RuntimeException("World could not be found in Movement Handler")),
-        positions.get(playerUuid));
+        positions.get(playerUuid).toDouble().add(0.5, 0.5, 0.5));
   }
 
   public boolean addHostViewer(UUID playerUuid) {
@@ -118,7 +120,7 @@ public class PlayerMovementHandler {
             }).submit(Nope.getInstance())
             .getUniqueId());
 
-    /* Messaging time cache */
+    /* Time caches */
     visualsTimer.put(uuid, System.currentTimeMillis());
   }
 
@@ -135,7 +137,7 @@ public class PlayerMovementHandler {
     }
     Sponge.getScheduler().getTaskById(taskUuid).ifPresent(Task::cancel);
 
-    /* Messaging time cache */
+    /* Time caches */
     visualsTimer.remove(event.getTargetEntity().getUniqueId());
   }
 
@@ -239,7 +241,15 @@ public class PlayerMovementHandler {
     }
 
     /* Perform cancellation behavior */
+    if (cancel && player.getVehicle().isPresent()) {
+      // Dismount so the even can be cancelled properly
+      Entity vehicle = player.getVehicle().get();
+      player.setVehicle(null);
+      // Move the vehicle back to the player so the vehicle doesn't get stuck
+      vehicle.setTransform(player.getTransform());
+    }
     canceller.accept(cancel);
 
   }
+
 }

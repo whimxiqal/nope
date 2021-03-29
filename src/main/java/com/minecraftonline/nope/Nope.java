@@ -66,7 +66,7 @@ import java.nio.file.Path;
 public class Nope {
 
   public static final String GLOBAL_HOST_NAME = "_global";
-  public static final int WORLD_HEIGHT = 256;
+  public static final int WORLD_DEPTH = 512;
   public static final int WORLD_RADIUS = 100000;
   public static String REPO_URL = "https://gitlab.com/minecraftonline/nope/";
   @Getter

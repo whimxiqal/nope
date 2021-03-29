@@ -29,13 +29,14 @@ public class ZoneLocationSelectionCommandElement extends CommandElement {
 
   @Nonnull
   @Override
-  public Text getUsage(CommandSource src) {
+  public Text getUsage(@Nonnull CommandSource src) {
     return Text.of("[[-w <world>] ", vector3i.getUsage(src), "]");
   }
 
   @Nullable
   @Override
-  protected ZoneWandHandler.Selection parseValue(CommandSource source, CommandArgs args) throws ArgumentParseException {
+  protected ZoneWandHandler.Selection parseValue(@Nonnull CommandSource source,
+                                                 CommandArgs args) throws ArgumentParseException {
     if (!args.hasNext()) {
       if (source instanceof Player) {
         Player player = (Player) source;
@@ -94,12 +95,12 @@ public class ZoneLocationSelectionCommandElement extends CommandElement {
               0);
         }
       }
-      if (vec.getY() < -Nope.WORLD_HEIGHT) {
+      if (vec.getY() < -Nope.WORLD_DEPTH) {
         throw new ArgumentParseException(Text.of("Value " + vec.getY() + " is too small!"),
             String.valueOf(vec.getY()),
             0);
       }
-      if (vec.getY() > Nope.WORLD_HEIGHT) {
+      if (vec.getY() > Nope.WORLD_DEPTH) {
         throw new ArgumentParseException(Text.of("Value " + vec.getY() + " is too large!"),
             String.valueOf(vec.getY()),
             0);
@@ -109,8 +110,11 @@ public class ZoneLocationSelectionCommandElement extends CommandElement {
     return new ZoneWandHandler.Selection(world, min, max);
   }
 
+  @Nonnull
   @Override
-  public List<String> complete(CommandSource src, CommandArgs args, CommandContext context) {
+  public List<String> complete(@Nonnull CommandSource src,
+                               @Nonnull CommandArgs args,
+                               @Nonnull CommandContext context) {
     return Collections.emptyList();
   }
 }

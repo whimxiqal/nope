@@ -114,13 +114,19 @@ public class InfoCommand extends LambdaCommandNode {
       if (host instanceof VolumeHost) {
         VolumeHost volumeHost = (VolumeHost) host;
         // Volume zones only:
-        headerLines.add(Format.keyValue("min: ", volumeHost.getMinX()
-            + ", " + volumeHost.getMinY()
-            + ", " + volumeHost.getMinZ()));
+        headerLines.add(Format.keyValue("min: ",
+            (volumeHost.getMinX() == Integer.MIN_VALUE ? "-Inf" : volumeHost.getMinX())
+            + ", "
+            + volumeHost.getMinY()
+            + ", "
+            + (volumeHost.getMinZ() == Integer.MIN_VALUE ? "-Inf" : volumeHost.getMinZ())));
 
-        headerLines.add(Format.keyValue("max: ", volumeHost.getMaxX()
-            + ", " + volumeHost.getMaxY()
-            + ", " + volumeHost.getMaxZ()));
+        headerLines.add(Format.keyValue("max: ",
+            (volumeHost.getMaxX() == Integer.MAX_VALUE ? "Inf" : volumeHost.getMaxX())
+                + ", "
+                + volumeHost.getMaxY()
+                + ", "
+                + (volumeHost.getMaxZ() == Integer.MAX_VALUE ? "Inf" : volumeHost.getMaxZ())));
       }
 
       int zonePriority = host.getPriority();

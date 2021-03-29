@@ -38,7 +38,7 @@ sourceSets {
 
 archivesBaseName = 'nope'
 group = 'com.minecraftonline'
-version = '0.1.0'
+version = '0.1.1'
 description = "A volume protection plugin"
 
 ext.spongeVersion = '7.3.0'

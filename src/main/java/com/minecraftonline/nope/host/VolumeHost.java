@@ -29,14 +29,14 @@ import com.minecraftonline.nope.structures.Volume;
 
 public abstract class VolumeHost extends Host implements Volume {
 
-  private final int xmin;
-  private final int xmax;
+  protected final int xmin;
+  protected final int xmax;
 
-  private final int ymin;
-  private final int ymax;
+  protected final int ymin;
+  protected final int ymax;
 
-  private final int zmin;
-  private final int zmax;
+  protected final int zmin;
+  protected final int zmax;
 
   /**
    * Default constructor.

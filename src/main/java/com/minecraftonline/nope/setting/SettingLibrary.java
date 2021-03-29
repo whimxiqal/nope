@@ -66,7 +66,6 @@ import java.lang.reflect.Modifier;
 import java.util.*;
 import java.util.stream.Collectors;
 
-@SuppressWarnings("unused")
 public final class SettingLibrary {
 
   @Description("When disabled, armor stands may not be broken")
@@ -273,13 +272,6 @@ public final class SettingLibrary {
   public static final SettingKey<Text> FAREWELL_TITLE = new TextSetting(
       "farewell-title",
       Text.EMPTY
-  );
-  @Description("When disabled, firework does not cause damage")
-  @Category(SettingKey.CategoryType.DAMAGE)
-  @NotImplemented
-  public static final SettingKey<Boolean> FIREWORK_DAMAGE = new StateSetting(
-      "firework-damage",
-      true
   );
   @Description("When disabled, fire does not spread or cause block damage")
   @Category(SettingKey.CategoryType.BLOCKS)
@@ -1287,7 +1279,7 @@ public final class SettingLibrary {
         double y = Double.parseDouble(parts[i++]);
         double z = Double.parseDouble(parts[i]);
         if (Math.max(Math.abs(x), Math.abs(z)) > Nope.WORLD_RADIUS
-            || Math.abs(y) > Nope.WORLD_HEIGHT) {
+            || Math.abs(y) > Nope.WORLD_DEPTH) {
           throw new ParseSettingException("The magnitudes of these numbers are too high!");
         }
         return Vector3d.from(x, y, z);
