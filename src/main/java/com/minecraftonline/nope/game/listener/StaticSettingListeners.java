@@ -26,12 +26,17 @@
 package com.minecraftonline.nope.game.listener;
 
 import com.minecraftonline.nope.Nope;
+import com.minecraftonline.nope.setting.SettingLibrary;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.entity.MoveEntityEvent;
 import org.spongepowered.api.event.filter.cause.Root;
 import org.spongepowered.api.event.network.ClientConnectionEvent;
+
+import java.util.LinkedList;
+import java.util.concurrent.atomic.AtomicReference;
 
 public final class StaticSettingListeners {
 
@@ -44,13 +49,38 @@ public final class StaticSettingListeners {
 
   @Listener
   public void onMove(MoveEntityEvent.Position event, @Root Player player) {
-    Nope.getInstance().getPlayerMovementHandler().tryPassThreshold(
-        player,
-        event.getFromTransform().getLocation(),
-        event.getToTransform().getLocation(),
-        true,
-        event::setCancelled
-    );
+    // Run the threshold handler for every player on the vehicle stack
+    LinkedList<Entity> entities = new LinkedList<>();
+    entities.add(player.getBaseVehicle());
+    AtomicReference<Entity> current = new AtomicReference<>();
+    while (!entities.isEmpty()) {
+      current.set(entities.pop());
+      entities.addAll(current.get().getPassengers());
+      if (current.get() instanceof Player) {
+        Nope.getInstance().getPlayerMovementHandler().tryPassThreshold(
+            (Player) current.get(),
+            event.getFromTransform().getLocation(),
+            event.getToTransform().getLocation(),
+            true,
+            cancelled -> {
+              // Do both just to be sure
+              if (cancelled) {
+                event.setToTransform(event.getFromTransform());
+              } else {
+                Nope.getInstance()
+                    .getPlayerMovementHandler()
+                    .updatePreviousLocation(player);
+              }
+              event.setCancelled(cancelled);
+            }
+        );
+        if (!Nope.getInstance().getHostTree().lookup(SettingLibrary.RIDE,
+            (Player) current.get(),
+            current.get().getLocation())) {
+          current.get().setVehicle(null);
+        }
+      }
+    }
   }
 
   @Listener

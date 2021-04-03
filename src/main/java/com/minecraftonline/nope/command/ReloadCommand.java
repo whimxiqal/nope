@@ -3,6 +3,7 @@ package com.minecraftonline.nope.command;
 import com.minecraftonline.nope.Nope;
 import com.minecraftonline.nope.command.common.CommandNode;
 import com.minecraftonline.nope.command.common.LambdaCommandNode;
+import com.minecraftonline.nope.game.listener.DynamicSettingListeners;
 import com.minecraftonline.nope.permission.Permissions;
 import com.minecraftonline.nope.util.Format;
 import org.spongepowered.api.command.CommandResult;
@@ -23,6 +24,7 @@ public class ReloadCommand extends LambdaCommandNode {
 
     setExecutor((src, args) -> {
       Nope.getInstance().loadState();
+      DynamicSettingListeners.register();
       src.sendMessage(Format.success("Successfully reloaded"));
       return CommandResult.success();
     });

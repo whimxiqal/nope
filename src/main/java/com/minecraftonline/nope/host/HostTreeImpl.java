@@ -89,7 +89,7 @@ public class HostTreeImpl implements HostTree {
    * @param storage            the type of storage to handle IO
    * @param globalHostName     the name given to the global host
    * @param worldNameConverter the converter with which to create the world host names
-   * @param zoneNameRegex    the allowed regex for added zones, which should ensure
+   * @param zoneNameRegex      the allowed regex for added zones, which should ensure
    *                           no conflicts with global or world hosts
    */
   public HostTreeImpl(@Nonnull Storage storage,
@@ -347,7 +347,8 @@ public class HostTreeImpl implements HostTree {
           && spongeLocation.getBlockY() >= getMinY()
           && spongeLocation.getBlockY() <= getMaxY()
           && spongeLocation.getBlockZ() >= getMinZ()
-          && spongeLocation.getBlockZ() <= getMaxZ();
+          && spongeLocation.getBlockZ() <= getMaxZ()
+          && spongeLocation.getExtent().getUniqueId().equals(getWorldUuid());
     }
 
     @Override
@@ -493,7 +494,7 @@ public class HostTreeImpl implements HostTree {
     /**
      * Writes Zones to storage.
      *
-     * @param zones    the host to store
+     * @param zones      the host to store
      * @param serializer the serializer which holds the logic for serialization
      * @throws IOException        if there is an error connecting to the storage
      * @throws HostParseException if there is any error parsing an existing stored Zone
@@ -651,10 +652,11 @@ public class HostTreeImpl implements HostTree {
     this.worldHosts.values().forEach(worldHost -> {
       if (worldHost.encompasses(location)) {
         list.add(worldHost);
+        list.addAll(worldHost.getZoneTree()
+            .containersOf(location.getBlockX(),
+                location.getBlockY(),
+                location.getBlockZ()));
       }
-      list.addAll(worldHost.getZoneTree().containersOf(location.getBlockX(),
-          location.getBlockY(),
-          location.getBlockZ()));
     });
     return list;
   }

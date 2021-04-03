@@ -100,6 +100,12 @@ public final class DynamicSettingListeners {
           AttackEntityEvent.class,
           entityVersusEntityCanceller(SettingLibrary.ARMOR_STAND_DESTROY, Player.class, ArmorStand.class));
   @DynamicSettingListener
+  static final SettingListener<SpawnEntityEvent> ARMOR_STAND_PLACE_LISTENER =
+      new CancelConditionSettingListener<>(
+          SettingLibrary.ARMOR_STAND_PLACE,
+          SpawnEntityEvent.class,
+          spawnEntityCanceler(SettingLibrary.ARMOR_STAND_PLACE, ArmorStand.class));
+  @DynamicSettingListener
   static final SettingListener<ChangeBlockEvent.Break> BLOCK_BREAK_LISTENER =
       new PlayerCauseCancelConditionSettingListener<>(
           SettingLibrary.BLOCK_BREAK,
@@ -131,7 +137,8 @@ public final class DynamicSettingListeners {
   static final SettingListener<NotifyNeighborBlockEvent> BLOCK_PROPAGATE_LISTENER =
       new SettingListener<>(
           Lists.newArrayList(SettingLibrary.BLOCK_PROPAGATE_ACROSS,
-              SettingLibrary.BLOCK_PROPAGATE_WITHIN),
+              SettingLibrary.BLOCK_PROPAGATE_WITHIN,
+              SettingLibrary.TNT_IGNITION),
           NotifyNeighborBlockEvent.class,
           event -> {
             Player player = event.getCause().first(Player.class).orElse(null);
@@ -139,8 +146,16 @@ public final class DynamicSettingListeners {
                 .orElseThrow(() ->
                     new RuntimeException("A NotifyNeighborBlockEvent needs a block cause"))
                 .getLocation();
+
+            // A filter to determine whether a notification should be canceled in some direction
             Predicate<Direction> directionsFilter = (direction -> {
               Location<World> recipient = notifier.add(direction.asBlockOffset());
+
+              if (recipient.getBlock().getType().equals(BlockTypes.TNT)
+                  && !Nope.getInstance().getHostTree().lookup(SettingLibrary.TNT_IGNITION, player, recipient)) {
+                return true;
+              }
+
               Host fromAcross = Nope.getInstance().getHostTree()
                   .lookupDictator(SettingLibrary.BLOCK_PROPAGATE_ACROSS, player, notifier);
               boolean fromAcrossData = fromAcross == null
@@ -613,6 +628,12 @@ public final class DynamicSettingListeners {
               Player.class,
               ItemFrame.class));
   @DynamicSettingListener
+  static final SettingListener<SpawnEntityEvent> ITEM_FRAME_PLACE_LISTENER =
+      new CancelConditionSettingListener<>(
+          SettingLibrary.ITEM_FRAME_PLACE,
+          SpawnEntityEvent.class,
+          spawnEntityCanceler(SettingLibrary.ARMOR_STAND_PLACE, ItemFrame.class));
+  @DynamicSettingListener
   static final SettingListener<ChangeInventoryEvent.Pickup.Pre> ITEM_PICKUP_LISTENER =
       new PlayerRootCancelConditionSettingListener<>(
           SettingLibrary.ITEM_PICKUP,
@@ -750,13 +771,19 @@ public final class DynamicSettingListeners {
                       : null,
                   ((Player) event.getTargetHolder()).getLocation()));
   @DynamicSettingListener
-  static final SettingListener<AttackEntityEvent> PAINTING_DESTROY_ATTACK_LISTENER =
+  static final SettingListener<AttackEntityEvent> PAINTING_ATTACK_LISTENER =
       new CancelConditionSettingListener<>(
           SettingLibrary.PAINTING_DESTROY,
           AttackEntityEvent.class,
           entityVersusEntityCanceller(SettingLibrary.PAINTING_DESTROY,
               Player.class,
               Painting.class));
+  @DynamicSettingListener
+  static final SettingListener<SpawnEntityEvent> PAINTING_PLACE_LISTENER =
+      new CancelConditionSettingListener<>(
+          SettingLibrary.PAINTING_PLACE,
+          SpawnEntityEvent.class,
+          spawnEntityCanceler(SettingLibrary.PAINTING_PLACE, Painting.class));
   @DynamicSettingListener
   static final SettingListener<MoveEntityEvent> PLAYER_COLLISION_LISTENER =
       new SingleSettingListener<>(
@@ -797,7 +824,7 @@ public final class DynamicSettingListeners {
           DamageEntityEvent.class,
           entityVersusEntityCanceller(SettingLibrary.PVP, Player.class, Player.class));
   @DynamicSettingListener
-  static final SettingListener<RideEntityEvent.Mount> RIDE_LISTENER =
+  static final SettingListener<RideEntityEvent.Mount> RIDE_MOUNT_LISTENER =
       new PlayerRootCancelConditionSettingListener<>(
           SettingLibrary.RIDE,
           RideEntityEvent.Mount.class,
@@ -868,32 +895,20 @@ public final class DynamicSettingListeners {
       new CancelConditionSettingListener<>(
           SettingLibrary.SPAWN_ANIMAL,
           SpawnEntityEvent.class,
-          event -> event.getEntities().stream().anyMatch(entity ->
-              (entity instanceof Animal)
-                  && !Nope.getInstance()
-                  .getHostTree()
-                  .lookupAnonymous(SettingLibrary.SPAWN_ANIMAL, entity.getLocation())));
+          spawnEntityCanceler(SettingLibrary.SPAWN_ANIMAL, Animal.class));
   @DynamicSettingListener
   static final SettingListener<SpawnEntityEvent> SPAWN_HOSTILE_LISTENER =
       new CancelConditionSettingListener<>(
           SettingLibrary.SPAWN_HOSTILE,
           SpawnEntityEvent.class,
-          event -> event.getEntities().stream().anyMatch(entity ->
-              (entity instanceof Hostile)
-                  && !Nope.getInstance()
-                  .getHostTree()
-                  .lookupAnonymous(SettingLibrary.SPAWN_HOSTILE, entity.getLocation())));
+          spawnEntityCanceler(SettingLibrary.SPAWN_HOSTILE, Hostile.class));
+
   @DynamicSettingListener
   static final SettingListener<SpawnEntityEvent> SPAWN_MOB_LISTENER =
       new CancelConditionSettingListener<>(
           SettingLibrary.SPAWN_MOB,
           SpawnEntityEvent.class,
-          event -> event.getEntities().stream().anyMatch(entity ->
-              (entity instanceof Agent)
-                  && !(entity instanceof Player)
-                  && !Nope.getInstance()
-                  .getHostTree()
-                  .lookupAnonymous(SettingLibrary.SPAWN_MOB, entity.getLocation())));
+          spawnEntityCanceler(SettingLibrary.SPAWN_MOB, Agent.class));
   @DynamicSettingListener
   static final SettingListener<InteractEntityEvent.Secondary> TNT_CART_IGNITION_LISTENER =
       new PlayerRootCancelConditionSettingListener<>(
@@ -1186,6 +1201,18 @@ public final class DynamicSettingListeners {
                       : null,
               sink.getLocation());
     };
+  }
+
+  private static <T extends SpawnEntityEvent> Predicate<T> spawnEntityCanceler(
+      SettingKey<Boolean> settingKey,
+      Class<? extends Entity> deniedType) {
+    return event -> event.getEntities().stream().anyMatch(entity ->
+        (deniedType.isInstance(entity))
+            && !Nope.getInstance()
+            .getHostTree()
+            .lookup(settingKey,
+                event.getCause().first(Player.class).orElse(null),
+                entity.getLocation()));
   }
 
   private static Predicate<ChangeBlockEvent> simpleChangeBlockCanceler(SettingKey<Boolean> key,

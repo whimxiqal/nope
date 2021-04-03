@@ -75,6 +75,13 @@ public final class SettingLibrary {
       "armor-stand-destroy",
       true
   );
+  @Description("When disabled, armor stands may not be placed")
+  @Category(SettingKey.CategoryType.ENTITY)
+  @PlayerRestrictive
+  public static final SettingKey<Boolean> ARMOR_STAND_PLACE = new StateSetting(
+      "armor-stand-place",
+      true
+  );
   @Description("When disabled, blocks may not be broken by players")
   @Category(SettingKey.CategoryType.BLOCKS)
   @PlayerRestrictive
@@ -397,6 +404,13 @@ public final class SettingLibrary {
       "item-frame-destroy",
       true
   );
+  @Description("When disabled, item frames may not be placed")
+  @Category(SettingKey.CategoryType.ENTITY)
+  @PlayerRestrictive
+  public static final SettingKey<Boolean> ITEM_FRAME_PLACE = new StateSetting(
+      "item-frame-place",
+      true
+  );
   @Description("When disabled, players cannot pick up items")
   @PlayerRestrictive
   public static final SettingKey<Boolean> ITEM_PICKUP = new StateSetting(
@@ -471,6 +485,13 @@ public final class SettingLibrary {
       "painting-destroy",
       true
   );
+  @Description("When disabled, paintings may not be placed")
+  @Category(SettingKey.CategoryType.ENTITY)
+  @PlayerRestrictive
+  public static final SettingKey<Boolean> PAINTING_PLACE = new StateSetting(
+      "painting-place",
+      true
+  );
   @Description("When disabled, all events caused by player collision are cancelled")
   @Category(SettingKey.CategoryType.ENTITY)
   public static final SettingKey<Boolean> PLAYER_COLLISION = new StateSetting(
@@ -532,21 +553,21 @@ public final class SettingLibrary {
   @Description("When disabled, mobs cannot spawn")
   @Category(SettingKey.CategoryType.ENTITY)
   @PlayerRestrictive
-  public static final SettingKey<Boolean> SPAWN_ANIMAL = new BooleanSetting(
+  public static final SettingKey<Boolean> SPAWN_ANIMAL = new StateSetting(
       "spawn-animal",
       true
   );
   @Description("When disabled, mobs cannot spawn")
   @Category(SettingKey.CategoryType.ENTITY)
   @PlayerRestrictive
-  public static final SettingKey<Boolean> SPAWN_HOSTILE = new BooleanSetting(
+  public static final SettingKey<Boolean> SPAWN_HOSTILE = new StateSetting(
       "spawn-hostile",
       true
   );
   @Description("When disabled, mobs cannot spawn")
   @Category(SettingKey.CategoryType.ENTITY)
   @PlayerRestrictive
-  public static final SettingKey<Boolean> SPAWN_MOB = new BooleanSetting(
+  public static final SettingKey<Boolean> SPAWN_MOB = new StateSetting(
       "spawn-mob",
       true
   );
@@ -995,8 +1016,10 @@ public final class SettingLibrary {
     public Boolean parse(String s) throws ParseSettingException {
       switch (s.toLowerCase()) {
         case "allow":
+        case "true":
           return true;
         case "deny":
+        case "false":
           return false;
         default:
           throw new ParseSettingException("Invalid state string. "

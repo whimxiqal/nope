@@ -60,7 +60,6 @@ import com.minecraftonline.nope.permission.Permissions;
 import com.minecraftonline.nope.util.Format;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandResult;
-import org.spongepowered.api.command.args.CommandElement;
 import org.spongepowered.api.command.args.GenericArguments;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.service.pagination.PaginationService;
@@ -84,17 +83,13 @@ public class InfoCommand extends LambdaCommandNode {
         "info",
         "i");
 
-    CommandElement zoneElement = GenericArguments.optional(NopeArguments.host(Text.of("zone")));
-    zoneElement = GenericArguments.flags().flag("f", "-friendly").buildWith(zoneElement);
-    addCommandElements(zoneElement);
+    addCommandElements(GenericArguments.optional(NopeArguments.host(Text.of("zone"))));
     setExecutor((src, args) -> {
 
       Host host = args.<Host>getOne("zone").orElse(NopeCommandRoot.inferHost(src).orElse(null));
       if (host == null) {
         return CommandResult.empty();
       }
-
-      final boolean friendly = args.<Boolean>getOne(Text.of("f")).orElse(false);
 
       List<Text> headerLines = Lists.newLinkedList();
 
@@ -104,24 +99,24 @@ public class InfoCommand extends LambdaCommandNode {
             .map(World::getName)
             .orElseThrow(() -> new RuntimeException("Sponge cannot find world with UUID: "
                 + host.getWorldUuid()));
-        headerLines.add(Format.keyValue("world: ", worldName));
+        headerLines.add(Format.keyValue(TextColors.DARK_GRAY, "world: ", worldName));
       }
 
       if (host.getParent() != null) {
-        headerLines.add(Format.keyValue("parent: ", Format.host(host.getParent())));
+        headerLines.add(Format.keyValue(TextColors.DARK_GRAY, "parent: ", Format.host(host.getParent())));
       }
 
       if (host instanceof VolumeHost) {
         VolumeHost volumeHost = (VolumeHost) host;
         // Volume zones only:
-        headerLines.add(Format.keyValue("min: ",
+        headerLines.add(Format.keyValue(TextColors.DARK_GRAY, "min: ",
             (volumeHost.getMinX() == Integer.MIN_VALUE ? "-Inf" : volumeHost.getMinX())
             + ", "
             + volumeHost.getMinY()
             + ", "
             + (volumeHost.getMinZ() == Integer.MIN_VALUE ? "-Inf" : volumeHost.getMinZ())));
 
-        headerLines.add(Format.keyValue("max: ",
+        headerLines.add(Format.keyValue(TextColors.DARK_GRAY, "max: ",
             (volumeHost.getMaxX() == Integer.MAX_VALUE ? "Inf" : volumeHost.getMaxX())
                 + ", "
                 + volumeHost.getMaxY()
@@ -130,8 +125,8 @@ public class InfoCommand extends LambdaCommandNode {
       }
 
       int zonePriority = host.getPriority();
-      headerLines.add(Format.keyValue("priority: ", String.valueOf(zonePriority)));
-      headerLines.add(Text.of(""));  // line separator
+      headerLines.add(Format.keyValue(TextColors.DARK_GRAY, "priority: ", String.valueOf(zonePriority)));
+      headerLines.add(Text.of(TextColors.DARK_GRAY, "--------------"));  // line separator
       headerLines.add(Text.of(TextColors.AQUA, "<< Settings >> ", Format.note("Click to unset")));
 
       Sponge.getScheduler().createTaskBuilder()

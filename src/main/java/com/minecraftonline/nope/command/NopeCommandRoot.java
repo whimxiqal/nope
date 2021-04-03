@@ -132,7 +132,7 @@ public class NopeCommandRoot extends CommandNode {
         "command."));
     // Cache Size Info (testing)
 
-//    showCacheSize(src);
+    showCacheSize(src);
     return CommandResult.success();
   }
 
@@ -143,7 +143,7 @@ public class NopeCommandRoot extends CommandNode {
           .getWorldHost(((Player) src).getLocation().getExtent().getUniqueId());
       if (worldHost instanceof HostTreeImpl.WorldHost) {
         if (((HostTreeImpl.WorldHost) worldHost).getZoneTree() instanceof HashQueueVolumeTree) {
-          src.sendMessage(Text.of("Cache size: ",
+          src.sendMessage(Text.of(TextColors.DARK_GRAY, "Cache size: ",
               Format.note(
                   ((HashQueueVolumeTree<?, ?>) ((HostTreeImpl.WorldHost) worldHost).getZoneTree())
                       .getCacheSize())));

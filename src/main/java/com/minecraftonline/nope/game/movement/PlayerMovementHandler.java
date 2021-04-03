@@ -44,29 +44,33 @@ import org.spongepowered.api.text.title.Title;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 public class PlayerMovementHandler {
 
-  private static final long POLL_INTERVAL_MILLISECONDS = 250;
+  private static final long POLL_INTERVAL_TICKS = 4;
   private static final long MESSAGE_COOLDOWN_MILLISECONDS = 1000;
 
   private final Map<UUID, Vector3i> positions = Maps.newConcurrentMap();
   private final Map<UUID, UUID> worldLocations = Maps.newConcurrentMap();
   private final Map<UUID, UUID> tasks = Maps.newConcurrentMap();
   private final Map<UUID, Long> visualsTimer = Maps.newConcurrentMap();
+  private final Map<UUID, String> lastSentMessages = Maps.newConcurrentMap();
 
   private final Set<UUID> viewers = ConcurrentHashMap.newKeySet();
 
   public void register() {
     Sponge.getEventManager().registerListeners(Nope.getInstance(), this);
+  }
+
+  public void updatePreviousLocation(Player player) {
+    this.positions.put(player.getUniqueId(), player.getLocation().getBlockPosition());
+    this.worldLocations.put(player.getUniqueId(), player.getLocation().getExtent().getUniqueId());
   }
 
   private Location<World> getPreviousLocation(UUID playerUuid) {
@@ -100,27 +104,29 @@ public class PlayerMovementHandler {
     /* Tasks */
     tasks.put(uuid,
         Sponge.getScheduler().createTaskBuilder()
-            .interval(POLL_INTERVAL_MILLISECONDS, TimeUnit.MILLISECONDS)
+            .intervalTicks(POLL_INTERVAL_TICKS)
             .execute(() -> {
               Player player = Sponge.getServer()
                   .getPlayer(uuid).orElseThrow(() ->
                       new RuntimeException("Player cannot be found in Movement Handler. Was the player properly flushed?"));
-              tryPassThreshold(player,
-                  getPreviousLocation(player.getUniqueId()),
-                  player.getLocation(),
-                  false,
-                  cancelled -> {
-                    if (cancelled) {
-                      player.setLocation(getPreviousLocation(uuid));
-                    } else {
-                      positions.put(uuid, player.getLocation().getBlockPosition());
-                      worldLocations.put(uuid, player.getLocation().getExtent().getUniqueId());
-                    }
-                  });
+              Location<World> previousLocation = getPreviousLocation(player.getUniqueId());
+              if (!previousLocation.getBlockPosition().equals(player.getLocation().getBlockPosition())
+                  || !previousLocation.getExtent().equals(player.getLocation().getExtent())) {
+                tryPassThreshold(player,
+                    previousLocation,
+                    player.getLocation(),
+                    false,
+                    cancelled -> {
+                      if (cancelled) {
+                        player.setLocation(getPreviousLocation(uuid));
+                      }
+                    });
+              }
+              updatePreviousLocation(player);
             }).submit(Nope.getInstance())
             .getUniqueId());
 
-    /* Time caches */
+    /* Player caches */
     visualsTimer.put(uuid, System.currentTimeMillis());
   }
 
@@ -137,8 +143,9 @@ public class PlayerMovementHandler {
     }
     Sponge.getScheduler().getTaskById(taskUuid).ifPresent(Task::cancel);
 
-    /* Time caches */
+    /* Player caches */
     visualsTimer.remove(event.getTargetEntity().getUniqueId());
+    lastSentMessages.remove(event.getTargetEntity().getUniqueId());
   }
 
   public void tryPassThreshold(Player player,
@@ -163,8 +170,9 @@ public class PlayerMovementHandler {
       return;
     }
 
-    exiting.sort(Comparator.comparing(Host::getPriority));
-    entering.sort(Comparator.comparing(Host::getPriority));
+    // Ignore sorting by priority for now, it doesn't really matter
+//    exiting.sort(Comparator.comparing(Host::getPriority));
+//    entering.sort(Comparator.comparing(Host::getPriority));
 
     boolean cancel = false;
     boolean visual = false;
@@ -176,6 +184,7 @@ public class PlayerMovementHandler {
     Text subtitle;
     boolean expired = visualsTimer.get(player.getUniqueId())
         + MESSAGE_COOLDOWN_MILLISECONDS < System.currentTimeMillis();
+    String lastSentMessage = lastSentMessages.getOrDefault(player.getUniqueId(), "");
 
     /* Exiting */
     for (int i = exiting.size() - 1; i >= 0; i--) {
@@ -191,11 +200,13 @@ public class PlayerMovementHandler {
         title = exiting.get(i).getData(SettingLibrary.FAREWELL_TITLE, player);
         subtitle = exiting.get(i).getData(SettingLibrary.FAREWELL_SUBTITLE, player);
       }
-      if (!message.isEmpty() && expired) {
+
+      if (!message.isEmpty() && (expired || !lastSentMessage.equals(message.toPlain()))) {
         player.sendMessage(message);
+        lastSentMessages.put(player.getUniqueId(), message.toPlain());
         visual = true;
       }
-      if ((!title.isEmpty() || !subtitle.isEmpty()) && expired) {
+      if (!title.isEmpty() || !subtitle.isEmpty()) {
         player.sendTitle(Title.builder().title(title).subtitle(subtitle).build());
         visual = true;
       }
@@ -207,31 +218,34 @@ public class PlayerMovementHandler {
     }
 
     /* Entering */
-    for (int i = entering.size() - 1; i >= 0; i--) {
-      movementData = entering.get(i).getData(SettingLibrary.ENTRY, player);
-      if (movementData.equals(SettingLibrary.Movement.NONE)
-          || (movementData.equals(SettingLibrary.Movement.UNNATURAL) && translate)) {
-        cancel = true;
-        message = entering.get(i).getData(SettingLibrary.ENTRY_DENY_MESSAGE, player);
-        title = entering.get(i).getData(SettingLibrary.ENTRY_DENY_TITLE, player);
-        subtitle = entering.get(i).getData(SettingLibrary.ENTRY_DENY_SUBTITLE, player);
-      } else {
-        message = entering.get(i).getData(SettingLibrary.GREETING, player);
-        title = entering.get(i).getData(SettingLibrary.GREETING_TITLE, player);
-        subtitle = entering.get(i).getData(SettingLibrary.GREETING_SUBTITLE, player);
-      }
-      if (!message.isEmpty() && expired) {
-        player.sendMessage(message);
-        visual = true;
-      }
-      if ((!title.isEmpty() || !subtitle.isEmpty()) && expired) {
-        player.sendTitle(Title.builder().title(title).subtitle(subtitle).build());
-        visual = true;
-      }
+    if (!cancel) {  // Only entering if we could exit from before
+      for (int i = entering.size() - 1; i >= 0; i--) {
+        movementData = entering.get(i).getData(SettingLibrary.ENTRY, player);
+        if (movementData.equals(SettingLibrary.Movement.NONE)
+            || (movementData.equals(SettingLibrary.Movement.UNNATURAL) && translate)) {
+          cancel = true;
+          message = entering.get(i).getData(SettingLibrary.ENTRY_DENY_MESSAGE, player);
+          title = entering.get(i).getData(SettingLibrary.ENTRY_DENY_TITLE, player);
+          subtitle = entering.get(i).getData(SettingLibrary.ENTRY_DENY_SUBTITLE, player);
+        } else {
+          message = entering.get(i).getData(SettingLibrary.GREETING, player);
+          title = entering.get(i).getData(SettingLibrary.GREETING_TITLE, player);
+          subtitle = entering.get(i).getData(SettingLibrary.GREETING_SUBTITLE, player);
+        }
+        if (!message.isEmpty() && (expired || !lastSentMessage.equals(message.toPlain()))) {
+          player.sendMessage(message);
+          lastSentMessages.put(player.getUniqueId(), message.toPlain());
+          visual = true;
+        }
+        if (!title.isEmpty() || !subtitle.isEmpty()) {
+          player.sendTitle(Title.builder().title(title).subtitle(subtitle).build());
+          visual = true;
+        }
 
-      if (entering.get(i) instanceof VolumeHost && isHostViewer(player.getUniqueId()) && expired) {
-        EffectsUtil.showVolume((VolumeHost) entering.get(i), player, 5);
-        visual = true;
+        if (entering.get(i) instanceof VolumeHost && isHostViewer(player.getUniqueId())) {
+          EffectsUtil.showVolume((VolumeHost) entering.get(i), player, 5);
+          visual = true;
+        }
       }
     }
 
@@ -241,6 +255,8 @@ public class PlayerMovementHandler {
     }
 
     /* Perform cancellation behavior */
+
+    // This is a quick fix for managing vehicles
     if (cancel && player.getVehicle().isPresent()) {
       // Dismount so the even can be cancelled properly
       Entity vehicle = player.getVehicle().get();
