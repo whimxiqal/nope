@@ -66,8 +66,12 @@ import java.nio.file.Path;
 public class Nope {
 
   public static final String GLOBAL_HOST_NAME = "_global";
+  public static final String ZONE_CONFIG_FILENAME = "zones.conf";
+  public static final String ZONE_CONFIG_BACKUP_FILENAME = "zones-backup.conf";
+
   public static final int WORLD_DEPTH = 512;
   public static final int WORLD_RADIUS = 100000;
+  public static final int MAX_HOST_COUNT = 100000;
   public static String REPO_URL = "https://gitlab.com/minecraftonline/nope/";
   @Getter
   private static Nope instance;
@@ -110,12 +114,6 @@ public class Nope {
     collisionHandler = new CollisionHandler();
     playerMovementHandler = new PlayerMovementHandler();
 
-    hostTree = new HostTreeImpl(
-        new HoconHostTreeImplStorage(),
-        Nope.GLOBAL_HOST_NAME,
-        s -> "_world-" + s,
-        "[a-zA-Z0-9\\-\\.][a-zA-Z0-9_\\-\\.]*");
-
     NopeKeys.ZONE_WAND = Key.builder()
         .type(TypeTokens.BOOLEAN_VALUE_TOKEN)
         .id("nopezonewand")
@@ -138,6 +136,7 @@ public class Nope {
   public void onServerStart(GameStartedServerEvent event) {
     Extra.printSplashscreen();
     loadState();
+    saveStateBackup();
 
     DynamicSettingListeners.register();
     StaticSettingListeners.register();
@@ -172,7 +171,18 @@ public class Nope {
   public void saveState() {
     try {
       if (isValid()) {
-        hostTree.save();
+        hostTree.save(ZONE_CONFIG_FILENAME);
+      }
+    } catch (Exception e) {
+      setValid(false);
+      e.printStackTrace();
+    }
+  }
+
+  public void saveStateBackup() {
+    try {
+      if (isValid()) {
+        hostTree.save(ZONE_CONFIG_BACKUP_FILENAME);
       }
     } catch (Exception e) {
       setValid(false);
@@ -183,7 +193,15 @@ public class Nope {
   public void loadState() {
     try {
       if (isValid()) {
-        hostTree.load();
+        HostTree freshTree = new HostTreeImpl(
+            new HoconHostTreeImplStorage(),
+            Nope.GLOBAL_HOST_NAME,
+            s -> "_world-" + s,
+            "[a-zA-Z0-9\\-\\.][a-zA-Z0-9_\\-\\.]*");
+        freshTree.load(ZONE_CONFIG_FILENAME);
+
+        // Set or replace the host tree
+        this.hostTree = freshTree;
       }
     } catch (Exception e) {
       setValid(false);

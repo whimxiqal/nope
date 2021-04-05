@@ -54,6 +54,7 @@ import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.entity.weather.Lightning;
 import org.spongepowered.api.event.Event;
+import org.spongepowered.api.event.action.FishingEvent;
 import org.spongepowered.api.event.action.SleepingEvent;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.event.block.InteractBlockEvent;
@@ -99,6 +100,13 @@ public final class DynamicSettingListeners {
           SettingLibrary.ARMOR_STAND_DESTROY,
           AttackEntityEvent.class,
           entityVersusEntityCanceller(SettingLibrary.ARMOR_STAND_DESTROY, Player.class, ArmorStand.class));
+  @DynamicSettingListener
+  static final SettingListener<InteractEntityEvent.Secondary> ARMOR_STAND_INTERACT_LISTENER =
+      new PlayerRootCancelConditionSettingListener<>(
+          SettingLibrary.ARMOR_STAND_INTERACT,
+          InteractEntityEvent.Secondary.class,
+          (event, player) -> event.getTargetEntity().getType().equals(EntityTypes.ARMOR_STAND)
+              && !Nope.getInstance().getHostTree().lookup(SettingLibrary.ARMOR_STAND_INTERACT, player, event.getTargetEntity().getLocation()));
   @DynamicSettingListener
   static final SettingListener<SpawnEntityEvent> ARMOR_STAND_PLACE_LISTENER =
       new CancelConditionSettingListener<>(
@@ -628,11 +636,18 @@ public final class DynamicSettingListeners {
               Player.class,
               ItemFrame.class));
   @DynamicSettingListener
+  static final SettingListener<InteractEntityEvent.Secondary> ITEM_FRAME_INTERACT_LISTENER =
+      new PlayerRootCancelConditionSettingListener<>(
+          SettingLibrary.ITEM_FRAME_INTERACT,
+          InteractEntityEvent.Secondary.class,
+          (event, player) -> event.getTargetEntity().getType().equals(EntityTypes.ITEM_FRAME)
+              && !Nope.getInstance().getHostTree().lookup(SettingLibrary.ITEM_FRAME_INTERACT, player, event.getTargetEntity().getLocation()));
+  @DynamicSettingListener
   static final SettingListener<SpawnEntityEvent> ITEM_FRAME_PLACE_LISTENER =
       new CancelConditionSettingListener<>(
           SettingLibrary.ITEM_FRAME_PLACE,
           SpawnEntityEvent.class,
-          spawnEntityCanceler(SettingLibrary.ARMOR_STAND_PLACE, ItemFrame.class));
+          spawnEntityCanceler(SettingLibrary.ITEM_FRAME_PLACE, ItemFrame.class));
   @DynamicSettingListener
   static final SettingListener<ChangeInventoryEvent.Pickup.Pre> ITEM_PICKUP_LISTENER =
       new PlayerRootCancelConditionSettingListener<>(
@@ -805,6 +820,18 @@ public final class DynamicSettingListeners {
                   .disableCollision((Player) event.getTargetEntity());
             }
           });
+  @DynamicSettingListener
+  static final SettingListener<FishingEvent.HookEntity> HOOK_ENTITY_LISTENER =
+      new PlayerCauseCancelConditionSettingListener<>(
+          SettingLibrary.PLAYER_COLLISION,
+          FishingEvent.HookEntity.class,
+          (event, player) ->
+              !Nope.getInstance().getHostTree().lookup(SettingLibrary.PLAYER_COLLISION, player, player.getLocation())
+                  || (
+                  event.getTargetEntity() instanceof Player
+                      && !Nope.getInstance().getHostTree().lookup(SettingLibrary.PLAYER_COLLISION,
+                      (Player) event.getTargetEntity(),
+                      event.getTargetEntity().getLocation())));
   @DynamicSettingListener
   static final SettingListener<DamageEntityEvent> PVA_LISTENER =
       new CancelConditionSettingListener<>(

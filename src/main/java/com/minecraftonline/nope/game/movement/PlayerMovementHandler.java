@@ -44,6 +44,8 @@ import org.spongepowered.api.text.title.Title;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 
+import java.util.Collection;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -153,12 +155,12 @@ public class PlayerMovementHandler {
                                Location<World> last,
                                boolean translate,
                                Consumer<Boolean> canceller) {
-    List<Host> exiting = Nope.getInstance()
+    List<Host> exiting = new LinkedList<>(Nope.getInstance()
         .getHostTree()
-        .getContainingHosts(first);
-    List<Host> entering = Nope.getInstance()
+        .getContainingHosts(first));
+    List<Host> entering = new LinkedList<>(Nope.getInstance()
         .getHostTree()
-        .getContainingHosts(last);
+        .getContainingHosts(last));
     Set<Host> unchanged = Sets.newHashSet(exiting);
     unchanged.retainAll(entering);
     exiting.removeAll(unchanged);

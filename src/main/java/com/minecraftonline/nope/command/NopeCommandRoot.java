@@ -64,6 +64,7 @@ import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.text.format.TextStyles;
 
 import javax.annotation.Nonnull;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -159,7 +160,7 @@ public class NopeCommandRoot extends CommandNode {
       return Optional.empty();
     }
     Player player = (Player) src;
-    List<Host> containing = Nope.getInstance()
+    Collection<Host> containing = Nope.getInstance()
         .getHostTree()
         .getContainingHosts(player.getLocation());
     if (containing.isEmpty()) {

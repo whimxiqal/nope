@@ -32,6 +32,7 @@ import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.entity.MoveEntityEvent;
+import org.spongepowered.api.event.filter.cause.First;
 import org.spongepowered.api.event.filter.cause.Root;
 import org.spongepowered.api.event.network.ClientConnectionEvent;
 
@@ -47,8 +48,14 @@ public final class StaticSettingListeners {
   private StaticSettingListeners() {
   }
 
+  /**
+   * A static listener to handle every entity within a movement event
+   *
+   * @param event  the event
+   * @param player the cause of movement
+   */
   @Listener
-  public void onMove(MoveEntityEvent.Position event, @Root Player player) {
+  public void onMoveEntityChain(MoveEntityEvent.Position event, @First Player player) {
     // Run the threshold handler for every player on the vehicle stack
     LinkedList<Entity> entities = new LinkedList<>();
     entities.add(player.getBaseVehicle());
@@ -74,9 +81,10 @@ public final class StaticSettingListeners {
               event.setCancelled(cancelled);
             }
         );
-        if (!Nope.getInstance().getHostTree().lookup(SettingLibrary.RIDE,
-            (Player) current.get(),
-            current.get().getLocation())) {
+        if (current.get().getVehicle().isPresent()
+            && !Nope.getInstance().getHostTree().lookup(SettingLibrary.RIDE,
+                (Player) current.get(),
+                current.get().getLocation())) {
           current.get().setVehicle(null);
         }
       }

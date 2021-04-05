@@ -36,6 +36,7 @@ import com.minecraftonline.nope.host.VolumeHost;
 import com.minecraftonline.nope.permission.Permissions;
 import com.minecraftonline.nope.util.Format;
 import org.spongepowered.api.command.CommandResult;
+import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.world.World;
 
@@ -69,8 +70,17 @@ public class MoveCommand extends LambdaCommandNode {
         throw new IllegalStateException("World was null where it never should be!");
       }
 
+      // Remove the host that's moving
+      VolumeHost removed;
       try {
-        VolumeHost removed = Nope.getInstance().getHostTree().removeZone(host.getName());
+        removed = Nope.getInstance().getHostTree().removeZone(host.getName());
+      } catch (IllegalArgumentException e) {
+        src.sendMessage(Format.error("Could not move zone: " + e.getMessage()));
+        return CommandResult.empty();
+      }
+
+      // Add the new one
+      try {
         VolumeHost created = Nope.getInstance().getHostTree().addZone(
             host.getName(),
             world.getUniqueId(),
@@ -78,10 +88,16 @@ public class MoveCommand extends LambdaCommandNode {
             max,
             host.getPriority()
         );
+        if (created == null) {
+          src.sendMessage(Format.error("Could not create zone"));
+          reAddHost(removed, src);
+          return CommandResult.empty();
+        }
         created.putAll(removed.getAll());
 
       } catch (IllegalArgumentException e) {
         src.sendMessage(Format.error("Could not move zone: " + e.getMessage()));
+        reAddHost(removed, src);
         return CommandResult.empty();
       }
 
@@ -96,5 +112,26 @@ public class MoveCommand extends LambdaCommandNode {
 
       return CommandResult.success();
     });
+  }
+
+  private void reAddHost(VolumeHost host, CommandSource src) {
+    VolumeHost reAdded;
+    try {
+      reAdded = Nope.getInstance().getHostTree().addZone(
+          host.getName(),
+          host.getWorldUuid(),
+          new Vector3i(host.getMinX(), host.getMinY(), host.getMinZ()),
+          new Vector3i(host.getMaxX(), host.getMaxY(), host.getMaxZ()),
+          host.getPriority());
+      if (reAdded == null) {
+        src.sendMessage(Format.error("Severe: The host in transit could not be recovered"));
+        Nope.getInstance().getLogger()
+            .error(String.format("Host %s was requested to move by %s. "
+                    + "The move failed and the original host could not be recovered.",
+            host.getName(), src.getName()));
+      }
+    } catch (IllegalArgumentException e) {
+      src.sendMessage(Format.error("Severe: The host in transit could not be recovered"));
+    }
   }
 }

@@ -25,6 +25,10 @@
 
 package com.minecraftonline.nope.structures;
 
+import com.flowpowered.math.vector.Vector3i;
+
+import java.util.Collection;
+
 public interface Volume {
 
   /**
@@ -85,6 +89,15 @@ public interface Volume {
         && y <= this.getMaxY()
         && z >= this.getMinZ()
         && z <= this.getMaxZ();
+  }
+
+  default boolean contains(Volume other) {
+    return other.getMinX() >= this.getMinX()
+        && other.getMaxX() <= this.getMaxX()
+        && other.getMinY() >= this.getMinY()
+        && other.getMaxY() <= this.getMaxY()
+        && other.getMinZ() >= this.getMinZ()
+        && other.getMaxZ() <= this.getMaxZ();
   }
 
   /**

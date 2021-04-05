@@ -55,10 +55,15 @@ public final class Templates {
   public static Template MALICIOUS_PROTECTIONS = new Template("malicious-protections", () -> {
     SettingMap map = new SettingMap();
     map.put(Setting.of(SettingLibrary.ARMOR_STAND_DESTROY, SettingValue.of(false)));
+    map.put(Setting.of(SettingLibrary.ARMOR_STAND_INTERACT, SettingValue.of(false)));
+    map.put(Setting.of(SettingLibrary.ARMOR_STAND_PLACE, SettingValue.of(false)));
     map.put(Setting.of(SettingLibrary.BLOCK_BREAK, SettingValue.of(false)));
     map.put(Setting.of(SettingLibrary.BLOCK_PLACE, SettingValue.of(false)));
     map.put(Setting.of(SettingLibrary.ITEM_FRAME_DESTROY, SettingValue.of(false)));
+    map.put(Setting.of(SettingLibrary.ITEM_FRAME_INTERACT, SettingValue.of(false)));
+    map.put(Setting.of(SettingLibrary.ITEM_FRAME_PLACE, SettingValue.of(false)));
     map.put(Setting.of(SettingLibrary.PAINTING_DESTROY, SettingValue.of(false)));
+    map.put(Setting.of(SettingLibrary.PAINTING_PLACE, SettingValue.of(false)));
     map.put(Setting.of(SettingLibrary.VEHICLE_DESTROY, SettingValue.of(false)));
     map.put(Setting.of(SettingLibrary.VEHICLE_PLACE, SettingValue.of(false)));
     return map;

@@ -27,6 +27,7 @@ package com.minecraftonline.nope.util;
 import com.google.common.collect.Lists;
 import com.minecraftonline.nope.Nope;
 import com.minecraftonline.nope.command.InfoCommand;
+import com.minecraftonline.nope.command.UnsetCommand;
 import com.minecraftonline.nope.host.Host;
 import com.minecraftonline.nope.permission.Permissions;
 import com.minecraftonline.nope.setting.Setting;
@@ -123,7 +124,7 @@ public final class Format {
                              @Nullable Text hoverMessage) {
     Text.Builder builder = Text.builder()
         .append(Text.of(TextColors.GOLD, TextStyles.ITALIC, "[",
-            Text.of(TextColors.GRAY, label), "]"))
+            Text.of(TextColors.LIGHT_PURPLE, label), "]"))
         .onClick(TextActions.runCommand(command));
     if (hoverMessage != null) {
       builder.onHover(TextActions.showText(Text.of(
@@ -198,11 +199,43 @@ public final class Format {
     return builder.build();
   }
 
-  public static <T> CompletableFuture<List<Text>> setting(Setting<T> setting) {
+  private static Text settingValue(Text value, boolean redundantOnDefault, Host redundancyController) {
+    Text.Builder builder = Text.builder();
+    if (redundancyController != null) {
+      // Redundant
+      builder.append(Text.of(TextColors.GRAY, value));
+      if (redundantOnDefault) {
+        builder.onHover(TextActions.showText(Text.of("This setting is redundant because it is the default value")));
+      } else {
+        builder.onHover(TextActions.showText(Text.of("This setting is redundant because host ",
+            Format.host(redundancyController),
+            " has the same setting")));
+      }
+    } else {
+      builder.append(Text.of(TextColors.WHITE, value));
+    }
+    return builder.build();
+  }
+
+  public static <T> CompletableFuture<List<Text>> setting(Setting<T> setting,
+                                                          @Nonnull Host host,
+                                                          @Nullable Host redundancyController) {
     return CompletableFuture.supplyAsync(() -> {
       List<Text> list = Lists.newLinkedList();
-      list.add(Text.of(Format.settingKey(setting.getKey(), false),
-          Format.note(" = ", setting.getKey().print(setting.getValue().getData()))));
+      list.add(Text.builder()
+          .append(Format.settingKey(setting.getKey(), false),
+              Format.settingValue(Text.of(" = ", setting.getKey().print(setting.getValue().getData())),
+                  host.equals(redundancyController),
+                  redundancyController))
+          .onClick(TextActions.suggestCommand(
+              Nope.getInstance().getCommandTree()
+                  .findNode(UnsetCommand.class)
+                  .orElseThrow(() ->
+                      new RuntimeException("UnsetCommand is not set in Nope command tree!"))
+                  .getFullCommand()
+                  + String.format(" -z %s %s",
+                  host.getName(),
+                  setting.getKey()))).build());
 
       if (setting.getValue().getTarget() != null) {
         SettingValue.Target target = setting.getValue().getTarget();

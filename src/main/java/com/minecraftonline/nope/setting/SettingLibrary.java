@@ -68,11 +68,18 @@ import java.util.stream.Collectors;
 
 public final class SettingLibrary {
 
-  @Description("When disabled, armor stands may not be broken")
+  @Description("When disabled, armor stands may not be broken by players")
   @Category(SettingKey.CategoryType.ENTITY)
   @PlayerRestrictive
   public static final SettingKey<Boolean> ARMOR_STAND_DESTROY = new StateSetting(
       "armor-stand-destroy",
+      true
+  );
+  @Description("When disabled, armor stands may not be interacted with by a player")
+  @Category(SettingKey.CategoryType.ENTITY)
+  @PlayerRestrictive
+  public static final SettingKey<Boolean> ARMOR_STAND_INTERACT = new StateSetting(
+      "armor-stand-interact",
       true
   );
   @Description("When disabled, armor stands may not be placed")
@@ -397,11 +404,18 @@ public final class SettingLibrary {
       "item-drop",
       true
   );
-  @Description("When disabled, item frames may not be broken")
+  @Description("When disabled, item frames may not be attacked by players")
   @Category(SettingKey.CategoryType.ENTITY)
   @PlayerRestrictive
   public static final SettingKey<Boolean> ITEM_FRAME_DESTROY = new StateSetting(
       "item-frame-destroy",
+      true
+  );
+  @Description("When disabled, item frames may not be interacted with by a player")
+  @Category(SettingKey.CategoryType.ENTITY)
+  @PlayerRestrictive
+  public static final SettingKey<Boolean> ITEM_FRAME_INTERACT = new StateSetting(
+      "item-frame-interact",
       true
   );
   @Description("When disabled, item frames may not be placed")
@@ -472,13 +486,7 @@ public final class SettingLibrary {
       "op-permissions",
       true
   );
-  // TODO write description
-  @NotImplemented
-  public static final SettingKey<Boolean> OTHER_EXPLOSION = new BooleanSetting(
-      "other-explosion",
-      true
-  );
-  @Description("When disabled, paintings may not be broken")
+  @Description("When disabled, paintings may not be broken by players")
   @Category(SettingKey.CategoryType.ENTITY)
   @PlayerRestrictive
   public static final SettingKey<Boolean> PAINTING_DESTROY = new StateSetting(

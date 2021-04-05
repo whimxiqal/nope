@@ -111,10 +111,10 @@ public class InfoCommand extends LambdaCommandNode {
         // Volume zones only:
         headerLines.add(Format.keyValue(TextColors.DARK_GRAY, "min: ",
             (volumeHost.getMinX() == Integer.MIN_VALUE ? "-Inf" : volumeHost.getMinX())
-            + ", "
-            + volumeHost.getMinY()
-            + ", "
-            + (volumeHost.getMinZ() == Integer.MIN_VALUE ? "-Inf" : volumeHost.getMinZ())));
+                + ", "
+                + volumeHost.getMinY()
+                + ", "
+                + (volumeHost.getMinZ() == Integer.MIN_VALUE ? "-Inf" : volumeHost.getMinZ())));
 
         headerLines.add(Format.keyValue(TextColors.DARK_GRAY, "max: ",
             (volumeHost.getMaxX() == Integer.MAX_VALUE ? "Inf" : volumeHost.getMaxX())
@@ -137,8 +137,9 @@ public class InfoCommand extends LambdaCommandNode {
                 .sorted(Comparator.comparing(setting -> setting.getKey().getId()))
                 .flatMap(setting -> {
                   try {
-                    return Format.setting(setting).get().stream()
-                        .map(text -> Text.builder().append(text)
+                    return Format.setting(setting, host, Nope.getInstance().getHostTree().isRedundant(host, setting.getKey()))
+                        .get()
+                        .stream().map(text -> Text.builder().append(text)
                             .onClick(TextActions.suggestCommand(
                                 Nope.getInstance().getCommandTree()
                                     .findNode(UnsetCommand.class)

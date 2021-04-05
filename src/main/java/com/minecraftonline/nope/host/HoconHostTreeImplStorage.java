@@ -50,23 +50,17 @@ import ninja.leaping.configurate.objectmapping.serialize.TypeSerializerCollectio
 
 public class HoconHostTreeImplStorage implements HostTreeImpl.Storage {
 
-  private static final String ZONE_CONFIG_FILENAME = "zones.conf";
   private static final String WORLD_SUB_ZONES_KEY = "sub-zones";
-  private final HoconConfigurationLoader loader;
 
-  /**
-   * Default constructor.
-   */
   @SuppressWarnings("UnstableApiUsage")
-  public HoconHostTreeImplStorage() {
-    // These method calls threw errors, including the loader?
+  private HoconConfigurationLoader getLoader(String fileName) {
     final TypeSerializerCollection typeSerializerCollection = TypeSerializerCollection.create()
         .register(NopeTypeTokens.JSON_ELEMENT_TYPE_TOKEN, new JsonElementSerializer());
 
     ConfigurationOptions options = ConfigurationOptions.defaults()
         .withSerializers(typeSerializerCollection);
 
-    Path zoneConfig = Nope.getInstance().getConfigDir().resolve(ZONE_CONFIG_FILENAME);
+    Path zoneConfig = Nope.getInstance().getConfigDir().resolve(fileName);
     try {
       if (zoneConfig.toFile().createNewFile()) {
         Nope.getInstance().getLogger().info("No config file found. New config file created.");
@@ -75,7 +69,7 @@ public class HoconHostTreeImplStorage implements HostTreeImpl.Storage {
       throw new RuntimeException("Zone config file was not found but could not be created.");
     }
 
-    this.loader = HoconConfigurationLoader.builder()
+    return HoconConfigurationLoader.builder()
         .setDefaultOptions(options)
         .setPath(zoneConfig)
         .build();
@@ -83,9 +77,9 @@ public class HoconHostTreeImplStorage implements HostTreeImpl.Storage {
 
   @Override
   @SuppressWarnings("UnstableApiUsage")
-  public GlobalHost readGlobalHost(Host.HostSerializer<GlobalHost> serializer)
+  public GlobalHost readGlobalHost(String fileName, Host.HostSerializer<GlobalHost> serializer)
       throws IOException, HostParseException {
-    try (Connection connection = new Connection(loader)) {
+    try (Connection connection = new Connection(getLoader(fileName))) {
       final JsonElement jsonElement = connection.node
           .getNode(Nope.GLOBAL_HOST_NAME)
           .getValue(NopeTypeTokens.JSON_ELEMENT_TYPE_TOKEN);
@@ -102,10 +96,10 @@ public class HoconHostTreeImplStorage implements HostTreeImpl.Storage {
 
   @Override
   @SuppressWarnings("UnstableApiUsage")
-  public Collection<WorldHost> readWorldHosts(Host.HostSerializer<WorldHost> serializer)
+  public Collection<WorldHost> readWorldHosts(String fileName, Host.HostSerializer<WorldHost> serializer)
       throws IOException, HostParseException {
 
-    try (Connection connection = new Connection(loader)) {
+    try (Connection connection = new Connection(getLoader(fileName))) {
       return connection.node.getChildrenMap().entrySet()
           .stream()
           .filter(entry ->
@@ -125,12 +119,12 @@ public class HoconHostTreeImplStorage implements HostTreeImpl.Storage {
 
   @Override
   @SuppressWarnings("UnstableApiUsage")
-  public Collection<HostTreeImpl.Zone> readZones(Collection<WorldHost> parents,
+  public Collection<HostTreeImpl.Zone> readZones(String fileName, Collection<WorldHost> parents,
                                                  Host.HostSerializer<HostTreeImpl.Zone> serializer)
       throws IOException, HostParseException {
 
     List<HostTreeImpl.Zone> zones = new ArrayList<>();
-    try (Connection connection = new Connection(loader)) {
+    try (Connection connection = new Connection(getLoader(fileName))) {
       // return collection of zones
       for (WorldHost worldHost : parents) {
         final ConfigurationNode worldNode = connection.node.getNode(worldHost.getName(), WORLD_SUB_ZONES_KEY);
@@ -154,10 +148,10 @@ public class HoconHostTreeImplStorage implements HostTreeImpl.Storage {
 
   @Override
   @SuppressWarnings("UnstableApiUsage")
-  public void writeGlobalHost(GlobalHost globalHost,
+  public void writeGlobalHost(String fileName, GlobalHost globalHost,
                               Host.HostSerializer<GlobalHost> serializer)
       throws IOException, HostParseException {
-    try (Connection connection = new Connection(loader)) {
+    try (Connection connection = new Connection(getLoader(fileName))) {
       // write GlobalHost
       final ConfigurationNode node = connection.node.getNode(Nope.GLOBAL_HOST_NAME);
       node.setValue(null); // Blank it.
@@ -170,11 +164,11 @@ public class HoconHostTreeImplStorage implements HostTreeImpl.Storage {
 
   @Override
   @SuppressWarnings("UnstableApiUsage")
-  public void writeWorldHosts(Collection<WorldHost> worldHosts,
+  public void writeWorldHosts(String fileName, Collection<WorldHost> worldHosts,
                               Host.HostSerializer<WorldHost> serializer)
       throws IOException, HostParseException {
 
-    try (Connection connection = new Connection(loader)) {
+    try (Connection connection = new Connection(getLoader(fileName))) {
       // write collection of WorldHosts
       for (WorldHost worldHost : worldHosts) {
         final ConfigurationNode node = connection.node.getNode(worldHost.getName());
@@ -189,11 +183,11 @@ public class HoconHostTreeImplStorage implements HostTreeImpl.Storage {
 
   @Override
   @SuppressWarnings("UnstableApiUsage")
-  public void writeZones(Collection<HostTreeImpl.Zone> zones,
+  public void writeZones(String fileName, Collection<HostTreeImpl.Zone> zones,
                          Host.HostSerializer<HostTreeImpl.Zone> serializer)
       throws IOException, HostParseException {
 
-    try (Connection connection = new Connection(loader)) {
+    try (Connection connection = new Connection(getLoader(fileName))) {
       // write collection of zones
       Set<String> worlds = zones.stream().map(zone ->
           zone.getParent().getName()).collect(Collectors.toSet());
@@ -220,9 +214,11 @@ public class HoconHostTreeImplStorage implements HostTreeImpl.Storage {
    */
   private class Connection implements Closeable {
     private final ConfigurationNode node;
+    private final HoconConfigurationLoader loader;
 
     public Connection(HoconConfigurationLoader loader) {
       try {
+        this.loader = loader;
         this.node = loader.load();
       } catch (IOException e) {
         throw new HostParseException(e);

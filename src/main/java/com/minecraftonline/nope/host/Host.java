@@ -26,6 +26,7 @@
 package com.minecraftonline.nope.host;
 
 import com.google.gson.JsonElement;
+import com.minecraftonline.nope.Nope;
 import com.minecraftonline.nope.setting.Setting;
 import com.minecraftonline.nope.setting.SettingKey;
 import com.minecraftonline.nope.setting.SettingLibrary;
@@ -48,6 +49,8 @@ import java.util.UUID;
  * A storage class for setting assignments.
  */
 public abstract class Host {
+
+  public static int HIGHEST_PRIORITY = 99999;
 
   public static String nameToContextKey(String name) {
     return "nope.host." + name;
@@ -75,7 +78,6 @@ public abstract class Host {
   @Setter
   @Getter
   private Host parent;
-  @Setter
   @Getter
   private int priority;
 
@@ -176,6 +178,13 @@ public abstract class Host {
         .filter(value -> value.getTarget().test(key, player))
         .map(SettingValue::getData)
         .orElse(key.getDefaultData());
+  }
+
+  public void setPriority(int priority) throws IllegalArgumentException {
+    if (priority > Nope.MAX_HOST_COUNT) {
+      throw new IllegalArgumentException(String.format("The priority set for host %s is too large!", getName()));
+    }
+    this.priority = priority;
   }
 
   /**

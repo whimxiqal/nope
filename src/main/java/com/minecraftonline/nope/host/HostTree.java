@@ -48,13 +48,17 @@ public interface HostTree {
 
   /**
    * Load all data from some specified storage.
+   *
+   * @param location the location information to load from
    */
-  void load() throws Exception;
+  void load(String location) throws Exception;
 
   /**
    * Save all data to some specified storage.
+   *
+   * @param location the location information to save to
    */
-  void save() throws Exception;
+  void save(String location) throws Exception;
 
   /**
    * Get the GlobalHost.
@@ -113,12 +117,12 @@ public interface HostTree {
    * @param pos2      another point which defines this zone
    * @param priority  a priority level. The higher the priority, the larger the precedence.
    *                  Two intersecting zones may not have the same priority level.
-   * @return the created zone
+   * @return the created zone, or null if it can't be created
    * @throws IllegalArgumentException if the inputs will lead to an invalid HostTree state,
    *                                  like if the name is not unique or the priority is the same
    *                                  as an overlapping zone
    */
-  @Nonnull
+  @Nullable
   VolumeHost addZone(final String name,
                      final UUID worldUuid,
                      final Vector3i pos1,
@@ -152,7 +156,7 @@ public interface HostTree {
    * @return a list of host containers
    */
   @Nonnull
-  List<Host> getContainingHosts(@Nonnull Location<World> location);
+  Collection<Host> getContainingHosts(@Nonnull Location<World> location);
 
   /**
    * Check if this SettingKey has been assigned to any hosts in the host tree.
@@ -161,6 +165,20 @@ public interface HostTree {
    * @return true if this key has been assigned to a host, false if not.
    */
   boolean isAssigned(final SettingKey<?> key);
+
+  /**
+   * Determines if a SettingKey is redundant. That is, see if a setting key
+   * is set to the same value as a Host such that the host has a greater
+   * priority and the Host completely encapsulates the original one.
+   *
+   * @param host the host which may have a redundant key
+   * @param key  a setting key which may be redundant
+   * @return the host which causes the key to be redundant on the input Host.
+   * Returns null if it is not redundant and returns the original host
+   * if it is redundant because of the plugin's default value
+   */
+  @Nullable
+  Host isRedundant(Host host, SettingKey<?> key);
 
   /**
    * Find the value corresponding to this setting key dependent on whether

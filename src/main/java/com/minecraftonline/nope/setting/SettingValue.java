@@ -66,8 +66,8 @@ public class SettingValue<T> {
   private final Target target;
 
   private SettingValue(@Nonnull T data, @Nonnull Target target) {
-    this.data = data;
-    this.target = target;
+    this.data = Objects.requireNonNull(data);
+    this.target = Objects.requireNonNull(target);
   }
 
   /**
@@ -91,6 +91,24 @@ public class SettingValue<T> {
    */
   public static <X> SettingValue<X> of(@Nonnull X data, @Nonnull Target target) {
     return new SettingValue<>(data, target);
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+
+    SettingValue<?> that = (SettingValue<?>) o;
+
+    if (!data.equals(that.data)) return false;
+    return target.equals(that.target);
+  }
+
+  @Override
+  public int hashCode() {
+    int result = data.hashCode();
+    result = 31 * result + target.hashCode();
+    return result;
   }
 
   /**
@@ -195,6 +213,28 @@ public class SettingValue<T> {
       target.users.addAll(collection);
       target.whitelist = false;
       return target;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+      if (this == o) return true;
+      if (o == null || getClass() != o.getClass()) return false;
+      if (!super.equals(o)) return false;
+
+      Target target = (Target) o;
+
+      if (whitelist != target.whitelist) return false;
+      if (forceAffect != target.forceAffect) return false;
+      return users.equals(target.users);
+    }
+
+    @Override
+    public int hashCode() {
+      int result = super.hashCode();
+      result = 31 * result + users.hashCode();
+      result = 31 * result + (whitelist ? 1 : 0);
+      result = 31 * result + (forceAffect ? 1 : 0);
+      return result;
     }
 
     /**

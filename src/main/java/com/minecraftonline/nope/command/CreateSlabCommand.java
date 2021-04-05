@@ -82,6 +82,10 @@ public class CreateSlabCommand extends LambdaCommandNode {
             maxSelection,
             priority
         );
+        if (zone == null) {
+          src.sendMessage(Format.error("Could not create zone"));
+          return CommandResult.empty();
+        }
         Nope.getInstance().saveState();
         DynamicSettingListeners.register();
         src.sendMessage(Format.success("Successfully created zone ", Format.note(zone.getName()), "!"));
