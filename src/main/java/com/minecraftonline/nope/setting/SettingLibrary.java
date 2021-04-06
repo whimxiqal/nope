@@ -449,6 +449,12 @@ public final class SettingLibrary {
       "leaf-decay",
       true
   );
+  @Description("When disabled, players cannot put leads on mobs")
+  @Category(SettingKey.CategoryType.BLOCKS)
+  public static final SettingKey<Boolean> LEASH = new StateSetting(
+      "leash",
+      true
+  );
   @Description("When disabled, lightning cannot strike")
   @Category(SettingKey.CategoryType.BLOCKS)
   public static final SettingKey<Boolean> LIGHTNING = new BooleanSetting(

@@ -38,6 +38,7 @@ import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.data.Transaction;
+import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityType;
@@ -48,6 +49,7 @@ import org.spongepowered.api.entity.hanging.Painting;
 import org.spongepowered.api.entity.living.Agent;
 import org.spongepowered.api.entity.living.ArmorStand;
 import org.spongepowered.api.entity.living.Hostile;
+import org.spongepowered.api.entity.living.Squid;
 import org.spongepowered.api.entity.living.animal.Animal;
 import org.spongepowered.api.entity.living.monster.Ghast;
 import org.spongepowered.api.entity.living.player.Player;
@@ -714,6 +716,18 @@ public final class DynamicSettingListeners {
               BlockTypes.LEAVES,
               BlockTypes.AIR));
   @DynamicSettingListener
+  static final SettingListener<LeashEntityEvent> LEASH_LISTENER =
+      new PlayerRootCancelConditionSettingListener<>(
+          SettingLibrary.LEASH,
+          LeashEntityEvent.class,
+          (event, player) -> {
+            Boolean canceling = !Nope.getInstance().getHostTree().lookup(SettingLibrary.LEASH,
+                player,
+                event.getTargetEntity().getLocation());
+            Nope.getInstance().getLogger().info(canceling.toString());
+            return canceling;
+          });
+  @DynamicSettingListener
   static final SettingListener<SpawnEntityEvent> LIGHTNING_LISTENER =
       new CancelConditionSettingListener<>(
           SettingLibrary.LIGHTNING,
@@ -837,7 +851,8 @@ public final class DynamicSettingListeners {
       new CancelConditionSettingListener<>(
           SettingLibrary.PVA,
           DamageEntityEvent.class,
-          entityVersusEntityCanceller(SettingLibrary.PVA, Player.class, Animal.class));
+          event -> entityVersusEntityCanceller(SettingLibrary.PVA, Player.class, Animal.class).test(event)
+      || entityVersusEntityCanceller(SettingLibrary.PVA, Player.class, Squid.class).test(event));
   @DynamicSettingListener
   static final SettingListener<DamageEntityEvent> PVH_LISTENER =
       new CancelConditionSettingListener<>(

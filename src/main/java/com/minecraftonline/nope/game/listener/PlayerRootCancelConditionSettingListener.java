@@ -25,6 +25,7 @@
 
 package com.minecraftonline.nope.game.listener;
 
+import com.minecraftonline.nope.Nope;
 import com.minecraftonline.nope.setting.SettingKey;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Cancellable;
@@ -51,6 +52,7 @@ class PlayerRootCancelConditionSettingListener<E extends Event & Cancellable>
         (event, player) -> {
           if (canceler.test(event, player)) {
             event.setCancelled(true);
+            Nope.getInstance().getLogger().info("Cancelled!");
           }
         });
   }

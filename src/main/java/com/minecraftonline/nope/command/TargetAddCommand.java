@@ -55,7 +55,7 @@ import com.minecraftonline.nope.command.common.FunctionlessCommandNode;
 import com.minecraftonline.nope.permission.Permissions;
 import org.spongepowered.api.text.Text;
 
-class TargetAddCommand extends FunctionlessCommandNode {
+public class TargetAddCommand extends FunctionlessCommandNode {
   public TargetAddCommand(CommandNode parent) {
     super(parent,
         Permissions.COMMAND_EDIT,

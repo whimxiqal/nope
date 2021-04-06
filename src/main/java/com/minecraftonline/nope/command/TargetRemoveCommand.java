@@ -55,7 +55,7 @@ import com.minecraftonline.nope.command.common.FunctionlessCommandNode;
 import com.minecraftonline.nope.permission.Permissions;
 import org.spongepowered.api.text.Text;
 
-public class TargetRemoveCommand extends FunctionlessCommandNode {
+class TargetRemoveCommand extends FunctionlessCommandNode {
   public TargetRemoveCommand(CommandNode parent) {
     super(parent,
         Permissions.COMMAND_EDIT,

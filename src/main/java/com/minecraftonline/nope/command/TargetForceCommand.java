@@ -71,7 +71,7 @@ import java.util.Optional;
  * A setting can bypass this passthrough feature by setting "force affect"
  * on a Target to simulate the motion that the affecting of a player is being forced.
  */
-public class TargetForceCommand extends LambdaCommandNode {
+class TargetForceCommand extends LambdaCommandNode {
   public TargetForceCommand(CommandNode parent) {
     super(parent,
         Permissions.COMMAND_EDIT,

@@ -50,10 +50,12 @@
 
 package com.minecraftonline.nope.command;
 
+import com.minecraftonline.nope.Nope;
 import com.minecraftonline.nope.arguments.NopeArguments;
 import com.minecraftonline.nope.arguments.TemplateCommandElement;
 import com.minecraftonline.nope.command.common.CommandNode;
 import com.minecraftonline.nope.command.common.LambdaCommandNode;
+import com.minecraftonline.nope.game.listener.DynamicSettingListeners;
 import com.minecraftonline.nope.host.Host;
 import com.minecraftonline.nope.permission.Permissions;
 import com.minecraftonline.nope.util.Format;
@@ -79,6 +81,9 @@ public class ApplyCommand extends LambdaCommandNode {
         return CommandResult.empty();
       }
       host.putAll(args.requireOne("template"));
+
+      Nope.getInstance().saveState();
+      DynamicSettingListeners.register();
       src.sendMessage(Format.success("Applied a template to host ",
           Format.host(host)));
       return CommandResult.success();

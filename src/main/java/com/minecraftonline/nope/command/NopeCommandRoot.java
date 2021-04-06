@@ -145,9 +145,8 @@ public class NopeCommandRoot extends CommandNode {
       if (worldHost instanceof HostTreeImpl.WorldHost) {
         if (((HostTreeImpl.WorldHost) worldHost).getZoneTree() instanceof HashQueueVolumeTree) {
           src.sendMessage(Text.of(TextColors.DARK_GRAY, "Cache size: ",
-              Format.note(
                   ((HashQueueVolumeTree<?, ?>) ((HostTreeImpl.WorldHost) worldHost).getZoneTree())
-                      .getCacheSize())));
+                      .getCacheSize()));
         }
       }
     }

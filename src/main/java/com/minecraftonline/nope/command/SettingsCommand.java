@@ -79,7 +79,7 @@ public class SettingsCommand extends LambdaCommandNode {
 
         pagination.builder()
             .title(Text.of("Nope Settings"))
-            .padding(Text.of(TextColors.DARK_GREEN, "="))
+            .padding(Text.of(Format.ACCENT, "="))
             .contents(contents)
             .build()
             .sendTo(src);

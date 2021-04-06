@@ -110,6 +110,7 @@ public class Nope {
 
   @Listener
   public void onInit(GameInitializationEvent event) {
+    Extra.printSplashscreen();
     zoneWandHandler = new ZoneWandHandler();
     collisionHandler = new CollisionHandler();
     playerMovementHandler = new PlayerMovementHandler();
@@ -134,7 +135,6 @@ public class Nope {
 
   @Listener
   public void onServerStart(GameStartedServerEvent event) {
-    Extra.printSplashscreen();
     loadState();
     saveStateBackup();
 

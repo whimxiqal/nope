@@ -27,6 +27,8 @@ package com.minecraftonline.nope.util;
 import com.google.common.collect.Lists;
 import com.minecraftonline.nope.Nope;
 import com.minecraftonline.nope.command.InfoCommand;
+import com.minecraftonline.nope.command.SetCommand;
+import com.minecraftonline.nope.command.TargetAddCommand;
 import com.minecraftonline.nope.command.UnsetCommand;
 import com.minecraftonline.nope.host.Host;
 import com.minecraftonline.nope.permission.Permissions;
@@ -135,6 +137,22 @@ public final class Format {
     return builder.build();
   }
 
+  public static Text commandSuggest(@Nonnull String label,
+                                    @Nonnull String command,
+                                    @Nullable Text hoverMessage) {
+    Text.Builder builder = Text.builder()
+        .append(Text.of(TextColors.GOLD, TextStyles.ITALIC, "[",
+            Text.of(TextColors.GRAY, label), "]"))
+        .onClick(TextActions.suggestCommand(command));
+    if (hoverMessage != null) {
+      builder.onHover(TextActions.showText(Text.of(
+          hoverMessage,
+          hoverMessage.isEmpty() ? Text.EMPTY : "\n",
+          Format.note(command))));
+    }
+    return builder.build();
+  }
+
   public static Text subtleCommand(@Nonnull String text, @Nonnull String command, @Nullable Text hoverMessage) {
     Text.Builder builder = Text.builder().append(Text.of(Format.ACCENT, text))
         .onClick(TextActions.runCommand(command));
@@ -185,7 +203,7 @@ public final class Format {
 
     if (key.getDescription() != null) {
       onHover.append(Text.NEW_LINE).append(Text.NEW_LINE);
-      onHover.append(Text.of(TextColors.GRAY, key.getDescription()));
+      onHover.append(Text.of(TextColors.WHITE, key.getDescription()));
     }
 
     builder.onHover(TextActions.showText(onHover.build()));
@@ -203,7 +221,7 @@ public final class Format {
     Text.Builder builder = Text.builder();
     if (redundancyController != null) {
       // Redundant
-      builder.append(Text.of(TextColors.GRAY, value));
+      builder.append(Text.of(TextColors.GRAY, TextStyles.STRIKETHROUGH, value));
       if (redundantOnDefault) {
         builder.onHover(TextActions.showText(Text.of("This setting is redundant because it is the default value")));
       } else {
@@ -222,20 +240,43 @@ public final class Format {
                                                           @Nullable Host redundancyController) {
     return CompletableFuture.supplyAsync(() -> {
       List<Text> list = Lists.newLinkedList();
-      list.add(Text.builder()
-          .append(Format.settingKey(setting.getKey(), false),
-              Format.settingValue(Text.of(" = ", setting.getKey().print(setting.getValue().getData())),
-                  host.equals(redundancyController),
-                  redundancyController))
-          .onClick(TextActions.suggestCommand(
-              Nope.getInstance().getCommandTree()
+      Text.Builder main = Text.builder();
+      main.append(Format.settingKey(setting.getKey(), false),
+          Text.of(" = ", Format.settingValue(setting.getKey().print(setting.getValue().getData()),
+              host.equals(redundancyController),
+              redundancyController)))
+          .append(Text.of("      "))
+          .append(Format.commandSuggest("UNSET", Nope.getInstance().getCommandTree()
                   .findNode(UnsetCommand.class)
                   .orElseThrow(() ->
                       new RuntimeException("UnsetCommand is not set in Nope command tree!"))
                   .getFullCommand()
                   + String.format(" -z %s %s",
-                  host.getName(),
-                  setting.getKey()))).build());
+              host.getName(),
+              setting.getKey()),
+              Text.of("Unset the value of this setting on this host")))
+          .append(Text.of(" "))
+          .append(Format.commandSuggest("SET", Nope.getInstance().getCommandTree()
+                  .findNode(SetCommand.class)
+                  .orElseThrow(() ->
+                      new RuntimeException("SetCommand is not set in Nope command tree!"))
+                  .getFullCommand()
+                  + String.format(" -z %s %s ___",
+              host.getName(),
+              setting.getKey()),
+              Text.of("Set this setting on this host with a value")))
+          .append(Text.of(" "))
+          .append(Format.commandSuggest("ADD", Nope.getInstance().getCommandTree()
+                  .findNode(TargetAddCommand.class)
+                  .orElseThrow(() ->
+                      new RuntimeException("TargetAddCommand is not set in Nope command tree!"))
+                  .getFullCommand()
+                  + String.format(" ___ -z %s %s ___",
+              host.getName(),
+              setting.getKey()),
+              Text.of("Add a target condition to this host")));
+
+      list.add(main.build());
 
       if (setting.getValue().getTarget() != null) {
         SettingValue.Target target = setting.getValue().getTarget();

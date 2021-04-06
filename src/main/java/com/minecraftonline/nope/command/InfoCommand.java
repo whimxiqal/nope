@@ -127,7 +127,17 @@ public class InfoCommand extends LambdaCommandNode {
       int zonePriority = host.getPriority();
       headerLines.add(Format.keyValue(TextColors.DARK_GRAY, "priority: ", String.valueOf(zonePriority)));
       headerLines.add(Text.of(TextColors.DARK_GRAY, "--------------"));  // line separator
-      headerLines.add(Text.of(TextColors.AQUA, "<< Settings >> ", Format.note("Click to unset")));
+      headerLines.add(Text.builder()
+          .append(Text.of(TextColors.AQUA, "<< Settings >>  "))
+          .append(Format.commandSuggest("NEW", Nope.getInstance().getCommandTree()
+              .findNode(SetCommand.class)
+              .orElseThrow(() ->
+                  new RuntimeException("SetCommand is not set in Nope command tree!"))
+              .getFullCommand()
+              + String.format(" -z %s ___ ___",
+              host.getName()),
+              Text.of("Set a new setting on this host.\nUse ", TextColors.GOLD, "/nope settings", TextColors.RESET, " to see all settings")))
+          .build());
 
       Sponge.getScheduler().createTaskBuilder()
           .async()
