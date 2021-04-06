@@ -451,6 +451,7 @@ public final class SettingLibrary {
   );
   @Description("When disabled, players cannot put leads on mobs")
   @Category(SettingKey.CategoryType.BLOCKS)
+  @PlayerRestrictive
   public static final SettingKey<Boolean> LEASH = new StateSetting(
       "leash",
       true
