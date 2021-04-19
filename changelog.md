@@ -1,3 +1,9 @@
+# 0.2.1
+- Fixed context calculator
+- Fixed info menu to only show commands to those with permission
+- Made some listeners prioritized EARLY instead of FIRST
+
+
 # 0.2.0
 - added settings
   - added `armor-stand-place` setting

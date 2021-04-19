@@ -66,7 +66,6 @@ import org.spongepowered.api.text.format.TextStyles;
 import javax.annotation.Nonnull;
 import java.util.Collection;
 import java.util.Comparator;
-import java.util.List;
 import java.util.Optional;
 
 public class NopeCommandRoot extends CommandNode {
@@ -87,6 +86,7 @@ public class NopeCommandRoot extends CommandNode {
     addChildren(new Position1Command(this));
     addChildren(new Position2Command(this));
     addChildren(new ReloadCommand(this));
+    addChildren(new SelectCommand(this));
     addChildren(new SetCommand(this));
     addChildren(new SetPriorityCommand(this));
     addChildren(new SettingsCommand(this));
@@ -122,12 +122,13 @@ public class NopeCommandRoot extends CommandNode {
         " ",
         Format.url("source code", Nope.REPO_URL),
         "."));
+    assert this.getHelpCommand() != null;
     src.sendMessage(Format.note(
         "Try the",
         " ",
         Format.command(
             "help",
-            this.getFullCommand(),
+            this.getHelpCommand().getFullCommand(),
             Text.EMPTY),
         " ",
         "command."));

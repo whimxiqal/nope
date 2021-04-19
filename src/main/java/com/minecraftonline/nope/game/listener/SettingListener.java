@@ -84,7 +84,7 @@ class SettingListener<E extends Event> implements EventListener<E> {
       if (key.isUnnaturalDefault() || assigned) {
         Sponge.getEventManager().registerListener(Nope.getInstance(),
             eventClass,
-            Order.FIRST,
+            Order.EARLY,
             listener);
         this.registered = true;
         return;

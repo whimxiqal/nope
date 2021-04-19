@@ -89,6 +89,7 @@ import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.Listener;
+import org.spongepowered.api.event.Order;
 import org.spongepowered.api.event.block.InteractBlockEvent;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.ItemStack;
@@ -107,7 +108,7 @@ public class ZoneWandHandler {
     return selectionMap;
   }
 
-  @Listener
+  @Listener(order = Order.FIRST)
   public void InteractBlockEvent(InteractBlockEvent event) {
     if (handleEvent(event, event.getTargetBlock())) {
       event.setCancelled(true);
@@ -126,6 +127,7 @@ public class ZoneWandHandler {
               if (!player.hasPermission(Permissions.COMMAND_CREATE.get())) {
                 player.setItemInHand(HandTypes.MAIN_HAND, ItemStack.empty());
                 player.sendMessage(Format.error("You don't have permission to use this!"));
+                return;
               }
               mutableBoolean.setTrue();
               selectionMap.compute(player.getUniqueId(), (k, v) -> {

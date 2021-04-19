@@ -584,6 +584,11 @@ public final class HostTreeImpl implements HostTree {
     }
 
     @Override
+    public boolean encompasses(Location<World> spongeLocation) {
+      return true;
+    }
+
+    @Override
     public UUID getWorldUuid() {
       return null;
     }

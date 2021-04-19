@@ -26,14 +26,12 @@ package com.minecraftonline.nope.command.common;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.minecraftonline.nope.Nope;
 import com.minecraftonline.nope.permission.Permission;
 import lombok.Getter;
 import org.spongepowered.api.command.args.CommandElement;
-import org.spongepowered.api.command.args.GenericArguments;
 import org.spongepowered.api.command.spec.CommandExecutor;
 import org.spongepowered.api.command.spec.CommandSpec;
+import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.api.text.Text;
 
 import javax.annotation.Nonnull;
@@ -43,14 +41,13 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
-import java.util.SortedMap;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 public abstract class CommandNode implements CommandExecutor {
 
   @Getter
+  @Nullable
   private final CommandNode parent;
   @Getter
   @Nullable
@@ -63,6 +60,9 @@ public abstract class CommandNode implements CommandExecutor {
   private final List<CommandNode> children = Lists.newArrayList();
   private final List<CommandElement> commandElements = new ArrayList<>();
   private Supplier<Text> comment = () -> null;
+  @Getter
+  @Nullable
+  private final HelpCommandNode helpCommand;
 
   /**
    * A helpful constructor which easily allows for addition of
@@ -106,7 +106,10 @@ public abstract class CommandNode implements CommandExecutor {
     this.description = description;
     this.aliases.add(primaryAlias);
     if (addHelp) {
-      this.children.add(new CommandTree.HelpCommandNode(this));
+      helpCommand = new HelpCommandNode(this);
+      this.children.add(helpCommand);
+    } else {
+      helpCommand = null;
     }
   }
 
@@ -132,6 +135,10 @@ public abstract class CommandNode implements CommandExecutor {
   @Nonnull
   public final String getPrimaryAlias() {
     return aliases.get(0);
+  }
+
+  public final boolean hasPermission(Subject subject) {
+    return this.permission == null || subject.hasPermission(this.permission.get());
   }
 
   /**

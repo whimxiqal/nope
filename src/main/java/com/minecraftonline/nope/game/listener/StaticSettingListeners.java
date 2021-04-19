@@ -31,9 +31,9 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
+import org.spongepowered.api.event.Order;
 import org.spongepowered.api.event.entity.MoveEntityEvent;
 import org.spongepowered.api.event.filter.cause.First;
-import org.spongepowered.api.event.filter.cause.Root;
 import org.spongepowered.api.event.network.ClientConnectionEvent;
 
 import java.util.LinkedList;
@@ -54,7 +54,7 @@ public final class StaticSettingListeners {
    * @param event  the event
    * @param player the cause of movement
    */
-  @Listener
+  @Listener(order = Order.EARLY)
   public void onMoveEntityChain(MoveEntityEvent.Position event, @First Player player) {
     // Run the threshold handler for every player on the vehicle stack
     LinkedList<Entity> entities = new LinkedList<>();

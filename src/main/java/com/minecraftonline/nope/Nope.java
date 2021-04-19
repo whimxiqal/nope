@@ -45,7 +45,6 @@ import lombok.Setter;
 import org.slf4j.Logger;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.config.ConfigDir;
-import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.DataRegistration;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.event.Listener;
@@ -55,6 +54,7 @@ import org.spongepowered.api.event.game.state.GamePreInitializationEvent;
 import org.spongepowered.api.event.game.state.GameStartedServerEvent;
 import org.spongepowered.api.event.game.state.GameStoppingServerEvent;
 import org.spongepowered.api.event.world.LoadWorldEvent;
+import org.spongepowered.api.plugin.Dependency;
 import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.service.permission.PermissionService;
@@ -62,7 +62,7 @@ import org.spongepowered.api.util.TypeTokens;
 
 import java.nio.file.Path;
 
-@Plugin(id = "nope")
+@Plugin(id = "nope", dependencies = {@Dependency(id = "worldedit", optional = true)})
 public class Nope {
 
   public static final String GLOBAL_HOST_NAME = "_global";
@@ -119,7 +119,7 @@ public class Nope {
         .type(TypeTokens.BOOLEAN_VALUE_TOKEN)
         .id("nopezonewand")
         .name("Nope zone wand")
-        .query(DataQuery.of("nopezonewand"))
+        .query(ZoneWandManipulator.QUERY)
         .build();
 
     DataRegistration.builder()

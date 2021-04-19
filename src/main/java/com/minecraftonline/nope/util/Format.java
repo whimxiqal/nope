@@ -36,6 +36,7 @@ import com.minecraftonline.nope.setting.Setting;
 import com.minecraftonline.nope.setting.SettingKey;
 import com.minecraftonline.nope.setting.SettingValue;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.action.TextActions;
 import org.spongepowered.api.text.format.TextColor;
@@ -236,6 +237,7 @@ public final class Format {
   }
 
   public static <T> CompletableFuture<List<Text>> setting(Setting<T> setting,
+                                                          Subject subject,
                                                           @Nonnull Host host,
                                                           @Nullable Host redundancyController) {
     return CompletableFuture.supplyAsync(() -> {
@@ -245,36 +247,49 @@ public final class Format {
           Text.of(" = ", Format.settingValue(setting.getKey().print(setting.getValue().getData()),
               host.equals(redundancyController),
               redundancyController)))
-          .append(Text.of("      "))
-          .append(Format.commandSuggest("UNSET", Nope.getInstance().getCommandTree()
-                  .findNode(UnsetCommand.class)
-                  .orElseThrow(() ->
-                      new RuntimeException("UnsetCommand is not set in Nope command tree!"))
-                  .getFullCommand()
-                  + String.format(" -z %s %s",
-              host.getName(),
-              setting.getKey()),
-              Text.of("Unset the value of this setting on this host")))
-          .append(Text.of(" "))
-          .append(Format.commandSuggest("SET", Nope.getInstance().getCommandTree()
-                  .findNode(SetCommand.class)
-                  .orElseThrow(() ->
-                      new RuntimeException("SetCommand is not set in Nope command tree!"))
-                  .getFullCommand()
-                  + String.format(" -z %s %s ___",
-              host.getName(),
-              setting.getKey()),
-              Text.of("Set this setting on this host with a value")))
-          .append(Text.of(" "))
-          .append(Format.commandSuggest("ADD", Nope.getInstance().getCommandTree()
-                  .findNode(TargetAddCommand.class)
-                  .orElseThrow(() ->
-                      new RuntimeException("TargetAddCommand is not set in Nope command tree!"))
-                  .getFullCommand()
-                  + String.format(" ___ -z %s %s ___",
-              host.getName(),
-              setting.getKey()),
-              Text.of("Add a target condition to this host")));
+          .append(Text.of("     "));
+
+      /* Unset Button */
+      UnsetCommand unsetCommand = Nope.getInstance().getCommandTree()
+          .findNode(UnsetCommand.class)
+          .orElseThrow(() ->
+              new RuntimeException("UnsetCommand is not set in Nope command tree!"));
+      if (unsetCommand.hasPermission(subject)) {
+        main.append(Text.of(" "))
+            .append(Format.commandSuggest("UNSET",
+                unsetCommand.getFullCommand() + String.format(" -z %s %s",
+                    host.getName(),
+                    setting.getKey()),
+                Text.of("Unset the value of this setting on this host")));
+      }
+
+      /* Set Button */
+      SetCommand setCommand = Nope.getInstance().getCommandTree()
+          .findNode(SetCommand.class)
+          .orElseThrow(() ->
+              new RuntimeException("SetCommand is not set in Nope command tree!"));
+      if (unsetCommand.hasPermission(subject)) {
+        main.append(Text.of(" "))
+            .append(Format.commandSuggest("SET",
+                setCommand.getFullCommand() + String.format(" -z %s %s ___",
+                    host.getName(),
+                    setting.getKey()),
+                Text.of("Set this setting on this host with a value")));
+      }
+
+      /* Add Target Button */
+      TargetAddCommand targetAddCommand = Nope.getInstance().getCommandTree()
+          .findNode(TargetAddCommand.class)
+          .orElseThrow(() ->
+              new RuntimeException("TargetAddCommand is not set in Nope command tree!"));
+      if (targetAddCommand.hasPermission(subject)) {
+        main.append(Text.of(" "))
+            .append(Format.commandSuggest("ADD",
+                targetAddCommand + String.format(" ___ -z %s %s ___",
+                    host.getName(),
+                    setting.getKey()),
+                Text.of("Add a target condition to this host")));
+      }
 
       list.add(main.build());
 

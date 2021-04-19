@@ -235,9 +235,7 @@ public abstract class Host {
    * @param spongeLocation the location
    * @return true if within the host
    */
-  public boolean encompasses(Location<World> spongeLocation) {
-    return true;
-  }
+  public abstract boolean encompasses(Location<World> spongeLocation);
 
   /**
    * Get the UUID of the Sponge Minecraft

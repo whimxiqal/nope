@@ -147,7 +147,7 @@ public class InfoCommand extends LambdaCommandNode {
                 .sorted(Comparator.comparing(setting -> setting.getKey().getId()))
                 .flatMap(setting -> {
                   try {
-                    return Format.setting(setting, host, Nope.getInstance().getHostTree().isRedundant(host, setting.getKey()))
+                    return Format.setting(setting, src, host, Nope.getInstance().getHostTree().isRedundant(host, setting.getKey()))
                         .get()
                         .stream().map(text -> Text.builder().append(text)
                             .onClick(TextActions.suggestCommand(

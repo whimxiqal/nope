@@ -27,6 +27,7 @@ package com.minecraftonline.nope.context;
 
 import com.minecraftonline.nope.Nope;
 import com.minecraftonline.nope.host.Host;
+import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.service.context.ContextCalculator;
@@ -40,18 +41,23 @@ public class ZoneContextCalculator implements ContextCalculator<Subject> {
 
   @Override
   public void accumulateContexts(@Nonnull Subject target, @Nonnull Set<Context> accumulator) {
-    if (!(target instanceof Player)) {
+    if (!target.getCommandSource().isPresent()) {
+      return;
+    }
+    if (!(target.getCommandSource().get() instanceof Player)) {
       return;
     }
     Nope.getInstance().getHostTree()
-        .getContainingHosts(((Player) target).getLocation())
+        .getContainingHosts(((Player) target.getCommandSource().get()).getLocation())
         .forEach(host -> accumulator.add(host.getContext()));
   }
 
   @Override
   public boolean matches(@Nonnull Context context, @Nonnull Subject target) {
-    Nope.getInstance().getLogger().info("Matching?");
-    if (!(target instanceof Player)) {
+    if (!target.getCommandSource().isPresent()) {
+      return false;
+    }
+    if (!(target.getCommandSource().get() instanceof Player)) {
       return false;
     }
     return Host.contextKeyToName(context.getKey())
