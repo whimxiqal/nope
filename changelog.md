@@ -1,7 +1,9 @@
-# 0.2.1
+# 0.3.0
 - Fixed context calculator
 - Fixed info menu to only show commands to those with permission
 - Made some listeners prioritized EARLY instead of FIRST
+- Added setting `hook-entity`
+- Fixed player-caused damage settings to include fire ignition
 
 
 # 0.2.0

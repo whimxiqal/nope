@@ -243,11 +243,6 @@ public final class Format {
     return CompletableFuture.supplyAsync(() -> {
       List<Text> list = Lists.newLinkedList();
       Text.Builder main = Text.builder();
-      main.append(Format.settingKey(setting.getKey(), false),
-          Text.of(" = ", Format.settingValue(setting.getKey().print(setting.getValue().getData()),
-              host.equals(redundancyController),
-              redundancyController)))
-          .append(Text.of("     "));
 
       /* Unset Button */
       UnsetCommand unsetCommand = Nope.getInstance().getCommandTree()
@@ -255,12 +250,12 @@ public final class Format {
           .orElseThrow(() ->
               new RuntimeException("UnsetCommand is not set in Nope command tree!"));
       if (unsetCommand.hasPermission(subject)) {
-        main.append(Text.of(" "))
-            .append(Format.commandSuggest("UNSET",
+        main.append(Format.commandSuggest("UNSET",
                 unsetCommand.getFullCommand() + String.format(" -z %s %s",
                     host.getName(),
                     setting.getKey()),
-                Text.of("Unset the value of this setting on this host")));
+                Text.of("Unset the value of this setting on this host")))
+            .append(Text.of(" "));
       }
 
       /* Set Button */
@@ -269,12 +264,12 @@ public final class Format {
           .orElseThrow(() ->
               new RuntimeException("SetCommand is not set in Nope command tree!"));
       if (unsetCommand.hasPermission(subject)) {
-        main.append(Text.of(" "))
-            .append(Format.commandSuggest("SET",
+        main.append(Format.commandSuggest("SET",
                 setCommand.getFullCommand() + String.format(" -z %s %s ___",
                     host.getName(),
                     setting.getKey()),
-                Text.of("Set this setting on this host with a value")));
+                Text.of("Set this setting on this host with a value")))
+            .append(Text.of(" "));
       }
 
       /* Add Target Button */
@@ -283,13 +278,18 @@ public final class Format {
           .orElseThrow(() ->
               new RuntimeException("TargetAddCommand is not set in Nope command tree!"));
       if (targetAddCommand.hasPermission(subject)) {
-        main.append(Text.of(" "))
-            .append(Format.commandSuggest("ADD",
-                targetAddCommand + String.format(" ___ -z %s %s ___",
+        main.append(Format.commandSuggest("ADD",
+                targetAddCommand.getFullCommand() + String.format(" ___ -z %s %s ___",
                     host.getName(),
                     setting.getKey()),
-                Text.of("Add a target condition to this host")));
+                Text.of("Add a target condition to this host")))
+            .append(Text.of(" "));
       }
+
+      main.append(Format.settingKey(setting.getKey(), false),
+          Text.of(" = ", Format.settingValue(setting.getKey().print(setting.getValue().getData()),
+              host.equals(redundancyController),
+              redundancyController)));
 
       list.add(main.build());
 

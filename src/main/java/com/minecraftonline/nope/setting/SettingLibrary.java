@@ -355,6 +355,13 @@ public final class SettingLibrary {
       "greeting-title",
       Text.EMPTY
   );
+  @Description("When disabled, entities cannot be hooked with a fishing hook")
+  @Category(SettingKey.CategoryType.ENTITY)
+  @PlayerRestrictive
+  public static final SettingKey<Boolean> HOOK_ENTITY = new StateSetting(
+      "hook-entity",
+      true
+  );
   @Description("When disabled, hostile creatures cannot inflict damage on players")
   @Category(SettingKey.CategoryType.DAMAGE)
   public static final SettingKey<Boolean> HVP = new StateSetting(
