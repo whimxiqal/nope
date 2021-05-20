@@ -54,6 +54,7 @@ import com.google.common.collect.Maps;
 import com.minecraftonline.nope.Nope;
 import com.minecraftonline.nope.arguments.NopeArguments;
 import com.minecraftonline.nope.command.common.CommandNode;
+import com.minecraftonline.nope.command.common.FlagDescription;
 import com.minecraftonline.nope.command.common.LambdaCommandNode;
 import com.minecraftonline.nope.host.Host;
 import com.minecraftonline.nope.permission.Permissions;
@@ -81,6 +82,7 @@ class TargetTypeCommand extends LambdaCommandNode {
             .buildWith(GenericArguments.none()),
         NopeArguments.settingKey(Text.of("setting")),
         GenericArguments.choices(Text.of("type"), choices));
+    addFlagDescription(FlagDescription.ZONE);
     setExecutor((src, args) -> {
       Host host = args.<Host>getOne("zone").orElse(NopeCommandRoot.inferHost(src).orElse(null));
       if (host == null) {

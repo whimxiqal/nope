@@ -28,6 +28,7 @@ package com.minecraftonline.nope.command;
 import com.minecraftonline.nope.Nope;
 import com.minecraftonline.nope.arguments.NopeArguments;
 import com.minecraftonline.nope.command.common.CommandNode;
+import com.minecraftonline.nope.command.common.FlagDescription;
 import com.minecraftonline.nope.command.common.LambdaCommandNode;
 import com.minecraftonline.nope.host.Host;
 import com.minecraftonline.nope.permission.Permissions;
@@ -45,13 +46,12 @@ public class UnsetCommand extends LambdaCommandNode {
         Permissions.COMMAND_EDIT,
         Text.of("Unset settings on a zone"),
         "unset");
-
     addCommandElements(
         GenericArguments.flags()
             .valueFlag(NopeArguments.host(Text.of("zone")), "z", "-zone")
             .buildWith(GenericArguments.none()),
         GenericArguments.onlyOne(NopeArguments.settingKey(Text.of("setting"))));
-
+    addFlagDescription(FlagDescription.ZONE);
     setExecutor((src, args) -> {
       SettingKey<?> settingKey = args.requireOne(Text.of("setting"));
 

@@ -23,36 +23,44 @@
  *
  */
 
-package com.minecraftonline.nope.game.listener;
+package com.minecraftonline.nope.setting;
 
-import com.minecraftonline.nope.Nope;
-import com.minecraftonline.nope.setting.SettingKey;
-import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.event.Cancellable;
-import org.spongepowered.api.event.Event;
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonPrimitive;
+import com.minecraftonline.nope.util.NopeTypeTokens;
+import org.spongepowered.api.text.Text;
 
 import javax.annotation.Nonnull;
-import java.util.function.BiPredicate;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.stream.Collectors;
 
-/**
- * An accessibility class for cancelling events if a player is the root cause
- * of an event and they are found to have a specific state on a specific
- * setting.
- *
- * @param <E> the event type for which to listen and cancel
- */
-class PlayerRootCancelConditionSettingListener<E extends Event & Cancellable>
-    extends PlayerRootSettingListener<E> {
+public class StringSetSetting extends SetSetting<String> {
 
-  public PlayerRootCancelConditionSettingListener(@Nonnull SettingKey<?> key,
-                                                  @Nonnull Class<E> eventClass,
-                                                  @Nonnull BiPredicate<E, Player> canceler) {
-    super(key,
-        eventClass,
-        (event, player) -> {
-          if (canceler.test(event, player)) {
-            event.setCancelled(true);
-          }
-        });
+  public StringSetSetting(String id, Set<String> defaultValue) {
+    super(id, defaultValue);
+  }
+
+  @Override
+  public JsonElement elementToJsonGenerified(String value) {
+    return new JsonPrimitive(value);
+  }
+
+  @Override
+  public String elementFromJsonGenerified(JsonElement jsonElement) {
+    return jsonElement.getAsString();
+  }
+
+  @Override
+  public Set<String> parse(String s) throws ParseSettingException {
+    return new HashSet<>(Arrays.asList(s.split(SettingLibrary.SET_SPLIT_REGEX)));
+  }
+
+  @Nonnull
+  @Override
+  public Text printElement(String element) {
+    return Text.of(element);
   }
 }

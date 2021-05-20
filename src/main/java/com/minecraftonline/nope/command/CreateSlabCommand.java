@@ -29,6 +29,7 @@ import com.flowpowered.math.vector.Vector3i;
 import com.minecraftonline.nope.Nope;
 import com.minecraftonline.nope.arguments.NopeArguments;
 import com.minecraftonline.nope.command.common.CommandNode;
+import com.minecraftonline.nope.command.common.FlagDescription;
 import com.minecraftonline.nope.command.common.LambdaCommandNode;
 import com.minecraftonline.nope.game.listener.DynamicSettingListeners;
 import com.minecraftonline.nope.host.Host;
@@ -56,6 +57,7 @@ public class CreateSlabCommand extends LambdaCommandNode {
         GenericArguments.flags()
             .valueFlag(GenericArguments.integer(Text.of("priority")), "p")
             .buildWith(GenericArguments.none()));
+    addFlagDescription(FlagDescription.PRIORITY);
     setExecutor((src, args) -> {
       if (!(src instanceof Player)) {
         return CommandResult.empty();

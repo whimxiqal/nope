@@ -73,17 +73,34 @@ public class HelpCommandNode extends CommandNode implements CommandExecutor {
         " ",
         TextColors.AQUA, this.getParent().getPrimaryAlias()))
         .header(Text.of(
-            TextColors.LIGHT_PURPLE, "Parameters:",
-            " ",
+            TextColors.LIGHT_PURPLE, "Parameters > ",
             TextColors.GRAY,
             parent.build().getUsage(src),
             Text.NEW_LINE,
             parent.getComment() == null
                 ? Text.EMPTY
-                : Text.of(parent.getComment(), Text.NEW_LINE),
-            TextColors.LIGHT_PURPLE, "Description:",
-            " ",
-            TextColors.YELLOW, parent.getDescription()))
+                : Text.of("(", parent.getComment(), ")", Text.NEW_LINE),
+            TextColors.LIGHT_PURPLE, "Description > ",
+            TextColors.YELLOW, parent.getDescription(),
+            getParent().getFlagDescriptions().isEmpty()
+                ? Text.EMPTY
+                : Text.of(
+                "\n",
+                TextColors.LIGHT_PURPLE, "Flags > ",
+                Text.joinWith(Text.of(" "), getParent().getFlagDescriptions().entrySet().stream()
+                    .map(entry -> Format.hover(Text.of(TextStyles.ITALIC,
+                        TextColors.DARK_GRAY, "[",
+                        entry.getValue().isValueFlag()
+                            ? TextColors.GREEN
+                            : TextColors.GOLD,
+                        "-", entry.getKey(),
+                        TextColors.DARK_GRAY, "]"),
+                        Text.of(entry.getValue().isValueFlag()
+                                ? Text.of(TextColors.GREEN, "Flag - Requires Value")
+                                : Text.of(TextColors.GOLD, "Flag"),
+                            "\n",
+                            TextColors.RESET, entry.getValue().getDescription())))
+                    .collect(Collectors.toList())))))
         .contents(parent.getChildren().stream()
             .filter(command -> command.getPermission() == null
                 || src.hasPermission(command.getPermission().get()))

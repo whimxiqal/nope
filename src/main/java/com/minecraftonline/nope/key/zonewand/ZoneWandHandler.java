@@ -192,7 +192,7 @@ public class ZoneWandHandler {
       if (!(location.getExtent().equals(this.world) && location.getBlockPosition().equals(this.pos1))) {
         this.world = location.getExtent();
         this.pos1 = location.getBlockPosition();
-        src.sendMessage(Format.info("Position 1 set " + this.pos1.toString()));
+        src.sendMessage(Format.success("Position 1 set to ", Format.ACCENT, this.pos1));
       }
     }
 
@@ -205,7 +205,7 @@ public class ZoneWandHandler {
       if (!(location.getExtent().equals(this.world) && location.getBlockPosition().equals(this.pos2))) {
         this.world = location.getExtent();
         this.pos2 = location.getBlockPosition();
-        src.sendMessage(Format.info("Position 2 set " + this.pos2.toString()));
+        src.sendMessage(Format.success("Position 2 set to ", Format.ACCENT, this.pos2));
       }
     }
 

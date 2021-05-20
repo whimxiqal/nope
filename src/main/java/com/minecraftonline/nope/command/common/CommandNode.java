@@ -26,6 +26,7 @@ package com.minecraftonline.nope.command.common;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
+import com.minecraftonline.nope.Nope;
 import com.minecraftonline.nope.permission.Permission;
 import lombok.Getter;
 import org.spongepowered.api.command.args.CommandElement;
@@ -39,7 +40,9 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -59,6 +62,8 @@ public abstract class CommandNode implements CommandExecutor {
   private final List<String> aliases = Lists.newArrayList();
   private final List<CommandNode> children = Lists.newArrayList();
   private final List<CommandElement> commandElements = new ArrayList<>();
+  @Getter
+  private final Map<String, FlagDescription> flagDescriptions = new HashMap<>();
   private Supplier<Text> comment = () -> null;
   @Getter
   @Nullable
@@ -181,6 +186,14 @@ public abstract class CommandNode implements CommandExecutor {
 
   public final boolean isRoot() {
     return parent == null;
+  }
+
+  public final void addFlagDescription(FlagDescription flagDescription) {
+    this.flagDescriptions.put(flagDescription.getFlag(), flagDescription);
+  }
+
+  public final void addFlagDescription(String flag, Text description, boolean valueFlag) {
+    this.addFlagDescription(new FlagDescription(flag, description, valueFlag));
   }
 
   @Nonnull

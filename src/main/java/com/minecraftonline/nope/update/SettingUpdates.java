@@ -26,6 +26,7 @@
 package com.minecraftonline.nope.update;
 
 import com.google.gson.JsonElement;
+import com.minecraftonline.nope.setting.BooleanSetting;
 import com.minecraftonline.nope.setting.Setting;
 import com.minecraftonline.nope.setting.SettingLibrary;
 import com.minecraftonline.nope.setting.SettingValue;
@@ -49,7 +50,7 @@ public class SettingUpdates {
   public static final SettingUpdate<Boolean,
       Set<SettingLibrary.ExplosiveEnum>>
       CREEPER_EXPLOSION_DAMAGE_UPDATE =
-      new SettingUpdate<>(new SettingLibrary.BooleanSetting(
+      new SettingUpdate<>(new BooleanSetting(
           "creeper-explosion-damage",
           true
       ), value -> {
@@ -67,7 +68,7 @@ public class SettingUpdates {
   public static final SettingUpdate<Boolean,
       Set<SettingLibrary.ExplosiveEnum>>
       CREEPER_EXPLOSION_GRIEF_UPDATE =
-      new SettingUpdate<>(new SettingLibrary.BooleanSetting(
+      new SettingUpdate<>(new BooleanSetting(
           "creeper-explosion-grief",
           true
       ), value -> {

@@ -23,36 +23,21 @@
  *
  */
 
-package com.minecraftonline.nope.game.listener;
+package com.minecraftonline.nope.util;
 
-import com.minecraftonline.nope.Nope;
-import com.minecraftonline.nope.setting.SettingKey;
-import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.event.Cancellable;
-import org.spongepowered.api.event.Event;
+import com.google.common.collect.Sets;
+import org.spongepowered.api.block.BlockType;
+import org.spongepowered.api.block.BlockTypes;
 
-import javax.annotation.Nonnull;
-import java.util.function.BiPredicate;
+import java.util.Set;
 
-/**
- * An accessibility class for cancelling events if a player is the root cause
- * of an event and they are found to have a specific state on a specific
- * setting.
- *
- * @param <E> the event type for which to listen and cancel
- */
-class PlayerRootCancelConditionSettingListener<E extends Event & Cancellable>
-    extends PlayerRootSettingListener<E> {
+public final class Groups {
 
-  public PlayerRootCancelConditionSettingListener(@Nonnull SettingKey<?> key,
-                                                  @Nonnull Class<E> eventClass,
-                                                  @Nonnull BiPredicate<E, Player> canceler) {
-    super(key,
-        eventClass,
-        (event, player) -> {
-          if (canceler.test(event, player)) {
-            event.setCancelled(true);
-          }
-        });
+  private Groups() {
   }
+
+  public static final Set<BlockType> LIQUID_GRIEFABLE = Sets.newHashSet(
+      BlockTypes.SNOW_LAYER,
+      BlockTypes.TALLGRASS);
+
 }

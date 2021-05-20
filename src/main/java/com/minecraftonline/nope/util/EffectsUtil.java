@@ -43,8 +43,9 @@ public class EffectsUtil {
    * @param volume    the volume whose walls to display
    * @param player    the viewer of the display
    * @param proximity the distance away from the viewing location to show
+   * @return true the volume was close enough to be at least partially displayed
    */
-  public static void showVolume(Volume volume, Player player, int proximity) {
+  public static boolean showVolume(Volume volume, Player player, int proximity) {
     final int[][] volumePos = new int[][]{
         {volume.getMinX(), volume.getMinY(), volume.getMinZ()},
         {volume.getMaxX(), volume.getMaxY(), volume.getMaxZ()}
@@ -66,6 +67,7 @@ public class EffectsUtil {
     final int proximitySquared = proximity * proximity;
     final Random random = new Random();
     final double[] vals = new double[3];
+    boolean particleDisplayed = false;
     for (int i = 0; i < 3; i++) {    // chooses which dimension is constant for illumination of one face
       for (int j = 0; j < 2; j++) {  // chooses between the min and max value of the dimension
         for (int a = Math.max(volumePos[0][(i + 1) % 3], playerPos[0][(i + 1) % 3]);
@@ -81,6 +83,7 @@ public class EffectsUtil {
               vals[2] = b + portion * q;
               Vector3d particleLocation = new Vector3d(vals[(3 - i) % 3], vals[(4 - i) % 3], vals[(5 - i) % 3]);
               if (particleLocation.distanceSquared(player.getLocation().getPosition()) < proximitySquared) {
+                particleDisplayed = true;
                 Sponge.getScheduler().createTaskBuilder()
                     .async()
                     .delayTicks(random.nextInt(60))
@@ -96,6 +99,7 @@ public class EffectsUtil {
         }
       }
     }
+    return particleDisplayed;
   }
 
 }

@@ -33,13 +33,13 @@ import com.minecraftonline.nope.setting.SettingKey;
 import com.minecraftonline.nope.setting.SettingLibrary;
 import com.minecraftonline.nope.util.Extra;
 import com.minecraftonline.nope.util.Format;
+import com.minecraftonline.nope.util.Groups;
 import net.minecraft.entity.monster.EntitySnowman;
 import net.minecraft.entity.projectile.EntityTippedArrow;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.data.Transaction;
-import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityType;
@@ -72,7 +72,9 @@ import org.spongepowered.api.event.entity.*;
 import org.spongepowered.api.event.item.inventory.ChangeInventoryEvent;
 import org.spongepowered.api.event.item.inventory.ClickInventoryEvent;
 import org.spongepowered.api.event.item.inventory.DropItemEvent;
+import org.spongepowered.api.event.item.inventory.UseItemStackEvent;
 import org.spongepowered.api.event.world.ExplosionEvent;
+import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.api.world.Location;
@@ -273,6 +275,25 @@ public final class DynamicSettingListeners {
                   !Nope.getInstance().getHostTree().lookup(SettingLibrary.ENDERPEARL_TELEPORT,
                       player,
                       event.getToTransform().getLocation())));
+  @DynamicSettingListener
+  static final SettingListener<UseItemStackEvent.Finish> USE_CHORUS_FRUIT_LISTENER =
+      new SingleSettingListener<>(
+          SettingLibrary.CHORUS_FRUIT_TELEPORT,
+          UseItemStackEvent.Finish.class,
+          event -> {
+            Optional<Player> player = event.getCause().first(Player.class);
+            if (!player.isPresent()) return;
+            if (event.getItemStackInUse().getType().equals(ItemTypes.CHORUS_FRUIT)) {
+              Nope.getInstance().getPlayerMovementHandler().cancelNextTeleport(player.get().getUniqueId(), teleportEvent ->
+                  !Nope.getInstance().getHostTree().lookup(SettingLibrary.CHORUS_FRUIT_TELEPORT,
+                      player.get(),
+                      teleportEvent.getFromTransform().getLocation())
+                      ||
+                      !Nope.getInstance().getHostTree().lookup(SettingLibrary.CHORUS_FRUIT_TELEPORT,
+                          player.get(),
+                          teleportEvent.getToTransform().getLocation()));
+            }
+          });
   @DynamicSettingListener
   static final SettingListener<DamageEntityEvent> EVP_LISTENER =
       new CancelConditionSettingListener<>(
@@ -494,6 +515,19 @@ public final class DynamicSettingListeners {
                           ChangeBlockEvent.class,
                           null)))));
   @DynamicSettingListener
+  static final SettingListener<InteractBlockEvent.Secondary> FLOWER_POT_INTERACT_LISTENER =
+      new PlayerRootCancelConditionSettingListener<>(
+          SettingLibrary.FLOWER_POT_INTERACT,
+          InteractBlockEvent.Secondary.class,
+          (event, player) -> event.getTargetBlock().getState().getType().equals(BlockTypes.FLOWER_POT)
+              && !Nope.getInstance().getHostTree()
+              .lookup(SettingLibrary.FLOWER_POT_INTERACT,
+                  player,
+                  event.getTargetBlock().getLocation()
+                      .orElseThrow(Extra.noLocation(SettingLibrary.INTERACT,
+                          InteractBlockEvent.Secondary.class,
+                          player))));
+  @DynamicSettingListener
   static final SettingListener<ChangeBlockEvent> FROSTED_ICE_FORM_LISTENER =
       new CancelConditionSettingListener<>(
           SettingLibrary.FROSTED_ICE_FORM,
@@ -688,6 +722,7 @@ public final class DynamicSettingListeners {
                 || block.getBlockState().getType().equals(BlockTypes.FLOWING_LAVA)) {
               event.getTransactions().forEach(transaction -> {
                 if (!transaction.isValid()) return;
+                if (Groups.LIQUID_GRIEFABLE.contains(transaction.getOriginal().getState().getType())) return;
                 if (!Nope.getInstance().getHostTree().lookupAnonymous(SettingLibrary.LAVA_GRIEF,
                     transaction.getFinal().getLocation().orElseThrow(Extra.noLocation(
                         SettingLibrary.LAVA_GRIEF,
@@ -739,13 +774,9 @@ public final class DynamicSettingListeners {
       new PlayerRootCancelConditionSettingListener<>(
           SettingLibrary.LEASH,
           LeashEntityEvent.class,
-          (event, player) -> {
-            Boolean canceling = !Nope.getInstance().getHostTree().lookup(SettingLibrary.LEASH,
-                player,
-                event.getTargetEntity().getLocation());
-            Nope.getInstance().getLogger().info(canceling.toString());
-            return canceling;
-          });
+          (event, player) -> !Nope.getInstance().getHostTree().lookup(SettingLibrary.LEASH,
+              player,
+              event.getTargetEntity().getLocation()));
   @DynamicSettingListener
   static final SettingListener<SpawnEntityEvent> LIGHTNING_LISTENER =
       new CancelConditionSettingListener<>(
@@ -1081,6 +1112,21 @@ public final class DynamicSettingListeners {
                   .lookupAnonymous(SettingLibrary.UNSPAWNABLE_MOBS, entity.getLocation())
                   .contains(entity.getType())));
   @DynamicSettingListener
+  static final SettingListener<InteractEntityEvent.Secondary> USE_NAME_TAG_LISTENER =
+      new PlayerRootCancelConditionSettingListener<>(
+          SettingLibrary.USE_NAME_TAG,
+          InteractEntityEvent.Secondary.class,
+          (event, player) -> player.getItemInHand(event.getHandType())
+              .filter(stack -> stack.getType().equals(ItemTypes.NAME_TAG))
+              .isPresent()
+              &&
+              (!Nope.getInstance()
+                  .getHostTree()
+                  .lookup(SettingLibrary.USE_NAME_TAG, player, player.getLocation())
+                  || !Nope.getInstance()
+                  .getHostTree()
+                  .lookup(SettingLibrary.USE_NAME_TAG, player, event.getTargetEntity().getLocation())));
+  @DynamicSettingListener
   static final SettingListener<ChangeBlockEvent> VINE_GROWTH_LISTENER =
       new CancelConditionSettingListener<>(
           SettingLibrary.VINE_GROWTH,
@@ -1098,6 +1144,7 @@ public final class DynamicSettingListeners {
                 || block.getBlockState().getType().equals(BlockTypes.FLOWING_WATER)) {
               event.getTransactions().forEach(transaction -> {
                 if (!transaction.isValid()) return;
+                if (Groups.LIQUID_GRIEFABLE.contains(transaction.getOriginal().getState().getType())) return;
                 if (!Nope.getInstance().getHostTree().lookupAnonymous(SettingLibrary.WATER_GRIEF,
                     transaction.getFinal().getLocation().orElseThrow(Extra.noLocation(
                         SettingLibrary.WATER_GRIEF,

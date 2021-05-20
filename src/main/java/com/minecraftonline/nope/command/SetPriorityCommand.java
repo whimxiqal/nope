@@ -28,6 +28,7 @@ package com.minecraftonline.nope.command;
 import com.minecraftonline.nope.Nope;
 import com.minecraftonline.nope.arguments.NopeArguments;
 import com.minecraftonline.nope.command.common.CommandNode;
+import com.minecraftonline.nope.command.common.FlagDescription;
 import com.minecraftonline.nope.command.common.LambdaCommandNode;
 import com.minecraftonline.nope.host.Host;
 import com.minecraftonline.nope.permission.Permissions;
@@ -49,6 +50,7 @@ public class SetPriorityCommand extends LambdaCommandNode {
             .valueFlag(NopeArguments.host(Text.of("zone")), "z", "-zone")
             .buildWith(GenericArguments.none()),
         GenericArguments.integer(Text.of("priority")));
+    addFlagDescription(FlagDescription.ZONE);
     setExecutor((src, args) -> {
       int priority = args.requireOne("priority");
 

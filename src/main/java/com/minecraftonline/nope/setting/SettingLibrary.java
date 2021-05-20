@@ -33,22 +33,14 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonPrimitive;
 import com.minecraftonline.nope.Nope;
 import com.minecraftonline.nope.update.SettingUpdates;
-import com.minecraftonline.nope.util.Format;
-import com.minecraftonline.nope.util.NopeTypeTokens;
-import org.spongepowered.api.CatalogType;
-import org.spongepowered.api.Sponge;
-import org.spongepowered.api.data.persistence.DataFormats;
 import org.spongepowered.api.entity.EnderCrystal;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.explosive.Explosive;
 import org.spongepowered.api.entity.explosive.PrimedTNT;
 import org.spongepowered.api.entity.living.monster.Creeper;
 import org.spongepowered.api.entity.living.monster.Wither;
-import org.spongepowered.api.entity.living.player.gamemode.GameMode;
-import org.spongepowered.api.entity.living.player.gamemode.GameModes;
 import org.spongepowered.api.entity.projectile.Firework;
 import org.spongepowered.api.entity.projectile.explosive.WitherSkull;
 import org.spongepowered.api.entity.projectile.explosive.fireball.LargeFireball;
@@ -57,72 +49,78 @@ import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
-import org.spongepowered.api.text.serializer.TextSerializers;
 
 import javax.annotation.Nonnull;
-import java.io.IOException;
 import java.lang.annotation.*;
 import java.lang.reflect.Modifier;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public final class SettingLibrary {
 
-  @Description("When disabled, armor stands may not be broken by players")
-  @Category(SettingKey.CategoryType.ENTITY)
+  @Blurb("Armor stand destruction restriction")
+  @Description("When disabled, armor stands may not be broken by players.")
+  @Category(SettingKey.CategoryType.ENTITIES)
   @PlayerRestrictive
   public static final SettingKey<Boolean> ARMOR_STAND_DESTROY = new StateSetting(
       "armor-stand-destroy",
       true
   );
-  @Description("When disabled, armor stands may not be interacted with by a player")
-  @Category(SettingKey.CategoryType.ENTITY)
+  @Blurb("Armor stand interact restriction")
+  @Description("When disabled, armor stands may not be interacted with by a player.")
+  @Category(SettingKey.CategoryType.ENTITIES)
   @PlayerRestrictive
   public static final SettingKey<Boolean> ARMOR_STAND_INTERACT = new StateSetting(
       "armor-stand-interact",
       true
   );
-  @Description("When disabled, armor stands may not be placed")
-  @Category(SettingKey.CategoryType.ENTITY)
+  @Blurb("Armor stand placement restriction")
+  @Description("When disabled, armor stands may not be placed.")
+  @Category(SettingKey.CategoryType.ENTITIES)
   @PlayerRestrictive
   public static final SettingKey<Boolean> ARMOR_STAND_PLACE = new StateSetting(
       "armor-stand-place",
       true
   );
-  @Description("When disabled, blocks may not be broken by players")
+  @Blurb("Block break restriction")
+  @Description("When disabled, blocks may not be broken by players.")
   @Category(SettingKey.CategoryType.BLOCKS)
   @PlayerRestrictive
   public static final SettingKey<Boolean> BLOCK_BREAK = new StateSetting(
       "block-break",
       true
   );
-  @Description("When disabled, blocks may not be placed by players")
+  @Blurb("Block place restriction")
+  @Description("When disabled, blocks may not be placed by players.")
   @Category(SettingKey.CategoryType.BLOCKS)
   @PlayerRestrictive
   public static final SettingKey<Boolean> BLOCK_PLACE = new StateSetting(
       "block-place",
       true
   );
-  @Description("When disabled, block updates will not affect others across the zone boundary")
+  @Blurb("Inside to outside block updates")
+  @Description("When disabled, block updates will not affect others across the zone boundary.")
   @Category(SettingKey.CategoryType.BLOCKS)
   public static final SettingKey<Boolean> BLOCK_PROPAGATE_ACROSS = new BooleanSetting(
       "block-propagate-across",
       true
   );
-  @Description("When disabled, block updates will not affect others within the zone")
+  @Blurb("Inside to inside block updates")
+  @Description("When disabled, block updates will not affect others within the zone.")
   @Category(SettingKey.CategoryType.BLOCKS)
   public static final SettingKey<Boolean> BLOCK_PROPAGATE_WITHIN = new BooleanSetting(
       "block-propagate-within",
       true
   );
-  @Description("When disabled, blocks like farmland may not be trampled")
+  @Blurb("Trample restriction")
+  @Description("When disabled, blocks like farmland may not be trampled.")
   @Category(SettingKey.CategoryType.BLOCKS)
   @PlayerRestrictive
   public static final SettingKey<Boolean> BLOCK_TRAMPLE = new StateSetting(
       "block-trample",
       true
   );
-  @Description("The quantity of block locations to cache for each world. "
+  @Blurb("Size of world block caches")
+  @Description("This is the quantity of block locations to cache for each world. "
       + "Total memory is roughly this multiplied by 56 bytes, "
       + "multiplied by the number of worlds. Set 0 to disable caching.")
   @Global
@@ -130,67 +128,70 @@ public final class SettingLibrary {
       "cache-size",
       75000
   );
-  @Description("When disabled, players may not open chests")
+  @Blurb("Chest access restriction")
+  @Description("When disabled, players may not open chests.")
   @Category(SettingKey.CategoryType.BLOCKS)
   @PlayerRestrictive
   public static final SettingKey<Boolean> CHEST_ACCESS = new StateSetting(
       "chest-access",
       true
   );
-  @Description("When disabled, players may not teleport by eating a chorus fruit")
-  @NotImplemented
+  @Blurb("Chorus fruit teleport restriction")
+  @Description("When disabled, players may not teleport by eating a chorus fruit.")
+  @Category(SettingKey.CategoryType.MOVEMENT)
   @PlayerRestrictive
   public static final SettingKey<Boolean> CHORUS_FRUIT_TELEPORT = new StateSetting(
       "chorus-fruit-teleport",
       true
   );
-  @Description("When disabled, concrete powder does not solidify into concrete")
+  @Blurb("Concrete powder solidification")
+  @Description("When disabled, concrete powder does not solidify into concrete.")
   @Category(SettingKey.CategoryType.BLOCKS)
   public static final SettingKey<Boolean> CONCRETE_SOLIDIFICATION = new BooleanSetting(
       "concrete-solidification",
       true
   );
-  @Description("When disabled, crops do not grow")
+  @Blurb("Crop growth")
+  @Description("When disabled, crops do not grow.")
   @Category(SettingKey.CategoryType.BLOCKS)
   @PlayerRestrictive
   public static final SettingKey<Boolean> CROP_GROWTH = new BooleanSetting(
       "crop-growth",
       true
   );
-  @Description("Deop the player upon entering")
+  @Blurb("Entity experience drop")
+  @Description("When disabled, experience points are never dropped.")
   @NotImplemented
   @PlayerRestrictive
-  public static final SettingKey<Boolean> DEOP_ON_ENTER = new BooleanSetting(
-      "deop-on-enter",
-      false
-  );
-  @Description("When disabled, experience points are never dropped")
-  @NotImplemented
-  @PlayerRestrictive
+  // TODO implement this one by simply deleted exp if it spawns
   public static final SettingKey<Boolean> DROP_EXP = new BooleanSetting(
       "drop-exp",
       false
   );
-  @Description("Enables grief caused by the enderdragon")
+  @Blurb("Grief caused by the enderdragon")
+  @Description("Enables grief caused by the enderdragon.")
   @Category(SettingKey.CategoryType.BLOCKS)
   public static final SettingKey<Boolean> ENDERDRAGON_GRIEF = new BooleanSetting(
       "enderdragon-grief",
       true
   );
-  @Description("When disabled, endermen do not grief blocks by picking them up")
+  @Blurb("Grief caused by endermen")
+  @Description("When disabled, endermen do not grief blocks by picking them up.")
   @Category(SettingKey.CategoryType.BLOCKS)
   public static final SettingKey<Boolean> ENDERMAN_GRIEF = new BooleanSetting(
       "enderman-grief",
       true
   );
-  @Description("When disabled, enderpearls may not be used for teleportation")
+  @Blurb("Enderpearl teleport restriction")
+  @Description("When disabled, enderpearls may not be used for teleportation.")
   @Category(SettingKey.CategoryType.MOVEMENT)
   @PlayerRestrictive
   public static final SettingKey<Boolean> ENDERPEARL_TELEPORT = new StateSetting(
       "enderpearl-teleport",
       true
   );
-  @Description("Specify which type of movement is allowed by players to enter")
+  @Blurb("Host entrance restriction")
+  @Description("Specify which type of movement is allowed by players to enter.")
   @Category(SettingKey.CategoryType.MOVEMENT)
   @PlayerRestrictive
   public static final SettingKey<Movement> ENTRY = new EnumSetting<>(
@@ -198,32 +199,37 @@ public final class SettingLibrary {
       Movement.ALL,
       Movement.class
   );
-  @Description("The message that is sent to a player if they are barred from entry")
+  @Blurb("Message when entry is denied")
+  @Description("The message that is sent to a player if they are barred from entry.")
   @Category(SettingKey.CategoryType.MOVEMENT)
   public static final SettingKey<Text> ENTRY_DENY_MESSAGE = new TextSetting(
       "entry-deny-message",
       Text.of(TextColors.RED, "You are not allowed to go there")
   );
-  @Description("The subtitle that is sent to a player if they are barred from entry")
+  @Blurb("Subtitle when entry is denied")
+  @Description("The subtitle that is sent to a player if they are barred from entry.")
   @Category(SettingKey.CategoryType.MOVEMENT)
   public static final SettingKey<Text> ENTRY_DENY_SUBTITLE = new TextSetting(
       "entry-deny-subtitle",
       Text.EMPTY
   );
-  @Description("The title that is sent to a player if they are barred from entry")
+  @Blurb("Title when entry is denied")
+  @Description("The title that is sent to a player if they are barred from entry.")
   @Category(SettingKey.CategoryType.MOVEMENT)
   public static final SettingKey<Text> ENTRY_DENY_TITLE = new TextSetting(
       "entry-deny-title",
       Text.EMPTY
   );
-  @Description("When disabled, the environment cannot inflict damage on players")
+  @Blurb("Environment-to-player damage")
+  @Description("When disabled, the environment cannot inflict damage on players.")
   @Category(SettingKey.CategoryType.DAMAGE)
   @PlayerRestrictive
   public static final SettingKey<Boolean> EVP = new StateSetting(
       "evp",
       true
   );
-  @Description("Specify which type of movement is allowed by players to exit")
+  @Blurb("Host exit restriction")
+  @Description("Specify which type of movement is allowed by players to exit.")
   @Category(SettingKey.CategoryType.MOVEMENT)
   @PlayerRestrictive
   public static final SettingKey<Movement> EXIT = new EnumSetting<>(
@@ -231,68 +237,79 @@ public final class SettingLibrary {
       Movement.ALL,
       Movement.class
   );
-  @Description("The message that is sent to the player if they are barred from exiting")
+  @Blurb("Message when exit is denied")
+  @Description("The message that is sent to the player if they are barred from exiting.")
   @Category(SettingKey.CategoryType.MOVEMENT)
   public static final SettingKey<Text> EXIT_DENY_MESSAGE = new TextSetting(
       "exit-deny-message",
       Text.of(TextColors.RED, "You are not allowed to leave here")
   );
-  @Description("The subtitle that is sent to a player if they are barred from exiting")
+  @Blurb("Subtitle when exit is denied")
+  @Description("The subtitle that is sent to a player if they are barred from exiting.")
   @Category(SettingKey.CategoryType.MOVEMENT)
   public static final SettingKey<Text> EXIT_DENY_SUBTITLE = new TextSetting(
       "exit-deny-subtitle",
       Text.EMPTY
   );
-  @Description("The title that is sent to a player if they are barred from exiting")
+  @Blurb("Title when exit is denied")
+  @Description("The title that is sent to a player if they are barred from exiting.")
   @Category(SettingKey.CategoryType.MOVEMENT)
   public static final SettingKey<Text> EXIT_DENY_TITLE = new TextSetting(
       "exit-deny-title",
       Text.EMPTY
   );
-  @Description("When disabled, creepers do not grief blocks when they explode")
-  @Category(SettingKey.CategoryType.BLOCKS)
-  public static final SettingKey<Set<ExplosiveEnum>> EXPLOSION_GRIEF_BLACKLIST = new EnumSetSetting<>(
-      "explosion-block-grief-blacklist",
-      new HashSet<>(),
-      ExplosiveEnum.class
-  );
-  @Description("When disabled, creepers do not cause damage")
+  @Blurb("Harmless explosions")
+  @Description("A list of explosives whose explosions do not cause damage.")
   @Category(SettingKey.CategoryType.DAMAGE)
   public static final SettingKey<Set<ExplosiveEnum>> EXPLOSION_DAMAGE_BLACKLIST = new EnumSetSetting<>(
       "explosion-damage-blacklist",
       new HashSet<>(),
       ExplosiveEnum.class
   );
-  @Description("When disabled, players do not experience fall damage")
+  @Blurb("Nondestructive explosions")
+  @Description("A list of explosives whose explosions do not grief.")
+  @Category(SettingKey.CategoryType.BLOCKS)
+  public static final SettingKey<Set<ExplosiveEnum>> EXPLOSION_GRIEF_BLACKLIST = new EnumSetSetting<>(
+      "explosion-block-grief-blacklist",
+      new HashSet<>(),
+      ExplosiveEnum.class
+  );
+  @Blurb("Fall damage")
+  @Description("When disabled, players do not experience fall damage.")
   @Category(SettingKey.CategoryType.DAMAGE)
   public static final SettingKey<Boolean> FALL_DAMAGE = new BooleanSetting(
       "fall-damage",
       false
   );
-  @Description("The message to a player when they leave")
+  @Blurb("Message upon exit")
+  @Description("The message to a player when they leave the host.")
   @Category(SettingKey.CategoryType.MOVEMENT)
   public static final SettingKey<Text> FAREWELL = new TextSetting(
       "farewell",
       Text.EMPTY
   );
-  @Description("The subtitle that appears to a player when they leave")
+  @Blurb("Subtitle upon exit")
+  @Description("The subtitle that appears to a player when they leave.")
   @Category(SettingKey.CategoryType.MOVEMENT)
   public static final SettingKey<Text> FAREWELL_SUBTITLE = new TextSetting(
       "farewell-subtitle",
       Text.EMPTY
   );
-  @Description("The title that appears to a player when they leave")
+  @Blurb("Title upon exit")
+  @Description("The title that appears to a player when they leave.")
   @Category(SettingKey.CategoryType.MOVEMENT)
   public static final SettingKey<Text> FAREWELL_TITLE = new TextSetting(
       "farewell-title",
       Text.EMPTY
   );
-  @Description("When disabled, fire does not spread or cause block damage")
+  @Blurb("Fire spread/damage")
+  @Description("When disabled, fire does not spread or cause block damage.")
   @Category(SettingKey.CategoryType.BLOCKS)
   public static final SettingKey<Boolean> FIRE_EFFECT = new StateSetting(
       "fire-effect",
       true
   );
+  @Blurb("Fire ignition restriction")
   @Description("When disabled, players cannot light fire")
   @Category(SettingKey.CategoryType.BLOCKS)
   @PlayerRestrictive
@@ -300,328 +317,380 @@ public final class SettingLibrary {
       "fire-ignition",
       true
   );
-  @Description("When disabled, fire is not started naturally")
+  @Blurb("Natural fire ignition")
+  @Description("When disabled, fire is not started naturally.")
   public static final SettingKey<Boolean> FIRE_NATURAL_IGNITION = new StateSetting(
       "fire-natural-ignition",
       true
   );
-  @Description("When disabled, frosted ice does not form")
+  @Blurb("Flower pot interaction restriction")
+  @Description("When disabled, players cannot interact with flower pots.")
+  @Category(SettingKey.CategoryType.BLOCKS)
+  @PlayerRestrictive
+  public static final SettingKey<Boolean> FLOWER_POT_INTERACT = new StateSetting(
+      "flower-pot-interact",
+      true
+  );
+  @Blurb("Frosted ice formation")
+  @Description("When disabled, frosted ice does not form.")
   @Category(SettingKey.CategoryType.BLOCKS)
   public static final SettingKey<Boolean> FROSTED_ICE_FORM = new StateSetting(
       "frosted-ice-form",
       true
   );
-  @Description("When disabled, frosted ice does not melt")
+  @Blurb("Frosted ice melt")
+  @Description("When disabled, frosted ice does not melt.")
   @Category(SettingKey.CategoryType.BLOCKS)
   public static final SettingKey<Boolean> FROSTED_ICE_MELT = new StateSetting(
       "frosted-ice-melt",
       true
   );
-  @Description("The default gamemode of players")
-  @NotImplemented
-  public static final SettingKey<String> GAME_MODE = new CatalogTypeSetting<>(
-      "game-mode",
-      GameModes.NOT_SET,
-      GameMode.class
-  );
-  @Description("When disabled, ghasts do not shoot fireballs")
-  @Category(SettingKey.CategoryType.ENTITY)
+  @Blurb("Ghast production of fireballs")
+  @Description("When disabled, ghasts do not shoot fireballs.")
+  @Category(SettingKey.CategoryType.ENTITIES)
   public static final SettingKey<Boolean> GHAST_FIREBALL = new StateSetting(
       "ghast-fireball",
       true
   );
-  @Description("When disabled, grass does not grow naturally")
+  @Blurb("Grass growth")
+  @Description("When disabled, grass does not grow naturally.")
   @Category(SettingKey.CategoryType.BLOCKS)
   @PlayerRestrictive
   public static final SettingKey<Boolean> GRASS_GROWTH = new StateSetting(
       "grass-growth",
       true
   );
+  @Blurb("Message upon entry")
   @Description("The message to a player when they enter")
   @Category(SettingKey.CategoryType.MOVEMENT)
   public static final SettingKey<Text> GREETING = new TextSetting(
       "greeting",
       Text.EMPTY
   );
-  @Description("The subtitle that appears to a player when they enter")
+  @Blurb("Subtitle upon entry")
+  @Description("The subtitle that appears to a player when they enter.")
   @Category(SettingKey.CategoryType.MOVEMENT)
   public static final SettingKey<Text> GREETING_SUBTITLE = new TextSetting(
       "greeting-subtitle",
       Text.EMPTY
   );
-  @Description("The title that appears to a player when they enter")
+  @Blurb("Title upon entry")
+  @Description("The title that appears to a player when they enter.")
   @Category(SettingKey.CategoryType.MOVEMENT)
   public static final SettingKey<Text> GREETING_TITLE = new TextSetting(
       "greeting-title",
       Text.EMPTY
   );
-  @Description("When disabled, entities cannot be hooked with a fishing hook")
-  @Category(SettingKey.CategoryType.ENTITY)
+  @Blurb("Fishing hook to entity attachment")
+  @Description("When disabled, entities cannot be hooked with a fishing hook.")
+  @Category(SettingKey.CategoryType.ENTITIES)
   @PlayerRestrictive
   public static final SettingKey<Boolean> HOOK_ENTITY = new StateSetting(
       "hook-entity",
       true
   );
-  @Description("When disabled, hostile creatures cannot inflict damage on players")
+  @Blurb("Hostile to player damage")
+  @Description("When disabled, hostile creatures cannot inflict damage on players.")
   @Category(SettingKey.CategoryType.DAMAGE)
   public static final SettingKey<Boolean> HVP = new StateSetting(
       "hvp",
       true
   );
-  @Description("When disabled, ice does not form")
+  @Blurb("Ice formation")
+  @Description("When disabled, ice does not form.")
   @Category(SettingKey.CategoryType.BLOCKS)
   public static final SettingKey<Boolean> ICE_FORM = new BooleanSetting(
       "ice-form",
       true
   );
-  @Description("When disabled, ice does not melt")
+  @Blurb("Ice melt")
+  @Description("When disabled, ice does not melt.")
   @Category(SettingKey.CategoryType.BLOCKS)
   public static final SettingKey<Boolean> ICE_MELT = new BooleanSetting(
       "ice-melt",
       true
   );
-  @Description("When disabled, players may not interact with any blocks")
+  @Blurb("General interaction restriction")
+  @Description("When disabled, players may not interact with any blocks.")
   @Category(SettingKey.CategoryType.BLOCKS)
   @PlayerRestrictive
   public static final SettingKey<Boolean> INTERACT = new StateSetting(
       "interact",
       true
   );
-  @Description("When disabled, animals are invincible")
+  @Blurb("Animal invincibility")
+  @Description("When disabled, animals are invincible.")
   @Category(SettingKey.CategoryType.DAMAGE)
   public static final SettingKey<Boolean> INVINCIBLE_ANIMALS = new BooleanSetting(
       "invincible-animals",
       false
   );
-  @Description("When disabled, mobs cannot take damage")
+  @Blurb("All mob invincibility")
+  @Description("When disabled, mobs cannot take damage.")
   @Category(SettingKey.CategoryType.DAMAGE)
   public static final SettingKey<Boolean> INVINCIBLE_MOBS = new BooleanSetting(
       "invincible-mobs",
       false
   );
-  @Description("When enabled, players cannot take damage")
+  @Blurb("Player invincibility")
+  @Description("When enabled, players cannot take damage.")
   @Category(SettingKey.CategoryType.DAMAGE)
   public static final SettingKey<Boolean> INVINCIBLE_PLAYERS = new BooleanSetting(
       "invincible-players",
       false
   );
-  @Description("When disabled, players cannot drop items")
+  @Blurb("Item drop restriction")
+  @Description("When disabled, players cannot drop items.")
   @PlayerRestrictive
   public static final SettingKey<Boolean> ITEM_DROP = new BooleanSetting(
       "item-drop",
       true
   );
-  @Description("When disabled, item frames may not be attacked by players")
-  @Category(SettingKey.CategoryType.ENTITY)
+  @Blurb("Item frame destruction restriction")
+  @Description("When disabled, item frames may not be attacked by players.")
+  @Category(SettingKey.CategoryType.ENTITIES)
   @PlayerRestrictive
   public static final SettingKey<Boolean> ITEM_FRAME_DESTROY = new StateSetting(
       "item-frame-destroy",
       true
   );
-  @Description("When disabled, item frames may not be interacted with by a player")
-  @Category(SettingKey.CategoryType.ENTITY)
+  @Blurb("Item frame interaction restriction")
+  @Description("When disabled, item frames may not be interacted with by a player.")
+  @Category(SettingKey.CategoryType.ENTITIES)
   @PlayerRestrictive
   public static final SettingKey<Boolean> ITEM_FRAME_INTERACT = new StateSetting(
       "item-frame-interact",
       true
   );
-  @Description("When disabled, item frames may not be placed")
-  @Category(SettingKey.CategoryType.ENTITY)
+  @Blurb("Item frame placement restriction")
+  @Description("When disabled, item frames may not be placed.")
+  @Category(SettingKey.CategoryType.ENTITIES)
   @PlayerRestrictive
   public static final SettingKey<Boolean> ITEM_FRAME_PLACE = new StateSetting(
       "item-frame-place",
       true
   );
-  @Description("When disabled, players cannot pick up items")
+  @Blurb("Item pickup restriction")
+  @Description("When disabled, players cannot pick up items.")
   @PlayerRestrictive
   public static final SettingKey<Boolean> ITEM_PICKUP = new StateSetting(
       "item-pickup",
       true
   );
-  @Description("When disabled, lava does not spread")
+  @Blurb("Lava flow")
+  @Description("When disabled, lava does not spread.")
   @Category(SettingKey.CategoryType.BLOCKS)
   public static final SettingKey<Boolean> LAVA_FLOW = new BooleanSetting(
       "lava-flow",
       true
   );
-  @Description("When disabled, lava does not break blocks")
+  @Blurb("Grief caused by lava")
+  @Description("When disabled, lava does not break blocks.")
   @Category(SettingKey.CategoryType.BLOCKS)
   public static final SettingKey<Boolean> LAVA_GRIEF = new BooleanSetting(
       "lava-grief",
       true
   );
-  @Description("When disabled, leaf will not decay naturally")
+  @Blurb("Leaf decay")
+  @Description("When disabled, leaf will not decay naturally.")
   @Category(SettingKey.CategoryType.BLOCKS)
   public static final SettingKey<Boolean> LEAF_DECAY = new StateSetting(
       "leaf-decay",
       true
   );
-  @Description("When disabled, players cannot put leads on mobs")
+  @Blurb("Putting leads on entities restriction")
+  @Description("When disabled, players cannot put leads on entities.")
   @Category(SettingKey.CategoryType.BLOCKS)
   @PlayerRestrictive
   public static final SettingKey<Boolean> LEASH = new StateSetting(
       "leash",
       true
   );
-  @Description("When disabled, lightning cannot strike")
+  @Blurb("Lightning strikes")
+  @Description("When disabled, lightning cannot strike.")
   @Category(SettingKey.CategoryType.BLOCKS)
   public static final SettingKey<Boolean> LIGHTNING = new BooleanSetting(
       "lightning",
       true
   );
-  @Description("When disabled, mushrooms do not grow")
+  @Blurb("Mushroom growth")
+  @Description("When disabled, mushrooms do not grow.")
   @Category(SettingKey.CategoryType.BLOCKS)
   @PlayerRestrictive
   public static final SettingKey<Boolean> MUSHROOM_GROWTH = new BooleanSetting(
       "mushroom-growth",
       true
   );
-  @Description("When disabled, mycelium does not spread")
+  @Blurb("Mycelium spread")
+  @Description("When disabled, mycelium does not spread.")
   @Category(SettingKey.CategoryType.BLOCKS)
   public static final SettingKey<Boolean> MYCELIUM_SPREAD = new BooleanSetting(
       "mycelium-spread",
       true
   );
-  @Description("When disabled, health does not regenerate naturally")
+  @Blurb("Player health regeneration")
+  @Description("When disabled, player health does not regenerate naturally.")
   @PlayerRestrictive
   public static final SettingKey<Boolean> NATURAL_HEALTH_REGEN = new BooleanSetting(
       "natural-health-regen",
       true
   );
-  @Description("When disabled, hunger does not drain naturally")
+  @Blurb("Player hunger drain")
+  @Description("When disabled, player hunger does not drain naturally.")
   @NotImplemented
   public static final SettingKey<Boolean> NATURAL_HUNGER_DRAIN = new BooleanSetting(
       "natural-hunger-drain",
       true
   );
-  // TODO write description
-  @NotImplemented
-  public static final SettingKey<Boolean> OP_PERMISSIONS = new StateSetting(
-      "op-permissions",
-      true
-  );
-  @Description("When disabled, paintings may not be broken by players")
-  @Category(SettingKey.CategoryType.ENTITY)
+  @Blurb("Painting destruction restriction")
+  @Description("When disabled, paintings may not be broken by players.")
+  @Category(SettingKey.CategoryType.ENTITIES)
   @PlayerRestrictive
   public static final SettingKey<Boolean> PAINTING_DESTROY = new StateSetting(
       "painting-destroy",
       true
   );
-  @Description("When disabled, paintings may not be placed")
-  @Category(SettingKey.CategoryType.ENTITY)
+  @Blurb("Painting placement restriction")
+  @Description("When disabled, paintings may not be placed.")
+  @Category(SettingKey.CategoryType.ENTITIES)
   @PlayerRestrictive
   public static final SettingKey<Boolean> PAINTING_PLACE = new StateSetting(
       "painting-place",
       true
   );
-  @Description("When disabled, all events caused by player collision are cancelled")
-  @Category(SettingKey.CategoryType.ENTITY)
+  @Blurb("Player collision")
+  @Description("When disabled, all interactions caused by player collision are cancelled.")
+  @Category(SettingKey.CategoryType.ENTITIES)
   public static final SettingKey<Boolean> PLAYER_COLLISION = new StateSetting(
       "player-collision",
       true
   );
-  @Description("When disabled, players cannot inflict damage on animals")
+  @Blurb("Player to animal damage")
+  @Description("When disabled, players cannot inflict damage on animals.")
   @Category(SettingKey.CategoryType.DAMAGE)
   @PlayerRestrictive
   public static final SettingKey<Boolean> PVA = new StateSetting(
       "pva",
       true
   );
-  @Description("When disabled, players cannot inflict damage on hostile creatures")
+  @Blurb("Player to hostile mob damage")
+  @Description("When disabled, players cannot inflict damage on hostile creatures.")
   @Category(SettingKey.CategoryType.DAMAGE)
   @PlayerRestrictive
   public static final SettingKey<Boolean> PVH = new StateSetting(
       "pvh",
       true
   );
-  @Description("When disabled, players cannot inflict damage on other players")
+  @Blurb("Player to player damage")
+  @Description("When disabled, players cannot inflict damage on other players.")
   @Category(SettingKey.CategoryType.DAMAGE)
   @PlayerRestrictive
   public static final SettingKey<Boolean> PVP = new StateSetting(
       "pvp",
       true
   );
-  @Description("When disabled, players cannot ride other entities")
-  @Category(SettingKey.CategoryType.ENTITY)
+  @Blurb("Plugins which are considered restricted")
+  @Description("The plugins that cannot break restrictive setting rules.")
+  @NotImplemented
+  public static final SettingKey<Set<String>> RESTRICTED_PLUGINS = new StringSetSetting(
+      "restricted-plugins",
+      new HashSet<>()
+  );
+  @Blurb("Players' ability to ride entities")
+  @Description("When disabled, players cannot ride other entities.")
+  @Category(SettingKey.CategoryType.ENTITIES)
   @PlayerRestrictive
   public static final SettingKey<Boolean> RIDE = new StateSetting(
       "ride",
       true
   );
-  @Description("When disabled, players cannot sleep")
+  public static final String SET_SPLIT_REGEX = "(?<![ ,])(( )+|( *, *))(?![ ,])";
+  @Blurb("Players' ability to sleep")
+  @Description("When disabled, players cannot sleep.")
   @PlayerRestrictive
   public static final SettingKey<Boolean> SLEEP = new StateSetting(
       "sleep",
       true
   );
-  @Description("When disabled, snowmen do not make trails")
+  @Blurb("Snowman snow trail creation")
+  @Description("When disabled, snowmen do not make snow trails.")
   @Category(SettingKey.CategoryType.BLOCKS)
   public static final SettingKey<Boolean> SNOWMAN_TRAILS = new StateSetting(
       "snowman-trails",
       true
   );
-  @Description("When disabled, snow does not accumulate naturally")
+  @Blurb("Snowfall snow placement")
+  @Description("When disabled, snow does not accumulate naturally.")
   @Category(SettingKey.CategoryType.BLOCKS)
   public static final SettingKey<Boolean> SNOW_ACCUMULATION = new StateSetting(
       "snow-accumulation",
       true
   );
-  @Description("When disabled, snow does not melt")
+  @Blurb("Snow melt")
+  @Description("When disabled, snow does not melt.")
   @Category(SettingKey.CategoryType.BLOCKS)
   public static final SettingKey<Boolean> SNOW_MELT = new StateSetting(
       "snow-melt",
       true
   );
-  @Description("When disabled, mobs cannot spawn")
-  @Category(SettingKey.CategoryType.ENTITY)
+  @Blurb("Animal spawning")
+  @Description("When disabled, animals cannot spawn.")
+  @Category(SettingKey.CategoryType.ENTITIES)
   @PlayerRestrictive
   public static final SettingKey<Boolean> SPAWN_ANIMAL = new StateSetting(
       "spawn-animal",
       true
   );
-  @Description("When disabled, mobs cannot spawn")
-  @Category(SettingKey.CategoryType.ENTITY)
+  @Blurb("Hostile mob spawning")
+  @Description("When disabled, hostile mobs cannot spawn.")
+  @Category(SettingKey.CategoryType.ENTITIES)
   @PlayerRestrictive
   public static final SettingKey<Boolean> SPAWN_HOSTILE = new StateSetting(
       "spawn-hostile",
       true
   );
-  @Description("When disabled, mobs cannot spawn")
-  @Category(SettingKey.CategoryType.ENTITY)
+  @Blurb("All mob spawning")
+  @Description("When disabled, no mobs can spawn.")
+  @Category(SettingKey.CategoryType.ENTITIES)
   @PlayerRestrictive
   public static final SettingKey<Boolean> SPAWN_MOB = new StateSetting(
       "spawn-mob",
       true
   );
-  @Description("The Data Source name of the SQL database to be used if SQL is the storage type")
+  @Blurb("SQL data source name")
+  @Description("The Data Source name of the SQL database to be used if SQL is the storage type.")
   @NotImplemented
   @Global
   public static final SettingKey<String> SQL_DSN = new StringSetting(
       "sql-dsn",
       "jdbc:mysql://localhost/nope"
   );
-  @Description("The password for the SQL database to be used if SQL is the storage type")
+  @Blurb("SQL password")
+  @Description("The password for the SQL database to be used if SQL is the storage type.")
   @NotImplemented
   @Global
   public static final SettingKey<String> SQL_PASSWORD = new StringSetting(
       "sql-password",
       "nope"
   );
-  @Description("The table prefix to be placed before SQL tables if SQL is the storage type")
+  @Blurb("SQL table prefix")
+  @Description("The table prefix to be placed before SQL tables if SQL is the storage type.")
   @NotImplemented
   @Global
   public static final SettingKey<String> SQL_TABLE_PREFIX = new StringSetting(
       "sql-table-prefix",
       "nope"
   );
-  @Description("The username for the SQL database to be used if SQL is the storage type")
+  @Blurb("SQL username")
+  @Description("The username for the SQL database to be used if SQL is the storage type.")
   @NotImplemented
   @Global
   public static final SettingKey<String> SQL_USERNAME = new StringSetting(
       "sql-username",
       "nope"
   );
-  @Description("The type of storage to persist Nope server state")
+  @Blurb("Storage type")
+  @Description("The type of storage to persist Nope server state.")
   @NotImplemented
   @Global
   public static final SettingKey<StorageType> STORAGE_TYPE = new EnumSetting<>(
@@ -629,82 +698,102 @@ public final class SettingLibrary {
       StorageType.HOCON,
       StorageType.class
   );
-  @Description("The designated point of access to the zone via teleport")
+  @Blurb("Location at which to teleport")
+  @Description("The designated point of access to the zone via teleport.")
   public static final SettingKey<Vector3d> TELEPORT_LOCATION = new Vector3dSetting(
       "teleport-location",
       Vector3d.ZERO
   );
-  @Description("When disabled, tnt may not be activated")
+  @Blurb("TNT ignition restriction")
+  @Description("When disabled, tnt may not be activated.")
+  @PlayerRestrictive
   public static final SettingKey<Boolean> TNT_IGNITION = new StateSetting(
       "tnt-ignition",
       true
   );
-  @Description("When disabled, tnt may not be placed")
+  @Blurb("TNT placement restriction")
+  @Description("When disabled, tnt may not be placed.")
   @Category(SettingKey.CategoryType.BLOCKS)
   @PlayerRestrictive
   public static final SettingKey<Boolean> TNT_PLACEMENT = new StateSetting(
       "tnt-placement",
       true
   );
-  @Description("These entity types will not be allowed to spawn")
-  @Category(SettingKey.CategoryType.ENTITY)
+  @Blurb("Commands which directly cause movement")
+  @Description("These commands will be considered unnatural methods of teleportation.")
+  @PlayerRestrictive
+  @Global
+  public static final SettingKey<Set<String>> MOVEMENT_COMMANDS = new StringSetSetting(
+      "movement-commands",
+      Sets.newHashSet()
+  );
+  @Blurb("Mobs which are unspawnable")
+  @Description("These entity types will not be allowed to spawn.")
+  @Category(SettingKey.CategoryType.ENTITIES)
   @PlayerRestrictive
   public static final SettingKey<Set<EntityType>> UNSPAWNABLE_MOBS = new EntityTypeSetSetting(
       "unspawnable-mobs",
       Sets.newHashSet()
   );
-  @Description("When disabled, players may not break vehicles")
-  @Category(SettingKey.CategoryType.ENTITY)
+  @Blurb("Name tag use")
+  @Description("When disabled, players may not use a name tag to rename an entity")
+  @PlayerRestrictive
+  public static final SettingKey<Boolean> USE_NAME_TAG = new StateSetting(
+      "use-name-tag",
+      true
+  );
+  @Blurb("Vehicle destruction restriction")
+  @Description("When disabled, players may not break vehicles.")
+  @Category(SettingKey.CategoryType.ENTITIES)
   @PlayerRestrictive
   public static final SettingKey<Boolean> VEHICLE_DESTROY = new StateSetting(
       "vehicle-destroy",
       true
   );
-  @Description("When disabled, players may not place vehicles")
-  @Category(SettingKey.CategoryType.ENTITY)
+  @Blurb("Vehicle placement restriction")
+  @Description("When disabled, players may not place vehicles.")
+  @Category(SettingKey.CategoryType.ENTITIES)
   @PlayerRestrictive
   public static final SettingKey<Boolean> VEHICLE_PLACE = new StateSetting(
       "vehicle-place",
       true
   );
-  @Description("When disabled, vines do not grow naturally")
+  @Blurb("Vine growth")
+  @Description("When disabled, vines do not grow naturally.")
   @Category(SettingKey.CategoryType.BLOCKS)
   public static final SettingKey<Boolean> VINE_GROWTH = new StateSetting(
       "vine-growth",
       true
   );
-  @Description("The type of item to be used as the Nope wand")
+  @Blurb("Item type used as the Nope Wand")
+  @Description("The type of item to be used as the Nope Wand.")
   @Global
   public static final SettingKey<String> WAND_ITEM = new CatalogTypeSetting<>(
       "wand-item",
       ItemTypes.STICK,
       ItemType.class
   );
+  @Blurb("Water flow")
   @Description("When disabled, water cannot flow")
   @Category(SettingKey.CategoryType.BLOCKS)
   public static final SettingKey<Boolean> WATER_FLOW = new BooleanSetting(
       "water-flow",
       true
   );
+  @Blurb("Grief caused by water")
   @Description("When disabled, water cannot break blocks")
   @Category(SettingKey.CategoryType.BLOCKS)
   public static final SettingKey<Boolean> WATER_GRIEF = new BooleanSetting(
       "water-grief",
       true
   );
-  @Description("When disabled, zombies cannot break blocks")
+  @Blurb("Grief caused by zombies")
+  @Description("When disabled, zombies cannot break blocks.")
   @Category(SettingKey.CategoryType.BLOCKS)
   public static final SettingKey<Boolean> ZOMBIE_GRIEF = new BooleanSetting(
       "zombie-grief",
       true
   );
-  @Description("The plugins that cannot break restrictive setting rules")
-  @Category(SettingKey.CategoryType.MISC)
-  public static final SettingKey<Set<String>> RESTRICTED_PLUGINS = new StringSetSetting(
-      "restricted-plugins",
-      new HashSet<>()
-  );
-  private static final String SET_SPLIT_REGEX = "(?<![ ,])(( )+|( *, *))(?![ ,])";  //"(, )|[ ,]";
   private static final HashMap<String, SettingKey<?>> settingMap = Maps.newHashMap();
 
   /**
@@ -760,9 +849,12 @@ public final class SettingLibrary {
             for (Annotation annotation : field.getAnnotations()) {
               if (annotation instanceof Description) {
                 key.setDescription(((Description) annotation).value());
+              } else if (annotation instanceof Blurb) {
+                key.setBlurb(((Blurb) annotation).value());
               } else if (annotation instanceof Category) {
                 key.setCategory(((Category) annotation).value());
               } else if (annotation instanceof Global) {
+                key.setCategory(SettingKey.CategoryType.GLOBAL);
                 key.setGlobal(true);
               } else if (annotation instanceof NotImplemented) {
                 key.setImplemented(false);
@@ -801,7 +893,7 @@ public final class SettingLibrary {
       }
       // This does not deserialize
       elem.put("restricted", setting.getKey().isPlayerRestrictive());
-      elem.put("value", setting.getKey().dataToJson(setting.getValue().getData()));
+      elem.put("value",  setting.getKey().dataToJson(setting.getValue().getData()));
       elem.put("target", SettingValue.Target.toJson(setting.getValue().getTarget()));
       settingList.add(elem);
     }
@@ -862,6 +954,9 @@ public final class SettingLibrary {
             + object.get("value")
             + ". Is this old? Skipping...");
         continue;
+      } catch (Exception generalException) {
+        Nope.getInstance().getLogger().error("Couldn't deserialize setting: " + key.getId());
+        continue;
       }
       map.put(Setting.of((SettingKey<Object>) key, val));
     }
@@ -914,6 +1009,17 @@ public final class SettingLibrary {
 
   @Retention(RetentionPolicy.RUNTIME)
   @Target(ElementType.FIELD)
+  public @interface Blurb {
+    /**
+     * A very short description of a {@link SettingKey}.
+     *
+     * @return SettingKey blurb
+     */
+    String value();
+  }
+
+  @Retention(RetentionPolicy.RUNTIME)
+  @Target(ElementType.FIELD)
   public @interface Global {
     // Empty
   }
@@ -950,399 +1056,6 @@ public final class SettingLibrary {
   @Target(ElementType.FIELD)
   public @interface UnnaturalDefault {
     // Empty
-  }
-
-  public static class BooleanSetting extends SettingKey<Boolean> {
-    public BooleanSetting(String id, Boolean defaultValue) {
-      super(id, defaultValue);
-    }
-
-    @Override
-    public Boolean parse(String data) throws ParseSettingException {
-      switch (data.toLowerCase()) {
-        case "true":
-        case "t":
-          return true;
-        case "false":
-        case "f":
-          return false;
-        default:
-          throw new ParseSettingException("Allowed values: t, true, f, false");
-      }
-    }
-
-    @Override
-    public Optional<List<String>> getParsable() {
-      return Optional.of(Lists.newArrayList("true", "false", "t", "f"));
-    }
-  }
-
-  public static class PositiveIntegerSetting extends SettingKey<Integer> {
-    public PositiveIntegerSetting(String id, Integer defaultValue) {
-      super(id, defaultValue);
-    }
-
-    @Override
-    public Integer dataFromJsonGenerified(JsonElement json) throws ParseSettingException {
-      int integer = json.getAsInt();
-      if (integer < 0) {
-        throw new ParseSettingException("Data must be a positive integer");
-      }
-      return integer;
-    }
-
-    @Override
-    public Integer parse(String data) throws ParseSettingException {
-      int integer;
-      try {
-        integer = Integer.parseInt(data);
-      } catch (NumberFormatException e) {
-        throw new ParseSettingException("Data must be an integer");
-      }
-      if (integer < 0) {
-        throw new ParseSettingException("Data must be a positive integer");
-      }
-      return integer;
-    }
-  }
-
-  public static class DoubleSetting extends SettingKey<Double> {
-    public DoubleSetting(String id, Double defaultValue) {
-      super(id, defaultValue);
-    }
-  }
-
-  public static class StringSetting extends SettingKey<String> {
-    public StringSetting(String id, String defaultValue) {
-      super(id, defaultValue);
-    }
-  }
-
-  public static class StateSetting extends SettingKey<Boolean> {
-    public StateSetting(String id, Boolean defaultValue) {
-      super(id, defaultValue);
-    }
-
-    @Override
-    public JsonElement dataToJsonGenerified(Boolean value) {
-      return new JsonPrimitive(value ? "allow" : "deny");
-    }
-
-    @Override
-    public Boolean dataFromJsonGenerified(JsonElement jsonElement) {
-      final String s = jsonElement.getAsString();
-      return parse(s);
-    }
-
-    @Override
-    public Boolean parse(String s) throws ParseSettingException {
-      switch (s.toLowerCase()) {
-        case "allow":
-        case "true":
-          return true;
-        case "deny":
-        case "false":
-          return false;
-        default:
-          throw new ParseSettingException("Invalid state string. "
-              + "Should be allow or deny. Was: " + s);
-      }
-    }
-
-    @Override
-    public Optional<List<String>> getParsable() {
-      return Optional.of(Lists.newArrayList("allow", "deny"));
-    }
-  }
-
-  public static class TextSetting extends SettingKey<Text> {
-
-    protected TextSetting(String id, Text defaultValue) {
-      super(id, defaultValue);
-    }
-
-    @Override
-    protected JsonElement dataToJsonGenerified(Text data) {
-      try {
-        return new Gson().toJsonTree(DataFormats.JSON.write(data.toContainer()));
-      } catch (IOException e) {
-        Nope.getInstance().getLogger().error("Could not serialize Text", e);
-        return new Gson().toJsonTree("");
-      }
-    }
-
-    @Override
-    public Text dataFromJsonGenerified(JsonElement json) {
-      try {
-        return Sponge.getDataManager()
-            .deserialize(Text.class, DataFormats.JSON.read(json.getAsString()))
-            .orElseThrow(() -> new RuntimeException(
-                "The json for Text cannot be serialized: "
-                    + json.toString()));
-      } catch (IllegalStateException | IOException e) {
-        Nope.getInstance().getLogger().error("Could not deserialize Text", e);
-        return Text.EMPTY;
-      }
-    }
-
-    @Nonnull
-    @Override
-    public Text print(Text data) {
-      return data;
-    }
-
-    @Override
-    public Text parse(String s) throws ParseSettingException {
-      return TextSerializers.FORMATTING_CODE.deserialize(s);
-    }
-  }
-
-  public static class EnumSetting<E extends Enum<E>> extends SettingKey<E> {
-
-    private final Class<E> enumClass;
-
-    protected EnumSetting(String id, E defaultData, Class<E> enumClass) {
-      super(id, defaultData);
-      this.enumClass = enumClass;
-    }
-
-    @Override
-    protected JsonElement dataToJsonGenerified(E data) {
-      return new Gson().toJsonTree(data.name().toLowerCase());
-    }
-
-    @Override
-    public E dataFromJsonGenerified(JsonElement json) {
-      return parse(json.getAsString());
-    }
-
-    @Override
-    public E parse(String s) throws ParseSettingException {
-      try {
-        return Enum.valueOf(enumClass, s.toUpperCase());
-      } catch (IllegalArgumentException ex) {
-        throw new ParseSettingException(s + " is not a valid "
-            + enumClass.getSimpleName()
-            + " type. "
-            + (
-            (enumClass.getEnumConstants().length <= 8)
-                ? "Allowed types: "
-                + Arrays.stream(enumClass.getEnumConstants()).map(e ->
-                e.toString().toLowerCase()).collect(Collectors.joining(", "))
-                : ""));
-      }
-    }
-
-    @Override
-    public Optional<List<String>> getParsable() {
-      return Optional.of(Arrays.stream(enumClass.getEnumConstants())
-          .map(E::toString)
-          .map(String::toLowerCase)
-          .collect(Collectors.toList()));
-    }
-  }
-
-  public static class StringSetSetting extends SettingKey<Set<String>> {
-
-    public StringSetSetting(String id, Set<String> defaultValue) {
-      super(id, defaultValue);
-    }
-
-    @Override
-    @SuppressWarnings("UnstableApiUsage")
-    public JsonElement dataToJsonGenerified(Set<String> value) {
-      return new Gson().toJsonTree(value, NopeTypeTokens.STRING_SET_TOKEN.getType());
-    }
-
-    @Override
-    public Set<String> dataFromJsonGenerified(JsonElement jsonElement) {
-      final Set<String> set = new HashSet<>();
-      jsonElement.getAsJsonArray().forEach(element -> set.add(element.getAsString()));
-      return set;
-    }
-
-    @Override
-    public Set<String> parse(String s) throws ParseSettingException {
-      return new HashSet<>(Arrays.asList(s.split(SET_SPLIT_REGEX)));
-    }
-  }
-
-  public static class EnumSetSetting<E extends Enum<E>> extends SettingKey<Set<E>> {
-    private final Class<E> enumClass;
-
-    public EnumSetSetting(String id, Set<E> defaultValue, Class<E> enumClass) {
-      super(id, defaultValue);
-      this.enumClass = enumClass;
-    }
-
-    @Override
-    @SuppressWarnings("UnstableApiUsage")
-    public JsonElement dataToJsonGenerified(Set<E> value) {
-      return new Gson().toJsonTree(value, NopeTypeTokens.STRING_SET_TOKEN.getType());
-    }
-
-    @Override
-    public Set<E> dataFromJsonGenerified(JsonElement jsonElement) {
-      final Set<E> set = new HashSet<>();
-      jsonElement.getAsJsonArray().forEach(element ->
-          set.add(Enum.valueOf(enumClass, element.getAsString().toUpperCase())));
-      return set;
-    }
-
-    @Override
-    public Set<E> parse(String s) throws ParseSettingException {
-      Set<E> set = new HashSet<>();
-      for (String token : s.split(SET_SPLIT_REGEX)) {
-        try {
-          set.add(Enum.valueOf(enumClass, token.toUpperCase()));
-        } catch (IllegalArgumentException ex) {
-          throw new ParseSettingException(token + " is not a valid "
-              + enumClass.getSimpleName()
-              + " type. "
-              + (
-              (enumClass.getEnumConstants().length <= 8)
-                  ? "Allowed types: "
-                  + Arrays.stream(enumClass.getEnumConstants()).map(e ->
-                  e.toString().toLowerCase()).collect(Collectors.joining(", "))
-                  : ""));
-        }
-      }
-      return set;
-    }
-
-    @Nonnull
-    @Override
-    public Text print(Set<E> data) {
-      return Text.of("[",
-          data.stream().map(enu -> enu.name().toLowerCase()).collect(Collectors.joining(", ")),
-          "]");
-    }
-  }
-
-  public static class CatalogTypeSetting<C extends CatalogType> extends SettingKey<String> {
-    private final Class<C> clazz;
-
-    public CatalogTypeSetting(String id, C defaultData, Class<C> clazz) {
-      super(id, defaultData.getId());
-      this.clazz = clazz;
-    }
-
-    @Override
-    public String parse(String id) throws ParseSettingException {
-      Sponge.getRegistry().getType(this.clazz, id).orElseThrow(() ->
-          new ParseSettingException("The given id "
-              + id
-              + " id not a valid "
-              + this.clazz.getSimpleName()));
-      return id;
-    }
-
-    @Override
-    public Optional<List<String>> getParsable() {
-      return Optional.of(Lists.newArrayList(Sponge.getRegistry()
-          .getAllOf(this.clazz)
-          .stream()
-          .map(CatalogType::getName)
-          .collect(Collectors.toList())));
-    }
-  }
-
-  public static class EntityTypeSetSetting extends SettingKey<Set<EntityType>> {
-    public EntityTypeSetSetting(String id, Set<EntityType> defaultValue) {
-      super(id, defaultValue);
-    }
-
-    @Override
-    public JsonElement dataToJsonGenerified(Set<EntityType> value) {
-      final JsonArray jsonArray = new JsonArray();
-      for (EntityType entityType : value) {
-        jsonArray.add(new JsonPrimitive(entityType.getId()));
-      }
-      return jsonArray;
-    }
-
-    @Override
-    public Set<EntityType> dataFromJsonGenerified(JsonElement jsonElement) {
-      return stringsToEntityTypes(Lists.newLinkedList(jsonElement.getAsJsonArray())
-          .stream()
-          .map(JsonElement::getAsString)
-          .collect(Collectors.toList()));
-    }
-
-    @Override
-    public Set<EntityType> parse(String s) throws ParseSettingException {
-      Nope.getInstance().getLogger().info("EntityType parsing string: " + s);
-      return stringsToEntityTypes(Arrays.asList(s.split(SET_SPLIT_REGEX)));
-    }
-
-    private Set<EntityType> stringsToEntityTypes(Collection<String> strings) {
-      Nope.getInstance().getLogger().info("Split strings: " + String.join("|", strings));
-      Set<EntityType> set = new HashSet<>();
-      for (String s : strings) {
-        final EntityType entityType = Sponge.getRegistry()
-            .getType(EntityType.class, s)
-            .orElseThrow(() -> new ParseSettingException("Unknown EntityType: " + s));
-        set.add(entityType);
-      }
-      return set;
-    }
-  }
-
-  public static class Vector3dSetting extends SettingKey<Vector3d> {
-    public Vector3dSetting(String id, Vector3d defaultValue) {
-      super(id, defaultValue);
-    }
-
-    @Override
-    public JsonElement dataToJsonGenerified(Vector3d value) {
-      final JsonObject jsonObject = new JsonObject();
-      jsonObject.addProperty("x", value.getX());
-      jsonObject.addProperty("y", value.getY());
-      jsonObject.addProperty("z", value.getZ());
-      return jsonObject;
-    }
-
-    @Override
-    public Vector3d dataFromJsonGenerified(JsonElement jsonElement) {
-      final JsonObject jsonObject = jsonElement.getAsJsonObject();
-      return Vector3d.from(
-          jsonObject.get("x").getAsDouble(),
-          jsonObject.get("y").getAsDouble(),
-          jsonObject.get("z").getAsDouble()
-      );
-    }
-
-    @Override
-    public Vector3d parse(String s) throws ParseSettingException {
-      String[] parts = s.split(SET_SPLIT_REGEX, 3);
-      if (parts.length != 3) {
-        throw new ParseSettingException("Expected 3 parts for Vector3d, got " + parts.length);
-      }
-      int i = 0;
-      try {
-        double x = Double.parseDouble(parts[i++]);
-        double y = Double.parseDouble(parts[i++]);
-        double z = Double.parseDouble(parts[i]);
-        if (Math.max(Math.abs(x), Math.abs(z)) > Nope.WORLD_RADIUS
-            || Math.abs(y) > Nope.WORLD_DEPTH) {
-          throw new ParseSettingException("The magnitudes of these numbers are too high!");
-        }
-        return Vector3d.from(x, y, z);
-      } catch (NumberFormatException e) {
-        throw new ParseSettingException("Value at position " + i + ", "
-            + "could not be parsed into a double");
-      }
-    }
-
-    @Nonnull
-    @Override
-    public Text print(Vector3d data) {
-      return Text.of(Format.keyValue("x:", String.valueOf(data.getX())),
-          ", ",
-          Format.keyValue("y:", String.valueOf(data.getY())),
-          ", ",
-          Format.keyValue("z:", String.valueOf(data.getZ())));
-    }
   }
 
 }

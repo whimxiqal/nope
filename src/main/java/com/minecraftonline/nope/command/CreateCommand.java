@@ -50,6 +50,7 @@
 package com.minecraftonline.nope.command;
 
 import com.minecraftonline.nope.Nope;
+import com.minecraftonline.nope.command.common.FlagDescription;
 import com.minecraftonline.nope.host.VolumeHost;
 import com.minecraftonline.nope.key.zonewand.ZoneWandHandler;
 import com.minecraftonline.nope.arguments.NopeArguments;
@@ -80,6 +81,7 @@ public class CreateCommand extends LambdaCommandNode {
         GenericArguments.flags()
             .valueFlag(GenericArguments.integer(Text.of("priority")), "p")
             .buildWith(GenericArguments.none()));
+    addFlagDescription(FlagDescription.PRIORITY);
     addChildren(new CreateSlabCommand(this));
     setExecutor((src, args) -> {
       if (!(src instanceof Player)) {

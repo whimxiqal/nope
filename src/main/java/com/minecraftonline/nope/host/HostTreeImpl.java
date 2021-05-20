@@ -35,7 +35,7 @@ import com.minecraftonline.nope.Nope;
 import com.minecraftonline.nope.setting.SettingKey;
 import com.minecraftonline.nope.setting.SettingLibrary;
 import com.minecraftonline.nope.setting.SettingValue;
-import com.minecraftonline.nope.structures.HashQueueVolumeTree;
+import com.minecraftonline.nope.structures.FlexibleHashQueueVolumeTree;
 import com.minecraftonline.nope.structures.VolumeTree;
 
 import java.io.IOException;
@@ -52,6 +52,7 @@ import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -629,7 +630,12 @@ public final class HostTreeImpl implements HostTree {
       } else if (cacheSize == 0) {
         this.zoneTree = new VolumeTree<>();
       } else {
-        this.zoneTree = new HashQueueVolumeTree<>(cacheSize);
+        FlexibleHashQueueVolumeTree<String, Zone> flexVolumeTree = new FlexibleHashQueueVolumeTree<>(cacheSize);
+        Sponge.getScheduler().createTaskBuilder().async()
+            .interval(1, TimeUnit.SECONDS)
+            .execute(flexVolumeTree::trim)
+            .submit(Nope.getInstance());
+        this.zoneTree = flexVolumeTree;
       }
 
       this.worldUuid = worldUuid;
@@ -659,7 +665,7 @@ public final class HostTreeImpl implements HostTree {
           .map(WorldProperties::getWorldName)
           .orElseThrow(() -> new RuntimeException(String.format(
               "WorldHost has invalid world UUID: %s",
-              host.worldUuid.toString()))));
+              host.worldUuid))));
       return new Gson().toJsonTree(serializedHost);
     }
 

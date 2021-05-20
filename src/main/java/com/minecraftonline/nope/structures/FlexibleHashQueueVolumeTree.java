@@ -40,13 +40,13 @@ import java.util.stream.Collectors;
  * @param <S> the volume key type
  * @param <T> the volume type
  */
-public class HashQueueVolumeTree<S, T extends Volume> extends VolumeTree<S, T> {
+public class FlexibleHashQueueVolumeTree<S, T extends Volume> extends VolumeTree<S, T> {
 
   private final Map<Query, Set<S>> cache = Maps.newConcurrentMap();
   private final Queue<Query> history = new ConcurrentLinkedQueue<>();
   private final int size;
 
-  public HashQueueVolumeTree(int size) {
+  public FlexibleHashQueueVolumeTree(int size) {
     super();
     this.size = size;
   }
@@ -64,7 +64,6 @@ public class HashQueueVolumeTree<S, T extends Volume> extends VolumeTree<S, T> {
     Set<S> keys = root.findVolumes(x, y, z);
     cache.put(query, keys);
     history.add(query);
-    trim();
     return keys.stream().map(volumes::get).collect(Collectors.toList());
   }
 
@@ -93,9 +92,13 @@ public class HashQueueVolumeTree<S, T extends Volume> extends VolumeTree<S, T> {
     return super.remove(key);
   }
 
-  private void trim() {
-    if (history.size() > size) {
-      cache.remove(history.remove());
+  public void trim() {
+    Queue<Query> deletionStage = new ConcurrentLinkedQueue<>();
+    while (history.size() > size) {
+      deletionStage.add(history.remove());
+    }
+    while (!deletionStage.isEmpty()) {
+      cache.remove(deletionStage.remove());
     }
   }
 

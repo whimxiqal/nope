@@ -23,36 +23,26 @@
  *
  */
 
-package com.minecraftonline.nope.game.listener;
+package com.minecraftonline.nope.command.common;
 
-import com.minecraftonline.nope.Nope;
-import com.minecraftonline.nope.setting.SettingKey;
-import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.event.Cancellable;
-import org.spongepowered.api.event.Event;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.format.TextColors;
 
-import javax.annotation.Nonnull;
-import java.util.function.BiPredicate;
+@Data
+@AllArgsConstructor
+public class FlagDescription {
 
-/**
- * An accessibility class for cancelling events if a player is the root cause
- * of an event and they are found to have a specific state on a specific
- * setting.
- *
- * @param <E> the event type for which to listen and cancel
- */
-class PlayerRootCancelConditionSettingListener<E extends Event & Cancellable>
-    extends PlayerRootSettingListener<E> {
+  public static final FlagDescription ZONE = new FlagDescription("z",
+      Text.of("Specify a ", TextColors.AQUA, "zone", TextColors.RESET, ""),
+      true);
+  public static final FlagDescription PRIORITY = new FlagDescription("p",
+      Text.of("Specify a ", TextColors.AQUA, "priority", TextColors.RESET, " level for a zone"),
+      true);
 
-  public PlayerRootCancelConditionSettingListener(@Nonnull SettingKey<?> key,
-                                                  @Nonnull Class<E> eventClass,
-                                                  @Nonnull BiPredicate<E, Player> canceler) {
-    super(key,
-        eventClass,
-        (event, player) -> {
-          if (canceler.test(event, player)) {
-            event.setCancelled(true);
-          }
-        });
-  }
+  private String flag;
+  private Text description;
+  private boolean valueFlag;
+
 }

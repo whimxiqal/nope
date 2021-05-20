@@ -53,7 +53,7 @@ import com.minecraftonline.nope.Nope;
 import com.minecraftonline.nope.command.common.CommandNode;
 import com.minecraftonline.nope.host.Host;
 import com.minecraftonline.nope.host.HostTreeImpl;
-import com.minecraftonline.nope.structures.HashQueueVolumeTree;
+import com.minecraftonline.nope.structures.FlexibleHashQueueVolumeTree;
 import com.minecraftonline.nope.util.Format;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
@@ -144,9 +144,9 @@ public class NopeCommandRoot extends CommandNode {
           .getHostTree()
           .getWorldHost(((Player) src).getLocation().getExtent().getUniqueId());
       if (worldHost instanceof HostTreeImpl.WorldHost) {
-        if (((HostTreeImpl.WorldHost) worldHost).getZoneTree() instanceof HashQueueVolumeTree) {
+        if (((HostTreeImpl.WorldHost) worldHost).getZoneTree() instanceof FlexibleHashQueueVolumeTree) {
           src.sendMessage(Text.of(TextColors.DARK_GRAY, "Cache size: ",
-                  ((HashQueueVolumeTree<?, ?>) ((HostTreeImpl.WorldHost) worldHost).getZoneTree())
+                  ((FlexibleHashQueueVolumeTree<?, ?>) ((HostTreeImpl.WorldHost) worldHost).getZoneTree())
                       .getCacheSize()));
         }
       }

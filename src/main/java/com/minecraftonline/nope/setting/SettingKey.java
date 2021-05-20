@@ -68,6 +68,10 @@ public abstract class SettingKey<T> {
   private String description = null;
   @Getter
   @Setter
+  @Nullable
+  private String blurb = null;
+  @Getter
+  @Setter
   @Nonnull
   private CategoryType category = CategoryType.MISC;
   @Getter
@@ -89,9 +93,10 @@ public abstract class SettingKey<T> {
   public enum CategoryType {
     BLOCKS,
     DAMAGE,
-    ENTITY,
+    ENTITIES,
     MISC,
     MOVEMENT,
+    GLOBAL,
   }
 
   protected SettingKey(String id, T defaultData) {

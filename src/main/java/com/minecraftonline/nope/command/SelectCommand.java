@@ -29,6 +29,7 @@ import com.flowpowered.math.vector.Vector3i;
 import com.minecraftonline.nope.Nope;
 import com.minecraftonline.nope.arguments.NopeArguments;
 import com.minecraftonline.nope.command.common.CommandNode;
+import com.minecraftonline.nope.command.common.FlagDescription;
 import com.minecraftonline.nope.command.common.LambdaCommandNode;
 import com.minecraftonline.nope.host.Host;
 import com.minecraftonline.nope.host.VolumeHost;
@@ -61,6 +62,7 @@ public class SelectCommand extends LambdaCommandNode {
             .valueFlag(NopeArguments.host(Text.of("zone")), "z", "-zone")
             .flag("w")
             .buildWith(GenericArguments.none()));
+    addFlagDescription(FlagDescription.ZONE);
     setExecutor((src, args) -> {
       if (!(src instanceof Player)) {
         return CommandResult.empty();

@@ -130,8 +130,15 @@ class TeleportCommand extends LambdaCommandNode {
                   random.nextInt(volumeHost.getMaxX() + 1 - volumeHost.getMinX()) + volumeHost.getMinX(),
                   random.nextInt(volumeHost.getMaxY() + 1 - volumeHost.getMinY()) + volumeHost.getMinY(),
                   random.nextInt(volumeHost.getMaxZ() + 1 - volumeHost.getMinZ()) + volumeHost.getMinZ()))) {
-                src.sendMessage(Format.success("Teleported to a random location inside zone ",
-                    Format.host(host)));
+                src.sendMessage(Format.success("Teleported to a random location inside or near zone ",
+                    Format.host(host), " ", Format.command(
+                        "SHOW",
+                        Nope.getInstance().getCommandTree()
+                            .findNode(ShowCommand.class)
+                            .orElseThrow(() ->
+                                new RuntimeException("Wand command is not present in the Nope command tree!"))
+                            .getFullCommand() + " " + volumeHost.getName(),
+                        Text.of("Show the boundaries of this zone"))));
                 return;
               }
             }

@@ -23,36 +23,35 @@
  *
  */
 
-package com.minecraftonline.nope.game.listener;
+package com.minecraftonline.nope.setting;
 
-import com.minecraftonline.nope.Nope;
-import com.minecraftonline.nope.setting.SettingKey;
-import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.event.Cancellable;
-import org.spongepowered.api.event.Event;
+import com.google.gson.JsonElement;
 
-import javax.annotation.Nonnull;
-import java.util.function.BiPredicate;
+public class PositiveIntegerSetting extends SettingKey<Integer> {
+  public PositiveIntegerSetting(String id, Integer defaultValue) {
+    super(id, defaultValue);
+  }
 
-/**
- * An accessibility class for cancelling events if a player is the root cause
- * of an event and they are found to have a specific state on a specific
- * setting.
- *
- * @param <E> the event type for which to listen and cancel
- */
-class PlayerRootCancelConditionSettingListener<E extends Event & Cancellable>
-    extends PlayerRootSettingListener<E> {
+  @Override
+  public Integer dataFromJsonGenerified(JsonElement json) throws ParseSettingException {
+    int integer = json.getAsInt();
+    if (integer < 0) {
+      throw new ParseSettingException("Data must be a positive integer");
+    }
+    return integer;
+  }
 
-  public PlayerRootCancelConditionSettingListener(@Nonnull SettingKey<?> key,
-                                                  @Nonnull Class<E> eventClass,
-                                                  @Nonnull BiPredicate<E, Player> canceler) {
-    super(key,
-        eventClass,
-        (event, player) -> {
-          if (canceler.test(event, player)) {
-            event.setCancelled(true);
-          }
-        });
+  @Override
+  public Integer parse(String data) throws ParseSettingException {
+    int integer;
+    try {
+      integer = Integer.parseInt(data);
+    } catch (NumberFormatException e) {
+      throw new ParseSettingException("Data must be an integer");
+    }
+    if (integer < 0) {
+      throw new ParseSettingException("Data must be a positive integer");
+    }
+    return integer;
   }
 }

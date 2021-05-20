@@ -53,6 +53,7 @@ package com.minecraftonline.nope.command;
 import com.minecraftonline.nope.Nope;
 import com.minecraftonline.nope.arguments.NopeArguments;
 import com.minecraftonline.nope.command.common.CommandNode;
+import com.minecraftonline.nope.command.common.FlagDescription;
 import com.minecraftonline.nope.command.common.LambdaCommandNode;
 import com.minecraftonline.nope.host.Host;
 import com.minecraftonline.nope.permission.Permissions;
@@ -77,6 +78,7 @@ class TargetAddPermissionCommand extends LambdaCommandNode {
         NopeArguments.settingKey(Text.of("setting")),
         GenericArguments.string(Text.of("permission")),
         GenericArguments.bool(Text.of("value")));
+    addFlagDescription(FlagDescription.ZONE);
     setComment(() -> Format.note("Players without the designated permission requirement will "
         + "not be affected by this zone's setting"));
     setExecutor((src, args) -> {

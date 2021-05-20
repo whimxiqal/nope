@@ -33,10 +33,12 @@ import com.minecraftonline.nope.host.Host;
 import com.minecraftonline.nope.host.VolumeHost;
 import com.minecraftonline.nope.setting.SettingLibrary;
 import com.minecraftonline.nope.util.EffectsUtil;
+import lombok.Data;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
+import org.spongepowered.api.event.entity.MoveEntityEvent;
 import org.spongepowered.api.event.network.ClientConnectionEvent;
 import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.text.Text;
@@ -44,116 +46,141 @@ import org.spongepowered.api.text.title.Title;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 
-import java.util.Collection;
+import javax.annotation.Nonnull;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 public class PlayerMovementHandler {
+
+  @Data
+  private static class PlayerMovementData {
+    private final UUID taskId;
+    private Vector3i position;
+    private UUID worldId;
+    private long visualsTimeStamp;
+    private String lastSentMessage;
+    private boolean viewing;
+    private boolean nextUnnaturalTeleportRestricted;
+    private Predicate<MoveEntityEvent.Teleport> nextTeleportCanceller;
+
+    PlayerMovementData(@Nonnull UUID taskId, @Nonnull Entity entity) {
+      this.taskId = taskId;
+      this.position = entity.getLocation().getBlockPosition();
+      this.worldId = entity.getLocation().getExtent().getUniqueId();
+      this.visualsTimeStamp = System.currentTimeMillis();
+      this.lastSentMessage = "A fox flew farther than Florence";
+      this.viewing = false;
+      this.nextUnnaturalTeleportRestricted = false;
+      this.nextTeleportCanceller = event -> false;
+    }
+  }
 
   private static final long POLL_INTERVAL_TICKS = 4;
   private static final long MESSAGE_COOLDOWN_MILLISECONDS = 1000;
 
-  private final Map<UUID, Vector3i> positions = Maps.newConcurrentMap();
-  private final Map<UUID, UUID> worldLocations = Maps.newConcurrentMap();
-  private final Map<UUID, UUID> tasks = Maps.newConcurrentMap();
-  private final Map<UUID, Long> visualsTimer = Maps.newConcurrentMap();
-  private final Map<UUID, String> lastSentMessages = Maps.newConcurrentMap();
-
-  private final Set<UUID> viewers = ConcurrentHashMap.newKeySet();
+  private final Map<UUID, PlayerMovementData> movementDataMap = Maps.newConcurrentMap();
 
   public void register() {
     Sponge.getEventManager().registerListeners(Nope.getInstance(), this);
   }
 
   public void updatePreviousLocation(Player player) {
-    this.positions.put(player.getUniqueId(), player.getLocation().getBlockPosition());
-    this.worldLocations.put(player.getUniqueId(), player.getLocation().getExtent().getUniqueId());
+    this.movementDataMap.get(player.getUniqueId()).setPosition(player.getLocation().getBlockPosition());
+    this.movementDataMap.get(player.getUniqueId()).setWorldId(player.getLocation().getExtent().getUniqueId());
   }
 
   private Location<World> getPreviousLocation(UUID playerUuid) {
     return new Location<>(Sponge.getServer()
-        .getWorld(worldLocations.get(playerUuid))
+        .getWorld(movementDataMap.get(playerUuid).getWorldId())
         .orElseThrow(() ->
             new RuntimeException("World could not be found in Movement Handler")),
-        positions.get(playerUuid).toDouble().add(0.5, 0.5, 0.5));
+        movementDataMap.get(playerUuid).getPosition().toDouble().add(0.5, 0.5, 0.5));
   }
 
-  public boolean addHostViewer(UUID playerUuid) {
-    return viewers.add(playerUuid);
+  public void addHostViewer(UUID playerUuid) {
+    movementDataMap.get(playerUuid).setViewing(true);
   }
 
   public boolean isHostViewer(UUID playerUuid) {
-    return viewers.contains(playerUuid);
+    return movementDataMap.get(playerUuid).isViewing();
   }
 
-  public boolean removeHostViewer(UUID playerUuid) {
-    return viewers.remove(playerUuid);
+  public void removeHostViewer(UUID playerUuid) {
+    movementDataMap.get(playerUuid).setViewing(false);
+  }
+
+  public void restrictNextUnnaturalTeleport(UUID playerUuid, boolean restricted) {
+    movementDataMap.get(playerUuid).setNextUnnaturalTeleportRestricted(restricted);
+  }
+
+  public boolean isNextUnnaturalTeleportRestricted(UUID playerUuid) {
+    return movementDataMap.get(playerUuid).isNextUnnaturalTeleportRestricted();
+  }
+
+  public void cancelNextTeleport(UUID playerUuid, Predicate<MoveEntityEvent.Teleport> canceller) {
+    movementDataMap.get(playerUuid).setNextTeleportCanceller(canceller);
+  }
+
+  public Predicate<MoveEntityEvent.Teleport> isNextTeleportCancelled(UUID playerUuid) {
+    return movementDataMap.get(playerUuid).getNextTeleportCanceller();
   }
 
   @Listener
   public void onJoin(ClientConnectionEvent.Join event) {
     UUID uuid = event.getTargetEntity().getUniqueId();
 
-    /* Location cache */
-    positions.put(uuid, event.getTargetEntity().getLocation().getBlockPosition());
-    worldLocations.put(uuid, event.getTargetEntity().getLocation().getExtent().getUniqueId());
+    UUID taskId = Sponge.getScheduler().createTaskBuilder()
+        .intervalTicks(POLL_INTERVAL_TICKS)
+        .execute(() -> {
+          Player player = Sponge.getServer()
+              .getPlayer(uuid).orElseThrow(() ->
+                  new RuntimeException("Player cannot be found in Movement Handler. Was the player properly flushed?"));
+          Location<World> previousLocation = getPreviousLocation(player.getUniqueId());
+          if (!previousLocation.getBlockPosition().equals(player.getLocation().getBlockPosition())
+              || !previousLocation.getExtent().equals(player.getLocation().getExtent())) {
+            if (isNextUnnaturalTeleportRestricted(player.getUniqueId())) {
+              tryPassThreshold(player,
+                  previousLocation,
+                  player.getLocation(),
+                  false,
+                  cancelled -> {
+                    if (cancelled) {
+                      player.setLocation(getPreviousLocation(uuid));
+                    }
+                  });
+              restrictNextUnnaturalTeleport(player.getUniqueId(), false);
+            }
+          }
+          updatePreviousLocation(player);
+        }).submit(Nope.getInstance())
+        .getUniqueId();
 
-    /* Tasks */
-    tasks.put(uuid,
-        Sponge.getScheduler().createTaskBuilder()
-            .intervalTicks(POLL_INTERVAL_TICKS)
-            .execute(() -> {
-              Player player = Sponge.getServer()
-                  .getPlayer(uuid).orElseThrow(() ->
-                      new RuntimeException("Player cannot be found in Movement Handler. Was the player properly flushed?"));
-              Location<World> previousLocation = getPreviousLocation(player.getUniqueId());
-              if (!previousLocation.getBlockPosition().equals(player.getLocation().getBlockPosition())
-                  || !previousLocation.getExtent().equals(player.getLocation().getExtent())) {
-                tryPassThreshold(player,
-                    previousLocation,
-                    player.getLocation(),
-                    false,
-                    cancelled -> {
-                      if (cancelled) {
-                        player.setLocation(getPreviousLocation(uuid));
-                      }
-                    });
-              }
-              updatePreviousLocation(player);
-            }).submit(Nope.getInstance())
-            .getUniqueId());
-
-    /* Player caches */
-    visualsTimer.put(uuid, System.currentTimeMillis());
+    movementDataMap.put(uuid, new PlayerMovementData(taskId, event.getTargetEntity()));
   }
 
   @Listener
   public void onLeave(ClientConnectionEvent.Disconnect event) {
-    /* Location cache */
-    positions.remove(event.getTargetEntity().getUniqueId());
-    worldLocations.remove(event.getTargetEntity().getUniqueId());
+    UUID entityUuid = event.getTargetEntity().getUniqueId();
 
-    /* Tasks */
-    UUID taskUuid = tasks.remove(event.getTargetEntity().getUniqueId());
+    /* Clean Up */
+    UUID taskUuid = movementDataMap.get(entityUuid).getTaskId();
     if (taskUuid == null) {
       throw new RuntimeException("Player could not be removed from the Movement Handler properly.");
     }
     Sponge.getScheduler().getTaskById(taskUuid).ifPresent(Task::cancel);
 
-    /* Player caches */
-    visualsTimer.remove(event.getTargetEntity().getUniqueId());
-    lastSentMessages.remove(event.getTargetEntity().getUniqueId());
+    movementDataMap.remove(entityUuid);
   }
 
   public void tryPassThreshold(Player player,
                                Location<World> first,
                                Location<World> last,
-                               boolean translate,
+                               boolean natural,
                                Consumer<Boolean> canceller) {
     List<Host> exiting = new LinkedList<>(Nope.getInstance()
         .getHostTree()
@@ -179,20 +206,23 @@ public class PlayerMovementHandler {
     boolean cancel = false;
     boolean visual = false;
 
-    /* Find applicable values for exiting or entering */
+    /* Find these applicable values for exiting or entering */
     SettingLibrary.Movement movementData;
     Text message;
     Text title;
     Text subtitle;
-    boolean expired = visualsTimer.get(player.getUniqueId())
+    boolean expired = movementDataMap.get(player.getUniqueId()).getVisualsTimeStamp()
         + MESSAGE_COOLDOWN_MILLISECONDS < System.currentTimeMillis();
-    String lastSentMessage = lastSentMessages.getOrDefault(player.getUniqueId(), "");
+    String lastSentMessage = movementDataMap.get(player.getUniqueId()).getLastSentMessage();
 
     /* Exiting */
     for (int i = exiting.size() - 1; i >= 0; i--) {
       movementData = exiting.get(i).getData(SettingLibrary.EXIT, player);
       if (movementData.equals(SettingLibrary.Movement.NONE)
-          || (movementData.equals(SettingLibrary.Movement.UNNATURAL) && translate)) {
+          || (movementData.equals(SettingLibrary.Movement.UNNATURAL) && natural)) {
+        Nope.getInstance().getLogger().info("Cancelling...");
+        Nope.getInstance().getLogger().info("Movement Data: " + movementData);
+        Nope.getInstance().getLogger().info("Natural: " + natural);
         cancel = true;
         message = exiting.get(i).getData(SettingLibrary.EXIT_DENY_MESSAGE, player);
         title = exiting.get(i).getData(SettingLibrary.EXIT_DENY_TITLE, player);
@@ -205,7 +235,7 @@ public class PlayerMovementHandler {
 
       if (!message.isEmpty() && (expired || !lastSentMessage.equals(message.toPlain()))) {
         player.sendMessage(message);
-        lastSentMessages.put(player.getUniqueId(), message.toPlain());
+        movementDataMap.get(player.getUniqueId()).setLastSentMessage(message.toPlain());
         visual = true;
       }
       if (!title.isEmpty() || !subtitle.isEmpty()) {
@@ -224,7 +254,7 @@ public class PlayerMovementHandler {
       for (int i = entering.size() - 1; i >= 0; i--) {
         movementData = entering.get(i).getData(SettingLibrary.ENTRY, player);
         if (movementData.equals(SettingLibrary.Movement.NONE)
-            || (movementData.equals(SettingLibrary.Movement.UNNATURAL) && translate)) {
+            || (movementData.equals(SettingLibrary.Movement.UNNATURAL) && natural)) {
           cancel = true;
           message = entering.get(i).getData(SettingLibrary.ENTRY_DENY_MESSAGE, player);
           title = entering.get(i).getData(SettingLibrary.ENTRY_DENY_TITLE, player);
@@ -236,7 +266,7 @@ public class PlayerMovementHandler {
         }
         if (!message.isEmpty() && (expired || !lastSentMessage.equals(message.toPlain()))) {
           player.sendMessage(message);
-          lastSentMessages.put(player.getUniqueId(), message.toPlain());
+          movementDataMap.get(player.getUniqueId()).setLastSentMessage(message.toPlain());
           visual = true;
         }
         if (!title.isEmpty() || !subtitle.isEmpty()) {
@@ -244,7 +274,7 @@ public class PlayerMovementHandler {
           visual = true;
         }
 
-        if (entering.get(i) instanceof VolumeHost && isHostViewer(player.getUniqueId())) {
+        if (entering.get(i) instanceof VolumeHost && isHostViewer(player.getUniqueId()) && expired) {
           EffectsUtil.showVolume((VolumeHost) entering.get(i), player, 5);
           visual = true;
         }
@@ -253,12 +283,12 @@ public class PlayerMovementHandler {
 
     /* Update message time (for reduced spamming) */
     if (visual) {
-      visualsTimer.put(player.getUniqueId(), System.currentTimeMillis());
+      movementDataMap.get(player.getUniqueId()).setVisualsTimeStamp(System.currentTimeMillis());
     }
 
     /* Perform cancellation behavior */
 
-    // This is a quick fix for managing vehicles
+    // This is a quick fix for managing cancellation while riding vehicles
     if (cancel && player.getVehicle().isPresent()) {
       // Dismount so the even can be cancelled properly
       Entity vehicle = player.getVehicle().get();
@@ -266,6 +296,11 @@ public class PlayerMovementHandler {
       // Move the vehicle back to the player so the vehicle doesn't get stuck
       vehicle.setTransform(player.getTransform());
     }
+
+    if (!cancel) {
+      updatePreviousLocation(player);
+    }
+
     canceller.accept(cancel);
 
   }

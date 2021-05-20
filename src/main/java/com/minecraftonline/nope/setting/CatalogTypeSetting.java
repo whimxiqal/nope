@@ -23,36 +23,40 @@
  *
  */
 
-package com.minecraftonline.nope.game.listener;
+package com.minecraftonline.nope.setting;
 
-import com.minecraftonline.nope.Nope;
-import com.minecraftonline.nope.setting.SettingKey;
-import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.event.Cancellable;
-import org.spongepowered.api.event.Event;
+import com.google.common.collect.Lists;
+import org.spongepowered.api.CatalogType;
+import org.spongepowered.api.Sponge;
 
-import javax.annotation.Nonnull;
-import java.util.function.BiPredicate;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
-/**
- * An accessibility class for cancelling events if a player is the root cause
- * of an event and they are found to have a specific state on a specific
- * setting.
- *
- * @param <E> the event type for which to listen and cancel
- */
-class PlayerRootCancelConditionSettingListener<E extends Event & Cancellable>
-    extends PlayerRootSettingListener<E> {
+public class CatalogTypeSetting<C extends CatalogType> extends SettingKey<String> {
+  private final Class<C> clazz;
 
-  public PlayerRootCancelConditionSettingListener(@Nonnull SettingKey<?> key,
-                                                  @Nonnull Class<E> eventClass,
-                                                  @Nonnull BiPredicate<E, Player> canceler) {
-    super(key,
-        eventClass,
-        (event, player) -> {
-          if (canceler.test(event, player)) {
-            event.setCancelled(true);
-          }
-        });
+  public CatalogTypeSetting(String id, C defaultData, Class<C> clazz) {
+    super(id, defaultData.getId());
+    this.clazz = clazz;
+  }
+
+  @Override
+  public String parse(String id) throws ParseSettingException {
+    Sponge.getRegistry().getType(this.clazz, id).orElseThrow(() ->
+        new ParseSettingException("The given id "
+            + id
+            + " id not a valid "
+            + this.clazz.getSimpleName()));
+    return id;
+  }
+
+  @Override
+  public Optional<List<String>> getParsable() {
+    return Optional.of(Lists.newArrayList(Sponge.getRegistry()
+        .getAllOf(this.clazz)
+        .stream()
+        .map(CatalogType::getName)
+        .collect(Collectors.toList())));
   }
 }

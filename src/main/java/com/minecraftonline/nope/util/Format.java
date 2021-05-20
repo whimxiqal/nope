@@ -48,6 +48,7 @@ import javax.annotation.Nullable;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
@@ -101,9 +102,13 @@ public final class Format {
   }
 
   public static Text hover(String label, String onHover) {
+    return hover(Text.of(TextStyles.ITALIC, label), Format.note(onHover));
+  }
+
+  public static Text hover(Text label, Text onHover) {
     return Text.builder()
-        .append(Text.of(TextStyles.ITALIC, label))
-        .onHover(TextActions.showText(Format.note(onHover)))
+        .append(label)
+        .onHover(TextActions.showText(onHover))
         .build();
   }
 
@@ -127,7 +132,7 @@ public final class Format {
                              @Nullable Text hoverMessage) {
     Text.Builder builder = Text.builder()
         .append(Text.of(TextColors.GOLD, TextStyles.ITALIC, "[",
-            Text.of(TextColors.LIGHT_PURPLE, label), "]"))
+            Text.of(TextColors.LIGHT_PURPLE, label.toUpperCase()), "]"))
         .onClick(TextActions.runCommand(command));
     if (hoverMessage != null) {
       builder.onHover(TextActions.showText(Text.of(
@@ -186,7 +191,9 @@ public final class Format {
 
     Text.Builder idText = Text.builder().append(Text.of(Format.ACCENT, key.getId()));
 
-    Text.Builder onHover = Text.builder();
+    Text.Builder onHover = Text.builder()
+        .append(Text.of(TextColors.AQUA, key.getId()))
+        .append(Text.NEW_LINE);
 
     if (!key.isImplemented()) {
       idText.style(TextStyles.STRIKETHROUGH);
@@ -197,10 +204,14 @@ public final class Format {
     onHover.append(Format.keyValue("Type:", key.valueType().getSimpleName()));
     onHover.append(Text.NEW_LINE);
 
-    onHover.append(Format.keyValue("Default value:", key.print(key.getDefaultData())));
+    Text defaultData = key.print(key.getDefaultData());
+    onHover.append(Format.keyValue("Default value:", defaultData.isEmpty() ? Text.of("(Empty)") : defaultData));
     onHover.append(Text.NEW_LINE);
 
     onHover.append(Format.keyValue("Restrictive:", String.valueOf(key.isPlayerRestrictive())));
+    onHover.append(Text.NEW_LINE);
+
+    onHover.append(Format.keyValue("Category:", key.getCategory().name().toLowerCase()));
 
     if (key.getDescription() != null) {
       onHover.append(Text.NEW_LINE).append(Text.NEW_LINE);
@@ -211,8 +222,9 @@ public final class Format {
 
     builder.append(idText.build());
     if (verbose) {
-      builder.append(Text.of(" "));
-      builder.append(Format.note(key.getDescription() == null ? "No description" : key.getDescription()));
+      builder.append(Text.of(" ", key.getBlurb() == null
+          ? (key.getDescription() == null ? "No description" : key.getDescription())
+          : key.getBlurb()));
     }
 
     return builder.build();
@@ -224,11 +236,12 @@ public final class Format {
       // Redundant
       builder.append(Text.of(TextColors.GRAY, TextStyles.STRIKETHROUGH, value));
       if (redundantOnDefault) {
-        builder.onHover(TextActions.showText(Text.of("This setting is redundant because it is the default value")));
+        builder.onHover(TextActions.showText(Text.of("This setting is redundant because it is the default value,"
+        + " so this setting serves no purpose.")));
       } else {
         builder.onHover(TextActions.showText(Text.of("This setting is redundant because host ",
             Format.host(redundancyController),
-            " has the same setting")));
+            " has the same setting, so this setting serves no purpose.")));
       }
     } else {
       builder.append(Text.of(TextColors.WHITE, value));
@@ -251,10 +264,10 @@ public final class Format {
               new RuntimeException("UnsetCommand is not set in Nope command tree!"));
       if (unsetCommand.hasPermission(subject)) {
         main.append(Format.commandSuggest("UNSET",
-                unsetCommand.getFullCommand() + String.format(" -z %s %s",
-                    host.getName(),
-                    setting.getKey()),
-                Text.of("Unset the value of this setting on this host")))
+            unsetCommand.getFullCommand() + String.format(" -z %s %s",
+                host.getName(),
+                setting.getKey()),
+            Text.of("Unset the value of this setting on this host")))
             .append(Text.of(" "));
       }
 
@@ -265,10 +278,10 @@ public final class Format {
               new RuntimeException("SetCommand is not set in Nope command tree!"));
       if (unsetCommand.hasPermission(subject)) {
         main.append(Format.commandSuggest("SET",
-                setCommand.getFullCommand() + String.format(" -z %s %s ___",
-                    host.getName(),
-                    setting.getKey()),
-                Text.of("Set this setting on this host with a value")))
+            setCommand.getFullCommand() + String.format(" -z %s %s ___",
+                host.getName(),
+                setting.getKey()),
+            Text.of("Set this setting on this host with a value")))
             .append(Text.of(" "));
       }
 
@@ -279,15 +292,16 @@ public final class Format {
               new RuntimeException("TargetAddCommand is not set in Nope command tree!"));
       if (targetAddCommand.hasPermission(subject)) {
         main.append(Format.commandSuggest("ADD",
-                targetAddCommand.getFullCommand() + String.format(" ___ -z %s %s ___",
-                    host.getName(),
-                    setting.getKey()),
-                Text.of("Add a target condition to this host")))
+            targetAddCommand.getFullCommand() + String.format(" ___ -z %s %s ___",
+                host.getName(),
+                setting.getKey()),
+            Text.of("Add a target condition to this host")))
             .append(Text.of(" "));
       }
 
+      Text data = setting.getKey().print(setting.getValue().getData());
       main.append(Format.settingKey(setting.getKey(), false),
-          Text.of(" = ", Format.settingValue(setting.getKey().print(setting.getValue().getData()),
+          Text.of(" = ", Format.settingValue(data.isEmpty() ? Text.of("(Empty)") : data,
               host.equals(redundancyController),
               redundancyController)));
 

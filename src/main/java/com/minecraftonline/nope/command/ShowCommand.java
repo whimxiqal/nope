@@ -89,8 +89,11 @@ public class ShowCommand extends LambdaCommandNode {
         return CommandResult.empty();
       }
       VolumeHost volumeHost = (VolumeHost) host;
-      src.sendMessage(Format.success("Showing nearby borders of zone ", Format.host(host)));
-      EffectsUtil.showVolume(volumeHost, player, 12);
+      if (EffectsUtil.showVolume(volumeHost, player, 12)) {
+        src.sendMessage(Format.success("Showing nearby borders of zone ", Format.host(host)));
+      } else {
+        src.sendMessage(Format.error("The boundaries of zone ", Format.host(host), " are not near you"));
+      }
       return CommandResult.success();
     });
   }
