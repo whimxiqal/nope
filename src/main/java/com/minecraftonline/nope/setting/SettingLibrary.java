@@ -161,9 +161,7 @@ public final class SettingLibrary {
   );
   @Blurb("Entity experience drop")
   @Description("When disabled, experience points are never dropped.")
-  @NotImplemented
   @PlayerRestrictive
-  // TODO implement this one by simply deleted exp if it spawns
   public static final SettingKey<Boolean> DROP_EXP = new BooleanSetting(
       "drop-exp",
       false

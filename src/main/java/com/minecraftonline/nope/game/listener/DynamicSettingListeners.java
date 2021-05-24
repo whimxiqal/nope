@@ -44,6 +44,7 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.EntityTypes;
+import org.spongepowered.api.entity.ExperienceOrb;
 import org.spongepowered.api.entity.explosive.Explosive;
 import org.spongepowered.api.entity.hanging.ItemFrame;
 import org.spongepowered.api.entity.hanging.Painting;
@@ -250,6 +251,12 @@ public final class DynamicSettingListeners {
                               ChangeBlockEvent.Grow.class,
                               null)))));
   @DynamicSettingListener
+  static final SettingListener<SpawnEntityEvent> DROP_EXP_LISTENER =
+      new CancelConditionSettingListener<>(
+          SettingLibrary.DROP_EXP,
+          SpawnEntityEvent.class,
+          spawnEntityCanceler(SettingLibrary.DROP_EXP, ExperienceOrb.class));
+  @DynamicSettingListener
   static final SettingListener<ChangeBlockEvent.Break> ENDERDRAGON_GRIEF_BLOCK_LISTENER =
       new EntityBreakConditionSettingListener(
           SettingLibrary.ENDERDRAGON_GRIEF,
@@ -284,14 +291,18 @@ public final class DynamicSettingListeners {
             Optional<Player> player = event.getCause().first(Player.class);
             if (!player.isPresent()) return;
             if (event.getItemStackInUse().getType().equals(ItemTypes.CHORUS_FRUIT)) {
-              Nope.getInstance().getPlayerMovementHandler().cancelNextTeleport(player.get().getUniqueId(), teleportEvent ->
-                  !Nope.getInstance().getHostTree().lookup(SettingLibrary.CHORUS_FRUIT_TELEPORT,
-                      player.get(),
-                      teleportEvent.getFromTransform().getLocation())
-                      ||
+              Nope.getInstance()
+                  .getPlayerMovementHandler()
+                  .cancelNextTeleportIf(player.get().getUniqueId(),
+                      teleportEvent ->
                       !Nope.getInstance().getHostTree().lookup(SettingLibrary.CHORUS_FRUIT_TELEPORT,
                           player.get(),
-                          teleportEvent.getToTransform().getLocation()));
+                          teleportEvent.getFromTransform().getLocation())
+                          ||
+                          !Nope.getInstance().getHostTree().lookup(SettingLibrary.CHORUS_FRUIT_TELEPORT,
+                              player.get(),
+                              teleportEvent.getToTransform().getLocation()),
+                      10000);
             }
           });
   @DynamicSettingListener

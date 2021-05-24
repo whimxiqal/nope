@@ -38,6 +38,7 @@ public final class Groups {
 
   public static final Set<BlockType> LIQUID_GRIEFABLE = Sets.newHashSet(
       BlockTypes.SNOW_LAYER,
-      BlockTypes.TALLGRASS);
+      BlockTypes.TALLGRASS,
+      BlockTypes.WATERLILY);
 
 }

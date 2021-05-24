@@ -26,6 +26,7 @@
 package com.minecraftonline.nope.game.listener;
 
 import com.minecraftonline.nope.Nope;
+import com.minecraftonline.nope.game.movement.PlayerMovementHandler;
 import com.minecraftonline.nope.setting.SettingLibrary;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.Entity;
@@ -76,26 +77,22 @@ public final class StaticSettingListeners {
       current.set(entities.pop());
       entities.addAll(current.get().getPassengers());
       if (current.get() instanceof Player) {
-        Nope.getInstance().getPlayerMovementHandler().tryPassThreshold(
+        if (Nope.getInstance().getPlayerMovementHandler().tryPassThreshold(
             (Player) current.get(),
             event.getFromTransform().getLocation(),
             event.getToTransform().getLocation(),
-            true,
-            cancelled -> {
-              // Do both just to be sure
-              if (cancelled) {
-                if (event.getFromTransform().getLocation().getY() > event.getToTransform().getLocation().getY()) {
-                  // The player's is likely falling and it was cancelled.
-                  //  They might be stuck! Manually cancel by moving them out and up.
-                  player.setLocation(event.getFromTransform().getLocation().add(0, 1.5, 0));
-                  event.setCancelled(false);
-                } else {
-                  event.setToTransform(event.getFromTransform());
-                  event.setCancelled(true);
-                }
-              }
-            }
-        );
+            true)) {
+          // Do both just to be sure
+          if (event.getFromTransform().getLocation().getY() > event.getToTransform().getLocation().getY()) {
+            // The player's is likely falling and it was cancelled.
+            //  They might be stuck! Manually cancel by moving them out and up.
+            player.setLocation(event.getFromTransform().getLocation().add(0, 1.5, 0));
+            event.setCancelled(false);
+          } else {
+            event.setToTransform(event.getFromTransform());
+            event.setCancelled(true);
+          }
+        }
         if (current.get().getVehicle().isPresent()
             && !Nope.getInstance().getHostTree().lookup(SettingLibrary.RIDE,
             (Player) current.get(),
@@ -108,7 +105,7 @@ public final class StaticSettingListeners {
 
   @Listener(order = Order.EARLY)
   public void onTeleport(MoveEntityEvent.Teleport event, @First Player player) {
-
+    // Duplicates -- Consecutive teleports from the same location
     if (cancellingDuplicatesSet.contains(player.getUniqueId())
         && lastTeleportFromLocations.containsKey(player.getUniqueId())
         && event.getFromTransform().getLocation().equals(lastTeleportFromLocations.get(player.getUniqueId()))) {
@@ -117,17 +114,18 @@ public final class StaticSettingListeners {
       event.setCancelled(true);
     } else {
       // Not a duplicate
-      if (Nope.getInstance().getPlayerMovementHandler().isNextTeleportCancelled(player.getUniqueId()).test(event)) {
+      PlayerMovementHandler handler = Nope.getInstance().getPlayerMovementHandler();
+      if (handler.resolveTeleportCancellation(player.getUniqueId(), event)) {
         // Cancel because it was manually requested by something else
         event.setToTransform(event.getFromTransform());
         event.setCancelled(true);
-        Nope.getInstance().getPlayerMovementHandler().cancelNextTeleport(player.getUniqueId(), e -> false);
       }
-      // Ensure future duplications are cancelled
+      // Cancel future duplicate teleport events
       cancellingDuplicatesSet.add(player.getUniqueId());
       lastTeleportFromLocations.put(player.getUniqueId(), event.getFromTransform().getLocation());
+      // Allow future duplicates in 20 ticks
       Sponge.getScheduler().createTaskBuilder()
-          .delay(1, TimeUnit.SECONDS)
+          .delayTicks(20)
           .execute(() -> cancellingDuplicatesSet.remove(player.getUniqueId()))
           .submit(Nope.getInstance());
     }
@@ -136,20 +134,33 @@ public final class StaticSettingListeners {
 
   @Listener(order = Order.EARLY)
   public void onSendCommand(SendCommandEvent event, @First Player player) {
-    for (String command :
-        Nope.getInstance()
-            .getHostTree()
-            .lookup(SettingLibrary.MOVEMENT_COMMANDS, player, player.getLocation())) {
+    for (String command : Nope.getInstance()
+        .getHostTree()
+        .lookup(SettingLibrary.MOVEMENT_COMMANDS, player, player.getLocation())) {
       String substring = event.getCommand().substring(0, Math.min(event.getCommand().length(), command.length()));
       if (substring.equalsIgnoreCase(command)) {
-        Nope.getInstance().getPlayerMovementHandler().restrictNextUnnaturalTeleport(player.getUniqueId(), true);
+        Nope.getInstance()
+            .getPlayerMovementHandler()
+            .cancelNextTeleportIf(player.getUniqueId(),
+                teleportEvent ->
+                    Nope.getInstance().getPlayerMovementHandler().tryPassThreshold(player,
+                        teleportEvent.getFromTransform().getLocation(),
+                        teleportEvent.getToTransform().getLocation(),
+                        false),
+                10000);
       }
     }
   }
 
   @Listener
+  public void onJoin(ClientConnectionEvent.Join event) {
+    Nope.getInstance().getPlayerMovementHandler().logIn(event.getTargetEntity().getUniqueId());
+  }
+
+  @Listener
   public void onLeave(ClientConnectionEvent.Disconnect event) {
-    Nope.getInstance().getCollisionHandler().loggedOut(event.getTargetEntity());
+    Nope.getInstance().getCollisionHandler().logOut(event.getTargetEntity());
+    Nope.getInstance().getPlayerMovementHandler().logOut(event.getTargetEntity().getUniqueId());
   }
 
 }

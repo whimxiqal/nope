@@ -25,7 +25,6 @@
 
 package com.minecraftonline.nope.game.movement;
 
-import com.flowpowered.math.vector.Vector3i;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.minecraftonline.nope.Nope;
@@ -34,13 +33,10 @@ import com.minecraftonline.nope.host.VolumeHost;
 import com.minecraftonline.nope.setting.SettingLibrary;
 import com.minecraftonline.nope.util.EffectsUtil;
 import lombok.Data;
-import org.spongepowered.api.Sponge;
+import lombok.NoArgsConstructor;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.entity.MoveEntityEvent;
-import org.spongepowered.api.event.network.ClientConnectionEvent;
-import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.title.Title;
 import org.spongepowered.api.world.Location;
@@ -52,55 +48,24 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 public class PlayerMovementHandler {
 
   @Data
+  @NoArgsConstructor
   private static class PlayerMovementData {
-    private final UUID taskId;
-    private Vector3i position;
-    private UUID worldId;
-    private long visualsTimeStamp;
-    private String lastSentMessage;
-    private boolean viewing;
-    private boolean nextUnnaturalTeleportRestricted;
-    private Predicate<MoveEntityEvent.Teleport> nextTeleportCanceller;
-
-    PlayerMovementData(@Nonnull UUID taskId, @Nonnull Entity entity) {
-      this.taskId = taskId;
-      this.position = entity.getLocation().getBlockPosition();
-      this.worldId = entity.getLocation().getExtent().getUniqueId();
-      this.visualsTimeStamp = System.currentTimeMillis();
-      this.lastSentMessage = "A fox flew farther than Florence";
-      this.viewing = false;
-      this.nextUnnaturalTeleportRestricted = false;
-      this.nextTeleportCanceller = event -> false;
-    }
+    private long visualsTimeStamp = System.currentTimeMillis();
+    private String lastSentMessage = "Few foxes fly farther than Florence";
+    private boolean viewing = false;
+    private boolean nextTeleportVerified = false;
+    private Predicate<MoveEntityEvent.Teleport> nextTeleportCanceller = event -> false;
+    private long nextTeleportCancellationExpiry = System.currentTimeMillis();
   }
 
-  private static final long POLL_INTERVAL_TICKS = 4;
   private static final long MESSAGE_COOLDOWN_MILLISECONDS = 1000;
 
   private final Map<UUID, PlayerMovementData> movementDataMap = Maps.newConcurrentMap();
-
-  public void register() {
-    Sponge.getEventManager().registerListeners(Nope.getInstance(), this);
-  }
-
-  public void updatePreviousLocation(Player player) {
-    this.movementDataMap.get(player.getUniqueId()).setPosition(player.getLocation().getBlockPosition());
-    this.movementDataMap.get(player.getUniqueId()).setWorldId(player.getLocation().getExtent().getUniqueId());
-  }
-
-  private Location<World> getPreviousLocation(UUID playerUuid) {
-    return new Location<>(Sponge.getServer()
-        .getWorld(movementDataMap.get(playerUuid).getWorldId())
-        .orElseThrow(() ->
-            new RuntimeException("World could not be found in Movement Handler")),
-        movementDataMap.get(playerUuid).getPosition().toDouble().add(0.5, 0.5, 0.5));
-  }
 
   public void addHostViewer(UUID playerUuid) {
     movementDataMap.get(playerUuid).setViewing(true);
@@ -114,74 +79,62 @@ public class PlayerMovementHandler {
     movementDataMap.get(playerUuid).setViewing(false);
   }
 
-  public void restrictNextUnnaturalTeleport(UUID playerUuid, boolean restricted) {
-    movementDataMap.get(playerUuid).setNextUnnaturalTeleportRestricted(restricted);
+  /**
+   * Set up cancellation of the next teleport, only if the canceller test
+   * is true. Whether or not the canceller resolves true or false,
+   * the subsequent teleport is allowed without any checks.
+   * (Only one check on one teleport event is made.)
+   *
+   * @param playerUuid the uuid of the player
+   * @param canceller the cancellation test
+   * @param timeoutMillis the timeout in milliseconds, after which the
+   *                      any cancellation behavior is ignored (used in case
+   *                      an expected teleport event actually is never thrown
+   *                      for whatever reason)
+   */
+  public void cancelNextTeleportIf(@Nonnull UUID playerUuid,
+                                   @Nonnull Predicate<MoveEntityEvent.Teleport> canceller,
+                                   int timeoutMillis) {
+    PlayerMovementData data = movementDataMap.get(playerUuid);
+    data.setNextTeleportVerified(true);
+    data.setNextTeleportCanceller(canceller);
+    data.setNextTeleportCancellationExpiry(System.currentTimeMillis() + timeoutMillis);
   }
 
-  public boolean isNextUnnaturalTeleportRestricted(UUID playerUuid) {
-    return movementDataMap.get(playerUuid).isNextUnnaturalTeleportRestricted();
-  }
-
-  public void cancelNextTeleport(UUID playerUuid, Predicate<MoveEntityEvent.Teleport> canceller) {
-    movementDataMap.get(playerUuid).setNextTeleportCanceller(canceller);
-  }
-
-  public Predicate<MoveEntityEvent.Teleport> isNextTeleportCancelled(UUID playerUuid) {
-    return movementDataMap.get(playerUuid).getNextTeleportCanceller();
-  }
-
-  @Listener
-  public void onJoin(ClientConnectionEvent.Join event) {
-    UUID uuid = event.getTargetEntity().getUniqueId();
-
-    UUID taskId = Sponge.getScheduler().createTaskBuilder()
-        .intervalTicks(POLL_INTERVAL_TICKS)
-        .execute(() -> {
-          Player player = Sponge.getServer()
-              .getPlayer(uuid).orElseThrow(() ->
-                  new RuntimeException("Player cannot be found in Movement Handler. Was the player properly flushed?"));
-          Location<World> previousLocation = getPreviousLocation(player.getUniqueId());
-          if (!previousLocation.getBlockPosition().equals(player.getLocation().getBlockPosition())
-              || !previousLocation.getExtent().equals(player.getLocation().getExtent())) {
-            if (isNextUnnaturalTeleportRestricted(player.getUniqueId())) {
-              tryPassThreshold(player,
-                  previousLocation,
-                  player.getLocation(),
-                  false,
-                  cancelled -> {
-                    if (cancelled) {
-                      player.setLocation(getPreviousLocation(uuid));
-                    }
-                  });
-              restrictNextUnnaturalTeleport(player.getUniqueId(), false);
-            }
-          }
-          updatePreviousLocation(player);
-        }).submit(Nope.getInstance())
-        .getUniqueId();
-
-    movementDataMap.put(uuid, new PlayerMovementData(taskId, event.getTargetEntity()));
-  }
-
-  @Listener
-  public void onLeave(ClientConnectionEvent.Disconnect event) {
-    UUID entityUuid = event.getTargetEntity().getUniqueId();
-
-    /* Clean Up */
-    UUID taskUuid = movementDataMap.get(entityUuid).getTaskId();
-    if (taskUuid == null) {
-      throw new RuntimeException("Player could not be removed from the Movement Handler properly.");
+  /**
+   * Identify if this teleport event should be cancelled based on
+   * previous set cancellation behavior. If special behavior is needed,
+   * it also prepares the user's system for the next event.
+   *
+   * @param playerUuid the player uuid
+   * @param event the event that was thrown
+   * @return true if it should be cancelled
+   */
+  public boolean resolveTeleportCancellation(@Nonnull UUID playerUuid, @Nonnull MoveEntityEvent.Teleport event) {
+    PlayerMovementData data = movementDataMap.get(playerUuid);
+    if (!data.isNextTeleportVerified()) {
+      return false;
     }
-    Sponge.getScheduler().getTaskById(taskUuid).ifPresent(Task::cancel);
-
-    movementDataMap.remove(entityUuid);
+    movementDataMap.get(playerUuid).setNextTeleportVerified(false);
+    if (System.currentTimeMillis() < data.getNextTeleportCancellationExpiry()) {
+      return movementDataMap.get(playerUuid).nextTeleportCanceller.test(event);
+    } else {
+      return false;
+    }
   }
 
-  public void tryPassThreshold(Player player,
+  public void logIn(UUID playerUuid) {
+    movementDataMap.put(playerUuid, new PlayerMovementData());
+  }
+
+  public void logOut(UUID playerUuid) {
+    movementDataMap.remove(playerUuid);
+  }
+
+  public boolean tryPassThreshold(Player player,
                                Location<World> first,
                                Location<World> last,
-                               boolean natural,
-                               Consumer<Boolean> canceller) {
+                               boolean natural) {
     List<Host> exiting = new LinkedList<>(Nope.getInstance()
         .getHostTree()
         .getContainingHosts(first));
@@ -195,13 +148,10 @@ public class PlayerMovementHandler {
 
     /* Call it quits if we aren't moving anywhere special */
     if (exiting.isEmpty() && entering.isEmpty()) {
-      canceller.accept(false);
-      return;
+      return false;
     }
 
     // Ignore sorting by priority for now, it doesn't really matter
-//    exiting.sort(Comparator.comparing(Host::getPriority));
-//    entering.sort(Comparator.comparing(Host::getPriority));
 
     boolean cancel = false;
     boolean visual = false;
@@ -220,9 +170,6 @@ public class PlayerMovementHandler {
       movementData = exiting.get(i).getData(SettingLibrary.EXIT, player);
       if (movementData.equals(SettingLibrary.Movement.NONE)
           || (movementData.equals(SettingLibrary.Movement.UNNATURAL) && natural)) {
-        Nope.getInstance().getLogger().info("Cancelling...");
-        Nope.getInstance().getLogger().info("Movement Data: " + movementData);
-        Nope.getInstance().getLogger().info("Natural: " + natural);
         cancel = true;
         message = exiting.get(i).getData(SettingLibrary.EXIT_DENY_MESSAGE, player);
         title = exiting.get(i).getData(SettingLibrary.EXIT_DENY_TITLE, player);
@@ -297,12 +244,7 @@ public class PlayerMovementHandler {
       vehicle.setTransform(player.getTransform());
     }
 
-    if (!cancel) {
-      updatePreviousLocation(player);
-    }
-
-    canceller.accept(cancel);
-
+    return cancel;
   }
 
 }

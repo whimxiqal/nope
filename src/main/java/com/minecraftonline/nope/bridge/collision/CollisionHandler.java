@@ -50,7 +50,7 @@ public class CollisionHandler {
     }
   }
 
-  public void loggedOut(Player player) {
+  public void logOut(Player player) {
     disabledCollision.remove(player.getUniqueId());
   }
 

@@ -130,7 +130,7 @@ class TeleportCommand extends LambdaCommandNode {
                   random.nextInt(volumeHost.getMaxX() + 1 - volumeHost.getMinX()) + volumeHost.getMinX(),
                   random.nextInt(volumeHost.getMaxY() + 1 - volumeHost.getMinY()) + volumeHost.getMinY(),
                   random.nextInt(volumeHost.getMaxZ() + 1 - volumeHost.getMinZ()) + volumeHost.getMinZ()))) {
-                src.sendMessage(Format.success("Teleported to a random location inside or near zone ",
+                  src.sendMessage(Format.success("Teleported to zone ",
                     Format.host(host), " ", Format.command(
                         "SHOW",
                         Nope.getInstance().getCommandTree()

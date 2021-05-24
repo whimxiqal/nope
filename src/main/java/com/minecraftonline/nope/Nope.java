@@ -140,7 +140,6 @@ public class Nope {
 
     DynamicSettingListeners.register();
     StaticSettingListeners.register();
-    playerMovementHandler.register();
 
     Sponge.getServiceManager()
         .provide(PermissionService.class)
@@ -151,11 +150,6 @@ public class Nope {
     commandTree = new NopeCommandTree();
     commandTree.register();
 
-  }
-
-  @Listener
-  public void onWorldLoad(LoadWorldEvent event) {
-    // TODO load additional worlds.
   }
 
   @Listener
