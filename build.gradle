@@ -2,7 +2,7 @@ buildscript {
     repositories {
         maven {
             name = 'forge'
-            url = 'http://files.minecraftforge.net/maven'
+            url = 'https://files.minecraftforge.net/maven'
         }
         maven {
             name = 'sponge'
@@ -15,7 +15,7 @@ buildscript {
     }
     dependencies {
         classpath 'org.spongepowered:mixingradle:0.7-SNAPSHOT'
-        classpath 'net.minecraftforge.gradle:ForgeGradle:3.0.185'
+        classpath 'net.minecraftforge.gradle:ForgeGradle:4.1.12'
     }
 }
 
@@ -27,6 +27,7 @@ plugins {
     //id 'net.minecrell.vanillagradle.server' version '2.2-6'
 }
 
+apply plugin: 'java'
 apply plugin: 'net.minecraftforge.gradle'
 apply plugin: 'org.spongepowered.mixin'
 
@@ -53,7 +54,7 @@ sponge.plugin.meta {
 }
 
 repositories {
-    maven { url "http://maven.sk89q.com/repo/" }
+    maven { url "https://maven.sk89q.com/repo/" }
 }
 
 //minecraftDep = "joined"
@@ -65,28 +66,28 @@ dependencies {
     implementation "org.spongepowered:spongeapi:${spongeVersion}"
     annotationProcessor "org.spongepowered:spongeapi:${spongeVersion}"
 
-    implementation("net.minecraftforge.gradle:ForgeGradle:3.0.185")
+    implementation 'net.minecraftforge.gradle:ForgeGradle:4.1.12'
 
-    compile 'org.spongepowered:mixin:0.8.1-SNAPSHOT'
+    implementation 'org.spongepowered:mixin:0.8.1-SNAPSHOT'
     annotationProcessor "org.spongepowered:mixin:0.8.1-SNAPSHOT:processor"
 
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.3.1'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.3.1'
 
-    compile files('libs/craftbook-api-extra22.26-original.jar')
+//    compile files('libs/craftbook-api-extra22.26-original.jar')
 
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.6.0'
 
     // Lombok
-    compileOnly 'org.projectlombok:lombok:1.18.16'
+    implementation 'org.projectlombok:lombok:1.18.16'
     annotationProcessor 'org.projectlombok:lombok:1.18.16'
 
-    testCompileOnly 'org.projectlombok:lombok:1.18.16'
+    testImplementation 'org.projectlombok:lombok:1.18.16'
     testAnnotationProcessor 'org.projectlombok:lombok:1.18.16'
 
     // WorldEdit
-    compileOnly 'com.sk89q.worldedit:worldedit-sponge:6.1.7-SNAPSHOT'
-    compileOnly 'com.sk89q.worldedit:worldedit-core:6.1.4-SNAPSHOT'
+    implementation 'com.sk89q.worldedit:worldedit-sponge:6.1.7-SNAPSHOT'
+    implementation 'com.sk89q.worldedit:worldedit-core:6.1.4-SNAPSHOT'
 }
 
 minecraft {
