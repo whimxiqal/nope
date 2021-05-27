@@ -1,8 +1,14 @@
+# 0.4.1
+
+- Added `natural` option to movement settings `entry` and `exit`
+- Fixed gradle settings
+- Added `flower-pot-interact: false` to the `malicious-protections` template
+
 # 0.4.0
 
 - Made cache trimming lazy by scheduling it asynchronously
 - Added settings:
-    - `unnatural-movement-commands` as described above
+    - `movement-commands` as described above
     - `flower-pot-interact` to disable the interacting of flower pots
     - `use-name-tag` to disable the use of name tags to name entities
     - implemented `chorus-fruit-teleport` to disable teleportation into, out of, or within hosts with is disabled

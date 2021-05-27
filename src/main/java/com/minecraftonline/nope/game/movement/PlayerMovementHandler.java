@@ -169,6 +169,7 @@ public class PlayerMovementHandler {
     for (int i = exiting.size() - 1; i >= 0; i--) {
       movementData = exiting.get(i).getData(SettingLibrary.EXIT, player);
       if (movementData.equals(SettingLibrary.Movement.NONE)
+          || (movementData.equals(SettingLibrary.Movement.NATURAL) && !natural)
           || (movementData.equals(SettingLibrary.Movement.UNNATURAL) && natural)) {
         cancel = true;
         message = exiting.get(i).getData(SettingLibrary.EXIT_DENY_MESSAGE, player);
@@ -201,6 +202,7 @@ public class PlayerMovementHandler {
       for (int i = entering.size() - 1; i >= 0; i--) {
         movementData = entering.get(i).getData(SettingLibrary.ENTRY, player);
         if (movementData.equals(SettingLibrary.Movement.NONE)
+            || (movementData.equals(SettingLibrary.Movement.NATURAL) && !natural)
             || (movementData.equals(SettingLibrary.Movement.UNNATURAL) && natural)) {
           cancel = true;
           message = entering.get(i).getData(SettingLibrary.ENTRY_DENY_MESSAGE, player);

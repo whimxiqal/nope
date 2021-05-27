@@ -59,6 +59,7 @@ public final class Templates {
     map.put(Setting.of(SettingLibrary.ARMOR_STAND_PLACE, SettingValue.of(false)));
     map.put(Setting.of(SettingLibrary.BLOCK_BREAK, SettingValue.of(false)));
     map.put(Setting.of(SettingLibrary.BLOCK_PLACE, SettingValue.of(false)));
+    map.put(Setting.of(SettingLibrary.FLOWER_POT_INTERACT, SettingValue.of(false)));
     map.put(Setting.of(SettingLibrary.ITEM_FRAME_DESTROY, SettingValue.of(false)));
     map.put(Setting.of(SettingLibrary.ITEM_FRAME_INTERACT, SettingValue.of(false)));
     map.put(Setting.of(SettingLibrary.ITEM_FRAME_PLACE, SettingValue.of(false)));

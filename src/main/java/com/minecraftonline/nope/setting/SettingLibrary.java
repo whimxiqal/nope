@@ -963,8 +963,9 @@ public final class SettingLibrary {
 
   public enum Movement {
     ALL,
-    UNNATURAL,
-    NONE
+    NATURAL,
+    NONE,
+    UNNATURAL
   }
 
   public enum StorageType {
