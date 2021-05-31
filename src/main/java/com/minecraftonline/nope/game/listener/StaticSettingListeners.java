@@ -134,10 +134,11 @@ public final class StaticSettingListeners {
 
   @Listener(order = Order.EARLY)
   public void onSendCommand(SendCommandEvent event, @First Player player) {
+    String substring;
     for (String command : Nope.getInstance()
         .getHostTree()
         .lookup(SettingLibrary.MOVEMENT_COMMANDS, player, player.getLocation())) {
-      String substring = event.getCommand().substring(0, Math.min(event.getCommand().length(), command.length()));
+      substring = event.getCommand().substring(0, Math.min(event.getCommand().length(), command.length()));
       if (substring.equalsIgnoreCase(command)) {
         Nope.getInstance()
             .getPlayerMovementHandler()

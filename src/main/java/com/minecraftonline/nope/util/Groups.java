@@ -37,8 +37,22 @@ public final class Groups {
   }
 
   public static final Set<BlockType> LIQUID_GRIEFABLE = Sets.newHashSet(
+      BlockTypes.BEETROOTS,
+      BlockTypes.BROWN_MUSHROOM,
+      BlockTypes.CARROTS,
+      BlockTypes.DEADBUSH,
+      BlockTypes.MELON_STEM,
+      BlockTypes.NETHER_WART,
+      BlockTypes.POTATOES,
+      BlockTypes.PUMPKIN_STEM,
+      BlockTypes.RED_FLOWER,
+      BlockTypes.RED_MUSHROOM,
+      BlockTypes.SAPLING,
       BlockTypes.SNOW_LAYER,
       BlockTypes.TALLGRASS,
-      BlockTypes.WATERLILY);
+      BlockTypes.WATERLILY,
+      BlockTypes.WHEAT,
+      BlockTypes.YELLOW_FLOWER
+  );
 
 }

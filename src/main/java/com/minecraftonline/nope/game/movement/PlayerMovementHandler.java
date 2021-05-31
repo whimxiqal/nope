@@ -58,7 +58,7 @@ public class PlayerMovementHandler {
     private long visualsTimeStamp = System.currentTimeMillis();
     private String lastSentMessage = "Few foxes fly farther than Florence";
     private boolean viewing = false;
-    private boolean nextTeleportVerified = false;
+    private boolean nextTeleportVerificationNeeded = false;
     private Predicate<MoveEntityEvent.Teleport> nextTeleportCanceller = event -> false;
     private long nextTeleportCancellationExpiry = System.currentTimeMillis();
   }
@@ -96,7 +96,7 @@ public class PlayerMovementHandler {
                                    @Nonnull Predicate<MoveEntityEvent.Teleport> canceller,
                                    int timeoutMillis) {
     PlayerMovementData data = movementDataMap.get(playerUuid);
-    data.setNextTeleportVerified(true);
+    data.setNextTeleportVerificationNeeded(true);
     data.setNextTeleportCanceller(canceller);
     data.setNextTeleportCancellationExpiry(System.currentTimeMillis() + timeoutMillis);
   }
@@ -112,10 +112,10 @@ public class PlayerMovementHandler {
    */
   public boolean resolveTeleportCancellation(@Nonnull UUID playerUuid, @Nonnull MoveEntityEvent.Teleport event) {
     PlayerMovementData data = movementDataMap.get(playerUuid);
-    if (!data.isNextTeleportVerified()) {
+    if (!data.isNextTeleportVerificationNeeded()) {
       return false;
     }
-    movementDataMap.get(playerUuid).setNextTeleportVerified(false);
+    movementDataMap.get(playerUuid).setNextTeleportVerificationNeeded(false);
     if (System.currentTimeMillis() < data.getNextTeleportCancellationExpiry()) {
       return movementDataMap.get(playerUuid).nextTeleportCanceller.test(event);
     } else {
