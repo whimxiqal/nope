@@ -1,3 +1,8 @@
+# 0.4.2
+
+- Updated the list of griefable blocks by liquid from `water-grief` and `lava-grief`
+  by adding all plants.
+
 # 0.4.1
 
 - Added `natural` option to movement settings `entry` and `exit`
