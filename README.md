@@ -1,16 +1,16 @@
 # Nope
 
-Nope is a Minecraft volume protection plugin written by PietElite and tyhdefu for the Sponge plugin platform. It is based upon LionsArea and WorldGuard (https://github.com/EngineHub/WorldGuard), and has been designed to be compatible with the first and to have the same functionality as the second. It allows the user to change the handling of various behaviour within volumes called Zones, worlds and the entire server. Its most common usage case is to prevent block breakage within given volumes, however many other settings exist, such as settings to prevent PVP and to disable any kind of damage to players.
+Nope is a Minecraft volume protection plugin written by PietElite and tyhdefu for the Sponge plugin platform. It is based upon LionsArea and [WorldGuard](https://github.com/EngineHub/WorldGuard), and has been designed to be compatible with the former and to have the same functionality as the latter. It allows the user to change the handling of various behaviour within containers called Hosts. A Host can be a 3-D volume called a zone, worlds, or the entire server. Many different settings may be applied to these Hosts. These settings determine whether players may do things (like break blocks, place blocks, PvP with each other, or interact with certain objects) and also determine whether natural processes occur around the Host (like ice thawing or leaf decay).
 
 ## Installation
 
-The first step is to have Sponge installed on your server, Sponge's documentation has the instructions on that (https://docs.spongepowered.org/stable/en/server/index.html). Put Nope's jar file into the mods folder of your server. After it starts up for the first time, it will automatically generate a HOCON configuration file with the name ``zones.conf``, where all the data and changes are saved. Support for MySQL databases is planned.
+To install the plugin, first [install Sponge](https://docs.spongepowered.org/stable/en/server/index.html). Put Nope's jar file into the mods folder of your server. You can find the latest jar file [here](https://gitlab.com/minecraftonline/nope/-/packages). Once you start the server, a HOCON configuration file with the name `zones.conf` will be generated, in which all the data and changes are saved. Support for databases is planned.
 
 ## Usage
 
-If this is your first time using Nope, then it is recommended to read the ``tutorial.md`` file to learn how to use the plugin.
+If this is your first time using Nope, then it is recommended to read the `tutorial.md` file to learn how to use the plugin.
 
-Please submit any bugs you encounter into our GitLab issue tracker.
+Please submit any bugs you encounter to our [issues page](https://gitlab.com/minecraftonline/nope/-/issues).
 
 ### Commands  
 
@@ -77,7 +77,7 @@ Pipes are equivalent to "or".
             - **player** <*setting-name*> <*player*>
                 - Removes a player from the whitelist or blacklist
         - **force** <*setting*>
-            - Toggles whether the ``nope.unrestricted`` permission is respected on the given setting
+            - Toggles whether the `nope.unrestricted` permission is respected on the given setting
     - **settings**
         - Gives the list of all the Settings Nope has
     - **set** [-z <*zone-name*>] <*setting-name*> <*setting-value*>
@@ -105,26 +105,24 @@ Pipes are equivalent to "or".
 
 | Permission name | Purpose |
 | :-------------: | :-----: |
-| ``nope.command.create`` | Allows the user to create Zones |
-| ``nope.command.destroy`` | Allows the user to destroy Zones |
-| ``nope.command.edit`` | Allows the user to edit parameters of Zones |
-| ``nope.command.info`` | Allows the user to view information about Zones |
-| ``nope.command.list`` | Allows the user to view the list of all Zones |
-| ``nope.command.show`` | Allows the user to see the boundaries of Zones |
-| ``nope.command.teleport`` | Allows the user to teleport to a Zone |
-| ``nope.command.reload`` | Allows the user to reload Nope |
-| ``nope.command.setting`` | Allows the user to see the Settings and set them to Zones |
-| ``nope.unrestricted`` | Unrestricted access to all commands |
+| `nope.command.create` | Allows the user to create Zones |
+| `nope.command.destroy` | Allows the user to destroy Zones |
+| `nope.command.edit` | Allows the user to edit parameters of Zones |
+| `nope.command.info` | Allows the user to view information about Zones |
+| `nope.command.list` | Allows the user to view the list of all Zones |
+| `nope.command.show` | Allows the user to see the boundaries of Zones |
+| `nope.command.teleport` | Allows the user to teleport to a Zone |
+| `nope.command.reload` | Allows the user to reload Nope |
+| `nope.command.setting` | Allows the user to see the Settings and set them to Zones |
+| `nope.unrestricted` | Allows the player to bypass restrictive setting behavior |
 
 ## Templates
 
-``default-protections`` - disables mob grief, lava and water block damage, TNT placement and ignition, fire ignition and damage.
+`default-protections` - A list of settings designed to be applied to the global host to protect an anti-grief server
 
-``malicious-protections`` - disables destruction, interaction and placement of armor stands, block breakage and placement, destruction, interaction and placement of item frames, placement and destruction of paintings, placement and destruction of vehicles (boats and minecarts).
+`malicious-protections` - A list of settings designed to be applied to hosts that should not be edited by players
 
 ## Contributing
-
-This project uses Google standards for code styling. You can apply real-time evaluation of your code for compliance with Google Checks using a plugin. For IntelliJ-IDEA, you can download Checkstyle-IDEA and apply Google Checks in the settings.
 
 Commit early and commit often. When you submit a merge request (or push your changes directly, each commit purpose should be well defined.
 
