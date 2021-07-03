@@ -18,6 +18,7 @@ jobs:
         fail_on_error: true
         reporter: 'github-pr-check'
         tool_name: 'checkstyle'
+        level: error
 
   build:
     runs-on: ubuntu-latest
