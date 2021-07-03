@@ -19,6 +19,7 @@ jobs:
         reporter: 'github-pr-check'
         tool_name: 'checkstyle'
         level: error
+        filter_mode: nofilter
 
   build:
     runs-on: ubuntu-latest
