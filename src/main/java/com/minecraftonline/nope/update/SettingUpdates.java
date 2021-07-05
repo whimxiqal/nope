@@ -52,9 +52,7 @@ import java.util.Set;
 public class SettingUpdates {
 
   @ActiveSettingUpdate
-  public static final SettingUpdate<Boolean,
-      Set<SettingLibrary.Explosive>>
-      CREEPER_EXPLOSION_DAMAGE_UPDATE =
+  public static final SettingUpdate<Boolean, Set<SettingLibrary.Explosive>> CREEPER_EXPLOSION_DAMAGE_UPDATE =
       new SettingUpdate<>(new BooleanSettingKey(
           "creeper-explosion-damage",
           true
@@ -71,9 +69,7 @@ public class SettingUpdates {
       });
 
   @ActiveSettingUpdate
-  public static final SettingUpdate<Boolean,
-      Set<SettingLibrary.Explosive>>
-      CREEPER_EXPLOSION_GRIEF_UPDATE =
+  public static final SettingUpdate<Boolean, Set<SettingLibrary.Explosive>> CREEPER_EXPLOSION_GRIEF_UPDATE =
       new SettingUpdate<>(new BooleanSettingKey(
           "creeper-explosion-grief",
           true

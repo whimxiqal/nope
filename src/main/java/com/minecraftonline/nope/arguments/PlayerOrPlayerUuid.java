@@ -38,7 +38,7 @@ public class PlayerOrPlayerUuid extends CommandElement {
     try {
       uuid = UUID.fromString(arg);
     } catch (IllegalArgumentException ignored) {
-      // Invalid uuid, try for playername
+      // Invalid uuid, try for player name
     }
 
     if (uuid == null) {
@@ -54,7 +54,7 @@ public class PlayerOrPlayerUuid extends CommandElement {
         if (throwable instanceof ExecutionException) {
           future.completeExceptionally(throwable);
         } else {
-          Nope.getInstance().getLogger().error("Error while waiting for gameprofile", throwable);
+          Nope.getInstance().getLogger().error("Error while waiting for game profile", throwable);
         }
         return;
       }

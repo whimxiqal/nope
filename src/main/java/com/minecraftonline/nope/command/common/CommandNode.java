@@ -34,6 +34,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.TreeMap;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import lombok.Getter;
@@ -64,7 +65,8 @@ public abstract class CommandNode implements CommandExecutor {
   @Getter
   private final Map<String, FlagDescription> flagDescriptions = new HashMap<>();
   @Getter
-  private final @Nullable HelpCommandNode helpCommand;
+  @Nullable
+  private final HelpCommandNode helpCommand;
   private Supplier<Text> comment = () -> null;
 
   /**
@@ -128,9 +130,10 @@ public abstract class CommandNode implements CommandExecutor {
     builder.arguments(this.commandElements.toArray(new CommandElement[0]))
         .children(this.children
             .stream()
-            // This is important! Make sure it stays sorted
-            .sorted(Comparator.comparing(CommandNode::getPrimaryAlias))
-            .collect(Collectors.toMap(CommandNode::getAliases, CommandNode::build)))
+            .collect(Collectors.toMap(CommandNode::getAliases,
+                CommandNode::build,
+                (first, second) -> first,
+                () -> new TreeMap<>(Comparator.comparing(list -> list.get(0))))))
         .description(this.description)
         // Stops too many argument error messages due to falling back to help subcommand
         .childArgumentParseExceptionFallback(false)

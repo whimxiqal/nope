@@ -28,7 +28,6 @@ import com.google.inject.Inject;
 import com.minecraftonline.nope.bridge.collision.CollisionHandler;
 import com.minecraftonline.nope.command.NopeCommandRoot;
 import com.minecraftonline.nope.command.common.CommandTree;
-import com.minecraftonline.nope.command.common.NopeCommandTree;
 import com.minecraftonline.nope.context.ZoneContextCalculator;
 import com.minecraftonline.nope.game.listener.DynamicSettingListeners;
 import com.minecraftonline.nope.game.listener.StaticSettingListeners;
@@ -42,6 +41,8 @@ import com.minecraftonline.nope.key.zonewand.ZoneWandHandler;
 import com.minecraftonline.nope.key.zonewand.ZoneWandManipulator;
 import com.minecraftonline.nope.setting.SettingLibrary;
 import com.minecraftonline.nope.util.Extra;
+import com.minecraftonline.nope.util.Format;
+import java.io.IOException;
 import java.nio.file.Path;
 import lombok.Getter;
 import lombok.Setter;
@@ -75,7 +76,7 @@ public class Nope {
   public static final int WORLD_DEPTH = 512;
   public static final int WORLD_RADIUS = 100000;
   public static final int MAX_HOST_COUNT = 100000;
-  public static String REPO_URL = "https://gitlab.com/minecraftonline/nope/";
+  public static final String REPO_URL = "https://gitlab.com/minecraftonline/nope/";
   @Getter
   private static Nope instance;
   @Getter
@@ -122,6 +123,7 @@ public class Nope {
    * @param event the event
    */
   @Listener
+  @SuppressWarnings("UnstableApiUsage")
   public void onInit(GameInitializationEvent event) {
     Extra.printSplashscreen();
     zoneWandHandler = new ZoneWandHandler();
@@ -225,8 +227,9 @@ public class Nope {
         // Set or replace the host tree
         this.hostTree = freshTree;
       }
-    } catch (Exception e) {
+    } catch (IOException e) {
       setValid(false);
+      Sponge.getServer().getConsole().sendMessage(Format.error(e.getMessage()));
       e.printStackTrace();
     }
   }

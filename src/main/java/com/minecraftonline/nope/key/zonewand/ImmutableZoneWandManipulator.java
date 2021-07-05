@@ -25,6 +25,7 @@
 package com.minecraftonline.nope.key.zonewand;
 
 import com.minecraftonline.nope.key.NopeKeys;
+import org.jetbrains.annotations.NotNull;
 import org.spongepowered.api.data.manipulator.immutable.common.AbstractImmutableBooleanData;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 
@@ -42,7 +43,7 @@ public class ImmutableZoneWandManipulator
   }
 
   @Override
-  public ZoneWandManipulator asMutable() {
+  public @NotNull ZoneWandManipulator asMutable() {
     return new ZoneWandManipulator(getValue());
   }
 

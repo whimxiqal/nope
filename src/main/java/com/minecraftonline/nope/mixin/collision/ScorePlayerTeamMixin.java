@@ -50,16 +50,6 @@ public abstract class ScorePlayerTeamMixin implements ScorePlayerTeamBridge {
   /**
    * A set of all team member usernames.
    */
-  /*private final Set<String> membershipSet = Sets.<String>newHashSet();
-  private String displayName;
-  private String prefix = "";
-  private String suffix = "";
-  private boolean allowFriendlyFire = true;
-  private boolean canSeeFriendlyInvisibles = true;
-  private Team.EnumVisible nameTagVisibility = Team.EnumVisible.ALWAYS;
-  private Team.EnumVisible deathMessageVisibility = Team.EnumVisible.ALWAYS;
-  private TextFormatting color = TextFormatting.RESET;
-  private Team.CollisionRule collisionRule = Team.CollisionRule.ALWAYS;*/
   @Override
   public void nope$fromWithNewCollisionRule(ScorePlayerTeam oldTeam, Team.CollisionRule rule) {
     this.membershipSet.clear();

@@ -26,6 +26,7 @@ package com.minecraftonline.nope.key.zonewand;
 
 import com.minecraftonline.nope.key.NopeKeys;
 import java.util.Optional;
+import org.jetbrains.annotations.NotNull;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataQuery;
@@ -52,22 +53,22 @@ public class ZoneWandManipulator
   }
 
   @Override
-  public Optional<ZoneWandManipulator> fill(DataHolder dataHolder, MergeFunction overlap) {
+  public @NotNull Optional<ZoneWandManipulator> fill(DataHolder dataHolder, @NotNull MergeFunction overlap) {
     return from(dataHolder.toContainer());
   }
 
   @Override
-  public Optional<ZoneWandManipulator> from(DataContainer container) {
+  public @NotNull Optional<ZoneWandManipulator> from(DataContainer container) {
     return container.getBoolean(NopeKeys.ZONE_WAND.getQuery()).map(ZoneWandManipulator::new);
   }
 
   @Override
-  public ZoneWandManipulator copy() {
+  public @NotNull ZoneWandManipulator copy() {
     return new ZoneWandManipulator(this.getValue());
   }
 
   @Override
-  public ImmutableZoneWandManipulator asImmutable() {
+  public @NotNull ImmutableZoneWandManipulator asImmutable() {
     return new ImmutableZoneWandManipulator(this.getValue());
   }
 
@@ -83,17 +84,17 @@ public class ZoneWandManipulator
       implements DataManipulatorBuilder<ZoneWandManipulator, ImmutableZoneWandManipulator> {
 
     @Override
-    public ZoneWandManipulator create() {
+    public @NotNull ZoneWandManipulator create() {
       return new ZoneWandManipulator(false);
     }
 
     @Override
-    public Optional<ZoneWandManipulator> createFrom(DataHolder dataHolder) {
+    public @NotNull Optional<ZoneWandManipulator> createFrom(DataHolder dataHolder) {
       return build(dataHolder.toContainer());
     }
 
     @Override
-    public Optional<ZoneWandManipulator> build(DataView container) throws InvalidDataException {
+    public @NotNull Optional<ZoneWandManipulator> build(DataView container) throws InvalidDataException {
       return container.getBoolean(NopeKeys.ZONE_WAND.getQuery()).map(ZoneWandManipulator::new);
     }
   }

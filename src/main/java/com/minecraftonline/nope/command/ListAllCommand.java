@@ -67,9 +67,9 @@ import org.spongepowered.api.text.Text;
 /**
  * A command to list all of the hosts on the server.
  */
-public class ListallCommand extends LambdaCommandNode {
+public class ListAllCommand extends LambdaCommandNode {
 
-  ListallCommand(CommandNode parent) {
+  ListAllCommand(CommandNode parent) {
     super(parent,
         Permissions.COMMAND_LIST,
         Text.of("List all zones"),

@@ -26,7 +26,6 @@ public class CollisionUtil {
   public static final int REMOVE_TEAM = 1;
   public static final int UPDATE_SCOREBOARD = 2;
   public static final int ADD_PLAYER_TO_SCOREBOARD = 3;
-  public static final int REMOVE_PLAYER_FROM_TEAM = 4;
 
   /**
    * Make a score player team without collision.
@@ -34,12 +33,11 @@ public class CollisionUtil {
    * @param scorePlayerTeam score player team
    * @return score player team with no collision
    */
+  @SuppressWarnings("ConstantConditions")
   public static ScorePlayerTeam makeWithNoCollision(ScorePlayerTeam scorePlayerTeam) {
-    ScorePlayerTeam team = new ScorePlayerTeam(
-        ((ScorePlayerTeamBridge) scorePlayerTeam).nope$getScoreboard(),
+    ScorePlayerTeam team = new ScorePlayerTeam(((ScorePlayerTeamBridge) scorePlayerTeam).nope$getScoreboard(),
         scorePlayerTeam.getName());
-    ((ScorePlayerTeamBridge) team).nope$fromWithNewCollisionRule(scorePlayerTeam,
-        Team.CollisionRule.NEVER);
+    ((ScorePlayerTeamBridge) team).nope$fromWithNewCollisionRule(scorePlayerTeam, Team.CollisionRule.NEVER);
     return team;
   }
 
@@ -119,13 +117,13 @@ public class CollisionUtil {
    *
    * @param player the player
    */
+  @SuppressWarnings("OptionalGetWithoutIsPresent")
   public static void disableCollision(Player player) {
     EntityPlayerMP entityPlayerMp = (EntityPlayerMP) player;
     Team team = entityPlayerMp.getTeam();
     if (team == null) {
-      ServerScoreboardBridge scoreboardBridge = (ServerScoreboardBridge) Sponge.getServer()
-          .getServerScoreboard()
-          .get();
+      ServerScoreboardBridge scoreboardBridge =
+          (ServerScoreboardBridge) Sponge.getServer().getServerScoreboard().get();
 
       addDisabledCollisionPlayersToTeam(scoreboardBridge.nope$getDummyNoCollisionTeam(),
           Collections.singletonList(entityPlayerMp));
@@ -140,14 +138,14 @@ public class CollisionUtil {
    *
    * @param player the player
    */
+  @SuppressWarnings("OptionalGetWithoutIsPresent")
   public static void enableCollision(Player player) {
     EntityPlayerMP entityPlayerMp = (EntityPlayerMP) player;
     Team team = entityPlayerMp.getTeam();
     if (team == null) {
       // Remove the dummy team
-      ServerScoreboardBridge scoreboardBridge = (ServerScoreboardBridge) Sponge.getServer()
-          .getServerScoreboard()
-          .get();
+      ServerScoreboardBridge scoreboardBridge =
+          (ServerScoreboardBridge) Sponge.getServer().getServerScoreboard().get();
       removeDummyTeam(scoreboardBridge.nope$getDummyNoCollisionTeam(),
           Collections.singletonList(entityPlayerMp));
     } else {

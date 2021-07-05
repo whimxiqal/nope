@@ -59,9 +59,7 @@ public class TextSettingKey extends SettingKey<Text> {
     try {
       return Sponge.getDataManager()
           .deserialize(Text.class, DataFormats.JSON.read(json.getAsString()))
-          .orElseThrow(() -> new RuntimeException(
-              "The json for Text cannot be serialized: "
-                  + json.toString()));
+          .orElseThrow(() -> new RuntimeException("The json for Text cannot be serialized: " + json));
     } catch (IllegalStateException | IOException e) {
       Nope.getInstance().getLogger().error("Could not deserialize Text", e);
       return Text.EMPTY;

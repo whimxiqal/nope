@@ -164,7 +164,7 @@ public class HoconHostTreeImplStorage implements HostTreeImpl.Storage {
       final JsonElement element = serializer.serialize(globalHost);
       node.setValue(NopeTypeTokens.JSON_ELEM_TT, element);
     } catch (ObjectMappingException e) {
-      throw new HostParseException("Error writing globalhost", e);
+      throw new HostParseException("Error writing global host", e);
     }
   }
 

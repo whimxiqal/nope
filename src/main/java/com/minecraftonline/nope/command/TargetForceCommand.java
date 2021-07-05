@@ -68,7 +68,7 @@ import org.spongepowered.api.text.Text;
 /**
  * The permission UNAFFECTED in {@link com.minecraftonline.nope.permission.Permissions}
  * is given to high ranking players who should not be affected by Nope.
- * A setting can bypass this passthrough feature by setting "force affect"
+ * A setting can bypass this pass-through feature by setting "force affect"
  * on a Target to simulate the motion that the affecting of a player is being forced.
  */
 class TargetForceCommand extends LambdaCommandNode {

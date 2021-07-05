@@ -32,6 +32,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.minecraftonline.nope.Nope;
+import com.minecraftonline.nope.setting.Setting;
 import com.minecraftonline.nope.setting.SettingKey;
 import com.minecraftonline.nope.setting.SettingLibrary;
 import com.minecraftonline.nope.setting.SettingValue;
@@ -144,7 +145,7 @@ public final class HostTreeImpl implements HostTree {
   }
 
   @Override
-  public void load(String location) {
+  public void load(String location) throws IOException {
 
     // Setup worlds
     Sponge.getServer()
@@ -163,7 +164,7 @@ public final class HostTreeImpl implements HostTree {
         this.globalHost = savedGlobalHost;
       }
     } catch (IOException e) {
-      Nope.getInstance().getLogger().error("Nope's GlobalHost could not be read.", e);
+      throw new IOException("Nope's GlobalHost could not be read.", e);
     }
 
     // Read WorldHosts
@@ -171,39 +172,39 @@ public final class HostTreeImpl implements HostTree {
       storage.readWorldHosts(location, new WorldHostSerializer()).forEach(worldHost ->
           worldHosts.put(worldHost.getWorldUuid(), worldHost));
     } catch (IOException e) {
-      Nope.getInstance().getLogger().error("Nope's WorldHosts could not be read.", e);
+      throw new IOException("Nope's WorldHosts could not be read.", e);
     }
 
     // Read Zones
     try {
       storage.readZones(location, worldHosts.values(), new ZoneSerializer()).forEach(this::addZone);
     } catch (IOException e) {
-      Nope.getInstance().getLogger().error("Nope's Zones could not be read.", e);
+      throw new IOException("Nope's Zones could not be read.", e);
     }
 
   }
 
   @Override
-  public void save(String location) {
+  public void save(String location) throws IOException {
     try {
       storage.writeGlobalHost(location, globalHost, new GlobalHostSerializer());
     } catch (IOException e) {
-      Nope.getInstance().getLogger().error("Nope's GlobalHost could not be written.", e);
+      throw new IOException("Nope's GlobalHost could not be written.", e);
     }
 
     try {
       storage.writeWorldHosts(location, worldHosts.values(), new WorldHostSerializer());
     } catch (IOException e) {
-      Nope.getInstance().getLogger().error("Nope's WorldHosts could not be written.", e);
+      throw new IOException("Nope's WorldHosts could not be written.", e);
     }
 
-    worldHosts.values().forEach(worldHost -> {
+    for (WorldHost worldHost : worldHosts.values()) {
       try {
         storage.writeZones(location, worldHost.getZoneTree().volumes(), new ZoneSerializer());
       } catch (IOException e) {
-        Nope.getInstance().getLogger().error("Nope's Zones could not be written.", e);
+        throw new IOException("Nope's Zones could not be written.", e);
       }
-    });
+    }
   }
 
   private WorldHost newWorldHost(UUID worldUuid) {
@@ -500,7 +501,7 @@ public final class HostTreeImpl implements HostTree {
      *
      * @param location   the location of the data
      * @param serializer the serializer which holds the logic for serialization
-     * @return the GLobalHost, or null if it does not exist in storage
+     * @return the GlobalHost, or null if it does not exist in storage
      * @throws IOException        if there is an error connecting to the storage
      * @throws HostParseException if there was an error parsing an existing stored GlobalHost
      */
@@ -716,12 +717,11 @@ public final class HostTreeImpl implements HostTree {
   /**
    * An object representing a three dimensional Nope Zone in a Minecraft world.
    * The Zone stores data about its location and extent in three dimensional
-   * space and it stores com.minecraftonline.nope.setting.Setting data for handling
+   * space and it stores {@link Setting} data for handling
    * and manipulating Sponge events based in its specific configuration.
    */
   public class Zone extends VolumeHost {
 
-    @Getter
     private final UUID worldUuid;
 
     /**
@@ -778,6 +778,12 @@ public final class HostTreeImpl implements HostTree {
           && spongeLocation.getBlockZ() >= getMinZ()
           && spongeLocation.getBlockZ() <= getMaxZ()
           && spongeLocation.getExtent().getUniqueId().equals(getWorldUuid());
+    }
+
+    @Nullable
+    @Override
+    public UUID getWorldUuid() {
+      return this.worldUuid;
     }
 
     @Override

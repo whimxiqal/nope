@@ -75,7 +75,7 @@ public class GroupMap<G, T> implements Multimap<G, T> {
   public G group(T t1, T t2, Supplier<G> generator) {
     G g1 = getGroupOf(t1);
     G g2 = getGroupOf(t2);
-    if (g1.equals(g2)) {
+    if (g1 != null && g1.equals(g2)) {
       return null;
     }
     if (g1 == null) {
@@ -94,13 +94,12 @@ public class GroupMap<G, T> implements Multimap<G, T> {
       if (g2 == null) {
         // Only the first has a group. Add the second
         put(g1, t2);
-        return g1;
       } else {
         // Both have a group. Merge the second into the first
         Collection<T> elements2 = removeAll(g2);
         putAll(g1, elements2);
-        return g1;
       }
+      return g1;
     }
   }
 

@@ -28,6 +28,7 @@ import com.minecraftonline.nope.permission.Permission;
 import java.util.Objects;
 import java.util.function.BiFunction;
 import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.args.CommandContext;
@@ -65,7 +66,7 @@ public abstract class LambdaCommandNode extends CommandNode {
   }
 
   @Override
-  public final CommandResult execute(@Nonnull CommandSource src, @Nonnull CommandContext args) {
+  public final @NotNull CommandResult execute(@Nonnull CommandSource src, @Nonnull CommandContext args) {
     return executor.apply(src, args);
   }
 }

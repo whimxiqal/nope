@@ -23,6 +23,7 @@ public class JsonElementSerializer implements TypeSerializer<JsonElement> {
 
   @Nullable
   @Override
+  @SuppressWarnings("UnstableApiUsage")
   public JsonElement deserialize(@NonNull TypeToken<?> type, @NonNull ConfigurationNode value)
       throws ObjectMappingException {
     final Object obj = value.getValue();
@@ -37,7 +38,6 @@ public class JsonElementSerializer implements TypeSerializer<JsonElement> {
       JsonArray array = new JsonArray();
       for (ConfigurationNode node : value.getChildrenList()) {
         // Recursive - keep going down until we get the full "tree"
-
         array.add(node.getValue(NopeTypeTokens.JSON_ELEM_TT));
       }
       return array;
@@ -59,6 +59,7 @@ public class JsonElementSerializer implements TypeSerializer<JsonElement> {
   }
 
   @Override
+  @SuppressWarnings("UnstableApiUsage")
   public void serialize(@NonNull TypeToken<?> type,
                         @Nullable JsonElement obj,
                         @NonNull ConfigurationNode value) throws ObjectMappingException {
@@ -90,6 +91,7 @@ public class JsonElementSerializer implements TypeSerializer<JsonElement> {
     }
   }
 
+  @SuppressWarnings("UnstableApiUsage")
   private static class JsonPrimitiveSerializer implements TypeSerializer<JsonPrimitive> {
     @Override
     public @Nullable JsonPrimitive deserialize(@NonNull TypeToken<?> type,

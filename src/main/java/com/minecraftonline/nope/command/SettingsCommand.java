@@ -47,7 +47,7 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 
 /**
- * A comand to list all Nope settings.
+ * A command to list all Nope settings.
  */
 public class SettingsCommand extends LambdaCommandNode {
 

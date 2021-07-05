@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.function.Supplier;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import org.jetbrains.annotations.NotNull;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.args.ArgumentParseException;
 import org.spongepowered.api.command.args.CommandArgs;
@@ -24,7 +25,7 @@ public class Vector3iCommandElement extends CommandElement {
 
   @Nonnull
   @Override
-  public Text getUsage(CommandSource src) {
+  public Text getUsage(@NotNull CommandSource src) {
     return Text.of("<x1> <y1> <z1> <x2> <y2> <z2>");
   }
 
@@ -61,8 +62,11 @@ public class Vector3iCommandElement extends CommandElement {
     }
   }
 
+  @NotNull
   @Override
-  public List<String> complete(CommandSource src, CommandArgs args, CommandContext context) {
+  public List<String> complete(@NotNull CommandSource src,
+                                        @NotNull CommandArgs args,
+                                        @NotNull CommandContext context) {
     return Collections.emptyList();
   }
 }

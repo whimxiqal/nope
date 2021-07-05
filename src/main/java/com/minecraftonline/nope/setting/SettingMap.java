@@ -40,8 +40,7 @@ import javax.annotation.Nonnull;
  */
 public class SettingMap implements Map<SettingKey<?>, SettingValue<?>> {
 
-  Map<SettingKey<?>, SettingValue<?>> data = Maps.newHashMap();
-
+  private final Map<SettingKey<?>, SettingValue<?>> data = Maps.newHashMap();
 
   @Override
   public int size() {

@@ -86,7 +86,7 @@ public class NopeCommandRoot extends CommandNode {
     addChildren(new CreateCommand(this));
     addChildren(new DestroyCommand(this));
     addChildren(new InfoCommand(this));
-    addChildren(new ListallCommand(this));
+    addChildren(new ListAllCommand(this));
     addChildren(new ListCommand(this));
     addChildren(new MoveCommand(this));
     addChildren(new Position1Command(this));

@@ -27,7 +27,6 @@ package com.minecraftonline.nope.config.configurate.serializer;
 import com.flowpowered.math.vector.Vector3i;
 import com.google.common.reflect.TypeToken;
 import ninja.leaping.configurate.ConfigurationNode;
-import ninja.leaping.configurate.objectmapping.ObjectMappingException;
 import ninja.leaping.configurate.objectmapping.serialize.TypeSerializer;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -39,6 +38,7 @@ public class Vector3iSerializer implements TypeSerializer<Vector3i> {
 
   @Nullable
   @Override
+  @SuppressWarnings("UnstableApiUsage")
   public Vector3i deserialize(@NonNull TypeToken<?> type, @NonNull ConfigurationNode value) {
     if (value.isVirtual()) {
       return null;
@@ -51,6 +51,7 @@ public class Vector3iSerializer implements TypeSerializer<Vector3i> {
   }
 
   @Override
+  @SuppressWarnings("UnstableApiUsage")
   public void serialize(@NonNull TypeToken<?> type,
                         @Nullable Vector3i obj,
                         @NonNull ConfigurationNode value) {

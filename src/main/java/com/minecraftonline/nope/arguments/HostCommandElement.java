@@ -32,6 +32,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import org.jetbrains.annotations.NotNull;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.args.ArgumentParseException;
 import org.spongepowered.api.command.args.CommandArgs;
@@ -48,7 +49,7 @@ class HostCommandElement extends CommandElement {
 
   @Nonnull
   @Override
-  public Text getUsage(CommandSource src) {
+  public Text getUsage(@NotNull CommandSource src) {
     return Text.of("<zone>");
   }
 

@@ -201,10 +201,10 @@ public class InfoCommand extends LambdaCommandNode {
   }
 
   /**
-   * Gets a gameprofile promise.
+   * Gets a game profile promise.
    *
    * @param uuid UUID
-   * @return CompletableFuture to obtain a gameprofile.
+   * @return CompletableFuture to obtain a game profile.
    */
   private static CompletableFuture<GameProfile> getProfile(UUID uuid) {
     return Sponge.getServer().getGameProfileManager().get(uuid);

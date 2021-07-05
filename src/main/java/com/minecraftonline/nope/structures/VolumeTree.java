@@ -357,7 +357,7 @@ public class VolumeTree<S, T extends Volume> implements VolumeMap<S, T> {
    * A node which represents a division across a dimension
    * at some dividing integer value.
    */
-  @EqualsAndHashCode(callSuper = false)
+  @EqualsAndHashCode(callSuper = true)
   @Data
   protected abstract class DimensionDivider extends Node {
     protected final int divider;

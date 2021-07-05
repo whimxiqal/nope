@@ -127,7 +127,7 @@ public class SettingValue<T> {
   public static class Target extends HashMap<String, Boolean>
       implements BiPredicate<SettingKey<?>, User> {
 
-    private Set<UUID> users = Sets.newHashSet();
+    private final Set<UUID> users = Sets.newHashSet();
     private boolean whitelist = true;
     @Getter
     @Setter
@@ -170,7 +170,6 @@ public class SettingValue<T> {
      * @param json the serialized target
      * @return the target object
      */
-    @SuppressWarnings("UnstableApiUsage")
     public static Target fromJson(JsonElement json) {
       if (json == null) {
         return new Target();

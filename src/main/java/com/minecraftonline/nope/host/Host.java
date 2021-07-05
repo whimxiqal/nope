@@ -237,7 +237,7 @@ public abstract class Host {
   /**
    * Check if a Sponge locatable exists within this host.
    * This is the same as calling this method with the
-   * locatable's location with {@link #encompasses(Location)}
+   * locatable location with {@link #encompasses(Location)}
    *
    * @param spongeLocatable the locatable
    * @return true if within the host

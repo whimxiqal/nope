@@ -77,13 +77,15 @@ public class CreateSlabCommand extends LambdaCommandNode {
               .map(host -> host.getPriority() + 1).orElse(0));
 
       try {
-        assert selection.getWorld() != null;
-        Vector3i minSelection = new Vector3i(Integer.MIN_VALUE,
-            selection.getMin().getY(),
-            Integer.MIN_VALUE);
-        Vector3i maxSelection = new Vector3i(Integer.MAX_VALUE,
-            selection.getMax().getY(),
-            Integer.MAX_VALUE);
+        if (selection.getWorld() == null
+            || selection.getMin() == null
+            || selection.getMax() == null) {
+          // This shouldn't happen
+          src.sendMessage(Format.error("Selection is malformed"));
+          return CommandResult.empty();
+        }
+        Vector3i minSelection = new Vector3i(Integer.MIN_VALUE, selection.getMin().getY(), Integer.MIN_VALUE);
+        Vector3i maxSelection = new Vector3i(Integer.MAX_VALUE, selection.getMax().getY(), Integer.MAX_VALUE);
         VolumeHost zone = Nope.getInstance().getHostTree().addZone(
             name,
             selection.getWorld().getUniqueId(),

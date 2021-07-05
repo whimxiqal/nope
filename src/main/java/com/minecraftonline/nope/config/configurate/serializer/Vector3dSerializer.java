@@ -39,6 +39,7 @@ public class Vector3dSerializer implements TypeSerializer<Vector3d> {
 
   @Nullable
   @Override
+  @SuppressWarnings("UnstableApiUsage")
   public Vector3d deserialize(@NonNull TypeToken<?> type, @NonNull ConfigurationNode value) {
     if (value.isVirtual()) {
       return null;
@@ -51,6 +52,7 @@ public class Vector3dSerializer implements TypeSerializer<Vector3d> {
   }
 
   @Override
+  @SuppressWarnings("UnstableApiUsage")
   public void serialize(@NonNull TypeToken<?> type,
                         @Nullable Vector3d obj,
                         @NonNull ConfigurationNode value) throws ObjectMappingException {
