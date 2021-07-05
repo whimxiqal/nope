@@ -50,23 +50,26 @@
 package com.minecraftonline.nope.command;
 
 import com.minecraftonline.nope.Nope;
-import com.minecraftonline.nope.command.common.FlagDescription;
-import com.minecraftonline.nope.host.VolumeHost;
-import com.minecraftonline.nope.key.zonewand.ZoneWandHandler;
 import com.minecraftonline.nope.arguments.NopeArguments;
 import com.minecraftonline.nope.command.common.CommandNode;
+import com.minecraftonline.nope.command.common.FlagDescription;
 import com.minecraftonline.nope.command.common.LambdaCommandNode;
-import com.minecraftonline.nope.host.Host;
 import com.minecraftonline.nope.game.listener.DynamicSettingListeners;
+import com.minecraftonline.nope.host.Host;
+import com.minecraftonline.nope.host.VolumeHost;
+import com.minecraftonline.nope.key.zonewand.ZoneWandHandler;
 import com.minecraftonline.nope.permission.Permissions;
 import com.minecraftonline.nope.util.Format;
+import java.util.Comparator;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.args.GenericArguments;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
 
-import java.util.Comparator;
-
+/**
+ * Command to create a zone with a current Zone wand selection
+ * and a given name.
+ */
 public class CreateCommand extends LambdaCommandNode {
 
   CreateCommand(CommandNode parent) {
@@ -113,7 +116,8 @@ public class CreateCommand extends LambdaCommandNode {
         }
         Nope.getInstance().saveState();
         DynamicSettingListeners.register();
-        src.sendMessage(Format.success("Successfully created zone ", Format.note(zone.getName()), "!"));
+        src.sendMessage(Format.success("Successfully created zone ",
+            Format.note(zone.getName()), "!"));
         Nope.getInstance().getZoneWandHandler().getSelectionMap().remove(player.getUniqueId());
       } catch (IllegalArgumentException e) {
         src.sendMessage(Format.error("Could not create zone: " + e.getMessage()));

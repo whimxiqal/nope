@@ -28,11 +28,19 @@ package com.minecraftonline.nope.update;
 import com.minecraftonline.nope.setting.Setting;
 import com.minecraftonline.nope.setting.SettingKey;
 import com.minecraftonline.nope.setting.SettingValue;
+import java.util.function.Function;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
-import java.util.function.Function;
-
+/**
+ * A converter to allow the transferal of information
+ * about a setting, given its key and some value stored
+ * in the server configuration, to a new setting with some key
+ * and some value.
+ *
+ * @param <T> the type of value stored in the original setting
+ * @param <S> the type of value stored in the resulting setting
+ */
 @AllArgsConstructor
 public class SettingUpdate<T, S> {
 

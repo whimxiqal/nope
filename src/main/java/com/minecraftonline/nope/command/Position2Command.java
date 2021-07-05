@@ -61,7 +61,16 @@ import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.action.TextActions;
 
+/**
+ * The command to set position 2 of the player's nope selection.
+ */
 public class Position2Command extends LambdaCommandNode {
+
+  /**
+   * Default constructor.
+   *
+   * @param parent the parent command
+   */
   public Position2Command(CommandNode parent) {
     super(parent,
         Permissions.COMMAND_CREATE,

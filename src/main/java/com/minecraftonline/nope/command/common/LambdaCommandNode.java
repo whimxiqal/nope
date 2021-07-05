@@ -25,14 +25,13 @@
 package com.minecraftonline.nope.command.common;
 
 import com.minecraftonline.nope.permission.Permission;
+import java.util.Objects;
+import java.util.function.BiFunction;
+import javax.annotation.Nonnull;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.args.CommandContext;
 import org.spongepowered.api.text.Text;
-
-import javax.annotation.Nonnull;
-import java.util.Objects;
-import java.util.function.BiFunction;
 
 /**
  * A function with a tighter implementation because the executor can be added
@@ -40,7 +39,8 @@ import java.util.function.BiFunction;
  */
 public abstract class LambdaCommandNode extends CommandNode {
 
-  private BiFunction<CommandSource, CommandContext, CommandResult> executor = (src, args) -> CommandResult.empty();
+  private BiFunction<CommandSource, CommandContext, CommandResult> executor = (src, args) ->
+      CommandResult.empty();
 
   public LambdaCommandNode(CommandNode parent,
                            Permission permission,
@@ -58,7 +58,9 @@ public abstract class LambdaCommandNode extends CommandNode {
     super(parent, permission, description, primaryAlias, addHelp);
   }
 
-  protected final void setExecutor(@Nonnull BiFunction<CommandSource, CommandContext, CommandResult> executor) {
+  protected final void setExecutor(@Nonnull BiFunction<CommandSource,
+      CommandContext,
+      CommandResult> executor) {
     this.executor = Objects.requireNonNull(executor);
   }
 

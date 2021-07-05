@@ -26,13 +26,18 @@
 package com.minecraftonline.nope.setting;
 
 import com.google.common.collect.Lists;
-import org.spongepowered.api.CatalogType;
-import org.spongepowered.api.Sponge;
-
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import org.spongepowered.api.CatalogType;
+import org.spongepowered.api.Sponge;
 
+/**
+ * A setting to store a value which is a {@link CatalogType}.
+ * with the Sponge API
+ *
+ * @param <C> catalog type
+ */
 public class CatalogTypeSetting<C extends CatalogType> extends SettingKey<String> {
   private final Class<C> clazz;
 

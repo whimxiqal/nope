@@ -26,23 +26,21 @@
 package com.minecraftonline.nope.structures;
 
 import com.google.common.collect.HashMultimap;
-import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMultiset;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multiset;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Supplier;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 /**
- * A class to map objects into groups
+ * A class to map objects into groups.
  */
 public class GroupMap<G, T> implements Multimap<G, T> {
 
@@ -71,7 +69,7 @@ public class GroupMap<G, T> implements Multimap<G, T> {
    *                  a new group is generated as a result of neither
    *                  elements being grouped yet.
    * @return the group that both elements are now in,
-   * or null if both elements were already grouped to the same group.
+   *         or null if both elements were already grouped to the same group.
    */
   @Nullable
   public G group(T t1, T t2, Supplier<G> generator) {

@@ -30,7 +30,6 @@ import com.minecraftonline.nope.setting.BooleanSetting;
 import com.minecraftonline.nope.setting.Setting;
 import com.minecraftonline.nope.setting.SettingLibrary;
 import com.minecraftonline.nope.setting.SettingValue;
-
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -43,12 +42,18 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
+/**
+ * A class to store a series of static {@link SettingUpdate}s
+ * which help to convert a version of settings to new settings
+ * if changes were made to how settings worked throughout
+ * development.
+ */
 @SuppressWarnings("unused")
 public class SettingUpdates {
 
   @ActiveSettingUpdate
   public static final SettingUpdate<Boolean,
-      Set<SettingLibrary.ExplosiveEnum>>
+      Set<SettingLibrary.Explosive>>
       CREEPER_EXPLOSION_DAMAGE_UPDATE =
       new SettingUpdate<>(new BooleanSetting(
           "creeper-explosion-damage",
@@ -59,14 +64,15 @@ public class SettingUpdates {
               SettingValue.of(new HashSet<>(), value.getTarget()));
         } else {
           return Setting.of(SettingLibrary.EXPLOSION_DAMAGE_BLACKLIST,
-              SettingValue.of(new HashSet<>(Collections.singleton(SettingLibrary.ExplosiveEnum.CREEPER)),
+              SettingValue.of(new HashSet<>(Collections.singleton(
+                  SettingLibrary.Explosive.CREEPER)),
                   value.getTarget()));
         }
       });
 
   @ActiveSettingUpdate
   public static final SettingUpdate<Boolean,
-      Set<SettingLibrary.ExplosiveEnum>>
+      Set<SettingLibrary.Explosive>>
       CREEPER_EXPLOSION_GRIEF_UPDATE =
       new SettingUpdate<>(new BooleanSetting(
           "creeper-explosion-grief",
@@ -77,16 +83,11 @@ public class SettingUpdates {
               SettingValue.of(new HashSet<>(), value.getTarget()));
         } else {
           return Setting.of(SettingLibrary.EXPLOSION_GRIEF_BLACKLIST,
-              SettingValue.of(new HashSet<>(Collections.singleton(SettingLibrary.ExplosiveEnum.CREEPER)),
+              SettingValue.of(new HashSet<>(Collections.singleton(
+                  SettingLibrary.Explosive.CREEPER)),
                   value.getTarget()));
         }
       });
-
-  @Retention(RetentionPolicy.RUNTIME)
-  @Target(ElementType.FIELD)
-  public @interface ActiveSettingUpdate {
-    // none
-  }
 
   /**
    * Get all {@link SettingUpdate}s in the class that are
@@ -96,8 +97,8 @@ public class SettingUpdates {
    */
   @SuppressWarnings("unchecked")
   public static <T> Optional<? extends Setting<?>> convertSetting(String oldSettingId,
-                                                        JsonElement oldSettingValue,
-                                                        JsonElement oldSettingTarget) {
+                                                                  JsonElement oldSettingValue,
+                                                                  JsonElement oldSettingTarget) {
     return Arrays.stream(SettingUpdates.class.getDeclaredFields())
         .filter(field -> Modifier.isStatic(field.getModifiers()))
         .filter(field -> SettingUpdate.class.isAssignableFrom(field.getType()))
@@ -116,6 +117,16 @@ public class SettingUpdates {
             update.getKey().dataFromJsonGenerified(oldSettingValue),
             SettingValue.Target.fromJson(oldSettingTarget))))
         .findFirst();
+  }
+
+  /**
+   * An annotation to mark a setting update as "active",
+   * which will mean that the update will be applied.
+   */
+  @Retention(RetentionPolicy.RUNTIME)
+  @Target(ElementType.FIELD)
+  public @interface ActiveSettingUpdate {
+    // none
   }
 
 }

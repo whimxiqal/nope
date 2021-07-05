@@ -32,6 +32,12 @@ import com.minecraftonline.nope.permission.Permissions;
 import com.minecraftonline.nope.setting.SettingKey;
 import com.minecraftonline.nope.setting.SettingLibrary;
 import com.minecraftonline.nope.util.Format;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Optional;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.args.GenericArguments;
@@ -39,15 +45,6 @@ import org.spongepowered.api.service.pagination.PaginationList;
 import org.spongepowered.api.service.pagination.PaginationService;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
-
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Locale;
-import java.util.Optional;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 public class SettingsCommand extends LambdaCommandNode {
 
@@ -104,9 +101,9 @@ public class SettingsCommand extends LambdaCommandNode {
         contents.addAll(categories.stream()
             .sorted()
             .map(category ->
-            Text.of(TextColors.GRAY, "- ", Format.command(category,
-                this.getFullCommand() + " " + category,
-                Text.of("Search settings under this category"))))
+                Text.of(TextColors.GRAY, "- ", Format.command(category,
+                    this.getFullCommand() + " " + category,
+                    Text.of("Search settings under this category"))))
             .collect(Collectors.toList()));
         builder.title(Text.of("Nope Settings"));
       }

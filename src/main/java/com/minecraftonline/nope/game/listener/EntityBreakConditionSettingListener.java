@@ -28,14 +28,14 @@ package com.minecraftonline.nope.game.listener;
 import com.minecraftonline.nope.Nope;
 import com.minecraftonline.nope.setting.SettingKey;
 import com.minecraftonline.nope.util.Extra;
+import javax.annotation.Nonnull;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
 
-import javax.annotation.Nonnull;
-
-class EntityBreakConditionSettingListener extends CancelConditionSettingListener<ChangeBlockEvent.Break> {
+class EntityBreakConditionSettingListener
+    extends CancelConditionSettingListener<ChangeBlockEvent.Break> {
   public EntityBreakConditionSettingListener(@Nonnull SettingKey<Boolean> key,
                                              @Nonnull EntityType entityType) {
     super(key,

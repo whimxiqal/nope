@@ -27,12 +27,16 @@ package com.minecraftonline.nope.setting;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
-
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+/**
+ * Setting to store an enum.
+ *
+ * @param <E> the enum type
+ */
 public class EnumSetting<E extends Enum<E>> extends SettingKey<E> {
 
   private final Class<E> enumClass;

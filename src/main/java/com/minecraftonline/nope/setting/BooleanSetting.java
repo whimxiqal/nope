@@ -26,10 +26,12 @@
 package com.minecraftonline.nope.setting;
 
 import com.google.common.collect.Lists;
-
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * A setting storing a boolean value.
+ */
 public class BooleanSetting extends SettingKey<Boolean> {
   public BooleanSetting(String id, Boolean defaultValue) {
     super(id, defaultValue);

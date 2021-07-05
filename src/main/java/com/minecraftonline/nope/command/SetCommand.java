@@ -55,21 +55,23 @@ import com.minecraftonline.nope.arguments.NopeArguments;
 import com.minecraftonline.nope.command.common.CommandNode;
 import com.minecraftonline.nope.command.common.FlagDescription;
 import com.minecraftonline.nope.command.common.LambdaCommandNode;
-import com.minecraftonline.nope.host.Host;
 import com.minecraftonline.nope.game.listener.DynamicSettingListeners;
+import com.minecraftonline.nope.host.Host;
 import com.minecraftonline.nope.permission.Permissions;
-import com.minecraftonline.nope.setting.SetSetting;
+import com.minecraftonline.nope.setting.SetSettingKey;
 import com.minecraftonline.nope.setting.SettingKey;
 import com.minecraftonline.nope.setting.SettingValue;
 import com.minecraftonline.nope.util.Format;
+import java.util.Optional;
+import java.util.Set;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.args.GenericArguments;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 
-import java.util.Optional;
-import java.util.Set;
-
+/**
+ * A command to set a setting on a host.
+ */
 public class SetCommand extends LambdaCommandNode {
 
   SetCommand(CommandNode parent) {
@@ -114,11 +116,11 @@ public class SetCommand extends LambdaCommandNode {
 
         // Trying to set it as empty, as in a set-type setting
         if (!value.isPresent()) {
-          if (!(settingKey instanceof SetSetting)) {
+          if (!(settingKey instanceof SetSettingKey)) {
             src.sendMessage(Format.error("You need to supply a value"));
             return CommandResult.empty();
           }
-          host.put((SetSetting<?>) settingKey, SettingValue.of(Sets.newHashSet()));
+          host.put((SetSettingKey<?>) settingKey, SettingValue.of(Sets.newHashSet()));
           Nope.getInstance().saveState();
           DynamicSettingListeners.register();
           src.sendMessage(Format.success("Setting ",
@@ -131,21 +133,23 @@ public class SetCommand extends LambdaCommandNode {
         boolean append = args.hasAny("a");
         boolean remove = args.hasAny("r");
         if (append || remove) {
-          if (!(settingKey instanceof SetSetting)) {
+          if (!(settingKey instanceof SetSettingKey)) {
             src.sendMessage(Format.error("You may not append or remove values for this setting"));
             return CommandResult.empty();
           }
-          SetSetting<?> setSetting = (SetSetting<?>) settingKey;
+          SetSettingKey<?> setSettingKey = (SetSettingKey<?>) settingKey;
           if (!host.get(settingKey).isPresent()) {
-            src.sendMessage(Format.error("You may not append or remove values if there's no data set yet"));
+            src.sendMessage(Format.error("You may not append or remove values "
+                + "if there's no data set yet"));
             return CommandResult.empty();
           }
           if (append && remove) {
             src.sendMessage(Format.error("You may not append and remove values at the same time"));
             return CommandResult.empty();
           }
-          if (!updateSetSettingValue(host, setSetting, value.get(), append)) {
-            src.sendMessage(Format.error("Couldn't " + (append ? "append" : "remove") + " your values"));
+          if (!updateSetSettingValue(host, setSettingKey, value.get(), append)) {
+            src.sendMessage(Format.error("Couldn't " + (append ? "append" : "remove")
+                + " your values"));
             return CommandResult.empty();
           }
         } else {
@@ -168,12 +172,17 @@ public class SetCommand extends LambdaCommandNode {
     });
   }
 
-  private <T> void addSetting(Host zone, SettingKey<T> key, String s) throws SettingKey.ParseSettingException {
+  private <T> void addSetting(Host zone,
+                              SettingKey<T> key,
+                              String s) throws SettingKey.ParseSettingException {
     T data = key.parse(s);
     zone.put(key, SettingValue.of(data));
   }
 
-  private <T> boolean updateSetSettingValue(Host zone, SetSetting<T> key, String s, boolean add) throws SettingKey.ParseSettingException {
+  private <T> boolean updateSetSettingValue(Host zone,
+                                            SetSettingKey<T> key,
+                                            String s,
+                                            boolean add) throws SettingKey.ParseSettingException {
     Set<T> elements = key.parse(s);
     Optional<SettingValue<Set<T>>> value = zone.get(key);
     if (!value.isPresent()) {

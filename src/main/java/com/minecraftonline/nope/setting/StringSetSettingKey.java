@@ -25,21 +25,17 @@
 
 package com.minecraftonline.nope.setting;
 
-import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonPrimitive;
-import com.minecraftonline.nope.util.NopeTypeTokens;
-import org.spongepowered.api.text.Text;
-
-import javax.annotation.Nonnull;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.stream.Collectors;
+import javax.annotation.Nonnull;
+import org.spongepowered.api.text.Text;
 
-public class StringSetSetting extends SetSetting<String> {
+public class StringSetSettingKey extends SetSettingKey<String> {
 
-  public StringSetSetting(String id, Set<String> defaultValue) {
+  public StringSetSettingKey(String id, Set<String> defaultValue) {
     super(id, defaultValue);
   }
 

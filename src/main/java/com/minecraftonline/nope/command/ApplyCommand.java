@@ -60,12 +60,20 @@ import com.minecraftonline.nope.game.listener.DynamicSettingListeners;
 import com.minecraftonline.nope.host.Host;
 import com.minecraftonline.nope.permission.Permissions;
 import com.minecraftonline.nope.util.Format;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.args.GenericArguments;
 import org.spongepowered.api.text.Text;
 
+/**
+ * Command to apply a template of settings to a zone.
+ */
 public class ApplyCommand extends LambdaCommandNode {
+
+  /**
+   * Default constructor.
+   *
+   * @param parent parent command
+   */
   public ApplyCommand(CommandNode parent) {
     super(parent,
         Permissions.COMMAND_EDIT,

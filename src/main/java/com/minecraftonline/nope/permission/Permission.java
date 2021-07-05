@@ -25,7 +25,6 @@
 package com.minecraftonline.nope.permission;
 
 import com.minecraftonline.nope.util.Validate;
-
 import javax.annotation.Nonnull;
 
 /**

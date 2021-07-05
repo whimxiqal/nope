@@ -29,13 +29,12 @@ import com.minecraftonline.nope.Nope;
 import com.minecraftonline.nope.setting.Setting;
 import com.minecraftonline.nope.setting.SettingKey;
 import com.minecraftonline.nope.setting.SettingValue;
+import java.util.Collection;
+import javax.annotation.Nonnull;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.EventListener;
 import org.spongepowered.api.event.Order;
-
-import javax.annotation.Nonnull;
-import java.util.Collection;
 
 /**
  * A class to store information about how a SettingKey and SettingValue

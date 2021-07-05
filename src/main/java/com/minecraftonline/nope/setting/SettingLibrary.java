@@ -35,9 +35,24 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.minecraftonline.nope.Nope;
 import com.minecraftonline.nope.update.SettingUpdates;
+import java.lang.annotation.Annotation;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+import java.lang.reflect.Modifier;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.NoSuchElementException;
+import java.util.Optional;
+import java.util.Set;
+import javax.annotation.Nonnull;
 import org.spongepowered.api.entity.EnderCrystal;
 import org.spongepowered.api.entity.EntityType;
-import org.spongepowered.api.entity.explosive.Explosive;
 import org.spongepowered.api.entity.explosive.PrimedTNT;
 import org.spongepowered.api.entity.living.monster.Creeper;
 import org.spongepowered.api.entity.living.monster.Wither;
@@ -50,11 +65,10 @@ import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 
-import javax.annotation.Nonnull;
-import java.lang.annotation.*;
-import java.lang.reflect.Modifier;
-import java.util.*;
-
+/**
+ * A utility class to store all {@link SettingKey}s in Nope.
+ */
+@SuppressWarnings("checkstyle:LineLength")
 public final class SettingLibrary {
 
   @Blurb("Armor stand destruction restriction")
@@ -259,18 +273,18 @@ public final class SettingLibrary {
   @Blurb("Harmless explosions")
   @Description("A list of explosives whose explosions do not cause damage.")
   @Category(SettingKey.CategoryType.DAMAGE)
-  public static final SettingKey<Set<ExplosiveEnum>> EXPLOSION_DAMAGE_BLACKLIST = new EnumSetSetting<>(
+  public static final SettingKey<Set<Explosive>> EXPLOSION_DAMAGE_BLACKLIST = new EnumSetSettingKey<>(
       "explosion-damage-blacklist",
       new HashSet<>(),
-      ExplosiveEnum.class
+      Explosive.class
   );
   @Blurb("Nondestructive explosions")
   @Description("A list of explosives whose explosions do not grief.")
   @Category(SettingKey.CategoryType.BLOCKS)
-  public static final SettingKey<Set<ExplosiveEnum>> EXPLOSION_GRIEF_BLACKLIST = new EnumSetSetting<>(
+  public static final SettingKey<Set<Explosive>> EXPLOSION_GRIEF_BLACKLIST = new EnumSetSettingKey<>(
       "explosion-block-grief-blacklist",
       new HashSet<>(),
-      ExplosiveEnum.class
+      Explosive.class
   );
   @Blurb("Fall damage")
   @Description("When disabled, players do not experience fall damage.")
@@ -590,7 +604,7 @@ public final class SettingLibrary {
   @Blurb("Plugins which are considered restricted")
   @Description("The plugins that cannot break restrictive setting rules.")
   @NotImplemented
-  public static final SettingKey<Set<String>> RESTRICTED_PLUGINS = new StringSetSetting(
+  public static final SettingKey<Set<String>> RESTRICTED_PLUGINS = new StringSetSettingKey(
       "restricted-plugins",
       new HashSet<>()
   );
@@ -691,10 +705,10 @@ public final class SettingLibrary {
   @Description("The type of storage to persist Nope server state.")
   @NotImplemented
   @Global
-  public static final SettingKey<StorageType> STORAGE_TYPE = new EnumSetting<>(
+  public static final SettingKey<Storage> STORAGE_TYPE = new EnumSetting<>(
       "storage-type",
-      StorageType.HOCON,
-      StorageType.class
+      Storage.HOCON,
+      Storage.class
   );
   @Blurb("Location at which to teleport")
   @Description("The designated point of access to the zone via teleport.")
@@ -721,7 +735,7 @@ public final class SettingLibrary {
   @Description("These commands will be considered unnatural methods of teleportation.")
   @PlayerRestrictive
   @Global
-  public static final SettingKey<Set<String>> MOVEMENT_COMMANDS = new StringSetSetting(
+  public static final SettingKey<Set<String>> MOVEMENT_COMMANDS = new StringSetSettingKey(
       "movement-commands",
       Sets.newHashSet()
   );
@@ -729,7 +743,7 @@ public final class SettingLibrary {
   @Description("These entity types will not be allowed to spawn.")
   @Category(SettingKey.CategoryType.ENTITIES)
   @PlayerRestrictive
-  public static final SettingKey<Set<EntityType>> UNSPAWNABLE_MOBS = new EntityTypeSetSetting(
+  public static final SettingKey<Set<EntityType>> UNSPAWNABLE_MOBS = new EntityTypeSetSettingKey(
       "unspawnable-mobs",
       Sets.newHashSet()
   );
@@ -891,7 +905,7 @@ public final class SettingLibrary {
       }
       // This does not deserialize
       elem.put("restricted", setting.getKey().isPlayerRestrictive());
-      elem.put("value",  setting.getKey().dataToJson(setting.getValue().getData()));
+      elem.put("value", setting.getKey().dataToJson(setting.getValue().getData()));
       elem.put("target", SettingValue.Target.toJson(setting.getValue().getTarget()));
       settingList.add(elem);
     }
@@ -961,6 +975,9 @@ public final class SettingLibrary {
     return map;
   }
 
+  /**
+   * Enumeration for all movement types considered by Nope.
+   */
   public enum Movement {
     ALL,
     NATURAL,
@@ -968,13 +985,19 @@ public final class SettingLibrary {
     UNNATURAL
   }
 
-  public enum StorageType {
+  /**
+   * Enumeration for all storage types considered by Nope.
+   */
+  public enum Storage {
     MARIADB,
     SQLITE,
     HOCON
   }
 
-  public enum ExplosiveEnum {
+  /**
+   * Enumeration for all explosive types considered by Nope.
+   */
+  public enum Explosive {
     CREEPER(Creeper.class),
     ENDERCRYSTAL(EnderCrystal.class),
     FIREWORK(Firework.class),
@@ -984,17 +1007,20 @@ public final class SettingLibrary {
     WITHER(Wither.class),
     WITHERSKULL(WitherSkull.class);
 
-    private final Class<? extends Explosive> wrapped;
+    private final Class<? extends org.spongepowered.api.entity.explosive.Explosive> wrapped;
 
-    ExplosiveEnum(Class<? extends Explosive> wrapped) {
+    Explosive(Class<? extends org.spongepowered.api.entity.explosive.Explosive> wrapped) {
       this.wrapped = wrapped;
     }
 
-    public Class<? extends Explosive> getExplosive() {
+    public Class<? extends org.spongepowered.api.entity.explosive.Explosive> getExplosive() {
       return wrapped;
     }
   }
 
+  /**
+   * A description of a {@link SettingKey}.
+   */
   @Retention(RetentionPolicy.RUNTIME)
   @Target(ElementType.FIELD)
   public @interface Description {
@@ -1006,6 +1032,9 @@ public final class SettingLibrary {
     String value();
   }
 
+  /**
+   * A short description of a {@link SettingKey}.
+   */
   @Retention(RetentionPolicy.RUNTIME)
   @Target(ElementType.FIELD)
   public @interface Blurb {
@@ -1017,12 +1046,20 @@ public final class SettingLibrary {
     String value();
   }
 
+  /**
+   * An annotation to mark a {@link SettingKey} as
+   * only to be set on a global host.
+   */
   @Retention(RetentionPolicy.RUNTIME)
   @Target(ElementType.FIELD)
   public @interface Global {
     // Empty
   }
 
+  /**
+   * An annotation to mark a {@link SettingKey}'s category
+   * for sorting and listing purposes.
+   */
   @Retention(RetentionPolicy.RUNTIME)
   @Target(ElementType.FIELD)
   public @interface Category {
@@ -1034,12 +1071,22 @@ public final class SettingLibrary {
     SettingKey.CategoryType value();
   }
 
+  /**
+   * Marks a {@link SettingKey} as not implemented
+   * for formatting purposes.
+   */
   @Retention(RetentionPolicy.RUNTIME)
   @Target(ElementType.FIELD)
   public @interface NotImplemented {
     // Empty
   }
 
+  /**
+   * Marks a {@link SettingKey} as player-restrictive,
+   * meaning that a changed setting key's value would restrict
+   * a player if it applied to that player from normal Minecraft game behavior.
+   * For the purposes of not encumbering administrators.
+   */
   @Retention(RetentionPolicy.RUNTIME)
   @Target(ElementType.FIELD)
   public @interface PlayerRestrictive {

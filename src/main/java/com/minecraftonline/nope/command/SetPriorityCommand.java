@@ -37,6 +37,9 @@ import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.args.GenericArguments;
 import org.spongepowered.api.text.Text;
 
+/**
+ * A command that sets the priority of a host.
+ */
 public class SetPriorityCommand extends LambdaCommandNode {
 
   SetPriorityCommand(CommandNode parent) {

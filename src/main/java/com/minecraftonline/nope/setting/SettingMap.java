@@ -26,12 +26,11 @@
 package com.minecraftonline.nope.setting;
 
 import com.google.common.collect.Maps;
-
-import javax.annotation.Nonnull;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import javax.annotation.Nonnull;
 
 /**
  * A data structure to quickly retrieve {@link SettingValue}s based on
@@ -130,8 +129,7 @@ public class SettingMap implements Map<SettingKey<?>, SettingValue<?>> {
    *
    * @param key the key associated with the data to remove
    * @param <T> the type of key/value
-   * @return the previous value that existed under that key,
-   * or null if none existed
+   * @return the previous value that existed under that key, or null if none existed
    */
   @SuppressWarnings("unchecked")
   public <T> SettingValue<T> remove(SettingKey<T> key) {
@@ -196,12 +194,17 @@ public class SettingMap implements Map<SettingKey<?>, SettingValue<?>> {
   @SuppressWarnings("unchecked")
   public Set<Setting<?>> entries() {
     return data.keySet().stream()
-            .map(key -> Setting.of(
-                    (SettingKey<Object>) key,
-                    (SettingValue<Object>) this.get(key)))
-            .collect(Collectors.toSet());
+        .map(key -> Setting.of(
+            (SettingKey<Object>) key,
+            (SettingValue<Object>) this.get(key)))
+        .collect(Collectors.toSet());
   }
 
+  /**
+   * Copy this setting map into a new one.
+   *
+   * @return the new copy
+   */
   public SettingMap copy() {
     SettingMap copy = new SettingMap();
     copy.putAll(this);
@@ -210,19 +213,19 @@ public class SettingMap implements Map<SettingKey<?>, SettingValue<?>> {
 
   private IllegalStateException mismatchedState(SettingKey<?> key, SettingValue<?> val) {
     return new IllegalStateException(String.format(
-            "This SettingMap has an illegal mapping"
-                    + "of a key and value of two different types:"
-                    + "%s, %s",
-            key.getDefaultData().getClass(),
-            val.getData().getClass()));
+        "This SettingMap has an illegal mapping"
+            + "of a key and value of two different types:"
+            + "%s, %s",
+        key.getDefaultData().getClass(),
+        val.getData().getClass()));
   }
 
   private IllegalArgumentException illegalArguments(Object key, Object val) {
     return new IllegalArgumentException(String.format(
-            "This method was given parameters with invalid"
-                    + "key and value types:"
-                    + "%s, %s",
-            key.getClass(),
-            val.getClass()));
+        "This method was given parameters with invalid"
+            + "key and value types:"
+            + "%s, %s",
+        key.getClass(),
+        val.getClass()));
   }
 }

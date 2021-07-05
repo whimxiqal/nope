@@ -31,7 +31,6 @@ import com.minecraftonline.nope.config.configurate.serializer.JsonElementSeriali
 import com.minecraftonline.nope.host.HostTreeImpl.GlobalHost;
 import com.minecraftonline.nope.host.HostTreeImpl.WorldHost;
 import com.minecraftonline.nope.util.NopeTypeTokens;
-
 import java.io.Closeable;
 import java.io.IOException;
 import java.nio.file.Path;
@@ -41,13 +40,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.ConfigurationOptions;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
 import ninja.leaping.configurate.objectmapping.ObjectMappingException;
 import ninja.leaping.configurate.objectmapping.serialize.TypeSerializerCollection;
 
+/**
+ * The storage option which uses a HOCON file as storage.
+ *
+ * @see <a href="https://en.wikipedia.org/wiki/HOCON">HOCON on Wikipedia</a>
+ */
 public class HoconHostTreeImplStorage implements HostTreeImpl.Storage {
 
   private static final String WORLD_SUB_ZONES_KEY = "sub-zones";
@@ -55,7 +58,7 @@ public class HoconHostTreeImplStorage implements HostTreeImpl.Storage {
   @SuppressWarnings("UnstableApiUsage")
   private HoconConfigurationLoader getLoader(String fileName) {
     final TypeSerializerCollection typeSerializerCollection = TypeSerializerCollection.create()
-        .register(NopeTypeTokens.JSON_ELEMENT_TYPE_TOKEN, new JsonElementSerializer());
+        .register(NopeTypeTokens.JSON_ELEM_TT, new JsonElementSerializer());
 
     ConfigurationOptions options = ConfigurationOptions.defaults()
         .withSerializers(typeSerializerCollection);
@@ -82,7 +85,7 @@ public class HoconHostTreeImplStorage implements HostTreeImpl.Storage {
     try (Connection connection = new Connection(getLoader(fileName))) {
       final JsonElement jsonElement = connection.node
           .getNode(Nope.GLOBAL_HOST_NAME)
-          .getValue(NopeTypeTokens.JSON_ELEMENT_TYPE_TOKEN);
+          .getValue(NopeTypeTokens.JSON_ELEM_TT);
       if (jsonElement == null) {
         return null;
       }
@@ -96,7 +99,8 @@ public class HoconHostTreeImplStorage implements HostTreeImpl.Storage {
 
   @Override
   @SuppressWarnings("UnstableApiUsage")
-  public Collection<WorldHost> readWorldHosts(String fileName, Host.HostSerializer<WorldHost> serializer)
+  public Collection<WorldHost> readWorldHosts(String fileName,
+                                              Host.HostSerializer<WorldHost> serializer)
       throws IOException, HostParseException {
 
     try (Connection connection = new Connection(getLoader(fileName))) {
@@ -108,7 +112,7 @@ public class HoconHostTreeImplStorage implements HostTreeImpl.Storage {
             // Assume all other top level nodes are world zones.
             try {
               return serializer.deserialize(entry.getValue()
-                  .getValue(NopeTypeTokens.JSON_ELEMENT_TYPE_TOKEN));
+                  .getValue(NopeTypeTokens.JSON_ELEM_TT));
             } catch (ObjectMappingException e) {
               throw new HostParseException("ObjectMappingException when trying "
                   + "to read World Host node", e);
@@ -127,12 +131,14 @@ public class HoconHostTreeImplStorage implements HostTreeImpl.Storage {
     try (Connection connection = new Connection(getLoader(fileName))) {
       // return collection of zones
       for (WorldHost worldHost : parents) {
-        final ConfigurationNode worldNode = connection.node.getNode(worldHost.getName(), WORLD_SUB_ZONES_KEY);
+        final ConfigurationNode worldNode = connection.node
+            .getNode(worldHost.getName(), WORLD_SUB_ZONES_KEY);
 
-        for (Map.Entry<Object, ? extends ConfigurationNode> entry : worldNode.getChildrenMap().entrySet()) {
+        for (Map.Entry<Object, ? extends ConfigurationNode> entry
+            : worldNode.getChildrenMap().entrySet()) {
           try {
             final HostTreeImpl.Zone zone = serializer.deserialize(entry.getValue()
-                .getValue(NopeTypeTokens.JSON_ELEMENT_TYPE_TOKEN));
+                .getValue(NopeTypeTokens.JSON_ELEM_TT));
             zones.add(zone);
           } catch (IllegalArgumentException e) {
             Nope.getInstance().getLogger().error("Could not add zone", e);
@@ -156,7 +162,7 @@ public class HoconHostTreeImplStorage implements HostTreeImpl.Storage {
       final ConfigurationNode node = connection.node.getNode(Nope.GLOBAL_HOST_NAME);
       node.setValue(null); // Blank it.
       final JsonElement element = serializer.serialize(globalHost);
-      node.setValue(NopeTypeTokens.JSON_ELEMENT_TYPE_TOKEN, element);
+      node.setValue(NopeTypeTokens.JSON_ELEM_TT, element);
     } catch (ObjectMappingException e) {
       throw new HostParseException("Error writing globalhost", e);
     }
@@ -174,7 +180,7 @@ public class HoconHostTreeImplStorage implements HostTreeImpl.Storage {
         final ConfigurationNode node = connection.node.getNode(worldHost.getName());
         node.setValue(null); // Blank it.
         final JsonElement element = serializer.serialize(worldHost);
-        node.setValue(NopeTypeTokens.JSON_ELEMENT_TYPE_TOKEN, element);
+        node.setValue(NopeTypeTokens.JSON_ELEM_TT, element);
       }
     } catch (ObjectMappingException e) {
       throw new HostParseException("Error writing world hosts", e);
@@ -202,7 +208,7 @@ public class HoconHostTreeImplStorage implements HostTreeImpl.Storage {
             WORLD_SUB_ZONES_KEY,
             zone.getName());
 
-        node.setValue(NopeTypeTokens.JSON_ELEMENT_TYPE_TOKEN, serializer.serialize(zone));
+        node.setValue(NopeTypeTokens.JSON_ELEM_TT, serializer.serialize(zone));
       }
     } catch (ObjectMappingException e) {
       throw new HostParseException("Error saving config after writing zones", e);
@@ -212,7 +218,7 @@ public class HoconHostTreeImplStorage implements HostTreeImpl.Storage {
   /**
    * Connection class for local Hocon implementation of HostTree storage.
    */
-  private class Connection implements Closeable {
+  private static class Connection implements Closeable {
     private final ConfigurationNode node;
     private final HoconConfigurationLoader loader;
 

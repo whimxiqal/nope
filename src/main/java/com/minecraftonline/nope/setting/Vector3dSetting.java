@@ -30,9 +30,8 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.minecraftonline.nope.Nope;
 import com.minecraftonline.nope.util.Format;
-import org.spongepowered.api.text.Text;
-
 import javax.annotation.Nonnull;
+import org.spongepowered.api.text.Text;
 
 public class Vector3dSetting extends SettingKey<Vector3d> {
   public Vector3dSetting(String id, Vector3d defaultValue) {

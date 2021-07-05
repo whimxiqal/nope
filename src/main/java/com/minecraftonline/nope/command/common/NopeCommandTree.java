@@ -26,6 +26,9 @@ package com.minecraftonline.nope.command.common;
 
 import com.minecraftonline.nope.command.NopeCommandRoot;
 
+/**
+ * Nope's custom command tree.
+ */
 public class NopeCommandTree extends CommandTree {
 
   public NopeCommandTree() {

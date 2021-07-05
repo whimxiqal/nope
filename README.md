@@ -1,35 +1,49 @@
 # Nope
 
-Nope is a Minecraft volume protection plugin written by PietElite and tyhdefu for the Sponge plugin platform. It is based upon LionsArea and [WorldGuard](https://github.com/EngineHub/WorldGuard), and has been designed to be compatible with the former and to have the same functionality as the latter. It allows the user to change the handling of various behaviour within containers called Hosts. A Host can be a 3-D volume called a zone, worlds, or the entire server. Many different settings may be applied to these Hosts. These settings determine whether players may do things (like break blocks, place blocks, PvP with each other, or interact with certain objects) and also determine whether natural processes occur around the Host (like ice thawing or leaf decay).
+Nope is a Minecraft volume protection plugin written by PietElite and tyhdefu for the Sponge plugin platform. It is
+based upon LionsArea and [WorldGuard](https://github.com/EngineHub/WorldGuard), and has been designed to be compatible
+with the former and to have the same functionality as the latter. It allows the user to change the handling of various
+behaviour within containers called Hosts. A Host can be a 3-D volume called a zone, worlds, or the entire server. Many
+different settings may be applied to these Hosts. These settings determine whether players may do things (like break
+blocks, place blocks, PvP with each other, or interact with certain objects) and also determine whether natural
+processes occur around the Host (like ice thawing or leaf decay).
 
 ## Installation
 
-To install the plugin, first [install Sponge](https://docs.spongepowered.org/stable/en/server/index.html). Put Nope's jar file into the mods folder of your server. You can find the latest jar file [here](https://gitlab.com/minecraftonline/nope/-/packages). Once you start the server, a HOCON configuration file with the name `zones.conf` will be generated, in which all the data and changes are saved. Support for databases is planned.
+To install the plugin, first [install Sponge](https://docs.spongepowered.org/stable/en/server/index.html). Put Nope's
+jar file into the mods folder of your server. You can find the latest jar
+file [here](https://gitlab.com/minecraftonline/nope/-/packages). Once you start the server, a HOCON configuration file
+with the name `zones.conf` will be generated, in which all the data and changes are saved. Support for databases is
+planned.
 
 ## Usage
 
-If this is your first time using Nope, then it is recommended to read the `tutorial.md` file to learn how to use the plugin.
+If this is your first time using Nope, then it is recommended to read the `tutorial.md` file to learn how to use the
+plugin.
 
 Please submit any bugs you encounter to our [issues page](https://gitlab.com/minecraftonline/nope/-/issues).
 
-### Commands  
+### Commands
 
 All commands have a subcommand **help | ?** to display usage and further subcommands.
 
 Pipes are equivalent to "or".
 
-- **/nope** ...  
-    - Central command for Nope. Displays a welcome splash screen  
+- **/nope** ...
+    - Central command for Nope. Displays a welcome splash screen
     - **reload | load**
         - Reloads the configuration file from storage
     - **create | c | add** ... <*zone-name*> [[-w <*world*>] <*x1*> <*y1*> <*z1*> <*x2*> <*y2*> <*z3*>]] [-p <*p*>]
-        - Creates a Zone with the given name using the data from the user's Selection, otherwise uses data from the input if the Zone dimensions and location are explicitly given
-        - By default Nope gives the new Zone a priority, which is larger than the highest priority of intersecting Zones by one.
+        - Creates a Zone with the given name using the data from the user's Selection, otherwise uses data from the
+          input if the Zone dimensions and location are explicitly given
+        - By default Nope gives the new Zone a priority, which is larger than the highest priority of intersecting Zones
+          by one.
         - **slab** <*zone-name*>
-            - Creates a Zone, which is unbounded on the X and Z axis. As a result it covers every block with an Y value in a certain range.
+            - Creates a Zone, which is unbounded on the X and Z axis. As a result it covers every block with an Y value
+              in a certain range.
     - **destroy | remove** <*zone-name*>
         - Deletes the given zone
-    - **info | i** [*zone-name*]  
+    - **info | i** [*zone-name*]
         - Sends detailed information about the Zone through chat
         - Infers the zone the user is in if no name is given
     - **show** [*zone-name*]
@@ -57,10 +71,13 @@ Pipes are equivalent to "or".
         - Infers the zone the user is in if no name is given
         - Cannot be used to set the priority of a WorldHost or the GlobalHost
         - Cannot be used to set a negative priority to the Zone, as they are reserved to WorldHosts and the GlobalHost
-        - When the given Zone intersects with another Zone with the given priority, Nope bumps the priorities of all conflicting zones by one
+        - When the given Zone intersects with another Zone with the given priority, Nope bumps the priorities of all
+          conflicting zones by one
     - **target** ...
         - Makes changes to how a Zone targets players
-        - Anyone without added permission requirements will not be affected by the Zone's settings. In addition, specifically added players will be either the only ones affected or the only ones not affected, depending on whether this target type is a whitelist or a blacklist
+        - Anyone without added permission requirements will not be affected by the Zone's settings. In addition,
+          specifically added players will be either the only ones affected or the only ones not affected, depending on
+          whether this target type is a whitelist or a blacklist
         - **type** [-z <*zone-name*>] <*whitelist|blacklist*>
             - Changes the targeting type to a whitelist or a blacklist
         - **add** ...
@@ -94,7 +111,7 @@ Pipes are equivalent to "or".
         - Used for quickly applying many settings
         - Infers the zone the user is in if no name is given
 
-### Argument Syntax  
+### Argument Syntax
 
 | Symbol | Meaning  |   
 | :----: | :------: |
@@ -124,11 +141,13 @@ Pipes are equivalent to "or".
 
 ## Contributing
 
-Commit early and commit often. When you submit a merge request (or push your changes directly, each commit purpose should be well defined.
+Commit early and commit often. When you submit a merge request (or push your changes directly, each commit purpose
+should be well defined.
 
 ## License
 
-This project is licensed under the MIT License. You should have a copy of it together with Nope. If not, then you can read a copy of it on opensource.org (https://opensource.org/licenses/MIT).
+This project is licensed under the MIT License. You should have a copy of it together with Nope. If not, then you can
+read a copy of it on opensource.org (https://opensource.org/licenses/MIT).
 
 ## Credits
 

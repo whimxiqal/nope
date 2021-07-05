@@ -1,8 +1,13 @@
 package com.minecraftonline.nope.arguments;
 
-import com.minecraftonline.nope.Nope;
 import com.minecraftonline.nope.setting.SettingKey;
 import com.minecraftonline.nope.setting.SettingLibrary;
+import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.args.ArgumentParseException;
 import org.spongepowered.api.command.args.CommandArgs;
@@ -11,13 +16,9 @@ import org.spongepowered.api.command.args.CommandElement;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.util.StartsWithPredicate;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
-
+/**
+ * A {@link CommandElement} which parses a setting key from an argument.
+ */
 public class SettingKeyCommandElement extends CommandElement {
 
   protected SettingKeyCommandElement(@Nullable Text key) {

@@ -28,7 +28,6 @@ package com.minecraftonline.nope.setting;
 import com.google.common.collect.Lists;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonPrimitive;
-
 import java.util.List;
 import java.util.Optional;
 

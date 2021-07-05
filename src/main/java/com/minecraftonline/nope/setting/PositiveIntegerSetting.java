@@ -27,6 +27,9 @@ package com.minecraftonline.nope.setting;
 
 import com.google.gson.JsonElement;
 
+/**
+ * A setting that stores a positive integer as a value.
+ */
 public class PositiveIntegerSetting extends SettingKey<Integer> {
   public PositiveIntegerSetting(String id, Integer defaultValue) {
     super(id, defaultValue);

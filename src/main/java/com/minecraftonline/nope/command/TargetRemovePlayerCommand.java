@@ -60,14 +60,13 @@ import com.minecraftonline.nope.permission.Permissions;
 import com.minecraftonline.nope.setting.SettingKey;
 import com.minecraftonline.nope.setting.SettingValue;
 import com.minecraftonline.nope.util.Format;
+import java.util.Optional;
+import java.util.concurrent.ExecutionException;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.args.GenericArguments;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.text.Text;
-
-import java.util.Optional;
-import java.util.concurrent.ExecutionException;
 
 class TargetRemovePlayerCommand extends LambdaCommandNode {
   public TargetRemovePlayerCommand(CommandNode parent) {

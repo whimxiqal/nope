@@ -26,15 +26,14 @@
 package com.minecraftonline.nope.util;
 
 import com.google.common.collect.Sets;
+import java.util.Set;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.BlockTypes;
 
-import java.util.Set;
-
+/**
+ * A utility class to hold useful groups of {@link BlockTypes}.
+ */
 public final class Groups {
-
-  private Groups() {
-  }
 
   public static final Set<BlockType> LIQUID_GRIEFABLE = Sets.newHashSet(
       BlockTypes.BEETROOTS,
@@ -54,5 +53,8 @@ public final class Groups {
       BlockTypes.WHEAT,
       BlockTypes.YELLOW_FLOWER
   );
+
+  private Groups() {
+  }
 
 }

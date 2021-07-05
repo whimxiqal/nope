@@ -27,6 +27,11 @@ package com.minecraftonline.nope.arguments;
 import com.minecraftonline.nope.Nope;
 import com.minecraftonline.nope.host.Host;
 import com.minecraftonline.nope.util.Format;
+import java.util.List;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.args.ArgumentParseException;
 import org.spongepowered.api.command.args.CommandArgs;
@@ -34,12 +39,6 @@ import org.spongepowered.api.command.args.CommandContext;
 import org.spongepowered.api.command.args.CommandElement;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.util.StartsWithPredicate;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import java.util.List;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 class HostCommandElement extends CommandElement {
 
@@ -55,7 +54,8 @@ class HostCommandElement extends CommandElement {
 
   @Nullable
   @Override
-  protected Host parseValue(@Nonnull CommandSource source, CommandArgs args) throws ArgumentParseException {
+  protected Host parseValue(@Nonnull CommandSource source, CommandArgs args)
+      throws ArgumentParseException {
     String hostName = args.next().toLowerCase();
     Host host = Nope.getInstance().getHostTree().getHosts().get(hostName);
 
@@ -64,8 +64,8 @@ class HostCommandElement extends CommandElement {
     }
 
     throw new ArgumentParseException(Text.of("Zone ", Format.note(hostName), " does not exist!"),
-            hostName,
-            hostName.length());
+        hostName,
+        hostName.length());
   }
 
   @Nonnull
@@ -75,10 +75,10 @@ class HostCommandElement extends CommandElement {
                                @Nonnull CommandContext context) {
     final Predicate<String> startsWith = new StartsWithPredicate(args.nextIfPresent().orElse(""));
     return Nope.getInstance().getHostTree()
-            .getHosts()
-            .keySet()
-            .stream()
-            .filter(startsWith)
-            .collect(Collectors.toList());
+        .getHosts()
+        .keySet()
+        .stream()
+        .filter(startsWith)
+        .collect(Collectors.toList());
   }
 }

@@ -26,18 +26,18 @@
 package com.minecraftonline.nope.game.listener;
 
 import com.minecraftonline.nope.setting.SettingKey;
+import java.util.function.Predicate;
+import javax.annotation.Nonnull;
 import org.spongepowered.api.event.Cancellable;
 import org.spongepowered.api.event.Event;
-
-import javax.annotation.Nonnull;
-import java.util.function.Predicate;
 
 /**
  * An accessibility class for cancelling events.
  *
  * @param <E> the type of event to cancel
  */
-class CancelConditionSettingListener<E extends Event & Cancellable> extends SingleSettingListener<E> {
+class CancelConditionSettingListener<E extends Event & Cancellable>
+    extends SingleSettingListener<E> {
   public CancelConditionSettingListener(@Nonnull SettingKey<?> key,
                                         @Nonnull Class<E> eventClass,
                                         @Nonnull Predicate<E> canceler) {

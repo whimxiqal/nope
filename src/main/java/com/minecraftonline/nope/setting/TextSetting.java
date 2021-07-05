@@ -28,13 +28,12 @@ package com.minecraftonline.nope.setting;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.minecraftonline.nope.Nope;
+import java.io.IOException;
+import javax.annotation.Nonnull;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.persistence.DataFormats;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.serializer.TextSerializers;
-
-import javax.annotation.Nonnull;
-import java.io.IOException;
 
 public class TextSetting extends SettingKey<Text> {
 

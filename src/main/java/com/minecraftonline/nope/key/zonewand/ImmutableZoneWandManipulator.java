@@ -28,9 +28,13 @@ import com.minecraftonline.nope.key.NopeKeys;
 import org.spongepowered.api.data.manipulator.immutable.common.AbstractImmutableBooleanData;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 
-public class ImmutableZoneWandManipulator extends AbstractImmutableBooleanData<ImmutableZoneWandManipulator, ZoneWandManipulator> {
+/**
+ * An object to assist in the creation of the Zone wand.
+ */
+public class ImmutableZoneWandManipulator
+    extends AbstractImmutableBooleanData<ImmutableZoneWandManipulator, ZoneWandManipulator> {
   public ImmutableZoneWandManipulator(boolean value) {
-    super(NopeKeys.ZONE_WAND, value,  false);
+    super(NopeKeys.ZONE_WAND, value, false);
   }
 
   public ImmutableValue<Boolean> isWand() {

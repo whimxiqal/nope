@@ -28,6 +28,8 @@ package com.minecraftonline.nope.game.listener;
 import com.minecraftonline.nope.Nope;
 import com.minecraftonline.nope.game.movement.PlayerMovementHandler;
 import com.minecraftonline.nope.setting.SettingLibrary;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.Player;
@@ -39,15 +41,6 @@ import org.spongepowered.api.event.filter.cause.First;
 import org.spongepowered.api.event.network.ClientConnectionEvent;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
-
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
 
 public final class StaticSettingListeners {
 

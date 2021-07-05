@@ -26,12 +26,11 @@
 package com.minecraftonline.nope.game.listener;
 
 import com.minecraftonline.nope.setting.SettingKey;
-import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.event.Event;
-
-import javax.annotation.Nonnull;
 import java.util.Optional;
 import java.util.function.BiConsumer;
+import javax.annotation.Nonnull;
+import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.event.Event;
 
 /**
  * An accessibility class for handling events where a player is
@@ -41,8 +40,8 @@ import java.util.function.BiConsumer;
  */
 class PlayerCauseSettingListener<E extends Event> extends SingleSettingListener<E> {
   public PlayerCauseSettingListener(@Nonnull SettingKey<?> key,
-                                   @Nonnull Class<E> eventClass,
-                                   @Nonnull BiConsumer<E, Player> handler) {
+                                    @Nonnull Class<E> eventClass,
+                                    @Nonnull BiConsumer<E, Player> handler) {
     super(key, eventClass, event -> {
       Optional<Player> player = event.getCause().first(Player.class);
       if (!player.isPresent()) {

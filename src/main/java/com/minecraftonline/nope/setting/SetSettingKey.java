@@ -30,18 +30,21 @@ import com.google.common.collect.Sets;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonPrimitive;
-import com.minecraftonline.nope.util.Format;
-import org.spongepowered.api.entity.EntityType;
-import org.spongepowered.api.text.Text;
-
-import javax.annotation.Nonnull;
 import java.util.Comparator;
 import java.util.Set;
 import java.util.stream.Collectors;
+import javax.annotation.Nonnull;
+import org.spongepowered.api.text.Text;
 
-public abstract class SetSetting<T> extends SettingKey<Set<T>> {
+/**
+ * An abstract class to define a setting key which
+ * contains contains a set of values.
+ *
+ * @param <T> the type which is stored in a set
+ */
+public abstract class SetSettingKey<T> extends SettingKey<Set<T>> {
 
-  protected SetSetting(String id, Set<T> defaultData) {
+  protected SetSettingKey(String id, Set<T> defaultData) {
     super(id, defaultData);
   }
 

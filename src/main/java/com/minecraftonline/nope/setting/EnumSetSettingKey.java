@@ -27,18 +27,22 @@ package com.minecraftonline.nope.setting;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonPrimitive;
-import org.spongepowered.api.text.Text;
-
-import javax.annotation.Nonnull;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
+import javax.annotation.Nonnull;
+import org.spongepowered.api.text.Text;
 
-public class EnumSetSetting<E extends Enum<E>> extends SetSetting<E> {
+/**
+ * Setting to store a set of enums.
+ *
+ * @param <E> the enum type
+ */
+public class EnumSetSettingKey<E extends Enum<E>> extends SetSettingKey<E> {
   private final Class<E> enumClass;
 
-  public EnumSetSetting(String id, Set<E> defaultValue, Class<E> enumClass) {
+  public EnumSetSettingKey(String id, Set<E> defaultValue, Class<E> enumClass) {
     super(id, defaultValue);
     this.enumClass = enumClass;
   }

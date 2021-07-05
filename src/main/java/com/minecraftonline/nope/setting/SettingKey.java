@@ -27,21 +27,20 @@ package com.minecraftonline.nope.setting;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
+import java.util.List;
+import java.util.Optional;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import lombok.Getter;
 import lombok.Setter;
 import org.spongepowered.api.text.Text;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import java.util.List;
-import java.util.Optional;
 
 /**
  * The key object associated inside a {@link Setting}.
  * One or more {@link SettingValue} is normally associated with
  * a single {@link SettingKey} instantiated in multiple {@link Setting}s.
- * <p>
- * This object is abstract because every different type of data stored
+ *
+ * <p>This object is abstract because every different type of data stored
  * in the {@link SettingValue} may have unique serializing logic, so
  * every different generic type will require its own implementation.
  *
@@ -86,18 +85,6 @@ public abstract class SettingKey<T> {
   @Getter
   @Setter
   private boolean playerRestrictive = false;
-
-  /**
-   * Type of {@link SettingKey} for ordering purposes.
-   */
-  public enum CategoryType {
-    BLOCKS,
-    DAMAGE,
-    ENTITIES,
-    MISC,
-    MOVEMENT,
-    GLOBAL,
-  }
 
   protected SettingKey(String id, T defaultData) {
     this.id = id;
@@ -227,6 +214,21 @@ public abstract class SettingKey<T> {
     return this.id;
   }
 
+  /**
+   * Type of {@link SettingKey} for ordering purposes.
+   */
+  public enum CategoryType {
+    BLOCKS,
+    DAMAGE,
+    ENTITIES,
+    MISC,
+    MOVEMENT,
+    GLOBAL,
+  }
+
+  /**
+   * An exception to throw when a setting could not be parsed.
+   */
   public static class ParseSettingException extends IllegalArgumentException {
     public ParseSettingException() {
       super();

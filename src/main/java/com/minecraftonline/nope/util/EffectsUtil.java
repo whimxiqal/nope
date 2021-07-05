@@ -28,13 +28,15 @@ package com.minecraftonline.nope.util;
 import com.flowpowered.math.vector.Vector3d;
 import com.minecraftonline.nope.Nope;
 import com.minecraftonline.nope.structures.Volume;
+import java.util.Random;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.effect.particle.ParticleEffect;
 import org.spongepowered.api.effect.particle.ParticleTypes;
 import org.spongepowered.api.entity.living.player.Player;
 
-import java.util.Random;
-
+/**
+ * Utility class for minecraft effects.
+ */
 public class EffectsUtil {
 
   /**
@@ -68,10 +70,12 @@ public class EffectsUtil {
     final Random random = new Random();
     final double[] vals = new double[3];
     boolean particleDisplayed = false;
-    for (int i = 0; i < 3; i++) {    // chooses which dimension is constant for illumination of one face
-      for (int j = 0; j < 2; j++) {  // chooses between the min and max value of the dimension
+    // chooses which dimension is constant for illumination of one face
+    for (int i = 0; i < 3; i++) {
+      // chooses between the min and max value of the dimension
+      for (int j = 0; j < 2; j++) {
         for (int a = Math.max(volumePos[0][(i + 1) % 3], playerPos[0][(i + 1) % 3]);
-             a <= Math.min(volumePos[1][(i + 1) % 3], playerPos[1][(i + 1) %3]);
+             a <= Math.min(volumePos[1][(i + 1) % 3], playerPos[1][(i + 1) % 3]);
              a++) {    // chooses one dimension along the constant face
           for (int b = Math.max(volumePos[0][(i + 2) % 3], playerPos[0][(i + 2) % 3]);
                b <= Math.min(volumePos[1][(i + 2) % 3], playerPos[1][(i + 2) % 3]);
@@ -81,8 +85,11 @@ public class EffectsUtil {
               vals[0] = volumePos[j][i] + j;
               vals[1] = a + portion * q;
               vals[2] = b + portion * q;
-              Vector3d particleLocation = new Vector3d(vals[(3 - i) % 3], vals[(4 - i) % 3], vals[(5 - i) % 3]);
-              if (particleLocation.distanceSquared(player.getLocation().getPosition()) < proximitySquared) {
+              Vector3d particleLocation = new Vector3d(vals[(3 - i) % 3],
+                  vals[(4 - i) % 3],
+                  vals[(5 - i) % 3]);
+              if (particleLocation.distanceSquared(player.getLocation().getPosition())
+                  < proximitySquared) {
                 particleDisplayed = true;
                 Sponge.getScheduler().createTaskBuilder()
                     .async()

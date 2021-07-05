@@ -27,10 +27,9 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.minecraftonline.nope.structures.Volume;
 import com.minecraftonline.nope.structures.VolumeTree;
+import java.util.*;
 import lombok.Data;
 import org.junit.jupiter.api.Test;
-
-import java.util.*;
 
 public class VolumeTreeTest {
 
@@ -186,8 +185,8 @@ public class VolumeTreeTest {
         for (int x = 0; x < boardSizeX; x++) {
           if (answers[x][y][z] != solutions[x][y][z]) {
             System.out.println(String.format(
-                    "Wrong answer at (%d, %d, %d) -- Answer: %d, Solution: %d",
-                    x, y, z, answers[x][y][z], solutions[x][y][z]));
+                "Wrong answer at (%d, %d, %d) -- Answer: %d, Solution: %d",
+                x, y, z, answers[x][y][z], solutions[x][y][z]));
             failed++;
           } else {
             succeeded++;
@@ -224,9 +223,9 @@ public class VolumeTreeTest {
       zSize = random.nextInt(ZONE_MAX_Z_WIDTH - ZONE_MIN_Z_WIDTH + 1) + ZONE_MIN_Z_WIDTH;
 
       zones.put(i, new TestVolume(
-              xLocation, xLocation + xSize - 1,
-              yLocation, yLocation + ySize - 1,
-              zLocation, zLocation + zSize - 1));
+          xLocation, xLocation + xSize - 1,
+          yLocation, yLocation + ySize - 1,
+          zLocation, zLocation + zSize - 1));
     }
 
     // Build board
@@ -273,12 +272,12 @@ public class VolumeTreeTest {
       for (Volume volume : zones.values()) {
         if (volume.contains(xpoints[i], ypoints[i], zpoints[i])) {
           answers.get(i).add(String.format("{[%d, %d], [%d, %d], [%d, %d]}",
-                  volume.getMinX(),
-                  volume.getMaxX(),
-                  volume.getMinY(),
-                  volume.getMaxY(),
-                  volume.getMinZ(),
-                  volume.getMaxZ()));
+              volume.getMinX(),
+              volume.getMaxX(),
+              volume.getMinY(),
+              volume.getMaxY(),
+              volume.getMinZ(),
+              volume.getMaxZ()));
         }
       }
     }
@@ -288,16 +287,16 @@ public class VolumeTreeTest {
     for (int i = 0; i < TEST_POINT_COUNT; i++) {
       Set<String> dump = solutions.get(i);
       tree.containersOf(xpoints[i], ypoints[i], zpoints[i])
-              .stream()
-              .map(volume ->
-                      String.format("{[%d, %d], [%d, %d], [%d, %d]}",
-                              volume.getMinX(),
-                              volume.getMaxX(),
-                              volume.getMinY(),
-                              volume.getMaxY(),
-                              volume.getMinZ(),
-                              volume.getMaxZ()))
-              .forEach(dump::add);
+          .stream()
+          .map(volume ->
+              String.format("{[%d, %d], [%d, %d], [%d, %d]}",
+                  volume.getMinX(),
+                  volume.getMaxX(),
+                  volume.getMinY(),
+                  volume.getMaxY(),
+                  volume.getMinZ(),
+                  volume.getMaxZ()))
+          .forEach(dump::add);
     }
     treeElapse = System.currentTimeMillis() - treeElapse;
 
@@ -312,9 +311,9 @@ public class VolumeTreeTest {
       if (answers.get(i).size() != solutions.get(i).size() || !answers.get(i).containsAll(solutions.get(i))) {
         failed++;
         System.out.println(String.format("Wrong Answer: Point %d -- Answer: %s, Solution: %s\n",
-                i,
-                Arrays.toString(answers.get(i).toArray()),
-                Arrays.toString(solutions.get(i).toArray())));
+            i,
+            Arrays.toString(answers.get(i).toArray()),
+            Arrays.toString(solutions.get(i).toArray())));
       } else {
         succeeded++;
       }
@@ -378,12 +377,12 @@ public class VolumeTreeTest {
         for (int x = 0; x < countX; x++) {
           int id = z * countY * countX + y * countX + x;
           map.put(id, new TestVolume(
-                  x * (size + spacing) + borderSpacing,
-                  x * (size + spacing) + size + borderSpacing - 1,
-                  y * (size + spacing) + borderSpacing,
-                  y * (size + spacing) + size + borderSpacing - 1,
-                  z * (size + spacing) + borderSpacing,
-                  z * (size + spacing) + size + borderSpacing - 1));
+              x * (size + spacing) + borderSpacing,
+              x * (size + spacing) + size + borderSpacing - 1,
+              y * (size + spacing) + borderSpacing,
+              y * (size + spacing) + size + borderSpacing - 1,
+              z * (size + spacing) + borderSpacing,
+              z * (size + spacing) + size + borderSpacing - 1));
         }
       }
     }
@@ -395,8 +394,8 @@ public class VolumeTreeTest {
     int boardSizeY = countY * (size + spacing) - spacing + borderSpacing * 2;
     int boardSizeZ = countZ * (size + spacing) - spacing + borderSpacing * 2;
     char[][] board = constructBoard(map.values(),
-            boardSizeX,
-            boardSizeZ);
+        boardSizeX,
+        boardSizeZ);
     if (print) printBoard(board, boardSizeX, boardSizeZ);
     checkAnswers(map.values(), tree, boardSizeX, boardSizeY, boardSizeZ, false);
   }

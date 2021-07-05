@@ -26,7 +26,6 @@
 package com.minecraftonline.nope.setting;
 
 import com.google.common.collect.Sets;
-
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.Map;
@@ -41,7 +40,7 @@ public final class Templates {
     SettingMap map = new SettingMap();
     map.put(Setting.of(SettingLibrary.ENDERDRAGON_GRIEF, SettingValue.of(false)));
     map.put(Setting.of(SettingLibrary.ENDERMAN_GRIEF, SettingValue.of(false)));
-    map.put(Setting.of(SettingLibrary.EXPLOSION_GRIEF_BLACKLIST, SettingValue.of(Sets.newHashSet(SettingLibrary.ExplosiveEnum.values()))));
+    map.put(Setting.of(SettingLibrary.EXPLOSION_GRIEF_BLACKLIST, SettingValue.of(Sets.newHashSet(SettingLibrary.Explosive.values()))));
     map.put(Setting.of(SettingLibrary.FIRE_EFFECT, SettingValue.of(false)));
     map.put(Setting.of(SettingLibrary.FIRE_IGNITION, SettingValue.of(false)));
     map.put(Setting.of(SettingLibrary.LAVA_GRIEF, SettingValue.of(false)));

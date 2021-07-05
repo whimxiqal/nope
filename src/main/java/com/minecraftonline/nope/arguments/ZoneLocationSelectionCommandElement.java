@@ -5,6 +5,10 @@ import com.minecraftonline.nope.Nope;
 import com.minecraftonline.nope.command.WandCommand;
 import com.minecraftonline.nope.key.zonewand.ZoneWandHandler;
 import com.minecraftonline.nope.util.Format;
+import java.util.Collections;
+import java.util.List;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.args.ArgumentParseException;
@@ -14,11 +18,6 @@ import org.spongepowered.api.command.args.CommandElement;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.world.World;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import java.util.Collections;
-import java.util.List;
 
 public class ZoneLocationSelectionCommandElement extends CommandElement {
   private final Vector3iCommandElement vector3i = new Vector3iCommandElement(Text.of("vector3i"));

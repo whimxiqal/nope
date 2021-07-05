@@ -26,20 +26,23 @@ package com.minecraftonline.nope;
 
 import com.google.inject.Inject;
 import com.minecraftonline.nope.bridge.collision.CollisionHandler;
+import com.minecraftonline.nope.command.NopeCommandRoot;
+import com.minecraftonline.nope.command.common.CommandTree;
 import com.minecraftonline.nope.command.common.NopeCommandTree;
 import com.minecraftonline.nope.context.ZoneContextCalculator;
+import com.minecraftonline.nope.game.listener.DynamicSettingListeners;
 import com.minecraftonline.nope.game.listener.StaticSettingListeners;
 import com.minecraftonline.nope.game.movement.PlayerMovementHandler;
 import com.minecraftonline.nope.host.HoconHostTreeImplStorage;
 import com.minecraftonline.nope.host.HostTree;
-import com.minecraftonline.nope.key.NopeKeys;
-import com.minecraftonline.nope.key.zonewand.ZoneWandHandler;
-import com.minecraftonline.nope.key.zonewand.ImmutableZoneWandManipulator;
-import com.minecraftonline.nope.key.zonewand.ZoneWandManipulator;
 import com.minecraftonline.nope.host.HostTreeImpl;
-import com.minecraftonline.nope.game.listener.DynamicSettingListeners;
+import com.minecraftonline.nope.key.NopeKeys;
+import com.minecraftonline.nope.key.zonewand.ImmutableZoneWandManipulator;
+import com.minecraftonline.nope.key.zonewand.ZoneWandHandler;
+import com.minecraftonline.nope.key.zonewand.ZoneWandManipulator;
 import com.minecraftonline.nope.setting.SettingLibrary;
 import com.minecraftonline.nope.util.Extra;
+import java.nio.file.Path;
 import lombok.Getter;
 import lombok.Setter;
 import org.slf4j.Logger;
@@ -53,15 +56,15 @@ import org.spongepowered.api.event.game.state.GameInitializationEvent;
 import org.spongepowered.api.event.game.state.GamePreInitializationEvent;
 import org.spongepowered.api.event.game.state.GameStartedServerEvent;
 import org.spongepowered.api.event.game.state.GameStoppingServerEvent;
-import org.spongepowered.api.event.world.LoadWorldEvent;
 import org.spongepowered.api.plugin.Dependency;
 import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.util.TypeTokens;
 
-import java.nio.file.Path;
-
+/**
+ * The main class and entrypoint for the entire plugin.
+ */
 @Plugin(id = "nope", dependencies = {@Dependency(id = "worldedit", optional = true)})
 public class Nope {
 
@@ -76,7 +79,7 @@ public class Nope {
   @Getter
   private static Nope instance;
   @Getter
-  NopeCommandTree commandTree;
+  CommandTree commandTree;
   @Inject
   @Getter
   private Logger logger;
@@ -99,6 +102,11 @@ public class Nope {
   @Setter
   private boolean valid = true;
 
+  /**
+   * Pre-initialize hook.
+   *
+   * @param event the event
+   */
   @Listener
   public void onPreInitialize(GamePreInitializationEvent event) {
     instance = this;
@@ -108,6 +116,11 @@ public class Nope {
     }
   }
 
+  /**
+   * On initialization hook.
+   *
+   * @param event the event
+   */
   @Listener
   public void onInit(GameInitializationEvent event) {
     Extra.printSplashscreen();
@@ -133,6 +146,11 @@ public class Nope {
     Sponge.getEventManager().registerListeners(this, zoneWandHandler);
   }
 
+  /**
+   * Nope's server start event hook method.
+   *
+   * @param event the event
+   */
   @Listener
   public void onServerStart(GameStartedServerEvent event) {
     loadState();
@@ -147,7 +165,7 @@ public class Nope {
             service.registerContextCalculator(new ZoneContextCalculator()));
 
     // Register entire Nope command tree
-    commandTree = new NopeCommandTree();
+    commandTree = new CommandTree(new NopeCommandRoot());
     commandTree.register();
 
   }
@@ -162,6 +180,9 @@ public class Nope {
     loadState();
   }
 
+  /**
+   * Save state, which consists of the {@link HostTree}.
+   */
   public void saveState() {
     try {
       if (isValid()) {
@@ -173,6 +194,9 @@ public class Nope {
     }
   }
 
+  /**
+   * Saves the state to a backup location.
+   */
   public void saveStateBackup() {
     try {
       if (isValid()) {
@@ -184,6 +208,10 @@ public class Nope {
     }
   }
 
+  /**
+   * Loads plugin state from storage, which consists of host
+   * information from the {@link HostTree}.
+   */
   public void loadState() {
     try {
       if (isValid()) {

@@ -25,10 +25,6 @@
 
 package com.minecraftonline.nope.structures;
 
-import com.flowpowered.math.vector.Vector3i;
-
-import java.util.Collection;
-
 public interface Volume {
 
   /**

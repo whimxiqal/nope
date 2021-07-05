@@ -27,11 +27,16 @@ package com.minecraftonline.nope.arguments;
 import org.spongepowered.api.command.args.CommandElement;
 import org.spongepowered.api.text.Text;
 
+/**
+ * An enumerating class to centralize different methods for giving
+ * command arguments specific to Nope.
+ */
 public class NopeArguments {
 
   /**
    * Creates a zone command element, that returns a
-   * <b>{@link com.minecraftonline.nope.host.Host}<\b>
+   * <b>{@link com.minecraftonline.nope.host.Host}</b>.
+   *
    * @param key Key to use
    * @return CommandElement
    */
@@ -43,8 +48,8 @@ public class NopeArguments {
     return new SettingDataCommandElement(key);
   }
 
-  public static CommandElement playerOrPlayerUUID(Text key) {
-    return new PlayerOrPlayerUUID(key);
+  public static CommandElement playerOrPlayerUuid(Text key) {
+    return new PlayerOrPlayerUuid(key);
   }
 
   public static CommandElement settingKey(Text key) {

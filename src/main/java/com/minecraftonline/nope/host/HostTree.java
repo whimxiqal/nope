@@ -28,14 +28,11 @@ package com.minecraftonline.nope.host;
 import com.flowpowered.math.vector.Vector3i;
 import com.minecraftonline.nope.setting.SettingKey;
 import com.minecraftonline.nope.setting.SettingLibrary;
-
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
@@ -174,8 +171,8 @@ public interface HostTree {
    * @param host the host which may have a redundant key
    * @param key  a setting key which may be redundant
    * @return the host which causes the key to be redundant on the input Host.
-   * Returns null if it is not redundant and returns the original host
-   * if it is redundant because of the plugin's default value
+   *         Returns null if it is not redundant and returns the original host
+   *         if it is redundant because of the plugin's default value
    */
   @Nullable
   Host isRedundant(Host host, SettingKey<?> key);

@@ -25,9 +25,13 @@
 
 package com.minecraftonline.nope.arguments;
 
-import com.minecraftonline.nope.Nope;
 import com.minecraftonline.nope.setting.SettingMap;
 import com.minecraftonline.nope.setting.Templates;
+import java.util.List;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.args.ArgumentParseException;
 import org.spongepowered.api.command.args.CommandArgs;
@@ -35,12 +39,6 @@ import org.spongepowered.api.command.args.CommandContext;
 import org.spongepowered.api.command.args.CommandElement;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.util.StartsWithPredicate;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import java.util.List;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 public class TemplateCommandElement extends CommandElement {
   public TemplateCommandElement(@Nullable Text key) {

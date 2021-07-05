@@ -25,10 +25,9 @@
 
 package com.minecraftonline.nope.setting;
 
-import lombok.Getter;
-
 import java.util.Map;
 import java.util.function.Supplier;
+import lombok.Getter;
 
 public class Template implements Map.Entry<String, SettingMap> {
 

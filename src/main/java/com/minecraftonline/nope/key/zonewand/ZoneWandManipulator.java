@@ -25,6 +25,7 @@
 package com.minecraftonline.nope.key.zonewand;
 
 import com.minecraftonline.nope.key.NopeKeys;
+import java.util.Optional;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataQuery;
@@ -34,8 +35,6 @@ import org.spongepowered.api.data.manipulator.mutable.common.AbstractBooleanData
 import org.spongepowered.api.data.merge.MergeFunction;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.data.value.mutable.Value;
-
-import java.util.Optional;
 
 public class ZoneWandManipulator extends AbstractBooleanData<ZoneWandManipulator, ImmutableZoneWandManipulator> {
   public static final DataQuery QUERY = DataQuery.of("nopezonewand");
