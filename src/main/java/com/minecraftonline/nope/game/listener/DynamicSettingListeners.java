@@ -105,6 +105,8 @@ import org.spongepowered.api.world.explosion.Explosion;
 
 /**
  * A container class for all dynamically registered listeners.
+ *
+ * @see StaticSettingListeners
  */
 @SuppressWarnings("unused")
 public final class DynamicSettingListeners {

@@ -32,10 +32,14 @@ import ninja.leaping.configurate.objectmapping.serialize.TypeSerializer;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+/**
+ * A serializer for a {@link Vector3i}.
+ */
 public class Vector3iSerializer implements TypeSerializer<Vector3i> {
+
   @Nullable
   @Override
-  public Vector3i deserialize(@NonNull TypeToken<?> type, @NonNull ConfigurationNode value) throws ObjectMappingException {
+  public Vector3i deserialize(@NonNull TypeToken<?> type, @NonNull ConfigurationNode value) {
     if (value.isVirtual()) {
       return null;
     }
@@ -47,7 +51,9 @@ public class Vector3iSerializer implements TypeSerializer<Vector3i> {
   }
 
   @Override
-  public void serialize(@NonNull TypeToken<?> type, @Nullable Vector3i obj, @NonNull ConfigurationNode value) throws ObjectMappingException {
+  public void serialize(@NonNull TypeToken<?> type,
+                        @Nullable Vector3i obj,
+                        @NonNull ConfigurationNode value) {
     if (obj == null) {
       return;
     }

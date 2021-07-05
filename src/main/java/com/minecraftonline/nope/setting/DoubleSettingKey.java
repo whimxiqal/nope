@@ -25,34 +25,11 @@
 
 package com.minecraftonline.nope.setting;
 
-import com.google.common.collect.Lists;
-import java.util.List;
-import java.util.Optional;
-
 /**
- * A setting storing a boolean value.
+ * A setting which stores a double value.
  */
-public class BooleanSetting extends SettingKey<Boolean> {
-  public BooleanSetting(String id, Boolean defaultValue) {
+public class DoubleSettingKey extends SettingKey<Double> {
+  public DoubleSettingKey(String id, Double defaultValue) {
     super(id, defaultValue);
-  }
-
-  @Override
-  public Boolean parse(String data) throws ParseSettingException {
-    switch (data.toLowerCase()) {
-      case "true":
-      case "t":
-        return true;
-      case "false":
-      case "f":
-        return false;
-      default:
-        throw new ParseSettingException("Allowed values: t, true, f, false");
-    }
-  }
-
-  @Override
-  public Optional<List<String>> getParsable() {
-    return Optional.of(Lists.newArrayList("true", "false", "t", "f"));
   }
 }

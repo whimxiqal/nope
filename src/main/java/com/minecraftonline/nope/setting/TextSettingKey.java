@@ -35,9 +35,12 @@ import org.spongepowered.api.data.persistence.DataFormats;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.serializer.TextSerializers;
 
-public class TextSetting extends SettingKey<Text> {
+/**
+ * A setting key which stores {@link Text} as a value.
+ */
+public class TextSettingKey extends SettingKey<Text> {
 
-  protected TextSetting(String id, Text defaultValue) {
+  protected TextSettingKey(String id, Text defaultValue) {
     super(id, defaultValue);
   }
 

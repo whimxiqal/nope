@@ -30,8 +30,8 @@ import com.google.gson.JsonElement;
 /**
  * A setting that stores a positive integer as a value.
  */
-public class PositiveIntegerSetting extends SettingKey<Integer> {
-  public PositiveIntegerSetting(String id, Integer defaultValue) {
+public class PositiveIntegerSettingKey extends SettingKey<Integer> {
+  public PositiveIntegerSettingKey(String id, Integer defaultValue) {
     super(id, defaultValue);
   }
 

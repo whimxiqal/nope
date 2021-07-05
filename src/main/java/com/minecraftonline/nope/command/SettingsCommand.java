@@ -46,6 +46,9 @@ import org.spongepowered.api.service.pagination.PaginationService;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 
+/**
+ * A comand to list all Nope settings.
+ */
 public class SettingsCommand extends LambdaCommandNode {
 
   SettingsCommand(CommandNode parent) {
@@ -90,7 +93,9 @@ public class SettingsCommand extends LambdaCommandNode {
             .map(key -> Format.settingKey(key, true))
             .collect(Collectors.toList()));
 
-        builder.title(Text.of("Nope Settings - ", TextColors.AQUA, args.<String>requireOne("category").toUpperCase()));
+        builder.title(Text.of("Nope Settings - ",
+            TextColors.AQUA,
+            args.<String>requireOne("category").toUpperCase()));
         builder.header(Text.of(TextColors.DARK_GRAY, "<< ", Format.command("Back to Categories",
             getFullCommand(),
             Text.of("Return to category menu")),

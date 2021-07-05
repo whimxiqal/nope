@@ -35,6 +35,10 @@ import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.service.context.ContextCalculator;
 import org.spongepowered.api.service.permission.Subject;
 
+/**
+ * A context calculator for Nope zones for the purpose of
+ * context-intelligent permission use.
+ */
 public class ZoneContextCalculator implements ContextCalculator<Subject> {
 
   @Override

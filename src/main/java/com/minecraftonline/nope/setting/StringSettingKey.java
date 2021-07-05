@@ -25,45 +25,11 @@
 
 package com.minecraftonline.nope.setting;
 
-import com.google.common.collect.Lists;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonPrimitive;
-import java.util.List;
-import java.util.Optional;
-
-public class StateSetting extends SettingKey<Boolean> {
-  public StateSetting(String id, Boolean defaultValue) {
+/**
+ * A setting key which stores a string as a value.
+ */
+public class StringSettingKey extends SettingKey<String> {
+  public StringSettingKey(String id, String defaultValue) {
     super(id, defaultValue);
-  }
-
-  @Override
-  public JsonElement dataToJsonGenerified(Boolean value) {
-    return new JsonPrimitive(value ? "allow" : "deny");
-  }
-
-  @Override
-  public Boolean dataFromJsonGenerified(JsonElement jsonElement) {
-    final String s = jsonElement.getAsString();
-    return parse(s);
-  }
-
-  @Override
-  public Boolean parse(String s) throws ParseSettingException {
-    switch (s.toLowerCase()) {
-      case "allow":
-      case "true":
-        return true;
-      case "deny":
-      case "false":
-        return false;
-      default:
-        throw new ParseSettingException("Invalid state string. "
-            + "Should be allow or deny. Was: " + s);
-    }
-  }
-
-  @Override
-  public Optional<List<String>> getParsable() {
-    return Optional.of(Lists.newArrayList("allow", "deny"));
   }
 }

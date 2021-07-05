@@ -39,12 +39,15 @@ import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.args.GenericArguments;
 import org.spongepowered.api.text.Text;
 
+/**
+ * A command to unset a setting on a host.
+ */
 public class UnsetCommand extends LambdaCommandNode {
 
   UnsetCommand(CommandNode parent) {
     super(parent,
         Permissions.COMMAND_EDIT,
-        Text.of("Unset settings on a zone"),
+        Text.of("Unset settings on a host"),
         "unset");
     addCommandElements(
         GenericArguments.flags()

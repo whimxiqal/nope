@@ -25,59 +25,50 @@
 
 package com.minecraftonline.nope.setting;
 
-import com.google.gson.Gson;
+import com.google.common.collect.Lists;
 import com.google.gson.JsonElement;
-import java.util.Arrays;
+import com.google.gson.JsonPrimitive;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 /**
- * Setting to store an enum.
- *
- * @param <E> the enum type
+ * A setting to store a "state", which is essentially a boolean but
+ * is formatted as "allow" and "deny" instead of
+ * "true" and "false".
  */
-public class EnumSetting<E extends Enum<E>> extends SettingKey<E> {
-
-  private final Class<E> enumClass;
-
-  protected EnumSetting(String id, E defaultData, Class<E> enumClass) {
-    super(id, defaultData);
-    this.enumClass = enumClass;
+public class StateSettingKey extends SettingKey<Boolean> {
+  public StateSettingKey(String id, Boolean defaultValue) {
+    super(id, defaultValue);
   }
 
   @Override
-  protected JsonElement dataToJsonGenerified(E data) {
-    return new Gson().toJsonTree(data.name().toLowerCase());
+  public JsonElement dataToJsonGenerified(Boolean value) {
+    return new JsonPrimitive(value ? "allow" : "deny");
   }
 
   @Override
-  public E dataFromJsonGenerified(JsonElement json) {
-    return parse(json.getAsString());
+  public Boolean dataFromJsonGenerified(JsonElement jsonElement) {
+    final String s = jsonElement.getAsString();
+    return parse(s);
   }
 
   @Override
-  public E parse(String s) throws ParseSettingException {
-    try {
-      return Enum.valueOf(enumClass, s.toUpperCase());
-    } catch (IllegalArgumentException ex) {
-      throw new ParseSettingException(s + " is not a valid "
-          + enumClass.getSimpleName()
-          + " type. "
-          + (
-          (enumClass.getEnumConstants().length <= 8)
-              ? "Allowed types: "
-              + Arrays.stream(enumClass.getEnumConstants()).map(e ->
-              e.toString().toLowerCase()).collect(Collectors.joining(", "))
-              : ""));
+  public Boolean parse(String s) throws ParseSettingException {
+    switch (s.toLowerCase()) {
+      case "allow":
+      case "true":
+        return true;
+      case "deny":
+      case "false":
+        return false;
+      default:
+        throw new ParseSettingException("Invalid state string. "
+            + "Should be allow or deny. Was: " + s);
     }
   }
 
   @Override
   public Optional<List<String>> getParsable() {
-    return Optional.of(Arrays.stream(enumClass.getEnumConstants())
-        .map(E::toString)
-        .map(String::toLowerCase)
-        .collect(Collectors.toList()));
+    return Optional.of(Lists.newArrayList("allow", "deny"));
   }
 }

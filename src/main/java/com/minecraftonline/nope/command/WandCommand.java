@@ -72,6 +72,9 @@ import org.spongepowered.api.item.inventory.query.QueryOperationTypes;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 
+/**
+ * A command that retrieves a Nope wand for the purpose of selection Nope selections.
+ */
 public class WandCommand extends CommandNode {
 
   WandCommand(CommandNode parent) {

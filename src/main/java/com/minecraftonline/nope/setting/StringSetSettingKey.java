@@ -33,6 +33,9 @@ import java.util.Set;
 import javax.annotation.Nonnull;
 import org.spongepowered.api.text.Text;
 
+/**
+ * A setting key to store a set of strings.
+ */
 public class StringSetSettingKey extends SetSettingKey<String> {
 
   public StringSetSettingKey(String id, Set<String> defaultValue) {

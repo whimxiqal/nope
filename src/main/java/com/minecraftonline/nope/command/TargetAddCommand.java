@@ -55,7 +55,16 @@ import com.minecraftonline.nope.command.common.FunctionlessCommandNode;
 import com.minecraftonline.nope.permission.Permissions;
 import org.spongepowered.api.text.Text;
 
+/**
+ * A base command which allows the editing of targets on a setting.
+ */
 public class TargetAddCommand extends FunctionlessCommandNode {
+
+  /**
+   * Default constructor.
+   *
+   * @param parent the parent
+   */
   public TargetAddCommand(CommandNode parent) {
     super(parent,
         Permissions.COMMAND_EDIT,

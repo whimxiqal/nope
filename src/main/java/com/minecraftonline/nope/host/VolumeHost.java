@@ -27,6 +27,9 @@ package com.minecraftonline.nope.host;
 
 import com.minecraftonline.nope.structures.Volume;
 
+/**
+ * A {@link Host} that is also a {@link Volume}.
+ */
 public abstract class VolumeHost extends Host implements Volume {
 
   protected final int xmin;

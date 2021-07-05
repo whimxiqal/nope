@@ -19,6 +19,11 @@ import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.world.World;
 
+/**
+ * A {@link CommandElement} to identify a zone selection. The player may either
+ * specify the zone selection as a command argument or may make a selection
+ * with a zone wand.
+ */
 public class ZoneLocationSelectionCommandElement extends CommandElement {
   private final Vector3iCommandElement vector3i = new Vector3iCommandElement(Text.of("vector3i"));
 
@@ -56,7 +61,10 @@ public class ZoneLocationSelectionCommandElement extends CommandElement {
         }
         return selection;
       } else {
-        throw new ArgumentParseException(Format.error("You must provide co-ordinates if you are not a player!"), "", 0);
+        throw new ArgumentParseException(
+            Format.error("You must provide co-ordinates if you are not a player!"),
+            "",
+            0);
       }
     }
 
@@ -75,7 +83,10 @@ public class ZoneLocationSelectionCommandElement extends CommandElement {
     } else if (source instanceof Player) {
       world = ((Player) source).getWorld();
     } else {
-      throw new ArgumentParseException(Text.of("Could not infer world. Please provide it with -w worldname"), first, 0);
+      throw new ArgumentParseException(
+          Text.of("Could not infer world. Please provide it with \"-w <world name>\""),
+          first,
+          0);
     }
 
     Vector3i min = vector3i.parseValue(source, args);

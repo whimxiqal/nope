@@ -26,6 +26,7 @@
 package com.minecraftonline.nope.arguments;
 
 import com.minecraftonline.nope.setting.SettingMap;
+import com.minecraftonline.nope.setting.Template;
 import com.minecraftonline.nope.setting.Templates;
 import java.util.List;
 import java.util.function.Predicate;
@@ -40,6 +41,10 @@ import org.spongepowered.api.command.args.CommandElement;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.util.StartsWithPredicate;
 
+/**
+ * A command element to identify a {@link Template}
+ * from an argument.
+ */
 public class TemplateCommandElement extends CommandElement {
   public TemplateCommandElement(@Nullable Text key) {
     super(key);

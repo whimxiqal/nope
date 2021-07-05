@@ -33,6 +33,7 @@ import java.util.Map;
 import java.util.UUID;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import org.jetbrains.annotations.NotNull;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
@@ -120,10 +121,10 @@ public interface HostTree {
    *                                  as an overlapping zone
    */
   @Nullable
-  VolumeHost addZone(final String name,
-                     final UUID worldUuid,
-                     final Vector3i pos1,
-                     final Vector3i pos2,
+  VolumeHost addZone(@NotNull final String name,
+                     @NotNull final UUID worldUuid,
+                     @NotNull final Vector3i pos1,
+                     @NotNull final Vector3i pos2,
                      int priority)
       throws IllegalArgumentException;
 

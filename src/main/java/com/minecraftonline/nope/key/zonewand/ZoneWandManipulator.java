@@ -36,7 +36,11 @@ import org.spongepowered.api.data.merge.MergeFunction;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.data.value.mutable.Value;
 
-public class ZoneWandManipulator extends AbstractBooleanData<ZoneWandManipulator, ImmutableZoneWandManipulator> {
+/**
+ * The zone wand manipulator to help identify a zone wand as a wand.
+ */
+public class ZoneWandManipulator
+    extends AbstractBooleanData<ZoneWandManipulator, ImmutableZoneWandManipulator> {
   public static final DataQuery QUERY = DataQuery.of("nopezonewand");
 
   public ZoneWandManipulator(boolean value) {
@@ -72,7 +76,11 @@ public class ZoneWandManipulator extends AbstractBooleanData<ZoneWandManipulator
     return 0;
   }
 
-  public static class Builder implements DataManipulatorBuilder<ZoneWandManipulator, ImmutableZoneWandManipulator> {
+  /**
+   * Building class for the {@link ZoneWandManipulator}.
+   */
+  public static class Builder
+      implements DataManipulatorBuilder<ZoneWandManipulator, ImmutableZoneWandManipulator> {
 
     @Override
     public ZoneWandManipulator create() {

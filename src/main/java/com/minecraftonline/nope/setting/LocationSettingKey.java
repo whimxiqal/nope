@@ -37,9 +37,9 @@ import org.spongepowered.api.world.World;
 /**
  * A setting to store a {@link Location} as a value.
  */
-public final class LocationSetting extends SettingKey<Location<World>> {
+public final class LocationSettingKey extends SettingKey<Location<World>> {
 
-  public LocationSetting(String id, Location<World> location) {
+  public LocationSettingKey(String id, Location<World> location) {
     super(id, location);
   }
 

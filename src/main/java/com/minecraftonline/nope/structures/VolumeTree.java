@@ -28,7 +28,12 @@ package com.minecraftonline.nope.structures;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import java.util.*;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 import lombok.Data;
@@ -178,7 +183,7 @@ public class VolumeTree<S, T extends Volume> implements VolumeMap<S, T> {
 
         left = construct(Dimension.Z, Comparison.MIN, leftKeys, 0);
         right = construct(Dimension.Z, Comparison.MIN, rightKeys, changed ? 0 : unchangedCount + 1);
-        return new DimensionDividerXMin(divider, left, right);
+        return new DimensionDividerMinX(divider, left, right);
       } else {  // comparison == Comparison.MAX
 
         /* X MAX */
@@ -197,7 +202,7 @@ public class VolumeTree<S, T extends Volume> implements VolumeMap<S, T> {
 
         left = construct(Dimension.Z, Comparison.MAX, leftKeys, changed ? 0 : unchangedCount + 1);
         right = construct(Dimension.Z, Comparison.MAX, rightKeys, 0);
-        return new DimensionDividerXMax(divider, left, right);
+        return new DimensionDividerMaxX(divider, left, right);
       }
     } else {  // dimension == Dimension.Z
       if (comparison == Comparison.MIN) {
@@ -218,7 +223,7 @@ public class VolumeTree<S, T extends Volume> implements VolumeMap<S, T> {
 
         left = construct(Dimension.X, Comparison.MAX, leftKeys, 0);
         right = construct(Dimension.X, Comparison.MAX, rightKeys, changed ? 0 : unchangedCount + 1);
-        return new DimensionDividerZMin(divider, left, right);
+        return new DimensionDividerMinZ(divider, left, right);
       } else {
 
         /* Z MAX */
@@ -237,7 +242,7 @@ public class VolumeTree<S, T extends Volume> implements VolumeMap<S, T> {
 
         left = construct(Dimension.X, Comparison.MIN, leftKeys, changed ? 0 : unchangedCount + 1);
         right = construct(Dimension.X, Comparison.MIN, rightKeys, 0);
-        return new DimensionDividerZMax(divider, left, right);
+        return new DimensionDividerMaxZ(divider, left, right);
       }
     }
 
@@ -330,10 +335,17 @@ public class VolumeTree<S, T extends Volume> implements VolumeMap<S, T> {
     MIN, MAX
   }
 
+  /**
+   * A node in the volume tree. It returns volumes that contain the given
+   * coordinates.
+   */
   protected abstract class Node {
     abstract Set<S> findVolumes(int x, int y, int z);
   }
 
+  /**
+   * A node that reports 0 volumes.
+   */
   protected class EmptyNode extends Node {
     @Override
     Set<S> findVolumes(int x, int y, int z) {
@@ -341,6 +353,10 @@ public class VolumeTree<S, T extends Volume> implements VolumeMap<S, T> {
     }
   }
 
+  /**
+   * A node which represents a division across a dimension
+   * at some dividing integer value.
+   */
   @EqualsAndHashCode(callSuper = false)
   @Data
   protected abstract class DimensionDivider extends Node {
@@ -349,8 +365,12 @@ public class VolumeTree<S, T extends Volume> implements VolumeMap<S, T> {
     protected final Node right;
   }
 
-  protected class DimensionDividerXMin extends DimensionDivider {
-    public DimensionDividerXMin(int divider, Node left, Node right) {
+  /**
+   * A dividing node which represents a division for
+   * the minimum x value of {@link Volume}s.
+   */
+  protected class DimensionDividerMinX extends DimensionDivider {
+    public DimensionDividerMinX(int divider, Node left, Node right) {
       super(divider, left, right);
     }
 
@@ -364,8 +384,12 @@ public class VolumeTree<S, T extends Volume> implements VolumeMap<S, T> {
     }
   }
 
-  protected class DimensionDividerXMax extends DimensionDivider {
-    public DimensionDividerXMax(int divider, Node left, Node right) {
+  /**
+   * A dividing node which represents a division for
+   * the maximum x value of {@link Volume}s.
+   */
+  protected class DimensionDividerMaxX extends DimensionDivider {
+    public DimensionDividerMaxX(int divider, Node left, Node right) {
       super(divider, left, right);
     }
 
@@ -379,8 +403,12 @@ public class VolumeTree<S, T extends Volume> implements VolumeMap<S, T> {
     }
   }
 
-  protected class DimensionDividerZMin extends DimensionDivider {
-    public DimensionDividerZMin(int divider, Node left, Node right) {
+  /**
+   * A dividing node which represents a division for
+   * the minimum z value of {@link Volume}s.
+   */
+  protected class DimensionDividerMinZ extends DimensionDivider {
+    public DimensionDividerMinZ(int divider, Node left, Node right) {
       super(divider, left, right);
     }
 
@@ -394,8 +422,12 @@ public class VolumeTree<S, T extends Volume> implements VolumeMap<S, T> {
     }
   }
 
-  protected class DimensionDividerZMax extends DimensionDivider {
-    public DimensionDividerZMax(int divider, Node left, Node right) {
+  /**
+   * A dividing node which represents a division for
+   * the maximum z value of {@link Volume}s.
+   */
+  protected class DimensionDividerMaxZ extends DimensionDivider {
+    public DimensionDividerMaxZ(int divider, Node left, Node right) {
       super(divider, left, right);
     }
 
@@ -409,6 +441,12 @@ public class VolumeTree<S, T extends Volume> implements VolumeMap<S, T> {
     }
   }
 
+
+  /**
+   * A "leaf" of a tree which essentially just iterates through a set
+   * of "viable" volumes and gives all volumes which do actually
+   * contain the coordinates.
+   */
   protected class ViabilityLeaf extends Node {
 
     final Set<S> viable = Sets.newHashSet();

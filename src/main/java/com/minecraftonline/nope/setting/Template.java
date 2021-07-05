@@ -25,17 +25,26 @@
 
 package com.minecraftonline.nope.setting;
 
-import java.util.Map;
+import com.minecraftonline.nope.command.ApplyCommand;
 import java.util.function.Supplier;
 import lombok.Getter;
+import org.jetbrains.annotations.NotNull;
 
-public class Template implements Map.Entry<String, SettingMap> {
+/**
+ * A "template" which stores a {@link SettingMap} to represent
+ * a collection of settings that may be applied to a host
+ * to achieve some common desired behavior.
+ * Templates are applied with the {@link ApplyCommand}.
+ * There is currently no way for templates to be created dynamically in game;
+ * all templates are hard-coded.
+ */
+public class Template {
 
   @Getter
-  private String name;
+  private final String name;
   private Supplier<SettingMap> supplier;
 
-  public Template(String name, Supplier<SettingMap> supplier) {
+  public Template(@NotNull String name, @NotNull Supplier<SettingMap> supplier) {
     this.name = name;
     this.supplier = supplier;
   }
@@ -45,17 +54,16 @@ public class Template implements Map.Entry<String, SettingMap> {
     return this.name.hashCode();
   }
 
-  @Override
-  public String getKey() {
-    return this.name;
-  }
-
-  @Override
   public SettingMap getValue() {
     return this.supplier.get();
   }
 
-  @Override
+  /**
+   * Default setter.
+   *
+   * @param value the value
+   * @return the previous setting map
+   */
   public SettingMap setValue(SettingMap value) {
     SettingMap prev = this.supplier.get();
     this.supplier = () -> value;

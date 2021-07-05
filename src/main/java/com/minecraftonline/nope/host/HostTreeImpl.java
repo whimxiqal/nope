@@ -59,6 +59,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import lombok.AccessLevel;
 import lombok.Getter;
+import org.jetbrains.annotations.NotNull;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.world.Location;
@@ -262,10 +263,10 @@ public final class HostTreeImpl implements HostTree {
 
   @Nullable
   @Override
-  public Zone addZone(final String name,
-                      final UUID worldUuid,
-                      final Vector3i pos1,
-                      final Vector3i pos2,
+  public Zone addZone(@NotNull final String name,
+                      @NotNull final UUID worldUuid,
+                      @NotNull final Vector3i pos1,
+                      @NotNull final Vector3i pos2,
                       int priority) {
     if (getHosts().size() >= Nope.MAX_HOST_COUNT) {
       return null;  // Too many

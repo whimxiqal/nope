@@ -14,6 +14,9 @@ import org.spongepowered.api.command.args.CommandContext;
 import org.spongepowered.api.command.args.CommandElement;
 import org.spongepowered.api.text.Text;
 
+/**
+ * A command element that identifies a {@link Vector3i} in a command argument.
+ */
 public class Vector3iCommandElement extends CommandElement {
   protected Vector3iCommandElement(@Nullable Text key) {
     super(key);

@@ -102,7 +102,13 @@ public class CreateCommand extends LambdaCommandNode {
               .map(host -> host.getPriority() + 1).orElse(0));
 
       try {
-        assert selection.getWorld() != null;
+        if (selection.getWorld() == null
+            || selection.getMin() == null
+            || selection.getMax() == null) {
+          // This shouldn't happen
+          src.sendMessage(Format.error("Selection is malformed"));
+          return CommandResult.empty();
+        }
         VolumeHost zone = Nope.getInstance().getHostTree().addZone(
             name,
             selection.getWorld().getUniqueId(),

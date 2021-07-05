@@ -38,10 +38,10 @@ import org.spongepowered.api.Sponge;
  *
  * @param <C> catalog type
  */
-public class CatalogTypeSetting<C extends CatalogType> extends SettingKey<String> {
+public class CatalogTypeSettingKey<C extends CatalogType> extends SettingKey<String> {
   private final Class<C> clazz;
 
-  public CatalogTypeSetting(String id, C defaultData, Class<C> clazz) {
+  public CatalogTypeSettingKey(String id, C defaultData, Class<C> clazz) {
     super(id, defaultData.getId());
     this.clazz = clazz;
   }
