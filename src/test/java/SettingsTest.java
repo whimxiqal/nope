@@ -22,12 +22,17 @@
  * SOFTWARE.
  */
 
+import com.minecraftonline.nope.setting.Setting;
+import com.minecraftonline.nope.setting.SettingKey;
 import com.minecraftonline.nope.setting.SettingLibrary;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-
-import static org.junit.jupiter.api.Assertions.fail;
-
+/**
+ * Method for testing the {@link SettingKey}s in the
+ * {@link SettingLibrary} and make sure {@link Setting}s
+ * work correctly.
+ */
 public class SettingsTest {
   /**
    * Check that the settings are unique, no registration for the same id.
@@ -37,7 +42,7 @@ public class SettingsTest {
     try {
       SettingLibrary.initialize();
     } catch (IllegalStateException e) {
-      fail(e.getMessage());
+      Assertions.fail(e.getMessage());
     }
   }
 }
