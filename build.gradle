@@ -40,7 +40,7 @@ group = 'com.minecraftonline'
 version = '0.4.2'
 description = "A volume protection plugin"
 
-ext.spongeVersion = '8.0.0'
+ext.spongeVersion = '7.3.0'
 
 sponge.plugin.meta {
     authors = ['PietElite', 'tyhdefu', '14mRh4X0r']
