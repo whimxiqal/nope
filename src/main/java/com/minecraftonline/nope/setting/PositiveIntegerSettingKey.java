@@ -25,38 +25,36 @@
 
 package com.minecraftonline.nope.setting;
 
-import com.google.common.collect.Lists;
-import org.spongepowered.api.CatalogType;
-import org.spongepowered.api.Sponge;
+import com.google.gson.JsonElement;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
-public class CatalogTypeSetting<C extends CatalogType> extends SettingKey<String> {
-  private final Class<C> clazz;
-
-  public CatalogTypeSetting(String id, C defaultData, Class<C> clazz) {
-    super(id, defaultData.getId());
-    this.clazz = clazz;
+/**
+ * A setting that stores a positive integer as a value.
+ */
+public class PositiveIntegerSettingKey extends SettingKey<Integer> {
+  public PositiveIntegerSettingKey(String id, Integer defaultValue) {
+    super(id, defaultValue);
   }
 
   @Override
-  public String parse(String id) throws ParseSettingException {
-    Sponge.getRegistry().getType(this.clazz, id).orElseThrow(() ->
-        new ParseSettingException("The given id "
-            + id
-            + " id not a valid "
-            + this.clazz.getSimpleName()));
-    return id;
+  public Integer dataFromJsonGenerified(JsonElement json) throws ParseSettingException {
+    int integer = json.getAsInt();
+    if (integer < 0) {
+      throw new ParseSettingException("Data must be a positive integer");
+    }
+    return integer;
   }
 
   @Override
-  public Optional<List<String>> getParsable() {
-    return Optional.of(Lists.newArrayList(Sponge.getRegistry()
-        .getAllOf(this.clazz)
-        .stream()
-        .map(CatalogType::getName)
-        .collect(Collectors.toList())));
+  public Integer parse(String data) throws ParseSettingException {
+    int integer;
+    try {
+      integer = Integer.parseInt(data);
+    } catch (NumberFormatException e) {
+      throw new ParseSettingException("Data must be an integer");
+    }
+    if (integer < 0) {
+      throw new ParseSettingException("Data must be a positive integer");
+    }
+    return integer;
   }
 }

@@ -32,12 +32,12 @@ import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.minecraftonline.nope.Nope;
+import com.minecraftonline.nope.setting.Setting;
 import com.minecraftonline.nope.setting.SettingKey;
 import com.minecraftonline.nope.setting.SettingLibrary;
 import com.minecraftonline.nope.setting.SettingValue;
 import com.minecraftonline.nope.structures.FlexibleHashQueueVolumeTree;
 import com.minecraftonline.nope.structures.VolumeTree;
-
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Comparator;
@@ -58,9 +58,9 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-
 import lombok.AccessLevel;
 import lombok.Getter;
+import org.jetbrains.annotations.NotNull;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.world.Location;
@@ -110,16 +110,22 @@ public final class HostTreeImpl implements HostTree {
   public Host isRedundant(Host host, SettingKey<?> key) {
     // Check if this host even has a setting
     Optional<? extends SettingValue<?>> value = host.get(key);
-    if (!value.isPresent()) return null;
+    if (!value.isPresent()) {
+      return null;
+    }
     List<Host> containers = new LinkedList<>(getContainingHosts(host));
     containers.sort(Comparator.comparingInt(h -> -h.getPriority()));  // Sort maximum first
     for (Host container : containers) {
       // Continue if this container doesn't have priority over the desired host
-      if (container.getPriority() > host.getPriority()) continue;
+      if (container.getPriority() > host.getPriority()) {
+        continue;
+      }
 
       Optional<? extends SettingValue<?>> containerValue = container.get(key);
       // Continue if the value is not found on this host
-      if (!containerValue.isPresent()) continue;
+      if (!containerValue.isPresent()) {
+        continue;
+      }
 
       // If the value is the same, then its redundant. Otherwise, not redundant
       if (value.get().equals(containerValue.get())) {
@@ -131,51 +137,15 @@ public final class HostTreeImpl implements HostTree {
 
     // We're out of containers, so check if the default value is this one
     if (key.getDefaultData().equals(value.get().getData())) {
-      return host;  // Return the original host to signify that the default value makes this redundant
+      // Return the original host to signify that the default value makes this redundant
+      return host;
     } else {
       return null;
     }
   }
 
-  @Nonnull
-  public Collection<Host> getContainingHosts(Host host) {
-    Set<Host> containers = new HashSet<>();
-    if (host instanceof GlobalHost) {
-      return containers;  // Not contained by anything
-    }
-    if (host instanceof WorldHost) {
-      containers.add(globalHost);  // Only contained by global
-      return containers;
-    }
-    if (!(host instanceof Zone)) {
-      throw new IllegalArgumentException("The given host must be a GlobalHost, WorldHost, or Zone");
-    }
-    Zone zone = (Zone) host;
-
-    // Calculate all zones that encapsulate this one
-    assert zone.getWorldUuid() != null;
-    containers.addAll(getContainingHosts(new Location<>(Sponge.getServer()
-        .getWorld(zone.getWorldUuid())
-        .orElseThrow(() -> new RuntimeException("Could not find world")),
-        zone.getMinX(),
-        zone.getMinY(),
-        zone.getMinZ())));
-    containers.remove(zone);  // Don't keep the one that we're looking with
-    containers.retainAll(getContainingHosts(new Location<>(Sponge.getServer()
-        .getWorld(zone.getWorldUuid())
-        .orElseThrow(() -> new RuntimeException("Could not find world")),
-        zone.getMaxX(),
-        zone.getMaxY(),
-        zone.getMaxZ())));
-
-    // Add global and world hosts
-    containers.add(globalHost);
-    containers.add(zone.getParent());
-    return containers;
-  }
-
   @Override
-  public void load(String location) {
+  public void load(String location) throws IOException {
 
     // Setup worlds
     Sponge.getServer()
@@ -194,7 +164,7 @@ public final class HostTreeImpl implements HostTree {
         this.globalHost = savedGlobalHost;
       }
     } catch (IOException e) {
-      Nope.getInstance().getLogger().error("Nope's GlobalHost could not be read.", e);
+      throw new IOException("Nope's GlobalHost could not be read.", e);
     }
 
     // Read WorldHosts
@@ -202,39 +172,39 @@ public final class HostTreeImpl implements HostTree {
       storage.readWorldHosts(location, new WorldHostSerializer()).forEach(worldHost ->
           worldHosts.put(worldHost.getWorldUuid(), worldHost));
     } catch (IOException e) {
-      Nope.getInstance().getLogger().error("Nope's WorldHosts could not be read.", e);
+      throw new IOException("Nope's WorldHosts could not be read.", e);
     }
 
     // Read Zones
     try {
       storage.readZones(location, worldHosts.values(), new ZoneSerializer()).forEach(this::addZone);
     } catch (IOException e) {
-      Nope.getInstance().getLogger().error("Nope's Zones could not be read.", e);
+      throw new IOException("Nope's Zones could not be read.", e);
     }
 
   }
 
   @Override
-  public void save(String location) {
+  public void save(String location) throws IOException {
     try {
       storage.writeGlobalHost(location, globalHost, new GlobalHostSerializer());
     } catch (IOException e) {
-      Nope.getInstance().getLogger().error("Nope's GlobalHost could not be written.", e);
+      throw new IOException("Nope's GlobalHost could not be written.", e);
     }
 
     try {
       storage.writeWorldHosts(location, worldHosts.values(), new WorldHostSerializer());
     } catch (IOException e) {
-      Nope.getInstance().getLogger().error("Nope's WorldHosts could not be written.", e);
+      throw new IOException("Nope's WorldHosts could not be written.", e);
     }
 
-    worldHosts.values().forEach(worldHost -> {
+    for (WorldHost worldHost : worldHosts.values()) {
       try {
         storage.writeZones(location, worldHost.getZoneTree().volumes(), new ZoneSerializer());
       } catch (IOException e) {
-        Nope.getInstance().getLogger().error("Nope's Zones could not be written.", e);
+        throw new IOException("Nope's Zones could not be written.", e);
       }
-    });
+    }
   }
 
   private WorldHost newWorldHost(UUID worldUuid) {
@@ -243,7 +213,7 @@ public final class HostTreeImpl implements HostTree {
         .map(prop -> worldNameConverter.apply(prop.getWorldName()))
         .orElseThrow(() -> new RuntimeException(String.format(
             "The worldUuid %s does not correspond to a Sponge world)",
-            worldUuid.toString()))),
+            worldUuid))),
         worldUuid);
   }
 
@@ -294,10 +264,10 @@ public final class HostTreeImpl implements HostTree {
 
   @Nullable
   @Override
-  public Zone addZone(final String name,
-                      final UUID worldUuid,
-                      final Vector3i pos1,
-                      final Vector3i pos2,
+  public Zone addZone(@NotNull final String name,
+                      @NotNull final UUID worldUuid,
+                      @NotNull final Vector3i pos1,
+                      @NotNull final Vector3i pos2,
                       int priority) {
     if (getHosts().size() >= Nope.MAX_HOST_COUNT) {
       return null;  // Too many
@@ -386,6 +356,49 @@ public final class HostTreeImpl implements HostTree {
     return list;
   }
 
+  /**
+   * Get all hosts which completely contain the given host.
+   *
+   * @param host the contained host
+   * @return all containing hosts
+   */
+  @Nonnull
+  public Collection<Host> getContainingHosts(Host host) {
+    Set<Host> containers = new HashSet<>();
+    if (host instanceof GlobalHost) {
+      return containers;  // Not contained by anything
+    }
+    if (host instanceof WorldHost) {
+      containers.add(globalHost);  // Only contained by global
+      return containers;
+    }
+    if (!(host instanceof Zone)) {
+      throw new IllegalArgumentException("The given host must be a GlobalHost, WorldHost, or Zone");
+    }
+    Zone zone = (Zone) host;
+
+    // Calculate all zones that encapsulate this one
+    assert zone.getWorldUuid() != null;
+    containers.addAll(getContainingHosts(new Location<>(Sponge.getServer()
+        .getWorld(zone.getWorldUuid())
+        .orElseThrow(() -> new RuntimeException("Could not find world")),
+        zone.getMinX(),
+        zone.getMinY(),
+        zone.getMinZ())));
+    containers.remove(zone);  // Don't keep the one that we're looking with
+    containers.retainAll(getContainingHosts(new Location<>(Sponge.getServer()
+        .getWorld(zone.getWorldUuid())
+        .orElseThrow(() -> new RuntimeException("Could not find world")),
+        zone.getMaxX(),
+        zone.getMaxY(),
+        zone.getMaxZ())));
+
+    // Add global and world hosts
+    containers.add(globalHost);
+    containers.add(zone.getParent());
+    return containers;
+  }
+
   @Override
   public boolean isAssigned(SettingKey<?> key) {
     return getHosts().values().stream().anyMatch(host -> host.get(key).isPresent());
@@ -412,7 +425,9 @@ public final class HostTreeImpl implements HostTree {
 
   @Nullable
   @Override
-  public Host lookupDictator(@Nonnull SettingKey<?> key, @Nullable User user, @Nonnull Location<World> location) {
+  public Host lookupDictator(@Nonnull SettingKey<?> key,
+                             @Nullable User user,
+                             @Nonnull Location<World> location) {
     /* Collect all hosts */
     LinkedList<Host> hosts = new LinkedList<>();
 
@@ -470,7 +485,9 @@ public final class HostTreeImpl implements HostTree {
 
   @Nullable
   @Override
-  public Host lookupDictatorAnonymous(@Nonnull SettingKey<?> key, @Nullable User user, @Nonnull Location<World> location) {
+  public Host lookupDictatorAnonymous(@Nonnull SettingKey<?> key,
+                                      @Nullable User user,
+                                      @Nonnull Location<World> location) {
     return lookupDictator(key, null, location);
   }
 
@@ -484,7 +501,7 @@ public final class HostTreeImpl implements HostTree {
      *
      * @param location   the location of the data
      * @param serializer the serializer which holds the logic for serialization
-     * @return the GLobalHost, or null if it does not exist in storage
+     * @return the GlobalHost, or null if it does not exist in storage
      * @throws IOException        if there is an error connecting to the storage
      * @throws HostParseException if there was an error parsing an existing stored GlobalHost
      */
@@ -558,6 +575,9 @@ public final class HostTreeImpl implements HostTree {
                     Host.HostSerializer<Zone> serializer)
         throws IOException, HostParseException;
 
+    /**
+     * An exception class to throw when an error in parsing from storage occurs.
+     */
     class HostParseException extends RuntimeException {
       public HostParseException(Throwable t) {
         super(t);
@@ -595,6 +615,9 @@ public final class HostTreeImpl implements HostTree {
     }
   }
 
+  /**
+   * A serializer for {@link GlobalHost}s.
+   */
   public class GlobalHostSerializer implements Host.HostSerializer<GlobalHost> {
 
     @Override
@@ -630,7 +653,8 @@ public final class HostTreeImpl implements HostTree {
       } else if (cacheSize == 0) {
         this.zoneTree = new VolumeTree<>();
       } else {
-        FlexibleHashQueueVolumeTree<String, Zone> flexVolumeTree = new FlexibleHashQueueVolumeTree<>(cacheSize);
+        FlexibleHashQueueVolumeTree<String, Zone> flexVolumeTree =
+            new FlexibleHashQueueVolumeTree<>(cacheSize);
         Sponge.getScheduler().createTaskBuilder().async()
             .interval(1, TimeUnit.SECONDS)
             .execute(flexVolumeTree::trim)
@@ -654,6 +678,9 @@ public final class HostTreeImpl implements HostTree {
 
   }
 
+  /**
+   * A serializer for {@link WorldHost}s.
+   */
   public class WorldHostSerializer implements Host.HostSerializer<WorldHost> {
 
     @Override
@@ -690,12 +717,11 @@ public final class HostTreeImpl implements HostTree {
   /**
    * An object representing a three dimensional Nope Zone in a Minecraft world.
    * The Zone stores data about its location and extent in three dimensional
-   * space and it stores com.minecraftonline.nope.setting.Setting data for handling
+   * space and it stores {@link Setting} data for handling
    * and manipulating Sponge events based in its specific configuration.
    */
   public class Zone extends VolumeHost {
 
-    @Getter
     private final UUID worldUuid;
 
     /**
@@ -754,6 +780,12 @@ public final class HostTreeImpl implements HostTree {
           && spongeLocation.getExtent().getUniqueId().equals(getWorldUuid());
     }
 
+    @Nullable
+    @Override
+    public UUID getWorldUuid() {
+      return this.worldUuid;
+    }
+
     @Override
     public void setPriority(int priority) throws IllegalArgumentException {
       if (priority < 0) {
@@ -766,6 +798,9 @@ public final class HostTreeImpl implements HostTree {
     }
   }
 
+  /**
+   * A serializing class for {@link Zone}.
+   */
   public class ZoneSerializer implements Host.HostSerializer<Zone> {
 
     @Override

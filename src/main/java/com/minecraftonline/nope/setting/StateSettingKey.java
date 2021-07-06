@@ -25,33 +25,50 @@
 
 package com.minecraftonline.nope.setting;
 
+import com.google.common.collect.Lists;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonPrimitive;
+import java.util.List;
+import java.util.Optional;
 
-public class PositiveIntegerSetting extends SettingKey<Integer> {
-  public PositiveIntegerSetting(String id, Integer defaultValue) {
+/**
+ * A setting to store a "state", which is essentially a boolean but
+ * is formatted as "allow" and "deny" instead of
+ * "true" and "false".
+ */
+public class StateSettingKey extends SettingKey<Boolean> {
+  public StateSettingKey(String id, Boolean defaultValue) {
     super(id, defaultValue);
   }
 
   @Override
-  public Integer dataFromJsonGenerified(JsonElement json) throws ParseSettingException {
-    int integer = json.getAsInt();
-    if (integer < 0) {
-      throw new ParseSettingException("Data must be a positive integer");
-    }
-    return integer;
+  public JsonElement dataToJsonGenerified(Boolean value) {
+    return new JsonPrimitive(value ? "allow" : "deny");
   }
 
   @Override
-  public Integer parse(String data) throws ParseSettingException {
-    int integer;
-    try {
-      integer = Integer.parseInt(data);
-    } catch (NumberFormatException e) {
-      throw new ParseSettingException("Data must be an integer");
+  public Boolean dataFromJsonGenerified(JsonElement jsonElement) {
+    final String s = jsonElement.getAsString();
+    return parse(s);
+  }
+
+  @Override
+  public Boolean parse(String s) throws ParseSettingException {
+    switch (s.toLowerCase()) {
+      case "allow":
+      case "true":
+        return true;
+      case "deny":
+      case "false":
+        return false;
+      default:
+        throw new ParseSettingException("Invalid state string. "
+            + "Should be allow or deny. Was: " + s);
     }
-    if (integer < 0) {
-      throw new ParseSettingException("Data must be a positive integer");
-    }
-    return integer;
+  }
+
+  @Override
+  public Optional<List<String>> getParsable() {
+    return Optional.of(Lists.newArrayList("allow", "deny"));
   }
 }

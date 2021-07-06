@@ -80,6 +80,11 @@ import com.minecraftonline.nope.permission.Permissions;
 import com.minecraftonline.nope.setting.SettingLibrary;
 import com.minecraftonline.nope.setting.SettingValue;
 import com.minecraftonline.nope.util.Format;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+import javax.annotation.Nullable;
+import lombok.Getter;
 import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
@@ -96,11 +101,9 @@ import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 
-import javax.annotation.Nullable;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
-
+/**
+ * A handler for players using the zone wand.
+ */
 public class ZoneWandHandler {
   private final Map<UUID, Selection> selectionMap = new HashMap<>();
 
@@ -108,8 +111,13 @@ public class ZoneWandHandler {
     return selectionMap;
   }
 
+  /**
+   * Event handler for interacting with blocks.
+   *
+   * @param event the event
+   */
   @Listener(order = Order.FIRST)
-  public void InteractBlockEvent(InteractBlockEvent event) {
+  public void interactBlockEvent(InteractBlockEvent event) {
     if (handleEvent(event, event.getTargetBlock())) {
       event.setCancelled(true);
     }
@@ -166,7 +174,11 @@ public class ZoneWandHandler {
         .orElse(false);
   }
 
+  /**
+   * A prismatic Nope-specific selection.
+   */
   public static class Selection {
+    @Getter
     @Nullable
     private World world = null;
     @Nullable
@@ -177,12 +189,27 @@ public class ZoneWandHandler {
     public Selection() {
     }
 
-    public Selection(World world, Vector3i pos1, Vector3i pos2) {
+    /**
+     * Default constructor.
+     *
+     * @param world the world of the selection
+     * @param pos1 the position of the first corner
+     * @param pos2 the position of the second corner
+     */
+    public Selection(@Nullable World world,
+                     @Nullable Vector3i pos1,
+                     @Nullable Vector3i pos2) {
       this.world = world;
       this.pos1 = pos1;
       this.pos2 = pos2;
     }
 
+    /**
+     * Sets the first position of the selection.
+     *
+     * @param location the location for the position
+     * @param src the source requesting to set the position
+     */
     public void setPos1(Location<World> location, CommandSource src) {
       if (this.world != null && !this.world.equals(location.getExtent())) {
         this.pos2 = null;
@@ -196,6 +223,12 @@ public class ZoneWandHandler {
       }
     }
 
+    /**
+     * Sets the second position of the selection.
+     *
+     * @param location the location for the position
+     * @param src the source requesting to set the position
+     */
     public void setPos2(Location<World> location, CommandSource src) {
       if (this.world != null && !this.world.equals(location.getExtent())) {
         this.pos1 = null;
@@ -214,16 +247,29 @@ public class ZoneWandHandler {
           && this.pos2 != null;
     }
 
+    /**
+     * Get the minimum coordinate set.
+     *
+     * @return the coordinates
+     */
+    @Nullable
     public Vector3i getMin() {
-      return pos1.min(pos2);
+      return pos1 == null
+          ? (pos2 == null ? null : pos2)
+          : (pos2 == null ? pos1 : pos1.min(pos2));
     }
 
+    /**
+     * Get the maximum coordinate set.
+     *
+     * @return the coordinates
+     */
+    @Nullable
     public Vector3i getMax() {
-      return pos1.max(pos2);
+      return pos1 == null
+          ? (pos2 == null ? null : pos2)
+          : (pos2 == null ? pos1 : pos1.max(pos2));
     }
 
-    public World getWorld() {
-      return world;
-    }
   }
 }

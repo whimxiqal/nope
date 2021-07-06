@@ -26,14 +26,17 @@ package com.minecraftonline.nope.command.common;
 
 import com.minecraftonline.nope.permission.Permission;
 import com.minecraftonline.nope.util.Format;
-import org.spongepowered.api.command.CommandException;
+import javax.annotation.Nonnull;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.args.CommandContext;
 import org.spongepowered.api.text.Text;
 
-import javax.annotation.Nonnull;
-
+/**
+ * A type of command node to have no function when used.
+ * Instead, if no subcommand or subcommand given, it
+ * just says that there were insufficient arguments.
+ */
 public abstract class FunctionlessCommandNode extends CommandNode {
 
   public FunctionlessCommandNode(CommandNode parent,
@@ -44,17 +47,9 @@ public abstract class FunctionlessCommandNode extends CommandNode {
     super(parent, permission, description, primaryAlias, otherAliases);
   }
 
-  public FunctionlessCommandNode(CommandNode parent,
-                                 Permission permission,
-                                 @Nonnull Text description,
-                                 @Nonnull String primaryAlias,
-                                 boolean addHelp) {
-    super(parent, permission, description, primaryAlias, addHelp);
-  }
-
   @Nonnull
   @Override
-  public final CommandResult execute(CommandSource src, @Nonnull CommandContext args) throws CommandException {
+  public final CommandResult execute(CommandSource src, @Nonnull CommandContext args) {
     src.sendMessage(Format.error("Too few arguments!"));
     return CommandResult.empty();
   }

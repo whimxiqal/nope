@@ -30,11 +30,14 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.minecraftonline.nope.Nope;
 import com.minecraftonline.nope.util.Format;
+import javax.annotation.Nonnull;
 import org.spongepowered.api.text.Text;
 
-import javax.annotation.Nonnull;
-
+/**
+ * A setting key that stores a {@link Vector3d} as a value.
+ */
 public class Vector3dSetting extends SettingKey<Vector3d> {
+
   public Vector3dSetting(String id, Vector3d defaultValue) {
     super(id, defaultValue);
   }

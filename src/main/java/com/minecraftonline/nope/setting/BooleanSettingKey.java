@@ -25,42 +25,34 @@
 
 package com.minecraftonline.nope.setting;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonPrimitive;
-import com.minecraftonline.nope.util.NopeTypeTokens;
-import org.spongepowered.api.text.Text;
+import com.google.common.collect.Lists;
+import java.util.List;
+import java.util.Optional;
 
-import javax.annotation.Nonnull;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-public class StringSetSetting extends SetSetting<String> {
-
-  public StringSetSetting(String id, Set<String> defaultValue) {
+/**
+ * A setting storing a boolean value.
+ */
+public class BooleanSettingKey extends SettingKey<Boolean> {
+  public BooleanSettingKey(String id, Boolean defaultValue) {
     super(id, defaultValue);
   }
 
   @Override
-  public JsonElement elementToJsonGenerified(String value) {
-    return new JsonPrimitive(value);
+  public Boolean parse(String data) throws ParseSettingException {
+    switch (data.toLowerCase()) {
+      case "true":
+      case "t":
+        return true;
+      case "false":
+      case "f":
+        return false;
+      default:
+        throw new ParseSettingException("Allowed values: t, true, f, false");
+    }
   }
 
   @Override
-  public String elementFromJsonGenerified(JsonElement jsonElement) {
-    return jsonElement.getAsString();
-  }
-
-  @Override
-  public Set<String> parse(String s) throws ParseSettingException {
-    return new HashSet<>(Arrays.asList(s.split(SettingLibrary.SET_SPLIT_REGEX)));
-  }
-
-  @Nonnull
-  @Override
-  public Text printElement(String element) {
-    return Text.of(element);
+  public Optional<List<String>> getParsable() {
+    return Optional.of(Lists.newArrayList("true", "false", "t", "f"));
   }
 }

@@ -9,6 +9,9 @@ import com.minecraftonline.nope.util.Format;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.text.Text;
 
+/**
+ * The command to reload all config data from storage.
+ */
 public class ReloadCommand extends LambdaCommandNode {
 
   /**

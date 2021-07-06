@@ -26,11 +26,10 @@
 package com.minecraftonline.nope.bridge.collision;
 
 import com.minecraftonline.nope.util.CollisionUtil;
-import org.spongepowered.api.entity.living.player.Player;
-
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
+import org.spongepowered.api.entity.living.player.Player;
 
 /**
  * A handler to disable and re-enable collision for players.
@@ -38,12 +37,22 @@ import java.util.UUID;
 public class CollisionHandler {
   private final Set<UUID> disabledCollision = new HashSet<>();
 
+  /**
+   * Disable collision for an in-game player.
+   *
+   * @param player the player
+   */
   public void disableCollision(Player player) {
     if (disabledCollision.add(player.getUniqueId())) {
       CollisionUtil.disableCollision(player);
     }
   }
 
+  /**
+   * Enable collision for a player.
+   *
+   * @param player the player
+   */
   public void enableCollision(Player player) {
     if (disabledCollision.remove(player.getUniqueId())) {
       CollisionUtil.enableCollision(player);

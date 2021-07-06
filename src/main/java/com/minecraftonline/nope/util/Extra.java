@@ -26,15 +26,18 @@ package com.minecraftonline.nope.util;
 
 import com.minecraftonline.nope.Nope;
 import com.minecraftonline.nope.setting.SettingKey;
+import java.util.function.Supplier;
+import javax.annotation.Nullable;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Event;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 
-import javax.annotation.Nullable;
-import java.util.function.Supplier;
-
+/**
+ * A utility class to store static methods for managing "extra"
+ * miscellaneous behavior.
+ */
 public final class Extra {
 
   private Extra() {
@@ -77,7 +80,8 @@ public final class Extra {
     builder.append(Text.of(TextColors.RED, "||  \\\\    || "));
     builder.append(Text.of(TextColors.WHITE, "|     /  "));
     builder.append(Text.of(TextColors.WHITE, "|____  "));
-    builder.append(Text.of(TextColors.DARK_GRAY, "   by ", TextColors.LIGHT_PURPLE, "MinecraftOnline"));
+    builder.append(Text.of(TextColors.DARK_GRAY, "   by ",
+        TextColors.LIGHT_PURPLE, "MinecraftOnline"));
     Sponge.getServer().getConsole().sendMessage(builder.build());
 
     // Line 5
@@ -119,6 +123,16 @@ public final class Extra {
 
   }
 
+  /**
+   * Generates a {@link RuntimeException} for not being able to find
+   * the location during an event while looking for a setting with
+   * a given setting key and player.
+   *
+   * @param key        the setting key
+   * @param eventClass the type of event
+   * @param player     the player which is in question. Null if anonymous.
+   * @return a supplier for the runtime exception
+   */
   public static Supplier<RuntimeException> noLocation(SettingKey<?> key,
                                                       Class<? extends Event> eventClass,
                                                       @Nullable Player player) {

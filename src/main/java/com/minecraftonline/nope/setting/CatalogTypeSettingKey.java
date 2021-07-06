@@ -25,55 +25,43 @@
 
 package com.minecraftonline.nope.setting;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonElement;
-
-import java.util.Arrays;
+import com.google.common.collect.Lists;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import org.spongepowered.api.CatalogType;
+import org.spongepowered.api.Sponge;
 
-public class EnumSetting<E extends Enum<E>> extends SettingKey<E> {
+/**
+ * A setting to store a value which is a {@link CatalogType}.
+ * with the Sponge API
+ *
+ * @param <C> catalog type
+ */
+public class CatalogTypeSettingKey<C extends CatalogType> extends SettingKey<String> {
+  private final Class<C> clazz;
 
-  private final Class<E> enumClass;
-
-  protected EnumSetting(String id, E defaultData, Class<E> enumClass) {
-    super(id, defaultData);
-    this.enumClass = enumClass;
+  public CatalogTypeSettingKey(String id, C defaultData, Class<C> clazz) {
+    super(id, defaultData.getId());
+    this.clazz = clazz;
   }
 
   @Override
-  protected JsonElement dataToJsonGenerified(E data) {
-    return new Gson().toJsonTree(data.name().toLowerCase());
-  }
-
-  @Override
-  public E dataFromJsonGenerified(JsonElement json) {
-    return parse(json.getAsString());
-  }
-
-  @Override
-  public E parse(String s) throws ParseSettingException {
-    try {
-      return Enum.valueOf(enumClass, s.toUpperCase());
-    } catch (IllegalArgumentException ex) {
-      throw new ParseSettingException(s + " is not a valid "
-          + enumClass.getSimpleName()
-          + " type. "
-          + (
-          (enumClass.getEnumConstants().length <= 8)
-              ? "Allowed types: "
-              + Arrays.stream(enumClass.getEnumConstants()).map(e ->
-              e.toString().toLowerCase()).collect(Collectors.joining(", "))
-              : ""));
-    }
+  public String parse(String id) throws ParseSettingException {
+    Sponge.getRegistry().getType(this.clazz, id).orElseThrow(() ->
+        new ParseSettingException("The given id "
+            + id
+            + " id not a valid "
+            + this.clazz.getSimpleName()));
+    return id;
   }
 
   @Override
   public Optional<List<String>> getParsable() {
-    return Optional.of(Arrays.stream(enumClass.getEnumConstants())
-        .map(E::toString)
-        .map(String::toLowerCase)
-        .collect(Collectors.toList()));
+    return Optional.of(Lists.newArrayList(Sponge.getRegistry()
+        .getAllOf(this.clazz)
+        .stream()
+        .map(CatalogType::getName)
+        .collect(Collectors.toList())));
   }
 }

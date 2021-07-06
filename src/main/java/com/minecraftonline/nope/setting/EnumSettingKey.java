@@ -25,46 +25,59 @@
 
 package com.minecraftonline.nope.setting;
 
-import com.google.common.collect.Lists;
+import com.google.gson.Gson;
 import com.google.gson.JsonElement;
-import com.google.gson.JsonPrimitive;
-
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
-public class StateSetting extends SettingKey<Boolean> {
-  public StateSetting(String id, Boolean defaultValue) {
-    super(id, defaultValue);
+/**
+ * Setting to store an enum.
+ *
+ * @param <E> the enum type
+ */
+public class EnumSettingKey<E extends Enum<E>> extends SettingKey<E> {
+
+  private final Class<E> enumClass;
+
+  protected EnumSettingKey(String id, E defaultData, Class<E> enumClass) {
+    super(id, defaultData);
+    this.enumClass = enumClass;
   }
 
   @Override
-  public JsonElement dataToJsonGenerified(Boolean value) {
-    return new JsonPrimitive(value ? "allow" : "deny");
+  protected JsonElement dataToJsonGenerified(E data) {
+    return new Gson().toJsonTree(data.name().toLowerCase());
   }
 
   @Override
-  public Boolean dataFromJsonGenerified(JsonElement jsonElement) {
-    final String s = jsonElement.getAsString();
-    return parse(s);
+  public E dataFromJsonGenerified(JsonElement json) {
+    return parse(json.getAsString());
   }
 
   @Override
-  public Boolean parse(String s) throws ParseSettingException {
-    switch (s.toLowerCase()) {
-      case "allow":
-      case "true":
-        return true;
-      case "deny":
-      case "false":
-        return false;
-      default:
-        throw new ParseSettingException("Invalid state string. "
-            + "Should be allow or deny. Was: " + s);
+  public E parse(String s) throws ParseSettingException {
+    try {
+      return Enum.valueOf(enumClass, s.toUpperCase());
+    } catch (IllegalArgumentException ex) {
+      throw new ParseSettingException(s + " is not a valid "
+          + enumClass.getSimpleName()
+          + " type. "
+          + (
+          (enumClass.getEnumConstants().length <= 8)
+              ? "Allowed types: "
+              + Arrays.stream(enumClass.getEnumConstants()).map(e ->
+              e.toString().toLowerCase()).collect(Collectors.joining(", "))
+              : ""));
     }
   }
 
   @Override
   public Optional<List<String>> getParsable() {
-    return Optional.of(Lists.newArrayList("allow", "deny"));
+    return Optional.of(Arrays.stream(enumClass.getEnumConstants())
+        .map(E::toString)
+        .map(String::toLowerCase)
+        .collect(Collectors.toList()));
   }
 }

@@ -55,6 +55,10 @@ import com.minecraftonline.nope.host.Host;
 import com.minecraftonline.nope.host.HostTreeImpl;
 import com.minecraftonline.nope.structures.FlexibleHashQueueVolumeTree;
 import com.minecraftonline.nope.util.Format;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.Optional;
+import javax.annotation.Nonnull;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.args.CommandContext;
@@ -63,13 +67,15 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.text.format.TextStyles;
 
-import javax.annotation.Nonnull;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.Optional;
-
+/**
+ * An extension of a command node to represent Nope's root
+ * of its command tree.
+ */
 public class NopeCommandRoot extends CommandNode {
 
+  /**
+   * Default constructor.
+   */
   public NopeCommandRoot() {
     super(null,
         null,
@@ -80,7 +86,7 @@ public class NopeCommandRoot extends CommandNode {
     addChildren(new CreateCommand(this));
     addChildren(new DestroyCommand(this));
     addChildren(new InfoCommand(this));
-    addChildren(new ListallCommand(this));
+    addChildren(new ListAllCommand(this));
     addChildren(new ListCommand(this));
     addChildren(new MoveCommand(this));
     addChildren(new Position1Command(this));
@@ -90,7 +96,7 @@ public class NopeCommandRoot extends CommandNode {
     addChildren(new SetCommand(this));
     addChildren(new SetPriorityCommand(this));
     addChildren(new SettingsCommand(this));
-    addChildren(new ShowallCommand(this));
+    addChildren(new ShowsCommand(this));
     addChildren(new ShowCommand(this));
     addChildren(new TargetCommand(this));
     addChildren(new TeleportCommand(this));
@@ -144,10 +150,11 @@ public class NopeCommandRoot extends CommandNode {
           .getHostTree()
           .getWorldHost(((Player) src).getLocation().getExtent().getUniqueId());
       if (worldHost instanceof HostTreeImpl.WorldHost) {
-        if (((HostTreeImpl.WorldHost) worldHost).getZoneTree() instanceof FlexibleHashQueueVolumeTree) {
+        if (((HostTreeImpl.WorldHost) worldHost).getZoneTree()
+            instanceof FlexibleHashQueueVolumeTree) {
           src.sendMessage(Text.of(TextColors.DARK_GRAY, "Cache size: ",
-                  ((FlexibleHashQueueVolumeTree<?, ?>) ((HostTreeImpl.WorldHost) worldHost).getZoneTree())
-                      .getCacheSize()));
+              ((FlexibleHashQueueVolumeTree<?, ?>)
+                  ((HostTreeImpl.WorldHost) worldHost).getZoneTree()).getCacheSize()));
         }
       }
     }

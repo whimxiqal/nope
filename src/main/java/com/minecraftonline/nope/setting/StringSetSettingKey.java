@@ -25,8 +25,41 @@
 
 package com.minecraftonline.nope.setting;
 
-public class StringSetting extends SettingKey<String> {
-  public StringSetting(String id, String defaultValue) {
+import com.google.gson.JsonElement;
+import com.google.gson.JsonPrimitive;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+import javax.annotation.Nonnull;
+import org.spongepowered.api.text.Text;
+
+/**
+ * A setting key to store a set of strings.
+ */
+public class StringSetSettingKey extends SetSettingKey<String> {
+
+  public StringSetSettingKey(String id, Set<String> defaultValue) {
     super(id, defaultValue);
+  }
+
+  @Override
+  public JsonElement elementToJsonGenerified(String value) {
+    return new JsonPrimitive(value);
+  }
+
+  @Override
+  public String elementFromJsonGenerified(JsonElement jsonElement) {
+    return jsonElement.getAsString();
+  }
+
+  @Override
+  public Set<String> parse(String s) throws ParseSettingException {
+    return new HashSet<>(Arrays.asList(s.split(SettingLibrary.SET_SPLIT_REGEX)));
+  }
+
+  @Nonnull
+  @Override
+  public Text printElement(String element) {
+    return Text.of(element);
   }
 }

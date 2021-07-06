@@ -61,12 +61,21 @@ import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 
-public class ShowallCommand extends LambdaCommandNode {
-  public ShowallCommand(CommandNode parent) {
+/**
+ * Turn on or off automatic highlighting of zones whilst crossing their boundaries.
+ */
+public class ShowsCommand extends LambdaCommandNode {
+
+  /**
+   * Default constructor.
+   *
+   * @param parent the parent command
+   */
+  public ShowsCommand(CommandNode parent) {
     super(parent,
         Permission.of(Permissions.COMMAND_SHOW.get()),
-        Text.of("Graphically display any zone during motion"),
-        "showall");
+        Text.of("Turn on/off automatic highlighting of zones whilst crossing their boundaries"),
+        "shows");
     setExecutor((src, args) -> {
       if (!(src instanceof Player)) {
         src.sendMessage(Format.error("You must be a player to send this command!"));

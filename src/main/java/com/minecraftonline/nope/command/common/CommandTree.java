@@ -26,15 +26,19 @@ package com.minecraftonline.nope.command.common;
 
 import com.google.common.base.Preconditions;
 import com.minecraftonline.nope.Nope;
-import org.spongepowered.api.Sponge;
-
-import javax.annotation.Nonnull;
 import java.util.Optional;
 import java.util.Stack;
+import javax.annotation.Nonnull;
+import org.spongepowered.api.Sponge;
 
-public abstract class CommandTree {
+/**
+ * An abstract command tree which holds the entire plugin
+ * command structure. There is a root and each node within the tree
+ * may have children and parameters.
+ */
+public class CommandTree {
 
-  private CommandNode root;
+  private final CommandNode root;
 
   public CommandTree(@Nonnull CommandNode root) {
     Preconditions.checkNotNull(root);
@@ -49,6 +53,14 @@ public abstract class CommandTree {
     Sponge.getCommandManager().register(Nope.getInstance(), root().build(), root().getAliases());
   }
 
+  /**
+   * Find a certain command node from the tree by its type.
+   * If there are multiple of the same type (which there shouldn't be).
+   *
+   * @param commandType the java class wrapper type of the command
+   * @param <N>         the type of command
+   * @return the instance of the given type
+   */
   @Nonnull
   public <N extends CommandNode> Optional<N> findNode(Class<N> commandType) {
     Stack<CommandNode> nextUp = new Stack<>();
@@ -60,7 +72,7 @@ public abstract class CommandTree {
     while (!nextUp.isEmpty()) {
       current = nextUp.pop();
       if (commandType.isInstance(current)) {
-        return Optional.of((N) current);
+        return Optional.of(commandType.cast(current));
       }
       nextUp.addAll(current.getChildren());
     }

@@ -25,12 +25,11 @@
 
 package com.minecraftonline.nope.host;
 
-import com.flowpowered.math.vector.Vector3i;
-import com.google.common.collect.Lists;
 import com.minecraftonline.nope.structures.Volume;
 
-import java.util.Collection;
-
+/**
+ * A {@link Host} that is also a {@link Volume}.
+ */
 public abstract class VolumeHost extends Host implements Volume {
 
   protected final int xmin;
@@ -44,6 +43,7 @@ public abstract class VolumeHost extends Host implements Volume {
 
   /**
    * Default constructor.
+   *
    * @param name the name
    * @param xmin the minimum x value, inclusive
    * @param xmax the maximum x value, inclusive

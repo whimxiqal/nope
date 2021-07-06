@@ -26,12 +26,14 @@
 package com.minecraftonline.nope.structures;
 
 import com.google.common.collect.Maps;
-import lombok.Data;
-
-import javax.annotation.Nonnull;
-import java.util.*;
+import java.util.Collection;
+import java.util.Map;
+import java.util.Queue;
+import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.stream.Collectors;
+import javax.annotation.Nonnull;
+import lombok.Data;
 
 /**
  * An extension of {@link VolumeTree} with cached queries to
@@ -92,6 +94,10 @@ public class FlexibleHashQueueVolumeTree<S, T extends Volume> extends VolumeTree
     return super.remove(key);
   }
 
+  /**
+   * Remove values from this data structure until
+   * the size is at its soft maximum.
+   */
   public void trim() {
     Queue<Query> deletionStage = new ConcurrentLinkedQueue<>();
     while (history.size() > size) {

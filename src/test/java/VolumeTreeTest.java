@@ -27,85 +27,89 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.minecraftonline.nope.structures.Volume;
 import com.minecraftonline.nope.structures.VolumeTree;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Random;
+import java.util.Set;
 import lombok.Data;
 import org.junit.jupiter.api.Test;
 
-import java.util.*;
-
+/**
+ * A test class for the {@link VolumeTree}.
+ */
 public class VolumeTreeTest {
 
-  int WORLD_X_WIDTH = 10000;
-  int WORLD_Y_WIDTH = 256;
-  int WORLD_Z_WIDTH = 10000;
-
-  int ZONE_MIN_X_WIDTH = 10;
-  int ZONE_MIN_Y_WIDTH = 10;
-  int ZONE_MIN_Z_WIDTH = 10;
-
-  int ZONE_MAX_X_WIDTH = 100;
-  int ZONE_MAX_Y_WIDTH = 100;
-  int ZONE_MAX_Z_WIDTH = 100;
-
-  int TEST_POINT_COUNT = 10000;
-
-  int ZONE_COUNT = 1000;
-
-  boolean DEBUG = false;
+  private static final int WORLD_X_WIDTH = 10000;
+  private static final int WORLD_Y_WIDTH = 256;
+  private static final int WORLD_Z_WIDTH = 10000;
+  private static final int ZONE_MIN_X_WIDTH = 10;
+  private static final int ZONE_MIN_Y_WIDTH = 10;
+  private static final int ZONE_MIN_Z_WIDTH = 10;
+  private static final int ZONE_MAX_X_WIDTH = 100;
+  private static final int ZONE_MAX_Y_WIDTH = 100;
+  private static final int ZONE_MAX_Z_WIDTH = 100;
+  private static final int TEST_POINT_COUNT = 10000;
+  private static final int ZONE_COUNT = 1000;
+  private static final boolean DEBUG = false;
 
   @Data
   static class TestVolume implements Volume {
 
-    final int xmin;
-    final int xmax;
-    final int ymin;
-    final int ymax;
-    final int zmin;
-    final int zmax;
+    final int minX;
+    final int maxX;
+    final int minY;
+    final int maxY;
+    final int minZ;
+    final int maxZ;
 
     @Override
     public int getMinX() {
-      return xmin;
+      return minX;
     }
 
     @Override
     public int getMaxX() {
-      return xmax;
+      return maxX;
     }
 
     @Override
     public int getMinY() {
-      return ymin;
+      return minY;
     }
 
     @Override
     public int getMaxY() {
-      return ymax;
+      return maxY;
     }
 
     @Override
     public int getMinZ() {
-      return zmin;
+      return minZ;
     }
 
     @Override
     public int getMaxZ() {
-      return zmax;
+      return maxZ;
     }
   }
 
   private void surround(char[][] board, int x, int z, char c) {
     for (int i = -1; i <= 1; i++) {
       for (int j = -1; j <= 1; j++) {
-        if (i == 0 && j == 0) continue;
+        if (i == 0 && j == 0) {
+          continue;
+        }
         board[x + i][z + j] = c;
       }
     }
   }
 
-  private char[][] constructBoard(Collection<? extends Volume> volumes, int xSize, int ySize) {
-    char[][] board = new char[xSize][ySize];
-    for (int x = 0; x < xSize; x++) {
-      for (int y = 0; y < ySize; y++) {
+  private char[][] constructBoard(Collection<? extends Volume> volumes, int xsize, int ysize) {
+    char[][] board = new char[xsize][ysize];
+    for (int x = 0; x < xsize; x++) {
+      for (int y = 0; y < ysize; y++) {
         board[x][y] = '0';
       }
     }
@@ -120,8 +124,8 @@ public class VolumeTreeTest {
         }
       }
     }
-    for (int x = 0; x < xSize; x++) {
-      for (int z = 0; z < ySize; z++) {
+    for (int x = 0; x < xsize; x++) {
+      for (int z = 0; z < ysize; z++) {
         if (board[x][z] == '0') {
           board[x][z] = ' ';
         }
@@ -130,20 +134,20 @@ public class VolumeTreeTest {
     return board;
   }
 
-  private void printBoard(char[][] board, int xSize, int ySize) {
-    for (int y = 0; y < ySize; y++) {
-      for (int x = 0; x < xSize; x++) {
+  private void printBoard(char[][] board, int xsize, int ysize) {
+    for (int y = 0; y < ysize; y++) {
+      for (int x = 0; x < xsize; x++) {
         System.out.print(board[x][y]);
       }
       System.out.println();
     }
   }
 
-  private int[][][] findAnswers(Collection<? extends Volume> volumes, int xSize, int ySize, int zSize) {
-    int[][][] answers = new int[xSize][ySize][zSize];
-    for (int z = 0; z < zSize; z++) {
-      for (int y = 0; y < ySize; y++) {
-        for (int x = 0; x < xSize; x++) {
+  private int[][][] findAnswers(Collection<? extends Volume> volumes, int xsize, int ysize, int zsize) {
+    int[][][] answers = new int[xsize][ysize][zsize];
+    for (int z = 0; z < zsize; z++) {
+      for (int y = 0; y < ysize; y++) {
+        for (int x = 0; x < xsize; x++) {
           answers[x][y][z] = 0;
         }
       }
@@ -160,11 +164,11 @@ public class VolumeTreeTest {
     return answers;
   }
 
-  private int[][][] findSolutions(VolumeTree<?, ?> tree, int xSize, int ySize, int zSize) {
-    int[][][] solutions = new int[xSize][ySize][zSize];
-    for (int z = 0; z < zSize; z++) {
-      for (int y = 0; y < ySize; y++) {
-        for (int x = 0; x < xSize; x++) {
+  private int[][][] findSolutions(VolumeTree<?, ?> tree, int xsize, int ysize, int zsize) {
+    int[][][] solutions = new int[xsize][ysize][zsize];
+    for (int z = 0; z < zsize; z++) {
+      for (int y = 0; y < ysize; y++) {
+        for (int x = 0; x < xsize; x++) {
           solutions[x][y][z] = tree.containersOf(x, y, z).size();
         }
       }
@@ -185,9 +189,8 @@ public class VolumeTreeTest {
       for (int y = 0; y < boardSizeY; y++) {
         for (int x = 0; x < boardSizeX; x++) {
           if (answers[x][y][z] != solutions[x][y][z]) {
-            System.out.println(String.format(
-                    "Wrong answer at (%d, %d, %d) -- Answer: %d, Solution: %d",
-                    x, y, z, answers[x][y][z], solutions[x][y][z]));
+            System.out.printf("Wrong answer at (%d, %d, %d) -- Answer: %d, Solution: %d%n",
+                x, y, z, answers[x][y][z], solutions[x][y][z]);
             failed++;
           } else {
             succeeded++;
@@ -195,7 +198,9 @@ public class VolumeTreeTest {
         }
       }
     }
-    if (print) tree.print();
+    if (print) {
+      tree.print();
+    }
     System.out.printf("Successfully identified zones: %d\n", succeeded);
     System.out.printf("Failed identified zones: %d\n", failed);
     if (failed > 0) {
@@ -209,24 +214,24 @@ public class VolumeTreeTest {
 
     Map<Integer, Volume> zones = Maps.newHashMap();
 
-    int xLocation;
-    int yLocation;
-    int zLocation;
-    int xSize;
-    int ySize;
-    int zSize;
-    for (Integer i = 0; i < ZONE_COUNT; i++) {
-      xLocation = random.nextInt(WORLD_X_WIDTH - ZONE_MAX_X_WIDTH + 1);
-      yLocation = random.nextInt(WORLD_Y_WIDTH - ZONE_MAX_Y_WIDTH + 1);
-      zLocation = random.nextInt(WORLD_Z_WIDTH - ZONE_MAX_Z_WIDTH + 1);
-      xSize = random.nextInt(ZONE_MAX_X_WIDTH - ZONE_MIN_X_WIDTH + 1) + ZONE_MIN_X_WIDTH;
-      ySize = random.nextInt(ZONE_MAX_Y_WIDTH - ZONE_MIN_Y_WIDTH + 1) + ZONE_MIN_Y_WIDTH;
-      zSize = random.nextInt(ZONE_MAX_Z_WIDTH - ZONE_MIN_Z_WIDTH + 1) + ZONE_MIN_Z_WIDTH;
+    int locationX;
+    int locationY;
+    int locationZ;
+    int sizeX;
+    int sizeY;
+    int sizeZ;
+    for (int i = 0; i < ZONE_COUNT; i++) {
+      locationX = random.nextInt(WORLD_X_WIDTH - ZONE_MAX_X_WIDTH + 1);
+      locationY = random.nextInt(WORLD_Y_WIDTH - ZONE_MAX_Y_WIDTH + 1);
+      locationZ = random.nextInt(WORLD_Z_WIDTH - ZONE_MAX_Z_WIDTH + 1);
+      sizeX = random.nextInt(ZONE_MAX_X_WIDTH - ZONE_MIN_X_WIDTH + 1) + ZONE_MIN_X_WIDTH;
+      sizeY = random.nextInt(ZONE_MAX_Y_WIDTH - ZONE_MIN_Y_WIDTH + 1) + ZONE_MIN_Y_WIDTH;
+      sizeZ = random.nextInt(ZONE_MAX_Z_WIDTH - ZONE_MIN_Z_WIDTH + 1) + ZONE_MIN_Z_WIDTH;
 
       zones.put(i, new TestVolume(
-              xLocation, xLocation + xSize - 1,
-              yLocation, yLocation + ySize - 1,
-              zLocation, zLocation + zSize - 1));
+          locationX, locationX + sizeX - 1,
+          locationY, locationY + sizeY - 1,
+          locationZ, locationZ + sizeZ - 1));
     }
 
     // Build board
@@ -273,12 +278,12 @@ public class VolumeTreeTest {
       for (Volume volume : zones.values()) {
         if (volume.contains(xpoints[i], ypoints[i], zpoints[i])) {
           answers.get(i).add(String.format("{[%d, %d], [%d, %d], [%d, %d]}",
-                  volume.getMinX(),
-                  volume.getMaxX(),
-                  volume.getMinY(),
-                  volume.getMaxY(),
-                  volume.getMinZ(),
-                  volume.getMaxZ()));
+              volume.getMinX(),
+              volume.getMaxX(),
+              volume.getMinY(),
+              volume.getMaxY(),
+              volume.getMinZ(),
+              volume.getMaxZ()));
         }
       }
     }
@@ -288,16 +293,16 @@ public class VolumeTreeTest {
     for (int i = 0; i < TEST_POINT_COUNT; i++) {
       Set<String> dump = solutions.get(i);
       tree.containersOf(xpoints[i], ypoints[i], zpoints[i])
-              .stream()
-              .map(volume ->
-                      String.format("{[%d, %d], [%d, %d], [%d, %d]}",
-                              volume.getMinX(),
-                              volume.getMaxX(),
-                              volume.getMinY(),
-                              volume.getMaxY(),
-                              volume.getMinZ(),
-                              volume.getMaxZ()))
-              .forEach(dump::add);
+          .stream()
+          .map(volume ->
+              String.format("{[%d, %d], [%d, %d], [%d, %d]}",
+                  volume.getMinX(),
+                  volume.getMaxX(),
+                  volume.getMinY(),
+                  volume.getMaxY(),
+                  volume.getMinZ(),
+                  volume.getMaxZ()))
+          .forEach(dump::add);
     }
     treeElapse = System.currentTimeMillis() - treeElapse;
 
@@ -311,10 +316,10 @@ public class VolumeTreeTest {
     for (int i = 0; i < TEST_POINT_COUNT; i++) {
       if (answers.get(i).size() != solutions.get(i).size() || !answers.get(i).containsAll(solutions.get(i))) {
         failed++;
-        System.out.println(String.format("Wrong Answer: Point %d -- Answer: %s, Solution: %s\n",
-                i,
-                Arrays.toString(answers.get(i).toArray()),
-                Arrays.toString(solutions.get(i).toArray())));
+        System.out.printf("Wrong Answer: Point %d -- Answer: %s, Solution: %s\n%n",
+            i,
+            Arrays.toString(answers.get(i).toArray()),
+            Arrays.toString(solutions.get(i).toArray()));
       } else {
         succeeded++;
       }
@@ -358,14 +363,26 @@ public class VolumeTreeTest {
 
   @Test
   public void testPointGrid2D() {
-    testPointGrid2DHelper(2, 1, 2, 1, 0, 1, false);
-    testPointGrid2DHelper(2, 1, 2, 1, 0, 0, false);
-    testPointGrid2DHelper(2, 1, 1, 2, -1, 0, false);
-    testPointGrid2DHelper(2, 3, 1, 1, -2, 0, false);
-    testPointGrid2DHelper(2, 2, 2, 2, 0, 0, false);
+    testPointGrid2dHelper(2, 1, 2, 1, 0, 1, false);
+    testPointGrid2dHelper(2, 1, 2, 1, 0, 0, false);
+    testPointGrid2dHelper(2, 1, 1, 2, -1, 0, false);
+    testPointGrid2dHelper(2, 3, 1, 1, -2, 0, false);
+    testPointGrid2dHelper(2, 2, 2, 2, 0, 0, false);
   }
 
-  public void testPointGrid2DHelper(int size,
+  /**
+   * A helper class to create 2d volumes with specific standard
+   * sizes and spacings.
+   *
+   * @param size the side length of each 2d volume
+   * @param countX the count of 2d volumes in the x direction
+   * @param countY the count of 2d volumes in the y direction
+   * @param countZ the count of 2d volumes in the z direction
+   * @param spacing the spacing between 2d volumes
+   * @param borderSpacing the spacing on the borders of 2d volumes
+   * @param print whether to print these 2d volumes or not (used for debugging small cases)
+   */
+  public void testPointGrid2dHelper(int size,
                                     int countX, int countY, int countZ,
                                     int spacing,
                                     int borderSpacing,
@@ -378,12 +395,12 @@ public class VolumeTreeTest {
         for (int x = 0; x < countX; x++) {
           int id = z * countY * countX + y * countX + x;
           map.put(id, new TestVolume(
-                  x * (size + spacing) + borderSpacing,
-                  x * (size + spacing) + size + borderSpacing - 1,
-                  y * (size + spacing) + borderSpacing,
-                  y * (size + spacing) + size + borderSpacing - 1,
-                  z * (size + spacing) + borderSpacing,
-                  z * (size + spacing) + size + borderSpacing - 1));
+              x * (size + spacing) + borderSpacing,
+              x * (size + spacing) + size + borderSpacing - 1,
+              y * (size + spacing) + borderSpacing,
+              y * (size + spacing) + size + borderSpacing - 1,
+              z * (size + spacing) + borderSpacing,
+              z * (size + spacing) + size + borderSpacing - 1));
         }
       }
     }
@@ -395,9 +412,11 @@ public class VolumeTreeTest {
     int boardSizeY = countY * (size + spacing) - spacing + borderSpacing * 2;
     int boardSizeZ = countZ * (size + spacing) - spacing + borderSpacing * 2;
     char[][] board = constructBoard(map.values(),
-            boardSizeX,
-            boardSizeZ);
-    if (print) printBoard(board, boardSizeX, boardSizeZ);
+        boardSizeX,
+        boardSizeZ);
+    if (print) {
+      printBoard(board, boardSizeX, boardSizeZ);
+    }
     checkAnswers(map.values(), tree, boardSizeX, boardSizeY, boardSizeZ, false);
   }
 

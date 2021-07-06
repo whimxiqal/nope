@@ -55,19 +55,21 @@ import com.minecraftonline.nope.command.common.LambdaCommandNode;
 import com.minecraftonline.nope.host.Host;
 import com.minecraftonline.nope.permission.Permissions;
 import com.minecraftonline.nope.util.Format;
+import java.util.Comparator;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.args.GenericArguments;
 import org.spongepowered.api.service.pagination.PaginationService;
 import org.spongepowered.api.text.Text;
 
-import java.util.Comparator;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
+/**
+ * A command to list all of the hosts on the server.
+ */
+public class ListAllCommand extends LambdaCommandNode {
 
-public class ListallCommand extends LambdaCommandNode {
-
-  ListallCommand(CommandNode parent) {
+  ListAllCommand(CommandNode parent) {
     super(parent,
         Permissions.COMMAND_LIST,
         Text.of("List all zones"),

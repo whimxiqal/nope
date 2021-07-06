@@ -32,6 +32,13 @@ import com.minecraftonline.nope.host.Host;
 import com.minecraftonline.nope.host.VolumeHost;
 import com.minecraftonline.nope.setting.SettingLibrary;
 import com.minecraftonline.nope.util.EffectsUtil;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
+import java.util.function.Predicate;
+import javax.annotation.Nonnull;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.spongepowered.api.entity.Entity;
@@ -42,29 +49,12 @@ import org.spongepowered.api.text.title.Title;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 
-import javax.annotation.Nonnull;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
-import java.util.function.Predicate;
-
+/**
+ * A handler for player movement as it pertains to Nope's behavior and control.
+ */
 public class PlayerMovementHandler {
 
-  @Data
-  @NoArgsConstructor
-  private static class PlayerMovementData {
-    private long visualsTimeStamp = System.currentTimeMillis();
-    private String lastSentMessage = "Few foxes fly farther than Florence";
-    private boolean viewing = false;
-    private boolean nextTeleportVerificationNeeded = false;
-    private Predicate<MoveEntityEvent.Teleport> nextTeleportCanceller = event -> false;
-    private long nextTeleportCancellationExpiry = System.currentTimeMillis();
-  }
-
   private static final long MESSAGE_COOLDOWN_MILLISECONDS = 1000;
-
   private final Map<UUID, PlayerMovementData> movementDataMap = Maps.newConcurrentMap();
 
   public void addHostViewer(UUID playerUuid) {
@@ -85,8 +75,8 @@ public class PlayerMovementHandler {
    * the subsequent teleport is allowed without any checks.
    * (Only one check on one teleport event is made.)
    *
-   * @param playerUuid the uuid of the player
-   * @param canceller the cancellation test
+   * @param playerUuid    the uuid of the player
+   * @param canceller     the cancellation test
    * @param timeoutMillis the timeout in milliseconds, after which the
    *                      any cancellation behavior is ignored (used in case
    *                      an expected teleport event actually is never thrown
@@ -107,10 +97,11 @@ public class PlayerMovementHandler {
    * it also prepares the user's system for the next event.
    *
    * @param playerUuid the player uuid
-   * @param event the event that was thrown
+   * @param event      the event that was thrown
    * @return true if it should be cancelled
    */
-  public boolean resolveTeleportCancellation(@Nonnull UUID playerUuid, @Nonnull MoveEntityEvent.Teleport event) {
+  public boolean resolveTeleportCancellation(@Nonnull UUID playerUuid,
+                                             @Nonnull MoveEntityEvent.Teleport event) {
     PlayerMovementData data = movementDataMap.get(playerUuid);
     if (!data.isNextTeleportVerificationNeeded()) {
       return false;
@@ -131,10 +122,19 @@ public class PlayerMovementHandler {
     movementDataMap.remove(playerUuid);
   }
 
+  /**
+   * Attempt to pass a player from the first location to the second location.
+   *
+   * @param player  the player to move
+   * @param first   the first location
+   * @param last    the last location
+   * @param natural whether the movement is considered natural
+   * @return true if the player may move
+   */
   public boolean tryPassThreshold(Player player,
-                               Location<World> first,
-                               Location<World> last,
-                               boolean natural) {
+                                  Location<World> first,
+                                  Location<World> last,
+                                  boolean natural) {
     List<Host> exiting = new LinkedList<>(Nope.getInstance()
         .getHostTree()
         .getContainingHosts(first));
@@ -223,7 +223,8 @@ public class PlayerMovementHandler {
           visual = true;
         }
 
-        if (entering.get(i) instanceof VolumeHost && isHostViewer(player.getUniqueId()) && expired) {
+        if (entering.get(i) instanceof VolumeHost
+            && isHostViewer(player.getUniqueId()) && expired) {
           EffectsUtil.showVolume((VolumeHost) entering.get(i), player, 5);
           visual = true;
         }
@@ -247,6 +248,17 @@ public class PlayerMovementHandler {
     }
 
     return cancel;
+  }
+
+  @Data
+  @NoArgsConstructor
+  private static class PlayerMovementData {
+    private long visualsTimeStamp = System.currentTimeMillis();
+    private String lastSentMessage = "Few foxes fly farther than Florence";
+    private boolean viewing = false;
+    private boolean nextTeleportVerificationNeeded = false;
+    private Predicate<MoveEntityEvent.Teleport> nextTeleportCanceller = event -> false;
+    private long nextTeleportCancellationExpiry = System.currentTimeMillis();
   }
 
 }

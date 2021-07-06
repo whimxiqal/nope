@@ -40,6 +40,7 @@ import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.regions.selector.CuboidRegionSelector;
 import com.sk89q.worldedit.sponge.SpongeWorld;
 import com.sk89q.worldedit.sponge.SpongeWorldEdit;
+import java.util.Optional;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.args.GenericArguments;
@@ -48,8 +49,10 @@ import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 
-import java.util.Optional;
-
+/**
+ * A command to allows the player to put their Nope selection
+ * around the given zone.
+ */
 public class SelectCommand extends LambdaCommandNode {
 
   SelectCommand(CommandNode parent) {
@@ -80,20 +83,21 @@ public class SelectCommand extends LambdaCommandNode {
       VolumeHost volumeHost = (VolumeHost) host;
 
       if (args.hasFlag("w")) {
-        Optional<PluginContainer> pluginContainer = Sponge.getPluginManager().getPlugin("worldedit");
+        Optional<PluginContainer> pluginContainer = Sponge.getPluginManager()
+            .getPlugin("worldedit");
         if (!pluginContainer.isPresent()) {
           player.sendMessage(Format.error("WorldEdit is not loaded."));
           return CommandResult.empty();
         }
         SpongeWorld spongeWorld = SpongeWorldEdit.inst().getWorld(player.getLocation().getExtent());
-          SpongeWorldEdit.inst()
-              .getSession(player)
-              .setRegionSelector(spongeWorld, new CuboidRegionSelector(spongeWorld,
-                  new Vector(volumeHost.getMinX(), volumeHost.getMinY(), volumeHost.getMinZ()),
-                  new Vector(volumeHost.getMaxX(), volumeHost.getMaxY(), volumeHost.getMaxZ())));
-        player.sendMessage(Format.success("Your WorldEdit selection was set to the corners of zone ",
+        SpongeWorldEdit.inst()
+            .getSession(player)
+            .setRegionSelector(spongeWorld, new CuboidRegionSelector(spongeWorld,
+                new Vector(volumeHost.getMinX(), volumeHost.getMinY(), volumeHost.getMinZ()),
+                new Vector(volumeHost.getMaxX(), volumeHost.getMaxY(), volumeHost.getMaxZ())));
+        player.sendMessage(Format.success("Your WorldEdit selection "
+                + "was set to the corners of zone ",
             TextColors.GRAY, volumeHost.getName()));
-        return CommandResult.success();
       } else {
         Nope.getInstance().getZoneWandHandler().getSelectionMap().put(player.getUniqueId(),
             new ZoneWandHandler.Selection(Sponge.getServer()
@@ -101,10 +105,11 @@ public class SelectCommand extends LambdaCommandNode {
                 .orElseThrow(() -> new RuntimeException("Could not find world")),
                 new Vector3i(volumeHost.getMinX(), volumeHost.getMinY(), volumeHost.getMinZ()),
                 new Vector3i(volumeHost.getMaxX(), volumeHost.getMaxY(), volumeHost.getMaxZ())));
-        player.sendMessage(Format.success("Your Nope selection was set to the corners of zone ",
+        player.sendMessage(Format.success("Your Nope selection "
+                + "was set to the corners of zone ",
             TextColors.GRAY, volumeHost.getName()));
-        return CommandResult.success();
       }
+      return CommandResult.success();
     });
   }
 

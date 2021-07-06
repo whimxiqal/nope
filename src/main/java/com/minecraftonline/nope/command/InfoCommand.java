@@ -58,6 +58,14 @@ import com.minecraftonline.nope.host.Host;
 import com.minecraftonline.nope.host.VolumeHost;
 import com.minecraftonline.nope.permission.Permissions;
 import com.minecraftonline.nope.util.Format;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.args.GenericArguments;
@@ -68,18 +76,15 @@ import org.spongepowered.api.text.action.TextActions;
 import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.world.World;
 
-import java.util.*;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
+/**
+ * A command to view detailed information about a host.
+ */
 public class InfoCommand extends LambdaCommandNode {
 
   InfoCommand(CommandNode parent) {
     super(parent,
         Permissions.COMMAND_INFO,
-        Text.of("View detailed information about a zone"),
+        Text.of("View detailed information about a host"),
         "info",
         "i");
 
@@ -103,7 +108,9 @@ public class InfoCommand extends LambdaCommandNode {
       }
 
       if (host.getParent() != null) {
-        headerLines.add(Format.keyValue(TextColors.DARK_GRAY, "parent: ", Format.host(host.getParent())));
+        headerLines.add(Format.keyValue(TextColors.DARK_GRAY,
+            "parent: ",
+            Format.host(host.getParent())));
       }
 
       if (host instanceof VolumeHost) {
@@ -125,18 +132,22 @@ public class InfoCommand extends LambdaCommandNode {
       }
 
       int zonePriority = host.getPriority();
-      headerLines.add(Format.keyValue(TextColors.DARK_GRAY, "priority: ", String.valueOf(zonePriority)));
+      headerLines.add(Format.keyValue(TextColors.DARK_GRAY,
+          "priority: ",
+          String.valueOf(zonePriority)));
       headerLines.add(Text.of(TextColors.DARK_GRAY, "--------------"));  // line separator
       headerLines.add(Text.builder()
           .append(Text.of(TextColors.AQUA, "<< Settings >>  "))
           .append(Format.commandSuggest("NEW", Nope.getInstance().getCommandTree()
-              .findNode(SetCommand.class)
-              .orElseThrow(() ->
-                  new RuntimeException("SetCommand is not set in Nope command tree!"))
-              .getFullCommand()
-              + String.format(" -z %s ___ ___",
+                  .findNode(SetCommand.class)
+                  .orElseThrow(() ->
+                      new RuntimeException("SetCommand is not set in Nope command tree!"))
+                  .getFullCommand()
+                  + String.format(" -z %s ___ ___",
               host.getName()),
-              Text.of("Set a new setting on this host.\nUse ", TextColors.GOLD, "/nope settings", TextColors.RESET, " to see all settings")))
+              Text.of("Set a new setting on this host.\nUse ",
+                  TextColors.GOLD, "/nope settings", TextColors.RESET,
+                  " to see all settings")))
           .build());
 
       Sponge.getScheduler().createTaskBuilder()
@@ -147,18 +158,18 @@ public class InfoCommand extends LambdaCommandNode {
                 .sorted(Comparator.comparing(setting -> setting.getKey().getId()))
                 .flatMap(setting -> {
                   try {
-                    return Format.setting(setting, src, host, Nope.getInstance().getHostTree().isRedundant(host, setting.getKey()))
-                        .get()
+                    return Format.setting(setting, src, host, Nope.getInstance()
+                        .getHostTree()
+                        .isRedundant(host, setting.getKey())
+                    ).get()
                         .stream().map(text -> Text.builder().append(text)
                             .onClick(TextActions.suggestCommand(
                                 Nope.getInstance().getCommandTree()
                                     .findNode(UnsetCommand.class)
                                     .orElseThrow(() ->
-                                        new RuntimeException("UnsetCommand is not set in Nope command tree!"))
-                                    .getFullCommand()
-                                    + String.format(" -z %s %s",
-                                    host.getName(),
-                                    setting.getKey())))
+                                        new RuntimeException("UnsetCommand is not "
+                                            + "set in Nope command tree!")).getFullCommand()
+                                    + String.format(" -z %s %s", host.getName(), setting.getKey())))
                             .build());
                   } catch (InterruptedException | ExecutionException e) {
                     e.printStackTrace();
@@ -190,10 +201,10 @@ public class InfoCommand extends LambdaCommandNode {
   }
 
   /**
-   * Gets a gameprofile promise.
+   * Gets a game profile promise.
    *
    * @param uuid UUID
-   * @return CompletableFuture to obtain a gameprofile.
+   * @return CompletableFuture to obtain a game profile.
    */
   private static CompletableFuture<GameProfile> getProfile(UUID uuid) {
     return Sponge.getServer().getGameProfileManager().get(uuid);

@@ -27,19 +27,24 @@ package com.minecraftonline.nope.command;
 
 import com.flowpowered.math.vector.Vector3i;
 import com.minecraftonline.nope.Nope;
-import com.minecraftonline.nope.key.zonewand.ZoneWandHandler;
 import com.minecraftonline.nope.arguments.NopeArguments;
 import com.minecraftonline.nope.command.common.CommandNode;
 import com.minecraftonline.nope.command.common.LambdaCommandNode;
 import com.minecraftonline.nope.host.Host;
 import com.minecraftonline.nope.host.VolumeHost;
+import com.minecraftonline.nope.key.zonewand.ZoneWandHandler;
 import com.minecraftonline.nope.permission.Permissions;
 import com.minecraftonline.nope.util.Format;
+import java.util.Objects;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.world.World;
 
+/**
+ * A command to move the boundaries of a zone.
+ */
 public class MoveCommand extends LambdaCommandNode {
 
   MoveCommand(CommandNode parent) {
@@ -63,11 +68,11 @@ public class MoveCommand extends LambdaCommandNode {
 
       Vector3i min = selection.getMin();
       Vector3i max = selection.getMax();
-
       World world = selection.getWorld();
 
-      if (world == null) {
-        throw new IllegalStateException("World was null where it never should be!");
+      if (world == null || min == null || max == null) {
+        src.sendMessage(Format.error("Selection is malformed"));
+        return CommandResult.empty();
       }
 
       // Remove the host that's moving
@@ -119,7 +124,7 @@ public class MoveCommand extends LambdaCommandNode {
     try {
       reAdded = Nope.getInstance().getHostTree().addZone(
           host.getName(),
-          host.getWorldUuid(),
+          Objects.requireNonNull(host.getWorldUuid()),
           new Vector3i(host.getMinX(), host.getMinY(), host.getMinZ()),
           new Vector3i(host.getMaxX(), host.getMaxY(), host.getMaxZ()),
           host.getPriority());
@@ -128,10 +133,13 @@ public class MoveCommand extends LambdaCommandNode {
         Nope.getInstance().getLogger()
             .error(String.format("Host %s was requested to move by %s. "
                     + "The move failed and the original host could not be recovered.",
-            host.getName(), src.getName()));
+                host.getName(), src.getName()));
       }
     } catch (IllegalArgumentException e) {
       src.sendMessage(Format.error("Severe: The host in transit could not be recovered"));
+      Sponge.getServer().getConsole().sendMessage(Format.error(
+          "Severe: The host in transit could not be recovered"));
+      e.printStackTrace();
     }
   }
 }

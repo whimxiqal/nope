@@ -93,7 +93,7 @@ public class Setting<T> implements Map.Entry<SettingKey<T>, SettingValue<T>> {
   @Override
   public boolean equals(Object other) {
     return (other instanceof Setting)
-            && ((Setting<?>) other).key.getId().equals(this.key.getId())
-            && ((Setting<?>) other).value.getData().equals(this.value.getData());
+        && ((Setting<?>) other).key.getId().equals(this.key.getId())
+        && ((Setting<?>) other).value.getData().equals(this.value.getData());
   }
 }

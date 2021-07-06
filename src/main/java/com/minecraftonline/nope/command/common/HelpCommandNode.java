@@ -26,6 +26,9 @@
 package com.minecraftonline.nope.command.common;
 
 import com.minecraftonline.nope.util.Format;
+import java.util.Objects;
+import java.util.stream.Collectors;
+import javax.annotation.Nonnull;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
@@ -37,12 +40,17 @@ import org.spongepowered.api.text.action.TextActions;
 import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.text.format.TextStyles;
 
-import javax.annotation.Nonnull;
-import java.util.Objects;
-import java.util.stream.Collectors;
-
+/**
+ * A command node that displays all the following possibilities of any command
+ * in a formatted list.
+ */
 public class HelpCommandNode extends CommandNode implements CommandExecutor {
 
+  /**
+   * Default constructor.
+   *
+   * @param parent the parent command
+   */
   public HelpCommandNode(@Nonnull CommandNode parent) {
     super(parent,
         null,
@@ -67,7 +75,9 @@ public class HelpCommandNode extends CommandNode implements CommandExecutor {
             TextColors.AQUA, this.getParent().getParent().getPrimaryAlias(),
             TextColors.DARK_GRAY, "]"))
             .onHover(TextActions.showText(Format.note("Open the help menu for the parent command")))
-            .onClick(TextActions.runCommand(Objects.requireNonNull(this.getParent().getParent().getHelpCommand()).getFullCommand()))
+            .onClick(TextActions.runCommand(Objects.requireNonNull(this.getParent()
+                .getParent()
+                .getHelpCommand()).getFullCommand()))
             .build()
             : Text.EMPTY,
         " ",
@@ -111,11 +121,13 @@ public class HelpCommandNode extends CommandNode implements CommandExecutor {
                         command.getAliases().get(0),
                         " ",
                         TextColors.WHITE, TextStyles.RESET, command.getDescription()))
-                .onHover(TextActions.showText(Text.of(Format.note("Click for this command help menu"),
+                .onHover(TextActions.showText(Text.of(
+                    Format.note("Click for this command help menu"),
                     Text.NEW_LINE,
                     Format.note("Aliases: " + String.join(", ", command.getAliases())))))
                 .onClick(command.getHelpCommand() == null
-                    ? TextActions.executeCallback(s -> s.sendMessage(Format.info("Help commands don't have help menus")))
+                    ? TextActions.executeCallback(s ->
+                    s.sendMessage(Format.info("Help commands don't have help menus")))
                     : TextActions.runCommand(command.getHelpCommand().getFullCommand()))
                 .build())
             .collect(Collectors.toList()))

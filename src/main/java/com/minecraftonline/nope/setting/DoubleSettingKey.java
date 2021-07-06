@@ -25,8 +25,11 @@
 
 package com.minecraftonline.nope.setting;
 
-public class DoubleSetting extends SettingKey<Double> {
-  public DoubleSetting(String id, Double defaultValue) {
+/**
+ * A setting which stores a double value.
+ */
+public class DoubleSettingKey extends SettingKey<Double> {
+  public DoubleSettingKey(String id, Double defaultValue) {
     super(id, defaultValue);
   }
 }

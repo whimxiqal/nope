@@ -34,6 +34,18 @@ import com.minecraftonline.nope.setting.SettingLibrary;
 import com.minecraftonline.nope.util.Extra;
 import com.minecraftonline.nope.util.Format;
 import com.minecraftonline.nope.util.Groups;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+import java.lang.reflect.Modifier;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import net.minecraft.entity.monster.EntitySnowman;
 import net.minecraft.entity.projectile.EntityTippedArrow;
 import org.spongepowered.api.block.BlockSnapshot;
@@ -69,7 +81,16 @@ import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
 import org.spongepowered.api.event.cause.entity.damage.source.EntityDamageSource;
 import org.spongepowered.api.event.cause.entity.damage.source.IndirectEntityDamageSource;
 import org.spongepowered.api.event.data.ChangeDataHolderEvent;
-import org.spongepowered.api.event.entity.*;
+import org.spongepowered.api.event.entity.AttackEntityEvent;
+import org.spongepowered.api.event.entity.ConstructEntityEvent;
+import org.spongepowered.api.event.entity.DamageEntityEvent;
+import org.spongepowered.api.event.entity.IgniteEntityEvent;
+import org.spongepowered.api.event.entity.InteractEntityEvent;
+import org.spongepowered.api.event.entity.LeashEntityEvent;
+import org.spongepowered.api.event.entity.MoveEntityEvent;
+import org.spongepowered.api.event.entity.RideEntityEvent;
+import org.spongepowered.api.event.entity.SpawnEntityEvent;
+import org.spongepowered.api.event.entity.TargetEntityEvent;
 import org.spongepowered.api.event.item.inventory.ChangeInventoryEvent;
 import org.spongepowered.api.event.item.inventory.ClickInventoryEvent;
 import org.spongepowered.api.event.item.inventory.DropItemEvent;
@@ -82,21 +103,10 @@ import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.explosion.Explosion;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-import java.lang.reflect.Modifier;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
-
 /**
  * A container class for all dynamically registered listeners.
+ *
+ * @see StaticSettingListeners
  */
 @SuppressWarnings("unused")
 public final class DynamicSettingListeners {
@@ -106,14 +116,18 @@ public final class DynamicSettingListeners {
       new CancelConditionSettingListener<>(
           SettingLibrary.ARMOR_STAND_DESTROY,
           AttackEntityEvent.class,
-          entityVersusEntityCanceller(SettingLibrary.ARMOR_STAND_DESTROY, Player.class, ArmorStand.class));
+          entityVersusEntityCanceller(SettingLibrary.ARMOR_STAND_DESTROY,
+              Player.class,
+              ArmorStand.class));
   @DynamicSettingListener
   static final SettingListener<InteractEntityEvent.Secondary> ARMOR_STAND_INTERACT_LISTENER =
       new PlayerRootCancelConditionSettingListener<>(
           SettingLibrary.ARMOR_STAND_INTERACT,
           InteractEntityEvent.Secondary.class,
           (event, player) -> event.getTargetEntity().getType().equals(EntityTypes.ARMOR_STAND)
-              && !Nope.getInstance().getHostTree().lookup(SettingLibrary.ARMOR_STAND_INTERACT, player, event.getTargetEntity().getLocation()));
+              && !Nope.getInstance().getHostTree().lookup(SettingLibrary.ARMOR_STAND_INTERACT,
+              player,
+              event.getTargetEntity().getLocation()));
   @DynamicSettingListener
   static final SettingListener<SpawnEntityEvent> ARMOR_STAND_PLACE_LISTENER =
       new CancelConditionSettingListener<>(
@@ -167,7 +181,11 @@ public final class DynamicSettingListeners {
               Location<World> recipient = notifier.add(direction.asBlockOffset());
 
               if (recipient.getBlock().getType().equals(BlockTypes.TNT)
-                  && !Nope.getInstance().getHostTree().lookup(SettingLibrary.TNT_IGNITION, player, recipient)) {
+                  && !Nope.getInstance()
+                  .getHostTree()
+                  .lookup(SettingLibrary.TNT_IGNITION,
+                      player,
+                      recipient)) {
                 return true;
               }
 
@@ -283,29 +301,6 @@ public final class DynamicSettingListeners {
                       player,
                       event.getToTransform().getLocation())));
   @DynamicSettingListener
-  static final SettingListener<UseItemStackEvent.Finish> USE_CHORUS_FRUIT_LISTENER =
-      new SingleSettingListener<>(
-          SettingLibrary.CHORUS_FRUIT_TELEPORT,
-          UseItemStackEvent.Finish.class,
-          event -> {
-            Optional<Player> player = event.getCause().first(Player.class);
-            if (!player.isPresent()) return;
-            if (event.getItemStackInUse().getType().equals(ItemTypes.CHORUS_FRUIT)) {
-              Nope.getInstance()
-                  .getPlayerMovementHandler()
-                  .cancelNextTeleportIf(player.get().getUniqueId(),
-                      teleportEvent ->
-                      !Nope.getInstance().getHostTree().lookup(SettingLibrary.CHORUS_FRUIT_TELEPORT,
-                          player.get(),
-                          teleportEvent.getFromTransform().getLocation())
-                          ||
-                          !Nope.getInstance().getHostTree().lookup(SettingLibrary.CHORUS_FRUIT_TELEPORT,
-                              player.get(),
-                              teleportEvent.getToTransform().getLocation()),
-                      10000);
-            }
-          });
-  @DynamicSettingListener
   static final SettingListener<DamageEntityEvent> EVP_LISTENER =
       new CancelConditionSettingListener<>(
           SettingLibrary.EVP,
@@ -336,11 +331,16 @@ public final class DynamicSettingListeners {
               return;
             }
             Explosive cause = explosion.getSourceExplosive().get();
-            if (Nope.getInstance().getHostTree().lookupAnonymous(
-                SettingLibrary.EXPLOSION_DAMAGE_BLACKLIST,
-                explosion.getLocation()).stream().anyMatch(enu -> enu.getExplosive().isInstance(cause))) {
+            if (Nope.getInstance().getHostTree()
+                .lookupAnonymous(
+                    SettingLibrary.EXPLOSION_DAMAGE_BLACKLIST,
+                    explosion.getLocation())
+                .stream()
+                .anyMatch(enu -> enu.getExplosive().isInstance(cause))) {
               // Disable entity damage if explosion occurs in safe zone
-              event.setExplosion(Explosion.builder().from(explosion).shouldDamageEntities(false).build());
+              event.setExplosion(Explosion.builder()
+                  .from(explosion)
+                  .shouldDamageEntities(false).build());
             } else {
               // Disable entity damage if any nearby entities are in safe zone
               for (Entity nearby : explosion.getLocation()
@@ -348,10 +348,15 @@ public final class DynamicSettingListeners {
                   .getNearbyEntities(
                       explosion.getLocation().getPosition(),
                       explosion.getRadius())) {
-                if (Nope.getInstance().getHostTree().lookupAnonymous(
-                    SettingLibrary.EXPLOSION_DAMAGE_BLACKLIST,
-                    nearby.getLocation()).stream().anyMatch(enu -> enu.getExplosive().isInstance(cause))) {
-                  event.setExplosion(Explosion.builder().from(explosion).shouldDamageEntities(false).build());
+                if (Nope.getInstance().getHostTree()
+                    .lookupAnonymous(
+                        SettingLibrary.EXPLOSION_DAMAGE_BLACKLIST,
+                        nearby.getLocation())
+                    .stream()
+                    .anyMatch(enu -> enu.getExplosive().isInstance(cause))) {
+                  event.setExplosion(Explosion.builder()
+                      .from(explosion)
+                      .shouldDamageEntities(false).build());
                   return;
                 }
               }
@@ -369,11 +374,16 @@ public final class DynamicSettingListeners {
               return;
             }
             Explosive cause = explosion.getSourceExplosive().get();
-            if (Nope.getInstance().getHostTree().lookupAnonymous(
-                SettingLibrary.EXPLOSION_GRIEF_BLACKLIST,
-                explosion.getLocation()).stream().anyMatch(enu -> enu.getExplosive().isInstance(cause))) {
+            if (Nope.getInstance().getHostTree()
+                .lookupAnonymous(
+                    SettingLibrary.EXPLOSION_GRIEF_BLACKLIST,
+                    explosion.getLocation())
+                .stream()
+                .anyMatch(enu -> enu.getExplosive().isInstance(cause))) {
               // Disable entity damage if explosion occurs in safe zone
-              event.setExplosion(Explosion.builder().from(explosion).shouldBreakBlocks(false).build());
+              event.setExplosion(Explosion.builder()
+                  .from(explosion)
+                  .shouldBreakBlocks(false).build());
             } else {
               // Disable entity damage if any nearby entities are in safe zone
               int locX = explosion.getLocation().getBlockX();
@@ -388,7 +398,9 @@ public final class DynamicSettingListeners {
                         new Location<>(explosion.getWorld(), x, y, z))
                         .stream()
                         .anyMatch(enu -> enu.getExplosive().isInstance(cause))) {
-                      event.setExplosion(Explosion.builder().from(explosion).shouldBreakBlocks(false).build());
+                      event.setExplosion(Explosion.builder()
+                          .from(explosion)
+                          .shouldBreakBlocks(false).build());
                       return;
                     }
                   }
@@ -430,22 +442,24 @@ public final class DynamicSettingListeners {
             event.getTransactions().stream().filter(Transaction::isValid).forEach(transaction -> {
               if (
                   Nope.getInstance().getHostTree()
-                      .lookupAnonymous(SettingLibrary.EXPLOSION_GRIEF_BLACKLIST, transaction.getOriginal()
-                          .getLocation()
-                          .orElseThrow(Extra.noLocation(
-                              SettingLibrary.EXPLOSION_GRIEF_BLACKLIST,
-                              ChangeBlockEvent.Break.class,
-                              null)))
-                      .stream()
-                      .anyMatch(enu -> enu.getExplosive().isInstance(cause))
-                      ||
-                      Nope.getInstance().getHostTree()
-                          .lookupAnonymous(SettingLibrary.EXPLOSION_GRIEF_BLACKLIST, transaction.getFinal()
+                      .lookupAnonymous(SettingLibrary.EXPLOSION_GRIEF_BLACKLIST,
+                          transaction.getOriginal()
                               .getLocation()
                               .orElseThrow(Extra.noLocation(
                                   SettingLibrary.EXPLOSION_GRIEF_BLACKLIST,
                                   ChangeBlockEvent.Break.class,
                                   null)))
+                      .stream()
+                      .anyMatch(enu -> enu.getExplosive().isInstance(cause))
+                      ||
+                      Nope.getInstance().getHostTree()
+                          .lookupAnonymous(SettingLibrary.EXPLOSION_GRIEF_BLACKLIST,
+                              transaction.getFinal()
+                                  .getLocation()
+                                  .orElseThrow(Extra.noLocation(
+                                      SettingLibrary.EXPLOSION_GRIEF_BLACKLIST,
+                                      ChangeBlockEvent.Break.class,
+                                      null)))
                           .stream()
                           .anyMatch(enu -> enu.getExplosive().isInstance(cause))) {
                 transaction.setValid(false);
@@ -514,7 +528,9 @@ public final class DynamicSettingListeners {
       new CancelConditionSettingListener<>(
           SettingLibrary.FIRE_NATURAL_IGNITION,
           ChangeBlockEvent.class,
-          event -> !(event.getSource() instanceof Player || event.getContext().get(EventContextKeys.PLUGIN).isPresent())
+          event -> !(
+              event.getSource() instanceof Player
+                  || event.getContext().get(EventContextKeys.PLUGIN).isPresent())
               && event.getTransactions()
               .stream()
               .anyMatch(trans -> trans.getFinal().getState().getType().equals(BlockTypes.FIRE)
@@ -530,7 +546,10 @@ public final class DynamicSettingListeners {
       new PlayerRootCancelConditionSettingListener<>(
           SettingLibrary.FLOWER_POT_INTERACT,
           InteractBlockEvent.Secondary.class,
-          (event, player) -> event.getTargetBlock().getState().getType().equals(BlockTypes.FLOWER_POT)
+          (event, player) -> event.getTargetBlock()
+              .getState()
+              .getType()
+              .equals(BlockTypes.FLOWER_POT)
               && !Nope.getInstance().getHostTree()
               .lookup(SettingLibrary.FLOWER_POT_INTERACT,
                   player,
@@ -707,7 +726,11 @@ public final class DynamicSettingListeners {
           SettingLibrary.ITEM_FRAME_INTERACT,
           InteractEntityEvent.Secondary.class,
           (event, player) -> event.getTargetEntity().getType().equals(EntityTypes.ITEM_FRAME)
-              && !Nope.getInstance().getHostTree().lookup(SettingLibrary.ITEM_FRAME_INTERACT, player, event.getTargetEntity().getLocation()));
+              && !Nope.getInstance()
+              .getHostTree()
+              .lookup(SettingLibrary.ITEM_FRAME_INTERACT,
+                  player,
+                  event.getTargetEntity().getLocation()));
   @DynamicSettingListener
   static final SettingListener<SpawnEntityEvent> ITEM_FRAME_PLACE_LISTENER =
       new CancelConditionSettingListener<>(
@@ -732,8 +755,14 @@ public final class DynamicSettingListeners {
             if (block.getBlockState().getType().equals(BlockTypes.LAVA)
                 || block.getBlockState().getType().equals(BlockTypes.FLOWING_LAVA)) {
               event.getTransactions().forEach(transaction -> {
-                if (!transaction.isValid()) return;
-                if (Groups.LIQUID_GRIEFABLE.contains(transaction.getOriginal().getState().getType())) return;
+                if (!transaction.isValid()) {
+                  return;
+                }
+                if (Groups.LIQUID_GRIEFABLE.contains(transaction.getOriginal()
+                    .getState()
+                    .getType())) {
+                  return;
+                }
                 if (!Nope.getInstance().getHostTree().lookupAnonymous(SettingLibrary.LAVA_GRIEF,
                     transaction.getFinal().getLocation().orElseThrow(Extra.noLocation(
                         SettingLibrary.LAVA_GRIEF,
@@ -753,11 +782,18 @@ public final class DynamicSettingListeners {
           event -> {
             for (Transaction<BlockSnapshot> transaction : event.getTransactions()) {
               if (transaction.isValid()) {
-                if (transaction.getFinal().getState().getType().equals(BlockTypes.FLOWING_LAVA)) {
-                  if (!Nope.getInstance().getHostTree().lookupAnonymous(SettingLibrary.LAVA_FLOW,
-                      transaction.getFinal().getLocation().orElseThrow(Extra.noLocation(SettingLibrary.LAVA_FLOW,
-                          ChangeBlockEvent.class,
-                          null)))) {
+                if (transaction.getFinal()
+                    .getState()
+                    .getType()
+                    .equals(BlockTypes.FLOWING_LAVA)) {
+                  if (!Nope.getInstance()
+                      .getHostTree()
+                      .lookupAnonymous(SettingLibrary.LAVA_FLOW,
+                          transaction.getFinal()
+                              .getLocation()
+                              .orElseThrow(Extra.noLocation(SettingLibrary.LAVA_FLOW,
+                                  ChangeBlockEvent.class,
+                                  null)))) {
                     transaction.setValid(false);
                   }
                 }
@@ -904,20 +940,37 @@ public final class DynamicSettingListeners {
             Optional<Player> player = event.getCause()
                 .first(EntityTippedArrow.class)
                 .map(arrow -> arrow.shootingEntity)
-                .flatMap(entity -> entity instanceof Player ? Optional.of((Player) entity) : Optional.empty());
+                .flatMap(entity -> entity instanceof Player
+                    ? Optional.of((Player) entity)
+                    : Optional.empty());
             if (player.isPresent() && ((
                 (event.getTargetEntity() instanceof Player)
-                    && (!Nope.getInstance().getHostTree().lookup(SettingLibrary.PVP, player.get(), player.get().getLocation())
-                    || !Nope.getInstance().getHostTree().lookup(SettingLibrary.PVP, player.get(), event.getTargetEntity().getLocation())))
+                    && (!Nope.getInstance().getHostTree().lookup(SettingLibrary.PVP,
+                    player.get(),
+                    player.get().getLocation())
+                    || !Nope.getInstance().getHostTree().lookup(SettingLibrary.PVP,
+                    player.get(),
+                    event.getTargetEntity().getLocation())))
                 || (
-                (event.getTargetEntity() instanceof Animal || event.getTargetEntity() instanceof Squid)
-                    && (!Nope.getInstance().getHostTree().lookup(SettingLibrary.PVA, player.get(), player.get().getLocation())
-                    || !Nope.getInstance().getHostTree().lookup(SettingLibrary.PVA, player.get(), event.getTargetEntity().getLocation())))
-                || (
-                (event.getTargetEntity() instanceof Hostile)
-                    && (!Nope.getInstance().getHostTree().lookup(SettingLibrary.PVH, player.get(), player.get().getLocation())
-                    || !Nope.getInstance().getHostTree().lookup(SettingLibrary.PVH, player.get(), event.getTargetEntity().getLocation())))
-            )) {
+                (event.getTargetEntity() instanceof Animal
+                    || event.getTargetEntity() instanceof Squid)
+                    &&
+                    (!Nope.getInstance().getHostTree().lookup(SettingLibrary.PVA,
+                        player.get(),
+                        player.get().getLocation())
+                        ||
+                        !Nope.getInstance().getHostTree().lookup(SettingLibrary.PVA,
+                            player.get(),
+                            event.getTargetEntity().getLocation())))
+                ||
+                ((event.getTargetEntity() instanceof Hostile)
+                    && (!Nope.getInstance().getHostTree().lookup(SettingLibrary.PVH,
+                    player.get(),
+                    player.get().getLocation())
+                    ||
+                    !Nope.getInstance().getHostTree().lookup(SettingLibrary.PVH,
+                        player.get(),
+                        event.getTargetEntity().getLocation()))))) {
               event.setCancelled(true);
             }
           }
@@ -927,14 +980,21 @@ public final class DynamicSettingListeners {
       new CancelConditionSettingListener<>(
           SettingLibrary.PVA,
           DamageEntityEvent.class,
-          event -> entityVersusEntityCanceller(SettingLibrary.PVA, Player.class, Animal.class).test(event)
-              || entityVersusEntityCanceller(SettingLibrary.PVA, Player.class, Squid.class).test(event));
+          event -> entityVersusEntityCanceller(SettingLibrary.PVA,
+              Player.class,
+              Animal.class).test(event)
+              ||
+              entityVersusEntityCanceller(SettingLibrary.PVA,
+                  Player.class,
+                  Squid.class).test(event));
   @DynamicSettingListener
   static final SettingListener<DamageEntityEvent> PVH_LISTENER =
       new CancelConditionSettingListener<>(
           SettingLibrary.PVH,
           DamageEntityEvent.class,
-          entityVersusEntityCanceller(SettingLibrary.PVH, Player.class, Hostile.class));
+          entityVersusEntityCanceller(SettingLibrary.PVH,
+              Player.class,
+              Hostile.class));
   @DynamicSettingListener
   static final SettingListener<DamageEntityEvent> PVP_LISTENER =
       new CancelConditionSettingListener<>(
@@ -1020,7 +1080,6 @@ public final class DynamicSettingListeners {
           SettingLibrary.SPAWN_HOSTILE,
           SpawnEntityEvent.class,
           spawnEntityCanceler(SettingLibrary.SPAWN_HOSTILE, Hostile.class));
-
   @DynamicSettingListener
   static final SettingListener<SpawnEntityEvent> SPAWN_MOB_LISTENER =
       new CancelConditionSettingListener<>(
@@ -1123,6 +1182,37 @@ public final class DynamicSettingListeners {
                   .lookupAnonymous(SettingLibrary.UNSPAWNABLE_MOBS, entity.getLocation())
                   .contains(entity.getType())));
   @DynamicSettingListener
+  static final SettingListener<UseItemStackEvent.Finish> USE_CHORUS_FRUIT_LISTENER =
+      new SingleSettingListener<>(
+          SettingLibrary.CHORUS_FRUIT_TELEPORT,
+          UseItemStackEvent.Finish.class,
+          event -> {
+            Optional<Player> player = event.getCause().first(Player.class);
+            if (!player.isPresent()) {
+              return;
+            }
+            if (event.getItemStackInUse()
+                .getType()
+                .equals(ItemTypes.CHORUS_FRUIT)) {
+              Nope.getInstance()
+                  .getPlayerMovementHandler()
+                  .cancelNextTeleportIf(player.get().getUniqueId(),
+                      teleportEvent ->
+                          !Nope.getInstance()
+                              .getHostTree()
+                              .lookup(SettingLibrary.CHORUS_FRUIT_TELEPORT,
+                                  player.get(),
+                                  teleportEvent.getFromTransform().getLocation())
+                              ||
+                              !Nope.getInstance()
+                                  .getHostTree()
+                                  .lookup(SettingLibrary.CHORUS_FRUIT_TELEPORT,
+                                      player.get(),
+                                      teleportEvent.getToTransform().getLocation()),
+                      10000);
+            }
+          });
+  @DynamicSettingListener
   static final SettingListener<InteractEntityEvent.Secondary> USE_NAME_TAG_LISTENER =
       new PlayerRootCancelConditionSettingListener<>(
           SettingLibrary.USE_NAME_TAG,
@@ -1133,10 +1223,14 @@ public final class DynamicSettingListeners {
               &&
               (!Nope.getInstance()
                   .getHostTree()
-                  .lookup(SettingLibrary.USE_NAME_TAG, player, player.getLocation())
+                  .lookup(SettingLibrary.USE_NAME_TAG,
+                      player,
+                      player.getLocation())
                   || !Nope.getInstance()
                   .getHostTree()
-                  .lookup(SettingLibrary.USE_NAME_TAG, player, event.getTargetEntity().getLocation())));
+                  .lookup(SettingLibrary.USE_NAME_TAG,
+                      player,
+                      event.getTargetEntity().getLocation())));
   @DynamicSettingListener
   static final SettingListener<ChangeBlockEvent> VINE_GROWTH_LISTENER =
       new CancelConditionSettingListener<>(
@@ -1154,8 +1248,14 @@ public final class DynamicSettingListeners {
             if (block.getBlockState().getType().equals(BlockTypes.WATER)
                 || block.getBlockState().getType().equals(BlockTypes.FLOWING_WATER)) {
               event.getTransactions().forEach(transaction -> {
-                if (!transaction.isValid()) return;
-                if (Groups.LIQUID_GRIEFABLE.contains(transaction.getOriginal().getState().getType())) return;
+                if (!transaction.isValid()) {
+                  return;
+                }
+                if (Groups.LIQUID_GRIEFABLE.contains(transaction.getOriginal()
+                    .getState()
+                    .getType())) {
+                  return;
+                }
                 if (!Nope.getInstance().getHostTree().lookupAnonymous(SettingLibrary.WATER_GRIEF,
                     transaction.getFinal().getLocation().orElseThrow(Extra.noLocation(
                         SettingLibrary.WATER_GRIEF,
@@ -1173,14 +1273,20 @@ public final class DynamicSettingListeners {
           SettingLibrary.WATER_FLOW,
           ChangeBlockEvent.class,
           event -> {
-            if (event.getSource() instanceof Player) return;  // Player caused - player likely placed this (not flow)
+            if (event.getSource() instanceof Player) {
+              return;  // Player caused - player likely placed this (not flow)
+            }
             for (Transaction<BlockSnapshot> transaction : event.getTransactions()) {
               if (transaction.isValid()) {
-                if (transaction.getFinal().getState().getType().equals(BlockTypes.FLOWING_WATER)) {
-                  if (!Nope.getInstance().getHostTree().lookupAnonymous(SettingLibrary.WATER_FLOW,
-                      transaction.getFinal().getLocation().orElseThrow(Extra.noLocation(SettingLibrary.WATER_FLOW,
-                          ChangeBlockEvent.class,
-                          null)))) {
+                if (transaction.getFinal().getState()
+                    .getType()
+                    .equals(BlockTypes.FLOWING_WATER)) {
+                  if (!Nope.getInstance().getHostTree()
+                      .lookupAnonymous(SettingLibrary.WATER_FLOW,
+                          transaction.getFinal().getLocation()
+                              .orElseThrow(Extra.noLocation(SettingLibrary.WATER_FLOW,
+                                  ChangeBlockEvent.class,
+                                  null)))) {
                     transaction.setValid(false);
                   }
                 }
@@ -1287,7 +1393,7 @@ public final class DynamicSettingListeners {
 
   static void printEvent(Event event) {
     Nope.getInstance().getLogger().info("Event... (" + event.getClass().getSimpleName() + ")");
-    Nope.getInstance().getLogger().info("Source: " + event.getSource().toString());
+    Nope.getInstance().getLogger().info("Source: " + event.getSource());
     event.getCause().forEach(o -> Nope.getInstance().getLogger().info("Cause: " + o.toString()));
     Nope.getInstance().getLogger().info("Context: " + event.getContext().asMap().entrySet()
         .stream()
@@ -1365,6 +1471,9 @@ public final class DynamicSettingListeners {
                     null))));
   }
 
+  /**
+   * An annotation to mark a method as a dynamic {@link SettingListener}.
+   */
   @Retention(RetentionPolicy.RUNTIME)
   @Target(ElementType.FIELD)
   public @interface DynamicSettingListener {

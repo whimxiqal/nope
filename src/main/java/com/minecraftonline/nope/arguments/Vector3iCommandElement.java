@@ -1,21 +1,23 @@
 package com.minecraftonline.nope.arguments;
 
 import com.flowpowered.math.vector.Vector3i;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.function.Supplier;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import org.jetbrains.annotations.NotNull;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.args.ArgumentParseException;
 import org.spongepowered.api.command.args.CommandArgs;
 import org.spongepowered.api.command.args.CommandContext;
 import org.spongepowered.api.command.args.CommandElement;
-import org.spongepowered.api.command.args.GenericArguments;
 import org.spongepowered.api.text.Text;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.function.Supplier;
-
+/**
+ * A command element that identifies a {@link Vector3i} in a command argument.
+ */
 public class Vector3iCommandElement extends CommandElement {
   protected Vector3iCommandElement(@Nullable Text key) {
     super(key);
@@ -23,7 +25,7 @@ public class Vector3iCommandElement extends CommandElement {
 
   @Nonnull
   @Override
-  public Text getUsage(CommandSource src) {
+  public Text getUsage(@NotNull CommandSource src) {
     return Text.of("<x1> <y1> <z1> <x2> <y2> <z2>");
   }
 
@@ -60,8 +62,11 @@ public class Vector3iCommandElement extends CommandElement {
     }
   }
 
+  @NotNull
   @Override
-  public List<String> complete(CommandSource src, CommandArgs args, CommandContext context) {
+  public List<String> complete(@NotNull CommandSource src,
+                                        @NotNull CommandArgs args,
+                                        @NotNull CommandContext context) {
     return Collections.emptyList();
   }
 }

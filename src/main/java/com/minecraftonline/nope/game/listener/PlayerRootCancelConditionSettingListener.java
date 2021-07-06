@@ -25,14 +25,12 @@
 
 package com.minecraftonline.nope.game.listener;
 
-import com.minecraftonline.nope.Nope;
 import com.minecraftonline.nope.setting.SettingKey;
+import java.util.function.BiPredicate;
+import javax.annotation.Nonnull;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Cancellable;
 import org.spongepowered.api.event.Event;
-
-import javax.annotation.Nonnull;
-import java.util.function.BiPredicate;
 
 /**
  * An accessibility class for cancelling events if a player is the root cause

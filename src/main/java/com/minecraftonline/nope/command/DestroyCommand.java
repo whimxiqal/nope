@@ -53,14 +53,17 @@ import com.minecraftonline.nope.Nope;
 import com.minecraftonline.nope.arguments.NopeArguments;
 import com.minecraftonline.nope.command.common.CommandNode;
 import com.minecraftonline.nope.command.common.LambdaCommandNode;
-import com.minecraftonline.nope.host.Host;
 import com.minecraftonline.nope.game.listener.DynamicSettingListeners;
+import com.minecraftonline.nope.host.Host;
 import com.minecraftonline.nope.permission.Permissions;
 import com.minecraftonline.nope.util.Format;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.args.GenericArguments;
 import org.spongepowered.api.text.Text;
 
+/**
+ * Command to destroy a given zone by name.
+ */
 public class DestroyCommand extends LambdaCommandNode {
 
   DestroyCommand(CommandNode parent) {

@@ -28,6 +28,13 @@ package com.minecraftonline.nope.game.listener;
 import com.minecraftonline.nope.Nope;
 import com.minecraftonline.nope.game.movement.PlayerMovementHandler;
 import com.minecraftonline.nope.setting.SettingLibrary;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.atomic.AtomicReference;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.Player;
@@ -40,15 +47,13 @@ import org.spongepowered.api.event.network.ClientConnectionEvent;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
-
+/**
+ * Setting listeners that are "static", meaning that these listeners
+ * are registered for every server regardless of the settings that are
+ * set on the server.
+ *
+ * @see DynamicSettingListeners
+ */
 public final class StaticSettingListeners {
 
   private final Map<UUID, Location<World>> lastTeleportFromLocations = new HashMap<>();
@@ -62,7 +67,7 @@ public final class StaticSettingListeners {
   }
 
   /**
-   * A static listener to handle every entity within a movement event
+   * A static listener to handle every entity within a movement event.
    *
    * @param event  the event
    * @param player the cause of movement
@@ -103,12 +108,20 @@ public final class StaticSettingListeners {
     }
   }
 
+  /**
+   * Event handler for player teleportation.
+   *
+   * @param event the event
+   * @param player the player
+   */
   @Listener(order = Order.EARLY)
   public void onTeleport(MoveEntityEvent.Teleport event, @First Player player) {
     // Duplicates -- Consecutive teleports from the same location
     if (cancellingDuplicatesSet.contains(player.getUniqueId())
         && lastTeleportFromLocations.containsKey(player.getUniqueId())
-        && event.getFromTransform().getLocation().equals(lastTeleportFromLocations.get(player.getUniqueId()))) {
+        && event.getFromTransform()
+        .getLocation()
+        .equals(lastTeleportFromLocations.get(player.getUniqueId()))) {
       // Duplicate elimination
       event.setToTransform(event.getFromTransform());
       event.setCancelled(true);
@@ -132,6 +145,12 @@ public final class StaticSettingListeners {
 
   }
 
+  /**
+   * Send command event handler.
+   *
+   * @param event the event
+   * @param player the player
+   */
   @Listener(order = Order.EARLY)
   public void onSendCommand(SendCommandEvent event, @First Player player) {
     String substring;

@@ -28,14 +28,13 @@ package com.minecraftonline.nope.host;
 import com.flowpowered.math.vector.Vector3i;
 import com.minecraftonline.nope.setting.SettingKey;
 import com.minecraftonline.nope.setting.SettingLibrary;
-
+import java.io.IOException;
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-
+import org.jetbrains.annotations.NotNull;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
@@ -51,14 +50,14 @@ public interface HostTree {
    *
    * @param location the location information to load from
    */
-  void load(String location) throws Exception;
+  void load(String location) throws IOException;
 
   /**
    * Save all data to some specified storage.
    *
    * @param location the location information to save to
    */
-  void save(String location) throws Exception;
+  void save(String location) throws IOException;
 
   /**
    * Get the GlobalHost.
@@ -123,10 +122,10 @@ public interface HostTree {
    *                                  as an overlapping zone
    */
   @Nullable
-  VolumeHost addZone(final String name,
-                     final UUID worldUuid,
-                     final Vector3i pos1,
-                     final Vector3i pos2,
+  VolumeHost addZone(@NotNull final String name,
+                     @NotNull final UUID worldUuid,
+                     @NotNull final Vector3i pos1,
+                     @NotNull final Vector3i pos2,
                      int priority)
       throws IllegalArgumentException;
 
@@ -174,8 +173,8 @@ public interface HostTree {
    * @param host the host which may have a redundant key
    * @param key  a setting key which may be redundant
    * @return the host which causes the key to be redundant on the input Host.
-   * Returns null if it is not redundant and returns the original host
-   * if it is redundant because of the plugin's default value
+   *         Returns null if it is not redundant and returns the original host
+   *         if it is redundant because of the plugin's default value
    */
   @Nullable
   Host isRedundant(Host host, SettingKey<?> key);

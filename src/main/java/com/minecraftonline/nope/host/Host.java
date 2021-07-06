@@ -32,6 +32,10 @@ import com.minecraftonline.nope.setting.SettingKey;
 import com.minecraftonline.nope.setting.SettingLibrary;
 import com.minecraftonline.nope.setting.SettingMap;
 import com.minecraftonline.nope.setting.SettingValue;
+import java.util.Optional;
+import java.util.UUID;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import lombok.Getter;
 import lombok.Setter;
 import org.spongepowered.api.entity.living.player.Player;
@@ -40,35 +44,10 @@ import org.spongepowered.api.world.Locatable;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import java.util.Optional;
-import java.util.UUID;
-
 /**
  * A storage class for setting assignments.
  */
 public abstract class Host {
-
-  public static int HIGHEST_PRIORITY = 99999;
-
-  public static String nameToContextKey(String name) {
-    return "nope.host." + name;
-  }
-
-  public static Optional<String> contextKeyToName(String key) throws IllegalArgumentException {
-    if (!isContextKey(key)) {
-      return Optional.empty();
-    }
-    return Optional.of(key.substring(10));
-  }
-
-  public static boolean isContextKey(String key) {
-    if (key == null || key.length() < 11) {
-      return false;
-    }
-    return key.startsWith("nope.host.");
-  }
 
   @Getter
   private final String name;
@@ -97,6 +76,36 @@ public abstract class Host {
 
   public Host(String name) {
     this(name, 0);
+  }
+
+  public static String nameToContextKey(String name) {
+    return "nope.host." + name;
+  }
+
+  /**
+   * Statically convert a {@link Context} key into the name of a host.
+   *
+   * @param key the context key
+   * @return the name of the encoded host
+   */
+  public static Optional<String> contextKeyToName(String key) {
+    if (!isContextKey(key)) {
+      return Optional.empty();
+    }
+    return Optional.of(key.substring(10));
+  }
+
+  /**
+   * Checks whether the given string is a context key encoding a host's name.
+   *
+   * @param key the string that may be a key
+   * @return true if key
+   */
+  public static boolean isContextKey(String key) {
+    if (key == null || key.length() < 11) {
+      return false;
+    }
+    return key.startsWith("nope.host.");
   }
 
   /**
@@ -180,9 +189,17 @@ public abstract class Host {
         .orElse(key.getDefaultData());
   }
 
+  /**
+   * Set the priority of this host.
+   *
+   * @param priority the new priority
+   * @throws IllegalArgumentException if the value is too large
+   */
   public void setPriority(int priority) throws IllegalArgumentException {
     if (priority > Nope.MAX_HOST_COUNT) {
-      throw new IllegalArgumentException(String.format("The priority set for host %s is too large!", getName()));
+      throw new IllegalArgumentException(String.format(
+          "The priority set for host %s is too large!",
+          getName()));
     }
     this.priority = priority;
   }
@@ -220,7 +237,7 @@ public abstract class Host {
   /**
    * Check if a Sponge locatable exists within this host.
    * This is the same as calling this method with the
-   * locatable's location with {@link #encompasses(Location)}
+   * locatable location with {@link #encompasses(Location)}
    *
    * @param spongeLocatable the locatable
    * @return true if within the host
@@ -256,6 +273,11 @@ public abstract class Host {
     return obj instanceof Host && ((Host) obj).getName().equals(this.getName());
   }
 
+  /**
+   * A functional container for serializing and deserializing a {@link Host}.
+   *
+   * @param <T> the type of host
+   */
   public interface HostSerializer<T extends Host> {
     JsonElement serialize(T host);
 

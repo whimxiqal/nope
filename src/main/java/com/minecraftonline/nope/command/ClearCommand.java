@@ -59,8 +59,16 @@ import com.minecraftonline.nope.util.Format;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.text.Text;
 
+/**
+ * A command to clear all settings on a host.
+ */
 public class ClearCommand extends LambdaCommandNode {
 
+  /**
+   * Default constructor.
+   *
+   * @param parent parent command
+   */
   ClearCommand(CommandNode parent) {
     super(parent,
         Permissions.COMMAND_EDIT,

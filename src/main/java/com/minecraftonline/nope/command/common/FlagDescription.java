@@ -30,6 +30,10 @@ import lombok.Data;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 
+/**
+ * A data class to store information about given flags used
+ * in commands.
+ */
 @Data
 @AllArgsConstructor
 public class FlagDescription {

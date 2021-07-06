@@ -25,10 +25,9 @@
 
 package com.minecraftonline.nope.structures;
 
-import com.flowpowered.math.vector.Vector3i;
-
-import java.util.Collection;
-
+/**
+ * An interface for any prismatic volume.
+ */
 public interface Volume {
 
   /**
@@ -91,6 +90,13 @@ public interface Volume {
         && z <= this.getMaxZ();
   }
 
+  /**
+   * Determine whether another volume is entirely contained within
+   * this volume.
+   *
+   * @param other the other volume
+   * @return true if the other volume is contained in this one
+   */
   default boolean contains(Volume other) {
     return other.getMinX() >= this.getMinX()
         && other.getMaxX() <= this.getMaxX()

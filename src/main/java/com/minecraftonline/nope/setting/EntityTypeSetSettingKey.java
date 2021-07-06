@@ -25,27 +25,23 @@
 
 package com.minecraftonline.nope.setting;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
-import com.google.gson.Gson;
-import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import com.minecraftonline.nope.util.Format;
-import org.spongepowered.api.Sponge;
-import org.spongepowered.api.entity.EntityType;
-import org.spongepowered.api.text.Text;
-
-import javax.annotation.Nonnull;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.stream.Collectors;
+import javax.annotation.Nonnull;
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.entity.EntityType;
+import org.spongepowered.api.text.Text;
 
-public class EntityTypeSetSetting extends SetSetting<EntityType> {
-  public EntityTypeSetSetting(String id, Set<EntityType> defaultValue) {
+/**
+ * Setting to store sets of entity types.
+ */
+public class EntityTypeSetSettingKey extends SetSettingKey<EntityType> {
+  public EntityTypeSetSettingKey(String id, Set<EntityType> defaultValue) {
     super(id, defaultValue);
   }
 
@@ -58,7 +54,8 @@ public class EntityTypeSetSetting extends SetSetting<EntityType> {
   protected EntityType elementFromJsonGenerified(JsonElement jsonElement) {
     return Sponge.getRegistry()
         .getType(EntityType.class, jsonElement.getAsString())
-        .orElseThrow(() -> new ParseSettingException("Unknown EntityType: " + jsonElement.getAsString()));
+        .orElseThrow(() -> new ParseSettingException("Unknown EntityType: "
+            + jsonElement.getAsString()));
   }
 
   @Override

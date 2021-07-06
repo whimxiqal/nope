@@ -32,14 +32,17 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.minecraftonline.nope.host.Host;
 import com.minecraftonline.nope.permission.Permissions;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.UUID;
+import java.util.function.BiPredicate;
+import javax.annotation.Nonnull;
 import lombok.Getter;
 import lombok.Setter;
 import org.spongepowered.api.entity.living.player.User;
-
-import javax.annotation.Nonnull;
-import java.util.*;
-import java.util.function.BiPredicate;
-import java.util.function.Predicate;
 
 /**
  * The value component of a {@link Setting}.
@@ -95,12 +98,18 @@ public class SettingValue<T> {
 
   @Override
   public boolean equals(Object o) {
-    if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
 
     SettingValue<?> that = (SettingValue<?>) o;
 
-    if (!data.equals(that.data)) return false;
+    if (!data.equals(that.data)) {
+      return false;
+    }
     return target.equals(that.target);
   }
 
@@ -118,14 +127,21 @@ public class SettingValue<T> {
   public static class Target extends HashMap<String, Boolean>
       implements BiPredicate<SettingKey<?>, User> {
 
-    private Set<UUID> users = Sets.newHashSet();
+    private final Set<UUID> users = Sets.newHashSet();
     private boolean whitelist = true;
-    @Getter @Setter
+    @Getter
+    @Setter
     private boolean forceAffect = false;
 
     private Target() {
     }
 
+    /**
+     * Convert a target to a json element for serialization.
+     *
+     * @param target the target
+     * @return the serialized target
+     */
     public static JsonElement toJson(Target target) {
       Map<String, Object> map = Maps.newHashMap();
       if (!target.isEmpty()) {
@@ -148,7 +164,12 @@ public class SettingValue<T> {
       return new Gson().toJsonTree(map);
     }
 
-    @SuppressWarnings("UnstableApiUsage")
+    /**
+     * Convert a target from json into a target object.
+     *
+     * @param json the serialized target
+     * @return the target object
+     */
     public static Target fromJson(JsonElement json) {
       if (json == null) {
         return new Target();
@@ -156,7 +177,8 @@ public class SettingValue<T> {
       Target target = new Target();
       JsonObject map = json.getAsJsonObject();
       if (map.has("permissions")) {
-        for (Map.Entry<String, JsonElement> entry : map.get("permissions").getAsJsonObject().entrySet()) {
+        for (Map.Entry<String, JsonElement> entry
+            : map.get("permissions").getAsJsonObject().entrySet()) {
           target.put(entry.getKey(), entry.getValue().getAsBoolean());
         }
       }
@@ -170,7 +192,9 @@ public class SettingValue<T> {
         hasUsers = true;
       }
       if (hasUsers) {
-        for (JsonElement elem : map.get(target.whitelist ? "whitelist" : "blacklist").getAsJsonArray()) {
+        for (JsonElement elem : map.get(target.whitelist
+            ? "whitelist"
+            : "blacklist").getAsJsonArray()) {
           target.users.add(UUID.fromString(elem.getAsString()));
         }
       }
@@ -217,14 +241,24 @@ public class SettingValue<T> {
 
     @Override
     public boolean equals(Object o) {
-      if (this == o) return true;
-      if (o == null || getClass() != o.getClass()) return false;
-      if (!super.equals(o)) return false;
+      if (this == o) {
+        return true;
+      }
+      if (o == null || getClass() != o.getClass()) {
+        return false;
+      }
+      if (!super.equals(o)) {
+        return false;
+      }
 
       Target target = (Target) o;
 
-      if (whitelist != target.whitelist) return false;
-      if (forceAffect != target.forceAffect) return false;
+      if (whitelist != target.whitelist) {
+        return false;
+      }
+      if (forceAffect != target.forceAffect) {
+        return false;
+      }
       return users.equals(target.users);
     }
 

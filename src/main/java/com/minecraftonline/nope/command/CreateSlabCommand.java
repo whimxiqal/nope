@@ -37,13 +37,16 @@ import com.minecraftonline.nope.host.VolumeHost;
 import com.minecraftonline.nope.key.zonewand.ZoneWandHandler;
 import com.minecraftonline.nope.permission.Permissions;
 import com.minecraftonline.nope.util.Format;
+import java.util.Comparator;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.args.GenericArguments;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
 
-import java.util.Comparator;
-
+/**
+ * A command to create a zone with designated y values
+ * but infinite x and z dimensions.
+ */
 public class CreateSlabCommand extends LambdaCommandNode {
 
   CreateSlabCommand(CommandNode parent) {
@@ -74,7 +77,13 @@ public class CreateSlabCommand extends LambdaCommandNode {
               .map(host -> host.getPriority() + 1).orElse(0));
 
       try {
-        assert selection.getWorld() != null;
+        if (selection.getWorld() == null
+            || selection.getMin() == null
+            || selection.getMax() == null) {
+          // This shouldn't happen
+          src.sendMessage(Format.error("Selection is malformed"));
+          return CommandResult.empty();
+        }
         Vector3i minSelection = new Vector3i(Integer.MIN_VALUE, selection.getMin().getY(), Integer.MIN_VALUE);
         Vector3i maxSelection = new Vector3i(Integer.MAX_VALUE, selection.getMax().getY(), Integer.MAX_VALUE);
         VolumeHost zone = Nope.getInstance().getHostTree().addZone(
@@ -90,7 +99,8 @@ public class CreateSlabCommand extends LambdaCommandNode {
         }
         Nope.getInstance().saveState();
         DynamicSettingListeners.register();
-        src.sendMessage(Format.success("Successfully created zone ", Format.note(zone.getName()), "!"));
+        src.sendMessage(Format.success("Successfully created zone ",
+            Format.note(zone.getName()), "!"));
         Nope.getInstance().getZoneWandHandler().getSelectionMap().remove(player.getUniqueId());
       } catch (IllegalArgumentException e) {
         src.sendMessage(Format.error("Could not create zone: " + e.getMessage()));

@@ -25,6 +25,8 @@
 package com.minecraftonline.nope.key.zonewand;
 
 import com.minecraftonline.nope.key.NopeKeys;
+import java.util.Optional;
+import org.jetbrains.annotations.NotNull;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataQuery;
@@ -35,9 +37,11 @@ import org.spongepowered.api.data.merge.MergeFunction;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.data.value.mutable.Value;
 
-import java.util.Optional;
-
-public class ZoneWandManipulator extends AbstractBooleanData<ZoneWandManipulator, ImmutableZoneWandManipulator> {
+/**
+ * The zone wand manipulator to help identify a zone wand as a wand.
+ */
+public class ZoneWandManipulator
+    extends AbstractBooleanData<ZoneWandManipulator, ImmutableZoneWandManipulator> {
   public static final DataQuery QUERY = DataQuery.of("nopezonewand");
 
   public ZoneWandManipulator(boolean value) {
@@ -49,22 +53,22 @@ public class ZoneWandManipulator extends AbstractBooleanData<ZoneWandManipulator
   }
 
   @Override
-  public Optional<ZoneWandManipulator> fill(DataHolder dataHolder, MergeFunction overlap) {
+  public @NotNull Optional<ZoneWandManipulator> fill(DataHolder dataHolder, @NotNull MergeFunction overlap) {
     return from(dataHolder.toContainer());
   }
 
   @Override
-  public Optional<ZoneWandManipulator> from(DataContainer container) {
+  public @NotNull Optional<ZoneWandManipulator> from(DataContainer container) {
     return container.getBoolean(NopeKeys.ZONE_WAND.getQuery()).map(ZoneWandManipulator::new);
   }
 
   @Override
-  public ZoneWandManipulator copy() {
+  public @NotNull ZoneWandManipulator copy() {
     return new ZoneWandManipulator(this.getValue());
   }
 
   @Override
-  public ImmutableZoneWandManipulator asImmutable() {
+  public @NotNull ImmutableZoneWandManipulator asImmutable() {
     return new ImmutableZoneWandManipulator(this.getValue());
   }
 
@@ -73,20 +77,24 @@ public class ZoneWandManipulator extends AbstractBooleanData<ZoneWandManipulator
     return 0;
   }
 
-  public static class Builder implements DataManipulatorBuilder<ZoneWandManipulator, ImmutableZoneWandManipulator> {
+  /**
+   * Building class for the {@link ZoneWandManipulator}.
+   */
+  public static class Builder
+      implements DataManipulatorBuilder<ZoneWandManipulator, ImmutableZoneWandManipulator> {
 
     @Override
-    public ZoneWandManipulator create() {
+    public @NotNull ZoneWandManipulator create() {
       return new ZoneWandManipulator(false);
     }
 
     @Override
-    public Optional<ZoneWandManipulator> createFrom(DataHolder dataHolder) {
+    public @NotNull Optional<ZoneWandManipulator> createFrom(DataHolder dataHolder) {
       return build(dataHolder.toContainer());
     }
 
     @Override
-    public Optional<ZoneWandManipulator> build(DataView container) throws InvalidDataException {
+    public @NotNull Optional<ZoneWandManipulator> build(DataView container) throws InvalidDataException {
       return container.getBoolean(NopeKeys.ZONE_WAND.getQuery()).map(ZoneWandManipulator::new);
     }
   }

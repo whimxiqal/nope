@@ -64,12 +64,20 @@ import org.spongepowered.api.command.args.GenericArguments;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
 
+/**
+ * A command to visually show the boundaries of a zone.
+ */
 public class ShowCommand extends LambdaCommandNode {
 
+  /**
+   * Default constructor.
+   *
+   * @param parent the parent command
+   */
   public ShowCommand(CommandNode parent) {
     super(parent,
         Permission.of(Permissions.COMMAND_SHOW.get()),
-        Text.of("Graphically display the zone in the world"),
+        Text.of("Highlight the boundaries of the zone"),
         "show");
     addCommandElements(GenericArguments.optional(NopeArguments.host(Text.of("zone"))));
     setExecutor((src, args) -> {

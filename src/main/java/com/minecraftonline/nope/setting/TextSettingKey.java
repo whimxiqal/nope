@@ -28,17 +28,19 @@ package com.minecraftonline.nope.setting;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.minecraftonline.nope.Nope;
+import java.io.IOException;
+import javax.annotation.Nonnull;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.persistence.DataFormats;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.serializer.TextSerializers;
 
-import javax.annotation.Nonnull;
-import java.io.IOException;
+/**
+ * A setting key which stores {@link Text} as a value.
+ */
+public class TextSettingKey extends SettingKey<Text> {
 
-public class TextSetting extends SettingKey<Text> {
-
-  protected TextSetting(String id, Text defaultValue) {
+  protected TextSettingKey(String id, Text defaultValue) {
     super(id, defaultValue);
   }
 
@@ -57,9 +59,7 @@ public class TextSetting extends SettingKey<Text> {
     try {
       return Sponge.getDataManager()
           .deserialize(Text.class, DataFormats.JSON.read(json.getAsString()))
-          .orElseThrow(() -> new RuntimeException(
-              "The json for Text cannot be serialized: "
-                  + json.toString()));
+          .orElseThrow(() -> new RuntimeException("The json for Text cannot be serialized: " + json));
     } catch (IllegalStateException | IOException e) {
       Nope.getInstance().getLogger().error("Could not deserialize Text", e);
       return Text.EMPTY;

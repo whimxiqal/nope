@@ -61,12 +61,11 @@ import com.minecraftonline.nope.permission.Permissions;
 import com.minecraftonline.nope.setting.SettingKey;
 import com.minecraftonline.nope.setting.SettingValue;
 import com.minecraftonline.nope.util.Format;
+import java.util.Map;
+import java.util.Optional;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.args.GenericArguments;
 import org.spongepowered.api.text.Text;
-
-import java.util.Map;
-import java.util.Optional;
 
 class TargetTypeCommand extends LambdaCommandNode {
   public TargetTypeCommand(CommandNode parent) {

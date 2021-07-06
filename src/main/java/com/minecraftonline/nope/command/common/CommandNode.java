@@ -26,17 +26,7 @@ package com.minecraftonline.nope.command.common;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
-import com.minecraftonline.nope.Nope;
 import com.minecraftonline.nope.permission.Permission;
-import lombok.Getter;
-import org.spongepowered.api.command.args.CommandElement;
-import org.spongepowered.api.command.spec.CommandExecutor;
-import org.spongepowered.api.command.spec.CommandSpec;
-import org.spongepowered.api.service.permission.Subject;
-import org.spongepowered.api.text.Text;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -44,30 +34,40 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.TreeMap;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import lombok.Getter;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.spongepowered.api.command.args.CommandElement;
+import org.spongepowered.api.command.spec.CommandExecutor;
+import org.spongepowered.api.command.spec.CommandSpec;
+import org.spongepowered.api.service.permission.Subject;
+import org.spongepowered.api.text.Text;
 
+/**
+ * A general command node in the general command tree
+ * with the purpose of intuitively constructing the command structure.
+ */
 public abstract class CommandNode implements CommandExecutor {
 
   @Getter
-  @Nullable
-  private final CommandNode parent;
+  private final @Nullable CommandNode parent;
   @Getter
-  @Nullable
-  private final Permission permission;
+  private final @Nullable Permission permission;
   @Getter
-  @Nullable
-  private final Text description;
+  private final @NotNull Text description;
   @Getter
   private final List<String> aliases = Lists.newArrayList();
   private final List<CommandNode> children = Lists.newArrayList();
   private final List<CommandElement> commandElements = new ArrayList<>();
   @Getter
   private final Map<String, FlagDescription> flagDescriptions = new HashMap<>();
-  private Supplier<Text> comment = () -> null;
   @Getter
   @Nullable
   private final HelpCommandNode helpCommand;
+  private Supplier<Text> comment = () -> null;
 
   /**
    * A helpful constructor which easily allows for addition of
@@ -82,9 +82,9 @@ public abstract class CommandNode implements CommandExecutor {
    */
   public CommandNode(CommandNode parent,
                      Permission permission,
-                     @Nonnull Text description,
-                     @Nonnull String primaryAlias,
-                     @Nonnull String... otherAliases) {
+                     @NotNull Text description,
+                     @NotNull String primaryAlias,
+                     @NotNull String... otherAliases) {
     this(parent, permission, description, primaryAlias, true);
     Preconditions.checkNotNull(otherAliases);
     this.aliases.addAll(Arrays.asList(otherAliases));
@@ -99,10 +99,10 @@ public abstract class CommandNode implements CommandExecutor {
    * @param primaryAlias the alias to be used for referencing this command
    * @param addHelp      whether an extra help sub-command should be added afterwards
    */
-  public CommandNode(CommandNode parent,
-                     Permission permission,
-                     @Nonnull Text description,
-                     @Nonnull String primaryAlias,
+  public CommandNode(@Nullable CommandNode parent,
+                     @Nullable Permission permission,
+                     @NotNull Text description,
+                     @NotNull String primaryAlias,
                      boolean addHelp) {
     Preconditions.checkNotNull(description);
     Preconditions.checkNotNull(primaryAlias);
@@ -118,16 +118,25 @@ public abstract class CommandNode implements CommandExecutor {
     }
   }
 
-  @Nonnull
+  /**
+   * Build the Sponge {@link CommandSpec} which is used to
+   * tell Sponge how to use the command structure.
+   *
+   * @return the command spec
+   */
+  @NotNull
   public final CommandSpec build() {
     CommandSpec.Builder builder = CommandSpec.builder();
     builder.arguments(this.commandElements.toArray(new CommandElement[0]))
         .children(this.children
             .stream()
-            .sorted(Comparator.comparing(node -> node.getPrimaryAlias()))
-            .collect(Collectors.toMap(CommandNode::getAliases, CommandNode::build)))
+            .collect(Collectors.toMap(CommandNode::getAliases,
+                CommandNode::build,
+                (first, second) -> first,
+                () -> new TreeMap<>(Comparator.comparing(list -> list.get(0))))))
         .description(this.description)
-        .childArgumentParseExceptionFallback(false) // Stops too many argument error messages due to falling back to help subcommand
+        // Stops too many argument error messages due to falling back to help subcommand
+        .childArgumentParseExceptionFallback(false)
         .executor(this);
     if (permission != null) {
       builder.permission(permission.get());
@@ -137,7 +146,7 @@ public abstract class CommandNode implements CommandExecutor {
 
   // Getters and Setters
 
-  @Nonnull
+  @NotNull
   public final String getPrimaryAlias() {
     return aliases.get(0);
   }
@@ -151,25 +160,17 @@ public abstract class CommandNode implements CommandExecutor {
    *
    * @param aliases the aliases with which to call this command
    */
-  protected final void addAliases(@Nonnull String... aliases) {
-    this.aliases.addAll(Arrays.stream(aliases)
-        .filter(Objects::nonNull)
-        .collect(Collectors.toList()));
+  protected final void addAliases(@NotNull String... aliases) {
+    this.aliases.addAll(Arrays.asList(aliases));
   }
 
-  @Nonnull
+  @NotNull
   public final List<CommandNode> getChildren() {
     return children;
   }
 
-  protected final void addChildren(@Nonnull CommandNode... children) {
-    this.children.addAll(Arrays.stream(children)
-        .filter(Objects::nonNull)
-        .collect(Collectors.toList()));
-  }
-
-  public void setComment(@Nonnull Supplier<Text> comment) {
-    this.comment = comment;
+  protected final void addChildren(@NotNull CommandNode... children) {
+    this.children.addAll(Arrays.asList(children));
   }
 
   @Nullable
@@ -177,7 +178,11 @@ public abstract class CommandNode implements CommandExecutor {
     return this.comment.get();
   }
 
-  protected final void addCommandElements(@Nonnull CommandElement... commandElement) {
+  public void setComment(@NotNull Supplier<Text> comment) {
+    this.comment = comment;
+  }
+
+  protected final void addCommandElements(@NotNull CommandElement... commandElement) {
     Objects.requireNonNull(commandElement);
     for (CommandElement element : commandElement) {
       this.commandElements.add(Objects.requireNonNull(element));
@@ -196,15 +201,21 @@ public abstract class CommandNode implements CommandExecutor {
     this.addFlagDescription(new FlagDescription(flag, description, valueFlag));
   }
 
-  @Nonnull
+  /**
+   * Get the full command string by traversing backwards through
+   * the command tree and concatenating each parent class.
+   *
+   * @return the fully qualified command
+   */
+  @NotNull
   public final String getFullCommand() {
     StringBuilder command = new StringBuilder(getPrimaryAlias());
     CommandNode cur = this;
-    while (!cur.isRoot()) {
+    while (cur.parent != null /* is null if is root command */) {
       command.insert(0, cur.parent.getPrimaryAlias() + " ");
       cur = cur.parent;
     }
-    return "/" + command.toString();
+    return "/" + command;
   }
 
 }

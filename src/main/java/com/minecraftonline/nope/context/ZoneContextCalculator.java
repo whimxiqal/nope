@@ -27,16 +27,18 @@ package com.minecraftonline.nope.context;
 
 import com.minecraftonline.nope.Nope;
 import com.minecraftonline.nope.host.Host;
-import org.spongepowered.api.command.CommandSource;
+import java.util.Optional;
+import java.util.Set;
+import javax.annotation.Nonnull;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.service.context.ContextCalculator;
 import org.spongepowered.api.service.permission.Subject;
 
-import javax.annotation.Nonnull;
-import java.util.Optional;
-import java.util.Set;
-
+/**
+ * A context calculator for Nope zones for the purpose of
+ * context-intelligent permission use.
+ */
 public class ZoneContextCalculator implements ContextCalculator<Subject> {
 
   @Override

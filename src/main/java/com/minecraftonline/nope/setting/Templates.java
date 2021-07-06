@@ -26,7 +26,6 @@
 package com.minecraftonline.nope.setting;
 
 import com.google.common.collect.Sets;
-
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.Map;
@@ -34,6 +33,9 @@ import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+/**
+ * Hard-coded {@link Template}s.
+ */
 @SuppressWarnings("unused")
 public final class Templates {
 
@@ -41,7 +43,8 @@ public final class Templates {
     SettingMap map = new SettingMap();
     map.put(Setting.of(SettingLibrary.ENDERDRAGON_GRIEF, SettingValue.of(false)));
     map.put(Setting.of(SettingLibrary.ENDERMAN_GRIEF, SettingValue.of(false)));
-    map.put(Setting.of(SettingLibrary.EXPLOSION_GRIEF_BLACKLIST, SettingValue.of(Sets.newHashSet(SettingLibrary.ExplosiveEnum.values()))));
+    map.put(Setting.of(SettingLibrary.EXPLOSION_GRIEF_BLACKLIST,
+        SettingValue.of(Sets.newHashSet(SettingLibrary.Explosive.values()))));
     map.put(Setting.of(SettingLibrary.FIRE_EFFECT, SettingValue.of(false)));
     map.put(Setting.of(SettingLibrary.FIRE_IGNITION, SettingValue.of(false)));
     map.put(Setting.of(SettingLibrary.LAVA_GRIEF, SettingValue.of(false)));
@@ -73,6 +76,11 @@ public final class Templates {
   private Templates() {
   }
 
+  /**
+   * Get the map of all templates, keyed by their name.
+   *
+   * @return map of templates
+   */
   public static Map<String, SettingMap> getMap() {
     return Arrays.stream(Templates.class.getDeclaredFields())
         .filter(field -> Modifier.isStatic(field.getModifiers()))

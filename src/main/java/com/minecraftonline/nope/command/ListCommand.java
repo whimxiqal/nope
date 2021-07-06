@@ -56,16 +56,18 @@ import com.minecraftonline.nope.command.common.LambdaCommandNode;
 import com.minecraftonline.nope.host.Host;
 import com.minecraftonline.nope.permission.Permissions;
 import com.minecraftonline.nope.util.Format;
+import java.util.Comparator;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.service.pagination.PaginationService;
 import org.spongepowered.api.text.Text;
 
-import java.util.Comparator;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
+/**
+ * A command to list any hosts currently occupied by a player.
+ */
 public class ListCommand extends LambdaCommandNode {
 
   ListCommand(CommandNode parent) {
@@ -76,7 +78,8 @@ public class ListCommand extends LambdaCommandNode {
         "l");
     setExecutor((src, args) -> {
       if (!(src instanceof Player)) {
-        src.sendMessage(Format.error("You must be a player to perform this command. Did you mean 'listall'?"));
+        src.sendMessage(Format.error("You must be a player to perform this command."
+            + " Did you mean 'listall'?"));
         return CommandResult.empty();
       }
       Sponge.getServiceManager().provide(PaginationService.class)
@@ -94,10 +97,10 @@ public class ListCommand extends LambdaCommandNode {
                       Format.note(host.getPriority()), Format.ACCENT, " > ",
                       Format.note(Format.host(host)))))
               .collect(Collectors.toList()))
-              .title(Format.info("Occupied Zones"))
-              .padding(Format.note("="))
-              .build()
-              .sendTo(src);
+          .title(Format.info("Occupied Zones"))
+          .padding(Format.note("="))
+          .build()
+          .sendTo(src);
       return CommandResult.success();
     });
   }

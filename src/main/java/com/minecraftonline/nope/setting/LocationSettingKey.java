@@ -28,16 +28,18 @@ package com.minecraftonline.nope.setting;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonPrimitive;
 import com.minecraftonline.nope.util.Format;
+import javax.annotation.Nonnull;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 
-import javax.annotation.Nonnull;
+/**
+ * A setting to store a {@link Location} as a value.
+ */
+public final class LocationSettingKey extends SettingKey<Location<World>> {
 
-public final class LocationSetting extends SettingKey<Location<World>> {
-
-  public LocationSetting(String id, Location<World> location) {
+  public LocationSettingKey(String id, Location<World> location) {
     super(id, location);
   }
 
@@ -70,11 +72,14 @@ public final class LocationSetting extends SettingKey<Location<World>> {
   @Override
   public Location<World> parse(String data) throws ParseSettingException {
     String[] tokens = data.split(SettingLibrary.SET_SPLIT_REGEX);
-    if (tokens.length != 4) throw new ParseSettingException("This requires exactly 4 arguments: world and position");
+    if (tokens.length != 4) {
+      throw new ParseSettingException("This requires exactly 4 arguments: world and position");
+    }
     try {
       return new Location<>(Sponge.getServer()
           .getWorld(tokens[0])
-          .orElseThrow(() -> new ParseSettingException("The world " + tokens[0] + " doesn't exist")),
+          .orElseThrow(() ->
+              new ParseSettingException("The world " + tokens[0] + " doesn't exist")),
           Integer.parseInt(tokens[1]),
           Integer.parseInt(tokens[2]),
           Integer.parseInt(tokens[3]));

@@ -26,11 +26,10 @@
 package com.minecraftonline.nope.game.listener;
 
 import com.minecraftonline.nope.setting.SettingKey;
+import java.util.function.BiConsumer;
+import javax.annotation.Nonnull;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Event;
-
-import javax.annotation.Nonnull;
-import java.util.function.BiConsumer;
 
 /**
  * An accessibility class for handling events where a player is

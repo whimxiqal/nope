@@ -28,6 +28,11 @@ import com.google.common.collect.Lists;
 import com.minecraftonline.nope.setting.SettingKey;
 import com.minecraftonline.nope.setting.SettingLibrary;
 import com.minecraftonline.nope.setting.SettingValue;
+import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.stream.Collectors;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.args.ArgumentParseException;
 import org.spongepowered.api.command.args.CommandArgs;
@@ -35,12 +40,10 @@ import org.spongepowered.api.command.args.CommandContext;
 import org.spongepowered.api.command.args.CommandElement;
 import org.spongepowered.api.text.Text;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.stream.Collectors;
-
+/**
+ * A {@link CommandElement} to parse a {@link SettingValue}
+ * from an argument.
+ */
 public class SettingDataCommandElement extends CommandElement {
   protected SettingDataCommandElement(@Nullable Text key) {
     super(key);
@@ -48,7 +51,8 @@ public class SettingDataCommandElement extends CommandElement {
 
   @Nullable
   @Override
-  protected SettingValue<?> parseValue(@Nonnull CommandSource source, CommandArgs args) throws ArgumentParseException {
+  protected SettingValue<?> parseValue(@Nonnull CommandSource source,
+                                       CommandArgs args) throws ArgumentParseException {
     String keyId = args.next();
     SettingKey<?> key;
     try {
@@ -65,27 +69,20 @@ public class SettingDataCommandElement extends CommandElement {
       throw new ArgumentParseException(Text.of(e.getMessage()), e, dataString, keyId.length() + 1);
     }
 
-//    if (args.hasNext()) {
-//      String targetGroup = args.next();
-//      try {
-//        flag.setGroup(Flag.TargetGroup.valueOf(targetGroup.toUpperCase()));
-//      } catch (IllegalArgumentException e) {
-//        throw new ArgumentParseException(Text.of("Invalid Target Group"), targetGroup, settingName.length() + data.length() + targetGroup.length() + 2); // 2 for spaces
-//      }
-//    }
-
     return SettingValue.of(value);
   }
 
   @Nonnull
   @Override
-  public List<String> complete(@Nonnull CommandSource src, CommandArgs args, @Nonnull CommandContext context) {
+  public List<String> complete(@Nonnull CommandSource src,
+                               CommandArgs args,
+                               @Nonnull CommandContext context) {
     try {
       if (args.hasNext() && args.peek().isEmpty()) {
         return SettingLibrary.getAll()
-                .stream()
-                .map(SettingKey::getId)
-                .collect(Collectors.toList());
+            .stream()
+            .map(SettingKey::getId)
+            .collect(Collectors.toList());
       }
     } catch (ArgumentParseException e) {
       e.printStackTrace();
