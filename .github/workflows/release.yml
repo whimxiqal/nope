@@ -3,7 +3,7 @@ name: Release
 on:
   push:
     tags:
-      - '*'
+    - '*'
 
 jobs:
 
@@ -28,3 +28,4 @@ jobs:
         with:
           artifacts: "*.jar"
           token: ${{ secrets.GITHUB_TOKEN }}
+          draft: true
