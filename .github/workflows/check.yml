@@ -3,7 +3,7 @@ name: Check Code
 on:
   push:
     branches:
-    - 'master'
+    - '!master'
   pull_request:
     branches:
     - '*'
@@ -39,5 +39,3 @@ jobs:
         run: chmod +x gradlew
       - name: Build with Gradle
         run: ./gradlew build
-      - name: Test with Gradle
-        run: ./gradlew test

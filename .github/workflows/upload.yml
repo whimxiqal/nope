@@ -1,15 +1,15 @@
-name: Release
+name: Upload
 
 on:
   push:
-    tags:
-    - '*'
+    branches:
+    - 'master'
 
 jobs:
 
-  build-and-release:
+  build-and-upload:
     runs-on: ubuntu-latest
-    name: Build and Release
+    name: Build and Upload
     steps:
       - uses: actions/checkout@v2
       - name: Set up JDK 8
@@ -21,13 +21,8 @@ jobs:
         run: chmod +x gradlew
       - name: Build with Gradle
         run: ./gradlew build
-      - name: Upload artifact
+      - name: Upload
         uses: actions/upload-artifact@v2
         with:
-          path: "build/libs/*.jar"
-      - name: Release
-        uses: ncipollo/release-action@v1
-        with:
-          artifacts: "build/libs/*.jar"
-          token: ${{ secrets.GITHUB_TOKEN }}
-          draft: true
+          path: build/libs/**
+          if-no-files-found: error
