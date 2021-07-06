@@ -25,8 +25,8 @@
 
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import com.minecraftonline.nope.structures.Volume;
-import com.minecraftonline.nope.structures.VolumeTree;
+import com.minecraftonline.nope.common.struct.Volume;
+import com.minecraftonline.nope.common.struct.VolumeTree;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;

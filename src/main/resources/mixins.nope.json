@@ -1,12 +1,12 @@
 {
   "required": true,
   "minVersion": "0.7.10",
-  "package": "com.minecraftonline.nope.mixin",
+  "package": "com.minecraftonline.nope.sponge.mixin",
   "refmap": "mixins.nope.refmap.json",
   "target": "@env(DEFAULT)",
   "compatibilityLevel": "JAVA_8",
   "mixins": [
-    "collision.ScorePlayerTeamMixin",
-    "collision.ServerScoreboardCollisionMixin"
+    "com.minecraftonline.nope.sponge.collision.ScorePlayerTeamMixin",
+    "com.minecraftonline.nope.sponge.collision.ServerScoreboardCollisionMixin"
   ]
 }
