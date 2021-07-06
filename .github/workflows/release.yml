@@ -36,6 +36,6 @@ jobs:
       - name: Release
         uses: ncipollo/release-action@v1
         with:
-          artifacts: "*.jar"
+          artifacts: "**/*.jar"
           token: ${{ secrets.GITHUB_TOKEN }}
           draft: true
