@@ -21,8 +21,8 @@ jobs:
         run: chmod +x gradlew
       - name: Build with Gradle
         run: ./gradlew build
-      - name: Test with Gradle
-        run: ./gradlew test
+      - name: Upload artifact
+        uses: actions/upload-artifact@v2
       - name: Release
         uses: ncipollo/release-action@v1
         with:
