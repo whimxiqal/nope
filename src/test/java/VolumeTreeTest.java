@@ -189,9 +189,8 @@ public class VolumeTreeTest {
       for (int y = 0; y < boardSizeY; y++) {
         for (int x = 0; x < boardSizeX; x++) {
           if (answers[x][y][z] != solutions[x][y][z]) {
-            System.out.println(String.format(
-                "Wrong answer at (%d, %d, %d) -- Answer: %d, Solution: %d",
-                x, y, z, answers[x][y][z], solutions[x][y][z]));
+            System.out.printf("Wrong answer at (%d, %d, %d) -- Answer: %d, Solution: %d%n",
+                x, y, z, answers[x][y][z], solutions[x][y][z]);
             failed++;
           } else {
             succeeded++;
@@ -221,7 +220,7 @@ public class VolumeTreeTest {
     int sizeX;
     int sizeY;
     int sizeZ;
-    for (Integer i = 0; i < ZONE_COUNT; i++) {
+    for (int i = 0; i < ZONE_COUNT; i++) {
       locationX = random.nextInt(WORLD_X_WIDTH - ZONE_MAX_X_WIDTH + 1);
       locationY = random.nextInt(WORLD_Y_WIDTH - ZONE_MAX_Y_WIDTH + 1);
       locationZ = random.nextInt(WORLD_Z_WIDTH - ZONE_MAX_Z_WIDTH + 1);
@@ -317,10 +316,10 @@ public class VolumeTreeTest {
     for (int i = 0; i < TEST_POINT_COUNT; i++) {
       if (answers.get(i).size() != solutions.get(i).size() || !answers.get(i).containsAll(solutions.get(i))) {
         failed++;
-        System.out.println(String.format("Wrong Answer: Point %d -- Answer: %s, Solution: %s\n",
+        System.out.printf("Wrong Answer: Point %d -- Answer: %s, Solution: %s\n%n",
             i,
             Arrays.toString(answers.get(i).toArray()),
-            Arrays.toString(solutions.get(i).toArray())));
+            Arrays.toString(solutions.get(i).toArray()));
       } else {
         succeeded++;
       }
