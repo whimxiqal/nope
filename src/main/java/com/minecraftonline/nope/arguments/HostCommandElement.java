@@ -67,6 +67,7 @@ class HostCommandElement extends CommandElement {
     throw new ArgumentParseException(Text.of("Zone ", Format.note(hostName), " does not exist!"),
         hostName,
         hostName.length());
+    
   }
 
   @Nonnull
