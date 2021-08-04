@@ -25,7 +25,6 @@
 
 package com.minecraftonline.nope.common.setting;
 
-import com.minecraftonline.nope.sponge.command.ApplyCommand;
 import java.util.function.Supplier;
 import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
@@ -34,7 +33,7 @@ import org.jetbrains.annotations.NotNull;
  * A "template" which stores a {@link SettingMap} to represent
  * a collection of settings that may be applied to a host
  * to achieve some common desired behavior.
- * Templates are applied with the {@link ApplyCommand}.
+ * Templates are applied with commands.
  * There is currently no way for templates to be created dynamically in game;
  * all templates are hard-coded.
  */

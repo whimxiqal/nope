@@ -28,7 +28,6 @@ package com.minecraftonline.nope.common.setting;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonPrimitive;
 import com.minecraftonline.nope.common.struct.Location;
-import com.minecraftonline.nope.sponge.util.Format;
 import java.util.UUID;
 import org.jetbrains.annotations.NotNull;
 
@@ -61,11 +60,11 @@ public final class LocationSettingKey extends SettingKey<Location> {
   public String print(Location data) {
     return "world:" + data.getWorldUuid().toString()
         + ", "
-        + Format.keyValue("x:", String.valueOf(data.getPosX()))
+        + "x:" + data.getPosX()
         + ", "
-        + Format.keyValue("y:", String.valueOf(data.getPosY()))
+        + "y:" + data.getPosY()
         + ", "
-        + Format.keyValue("z:", String.valueOf(data.getPosZ()));
+        + "z:" + data.getPosZ();
   }
 
   @Override

@@ -34,7 +34,6 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.minecraftonline.nope.common.Nope;
 import com.minecraftonline.nope.common.struct.Vector3d;
-import com.minecraftonline.nope.sponge.SpongeNope;
 import com.minecraftonline.nope.common.update.SettingUpdates;
 import java.lang.annotation.Annotation;
 import java.lang.annotation.ElementType;
