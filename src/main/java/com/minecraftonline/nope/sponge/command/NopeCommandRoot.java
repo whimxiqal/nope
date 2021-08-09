@@ -49,23 +49,20 @@
 
 package com.minecraftonline.nope.sponge.command;
 
+import com.minecraftonline.nope.common.host.Host;
+import com.minecraftonline.nope.common.host.WorldHost;
+import com.minecraftonline.nope.common.struct.FlexibleHashQueueVolumeTree;
 import com.minecraftonline.nope.sponge.SpongeNope;
 import com.minecraftonline.nope.sponge.command.general.CommandNode;
-import com.minecraftonline.nope.common.host.Host;
-import com.minecraftonline.nope.common.host.HostTree;
-import com.minecraftonline.nope.common.struct.FlexibleHashQueueVolumeTree;
-import com.minecraftonline.nope.sponge.util.Format;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.Optional;
+import com.minecraftonline.nope.sponge.util.SpongeFormatter;
+import java.util.Objects;
 import javax.annotation.Nonnull;
+import net.kyori.adventure.audience.Audience;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.spongepowered.api.command.CommandResult;
-import org.spongepowered.api.command.CommandSource;
-import org.spongepowered.api.command.args.CommandContext;
+import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
-import org.spongepowered.api.text.format.TextStyles;
 
 /**
  * An extension of a command node to represent Nope's root
@@ -79,7 +76,7 @@ public class NopeCommandRoot extends CommandNode {
   public NopeCommandRoot() {
     super(null,
         null,
-        Text.of("All commands pertaining to Nope"),
+        "All commands pertaining to Nope",
         "nope");
     addChildren(new ApplyCommand(this));
     addChildren(new ClearCommand(this));
@@ -106,76 +103,44 @@ public class NopeCommandRoot extends CommandNode {
 
   @Nonnull
   @Override
-  public CommandResult execute(CommandSource src, @Nonnull CommandContext args) {
-    src.sendMessage(Text.of(Format.note("==========================")));
-    src.sendMessage(Text.of(
-        Format.THEME, TextStyles.BOLD, String.format(
-            "Nope v%s",
-            SpongeNope.getInstance().getPluginContainer().getVersion().orElse("unknown")),
-        " ",
-        TextStyles.RESET, Format.note("by MinecraftOnline")));
-    src.sendMessage(Text.of(
-        TextColors.AQUA, "Authors: ",
-        Format.note(String.join(
-            ", ",
-            SpongeNope.getInstance().getPluginContainer().getAuthors()))));
-    src.sendMessage(Format.note(
-        "Check out the",
-        " ",
-        Format.url("website", SpongeNope.getInstance().getPluginContainer().getUrl().orElse("unknown")),
-        " ",
-        "or",
-        " ",
-        Format.url("source code", SpongeNope.REPO_URL),
-        "."));
-    assert this.getHelpCommand() != null;
-    src.sendMessage(Format.note(
-        "Try the",
-        " ",
-        Format.command(
-            "help",
-            this.getHelpCommand().getFullCommand(),
-            Text.EMPTY),
-        " ",
-        "command."));
-    // Cache Size Info (testing)
-
-    showCacheSize(src);
+  public CommandResult execute(CommandContext context) {
+    Audience audience = context.cause().audience();
+    audience.sendMessage(Component.text("==========================").color(SpongeFormatter.DULL));
+    audience.sendMessage(Component.text("Nope v" + SpongeNope.instance().getPluginContainer().metadata().version())
+        .color(SpongeFormatter.THEME)
+        .decorate(TextDecoration.BOLD)
+        .append(Component.text(" by MinecraftOnline")
+            .color(SpongeFormatter.DULL)
+            .decorate(TextDecoration.ITALIC)));
+    audience.sendMessage(formatter().keyValue("Authors:", "PietElite, tyhdefu"));
+    audience.sendMessage(Component.text()
+        .append(Component.text("Check out the "))
+        .append(formatter().url("website", "https://www.minecraftonline.com/"))
+        .append(Component.text(" or "))
+        .append(formatter().url("source", "https://github.com/pietelite/nope/"))
+        .build());
+    audience.sendMessage(Component.text()
+        .append(Component.text("Try the "))
+        .append(formatter().command("help", Objects.requireNonNull(this.getHelpCommand()).getFullCommand(), Component.text("Show a helpful menu of commands")))
+        .build());
+    showCacheSize(context);
     return CommandResult.success();
   }
 
-  void showCacheSize(CommandSource src) {
-    if (src instanceof Player) {
-      Host worldHost = SpongeNope.getInstance()
+  void showCacheSize(CommandContext context) {
+    if (context.cause().root() instanceof Player) {
+      Host worldHost = SpongeNope.instance()
           .getHostTreeAdapter()
-          .getWorldHost(((Player) src).getLocation().getExtent().getUniqueId());
-      if (worldHost instanceof HostTree.WorldHost) {
-        if (((HostTree.WorldHost) worldHost).getZoneTree()
+          .getWorldHost(((Player) context.cause().root()).serverLocation().world().key().asString());
+      if (worldHost instanceof WorldHost) {
+        if (((WorldHost) worldHost).getZoneTree()
             instanceof FlexibleHashQueueVolumeTree) {
-          src.sendMessage(Text.of(TextColors.DARK_GRAY, "Cache size: ",
-              ((FlexibleHashQueueVolumeTree<?, ?>)
-                  ((HostTree.WorldHost) worldHost).getZoneTree()).getCacheSize()));
+          context.cause().audience().sendMessage(Component.text("Cache size: "
+              + ((FlexibleHashQueueVolumeTree<?, ?>)
+              ((WorldHost) worldHost).getZoneTree()).getCacheSize()).color(SpongeFormatter.DULL));
         }
       }
     }
-  }
-
-  static Optional<Host> inferHost(CommandSource src) {
-    if (!(src instanceof Player)) {
-      src.sendMessage(Format.error("Can't infer zone! "
-          + "Please specify the target zone."));
-      return Optional.empty();
-    }
-    Player player = (Player) src;
-    Collection<Host> containing = SpongeNope.getInstance()
-        .getHostTreeAdapter()
-        .getContainingHosts(player.getLocation());
-    if (containing.isEmpty()) {
-      src.sendMessage(Format.error("Can't infer zone! "
-          + "Please specify the target zone."));
-      return Optional.empty();
-    }
-    return containing.stream().max(Comparator.comparing(Host::getPriority));
   }
 
 }

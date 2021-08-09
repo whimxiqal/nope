@@ -49,87 +49,66 @@
 
 package com.minecraftonline.nope.sponge.command;
 
-import com.minecraftonline.nope.sponge.SpongeNope;
-import com.minecraftonline.nope.sponge.command.general.arguments.NopeArguments;
-import com.minecraftonline.nope.sponge.command.general.CommandNode;
-import com.minecraftonline.nope.sponge.command.general.FlagDescription;
-import com.minecraftonline.nope.sponge.command.general.LambdaCommandNode;
-import com.minecraftonline.nope.sponge.game.listener.DynamicSettingListeners;
-import com.minecraftonline.nope.common.host.Host;
 import com.minecraftonline.nope.common.host.VolumeHost;
-import com.minecraftonline.nope.sponge.key.zonewand.ZoneWandHandler;
 import com.minecraftonline.nope.common.permission.Permissions;
-import com.minecraftonline.nope.sponge.util.Format;
-import java.util.Comparator;
+import com.minecraftonline.nope.sponge.SpongeNope;
+import com.minecraftonline.nope.sponge.command.general.CommandErrors;
+import com.minecraftonline.nope.sponge.command.general.CommandNode;
+import com.minecraftonline.nope.sponge.command.general.arguments.NopeFlags;
+import com.minecraftonline.nope.sponge.command.general.arguments.NopeParameterKeys;
+import com.minecraftonline.nope.sponge.command.general.arguments.NopeParameters;
+import com.minecraftonline.nope.sponge.listener.DynamicSettingListeners;
+import com.minecraftonline.nope.sponge.wand.Selection;
 import org.spongepowered.api.command.CommandResult;
-import org.spongepowered.api.command.args.GenericArguments;
+import org.spongepowered.api.command.exception.CommandException;
+import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.text.Text;
 
 /**
  * Command to create a zone with a current Zone wand selection
  * and a given name.
  */
-public class CreateCommand extends LambdaCommandNode {
+public class CreateCommand extends CommandNode {
 
   CreateCommand(CommandNode parent) {
     super(parent,
         Permissions.COMMAND_CREATE,
-        Text.of("Create a zone with current selection and given name"),
+        "Create a zone with current selection and given name",
         "create",
         "c", "add");
-    addCommandElements(
-        GenericArguments.onlyOne(GenericArguments.string(Text.of("name"))),
-        NopeArguments.zoneLocation(Text.of("selection")),
-        GenericArguments.flags()
-            .valueFlag(GenericArguments.integer(Text.of("priority")), "p")
-            .buildWith(GenericArguments.none()));
-    addFlagDescription(FlagDescription.PRIORITY);
-    addChildren(new CreateSlabCommand(this));
-    setExecutor((src, args) -> {
-      if (!(src instanceof Player)) {
-        return CommandResult.empty();
-      }
+    addParameter(NopeParameters.NAME);
+    addParameter(NopeParameters.SELECTION);
+    addFlag(NopeFlags.PRIORITY_FLAG);
+  }
 
-      Player player = (Player) src;
-      String name = args.requireOne(Text.of("name"));
-      ZoneWandHandler.Selection selection = args.requireOne(Text.of("selection"));
-      int priority = args.<Integer>getOne("priority").orElse(
-          SpongeNope.getInstance()
-              .getHostTreeAdapter()
-              .getContainingHosts(player.getLocation())
-              .stream().max(Comparator.comparingInt(Host::getPriority))
-              .map(host -> host.getPriority() + 1).orElse(0));
+  @Override
+  public CommandResult execute(CommandContext context) throws CommandException {
+    if (!(context.cause().root() instanceof Player)) {
+      return CommandResult.error(CommandErrors.ONLY_PLAYERS.get());
+    }
 
-      try {
-        if (selection.getWorld() == null
-            || selection.getMin() == null
-            || selection.getMax() == null) {
-          // This shouldn't happen
-          src.sendMessage(Format.error("Selection is malformed"));
-          return CommandResult.empty();
-        }
-        VolumeHost zone = SpongeNope.getInstance().getHostTreeAdapter().addZone(
-            name,
-            selection.getWorld().getUniqueId(),
-            selection.getMin(),
-            selection.getMax(),
-            priority
-        );
-        if (zone == null) {
-          src.sendMessage(Format.error("Could not create zone"));
-          return CommandResult.empty();
-        }
-        SpongeNope.getInstance().saveState();
-        DynamicSettingListeners.register();
-        src.sendMessage(Format.success("Successfully created zone ",
-            Format.note(zone.getName()), "!"));
-        SpongeNope.getInstance().getZoneWandHandler().getSelectionMap().remove(player.getUniqueId());
-      } catch (IllegalArgumentException e) {
-        src.sendMessage(Format.error("Could not create zone: " + e.getMessage()));
-        return CommandResult.empty();
+    Player player = (Player) context.cause().root();
+    String name = context.requireOne(NopeParameterKeys.NAME);
+    Selection selection = context.requireOne(NopeParameterKeys.SELECTION);
+    int priority = context.requireOne(NopeParameterKeys.PRIORITY);
+
+    try {
+      VolumeHost zone = SpongeNope.instance().getHostTreeAdapter().addZone(
+          name,
+          selection.getWorldKey().asString(),
+          selection.minPosition(),
+          selection.maxPosition(),
+          priority
+      );
+      if (zone == null) {
+        return CommandResult.error(formatter().error("Could not create zone"));
       }
-      return CommandResult.success();
-    });
+      SpongeNope.instance().saveState();
+      DynamicSettingListeners.register();
+      player.sendMessage(formatter().success("Successfully created zone ___!", zone.getName()));
+    } catch (IllegalArgumentException e) {
+      return CommandResult.error(formatter().error(e.getMessage()));
+    }
+    return CommandResult.success();
   }
 }

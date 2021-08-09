@@ -25,20 +25,23 @@
 
 package com.minecraftonline.nope.sponge.util;
 
-import com.flowpowered.math.vector.Vector3d;
-import com.minecraftonline.nope.sponge.SpongeNope;
 import com.minecraftonline.nope.common.struct.Volume;
+import com.minecraftonline.nope.sponge.SpongeNope;
 import java.util.Random;
+import java.util.concurrent.TimeUnit;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.effect.particle.ParticleEffect;
 import org.spongepowered.api.effect.particle.ParticleTypes;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.scheduler.TaskExecutorService;
+import org.spongepowered.math.vector.Vector3d;
 
 /**
  * Utility class for minecraft effects.
  */
 public class EffectsUtil {
 
+  private static TaskExecutorService VOLUME_PARTICLE_TASK_EXECUTOR;
   /**
    * Display a volume in a world given specific tolerances.
    *
@@ -48,20 +51,24 @@ public class EffectsUtil {
    * @return true the volume was close enough to be at least partially displayed
    */
   public static boolean showVolume(Volume volume, Player player, int proximity) {
+    if (VOLUME_PARTICLE_TASK_EXECUTOR == null) {
+      VOLUME_PARTICLE_TASK_EXECUTOR = Sponge.asyncScheduler()
+          .createExecutor(SpongeNope.instance().getPluginContainer());
+    }
     final int[][] volumePos = new int[][]{
         {volume.getMinX(), volume.getMinY(), volume.getMinZ()},
         {volume.getMaxX(), volume.getMaxY(), volume.getMaxZ()}
     };
     final int[][] playerPos = new int[][]{
         {
-            player.getLocation().getBlockX() - proximity,
-            player.getLocation().getBlockY() - proximity,
-            player.getLocation().getBlockZ() - proximity
+            player.location().blockX() - proximity,
+            player.location().blockY() - proximity,
+            player.location().blockZ() - proximity
         },
         {
-            player.getLocation().getBlockX() + proximity,
-            player.getLocation().getBlockY() + proximity,
-            player.getLocation().getBlockZ() + proximity
+            player.location().blockX() + proximity,
+            player.location().blockY() + proximity,
+            player.location().blockZ() + proximity
         }
     };
     final int particleCount = 4;
@@ -88,18 +95,14 @@ public class EffectsUtil {
               Vector3d particleLocation = new Vector3d(vals[(3 - i) % 3],
                   vals[(4 - i) % 3],
                   vals[(5 - i) % 3]);
-              if (particleLocation.distanceSquared(player.getLocation().getPosition())
+              if (particleLocation.distanceSquared(player.location().position())
                   < proximitySquared) {
                 particleDisplayed = true;
-                Sponge.getScheduler().createTaskBuilder()
-                    .async()
-                    .delayTicks(random.nextInt(60))
-                    .execute(() ->
-                        player.spawnParticles(ParticleEffect.builder().type(ParticleTypes.CLOUD)
-                                .quantity(1)
-                                .build(),
-                            particleLocation))
-                    .submit(SpongeNope.getInstance());
+                VOLUME_PARTICLE_TASK_EXECUTOR.schedule(() ->
+                    player.spawnParticles(ParticleEffect.builder().type(ParticleTypes.CLOUD)
+                            .quantity(1)
+                            .build(),
+                        particleLocation), random.nextInt(3000), TimeUnit.MILLISECONDS);
               }
             }
           }

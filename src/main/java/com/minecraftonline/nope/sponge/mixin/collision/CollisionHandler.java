@@ -43,7 +43,7 @@ public class CollisionHandler {
    * @param player the player
    */
   public void disableCollision(Player player) {
-    if (disabledCollision.add(player.getUniqueId())) {
+    if (disabledCollision.add(player.uniqueId())) {
       CollisionUtil.disableCollision(player);
     }
   }
@@ -54,16 +54,16 @@ public class CollisionHandler {
    * @param player the player
    */
   public void enableCollision(Player player) {
-    if (disabledCollision.remove(player.getUniqueId())) {
+    if (disabledCollision.remove(player.uniqueId())) {
       CollisionUtil.enableCollision(player);
     }
   }
 
   public void logOut(Player player) {
-    disabledCollision.remove(player.getUniqueId());
+    disabledCollision.remove(player.uniqueId());
   }
 
   public boolean isCollisionDisabled(Player player) {
-    return this.disabledCollision.contains(player.getUniqueId());
+    return this.disabledCollision.contains(player.uniqueId());
   }
 }

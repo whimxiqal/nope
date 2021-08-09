@@ -50,59 +50,50 @@
 
 package com.minecraftonline.nope.sponge.command;
 
-import com.minecraftonline.nope.sponge.SpongeNope;
-import com.minecraftonline.nope.sponge.command.general.CommandNode;
-import com.minecraftonline.nope.sponge.command.general.LambdaCommandNode;
 import com.minecraftonline.nope.common.host.Host;
 import com.minecraftonline.nope.common.permission.Permissions;
-import com.minecraftonline.nope.sponge.util.Format;
+import com.minecraftonline.nope.sponge.SpongeNope;
+import com.minecraftonline.nope.sponge.command.general.CommandNode;
+import com.minecraftonline.nope.sponge.command.general.PlayerOnlyCommandNode;
+import com.minecraftonline.nope.sponge.util.AdapterUtil;
 import java.util.Comparator;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import net.kyori.adventure.text.Component;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandResult;
+import org.spongepowered.api.command.exception.CommandException;
+import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.service.pagination.PaginationService;
-import org.spongepowered.api.text.Text;
 
 /**
  * A command to list any hosts currently occupied by a player.
  */
-public class ListCommand extends LambdaCommandNode {
+public class ListCommand extends PlayerOnlyCommandNode {
 
   ListCommand(CommandNode parent) {
     super(parent,
         Permissions.COMMAND_LIST,
-        Text.of("List any currently occupied zones"),
+        "List any currently occupied zones",
         "list",
         "l");
-    setExecutor((src, args) -> {
-      if (!(src instanceof Player)) {
-        src.sendMessage(Format.error("You must be a player to perform this command."
-            + " Did you mean 'listall'?"));
-        return CommandResult.empty();
-      }
-      Sponge.getServiceManager().provide(PaginationService.class)
-          .orElseThrow(() -> new IllegalStateException("No pagination service found!"))
-          .builder()
-          .contents(Stream.concat(Stream.of(
-              Text.of(Format.ACCENT, "> ",
-                  Format.note("Priority"), Format.ACCENT, " > ",
-                  Format.note("Name"))),
-              SpongeNope.getInstance().getHostTreeAdapter()
-                  .getContainingHosts(((Player) src).getLocation())
-                  .stream()
-                  .sorted(Comparator.comparing(Host::getPriority))
-                  .map(host -> Text.of(Format.ACCENT, "> ",
-                      Format.note(host.getPriority()), Format.ACCENT, " > ",
-                      Format.note(Format.host(host)))))
-              .collect(Collectors.toList()))
-          .title(Format.info("Occupied Zones"))
-          .padding(Format.note("="))
-          .build()
-          .sendTo(src);
-      return CommandResult.success();
-    });
   }
 
+
+  @Override
+  public CommandResult execute(CommandContext context, Player cause) throws CommandException {
+    Sponge.serviceProvider().paginationService()
+        .builder()
+        .header(formatter().accent("> ___ > ___", "Priority", "Name"))
+        .contents(SpongeNope.instance().getHostTreeAdapter()
+            .getContainingHosts(AdapterUtil.adaptLocation(cause.serverLocation()))
+            .stream()
+            .sorted(Comparator.comparing(Host::getPriority))
+            .map(host -> formatter().accent("> ___ > ___", host.getPriority(), formatter().host(host)))
+            .collect(Collectors.toList()))
+        .title(Component.text("Occupied Zones"))
+        .padding(formatter().accent("="))
+        .build()
+        .sendTo(cause);
+    return CommandResult.success();
+  }
 }

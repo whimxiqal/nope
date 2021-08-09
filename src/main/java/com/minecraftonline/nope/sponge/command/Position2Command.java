@@ -50,58 +50,47 @@
 
 package com.minecraftonline.nope.sponge.command;
 
+import com.minecraftonline.nope.common.permission.Permissions;
 import com.minecraftonline.nope.sponge.SpongeNope;
 import com.minecraftonline.nope.sponge.command.general.CommandNode;
-import com.minecraftonline.nope.sponge.command.general.LambdaCommandNode;
-import com.minecraftonline.nope.sponge.key.zonewand.ZoneWandHandler;
-import com.minecraftonline.nope.common.permission.Permissions;
-import com.minecraftonline.nope.sponge.util.Format;
+import com.minecraftonline.nope.sponge.command.general.PlayerOnlyCommandNode;
+import com.minecraftonline.nope.sponge.wand.Selection;
+import net.kyori.adventure.text.Component;
 import org.spongepowered.api.command.CommandResult;
+import org.spongepowered.api.command.exception.CommandException;
+import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.action.TextActions;
 
 /**
- * The command to set position 2 of the player's nope selection.
+ * The command to set position 1 of the player's nope selection.
  */
-public class Position2Command extends LambdaCommandNode {
+public class Position2Command extends PlayerOnlyCommandNode {
 
   /**
    * Default constructor.
    *
-   * @param parent the parent command
+   * @param parent the parent class
    */
   public Position2Command(CommandNode parent) {
     super(parent,
         Permissions.COMMAND_CREATE,
-        Text.of("Set position 2 of the nope selection"),
+        "Set position 2 of the nope selection",
         "pos2");
-    setComment(() -> Format.note("You can also use the nope wand")
-        .toBuilder()
-        .onClick(TextActions.suggestCommand(SpongeNope.getInstance().getCommandTree()
-            .findNode(WandCommand.class)
-            .orElseThrow(() ->
-                new RuntimeException("Wand command is not present in the Nope command tree!"))
-            .getFullCommand()))
+    setComment(() -> Component.text()
+        .append(Component.text("You can also use the "))
+        .append(formatter().commandSuggest("nope wand",
+            getRelatedNode(WandCommand.class).getFullCommand(),
+            null))
         .build());
-    setExecutor((src, args) -> {
-      if (!(src instanceof Player)) {
-        src.sendMessage(Format.error("You must be in game to teleport"));
-        return CommandResult.empty();
-      }
+  }
 
-      Player player = (Player) src;
-      SpongeNope.getInstance()
-          .getZoneWandHandler()
-          .getSelectionMap()
-          .putIfAbsent(player.getUniqueId(), new ZoneWandHandler.Selection());
+  @Override
+  public CommandResult execute(CommandContext context, Player player) throws CommandException {
+    SpongeNope.instance()
+        .getSelectionHandler()
+        .draft(player.uniqueId())
+        .setPosition2(new Selection.Position(player.serverLocation()));
 
-      SpongeNope.getInstance()
-          .getZoneWandHandler()
-          .getSelectionMap()
-          .get(player.getUniqueId()).setPos2(player.getLocation(), player);
-
-      return CommandResult.success();
-    });
+    return CommandResult.success();
   }
 }

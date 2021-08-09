@@ -23,7 +23,7 @@
  *
  */
 
-package com.minecraftonline.nope.sponge.game.movement;
+package com.minecraftonline.nope.sponge.movement;
 
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;

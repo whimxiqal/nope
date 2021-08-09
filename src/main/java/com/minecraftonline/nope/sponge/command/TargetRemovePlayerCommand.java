@@ -51,10 +51,9 @@
 package com.minecraftonline.nope.sponge.command;
 
 import com.minecraftonline.nope.sponge.SpongeNope;
-import com.minecraftonline.nope.sponge.command.general.arguments.NopeArguments;
+import com.minecraftonline.nope.sponge.command.general.arguments.NopeParameters;
 import com.minecraftonline.nope.sponge.command.general.CommandNode;
 import com.minecraftonline.nope.sponge.command.general.FlagDescription;
-import com.minecraftonline.nope.sponge.command.general.LambdaCommandNode;
 import com.minecraftonline.nope.common.host.Host;
 import com.minecraftonline.nope.common.permission.Permissions;
 import com.minecraftonline.nope.common.setting.SettingKey;
@@ -65,19 +64,21 @@ import java.util.concurrent.ExecutionException;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.args.GenericArguments;
+import org.spongepowered.api.command.exception.CommandException;
+import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.text.Text;
 
-class TargetRemovePlayerCommand extends LambdaCommandNode {
+class TargetRemovePlayerCommand extends CommandNode {
   public TargetRemovePlayerCommand(CommandNode parent) {
     super(parent,
         Permissions.COMMAND_EDIT,
         Text.of("Remove a user to the whitelist or blacklist"),
         "player");
     addCommandElements(GenericArguments.flags()
-            .valueFlag(NopeArguments.host(Text.of("zone")), "z", "-zone")
+            .valueFlag(NopeParameters.host(Text.of("zone")), "z", "-zone")
             .buildWith(GenericArguments.none()),
-        NopeArguments.settingKey(Text.of("setting")),
+        NopeParameters.settingKey(Text.of("setting")),
         GenericArguments.string(Text.of("player")));
     addFlagDescription(FlagDescription.ZONE);
     setExecutor((src, args) -> {
@@ -128,5 +129,10 @@ class TargetRemovePlayerCommand extends LambdaCommandNode {
           .submit(SpongeNope.getInstance());
       return CommandResult.success();
     });
+  }
+
+  @Override
+  public CommandResult execute(CommandContext context) throws CommandException {
+    return null;
   }
 }

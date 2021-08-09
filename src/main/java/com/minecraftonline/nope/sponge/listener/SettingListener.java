@@ -23,7 +23,7 @@
  *
  */
 
-package com.minecraftonline.nope.sponge.game.listener;
+package com.minecraftonline.nope.sponge.listener;
 
 import com.minecraftonline.nope.sponge.SpongeNope;
 import com.minecraftonline.nope.common.setting.Setting;

@@ -23,7 +23,7 @@
  *
  */
 
-package com.minecraftonline.nope.sponge.game.listener;
+package com.minecraftonline.nope.sponge.listener;
 
 import com.minecraftonline.nope.common.setting.SettingKey;
 import java.util.function.BiConsumer;

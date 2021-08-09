@@ -65,13 +65,13 @@ public interface HostTreeAdapter {
   Host getGlobalHost();
 
   /**
-   * Get the WorldHost associated with this World UUID.
+   * Get the WorldHost associated with this world's id.
    *
-   * @param worldUuid the UUID of the world
+   * @param worldId the id of the world
    * @return the associated WorldHost, or null if none exists
    */
   @Nullable
-  Host getWorldHost(final UUID worldUuid);
+  Host getWorldHost(final String worldId);
 
   /**
    * Get the Zone associated with this Zone.
@@ -93,26 +93,26 @@ public interface HostTreeAdapter {
   /**
    * Get all the zone within the world of the given id.
    *
-   * @param worldUuid the UUID of the world
+   * @param worldId the id of the world
    * @return the associated Zones
-   * @throws IllegalArgumentException if no world exists with that UUID
+   * @throws IllegalArgumentException if no world exists with that id
    */
   @NotNull
   @SuppressWarnings("unused")
-  Collection<VolumeHost> getZones(final UUID worldUuid) throws IllegalArgumentException;
+  Collection<VolumeHost> getZones(final String worldId) throws IllegalArgumentException;
 
   /**
    * Add a zone to the HostTree with the given parameters.
    * The name must be unique. This method fails if it is called with a name
    * which is already in use.
    *
-   * @param name      the unique name of this zone,
-   *                  which cannot be formatted like a WorldHost name
-   * @param worldUuid the uuid of the world in which this zone resides
-   * @param pos1      a point which defines this zone
-   * @param pos2      another point which defines this zone
-   * @param priority  a priority level. The higher the priority, the larger the precedence.
-   *                  Two intersecting zones may not have the same priority level.
+   * @param name     the unique name of this zone,
+   *                 which cannot be formatted like a WorldHost name
+   * @param worldId  the id of the world in which this zone resides
+   * @param pos1     a point which defines this zone
+   * @param pos2     another point which defines this zone
+   * @param priority a priority level. The higher the priority, the larger the precedence.
+   *                 Two intersecting zones may not have the same priority level.
    * @return the created zone, or null if it can't be created
    * @throws IllegalArgumentException if the inputs will lead to an invalid HostTree state,
    *                                  like if the name is not unique or the priority is the same
@@ -120,7 +120,7 @@ public interface HostTreeAdapter {
    */
   @Nullable
   VolumeHost addZone(@NotNull final String name,
-                     @NotNull final UUID worldUuid,
+                     @NotNull final String worldId,
                      @NotNull final Vector3i pos1,
                      @NotNull final Vector3i pos2,
                      int priority)
@@ -170,8 +170,8 @@ public interface HostTreeAdapter {
    * @param host the host which may have a redundant key
    * @param key  a setting key which may be redundant
    * @return the host which causes the key to be redundant on the input Host.
-   *         Returns null if it is not redundant and returns the original host
-   *         if it is redundant because of the plugin's default value
+   * Returns null if it is not redundant and returns the original host
+   * if it is redundant because of the plugin's default value
    */
   @Nullable
   Host isRedundant(Host host, SettingKey<?> key);
@@ -183,7 +183,7 @@ public interface HostTreeAdapter {
    * This is the most important function of the HostTree.
    *
    * @param key      the setting key, obtained from the SettingLibrary
-   * @param userUuid     the subject's UUID to check for the setting
+   * @param userUuid the subject's UUID to check for the setting
    * @param location the location in the world to check for the setting
    * @param <V>      the type of value to retrieve
    * @return the assigned value corresponding to this setting key
@@ -213,7 +213,7 @@ public interface HostTreeAdapter {
    * and whether the subject is affected.
    *
    * @param key      the setting key, obtained from the SettingLibrary
-   * @param userUuid     the subject's uuid to check for the setting
+   * @param userUuid the subject's uuid to check for the setting
    * @param location the location in the world to check for the setting
    * @return the relevant host, or null if no host dictates this setting
    */

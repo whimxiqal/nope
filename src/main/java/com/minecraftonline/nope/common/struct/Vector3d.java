@@ -9,4 +9,8 @@ public class Vector3d {
   private double x;
   private double y;
   private double z;
+
+  public double distanceSquared() {
+    return x * x + y * y + z * z;
+  }
 }

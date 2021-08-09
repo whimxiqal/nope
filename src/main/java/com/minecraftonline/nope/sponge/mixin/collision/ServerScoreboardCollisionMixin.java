@@ -82,11 +82,11 @@ public class ServerScoreboardCollisionMixin implements ServerScoreboardBridge {
   public void beforeScoreboardPlayerAdd(String player,
                                         String newTeam,
                                         CallbackInfoReturnable<Boolean> cir) {
-    CollisionHandler collisionHandler = SpongeNope.getInstance().getCollisionHandler();
+    CollisionHandler collisionHandler = SpongeNope.instance().getCollisionHandler();
 
     // Remove dummy team so the client doesn't get confused when
     // its added to a team when its already in our dummy one.
-    Sponge.getServer().getPlayer(player).filter(collisionHandler::isCollisionDisabled)
+    Sponge.server().player(player).filter(collisionHandler::isCollisionDisabled)
         .ifPresent(p -> CollisionUtil.removeDummyTeam(this.nope$dummyNoCollisionTeam,
             Collections.singletonList((EntityPlayerMP) p)));
   }

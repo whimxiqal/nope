@@ -35,10 +35,8 @@ import com.minecraftonline.nope.common.setting.Setting;
 import com.minecraftonline.nope.common.setting.SettingKey;
 import com.minecraftonline.nope.common.setting.SettingLibrary;
 import com.minecraftonline.nope.common.setting.SettingValue;
-import com.minecraftonline.nope.common.struct.FlexibleHashQueueVolumeTree;
 import com.minecraftonline.nope.common.struct.Location;
 import com.minecraftonline.nope.common.struct.Vector3i;
-import com.minecraftonline.nope.common.struct.VolumeTree;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Comparator;
@@ -53,14 +51,12 @@ import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import lombok.AccessLevel;
-import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.spongepowered.api.ResourceKey;
 
 /**
  * Implementation of HostTree making distinctions between
@@ -73,11 +69,10 @@ public abstract class HostTree implements HostTreeAdapter {
 
   protected final HashMap<UUID, WorldHost> worldHosts = Maps.newHashMap();
   private final Map<String, UUID> zoneToWorld = Maps.newHashMap();
-  private final Storage storage;
-  private final String globalHostName;
-  private final Function<String, String> worldNameConverter;
+  protected final Storage storage;
+  protected final Function<String, String> worldNameConverter;
   private final String zoneNameRegex;
-  private final GlobalHost globalHost;
+  protected GlobalHost globalHost;
 
   /**
    * Default constructor.
@@ -93,11 +88,9 @@ public abstract class HostTree implements HostTreeAdapter {
                   @NotNull Function<String, String> worldNameConverter,
                   @NotNull String zoneNameRegex) {
     this.storage = storage;
-    this.globalHostName = globalHostName;
     this.worldNameConverter = worldNameConverter;
     this.zoneNameRegex = zoneNameRegex;
-
-    this.globalHost = new GlobalHost();
+    this.globalHost = new GlobalHost(globalHostName);
   }
 
   @Nullable
@@ -200,7 +193,7 @@ public abstract class HostTree implements HostTreeAdapter {
     return zone;
   }
 
-  private void addZone(Zone zone) {
+  protected void addZone(Zone zone) {
     if (getHosts().size() >= Nope.MAX_HOST_COUNT) {
       return;  // Too many
     }
@@ -215,10 +208,10 @@ public abstract class HostTree implements HostTreeAdapter {
           "Zone insertion failed because name %s already exists in the given world",
           zone.getName()));
     }
-    worldHosts.get(zone.getWorldUuid())
+    worldHosts.get(zone.getWorldKey())
         .getZoneTree()
         .add(zone.getName(), zone);  // Should return null
-    zoneToWorld.put(zone.getName(), zone.getWorldUuid());
+    zoneToWorld.put(zone.getName(), zone.getWorldKey());
   }
 
   /* ======= */
@@ -294,16 +287,16 @@ public abstract class HostTree implements HostTreeAdapter {
     Zone zone = (Zone) host;
 
     // Calculate all zones that encapsulate this one
-    assert zone.getWorldUuid() != null;
+    assert zone.getWorldKey() != null;
     containers.addAll(getContainingHosts(new Location(zone.getMinX(),
         zone.getMinY(),
         zone.getMinZ(),
-        zone.getWorldUuid())));
+        zone.getWorldKey())));
     containers.remove(zone);  // Don't keep the one that we're looking with
     containers.retainAll(getContainingHosts(new Location(zone.getMaxX(),
         zone.getMaxY(),
         zone.getMaxZ(),
-        zone.getWorldUuid())));
+        zone.getWorldKey())));
 
     // Add global and world hosts
     containers.add(globalHost);
@@ -501,31 +494,6 @@ public abstract class HostTree implements HostTreeAdapter {
   }
 
   /**
-   * Class for managing the single GlobalHost in this HostTree.
-   */
-  class GlobalHost extends Host {
-    private GlobalHost() {
-      super(globalHostName, -2);
-      setParent(null);
-    }
-
-    @Override
-    public void setPriority(int priority) {
-      throw new UnsupportedOperationException("You cannot set the priority of the global host!");
-    }
-
-    @Override
-    public boolean encompasses(Location location) {
-      return true;
-    }
-
-    @Override
-    public UUID getWorldUuid() {
-      return null;
-    }
-  }
-
-  /**
    * A serializer for {@link GlobalHost}s.
    */
   public class GlobalHostSerializer implements Host.HostSerializer<GlobalHost> {
@@ -539,50 +507,11 @@ public abstract class HostTree implements HostTreeAdapter {
 
     @Override
     public GlobalHost deserialize(JsonElement json) {
-      GlobalHost host = new GlobalHost();
+      String name = json.getAsJsonObject().get("name").getAsString();
+      GlobalHost host = new GlobalHost(name);
       host.putAll(SettingLibrary.deserializeSettingAssignments(json, host.getName()));
       return host;
     }
-  }
-
-  /**
-   * Class for managing the few WorldHosts in this HostTree.
-   */
-  public class WorldHost extends Host {
-
-    @Getter
-    private final UUID worldUuid;
-    @Getter(AccessLevel.PUBLIC)
-    private final VolumeTree<String, Zone> zoneTree;
-
-    WorldHost(String name, UUID worldUuid) {
-      super(name, -1);
-      int cacheSize = globalHost.getData(SettingLibrary.CACHE_SIZE);
-      if (cacheSize < 0) {
-        throw new RuntimeException("The cache size must be greater than 0");
-      } else if (cacheSize == 0) {
-        this.zoneTree = new VolumeTree<>();
-      } else {
-        FlexibleHashQueueVolumeTree<String, Zone> flexVolumeTree =
-            new FlexibleHashQueueVolumeTree<>(cacheSize);
-        Nope.getInstance().scheduleAsyncIntervalTask(flexVolumeTree::trim, 1, TimeUnit.SECONDS);
-        this.zoneTree = flexVolumeTree;
-      }
-
-      this.worldUuid = worldUuid;
-      setParent(globalHost);
-    }
-
-    @Override
-    public boolean encompasses(Location location) {
-      return location.getWorldUuid().equals(this.worldUuid);
-    }
-
-    @Override
-    public void setPriority(int priority) {
-      throw new UnsupportedOperationException("You cannot set the priority of a WorldHost!");
-    }
-
   }
 
   /**
@@ -648,12 +577,11 @@ public abstract class HostTree implements HostTreeAdapter {
           && location.getBlockY() <= getMaxY()
           && location.getBlockZ() >= getMinZ()
           && location.getBlockZ() <= getMaxZ()
-          && location.getWorldUuid().equals(getWorldUuid());
+          && location.getWorldUuid().equals(getWorldKey());
     }
 
-    @Nullable
     @Override
-    public UUID getWorldUuid() {
+    public @Nullable ResourceKey getWorldKey() {
       return this.worldUuid;
     }
 
@@ -679,7 +607,7 @@ public abstract class HostTree implements HostTreeAdapter {
       Map<String, Object> serializedHost = Maps.newHashMap();
       serializedHost.put("name", host.getName());
       serializedHost.put("settings", SettingLibrary.serializeSettingAssignments(host.getAll()));
-      serializedHost.put("parent", host.getWorldUuid().toString());
+      serializedHost.put("parent", host.getWorldKey().toString());
       serializedHost.put("priority", host.getPriority());
       Map<String, Integer> volume = Maps.newHashMap();
       volume.put("xmin", host.getMinX());

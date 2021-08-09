@@ -50,9 +50,8 @@
 
 package com.minecraftonline.nope.sponge.command;
 
-import com.minecraftonline.nope.sponge.command.general.arguments.NopeArguments;
+import com.minecraftonline.nope.sponge.command.general.arguments.NopeParameters;
 import com.minecraftonline.nope.sponge.command.general.CommandNode;
-import com.minecraftonline.nope.sponge.command.general.LambdaCommandNode;
 import com.minecraftonline.nope.common.host.Host;
 import com.minecraftonline.nope.common.host.VolumeHost;
 import com.minecraftonline.nope.common.permission.Permission;
@@ -61,13 +60,15 @@ import com.minecraftonline.nope.sponge.util.EffectsUtil;
 import com.minecraftonline.nope.sponge.util.Format;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.args.GenericArguments;
+import org.spongepowered.api.command.exception.CommandException;
+import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
 
 /**
  * A command to visually show the boundaries of a zone.
  */
-public class ShowCommand extends LambdaCommandNode {
+public class ShowCommand extends CommandNode {
 
   /**
    * Default constructor.
@@ -79,7 +80,7 @@ public class ShowCommand extends LambdaCommandNode {
         Permission.of(Permissions.COMMAND_SHOW.get()),
         Text.of("Highlight the boundaries of the zone"),
         "show");
-    addCommandElements(GenericArguments.optional(NopeArguments.host(Text.of("zone"))));
+    addCommandElements(GenericArguments.optional(NopeParameters.host(Text.of("zone"))));
     setExecutor((src, args) -> {
       if (!(src instanceof Player)) {
         src.sendMessage(Format.error("You must be a player to send this command!"));
@@ -104,5 +105,10 @@ public class ShowCommand extends LambdaCommandNode {
       }
       return CommandResult.success();
     });
+  }
+
+  @Override
+  public CommandResult execute(CommandContext context) throws CommandException {
+    return null;
   }
 }

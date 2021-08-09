@@ -50,24 +50,24 @@
 
 package com.minecraftonline.nope.sponge.command;
 
-import com.minecraftonline.nope.sponge.SpongeNope;
-import com.minecraftonline.nope.sponge.command.general.arguments.NopeArguments;
-import com.minecraftonline.nope.sponge.command.general.arguments.TemplateCommandElement;
-import com.minecraftonline.nope.sponge.command.general.CommandNode;
-import com.minecraftonline.nope.sponge.command.general.FlagDescription;
-import com.minecraftonline.nope.sponge.command.general.LambdaCommandNode;
-import com.minecraftonline.nope.sponge.game.listener.DynamicSettingListeners;
 import com.minecraftonline.nope.common.host.Host;
 import com.minecraftonline.nope.common.permission.Permissions;
-import com.minecraftonline.nope.sponge.util.Format;
+import com.minecraftonline.nope.sponge.SpongeNope;
+import com.minecraftonline.nope.sponge.command.general.CommandNode;
+import com.minecraftonline.nope.sponge.command.general.arguments.NopeFlags;
+import com.minecraftonline.nope.sponge.command.general.arguments.NopeParameterKeys;
+import com.minecraftonline.nope.sponge.command.general.arguments.NopeParameters;
+import com.minecraftonline.nope.sponge.listener.DynamicSettingListeners;
+import net.kyori.adventure.text.Component;
 import org.spongepowered.api.command.CommandResult;
-import org.spongepowered.api.command.args.GenericArguments;
-import org.spongepowered.api.text.Text;
+import org.spongepowered.api.command.exception.CommandException;
+import org.spongepowered.api.command.parameter.CommandContext;
 
 /**
  * Command to apply a template of settings to a zone.
  */
-public class ApplyCommand extends LambdaCommandNode {
+public class ApplyCommand extends CommandNode {
+
 
   /**
    * Default constructor.
@@ -77,27 +77,22 @@ public class ApplyCommand extends LambdaCommandNode {
   public ApplyCommand(CommandNode parent) {
     super(parent,
         Permissions.COMMAND_EDIT,
-        Text.of("Apply a template of settings to a zone"),
+        "Apply a template of settings to a zone",
         "apply");
-    addCommandElements(
-        GenericArguments.flags()
-            .valueFlag(NopeArguments.host(Text.of("zone")), "z", "-zone")
-            .buildWith(GenericArguments.none()),
-        new TemplateCommandElement(Text.of("template"))
-    );
-    addFlagDescription(FlagDescription.ZONE);
-    setExecutor((src, args) -> {
-      Host host = args.<Host>getOne("zone").orElse(NopeCommandRoot.inferHost(src).orElse(null));
-      if (host == null) {
-        return CommandResult.empty();
-      }
-      host.putAll(args.requireOne("template"));
+    addFlag(NopeFlags.HOST_INFER_FLAG);
+    addParameter(NopeParameters.TEMPLATE);
+  }
 
-      SpongeNope.getInstance().saveState();
-      DynamicSettingListeners.register();
-      src.sendMessage(Format.success("Applied a template to host ",
-          Format.host(host)));
-      return CommandResult.success();
-    });
+  @Override
+  public CommandResult execute(CommandContext context) throws CommandException {
+    Host host = context.requireOne(NopeParameterKeys.HOST);
+    host.putAll(context.requireOne(NopeParameterKeys.TEMPLATE).getSettingMap());
+    SpongeNope.instance().saveState();
+    DynamicSettingListeners.register();
+    context.cause()
+        .audience()
+        .sendMessage(SpongeNope.instance().formatter().success(Component.text("Applied a template to host ")
+            .append(SpongeNope.instance().formatter().host(host))));
+    return CommandResult.success();
   }
 }

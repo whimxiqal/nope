@@ -52,10 +52,9 @@ package com.minecraftonline.nope.sponge.command;
 
 import com.google.common.collect.Maps;
 import com.minecraftonline.nope.sponge.SpongeNope;
-import com.minecraftonline.nope.sponge.command.general.arguments.NopeArguments;
+import com.minecraftonline.nope.sponge.command.general.arguments.NopeParameters;
 import com.minecraftonline.nope.sponge.command.general.CommandNode;
 import com.minecraftonline.nope.sponge.command.general.FlagDescription;
-import com.minecraftonline.nope.sponge.command.general.LambdaCommandNode;
 import com.minecraftonline.nope.common.host.Host;
 import com.minecraftonline.nope.common.permission.Permissions;
 import com.minecraftonline.nope.common.setting.SettingKey;
@@ -65,9 +64,11 @@ import java.util.Map;
 import java.util.Optional;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.args.GenericArguments;
+import org.spongepowered.api.command.exception.CommandException;
+import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.text.Text;
 
-class TargetTypeCommand extends LambdaCommandNode {
+class TargetTypeCommand extends CommandNode {
   public TargetTypeCommand(CommandNode parent) {
     super(parent,
         Permissions.COMMAND_EDIT,
@@ -77,9 +78,9 @@ class TargetTypeCommand extends LambdaCommandNode {
     choices.put("whitelist", true);
     choices.put("blacklist", false);
     addCommandElements(GenericArguments.flags()
-            .valueFlag(NopeArguments.host(Text.of("zone")), "z", "-zone")
+            .valueFlag(NopeParameters.host(Text.of("zone")), "z", "-zone")
             .buildWith(GenericArguments.none()),
-        NopeArguments.settingKey(Text.of("setting")),
+        NopeParameters.settingKey(Text.of("setting")),
         GenericArguments.choices(Text.of("type"), choices));
     addFlagDescription(FlagDescription.ZONE);
     setExecutor((src, args) -> {
@@ -119,5 +120,10 @@ class TargetTypeCommand extends LambdaCommandNode {
         return CommandResult.empty();
       }
     });
+  }
+
+  @Override
+  public CommandResult execute(CommandContext context) throws CommandException {
+    return null;
   }
 }

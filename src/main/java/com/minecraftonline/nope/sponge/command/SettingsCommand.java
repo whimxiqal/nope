@@ -27,7 +27,6 @@ package com.minecraftonline.nope.sponge.command;
 
 import com.google.common.collect.Lists;
 import com.minecraftonline.nope.sponge.command.general.CommandNode;
-import com.minecraftonline.nope.sponge.command.general.LambdaCommandNode;
 import com.minecraftonline.nope.common.permission.Permissions;
 import com.minecraftonline.nope.common.setting.SettingKey;
 import com.minecraftonline.nope.common.setting.SettingLibrary;
@@ -41,6 +40,8 @@ import java.util.stream.Collectors;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.args.GenericArguments;
+import org.spongepowered.api.command.exception.CommandException;
+import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.service.pagination.PaginationList;
 import org.spongepowered.api.service.pagination.PaginationService;
 import org.spongepowered.api.text.Text;
@@ -49,7 +50,7 @@ import org.spongepowered.api.text.format.TextColors;
 /**
  * A command to list all Nope settings.
  */
-public class SettingsCommand extends LambdaCommandNode {
+public class SettingsCommand extends CommandNode {
 
   SettingsCommand(CommandNode parent) {
     super(parent,
@@ -122,4 +123,8 @@ public class SettingsCommand extends LambdaCommandNode {
     });
   }
 
+  @Override
+  public CommandResult execute(CommandContext context) throws CommandException {
+    return null;
+  }
 }

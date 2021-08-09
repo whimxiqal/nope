@@ -51,10 +51,9 @@
 package com.minecraftonline.nope.sponge.command;
 
 import com.minecraftonline.nope.sponge.SpongeNope;
-import com.minecraftonline.nope.sponge.command.general.arguments.NopeArguments;
+import com.minecraftonline.nope.sponge.command.general.arguments.NopeParameters;
 import com.minecraftonline.nope.sponge.command.general.CommandNode;
 import com.minecraftonline.nope.sponge.command.general.FlagDescription;
-import com.minecraftonline.nope.sponge.command.general.LambdaCommandNode;
 import com.minecraftonline.nope.common.host.Host;
 import com.minecraftonline.nope.common.permission.Permissions;
 import com.minecraftonline.nope.common.setting.SettingKey;
@@ -63,6 +62,8 @@ import com.minecraftonline.nope.sponge.util.Format;
 import java.util.Optional;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.args.GenericArguments;
+import org.spongepowered.api.command.exception.CommandException;
+import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.text.Text;
 
 /**
@@ -71,7 +72,7 @@ import org.spongepowered.api.text.Text;
  * A setting can bypass this pass-through feature by setting "force affect"
  * on a Target to simulate the motion that the affecting of a player is being forced.
  */
-class TargetForceCommand extends LambdaCommandNode {
+class TargetForceCommand extends CommandNode {
   public TargetForceCommand(CommandNode parent) {
     super(parent,
         Permissions.COMMAND_EDIT,
@@ -80,9 +81,9 @@ class TargetForceCommand extends LambdaCommandNode {
             + " permission is respected on this setting"),
         "force");
     addCommandElements(GenericArguments.flags()
-            .valueFlag(NopeArguments.host(Text.of("zone")), "z", "-zone")
+            .valueFlag(NopeParameters.host(Text.of("zone")), "z", "-zone")
             .buildWith(GenericArguments.none()),
-        NopeArguments.settingKey(Text.of("setting")));
+        NopeParameters.settingKey(Text.of("setting")));
     addFlagDescription(FlagDescription.ZONE);
     setExecutor((src, args) -> {
       Host host = args.<Host>getOne("zone").orElse(NopeCommandRoot.inferHost(src).orElse(null));
@@ -124,5 +125,10 @@ class TargetForceCommand extends LambdaCommandNode {
       SpongeNope.getInstance().saveState();
       return CommandResult.success();
     });
+  }
+
+  @Override
+  public CommandResult execute(CommandContext context) throws CommandException {
+    return null;
   }
 }

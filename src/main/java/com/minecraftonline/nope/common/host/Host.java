@@ -39,6 +39,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.spongepowered.api.ResourceKey;
 
 /**
  * A storage class for setting assignments.
@@ -206,12 +207,12 @@ public abstract class Host {
   public abstract boolean encompasses(Location location);
 
   /**
-   * Get the UUID of the Minecraft world to which this Host is associated.
+   * Get the ResourceKey of the Minecraft world to which this Host is associated.
    *
-   * @return the world's UUID, or null if the host is not associated with a world
+   * @return the world's ResourceKey, or null if the host is not associated with a world
    */
   @Nullable
-  public abstract UUID getWorldUuid();
+  public abstract ResourceKey getWorldKey();
 
   @Override
   public int hashCode() {

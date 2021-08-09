@@ -1,18 +1,17 @@
 package com.minecraftonline.nope.sponge.command;
 
+import com.minecraftonline.nope.common.permission.Permissions;
 import com.minecraftonline.nope.sponge.SpongeNope;
 import com.minecraftonline.nope.sponge.command.general.CommandNode;
-import com.minecraftonline.nope.sponge.command.general.LambdaCommandNode;
-import com.minecraftonline.nope.sponge.game.listener.DynamicSettingListeners;
-import com.minecraftonline.nope.common.permission.Permissions;
-import com.minecraftonline.nope.sponge.util.Format;
+import com.minecraftonline.nope.sponge.listener.DynamicSettingListeners;
 import org.spongepowered.api.command.CommandResult;
-import org.spongepowered.api.text.Text;
+import org.spongepowered.api.command.exception.CommandException;
+import org.spongepowered.api.command.parameter.CommandContext;
 
 /**
  * The command to reload all config data from storage.
  */
-public class ReloadCommand extends LambdaCommandNode {
+public class ReloadCommand extends CommandNode {
 
   /**
    * Default constructor.
@@ -21,15 +20,17 @@ public class ReloadCommand extends LambdaCommandNode {
    */
   public ReloadCommand(CommandNode parent) {
     super(parent, Permissions.COMMAND_RELOAD,
-        Text.of("Reloads all config data from storage"),
+        "Reloads all config data from storage",
         "reload", true);
     addAliases("load");
 
-    setExecutor((src, args) -> {
-      SpongeNope.getInstance().loadState();
-      DynamicSettingListeners.register();
-      src.sendMessage(Format.success("Successfully reloaded"));
-      return CommandResult.success();
-    });
+  }
+
+  @Override
+  public CommandResult execute(CommandContext context) throws CommandException {
+    SpongeNope.instance().loadState();
+    DynamicSettingListeners.register();
+    context.cause().audience().sendMessage(formatter().success("Successfully reloaded"));
+    return CommandResult.success();
   }
 }

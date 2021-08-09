@@ -51,11 +51,10 @@ package com.minecraftonline.nope.sponge.command;
 
 import com.google.common.collect.Sets;
 import com.minecraftonline.nope.sponge.SpongeNope;
-import com.minecraftonline.nope.sponge.command.general.arguments.NopeArguments;
+import com.minecraftonline.nope.sponge.command.general.arguments.NopeParameters;
 import com.minecraftonline.nope.sponge.command.general.CommandNode;
 import com.minecraftonline.nope.sponge.command.general.FlagDescription;
-import com.minecraftonline.nope.sponge.command.general.LambdaCommandNode;
-import com.minecraftonline.nope.sponge.game.listener.DynamicSettingListeners;
+import com.minecraftonline.nope.sponge.listener.DynamicSettingListeners;
 import com.minecraftonline.nope.common.host.Host;
 import com.minecraftonline.nope.common.permission.Permissions;
 import com.minecraftonline.nope.common.setting.SetSettingKey;
@@ -66,26 +65,28 @@ import java.util.Optional;
 import java.util.Set;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.args.GenericArguments;
+import org.spongepowered.api.command.exception.CommandException;
+import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 
 /**
  * A command to set a setting on a host.
  */
-public class SetCommand extends LambdaCommandNode {
+public class SetCommand extends CommandNode {
 
   SetCommand(CommandNode parent) {
     super(parent,
         Permissions.COMMAND_EDIT,
-        Text.of("Set setting on a host"),
+        "Set setting on a host",
         "set");
     addCommandElements(
         GenericArguments.flags()
-            .valueFlag(NopeArguments.host(Text.of("zone")), "z", "-zone")
+            .valueFlag(NopeParameters.host(Text.of("zone")), "z", "-zone")
             .flag("a")
             .flag("r")
             .buildWith(GenericArguments.none()),
-        NopeArguments.settingKey(Text.of("setting")),
+        NopeParameters.settingKey(Text.of("setting")),
         GenericArguments.optional(GenericArguments.remainingJoinedStrings(Text.of("value")))
     );
     addFlagDescription(FlagDescription.ZONE);
@@ -97,79 +98,6 @@ public class SetCommand extends LambdaCommandNode {
         Text.of(TextColors.AQUA, "Remove", TextColors.RESET,
             " entries from an existing collection of entries in a setting's value"),
         false);
-    setExecutor((src, args) -> {
-      SettingKey<?> settingKey = args.requireOne("setting");
-      Optional<String> value = args.getOne("value");
-
-      Host host = args.<Host>getOne("zone").orElse(NopeCommandRoot.inferHost(src).orElse(null));
-      if (host == null) {
-        return CommandResult.empty();
-      }
-
-      try {
-        if (!host.getName().equals(SpongeNope.getInstance().getHostTreeAdapter().getGlobalHost().getName())
-            && settingKey.isGlobal()) {
-          src.sendMessage(Format.warn("This setting may only ",
-              "work when applied globally"));
-          return CommandResult.empty();
-        }
-
-        // Trying to set it as empty, as in a set-type setting
-        if (!value.isPresent()) {
-          if (!(settingKey instanceof SetSettingKey)) {
-            src.sendMessage(Format.error("You need to supply a value"));
-            return CommandResult.empty();
-          }
-          host.put((SetSettingKey<?>) settingKey, SettingValue.of(Sets.newHashSet()));
-          SpongeNope.getInstance().saveState();
-          DynamicSettingListeners.register();
-          src.sendMessage(Format.success("Setting ",
-              Format.settingKey(settingKey, false),
-              " was set to empty on host ",
-              Format.host(host)));
-          return CommandResult.success();
-        }
-
-        boolean append = args.hasAny("a");
-        boolean remove = args.hasAny("r");
-        if (append || remove) {
-          if (!(settingKey instanceof SetSettingKey)) {
-            src.sendMessage(Format.error("You may not append or remove values for this setting"));
-            return CommandResult.empty();
-          }
-          SetSettingKey<?> setSettingKey = (SetSettingKey<?>) settingKey;
-          if (!host.get(settingKey).isPresent()) {
-            src.sendMessage(Format.error("You may not append or remove values "
-                + "if there's no data set yet"));
-            return CommandResult.empty();
-          }
-          if (append && remove) {
-            src.sendMessage(Format.error("You may not append and remove values at the same time"));
-            return CommandResult.empty();
-          }
-          if (!updateSetSettingValue(host, setSettingKey, value.get(), append)) {
-            src.sendMessage(Format.error("Couldn't " + (append ? "append" : "remove")
-                + " your values"));
-            return CommandResult.empty();
-          }
-        } else {
-          addSetting(host, settingKey, value.get());
-        }
-      } catch (SettingKey.ParseSettingException e) {
-        src.sendMessage(Format.error("Invalid value: ",
-            Format.note(e.getMessage())));
-        return CommandResult.empty();
-      }
-
-      SpongeNope.getInstance().saveState();
-      DynamicSettingListeners.register();
-      src.sendMessage(Format.success("Set setting ",
-          Format.settingKey(settingKey, false),
-          " on host ",
-          Format.host(host)));
-
-      return CommandResult.success();
-    });
   }
 
   private <T> void addSetting(Host zone,
@@ -194,5 +122,80 @@ public class SetCommand extends LambdaCommandNode {
       value.get().getData().removeAll(elements);
     }
     return true;
+  }
+
+  @Override
+  public CommandResult execute(CommandContext context) throws CommandException {
+    SettingKey<?> settingKey = args.requireOne("setting");
+    Optional<String> value = args.getOne("value");
+
+    Host host = args.<Host>getOne("zone").orElse(NopeCommandRoot.inferHost(src).orElse(null));
+    if (host == null) {
+      return CommandResult.empty();
+    }
+
+    try {
+      if (!host.getName().equals(SpongeNope.getInstance().getHostTreeAdapter().getGlobalHost().getName())
+          && settingKey.isGlobal()) {
+        src.sendMessage(Format.warn("This setting may only ",
+            "work when applied globally"));
+        return CommandResult.empty();
+      }
+
+      // Trying to set it as empty, as in a set-type setting
+      if (!value.isPresent()) {
+        if (!(settingKey instanceof SetSettingKey)) {
+          src.sendMessage(Format.error("You need to supply a value"));
+          return CommandResult.empty();
+        }
+        host.put((SetSettingKey<?>) settingKey, SettingValue.of(Sets.newHashSet()));
+        SpongeNope.getInstance().saveState();
+        DynamicSettingListeners.register();
+        src.sendMessage(Format.success("Setting ",
+            Format.settingKey(settingKey, false),
+            " was set to empty on host ",
+            Format.host(host)));
+        return CommandResult.success();
+      }
+
+      boolean append = args.hasAny("a");
+      boolean remove = args.hasAny("r");
+      if (append || remove) {
+        if (!(settingKey instanceof SetSettingKey)) {
+          src.sendMessage(Format.error("You may not append or remove values for this setting"));
+          return CommandResult.empty();
+        }
+        SetSettingKey<?> setSettingKey = (SetSettingKey<?>) settingKey;
+        if (!host.get(settingKey).isPresent()) {
+          src.sendMessage(Format.error("You may not append or remove values "
+              + "if there's no data set yet"));
+          return CommandResult.empty();
+        }
+        if (append && remove) {
+          src.sendMessage(Format.error("You may not append and remove values at the same time"));
+          return CommandResult.empty();
+        }
+        if (!updateSetSettingValue(host, setSettingKey, value.get(), append)) {
+          src.sendMessage(Format.error("Couldn't " + (append ? "append" : "remove")
+              + " your values"));
+          return CommandResult.empty();
+        }
+      } else {
+        addSetting(host, settingKey, value.get());
+      }
+    } catch (SettingKey.ParseSettingException e) {
+      src.sendMessage(Format.error("Invalid value: ",
+          Format.note(e.getMessage())));
+      return CommandResult.empty();
+    }
+
+    SpongeNope.getInstance().saveState();
+    DynamicSettingListeners.register();
+    src.sendMessage(Format.success("Set setting ",
+        Format.settingKey(settingKey, false),
+        " on host ",
+        Format.host(host)));
+
+    return CommandResult.success();
   }
 }

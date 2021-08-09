@@ -41,10 +41,13 @@ public class Template {
 
   @Getter
   private final String name;
+  @Getter
+  private final String description;
   private Supplier<SettingMap> supplier;
 
-  public Template(@NotNull String name, @NotNull Supplier<SettingMap> supplier) {
+  public Template(@NotNull String name, @NotNull String description, @NotNull Supplier<SettingMap> supplier) {
     this.name = name;
+    this.description = description;
     this.supplier = supplier;
   }
 
@@ -53,7 +56,7 @@ public class Template {
     return this.name.hashCode();
   }
 
-  public SettingMap getValue() {
+  public SettingMap getSettingMap() {
     return this.supplier.get();
   }
 

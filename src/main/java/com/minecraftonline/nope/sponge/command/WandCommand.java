@@ -62,6 +62,8 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.args.CommandContext;
+import org.spongepowered.api.command.exception.CommandException;
+import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.item.ItemType;
@@ -124,5 +126,10 @@ public class WandCommand extends CommandNode {
     player.sendMessage(Format.info("Left click for first position; "
         + "right click for second position"));
     return CommandResult.success();
+  }
+
+  @Override
+  public CommandResult execute(CommandContext context) throws CommandException {
+    return null;
   }
 }

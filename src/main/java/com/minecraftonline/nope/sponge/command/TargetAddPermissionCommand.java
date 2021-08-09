@@ -51,10 +51,9 @@
 package com.minecraftonline.nope.sponge.command;
 
 import com.minecraftonline.nope.sponge.SpongeNope;
-import com.minecraftonline.nope.sponge.command.general.arguments.NopeArguments;
+import com.minecraftonline.nope.sponge.command.general.arguments.NopeParameters;
 import com.minecraftonline.nope.sponge.command.general.CommandNode;
 import com.minecraftonline.nope.sponge.command.general.FlagDescription;
-import com.minecraftonline.nope.sponge.command.general.LambdaCommandNode;
 import com.minecraftonline.nope.common.host.Host;
 import com.minecraftonline.nope.common.permission.Permissions;
 import com.minecraftonline.nope.common.setting.SettingKey;
@@ -63,18 +62,20 @@ import com.minecraftonline.nope.sponge.util.Format;
 import java.util.Optional;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.args.GenericArguments;
+import org.spongepowered.api.command.exception.CommandException;
+import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.text.Text;
 
-class TargetAddPermissionCommand extends LambdaCommandNode {
+class TargetAddPermissionCommand extends CommandNode {
   public TargetAddPermissionCommand(CommandNode parent) {
     super(parent,
         Permissions.COMMAND_EDIT,
         Text.of("Add a permission requirement to a setting"),
         "permission", "perm");
     addCommandElements(GenericArguments.flags()
-            .valueFlag(NopeArguments.host(Text.of("zone")), "z", "-zone")
+            .valueFlag(NopeParameters.host(Text.of("zone")), "z", "-zone")
             .buildWith(GenericArguments.none()),
-        NopeArguments.settingKey(Text.of("setting")),
+        NopeParameters.settingKey(Text.of("setting")),
         GenericArguments.string(Text.of("permission")),
         GenericArguments.bool(Text.of("value")));
     addFlagDescription(FlagDescription.ZONE);
@@ -105,5 +106,10 @@ class TargetAddPermissionCommand extends LambdaCommandNode {
           Format.settingKey(key, false)));
       return CommandResult.success();
     });
+  }
+
+  @Override
+  public CommandResult execute(CommandContext context) throws CommandException {
+    return null;
   }
 }

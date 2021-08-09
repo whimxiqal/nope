@@ -23,10 +23,10 @@
  *
  */
 
-package com.minecraftonline.nope.sponge.game.listener;
+package com.minecraftonline.nope.sponge.listener;
 
 import com.minecraftonline.nope.sponge.SpongeNope;
-import com.minecraftonline.nope.sponge.game.movement.PlayerMovementHandler;
+import com.minecraftonline.nope.sponge.movement.PlayerMovementHandler;
 import com.minecraftonline.nope.common.setting.SettingLibrary;
 import java.util.HashMap;
 import java.util.HashSet;

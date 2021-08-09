@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2020 MinecraftOnline
+ * Copyright (c) 2021 MinecraftOnline
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,19 +20,34 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
+ *
  */
 
-package com.minecraftonline.nope.sponge.command.general;
+package com.minecraftonline.nope.sponge.listener;
 
-import com.minecraftonline.nope.sponge.command.NopeCommandRoot;
+import com.minecraftonline.nope.common.setting.SettingKey;
+import java.util.Optional;
+import java.util.function.BiConsumer;
+import javax.annotation.Nonnull;
+import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.event.Event;
 
 /**
- * Nope's custom command tree.
+ * An accessibility class for handling events where a player is
+ * anywhere in the cause stack.
+ *
+ * @param <E> the type of event for which to listen
  */
-public class NopeCommandTree extends CommandTree {
-
-  public NopeCommandTree() {
-    super(new NopeCommandRoot());
+class PlayerCauseSettingListener<E extends Event> extends SingleSettingListener<E> {
+  public PlayerCauseSettingListener(@Nonnull SettingKey<?> key,
+                                    @Nonnull Class<E> eventClass,
+                                    @Nonnull BiConsumer<E, Player> handler) {
+    super(key, eventClass, event -> {
+      Optional<Player> player = event.getCause().first(Player.class);
+      if (!player.isPresent()) {
+        return;
+      }
+      handler.accept(event, player.get());
+    });
   }
-
 }

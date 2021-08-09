@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2020 MinecraftOnline
+ * Copyright (c) 2021 MinecraftOnline
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,35 +20,22 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
+ *
  */
 
-package com.minecraftonline.nope.sponge.key.zonewand;
+package com.minecraftonline.nope.sponge.listener;
 
-import com.minecraftonline.nope.sponge.key.NopeKeys;
-import org.jetbrains.annotations.NotNull;
-import org.spongepowered.api.data.manipulator.immutable.common.AbstractImmutableBooleanData;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
+import com.minecraftonline.nope.common.setting.SettingKey;
+import java.util.Collections;
+import javax.annotation.Nonnull;
+import org.spongepowered.api.event.Event;
+import org.spongepowered.api.event.EventListener;
 
-/**
- * An object to assist in the creation of the Zone wand.
- */
-public class ImmutableZoneWandManipulator
-    extends AbstractImmutableBooleanData<ImmutableZoneWandManipulator, ZoneWandManipulator> {
-  public ImmutableZoneWandManipulator(boolean value) {
-    super(NopeKeys.ZONE_WAND, value, false);
-  }
+class SingleSettingListener<E extends Event> extends SettingListener<E> {
 
-  public ImmutableValue<Boolean> isWand() {
-    return this.getValueGetter();
-  }
-
-  @Override
-  public @NotNull ZoneWandManipulator asMutable() {
-    return new ZoneWandManipulator(getValue());
-  }
-
-  @Override
-  public int getContentVersion() {
-    return 0;
+  public SingleSettingListener(@Nonnull SettingKey<?> key,
+                               @Nonnull Class<E> eventClass,
+                               @Nonnull EventListener<E> listener) {
+    super(Collections.singleton(key), eventClass, listener);
   }
 }

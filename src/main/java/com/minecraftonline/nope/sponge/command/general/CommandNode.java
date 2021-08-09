@@ -26,25 +26,31 @@ package com.minecraftonline.nope.sponge.command.general;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
-import com.minecraftonline.nope.common.Nope;
 import com.minecraftonline.nope.common.permission.Permission;
-import java.util.ArrayList;
+import com.minecraftonline.nope.common.util.Formatter;
+import com.minecraftonline.nope.sponge.SpongeNope;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.Stack;
 import java.util.UUID;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 import lombok.Getter;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.TextColor;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.spongepowered.api.command.Command;
+import org.spongepowered.api.command.CommandExecutor;
+import org.spongepowered.api.command.parameter.Parameter;
+import org.spongepowered.api.command.parameter.managed.Flag;
+import org.spongepowered.api.service.permission.Subject;
 
 /**
  * A general command node in the general command tree
  * with the purpose of intuitively constructing the command structure.
  */
-public abstract class CommandNode {
+public abstract class CommandNode implements CommandExecutor {
 
   @Getter
   private final @Nullable CommandNode parent;
@@ -55,13 +61,16 @@ public abstract class CommandNode {
   @Getter
   private final List<String> aliases = Lists.newArrayList();
   private final List<CommandNode> children = Lists.newArrayList();
-  private final List<CommandElement> commandElements = new ArrayList<>();
   @Getter
-  private final Map<String, FlagDescription> flagDescriptions = new HashMap<>();
+  private final List<Parameter> parameters = Lists.newArrayList();
+  @Getter
+  private final List<Flag> flags = Lists.newArrayList();
+  @Getter
+  private final List<FlagDescription> flagDescriptions = Lists.newArrayList();
   @Getter
   @Nullable
   private final HelpCommandNode helpCommand;
-  private Supplier<String> comment = () -> null;
+  private Supplier<Component> comment = () -> null;
 
   /**
    * A helpful constructor which easily allows for addition of
@@ -120,7 +129,11 @@ public abstract class CommandNode {
   }
 
   public final boolean hasPermission(UUID playerUuid) {
-    return this.permission == null || Nope.getInstance().hasPermission(playerUuid, this.permission);
+    return this.permission == null || SpongeNope.instance().hasPermission(playerUuid, this.permission);
+  }
+
+  public final boolean hasPermission(Subject subject) {
+    return this.permission == null || subject.hasPermission(this.permission.get());
   }
 
   /**
@@ -142,31 +155,27 @@ public abstract class CommandNode {
   }
 
   @Nullable
-  public String getComment() {
+  public Component getComment() {
     return this.comment.get();
   }
 
-  public void setComment(@NotNull Supplier<String> comment) {
+  public void setComment(@NotNull Supplier<Component> comment) {
     this.comment = comment;
-  }
-
-  protected final void addCommandElements(@NotNull CommandElement... commandElement) {
-    Objects.requireNonNull(commandElement);
-    for (CommandElement element : commandElement) {
-      this.commandElements.add(Objects.requireNonNull(element));
-    }
   }
 
   public final boolean isRoot() {
     return parent == null;
   }
 
-  public final void addFlagDescription(FlagDescription flagDescription) {
-    this.flagDescriptions.put(flagDescription.getFlag(), flagDescription);
+  public final void addFlag(Flag flag/*, String description*/) {
+    this.flags.add(flag);
+//    this.flagDescriptions.add(new FlagDescription(flag.aliases().iterator().next(),
+//        description,
+//        flag.associatedParameter().isPresent()));
   }
 
-  public final void addFlagDescription(String flag, String description, boolean valueFlag) {
-    this.addFlagDescription(new FlagDescription(flag, description, valueFlag));
+  public final void addParameter(Parameter parameter) {
+    this.parameters.add(parameter);
   }
 
   /**
@@ -184,6 +193,44 @@ public abstract class CommandNode {
       cur = cur.parent;
     }
     return "/" + command;
+  }
+
+  public final Command.Parameterized build() {
+    Command.Builder builder = Command.builder()
+        .executor(this)
+        .extendedDescription(Component.text(description))
+        .shortDescription(Component.text(description))
+        .addParameters(parameters)
+        .addChildren(children.stream().collect(Collectors.toMap(CommandNode::getAliases, CommandNode::build)))
+        .addFlags(flags);
+
+    if (permission != null) {
+      builder.permission(permission.get());
+    }
+
+    return builder.build();
+  }
+
+  protected final Formatter<Component, TextColor> formatter() {
+    return SpongeNope.instance().formatter();
+  }
+
+  protected final <N extends CommandNode> N getRelatedNode(Class<N> nodeClass) {
+    CommandNode root = this;
+    while (root.parent != null) {
+      root = root.parent;
+    }
+    Stack<CommandNode> nextUp = new Stack<>();
+    nextUp.add(root);
+    CommandNode current;
+    while (!nextUp.isEmpty()) {
+      current = nextUp.pop();
+      if (nodeClass.isInstance(current)) {
+        return nodeClass.cast(current);
+      }
+      nextUp.addAll(current.getChildren());
+    }
+    throw new IllegalStateException("This command tree does not contain a command class of type " + nodeClass.getName());
   }
 
 }

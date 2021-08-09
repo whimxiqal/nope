@@ -49,46 +49,46 @@
 
 package com.minecraftonline.nope.sponge.command;
 
-import com.minecraftonline.nope.sponge.SpongeNope;
-import com.minecraftonline.nope.sponge.command.general.arguments.NopeArguments;
-import com.minecraftonline.nope.sponge.command.general.CommandNode;
-import com.minecraftonline.nope.sponge.command.general.LambdaCommandNode;
-import com.minecraftonline.nope.sponge.game.listener.DynamicSettingListeners;
 import com.minecraftonline.nope.common.host.Host;
 import com.minecraftonline.nope.common.permission.Permissions;
-import com.minecraftonline.nope.sponge.util.Format;
+import com.minecraftonline.nope.sponge.SpongeNope;
+import com.minecraftonline.nope.sponge.command.general.CommandNode;
+import com.minecraftonline.nope.sponge.command.general.arguments.NopeParameterKeys;
+import com.minecraftonline.nope.sponge.command.general.arguments.NopeParameters;
+import com.minecraftonline.nope.sponge.listener.DynamicSettingListeners;
 import org.spongepowered.api.command.CommandResult;
-import org.spongepowered.api.command.args.GenericArguments;
-import org.spongepowered.api.text.Text;
+import org.spongepowered.api.command.exception.CommandException;
+import org.spongepowered.api.command.parameter.CommandContext;
 
 /**
  * Command to destroy a given zone by name.
  */
-public class DestroyCommand extends LambdaCommandNode {
+public class DestroyCommand extends CommandNode {
 
   DestroyCommand(CommandNode parent) {
     super(parent,
         Permissions.COMMAND_DESTROY,
-        Text.of("Destroy a given zone"),
+        "Destroy a given zone",
         "destroy", "remove");
-    addCommandElements(GenericArguments.onlyOne(NopeArguments.host(Text.of("host"))));
-    setExecutor((src, args) -> {
-      Host host = args.requireOne("host");
+    addParameter(NopeParameters.HOST);
+  }
 
-      try {
-        SpongeNope.getInstance().getHostTreeAdapter().removeZone(host.getName());
-      } catch (IllegalArgumentException e) {
-        src.sendMessage(Format.error("This zone cannot be destroyed!"));
-        return CommandResult.empty();
-      }
+  @Override
+  public CommandResult execute(CommandContext context) throws CommandException {
+    Host host = context.requireOne(NopeParameterKeys.HOST);
 
-      SpongeNope.getInstance().saveState();
-      DynamicSettingListeners.register();
-      src.sendMessage(Format.success("Zone ",
-          Format.note(host.getName()),
-          " was successfully destroyed."));
+    try {
+      SpongeNope.instance().getHostTreeAdapter().removeZone(host.getName());
+    } catch (IllegalArgumentException e) {
+      return CommandResult.error(formatter().error("This zone cannot be destroyed!"));
+    }
 
-      return CommandResult.empty();
-    });
+    SpongeNope.instance().saveState();
+    DynamicSettingListeners.register();
+    context.cause()
+        .audience()
+        .sendMessage(formatter().success("Zone ___ was successfully destroyed.", host.getName()));
+
+    return CommandResult.success();
   }
 }

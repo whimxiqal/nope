@@ -25,17 +25,15 @@
 
 package com.minecraftonline.nope.sponge.command;
 
-import com.flowpowered.math.vector.Vector3i;
-import com.minecraftonline.nope.sponge.SpongeNope;
-import com.minecraftonline.nope.sponge.command.general.arguments.NopeArguments;
-import com.minecraftonline.nope.sponge.command.general.CommandNode;
-import com.minecraftonline.nope.sponge.command.general.FlagDescription;
-import com.minecraftonline.nope.sponge.command.general.LambdaCommandNode;
 import com.minecraftonline.nope.common.host.Host;
 import com.minecraftonline.nope.common.host.VolumeHost;
-import com.minecraftonline.nope.sponge.key.zonewand.ZoneWandHandler;
 import com.minecraftonline.nope.common.permission.Permissions;
-import com.minecraftonline.nope.sponge.util.Format;
+import com.minecraftonline.nope.sponge.SpongeNope;
+import com.minecraftonline.nope.sponge.command.general.CommandNode;
+import com.minecraftonline.nope.sponge.command.general.PlayerOnlyCommandNode;
+import com.minecraftonline.nope.sponge.command.general.arguments.NopeFlags;
+import com.minecraftonline.nope.sponge.command.general.arguments.NopeParameterKeys;
+import com.minecraftonline.nope.sponge.wand.Selection;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.regions.selector.CuboidRegionSelector;
 import com.sk89q.worldedit.sponge.SpongeWorld;
@@ -43,74 +41,63 @@ import com.sk89q.worldedit.sponge.SpongeWorldEdit;
 import java.util.Optional;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandResult;
-import org.spongepowered.api.command.args.GenericArguments;
+import org.spongepowered.api.command.exception.CommandException;
+import org.spongepowered.api.command.parameter.CommandContext;
+import org.spongepowered.api.command.parameter.managed.Flag;
 import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.plugin.PluginContainer;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
+import org.spongepowered.plugin.PluginContainer;
 
 /**
  * A command to allows the player to put their Nope selection
  * around the given zone.
  */
-public class SelectCommand extends LambdaCommandNode {
+public class SelectCommand extends PlayerOnlyCommandNode {
 
   SelectCommand(CommandNode parent) {
     super(parent,
         Permissions.COMMAND_CREATE,
-        Text.of("Create a zone with current selection and given name"),
+        "Create a zone with current selection and given name",
         "select");
-    addCommandElements(
-        GenericArguments.flags()
-            .valueFlag(NopeArguments.host(Text.of("zone")), "z", "-zone")
-            .flag("w")
-            .buildWith(GenericArguments.none()));
-    addFlagDescription(FlagDescription.ZONE);
-    setExecutor((src, args) -> {
-      if (!(src instanceof Player)) {
-        return CommandResult.empty();
-      }
-      Player player = (Player) src;
-
-      Host host = args.<Host>getOne("zone").orElse(NopeCommandRoot.inferHost(src).orElse(null));
-      if (host == null) {
-        return CommandResult.empty();
-      }
-      if (!(host instanceof VolumeHost) || host.getWorldUuid() == null) {
-        player.sendMessage(Format.error("The host " + host.getName() + " has no viable selection"));
-        return CommandResult.empty();
-      }
-      VolumeHost volumeHost = (VolumeHost) host;
-
-      if (args.hasFlag("w")) {
-        Optional<PluginContainer> pluginContainer = Sponge.getPluginManager()
-            .getPlugin("worldedit");
-        if (!pluginContainer.isPresent()) {
-          player.sendMessage(Format.error("WorldEdit is not loaded."));
-          return CommandResult.empty();
-        }
-        SpongeWorld spongeWorld = SpongeWorldEdit.inst().getWorld(player.getLocation().getExtent());
-        SpongeWorldEdit.inst()
-            .getSession(player)
-            .setRegionSelector(spongeWorld, new CuboidRegionSelector(spongeWorld,
-                new Vector(volumeHost.getMinX(), volumeHost.getMinY(), volumeHost.getMinZ()),
-                new Vector(volumeHost.getMaxX(), volumeHost.getMaxY(), volumeHost.getMaxZ())));
-        player.sendMessage(Format.success("Your WorldEdit selection "
-                + "was set to the corners of zone ",
-            TextColors.GRAY, volumeHost.getName()));
-      } else {
-        SpongeNope.getInstance().getZoneWandHandler().getSelectionMap().put(player.getUniqueId(),
-            new ZoneWandHandler.Selection(Sponge.getServer()
-                .getWorld(host.getWorldUuid())
-                .orElseThrow(() -> new RuntimeException("Could not find world")),
-                new Vector3i(volumeHost.getMinX(), volumeHost.getMinY(), volumeHost.getMinZ()),
-                new Vector3i(volumeHost.getMaxX(), volumeHost.getMaxY(), volumeHost.getMaxZ())));
-        player.sendMessage(Format.success("Your Nope selection "
-                + "was set to the corners of zone ",
-            TextColors.GRAY, volumeHost.getName()));
-      }
-      return CommandResult.success();
-    });
+    addFlag(NopeFlags.HOST_INFER_FLAG);
+    addFlag(Flag.of("w"));
   }
 
+  @Override
+  public CommandResult execute(CommandContext context, Player player) throws CommandException {
+    Host host = context.requireOne(NopeParameterKeys.HOST);
+
+    if (!(host instanceof VolumeHost) || host.getWorldKey() == null) {
+      return CommandResult.error(formatter().error("The host ___ has no viable selection", host.getName()));
+    }
+    VolumeHost volumeHost = (VolumeHost) host;
+
+    if (context.hasFlag("w")) {
+      Optional<PluginContainer> pluginContainer = Sponge.pluginManager().plugin("worldedit");
+      if (!pluginContainer.isPresent()) {
+        return CommandResult.error(formatter().error("WorldEdit is not loaded"));
+      }
+      SpongeWorld spongeWorld = SpongeWorldEdit.inst().getWorld(player.location().world());
+      SpongeWorldEdit.inst()
+          .getSession(player)
+          .setRegionSelector(spongeWorld, new CuboidRegionSelector(spongeWorld,
+              new Vector(volumeHost.getMinX(), volumeHost.getMinY(), volumeHost.getMinZ()),
+              new Vector(volumeHost.getMaxX(), volumeHost.getMaxY(), volumeHost.getMaxZ())));
+      player.sendMessage(formatter()
+          .success("Your WorldEdit selection was set to the corners of zone ___",
+              volumeHost.getName()));
+    } else {
+      Selection.Draft draft = SpongeNope.instance().getSelectionHandler().draft(player.uniqueId());
+      draft.setPosition1(new Selection.Position(player.serverLocation().worldKey(),
+          volumeHost.getMinX(),
+          volumeHost.getMinY(),
+          volumeHost.getMinZ()));
+      draft.setPosition2(new Selection.Position(player.serverLocation().worldKey(),
+          volumeHost.getMaxX(),
+          volumeHost.getMaxY(),
+          volumeHost.getMaxZ()));
+      player.sendMessage(formatter().success(
+          "Your Nope selection was set to the corners of zone ___", volumeHost.getName()));
+    }
+    return CommandResult.success();
+  }
 }

@@ -26,10 +26,9 @@
 package com.minecraftonline.nope.sponge.command;
 
 import com.minecraftonline.nope.sponge.SpongeNope;
-import com.minecraftonline.nope.sponge.command.general.arguments.NopeArguments;
+import com.minecraftonline.nope.sponge.command.general.arguments.NopeParameters;
 import com.minecraftonline.nope.sponge.command.general.CommandNode;
 import com.minecraftonline.nope.sponge.command.general.FlagDescription;
-import com.minecraftonline.nope.sponge.command.general.LambdaCommandNode;
 import com.minecraftonline.nope.common.host.Host;
 import com.minecraftonline.nope.common.permission.Permissions;
 import com.minecraftonline.nope.common.setting.SettingKey;
@@ -37,12 +36,14 @@ import com.minecraftonline.nope.common.setting.SettingValue;
 import com.minecraftonline.nope.sponge.util.Format;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.args.GenericArguments;
+import org.spongepowered.api.command.exception.CommandException;
+import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.text.Text;
 
 /**
  * A command to unset a setting on a host.
  */
-public class UnsetCommand extends LambdaCommandNode {
+public class UnsetCommand extends CommandNode {
 
   UnsetCommand(CommandNode parent) {
     super(parent,
@@ -51,32 +52,34 @@ public class UnsetCommand extends LambdaCommandNode {
         "unset");
     addCommandElements(
         GenericArguments.flags()
-            .valueFlag(NopeArguments.host(Text.of("zone")), "z", "-zone")
+            .valueFlag(NopeParameters.host(Text.of("zone")), "z", "-zone")
             .buildWith(GenericArguments.none()),
-        GenericArguments.onlyOne(NopeArguments.settingKey(Text.of("setting"))));
+        GenericArguments.onlyOne(NopeParameters.settingKey(Text.of("setting"))));
     addFlagDescription(FlagDescription.ZONE);
-    setExecutor((src, args) -> {
-      SettingKey<?> settingKey = args.requireOne(Text.of("setting"));
+  }
 
-      Host host = args.<Host>getOne("zone").orElse(NopeCommandRoot.inferHost(src).orElse(null));
-      if (host == null) {
-        return CommandResult.empty();
-      }
+  @Override
+  public CommandResult execute(CommandContext context) throws CommandException {
+    SettingKey<?> settingKey = args.requireOne(Text.of("setting"));
 
-      SettingValue<?> settingValue = host.remove(settingKey);
-
-      if (settingValue == null) {
-        src.sendMessage(Format.error(Format.settingKey(settingKey, false),
-            " is not assigned on this host!"));
-        return CommandResult.empty();
-      }
-      SpongeNope.getInstance().saveState();
-      src.sendMessage(Format.success("Unset ",
-          Format.settingKey(settingKey, false),
-          " on zone ",
-          Format.host(host)));
-
+    Host host = args.<Host>getOne("zone").orElse(NopeCommandRoot.inferHost(src).orElse(null));
+    if (host == null) {
       return CommandResult.empty();
-    });
+    }
+
+    SettingValue<?> settingValue = host.remove(settingKey);
+
+    if (settingValue == null) {
+      src.sendMessage(Format.error(Format.settingKey(settingKey, false),
+          " is not assigned on this host!"));
+      return CommandResult.empty();
+    }
+    SpongeNope.getInstance().saveState();
+    src.sendMessage(Format.success("Unset ",
+        Format.settingKey(settingKey, false),
+        " on zone ",
+        Format.host(host)));
+
+    return CommandResult.empty();
   }
 }

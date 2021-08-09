@@ -26,21 +26,22 @@
 package com.minecraftonline.nope.sponge.command;
 
 import com.minecraftonline.nope.sponge.SpongeNope;
-import com.minecraftonline.nope.sponge.command.general.arguments.NopeArguments;
+import com.minecraftonline.nope.sponge.command.general.arguments.NopeParameters;
 import com.minecraftonline.nope.sponge.command.general.CommandNode;
 import com.minecraftonline.nope.sponge.command.general.FlagDescription;
-import com.minecraftonline.nope.sponge.command.general.LambdaCommandNode;
 import com.minecraftonline.nope.common.host.Host;
 import com.minecraftonline.nope.common.permission.Permissions;
 import com.minecraftonline.nope.sponge.util.Format;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.args.GenericArguments;
+import org.spongepowered.api.command.exception.CommandException;
+import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.text.Text;
 
 /**
  * A command that sets the priority of a host.
  */
-public class SetPriorityCommand extends LambdaCommandNode {
+public class SetPriorityCommand extends CommandNode {
 
   SetPriorityCommand(CommandNode parent) {
     super(parent,
@@ -50,7 +51,7 @@ public class SetPriorityCommand extends LambdaCommandNode {
 
     addCommandElements(
         GenericArguments.flags()
-            .valueFlag(NopeArguments.host(Text.of("zone")), "z", "-zone")
+            .valueFlag(NopeParameters.host(Text.of("zone")), "z", "-zone")
             .buildWith(GenericArguments.none()),
         GenericArguments.integer(Text.of("priority")));
     addFlagDescription(FlagDescription.ZONE);
@@ -80,5 +81,10 @@ public class SetPriorityCommand extends LambdaCommandNode {
 
       return CommandResult.success();
     });
+  }
+
+  @Override
+  public CommandResult execute(CommandContext context) throws CommandException {
+    return null;
   }
 }

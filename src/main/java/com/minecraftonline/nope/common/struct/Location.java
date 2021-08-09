@@ -11,13 +11,13 @@ public class Location {
   private double posX;
   private double posY;
   private double posZ;
-  private UUID worldUuid;
+  private String worldId;
 
-  public Location(int x, int y, int z, UUID worldUuid) {
+  public Location(int x, int y, int z, String worldId) {
     this.posX = x;
     this.posY = y;
     this.posZ = z;
-    this.worldUuid = worldUuid;
+    this.worldId = worldId;
   }
 
   public int getBlockX() {

@@ -54,7 +54,7 @@ public class CollisionUtil {
     // Tell client about this new fancy collision disabling scoreboard
     SPacketTeams disabledCollisionTeamCreatePacket = new SPacketTeams(team, CREATE_SCOREBOARD);
 
-    CollisionHandler collisionHandler = SpongeNope.getInstance().getCollisionHandler();
+    CollisionHandler collisionHandler = SpongeNope.instance().getCollisionHandler();
     for (EntityPlayerMP entityPlayerMp : players) {
       if (!collisionHandler.isCollisionDisabled((Player) entityPlayerMp)) {
         continue;
@@ -81,7 +81,7 @@ public class CollisionUtil {
     if (currentTeam.getCollisionRule() != Team.CollisionRule.ALWAYS) {
       return; // Scoreboard has modified collision rules, do not change anything.
     }
-    CollisionHandler collisionHandler = SpongeNope.getInstance().getCollisionHandler();
+    CollisionHandler collisionHandler = SpongeNope.instance().getCollisionHandler();
 
     ScorePlayerTeam newDummyTeam = CollisionUtil.makeWithNoCollision(currentTeam);
     SPacketTeams disabledCollisionPacket = new SPacketTeams(newDummyTeam, UPDATE_SCOREBOARD);
@@ -123,7 +123,7 @@ public class CollisionUtil {
     Team team = entityPlayerMp.getTeam();
     if (team == null) {
       ServerScoreboardBridge scoreboardBridge =
-          (ServerScoreboardBridge) Sponge.getServer().getServerScoreboard().get();
+          (ServerScoreboardBridge) Sponge.server().serverScoreboard().get();
 
       addDisabledCollisionPlayersToTeam(scoreboardBridge.nope$getDummyNoCollisionTeam(),
           Collections.singletonList(entityPlayerMp));
@@ -145,7 +145,7 @@ public class CollisionUtil {
     if (team == null) {
       // Remove the dummy team
       ServerScoreboardBridge scoreboardBridge =
-          (ServerScoreboardBridge) Sponge.getServer().getServerScoreboard().get();
+          (ServerScoreboardBridge) Sponge.server().serverScoreboard().get();
       removeDummyTeam(scoreboardBridge.nope$getDummyNoCollisionTeam(),
           Collections.singletonList(entityPlayerMp));
     } else {
@@ -163,7 +163,7 @@ public class CollisionUtil {
    */
   public static List<EntityPlayerMP> convertPlayers(Collection<String> usernames) {
     return usernames.stream()
-        .map(name -> Sponge.getServer().getPlayer(name).orElse(null))
+        .map(name -> Sponge.server().player(name).orElse(null))
         .filter(Objects::nonNull)
         .map(player -> (EntityPlayerMP) player)
         .collect(Collectors.toList());

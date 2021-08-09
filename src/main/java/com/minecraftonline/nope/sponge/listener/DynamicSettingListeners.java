@@ -23,7 +23,7 @@
  *
  */
 
-package com.minecraftonline.nope.sponge.game.listener;
+package com.minecraftonline.nope.sponge.listener;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;

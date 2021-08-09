@@ -24,15 +24,15 @@
 
 package com.minecraftonline.nope.sponge.util;
 
-import com.minecraftonline.nope.sponge.SpongeNope;
 import com.minecraftonline.nope.common.setting.SettingKey;
+import com.minecraftonline.nope.sponge.SpongeNope;
 import java.util.function.Supplier;
 import javax.annotation.Nullable;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Event;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
 
 /**
  * A utility class to store static methods for managing "extra"
@@ -44,82 +44,78 @@ public final class Extra {
   }
 
   /**
-   * Sends a series of messages to the Sponge
-   * {@link org.spongepowered.api.command.source.ConsoleSource},
+   * Sends a series of messages to Sponge's server console
    * notifying the user pleasantly that Nope is loaded.
    */
   public static void printSplashscreen() {
-    Text.Builder builder = Text.builder();
+    TextComponent.Builder builder = Component.text();
 
     // Line 1
-    builder.append(Text.of(TextColors.WHITE, "           "));
-    builder.append(Text.of(TextColors.RED, "   ______    "));
-    builder.append(Text.of(TextColors.WHITE, " ____    "));
-    builder.append(Text.of(TextColors.WHITE, " ______"));
-    Sponge.getServer().getConsole().sendMessage(builder.build());
+    builder.append(Component.text("           ").color(SpongeFormatter.WHITE));
+    builder.append(Component.text("   ______    ").color(SpongeFormatter.ERROR));
+    builder.append(Component.text(" ____    ").color(SpongeFormatter.WHITE));
+    builder.append(Component.text(" ______").color(SpongeFormatter.WHITE));
+    Sponge.server().sendMessage(builder.build());
 
     // Line 2
-    builder.removeAll();
-    builder.append(Text.of(TextColors.WHITE, " |\\      | "));
-    builder.append(Text.of(TextColors.RED, "  / ____ \\   "));
-    builder.append(Text.of(TextColors.WHITE, "|    \\   "));
-    builder.append(Text.of(TextColors.WHITE, "|"));
-    Sponge.getServer().getConsole().sendMessage(builder.build());
+    builder = Component.text();
+    builder.append(Component.text(" |\\      | ").color(SpongeFormatter.WHITE));
+    builder.append(Component.text("  / ____ \\   ").color(SpongeFormatter.ERROR));
+    builder.append(Component.text("|    \\   ").color(SpongeFormatter.WHITE));
+    builder.append(Component.text("|").color(SpongeFormatter.WHITE));
+    Sponge.server().sendMessage(builder.build());
 
     // Line 3
-    builder.removeAll();
-    builder.append(Text.of(TextColors.WHITE, " | \\     | "));
-    builder.append(Text.of(TextColors.RED, " //\\\\    \\\\  "));
-    builder.append(Text.of(TextColors.WHITE, "|     \\  "));
-    builder.append(Text.of(TextColors.WHITE, "|"));
-    Sponge.getServer().getConsole().sendMessage(builder.build());
+    builder = Component.text();
+    builder.append(Component.text(" | \\     | ").color(SpongeFormatter.WHITE));
+    builder.append(Component.text(" //\\\\    \\\\  ").color(SpongeFormatter.ERROR));
+    builder.append(Component.text("|     \\  ").color(SpongeFormatter.WHITE));
+    builder.append(Component.text("|").color(SpongeFormatter.WHITE));
+    Sponge.server().sendMessage(builder.build());
 
     // Line 4
-    builder.removeAll();
-    builder.append(Text.of(TextColors.WHITE, " |  \\    | "));
-    builder.append(Text.of(TextColors.RED, "||  \\\\    || "));
-    builder.append(Text.of(TextColors.WHITE, "|     /  "));
-    builder.append(Text.of(TextColors.WHITE, "|____  "));
-    builder.append(Text.of(TextColors.DARK_GRAY, "   by ",
-        TextColors.LIGHT_PURPLE, "MinecraftOnline"));
-    Sponge.getServer().getConsole().sendMessage(builder.build());
+    builder = Component.text();
+    builder.append(Component.text(" |  \\    | ").color(SpongeFormatter.WHITE));
+    builder.append(Component.text("||  \\\\    || ").color(SpongeFormatter.ERROR));
+    builder.append(Component.text("|     /  ").color(SpongeFormatter.WHITE));
+    builder.append(Component.text("|____  ").color(SpongeFormatter.WHITE));
+    builder.append(Component.text("   by ").color(SpongeFormatter.DULL));
+    builder.append(Component.text("MinecraftOnline").color(SpongeFormatter.THEME));
+    Sponge.server().sendMessage(builder.build());
 
     // Line 5
-    builder.removeAll();
-    builder.append(Text.of(TextColors.WHITE, " |   \\   | "));
-    builder.append(Text.of(TextColors.RED, "||   \\\\   || "));
-    builder.append(Text.of(TextColors.WHITE, "|____/   "));
-    builder.append(Text.of(TextColors.WHITE, "|      "));
-    builder.append(Text.of(TextColors.AQUA, "      v",
-        SpongeNope.getInstance()
-            .getPluginContainer()
-            .getVersion().orElse("0.0.0")));
-    Sponge.getServer().getConsole().sendMessage(builder.build());
+    builder = Component.text();
+    builder.append(Component.text(" |   \\   | ").color(SpongeFormatter.WHITE));
+    builder.append(Component.text("||   \\\\   || ").color(SpongeFormatter.ERROR));
+    builder.append(Component.text("|____/   ").color(SpongeFormatter.WHITE));
+    builder.append(Component.text("|      ").color(SpongeFormatter.WHITE));
+    builder.append(Component.text("      v" + SpongeNope.instance().getPluginContainer().metadata().version())
+        .color(SpongeFormatter.GOLD));
+    Sponge.server().sendMessage(builder.build());
 
     // Line 6
-    builder.removeAll();
-    builder.append(Text.of(TextColors.WHITE, " |    \\  | "));
-    builder.append(Text.of(TextColors.RED, "||    \\\\  || "));
-    builder.append(Text.of(TextColors.WHITE, "|        "));
-    builder.append(Text.of(TextColors.WHITE, "|"));
-    Sponge.getServer().getConsole().sendMessage(builder.build());
+    builder = Component.text();
+    builder.append(Component.text(" |    \\  | ").color(SpongeFormatter.WHITE));
+    builder.append(Component.text("||    \\\\  || ").color(SpongeFormatter.ERROR));
+    builder.append(Component.text("|        ").color(SpongeFormatter.WHITE));
+    builder.append(Component.text("|").color(SpongeFormatter.WHITE));
+    Sponge.server().sendMessage(builder.build());
 
     // Line 7
-    builder.removeAll();
-    builder.append(Text.of(TextColors.WHITE, " |     \\ | "));
-    builder.append(Text.of(TextColors.RED, " \\\\____\\\\//  "));
-    builder.append(Text.of(TextColors.WHITE, "|        "));
-    builder.append(Text.of(TextColors.WHITE, "|"));
-    Sponge.getServer().getConsole().sendMessage(builder.build());
+    builder = Component.text();
+    builder.append(Component.text(" |     \\ | ").color(SpongeFormatter.WHITE));
+    builder.append(Component.text(" \\\\____\\\\//  ").color(SpongeFormatter.ERROR));
+    builder.append(Component.text("|        ").color(SpongeFormatter.WHITE));
+    builder.append(Component.text("|").color(SpongeFormatter.WHITE));
+    Sponge.server().sendMessage(builder.build());
 
     // Line 8
-    builder.removeAll();
-    builder.append(Text.of(TextColors.WHITE, " |      \\| "));
-    builder.append(Text.of(TextColors.RED, "  \\______/   "));
-    builder.append(Text.of(TextColors.WHITE, "|        "));
-    builder.append(Text.of(TextColors.WHITE, "|______"));
-    Sponge.getServer().getConsole().sendMessage(builder.build());
-    Sponge.getServer().getConsole().sendMessage(Text.of());
+    builder = Component.text();
+    builder.append(Component.text(" |      \\| ").color(SpongeFormatter.WHITE));
+    builder.append(Component.text("  \\______/   ").color(SpongeFormatter.ERROR));
+    builder.append(Component.text("|        ").color(SpongeFormatter.WHITE));
+    builder.append(Component.text("|______").color(SpongeFormatter.WHITE));
+    Sponge.server().sendMessage(builder.build());
 
   }
 
@@ -145,10 +141,10 @@ public final class Extra {
         (player == null
             ? ""
             : String.format(" The player is %s at position (%d, %d, %d) in world %s",
-            player.getName(),
-            player.getLocation().getBlockX(),
-            player.getLocation().getBlockY(),
-            player.getLocation().getBlockZ(),
-            player.getLocation().getExtent().getName())));
+            player.name(),
+            player.location().blockX(),
+            player.location().blockY(),
+            player.location().blockZ(),
+            player.world())));
   }
 }

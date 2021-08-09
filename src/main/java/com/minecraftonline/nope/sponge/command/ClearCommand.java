@@ -49,20 +49,21 @@
 
 package com.minecraftonline.nope.sponge.command;
 
-import com.minecraftonline.nope.sponge.SpongeNope;
-import com.minecraftonline.nope.sponge.command.general.arguments.NopeArguments;
-import com.minecraftonline.nope.sponge.command.general.CommandNode;
-import com.minecraftonline.nope.sponge.command.general.LambdaCommandNode;
 import com.minecraftonline.nope.common.host.Host;
 import com.minecraftonline.nope.common.permission.Permissions;
-import com.minecraftonline.nope.sponge.util.Format;
+import com.minecraftonline.nope.sponge.SpongeNope;
+import com.minecraftonline.nope.sponge.command.general.CommandNode;
+import com.minecraftonline.nope.sponge.command.general.arguments.NopeParameterKeys;
+import com.minecraftonline.nope.sponge.command.general.arguments.NopeParameters;
+import net.kyori.adventure.text.Component;
 import org.spongepowered.api.command.CommandResult;
-import org.spongepowered.api.text.Text;
+import org.spongepowered.api.command.exception.CommandException;
+import org.spongepowered.api.command.parameter.CommandContext;
 
 /**
  * A command to clear all settings on a host.
  */
-public class ClearCommand extends LambdaCommandNode {
+public class ClearCommand extends CommandNode {
 
   /**
    * Default constructor.
@@ -72,24 +73,22 @@ public class ClearCommand extends LambdaCommandNode {
   ClearCommand(CommandNode parent) {
     super(parent,
         Permissions.COMMAND_EDIT,
-        Text.of("Clear all settings on a host"),
+        "Clear all settings on a host",
         "clear");
-    addCommandElements(
-        NopeArguments.host(Text.of("zone"))
-    );
-    setExecutor((src, args) -> {
+    addParameter(NopeParameters.HOST_INFER);
+  }
 
-      Host host = args.<Host>getOne("zone").orElse(NopeCommandRoot.inferHost(src).orElse(null));
-      if (host == null) {
-        return CommandResult.empty();
-      }
+  @Override
+  public CommandResult execute(CommandContext context) throws CommandException {
 
-      host.clear();
-      SpongeNope.getInstance().saveState();
-      src.sendMessage(Format.success("Cleared settings on zone ",
-          Format.host(host)));
+    Host host = context.requireOne(NopeParameterKeys.HOST);
 
-      return CommandResult.success();
-    });
+    host.clear();
+    SpongeNope.instance().saveState();
+    context.cause()
+        .audience()
+        .sendMessage(formatter().success(Component.text("Cleared settings on zone ")
+                .append(SpongeNope.instance().formatter().host(host))));
+    return CommandResult.success();
   }
 }

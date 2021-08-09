@@ -49,51 +49,55 @@
 
 package com.minecraftonline.nope.sponge.command;
 
-import com.minecraftonline.nope.sponge.SpongeNope;
-import com.minecraftonline.nope.sponge.command.general.CommandNode;
-import com.minecraftonline.nope.sponge.command.general.LambdaCommandNode;
 import com.minecraftonline.nope.common.host.Host;
 import com.minecraftonline.nope.common.permission.Permissions;
-import com.minecraftonline.nope.sponge.util.Format;
+import com.minecraftonline.nope.sponge.SpongeNope;
+import com.minecraftonline.nope.sponge.command.general.CommandNode;
+import com.minecraftonline.nope.sponge.command.general.arguments.NopeParameterKeys;
+import com.minecraftonline.nope.sponge.command.general.arguments.NopeParameters;
+import com.minecraftonline.nope.sponge.util.SpongeFormatter;
 import java.util.Comparator;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import net.kyori.adventure.text.Component;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandResult;
-import org.spongepowered.api.command.args.GenericArguments;
-import org.spongepowered.api.service.pagination.PaginationService;
-import org.spongepowered.api.text.Text;
+import org.spongepowered.api.command.exception.CommandException;
+import org.spongepowered.api.command.parameter.CommandContext;
 
 /**
  * A command to list all of the hosts on the server.
  */
-public class ListAllCommand extends LambdaCommandNode {
+public class ListAllCommand extends CommandNode {
 
   ListAllCommand(CommandNode parent) {
     super(parent,
         Permissions.COMMAND_LIST,
-        Text.of("List all zones"),
+        "List all zones",
         "listall");
-    addCommandElements(GenericArguments.optional(GenericArguments.string(Text.of("regex"))));
-    setExecutor((src, args) -> {
-      Sponge.getServiceManager().provide(PaginationService.class)
-          .orElseThrow(() -> new IllegalStateException("No pagination service found!"))
-          .builder()
-          .contents(SpongeNope.getInstance().getHostTreeAdapter()
-              .getHosts()
-              .values()
-              .stream()
-              .filter(name -> !args.hasAny("regex")
-                  || Pattern.compile(args.requireOne("regex")).matcher(name.getName()).find())
-              .sorted(Comparator.comparing(Host::getName))
-              .map(host -> Text.of(Format.ACCENT, "> ", Format.note(Format.host(host))))
-              .collect(Collectors.toList()))
-          .title(Format.info("All Zones"))
-          .padding(Format.note("="))
-          .build()
-          .sendTo(src);
-      return CommandResult.success();
-    });
+    addParameter(NopeParameters.REGEX);
   }
 
+  @Override
+  public CommandResult execute(CommandContext context) throws CommandException {
+    Sponge.serviceProvider().paginationService()
+        .builder()
+        .contents(SpongeNope.instance().getHostTreeAdapter()
+            .getHosts()
+            .values()
+            .stream()
+            .filter(name -> !context.hasAny(NopeParameterKeys.REGEX)
+                || Pattern.compile(context.requireOne(NopeParameterKeys.REGEX)).matcher(name.getName()).find())
+            .sorted(Comparator.comparing(Host::getName))
+            .map(host -> Component.text()
+                .append(Component.text("> ").color(SpongeFormatter.ACCENT))
+                .append(formatter().host(host))
+                .build())
+            .collect(Collectors.toList()))
+        .title(Component.text("All Zones"))
+        .padding(formatter().accent("="))
+        .build()
+        .sendTo(context.cause().audience());
+    return CommandResult.success();
+  }
 }

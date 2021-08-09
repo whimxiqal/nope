@@ -52,11 +52,12 @@ package com.minecraftonline.nope.sponge.command;
 
 import com.minecraftonline.nope.sponge.SpongeNope;
 import com.minecraftonline.nope.sponge.command.general.CommandNode;
-import com.minecraftonline.nope.sponge.command.general.LambdaCommandNode;
 import com.minecraftonline.nope.common.permission.Permission;
 import com.minecraftonline.nope.common.permission.Permissions;
 import com.minecraftonline.nope.sponge.util.Format;
 import org.spongepowered.api.command.CommandResult;
+import org.spongepowered.api.command.exception.CommandException;
+import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
@@ -64,7 +65,7 @@ import org.spongepowered.api.text.format.TextColors;
 /**
  * Turn on or off automatic highlighting of zones whilst crossing their boundaries.
  */
-public class ShowsCommand extends LambdaCommandNode {
+public class ShowsCommand extends CommandNode {
 
   /**
    * Default constructor.
@@ -94,5 +95,10 @@ public class ShowsCommand extends LambdaCommandNode {
       }
       return CommandResult.success();
     });
+  }
+
+  @Override
+  public CommandResult execute(CommandContext context) throws CommandException {
+    return null;
   }
 }

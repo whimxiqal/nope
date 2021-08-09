@@ -26,6 +26,9 @@ package com.minecraftonline.nope.sponge.command.general;
 
 import com.minecraftonline.nope.common.permission.Permission;
 import javax.annotation.Nonnull;
+import org.spongepowered.api.command.CommandResult;
+import org.spongepowered.api.command.exception.CommandException;
+import org.spongepowered.api.command.parameter.CommandContext;
 
 /**
  * A type of command node to have no function when used.
@@ -44,8 +47,11 @@ public abstract class FunctionlessCommandNode extends CommandNode {
 
   @Nonnull
   @Override
-  public final CommandResult execute(CommandSource src, @Nonnull CommandContext args) {
-    src.sendMessage(Format.error("Too few arguments!"));
-    return CommandResult.empty();
+  public final CommandResult execute(CommandContext context) throws CommandException {
+    if (this.getHelpCommand() == null) {
+      return CommandResult.error(formatter().error("Too few arguments"));
+    } else {
+      return this.getHelpCommand().execute(context);
+    }
   }
 }

@@ -52,9 +52,8 @@ package com.minecraftonline.nope.sponge.command;
 
 import com.flowpowered.math.vector.Vector3d;
 import com.minecraftonline.nope.sponge.SpongeNope;
-import com.minecraftonline.nope.sponge.command.general.arguments.NopeArguments;
+import com.minecraftonline.nope.sponge.command.general.arguments.NopeParameters;
 import com.minecraftonline.nope.sponge.command.general.CommandNode;
-import com.minecraftonline.nope.sponge.command.general.LambdaCommandNode;
 import com.minecraftonline.nope.common.host.Host;
 import com.minecraftonline.nope.common.host.VolumeHost;
 import com.minecraftonline.nope.common.permission.Permissions;
@@ -65,12 +64,14 @@ import java.util.Optional;
 import java.util.Random;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandResult;
+import org.spongepowered.api.command.exception.CommandException;
+import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 
-class TeleportCommand extends LambdaCommandNode {
+class TeleportCommand extends CommandNode {
 
   private static final int MAX_TELEPORT_TRIES = 64;
 
@@ -80,7 +81,7 @@ class TeleportCommand extends LambdaCommandNode {
         Text.of("Teleport to a zone"),
         "teleport",
         "tp");
-    addCommandElements(NopeArguments.host(Text.of("zone")));
+    addCommandElements(NopeParameters.host(Text.of("zone")));
     setExecutor((src, args) -> {
       if (!(src instanceof Player)) {
         src.sendMessage(Format.error("You must be in game to teleport"));
@@ -89,7 +90,7 @@ class TeleportCommand extends LambdaCommandNode {
 
       Player player = (Player) src;
       Host host = args.requireOne("zone");
-      Optional<World> world = Optional.ofNullable(host.getWorldUuid())
+      Optional<World> world = Optional.ofNullable(host.getWorldKey())
           .flatMap(uuid -> Sponge.getServer().getWorld(uuid));
       if (!world.isPresent()) {
         src.sendMessage(Format.error("The world of that zone's teleport "
@@ -149,4 +150,8 @@ class TeleportCommand extends LambdaCommandNode {
 
   }
 
+  @Override
+  public CommandResult execute(CommandContext context) throws CommandException {
+    return null;
+  }
 }

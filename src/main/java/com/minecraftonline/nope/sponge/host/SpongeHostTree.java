@@ -3,15 +3,36 @@ package com.minecraftonline.nope.sponge.host;
 import com.google.common.collect.Maps;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
+import com.minecraftonline.nope.common.host.GlobalHost;
 import com.minecraftonline.nope.common.host.Host;
 import com.minecraftonline.nope.common.host.HostTree;
+import com.minecraftonline.nope.common.host.WorldHost;
 import com.minecraftonline.nope.common.setting.SettingLibrary;
+import com.minecraftonline.nope.sponge.SpongeNope;
 import java.io.IOException;
 import java.util.Map;
-import java.util.UUID;
+import java.util.function.Function;
+import org.jetbrains.annotations.NotNull;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.world.server.ServerWorld;
 
 public class SpongeHostTree extends HostTree {
+
+  /**
+   * Default constructor.
+   *
+   * @param storage            the type of storage to handle IO
+   * @param globalHostName     the name given to the global host
+   * @param worldNameConverter the converter with which to create the world host names
+   * @param zoneNameRegex      the allowed regex for added zones, which should ensure
+   */
+  public SpongeHostTree(@NotNull Storage storage,
+                        @NotNull String globalHostName,
+                        @NotNull Function<String, String> worldNameConverter,
+                        @NotNull String zoneNameRegex) {
+    super(storage, globalHostName, worldNameConverter, zoneNameRegex);
+  }
 
   @Override
   public void load(String location) throws IOException {
@@ -23,13 +44,13 @@ public class SpongeHostTree extends HostTree {
         .forEach(serverWorld ->
             worldHosts.put(
                 serverWorld.uniqueId(),
-                newWorldHost(worldProperties.getUniqueId())));
+                newWorldHost(serverWorld)));
 
     // Read GlobalHost
     try {
       GlobalHost savedGlobalHost = storage.readGlobalHost(location, new GlobalHostSerializer());
       if (savedGlobalHost == null) {
-        this.globalHost = new GlobalHost();
+        this.globalHost = new GlobalHost(SpongeNope.GLOBAL_HOST_NAME);
       } else {
         this.globalHost = savedGlobalHost;
       }
@@ -40,7 +61,7 @@ public class SpongeHostTree extends HostTree {
     // Read WorldHosts
     try {
       storage.readWorldHosts(location, new WorldHostSerializer()).forEach(worldHost ->
-          worldHosts.put(worldHost.getWorldUuid(), worldHost));
+          worldHosts.put(worldHost.getWorldKey(), worldHost));
     } catch (IOException e) {
       throw new IOException("Nope's WorldHosts could not be read.", e);
     }
@@ -77,14 +98,11 @@ public class SpongeHostTree extends HostTree {
     }
   }
 
-  private WorldHost newWorldHost(UUID worldUuid) {
-    return new WorldHost(Sponge.server()
-        .worldManager().worlworldUuid)
-        .map(prop -> worldNameConverter.apply(prop.getWorldName()))
-        .orElseThrow(() -> new RuntimeException(String.format(
-            "The worldUuid %s does not correspond to a Sponge world)",
-            worldUuid))),
-        worldUuid);
+  private WorldHost newWorldHost(ServerWorld world) {
+    return new WorldHost(world.properties().key().value(),
+        world.uniqueId(),
+        globalHost.getData(SettingLibrary.CACHE_SIZE),
+        globalHost);
   }
 
   /**
@@ -96,20 +114,30 @@ public class SpongeHostTree extends HostTree {
     public JsonElement serialize(WorldHost host) {
       Map<String, Object> serializedHost = Maps.newHashMap();
       serializedHost.put("settings", SettingLibrary.serializeSettingAssignments(host.getAll()));
-      serializedHost.put("world", Sponge.getServer()
-          .getWorldProperties(host.worldUuid)
-          .map(WorldProperties::getWorldName)
+
+      ResourceKey key = Sponge.server()
+          .worldManager().worldKey(host.getWorldKey())
           .orElseThrow(() -> new RuntimeException(String.format(
               "WorldHost has invalid world UUID: %s",
-              host.worldUuid))));
+              host.getWorldKey())));
+      Map<String, String> worldMap = Maps.newHashMap();
+      worldMap.put("namespace", key.namespace());
+      worldMap.put("value", key.value());
+      serializedHost.put("world", worldMap);
+
       return new Gson().toJsonTree(serializedHost);
     }
 
     @Override
     public WorldHost deserialize(JsonElement json) {
-      WorldHost host = newWorldHost(Sponge.getServer()
-          .getWorldProperties(json.getAsJsonObject().get("world").getAsString())
-          .map(WorldProperties::getUniqueId)
+      ResourceKey key = ResourceKey.of(json.getAsJsonObject()
+              .get("world").getAsJsonObject()
+              .get("namespace").getAsString(),
+          json.getAsJsonObject()
+              .get("world").getAsJsonObject()
+              .get("value").getAsString());
+      WorldHost host = newWorldHost(Sponge.server()
+          .worldManager().world(key)
           .orElseThrow(() -> new RuntimeException(String.format(
               "This JSON element for a WorldHost is storing an invalid World name '%s'",
               json.getAsJsonObject().get("world")))));

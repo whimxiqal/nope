@@ -36,22 +36,27 @@ import org.spongepowered.api.block.BlockTypes;
 public final class Groups {
 
   public static final Set<BlockType> LIQUID_GRIEFABLE = Sets.newHashSet(
-      BlockTypes.BEETROOTS,
-      BlockTypes.BROWN_MUSHROOM,
-      BlockTypes.CARROTS,
-      BlockTypes.DEADBUSH,
-      BlockTypes.MELON_STEM,
-      BlockTypes.NETHER_WART,
-      BlockTypes.POTATOES,
-      BlockTypes.PUMPKIN_STEM,
-      BlockTypes.RED_FLOWER,
-      BlockTypes.RED_MUSHROOM,
-      BlockTypes.SAPLING,
-      BlockTypes.SNOW_LAYER,
-      BlockTypes.TALLGRASS,
-      BlockTypes.WATERLILY,
-      BlockTypes.WHEAT,
-      BlockTypes.YELLOW_FLOWER
+      BlockTypes.BEETROOTS.get(),
+      BlockTypes.BROWN_MUSHROOM.get(),
+      BlockTypes.CARROTS.get(),
+      BlockTypes.DEAD_BUSH.get(),
+      BlockTypes.MELON_STEM.get(),
+      BlockTypes.NETHER_WART.get(),
+      BlockTypes.POTATOES.get(),
+      BlockTypes.PUMPKIN_STEM.get(),
+      BlockTypes.POPPY.get(),
+      BlockTypes.RED_MUSHROOM.get(),
+      BlockTypes.ACACIA_SAPLING.get(),
+      BlockTypes.BAMBOO_SAPLING.get(),
+      BlockTypes.BIRCH_SAPLING.get(),
+      BlockTypes.JUNGLE_SAPLING.get(),
+      BlockTypes.DARK_OAK_SAPLING.get(),
+      BlockTypes.OAK_SAPLING.get(),
+      BlockTypes.SNOW.get(),
+      BlockTypes.TALL_GRASS.get(),
+      BlockTypes.LILY_PAD.get(),
+      BlockTypes.WHEAT.get(),
+      BlockTypes.DANDELION.get()
   );
 
   private Groups() {

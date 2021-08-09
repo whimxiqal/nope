@@ -24,8 +24,8 @@
 
 package com.minecraftonline.nope.sponge.key;
 
-import org.spongepowered.api.data.key.Key;
-import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.data.Key;
+import org.spongepowered.api.data.value.Value;
 
 /**
  * A utility class to store all {@link Key}s.

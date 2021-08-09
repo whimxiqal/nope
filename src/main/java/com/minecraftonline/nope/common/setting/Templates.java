@@ -39,39 +39,43 @@ import java.util.stream.Collectors;
 @SuppressWarnings("unused")
 public final class Templates {
 
-  public static Template DEFAULT_PROTECTIONS = new Template("default-protections", () -> {
-    SettingMap map = new SettingMap();
-    map.put(Setting.of(SettingLibrary.ENDERDRAGON_GRIEF, SettingValue.of(false)));
-    map.put(Setting.of(SettingLibrary.ENDERMAN_GRIEF, SettingValue.of(false)));
-    map.put(Setting.of(SettingLibrary.EXPLOSION_GRIEF_BLACKLIST,
-        SettingValue.of(Sets.newHashSet(SettingLibrary.Explosive.values()))));
-    map.put(Setting.of(SettingLibrary.FIRE_EFFECT, SettingValue.of(false)));
-    map.put(Setting.of(SettingLibrary.FIRE_IGNITION, SettingValue.of(false)));
-    map.put(Setting.of(SettingLibrary.LAVA_GRIEF, SettingValue.of(false)));
-    map.put(Setting.of(SettingLibrary.TNT_IGNITION, SettingValue.of(false)));
-    map.put(Setting.of(SettingLibrary.TNT_PLACEMENT, SettingValue.of(false)));
-    map.put(Setting.of(SettingLibrary.WATER_GRIEF, SettingValue.of(false)));
-    map.put(Setting.of(SettingLibrary.ZOMBIE_GRIEF, SettingValue.of(false)));
-    return map;
-  });
+  public static Template SMP_PROTECTIONS = new Template("smp-protections",
+      "General global protection settings for a generic survival multiplayer server",
+      () -> {
+        SettingMap map = new SettingMap();
+        map.put(Setting.of(SettingLibrary.ENDERDRAGON_GRIEF, SettingValue.of(false)));
+        map.put(Setting.of(SettingLibrary.ENDERMAN_GRIEF, SettingValue.of(false)));
+        map.put(Setting.of(SettingLibrary.EXPLOSION_GRIEF_BLACKLIST,
+            SettingValue.of(Sets.newHashSet(SettingLibrary.Explosive.values()))));
+        map.put(Setting.of(SettingLibrary.FIRE_EFFECT, SettingValue.of(false)));
+        map.put(Setting.of(SettingLibrary.FIRE_IGNITION, SettingValue.of(false)));
+        map.put(Setting.of(SettingLibrary.LAVA_GRIEF, SettingValue.of(false)));
+        map.put(Setting.of(SettingLibrary.TNT_IGNITION, SettingValue.of(false)));
+        map.put(Setting.of(SettingLibrary.TNT_PLACEMENT, SettingValue.of(false)));
+        map.put(Setting.of(SettingLibrary.WATER_GRIEF, SettingValue.of(false)));
+        map.put(Setting.of(SettingLibrary.ZOMBIE_GRIEF, SettingValue.of(false)));
+        return map;
+      });
 
-  public static Template MALICIOUS_PROTECTIONS = new Template("malicious-protections", () -> {
-    SettingMap map = new SettingMap();
-    map.put(Setting.of(SettingLibrary.ARMOR_STAND_DESTROY, SettingValue.of(false)));
-    map.put(Setting.of(SettingLibrary.ARMOR_STAND_INTERACT, SettingValue.of(false)));
-    map.put(Setting.of(SettingLibrary.ARMOR_STAND_PLACE, SettingValue.of(false)));
-    map.put(Setting.of(SettingLibrary.BLOCK_BREAK, SettingValue.of(false)));
-    map.put(Setting.of(SettingLibrary.BLOCK_PLACE, SettingValue.of(false)));
-    map.put(Setting.of(SettingLibrary.FLOWER_POT_INTERACT, SettingValue.of(false)));
-    map.put(Setting.of(SettingLibrary.ITEM_FRAME_DESTROY, SettingValue.of(false)));
-    map.put(Setting.of(SettingLibrary.ITEM_FRAME_INTERACT, SettingValue.of(false)));
-    map.put(Setting.of(SettingLibrary.ITEM_FRAME_PLACE, SettingValue.of(false)));
-    map.put(Setting.of(SettingLibrary.PAINTING_DESTROY, SettingValue.of(false)));
-    map.put(Setting.of(SettingLibrary.PAINTING_PLACE, SettingValue.of(false)));
-    map.put(Setting.of(SettingLibrary.VEHICLE_DESTROY, SettingValue.of(false)));
-    map.put(Setting.of(SettingLibrary.VEHICLE_PLACE, SettingValue.of(false)));
-    return map;
-  });
+  public static Template DESTRUCTIVE_PLAYER_PROTECTIONS = new Template("destructive-player-protections",
+      "Protection settings from players attempting to be destructive",
+      () -> {
+        SettingMap map = new SettingMap();
+        map.put(Setting.of(SettingLibrary.ARMOR_STAND_DESTROY, SettingValue.of(false)));
+        map.put(Setting.of(SettingLibrary.ARMOR_STAND_INTERACT, SettingValue.of(false)));
+        map.put(Setting.of(SettingLibrary.ARMOR_STAND_PLACE, SettingValue.of(false)));
+        map.put(Setting.of(SettingLibrary.BLOCK_BREAK, SettingValue.of(false)));
+        map.put(Setting.of(SettingLibrary.BLOCK_PLACE, SettingValue.of(false)));
+        map.put(Setting.of(SettingLibrary.FLOWER_POT_INTERACT, SettingValue.of(false)));
+        map.put(Setting.of(SettingLibrary.ITEM_FRAME_DESTROY, SettingValue.of(false)));
+        map.put(Setting.of(SettingLibrary.ITEM_FRAME_INTERACT, SettingValue.of(false)));
+        map.put(Setting.of(SettingLibrary.ITEM_FRAME_PLACE, SettingValue.of(false)));
+        map.put(Setting.of(SettingLibrary.PAINTING_DESTROY, SettingValue.of(false)));
+        map.put(Setting.of(SettingLibrary.PAINTING_PLACE, SettingValue.of(false)));
+        map.put(Setting.of(SettingLibrary.VEHICLE_DESTROY, SettingValue.of(false)));
+        map.put(Setting.of(SettingLibrary.VEHICLE_PLACE, SettingValue.of(false)));
+        return map;
+      });
 
   private Templates() {
   }
@@ -81,7 +85,7 @@ public final class Templates {
    *
    * @return map of templates
    */
-  public static Map<String, SettingMap> getMap() {
+  public static Map<String, Template> getMap() {
     return Arrays.stream(Templates.class.getDeclaredFields())
         .filter(field -> Modifier.isStatic(field.getModifiers()))
         .filter(field -> Template.class.isAssignableFrom(field.getType()))
@@ -94,10 +98,10 @@ public final class Templates {
           }
         })
         .filter(Objects::nonNull)
-        .collect(Collectors.toMap(Template::getName, Template::getValue));
+        .collect(Collectors.toMap(Template::getName, template -> template));
   }
 
-  public static SettingMap get(String name) throws NoSuchElementException {
+  public static Template get(String name) throws NoSuchElementException {
     return getMap().get(name);
   }
 
