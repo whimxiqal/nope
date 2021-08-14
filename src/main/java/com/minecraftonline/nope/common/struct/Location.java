@@ -1,6 +1,6 @@
 package com.minecraftonline.nope.common.struct;
 
-import java.util.UUID;
+import com.minecraftonline.nope.common.host.Domain;
 import lombok.Data;
 
 /**
@@ -11,13 +11,13 @@ public class Location {
   private double posX;
   private double posY;
   private double posZ;
-  private String worldId;
+  private Domain domain;
 
-  public Location(int x, int y, int z, String worldId) {
+  public Location(int x, int y, int z, Domain domain) {
     this.posX = x;
     this.posY = y;
     this.posZ = z;
-    this.worldId = worldId;
+    this.domain = domain;
   }
 
   public int getBlockX() {

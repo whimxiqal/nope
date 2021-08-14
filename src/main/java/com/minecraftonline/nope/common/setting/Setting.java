@@ -25,75 +25,75 @@
 
 package com.minecraftonline.nope.common.setting;
 
-import java.util.Map;
 import java.util.Objects;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.experimental.Accessors;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
- * A class to manage all configurable components of the entire plugin.
- * This includes global configurations and, arguably more importantly,
- * the settings involving custom defined volumes (Zones) in a World.
+ * Setting DTO. Not for persistent storage.
  *
  * @param <T> the type of value stored
  */
-public class Setting<T> implements Map.Entry<SettingKey<T>, SettingValue<T>> {
+public class Setting<T> {
 
+  @Getter
+  @Accessors(fluent = true)
   private final SettingKey<T> key;
-  private SettingValue<T> value;
 
-  /**
-   * Basic static factory. The value is set to null.
-   *
-   * @param key the key object
-   * @param <X> the type of raw data stored
-   * @return the setting
-   */
-  public static <X> Setting<X> of(SettingKey<X> key) {
-    return new Setting<>(key, null);
-  }
+  @Getter
+  @Setter
+  @Accessors(fluent = true)
+  @Nullable
+  private T data;
 
-  /**
-   * Full static factory.
-   *
-   * @param key the key object
-   * @param val the value object which stores the raw data
-   * @param <X> the type of raw data stored
-   * @return the setting
-   */
-  public static <X> Setting<X> of(SettingKey<X> key, SettingValue<X> val) {
-    return new Setting<>(key, val);
-  }
+  @Getter
+  @Setter
+  @Accessors(fluent = true)
+  @Nullable
+  private Target target;
 
-  private Setting(SettingKey<T> key, SettingValue<T> value) {
+  private Setting(SettingKey<T> key, @Nullable T data, @Nullable Target target) {
     this.key = key;
-    this.value = value;
+    this.data = data;
+    this.target = target;
   }
 
-  @Override
-  public SettingKey<T> getKey() {
-    return key;
+  public static <X> Setting<X> of(@NotNull SettingKey<X> key) {
+    return new Setting<>(key, null, null);
   }
 
-  @Override
-  public SettingValue<T> getValue() {
-    return value;
+  public static <X> Setting<X> of(@NotNull SettingKey<X> key,
+                                  @Nullable X data) {
+    return new Setting<>(key, data, null);
   }
 
-  @Override
-  public SettingValue<T> setValue(SettingValue<T> settingValue) {
-    SettingValue<T> previous = value;
-    this.value = settingValue;
-    return previous;
+  public static <X> Setting<X> of(@NotNull SettingKey<X> key,
+                                  @Nullable Target target) {
+    return new Setting<>(key, null, target);
   }
 
-  @Override
-  public int hashCode() {
-    return Objects.hash(key.getId(), value.getData());
+  public static <X> Setting<X> of(@NotNull SettingKey<X> key,
+                                  @Nullable X data,
+                                  @Nullable Target target) {
+    return new Setting<>(key, data, target);
   }
 
-  @Override
-  public boolean equals(Object other) {
-    return (other instanceof Setting)
-        && ((Setting<?>) other).key.getId().equals(this.key.getId())
-        && ((Setting<?>) other).value.getData().equals(this.value.getData());
+  @SuppressWarnings("unchecked")
+  public static <X> Setting<X> ofUnchecked(@NotNull SettingKey<?> key,
+                                           @Nullable X data,
+                                           @Nullable Target target) {
+    return new Setting<>((SettingKey<X>) key, data, target);
   }
+
+  public T requireData() {
+    return Objects.requireNonNull(data);
+  }
+
+  public Target requireTarget() {
+    return Objects.requireNonNull(target);
+  }
+
 }

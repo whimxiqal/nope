@@ -54,12 +54,11 @@ import com.minecraftonline.nope.sponge.SpongeNope;
 import com.minecraftonline.nope.sponge.command.general.arguments.NopeParameters;
 import com.minecraftonline.nope.sponge.command.general.CommandNode;
 import com.minecraftonline.nope.sponge.command.general.FlagDescription;
-import com.minecraftonline.nope.sponge.listener.DynamicSettingListeners;
+import com.minecraftonline.nope.sponge.listener.dynamic.DynamicSettingListeners;
 import com.minecraftonline.nope.common.host.Host;
 import com.minecraftonline.nope.common.permission.Permissions;
-import com.minecraftonline.nope.common.setting.SetSettingKey;
+import com.minecraftonline.nope.common.setting.keys.SetSettingKey;
 import com.minecraftonline.nope.common.setting.SettingKey;
-import com.minecraftonline.nope.common.setting.SettingValue;
 import com.minecraftonline.nope.sponge.util.Format;
 import java.util.Optional;
 import java.util.Set;
@@ -100,14 +99,14 @@ public class SetCommand extends CommandNode {
         false);
   }
 
-  private <T> void addSetting(Host zone,
+  private <T> void addSetting(Settee zone,
                               SettingKey<T> key,
                               String s) throws SettingKey.ParseSettingException {
     T data = key.parse(s);
     zone.put(key, SettingValue.of(data));
   }
 
-  private <T> boolean updateSetSettingValue(Host zone,
+  private <T> boolean updateSetSettingValue(Settee zone,
                                             SetSettingKey<T> key,
                                             String s,
                                             boolean add) throws SettingKey.ParseSettingException {

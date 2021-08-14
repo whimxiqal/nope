@@ -30,7 +30,6 @@ import com.minecraftonline.nope.common.host.Host;
 import com.minecraftonline.nope.common.permission.Permissions;
 import com.minecraftonline.nope.common.setting.Setting;
 import com.minecraftonline.nope.common.setting.SettingKey;
-import com.minecraftonline.nope.common.setting.SettingValue;
 import com.minecraftonline.nope.common.util.Formatter;
 import com.minecraftonline.nope.sponge.SpongeNope;
 import com.minecraftonline.nope.sponge.command.InfoCommand;
@@ -75,7 +74,6 @@ public final class SpongeFormatter implements Formatter<Component, TextColor> {
   public static final TextColor GOLD = TextColor.color(HSVLike.of(50, 100, 87));
   public static final TextColor WHITE = TextColor.color(HSVLike.of(0, 0, 100));
 
-  public static final Component NEW_LINE = Component.text("\n");
   public static final Component SPACE = Component.text(" ");
 
   @Override
@@ -268,7 +266,7 @@ public final class SpongeFormatter implements Formatter<Component, TextColor> {
   }
 
   @Override
-  public Component host(@Nonnull Host host) {
+  public Component host(@Nonnull Host<?> host) {
     String name = host.getName();
     return command(
         name,
@@ -334,8 +332,8 @@ public final class SpongeFormatter implements Formatter<Component, TextColor> {
   @Override
   public <T> CompletableFuture<List<Component>> setting(Setting<T> setting,
                                                         UUID subject,
-                                                        @Nonnull Host host,
-                                                        @Nullable Host redundancyController) {
+                                                        @Nonnull Host<?> host,
+                                                        @Nullable Host<?> redundancyController) {
     return CompletableFuture.supplyAsync(() -> {
       TextComponent.Builder main = Component.text();
 

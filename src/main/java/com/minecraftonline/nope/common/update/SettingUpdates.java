@@ -26,10 +26,9 @@
 package com.minecraftonline.nope.common.update;
 
 import com.google.gson.JsonElement;
-import com.minecraftonline.nope.common.setting.BooleanSettingKey;
+import com.minecraftonline.nope.common.setting.keys.BooleanSettingKey;
 import com.minecraftonline.nope.common.setting.Setting;
 import com.minecraftonline.nope.common.setting.SettingLibrary;
-import com.minecraftonline.nope.common.setting.SettingValue;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -110,7 +109,7 @@ public class SettingUpdates {
         }).filter(Objects::nonNull)
         .filter(update -> update.getKey().getId().equals(oldSettingId))
         .map(update -> update.getConverter().apply(SettingValue.of(
-            update.getKey().dataFromJsonGenerified(oldSettingValue),
+            update.getKey().deserializeDataGenerified(oldSettingValue),
             SettingValue.Target.fromJson(oldSettingTarget))))
         .findFirst();
   }

@@ -34,16 +34,16 @@ import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
 
-class EntityBreakConditionSettingListener
-    extends CancelConditionSettingListener<ChangeBlockEvent.Break> {
+public class EntityBreakConditionSettingListener
+    extends CancelConditionSettingListener<ChangeBlockEvent.Pre> {
   public EntityBreakConditionSettingListener(@Nonnull SettingKey<Boolean> key,
                                              @Nonnull EntityType entityType) {
     super(key,
-        ChangeBlockEvent.Break.class,
+        ChangeBlockEvent.Pre.class,
         event -> {
-          for (Entity entity : event.getCause().allOf(Entity.class)) {
-            if (entity.getType().equals(entityType)) {
-              if (!SpongeNope.getInstance().getHostTreeAdapter().lookupAnonymous(key, entity.getLocation())) {
+          for (Entity entity : event.cause().allOf(Entity.class)) {
+            if (entity.type().equals(entityType)) {
+              if (!SpongeNope.calc(key, entity.getLocation())) {
                 return true;
               }
               event.getTransactions()

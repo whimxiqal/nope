@@ -39,7 +39,7 @@ import org.spongepowered.api.event.Event;
  *
  * @param <E> the event type for which to listen and cancel
  */
-class PlayerRootCancelConditionSettingListener<E extends Event & Cancellable>
+public class PlayerRootCancelConditionSettingListener<E extends Event & Cancellable>
     extends PlayerRootSettingListener<E> {
 
   public PlayerRootCancelConditionSettingListener(@Nonnull SettingKey<?> key,

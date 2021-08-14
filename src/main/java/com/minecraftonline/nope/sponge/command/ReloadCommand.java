@@ -3,7 +3,7 @@ package com.minecraftonline.nope.sponge.command;
 import com.minecraftonline.nope.common.permission.Permissions;
 import com.minecraftonline.nope.sponge.SpongeNope;
 import com.minecraftonline.nope.sponge.command.general.CommandNode;
-import com.minecraftonline.nope.sponge.listener.DynamicSettingListeners;
+import com.minecraftonline.nope.sponge.listener.dynamic.DynamicSettingListeners;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.parameter.CommandContext;

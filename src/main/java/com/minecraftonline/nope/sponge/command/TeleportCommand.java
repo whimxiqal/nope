@@ -55,10 +55,8 @@ import com.minecraftonline.nope.sponge.SpongeNope;
 import com.minecraftonline.nope.sponge.command.general.arguments.NopeParameters;
 import com.minecraftonline.nope.sponge.command.general.CommandNode;
 import com.minecraftonline.nope.common.host.Host;
-import com.minecraftonline.nope.common.host.VolumeHost;
 import com.minecraftonline.nope.common.permission.Permissions;
 import com.minecraftonline.nope.common.setting.SettingLibrary;
-import com.minecraftonline.nope.common.setting.SettingValue;
 import com.minecraftonline.nope.sponge.util.Format;
 import java.util.Optional;
 import java.util.Random;
@@ -102,7 +100,7 @@ class TeleportCommand extends CommandNode {
       if (host.get(SettingLibrary.TELEPORT_LOCATION).isPresent()) {
         SettingValue<Vector3d> value = host.get(SettingLibrary.TELEPORT_LOCATION).get();
         location = new Location<>(world.get(), value.getData());
-        if (!host.encompasses(location)) {
+        if (!host.contains(location)) {
           src.sendMessage(Format.error("The stored teleport location for this zone "
               + "is not within the zone"));
           return CommandResult.empty();
@@ -115,21 +113,21 @@ class TeleportCommand extends CommandNode {
         return CommandResult.success();
       }
 
-      if (!(host instanceof VolumeHost)) {
+      if (!(host instanceof CuboidZone)) {
         player.sendMessage(Format.error("That host needs to have a teleport location stored "
             + "before you can teleport there!"));
         return CommandResult.empty();
       }
-      VolumeHost volumeHost = (VolumeHost) host;
+      CuboidZone cuboidZone = (CuboidZone) host;
 
       Sponge.getScheduler().createTaskBuilder()
           .execute(() -> {
             Random random = new Random();
             for (int i = 0; i < MAX_TELEPORT_TRIES; i++) {
               if (player.setLocationSafely(new Location<>(world.get(),
-                  random.nextInt(volumeHost.getMaxX() + 1 - volumeHost.getMinX()) + volumeHost.getMinX(),
-                  random.nextInt(volumeHost.getMaxY() + 1 - volumeHost.getMinY()) + volumeHost.getMinY(),
-                  random.nextInt(volumeHost.getMaxZ() + 1 - volumeHost.getMinZ()) + volumeHost.getMinZ()))) {
+                  random.nextInt(cuboidZone.maxX() + 1 - cuboidZone.minX()) + cuboidZone.minX(),
+                  random.nextInt(cuboidZone.maxY() + 1 - cuboidZone.minY()) + cuboidZone.minY(),
+                  random.nextInt(cuboidZone.maxZ() + 1 - cuboidZone.minZ()) + cuboidZone.minZ()))) {
                 src.sendMessage(Format.success("Teleported to zone ",
                     Format.host(host), " ", Format.command(
                         "SHOW",
@@ -137,7 +135,7 @@ class TeleportCommand extends CommandNode {
                             .findNode(ShowCommand.class)
                             .orElseThrow(() ->
                                 new RuntimeException("Wand command is not present in the Nope command tree!"))
-                            .getFullCommand() + " " + volumeHost.getName(),
+                            .getFullCommand() + " " + cuboidZone.getName(),
                         Text.of("Show the boundaries of this zone"))));
                 return;
               }

@@ -28,7 +28,6 @@ package com.minecraftonline.nope.sponge.listener;
 import com.minecraftonline.nope.sponge.SpongeNope;
 import com.minecraftonline.nope.common.setting.Setting;
 import com.minecraftonline.nope.common.setting.SettingKey;
-import com.minecraftonline.nope.common.setting.SettingValue;
 import java.util.Collection;
 import javax.annotation.Nonnull;
 import org.spongepowered.api.Sponge;
@@ -45,7 +44,7 @@ import org.spongepowered.api.event.Order;
  * @see SettingKey
  * @see SettingValue
  */
-class SettingListener<E extends Event> implements EventListener<E> {
+public class SettingListener<E extends Event> implements EventListener<E> {
 
   private final Collection<SettingKey<?>> keys;
   private final EventListener<E> listener;

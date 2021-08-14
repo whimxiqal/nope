@@ -53,7 +53,6 @@ package com.minecraftonline.nope.sponge.command;
 import com.minecraftonline.nope.sponge.command.general.arguments.NopeParameters;
 import com.minecraftonline.nope.sponge.command.general.CommandNode;
 import com.minecraftonline.nope.common.host.Host;
-import com.minecraftonline.nope.common.host.VolumeHost;
 import com.minecraftonline.nope.common.permission.Permission;
 import com.minecraftonline.nope.common.permission.Permissions;
 import com.minecraftonline.nope.sponge.util.EffectsUtil;
@@ -88,20 +87,20 @@ public class ShowCommand extends CommandNode {
       }
 
       Player player = (Player) src;
-      Host host = args.<Host>getOne("zone").orElse(NopeCommandRoot.inferHost(src).orElse(null));
-      if (host == null) {
+      Settee settee = args.<Host>getOne("zone").orElse(NopeCommandRoot.inferHost(src).orElse(null));
+      if (settee == null) {
         player.sendMessage(Format.error("We couldn't find that host!"));
         return CommandResult.empty();
       }
-      if (!(host instanceof VolumeHost)) {
+      if (!(settee instanceof CuboidZone)) {
         src.sendMessage(Format.error("You must pick a volume zone!"));
         return CommandResult.empty();
       }
-      VolumeHost volumeHost = (VolumeHost) host;
-      if (EffectsUtil.showVolume(volumeHost, player, 12)) {
-        src.sendMessage(Format.success("Showing nearby borders of zone ", Format.host(host)));
+      CuboidZone cuboidZone = (CuboidZone) settee;
+      if (EffectsUtil.showVolume(cuboidZone, player, 12)) {
+        src.sendMessage(Format.success("Showing nearby borders of zone ", Format.host(settee)));
       } else {
-        src.sendMessage(Format.error("The boundaries of zone ", Format.host(host), " are not near you"));
+        src.sendMessage(Format.error("The boundaries of zone ", Format.host(settee), " are not near you"));
       }
       return CommandResult.success();
     });

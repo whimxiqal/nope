@@ -52,12 +52,12 @@ package com.minecraftonline.nope.sponge.command;
 
 import com.minecraftonline.nope.common.host.Host;
 import com.minecraftonline.nope.common.permission.Permissions;
-import com.minecraftonline.nope.sponge.SpongeNope;
+import com.minecraftonline.nope.common.setting.template.Template;
 import com.minecraftonline.nope.sponge.command.general.CommandNode;
 import com.minecraftonline.nope.sponge.command.general.arguments.NopeFlags;
 import com.minecraftonline.nope.sponge.command.general.arguments.NopeParameterKeys;
 import com.minecraftonline.nope.sponge.command.general.arguments.NopeParameters;
-import com.minecraftonline.nope.sponge.listener.DynamicSettingListeners;
+import com.minecraftonline.nope.sponge.listener.dynamic.DynamicSettingListeners;
 import net.kyori.adventure.text.Component;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.exception.CommandException;
@@ -85,14 +85,15 @@ public class ApplyCommand extends CommandNode {
 
   @Override
   public CommandResult execute(CommandContext context) throws CommandException {
-    Host host = context.requireOne(NopeParameterKeys.HOST);
-    host.putAll(context.requireOne(NopeParameterKeys.TEMPLATE).getSettingMap());
-    SpongeNope.instance().saveState();
+    Host<?> host = context.requireOne(NopeParameterKeys.HOST);
+    Template template = context.requireOne(NopeParameterKeys.TEMPLATE);
+    host.setAll(template.settings());
     DynamicSettingListeners.register();
     context.cause()
         .audience()
-        .sendMessage(SpongeNope.instance().formatter().success(Component.text("Applied a template to host ")
-            .append(SpongeNope.instance().formatter().host(host))));
+        .sendMessage(formatter().success("Applied template ___ to host ___",
+            Component.text(template.name()),
+            formatter().host(host)));
     return CommandResult.success();
   }
 }

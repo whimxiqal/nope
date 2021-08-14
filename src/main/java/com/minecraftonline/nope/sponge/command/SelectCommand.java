@@ -26,7 +26,6 @@
 package com.minecraftonline.nope.sponge.command;
 
 import com.minecraftonline.nope.common.host.Host;
-import com.minecraftonline.nope.common.host.VolumeHost;
 import com.minecraftonline.nope.common.permission.Permissions;
 import com.minecraftonline.nope.sponge.SpongeNope;
 import com.minecraftonline.nope.sponge.command.general.CommandNode;
@@ -66,10 +65,10 @@ public class SelectCommand extends PlayerOnlyCommandNode {
   public CommandResult execute(CommandContext context, Player player) throws CommandException {
     Host host = context.requireOne(NopeParameterKeys.HOST);
 
-    if (!(host instanceof VolumeHost) || host.getWorldKey() == null) {
+    if (!(host instanceof CuboidZone) || host.getWorldKey() == null) {
       return CommandResult.error(formatter().error("The host ___ has no viable selection", host.getName()));
     }
-    VolumeHost volumeHost = (VolumeHost) host;
+    CuboidZone cuboidZone = (CuboidZone) host;
 
     if (context.hasFlag("w")) {
       Optional<PluginContainer> pluginContainer = Sponge.pluginManager().plugin("worldedit");
@@ -80,23 +79,23 @@ public class SelectCommand extends PlayerOnlyCommandNode {
       SpongeWorldEdit.inst()
           .getSession(player)
           .setRegionSelector(spongeWorld, new CuboidRegionSelector(spongeWorld,
-              new Vector(volumeHost.getMinX(), volumeHost.getMinY(), volumeHost.getMinZ()),
-              new Vector(volumeHost.getMaxX(), volumeHost.getMaxY(), volumeHost.getMaxZ())));
+              new Vector(cuboidZone.minX(), cuboidZone.minY(), cuboidZone.minZ()),
+              new Vector(cuboidZone.maxX(), cuboidZone.maxY(), cuboidZone.maxZ())));
       player.sendMessage(formatter()
           .success("Your WorldEdit selection was set to the corners of zone ___",
-              volumeHost.getName()));
+              cuboidZone.getName()));
     } else {
       Selection.Draft draft = SpongeNope.instance().getSelectionHandler().draft(player.uniqueId());
       draft.setPosition1(new Selection.Position(player.serverLocation().worldKey(),
-          volumeHost.getMinX(),
-          volumeHost.getMinY(),
-          volumeHost.getMinZ()));
+          cuboidZone.minX(),
+          cuboidZone.minY(),
+          cuboidZone.minZ()));
       draft.setPosition2(new Selection.Position(player.serverLocation().worldKey(),
-          volumeHost.getMaxX(),
-          volumeHost.getMaxY(),
-          volumeHost.getMaxZ()));
+          cuboidZone.maxX(),
+          cuboidZone.maxY(),
+          cuboidZone.maxZ()));
       player.sendMessage(formatter().success(
-          "Your Nope selection was set to the corners of zone ___", volumeHost.getName()));
+          "Your Nope selection was set to the corners of zone ___", cuboidZone.getName()));
     }
     return CommandResult.success();
   }

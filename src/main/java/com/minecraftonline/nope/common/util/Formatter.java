@@ -3,7 +3,6 @@ package com.minecraftonline.nope.common.util;
 import com.minecraftonline.nope.common.host.Host;
 import com.minecraftonline.nope.common.setting.Setting;
 import com.minecraftonline.nope.common.setting.SettingKey;
-import com.minecraftonline.nope.common.setting.SettingValue;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -125,7 +124,7 @@ public interface Formatter<T, C> {
    * @param host the host
    * @return the text object
    */
-  T host(@Nonnull Host host);
+  T host(@Nonnull Host<?> host);
 
   /**
    * Display a {@link SettingKey}. Most important info is available
@@ -142,7 +141,7 @@ public interface Formatter<T, C> {
   /**
    * Generates a {@link CompletableFuture} to supply a list of text
    * which dictates information about a {@link Setting}, which is
-   * the combination of its {@link SettingKey} and its {@link SettingValue}.
+   * the combination of its {@link SettingKey} and its data.
    *
    * @param setting              the setting
    * @param subject              the uuid of the subject which requests the information.
@@ -154,25 +153,11 @@ public interface Formatter<T, C> {
    *                             This is only used to notify the requester of the
    *                             redundancy of the setting and has no further function.
    * @param <S>                  the type of value stored in the setting
-   * @param <P>                  the type of subject which may have permissions, null if no subject
    * @return the completable future to return the setting as a list of text
    */
   <S> CompletableFuture<List<T>> setting(Setting<S> setting,
                                          @Nullable UUID subject,
-                                         @Nonnull Host host,
-                                         @Nullable Host redundancyController);
+                                         @Nonnull Host<?> host,
+                                         @Nullable Host<?> redundancyController);
 
-  /**
-   * Display a {@link SettingValue}.
-   *
-   * @param value                the text version of the {@link SettingValue}
-   * @param redundantOnDefault   true if the setting value is redundant because
-   *                             the value is set to its setting's default value
-   * @param redundancyController the host on which the setting value is set which
-   *                             causes the setting to be redundant
-   * @return the text object
-   */
-  T settingValue(T value,
-                 boolean redundantOnDefault,
-                 Host redundancyController);
 }

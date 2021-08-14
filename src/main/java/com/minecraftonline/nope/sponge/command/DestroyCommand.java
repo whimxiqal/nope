@@ -55,7 +55,7 @@ import com.minecraftonline.nope.sponge.SpongeNope;
 import com.minecraftonline.nope.sponge.command.general.CommandNode;
 import com.minecraftonline.nope.sponge.command.general.arguments.NopeParameterKeys;
 import com.minecraftonline.nope.sponge.command.general.arguments.NopeParameters;
-import com.minecraftonline.nope.sponge.listener.DynamicSettingListeners;
+import com.minecraftonline.nope.sponge.listener.dynamic.DynamicSettingListeners;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.parameter.CommandContext;
@@ -78,7 +78,7 @@ public class DestroyCommand extends CommandNode {
     Host host = context.requireOne(NopeParameterKeys.HOST);
 
     try {
-      SpongeNope.instance().getHostTreeAdapter().removeZone(host.getName());
+      SpongeNope.instance().getHostSystemAdapter().removeZone(host.getName());
     } catch (IllegalArgumentException e) {
       return CommandResult.error(formatter().error("This zone cannot be destroyed!"));
     }

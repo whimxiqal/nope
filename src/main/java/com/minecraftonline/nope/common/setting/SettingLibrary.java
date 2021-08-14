@@ -25,16 +25,18 @@
 
 package com.minecraftonline.nope.common.setting;
 
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import com.google.gson.Gson;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.minecraftonline.nope.common.Nope;
+import com.minecraftonline.nope.common.setting.keys.BooleanSettingKey;
+import com.minecraftonline.nope.common.setting.keys.EnumSetSettingKey;
+import com.minecraftonline.nope.common.setting.keys.EnumSettingKey;
+import com.minecraftonline.nope.common.setting.keys.PositiveIntegerSettingKey;
+import com.minecraftonline.nope.common.setting.keys.StateSettingKey;
+import com.minecraftonline.nope.common.setting.keys.StringSetSettingKey;
+import com.minecraftonline.nope.common.setting.keys.StringSettingKey;
+import com.minecraftonline.nope.common.setting.keys.Vector3dSettingKey;
+import com.minecraftonline.nope.common.storage.Storage;
 import com.minecraftonline.nope.common.struct.Vector3d;
-import com.minecraftonline.nope.common.update.SettingUpdates;
 import java.lang.annotation.Annotation;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -42,13 +44,10 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
-import java.util.Optional;
 import java.util.Set;
 import org.jetbrains.annotations.NotNull;
 
@@ -694,12 +693,12 @@ public final class SettingLibrary {
   @Global
   public static final SettingKey<Storage> STORAGE_TYPE = new EnumSettingKey<>(
       "storage-type",
-      Storage.HOCON,
+      Storage.SQLITE,
       Storage.class
   );
   @Blurb("Location at which to teleport")
   @Description("The designated point of access to the zone via teleport.")
-  public static final SettingKey<Vector3d> TELEPORT_LOCATION = new Vector3dSetting(
+  public static final SettingKey<Vector3d> TELEPORT_LOCATION = new Vector3dSettingKey(
       "teleport-location",
       null
   );
@@ -824,9 +823,14 @@ public final class SettingLibrary {
     return output;
   }
 
-  public static Collection<SettingKey<?>> getAll() {
+  public static SettingKey<?> get(String id) {
     ensureInitialized();
-    return settingMap.values();
+    return settingMap.get(id);
+  }
+
+  public static Map<String, SettingKey<?>> getAll() {
+    ensureInitialized();
+    return settingMap;
   }
 
   /**
@@ -841,18 +845,18 @@ public final class SettingLibrary {
         .forEach(field -> {
           try {
             SettingKey<?> key = (SettingKey<?>) field.get(null);
-            if (settingMap.put(key.getId(), key) != null) {
-              throw new IllegalStateException("SettingKeys may not have the same id: " + key.getId());
+            if (settingMap.put(key.id(), key) != null) {
+              throw new IllegalStateException("SettingKeys may not have the same id: " + key.id());
             }
             for (Annotation annotation : field.getAnnotations()) {
               if (annotation instanceof Description) {
-                key.setDescription(((Description) annotation).value());
+                key.description(((Description) annotation).value());
               } else if (annotation instanceof Blurb) {
-                key.setBlurb(((Blurb) annotation).value());
+                key.blurb(((Blurb) annotation).value());
               } else if (annotation instanceof Category) {
-                key.setCategory(((Category) annotation).value());
+                key.category(((Category) annotation).value());
               } else if (annotation instanceof Global) {
-                key.setCategory(SettingKey.CategoryType.GLOBAL);
+                key.category(SettingKey.CategoryType.GLOBAL);
                 key.setGlobal(true);
               } else if (annotation instanceof NotImplemented) {
                 key.setImplemented(false);
@@ -873,95 +877,6 @@ public final class SettingLibrary {
   }
 
   /**
-   * Send a SettingMap to a JsonElement to be saved elsewhere
-   * so that it can be restored later using
-   * {@link #deserializeSettingAssignments(JsonElement, String)} )}.
-   *
-   * @param map the map of settings
-   * @return the finished json element
-   */
-  public static JsonElement serializeSettingAssignments(SettingMap map) {
-    List<Map<String, Object>> settingList = Lists.newLinkedList();
-    for (Setting<?> setting : map.entries()) {
-      Map<String, Object> elem = Maps.newHashMap();
-      elem.put("id", setting.getKey().getId());
-      // This does not deserialize:
-      if (setting.getKey().getDescription() != null) {
-        elem.put("description", setting.getKey().getDescription());
-      }
-      // This does not deserialize
-      elem.put("restricted", setting.getKey().isPlayerRestrictive());
-      elem.put("value", setting.getKey().dataToJson(setting.getValue().getData()));
-      elem.put("target", SettingValue.Target.toJson(setting.getValue().getTarget()));
-      settingList.add(elem);
-    }
-    return new Gson().toJsonTree(settingList);
-  }
-
-  /**
-   * Rebuild a SettingMap from a JsonElement that was stored
-   * in some persistent storage location.
-   *
-   * @param json the json object
-   * @return the restored SettingMap
-   */
-  @SuppressWarnings("unchecked")
-  public static SettingMap deserializeSettingAssignments(JsonElement json, String hostName) {
-    JsonElement element = json.getAsJsonObject().get("settings");
-    SettingMap map = new SettingMap();
-
-    if (element == null) {
-      return map;
-    }
-
-    JsonArray serializedSettings = element.getAsJsonArray();
-    for (JsonElement serializedSetting : serializedSettings) {
-      JsonObject object = serializedSetting.getAsJsonObject();
-      SettingKey<?> key;
-
-      try {
-        key = lookup(object.get("id").getAsString());
-      } catch (NoSuchElementException e) {
-        Optional<? extends Setting<?>> updated = SettingUpdates.convertSetting(
-            object.get("id").getAsString(),
-            object.get("value"),
-            object.get("target"));
-        if (updated.isPresent()) {
-          Nope.getInstance().logInfo("Old SettingKey id: "
-              + object.get("id")
-              + ". This was replaced with the a new Setting with SettingKey: "
-              + updated.get().getKey().getId());
-          map.put(updated.get());
-        } else {
-          Nope.getInstance().logError("Invalid SettingKey id: "
-              + object.get("id")
-              + ". Is this old? Skipping...");
-        }
-        continue;
-      }
-
-      SettingValue<Object> val;
-      try {
-        val = SettingValue.of(
-            key.dataFromJson(object.get("value")),
-            SettingValue.Target.fromJson(object.get("target")));
-      } catch (SettingKey.ParseSettingException e) {
-        Nope.getInstance().logError("Host: "
-            + hostName
-            + ", Invalid SettingKey value: "
-            + object.get("value")
-            + ". Is this old? Skipping...");
-        continue;
-      } catch (Exception generalException) {
-        Nope.getInstance().logError("Couldn't deserialize setting: " + key.getId());
-        continue;
-      }
-      map.put(Setting.of((SettingKey<Object>) key, val));
-    }
-    return map;
-  }
-
-  /**
    * Enumeration for all movement types considered by Nope.
    */
   public enum Movement {
@@ -969,15 +884,6 @@ public final class SettingLibrary {
     NATURAL,
     NONE,
     UNNATURAL
-  }
-
-  /**
-   * Enumeration for all storage types considered by Nope.
-   */
-  public enum Storage {
-    MARIADB,
-    SQLITE,
-    HOCON
   }
 
   /**

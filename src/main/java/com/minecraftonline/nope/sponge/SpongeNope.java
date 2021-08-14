@@ -26,23 +26,22 @@ package com.minecraftonline.nope.sponge;
 
 import com.google.inject.Inject;
 import com.minecraftonline.nope.common.Nope;
-import com.minecraftonline.nope.common.host.HostTreeAdapter;
+import com.minecraftonline.nope.common.setting.SettingKey;
 import com.minecraftonline.nope.common.setting.SettingLibrary;
+import com.minecraftonline.nope.common.struct.Location;
 import com.minecraftonline.nope.common.util.Formatter;
 import com.minecraftonline.nope.sponge.command.NopeCommandRoot;
 import com.minecraftonline.nope.sponge.context.ZoneContextCalculator;
-import com.minecraftonline.nope.sponge.listener.DynamicSettingListeners;
-import com.minecraftonline.nope.sponge.listener.StaticSettingListeners;
-import com.minecraftonline.nope.sponge.movement.PlayerMovementHandler;
-import com.minecraftonline.nope.sponge.host.SpongeHostTree;
 import com.minecraftonline.nope.sponge.key.NopeKeys;
+import com.minecraftonline.nope.sponge.listener.StaticSettingListeners;
+import com.minecraftonline.nope.sponge.listener.dynamic.DynamicSettingListeners;
 import com.minecraftonline.nope.sponge.mixin.collision.CollisionHandler;
+import com.minecraftonline.nope.sponge.movement.PlayerMovementHandler;
 import com.minecraftonline.nope.sponge.util.Extra;
 import com.minecraftonline.nope.sponge.util.SpongeFormatter;
 import com.minecraftonline.nope.sponge.util.SpongeLogger;
 import com.minecraftonline.nope.sponge.wand.SelectionHandler;
 import io.leangen.geantyref.TypeToken;
-import java.io.IOException;
 import java.nio.file.Path;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -51,6 +50,7 @@ import lombok.Setter;
 import lombok.experimental.Accessors;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
+import org.jetbrains.annotations.NotNull;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.Command;
@@ -58,6 +58,7 @@ import org.spongepowered.api.config.ConfigDir;
 import org.spongepowered.api.data.DataRegistration;
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.value.Value;
+import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.lifecycle.ConstructPluginEvent;
 import org.spongepowered.api.event.lifecycle.LoadedGameEvent;
@@ -66,6 +67,7 @@ import org.spongepowered.api.event.lifecycle.RegisterCommandEvent;
 import org.spongepowered.api.event.lifecycle.StoppedGameEvent;
 import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.service.context.ContextService;
+import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.jvm.Plugin;
 
@@ -91,8 +93,6 @@ public class SpongeNope extends Nope {
   @ConfigDir(sharedRoot = false)
   private Path configDir;
   @Getter
-  private HostTreeAdapter hostTreeAdapter;
-  @Getter
   private CollisionHandler collisionHandler;
   @Getter
   private PlayerMovementHandler playerMovementHandler;
@@ -104,6 +104,22 @@ public class SpongeNope extends Nope {
     super(new SpongeLogger());
   }
 
+  public static <V> V calc(@NotNull SettingKey<V> key,
+                           @NotNull ServerLocation location) {
+    return instance().hostSystem().lookupAnonymous(key, new Location(
+        location.blockX(),
+        location.blockY(),
+        location.blockZ(),
+        instance().hostSystem().getDomain(location.worldKey().formatted())
+    ));
+  }
+
+  public static <V> V calc(@NotNull final SettingKey<V> key,
+                           @NotNull final Location location,
+                           @NotNull final User user) {
+    return instance().hostSystem().lookup(key, user.uniqueId(), location);
+  }
+
   /**
    * Pre-initialize hook.
    *
@@ -111,16 +127,18 @@ public class SpongeNope extends Nope {
    */
   @Listener
   public void onConstruct(ConstructPluginEvent event) {
+    Extra.printSplashscreen();
+
+    // Set general static variables
     Nope.instance(this);
     instance = this;
+    path(configDir);
 
     SettingLibrary.initialize();
     if (configDir.toFile().mkdirs()) {
       logger().info("Created directories for Nope configuration");
     }
 
-    Extra.printSplashscreen();
-    zoneWandHandler = new ZoneWandHandler();
     collisionHandler = new CollisionHandler();
     playerMovementHandler = new PlayerMovementHandler();
 
@@ -134,7 +152,6 @@ public class SpongeNope extends Nope {
         .dataKey(NopeKeys.ZONE_WAND)
         .build();
 
-    Sponge.eventManager().registerListeners(pluginContainer, zoneWandHandler);
   }
 
   /**
@@ -174,58 +191,6 @@ public class SpongeNope extends Nope {
   @Listener
   public void refresh(RefreshGameEvent event) {
     loadState();
-  }
-
-  /**
-   * Save state, which consists of the {@link HostTreeAdapter}.
-   */
-  public void saveState() {
-    try {
-      if (isValid()) {
-        hostTreeAdapter.save(ZONE_CONFIG_FILENAME);
-      }
-    } catch (Exception e) {
-      setValid(false);
-      e.printStackTrace();
-    }
-  }
-
-  /**
-   * Saves the state to a backup location.
-   */
-  public void saveStateBackup() {
-    try {
-      if (isValid()) {
-        hostTreeAdapter.save(ZONE_CONFIG_BACKUP_FILENAME);
-      }
-    } catch (Exception e) {
-      setValid(false);
-      e.printStackTrace();
-    }
-  }
-
-  /**
-   * Loads plugin state from storage, which consists of host
-   * information from the {@link HostTreeAdapter}.
-   */
-  public void loadState() {
-    try {
-      if (isValid()) {
-        HostTreeAdapter freshTree = new SpongeHostTree(
-            new HoconHostTreeImplStorage(),
-            SpongeNope.GLOBAL_HOST_NAME,
-            s -> "_world-" + s,
-            "[a-zA-Z0-9\\-\\.][a-zA-Z0-9_\\-\\.]*");
-        freshTree.load(ZONE_CONFIG_FILENAME);
-
-        // Set or replace the host tree
-        this.hostTreeAdapter = freshTree;
-      }
-    } catch (IOException e) {
-      setValid(false);
-      logger().error(e.getMessage());
-      e.printStackTrace();
-    }
   }
 
   @Override

@@ -1,8 +1,10 @@
 package com.minecraftonline.nope.common;
 
+import com.minecraftonline.nope.common.host.HostSystem;
 import com.minecraftonline.nope.common.permission.Permission;
-import com.minecraftonline.nope.common.util.Formatter;
+import com.minecraftonline.nope.common.storage.DataHandler;
 import com.minecraftonline.nope.common.util.Logger;
+import java.nio.file.Path;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import lombok.Getter;
@@ -20,7 +22,6 @@ public abstract class Nope {
 
   public static final int WORLD_DEPTH = 512;
   public static final int WORLD_RADIUS = 100000;
-  public static final int MAX_HOST_COUNT = 100000;
   public static final String REPO_URL = "https://github.com/pietelite/nope/";
 
   @Setter
@@ -31,6 +32,21 @@ public abstract class Nope {
   @Getter
   @Accessors(fluent = true)
   private final Logger logger;
+
+  @Getter
+  @Setter
+  @Accessors(fluent = true)
+  private DataHandler data;
+
+  @Getter
+  @Setter
+  @Accessors(fluent = true)
+  private Path path;
+
+  @Getter
+  @Setter
+  @Accessors(fluent = true)
+  private HostSystem hostSystem;
 
   public final boolean hasPermission(UUID playerUuid, Permission permission) {
     return hasPermission(playerUuid, permission.get());

@@ -25,9 +25,7 @@
 package com.minecraftonline.nope.sponge.command.general.arguments;
 
 import com.minecraftonline.nope.common.host.Host;
-import com.minecraftonline.nope.common.setting.Templates;
 import com.minecraftonline.nope.sponge.SpongeNope;
-import com.minecraftonline.nope.sponge.util.AdapterUtil;
 import com.minecraftonline.nope.sponge.wand.Selection;
 import java.util.Collection;
 import java.util.Comparator;
@@ -57,12 +55,12 @@ public class NopeParameters {
       .optional()
       .addParser((parameterKey, reader, context) -> {
         String hostName = reader.parseString().toLowerCase();
-        Host host = SpongeNope.instance().getHostTreeAdapter().getHosts().get(hostName);
-        return Optional.ofNullable(host);
+        Settee settee = SpongeNope.instance().getHostSystemAdapter().getHosts().get(hostName);
+        return Optional.ofNullable(settee);
       })
       .completer((context, currentInput) -> {
         final Predicate<String> startsWith = new StartsWithPredicate(currentInput);
-        return SpongeNope.instance().getHostTreeAdapter()
+        return SpongeNope.instance().getHostSystemAdapter()
             .getHosts()
             .entrySet()
             .stream()
@@ -77,16 +75,16 @@ public class NopeParameters {
       .optional()
       .addParser((parameterKey, reader, context) -> {
         String hostName = reader.parseString().toLowerCase();
-        Host host = SpongeNope.instance().getHostTreeAdapter().getHosts().get(hostName);
-        if (host == null) {
+        Settee settee = SpongeNope.instance().getHostSystemAdapter().getHosts().get(hostName);
+        if (settee == null) {
           return inferHost(context);
         } else {
-          return Optional.of(host);
+          return Optional.of(settee);
         }
       })
       .completer((context, currentInput) -> {
         final Predicate<String> startsWith = new StartsWithPredicate(currentInput);
-        return SpongeNope.instance().getHostTreeAdapter()
+        return SpongeNope.instance().getHostSystemAdapter()
             .getHosts()
             .entrySet()
             .stream()
@@ -172,8 +170,8 @@ public class NopeParameters {
         } catch (ArgumentParseException e) {
           if (context.cause().root() instanceof Player) {
             return Optional.of(SpongeNope.instance()
-                .getHostTreeAdapter()
-                .getContainingHosts(AdapterUtil.adaptLocation(((Player) context.cause().root())
+                .getHostSystemAdapter()
+                .collectSuperiorHosts(AdapterUtil.adaptLocation(((Player) context.cause().root())
                     .serverLocation()))
                 .stream().max(Comparator.comparingInt(Host::getPriority))
                 .map(host -> host.getPriority() + 1).orElse(0));
@@ -197,14 +195,14 @@ public class NopeParameters {
    * @param context the command context
    * @return the host
    */
-  public static Optional<Host> inferHost(CommandContext context) {
+  public static Optional<Settee> inferHost(CommandContext context) {
     if (!(context.cause().root() instanceof Player)) {
       return Optional.empty();
     }
     Player player = (Player) context.cause().root();
-    Collection<Host> containing = SpongeNope.instance()
-        .getHostTreeAdapter()
-        .getContainingHosts(AdapterUtil.adaptLocation(player.serverLocation()));
+    Collection<Settee> containing = SpongeNope.instance()
+        .getHostSystemAdapter()
+        .collectSuperiorHosts(AdapterUtil.adaptLocation(player.serverLocation()));
     if (containing.isEmpty()) {
       return Optional.empty();
     }

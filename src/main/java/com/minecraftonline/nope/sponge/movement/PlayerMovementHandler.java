@@ -28,8 +28,6 @@ package com.minecraftonline.nope.sponge.movement;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.minecraftonline.nope.sponge.SpongeNope;
-import com.minecraftonline.nope.common.host.Host;
-import com.minecraftonline.nope.common.host.VolumeHost;
 import com.minecraftonline.nope.common.setting.SettingLibrary;
 import com.minecraftonline.nope.sponge.util.EffectsUtil;
 import java.util.LinkedList;
@@ -135,13 +133,13 @@ public class PlayerMovementHandler {
                                   Location<World> first,
                                   Location<World> last,
                                   boolean natural) {
-    List<Host> exiting = new LinkedList<>(SpongeNope.getInstance()
+    List<Settee> exiting = new LinkedList<>(SpongeNope.getInstance()
         .getHostTreeAdapter()
         .getContainingHosts(first));
-    List<Host> entering = new LinkedList<>(SpongeNope.getInstance()
+    List<Settee> entering = new LinkedList<>(SpongeNope.getInstance()
         .getHostTreeAdapter()
         .getContainingHosts(last));
-    Set<Host> unchanged = Sets.newHashSet(exiting);
+    Set<Settee> unchanged = Sets.newHashSet(exiting);
     unchanged.retainAll(entering);
     exiting.removeAll(unchanged);
     entering.removeAll(unchanged);
@@ -191,8 +189,8 @@ public class PlayerMovementHandler {
         visual = true;
       }
 
-      if (exiting.get(i) instanceof VolumeHost && isHostViewer(player.getUniqueId()) && expired) {
-        EffectsUtil.showVolume((VolumeHost) exiting.get(i), player, 5);
+      if (exiting.get(i) instanceof CuboidZone && isHostViewer(player.getUniqueId()) && expired) {
+        EffectsUtil.showVolume((CuboidZone) exiting.get(i), player, 5);
         visual = true;
       }
     }
@@ -223,9 +221,9 @@ public class PlayerMovementHandler {
           visual = true;
         }
 
-        if (entering.get(i) instanceof VolumeHost
+        if (entering.get(i) instanceof CuboidZone
             && isHostViewer(player.getUniqueId()) && expired) {
-          EffectsUtil.showVolume((VolumeHost) entering.get(i), player, 5);
+          EffectsUtil.showVolume((CuboidZone) entering.get(i), player, 5);
           visual = true;
         }
       }

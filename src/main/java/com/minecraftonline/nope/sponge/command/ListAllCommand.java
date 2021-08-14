@@ -82,7 +82,7 @@ public class ListAllCommand extends CommandNode {
   public CommandResult execute(CommandContext context) throws CommandException {
     Sponge.serviceProvider().paginationService()
         .builder()
-        .contents(SpongeNope.instance().getHostTreeAdapter()
+        .contents(SpongeNope.instance().getHostSystemAdapter()
             .getHosts()
             .values()
             .stream()

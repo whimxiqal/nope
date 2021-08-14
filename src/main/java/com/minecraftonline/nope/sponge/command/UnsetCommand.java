@@ -32,7 +32,6 @@ import com.minecraftonline.nope.sponge.command.general.FlagDescription;
 import com.minecraftonline.nope.common.host.Host;
 import com.minecraftonline.nope.common.permission.Permissions;
 import com.minecraftonline.nope.common.setting.SettingKey;
-import com.minecraftonline.nope.common.setting.SettingValue;
 import com.minecraftonline.nope.sponge.util.Format;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.args.GenericArguments;
@@ -62,12 +61,12 @@ public class UnsetCommand extends CommandNode {
   public CommandResult execute(CommandContext context) throws CommandException {
     SettingKey<?> settingKey = args.requireOne(Text.of("setting"));
 
-    Host host = args.<Host>getOne("zone").orElse(NopeCommandRoot.inferHost(src).orElse(null));
-    if (host == null) {
+    Settee settee = args.<Host>getOne("zone").orElse(NopeCommandRoot.inferHost(src).orElse(null));
+    if (settee == null) {
       return CommandResult.empty();
     }
 
-    SettingValue<?> settingValue = host.remove(settingKey);
+    SettingValue<?> settingValue = settee.remove(settingKey);
 
     if (settingValue == null) {
       src.sendMessage(Format.error(Format.settingKey(settingKey, false),
@@ -78,7 +77,7 @@ public class UnsetCommand extends CommandNode {
     src.sendMessage(Format.success("Unset ",
         Format.settingKey(settingKey, false),
         " on zone ",
-        Format.host(host)));
+        Format.host(settee)));
 
     return CommandResult.empty();
   }

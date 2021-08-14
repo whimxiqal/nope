@@ -26,21 +26,19 @@
 package com.minecraftonline.nope.common.setting;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonElement;
 import java.util.List;
 import java.util.Optional;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.experimental.Accessors;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 /**
  * The key object associated inside a {@link Setting}.
- * One or more {@link SettingValue} is normally associated with
- * a single {@link SettingKey} instantiated in multiple {@link Setting}s.
  *
  * <p>This object is abstract because every different type of data stored
- * in the {@link SettingValue} may have unique serializing logic, so
+ * as a value under this key may have unique serializing logic, so
  * every different generic type will require its own implementation.
  *
  * @param <T> the type of data which is ultimately keyed under this key
@@ -51,6 +49,7 @@ public abstract class SettingKey<T> {
    * The global unique identifier for this key.
    */
   @Getter
+  @Accessors(fluent = true)
   private final String id;
 
   /**
@@ -59,17 +58,21 @@ public abstract class SettingKey<T> {
    * if the user does not specify something different.
    */
   @Getter
+  @Accessors(fluent = true)
   private final T defaultData;
   @Getter
   @Setter
+  @Accessors(fluent = true)
   @Nullable
   private String description = null;
   @Getter
   @Setter
+  @Accessors(fluent = true)
   @Nullable
   private String blurb = null;
   @Getter
   @Setter
+  @Accessors(fluent = true)
   @NotNull
   private CategoryType category = CategoryType.MISC;
   @Getter
@@ -90,48 +93,20 @@ public abstract class SettingKey<T> {
     this.defaultData = defaultData;
   }
 
-  /**
-   * Convert some data into a Json structure.
-   * Data must be of the type of this object's generic type.
-   * Uses {@link #dataToJsonGenerified(Object)}.
-   *
-   * @param data the encoding data
-   * @return Json structure representing data
-   */
-  public final JsonElement dataToJson(Object data) {
-    return dataToJsonGenerified(cast(data));
+  public final Object serializeData(Object data) {
+    return serializeDataGenerified(cast(data));
   }
 
-  /**
-   * Convert some data into a Json structure.
-   *
-   * @param data the encoding data
-   * @return json structure representing data
-   */
-  protected JsonElement dataToJsonGenerified(T data) {
-    return new Gson().toJsonTree(data);
+  protected Object serializeDataGenerified(T data) {
+    return data;
   }
 
-  /**
-   * Parse some data from a Json structure.
-   * Data will be of the type of this object's generic type.
-   * Uses {@link #dataFromJsonGenerified(JsonElement)}.
-   *
-   * @param json Json structure
-   * @return the data represented by the Json structure
-   */
-  public final Object dataFromJson(JsonElement json) throws ParseSettingException {
-    return dataFromJsonGenerified(json);
+  public final Object deserializeData(Object serialized) throws ParseSettingException {
+    return deserializeDataGenerified(serialized);
   }
 
-  /**
-   * Parse some data from a Json structure.
-   *
-   * @param json Json structure
-   * @return the data represented by the Json structure
-   */
-  public T dataFromJsonGenerified(JsonElement json) throws ParseSettingException {
-    return new Gson().fromJson(json, valueType());
+  public T deserializeDataGenerified(Object serialized) throws ParseSettingException {
+    return cast(serialized);
   }
 
   /**
@@ -142,11 +117,7 @@ public abstract class SettingKey<T> {
    */
   @NotNull
   public String print(T data) {
-    JsonElement asJson = dataToJson(data);
-    if (asJson.isJsonPrimitive() && asJson.getAsJsonPrimitive().isString()) {
-      return asJson.getAsString();
-    }
-    return asJson.toString();
+    return serializeDataGenerified(data).toString();
   }
 
   /**
@@ -182,6 +153,10 @@ public abstract class SettingKey<T> {
     return (Class<T>) defaultData.getClass();
   }
 
+  public final <X> boolean isType(Class<X> type) {
+    return type.isAssignableFrom(valueType());
+  }
+
   /**
    * Cast the object to this object's generic type.
    *
@@ -196,6 +171,10 @@ public abstract class SettingKey<T> {
           valueType().getName()));
     }
     return valueType().cast(object);
+  }
+
+  public Setting<T> getDefaultSetting() {
+    return Setting.of(this, this.defaultData);
   }
 
   @Override

@@ -51,7 +51,6 @@ package com.minecraftonline.nope.sponge.command;
 
 import com.google.common.collect.Lists;
 import com.minecraftonline.nope.common.host.Host;
-import com.minecraftonline.nope.common.host.VolumeHost;
 import com.minecraftonline.nope.common.permission.Permissions;
 import com.minecraftonline.nope.sponge.SpongeNope;
 import com.minecraftonline.nope.sponge.command.general.CommandNode;
@@ -109,22 +108,22 @@ public class InfoCommand extends CommandNode {
           formatter().host(host.getParent())));
     }
 
-    if (host instanceof VolumeHost) {
-      VolumeHost volumeHost = (VolumeHost) host;
+    if (host instanceof CuboidZone) {
+      CuboidZone cuboidZone = (CuboidZone) host;
       // Volume zones only:
       headerLines.add(formatter().keyValue(SpongeFormatter.DULL, "min: ",
-          (volumeHost.getMinX() == Integer.MIN_VALUE ? "-Inf" : volumeHost.getMinX())
+          (cuboidZone.minX() == Integer.MIN_VALUE ? "-Inf" : cuboidZone.minX())
               + ", "
-              + volumeHost.getMinY()
+              + cuboidZone.minY()
               + ", "
-              + (volumeHost.getMinZ() == Integer.MIN_VALUE ? "-Inf" : volumeHost.getMinZ())));
+              + (cuboidZone.minZ() == Integer.MIN_VALUE ? "-Inf" : cuboidZone.minZ())));
 
       headerLines.add(formatter().keyValue(SpongeFormatter.DULL, "max: ",
-          (volumeHost.getMaxX() == Integer.MAX_VALUE ? "Inf" : volumeHost.getMaxX())
+          (cuboidZone.maxX() == Integer.MAX_VALUE ? "Inf" : cuboidZone.maxX())
               + ", "
-              + volumeHost.getMaxY()
+              + cuboidZone.maxY()
               + ", "
-              + (volumeHost.getMaxZ() == Integer.MAX_VALUE ? "Inf" : volumeHost.getMaxZ())));
+              + (cuboidZone.maxZ() == Integer.MAX_VALUE ? "Inf" : cuboidZone.maxZ())));
     }
 
     int zonePriority = host.getPriority();
@@ -154,8 +153,8 @@ public class InfoCommand extends CommandNode {
                       (context.subject() instanceof User)
                           ? ((User) context.subject()).uniqueId()
                           : null, host, SpongeNope.instance()
-                          .getHostTreeAdapter()
-                          .isRedundant(host, setting.getKey()))
+                          .getHostSystemAdapter()
+                          .findRedundancyController(host, setting.getKey()))
                       .get()
                       .stream()
                       .map(text -> text.clickEvent(ClickEvent.suggestCommand(

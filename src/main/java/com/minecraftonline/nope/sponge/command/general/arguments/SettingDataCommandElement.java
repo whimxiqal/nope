@@ -27,7 +27,6 @@ package com.minecraftonline.nope.sponge.command.general.arguments;
 import com.google.common.collect.Lists;
 import com.minecraftonline.nope.common.setting.SettingKey;
 import com.minecraftonline.nope.common.setting.SettingLibrary;
-import com.minecraftonline.nope.common.setting.SettingValue;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.stream.Collectors;

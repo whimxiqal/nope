@@ -55,7 +55,6 @@ import com.minecraftonline.nope.common.permission.Permissions;
 import com.minecraftonline.nope.sponge.SpongeNope;
 import com.minecraftonline.nope.sponge.command.general.CommandNode;
 import com.minecraftonline.nope.sponge.command.general.PlayerOnlyCommandNode;
-import com.minecraftonline.nope.sponge.util.AdapterUtil;
 import java.util.Comparator;
 import java.util.stream.Collectors;
 import net.kyori.adventure.text.Component;
@@ -84,8 +83,8 @@ public class ListCommand extends PlayerOnlyCommandNode {
     Sponge.serviceProvider().paginationService()
         .builder()
         .header(formatter().accent("> ___ > ___", "Priority", "Name"))
-        .contents(SpongeNope.instance().getHostTreeAdapter()
-            .getContainingHosts(AdapterUtil.adaptLocation(cause.serverLocation()))
+        .contents(SpongeNope.instance().getHostSystemAdapter()
+            .collectSuperiorHosts(AdapterUtil.adaptLocation(cause.serverLocation()))
             .stream()
             .sorted(Comparator.comparing(Host::getPriority))
             .map(host -> formatter().accent("> ___ > ___", host.getPriority(), formatter().host(host)))

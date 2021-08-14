@@ -49,9 +49,8 @@
 
 package com.minecraftonline.nope.sponge.command;
 
-import com.minecraftonline.nope.common.host.Host;
-import com.minecraftonline.nope.common.host.WorldHost;
-import com.minecraftonline.nope.common.struct.FlexibleHashQueueVolumeTree;
+import com.minecraftonline.nope.common.host.Domain;
+import com.minecraftonline.nope.common.struct.FlexibleHashQueueZoneTree;
 import com.minecraftonline.nope.sponge.SpongeNope;
 import com.minecraftonline.nope.sponge.command.general.CommandNode;
 import com.minecraftonline.nope.sponge.util.SpongeFormatter;
@@ -129,15 +128,15 @@ public class NopeCommandRoot extends CommandNode {
 
   void showCacheSize(CommandContext context) {
     if (context.cause().root() instanceof Player) {
-      Host worldHost = SpongeNope.instance()
-          .getHostTreeAdapter()
+      Settee worldSettee = SpongeNope.instance()
+          .getHostSystemAdapter()
           .getWorldHost(((Player) context.cause().root()).serverLocation().world().key().asString());
-      if (worldHost instanceof WorldHost) {
-        if (((WorldHost) worldHost).getZoneTree()
-            instanceof FlexibleHashQueueVolumeTree) {
+      if (worldSettee instanceof Domain) {
+        if (((Domain) worldSettee).getZoneTree()
+            instanceof FlexibleHashQueueZoneTree) {
           context.cause().audience().sendMessage(Component.text("Cache size: "
-              + ((FlexibleHashQueueVolumeTree<?, ?>)
-              ((WorldHost) worldHost).getZoneTree()).getCacheSize()).color(SpongeFormatter.DULL));
+              + ((FlexibleHashQueueZoneTree<?, ?>)
+              ((Domain) worldSettee).getZoneTree()).getCacheSize()).color(SpongeFormatter.DULL));
         }
       }
     }

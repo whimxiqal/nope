@@ -27,7 +27,6 @@ package com.minecraftonline.nope.common.update;
 
 import com.minecraftonline.nope.common.setting.Setting;
 import com.minecraftonline.nope.common.setting.SettingKey;
-import com.minecraftonline.nope.common.setting.SettingValue;
 import java.util.function.Function;
 import lombok.AllArgsConstructor;
 import lombok.Getter;

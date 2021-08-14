@@ -1,9 +1,9 @@
 # Nope
 
-Nope is a Minecraft volume protection plugin written by PietElite and tyhdefu for the Sponge plugin platform. It is
+Nope is a Minecraft cuboid protection plugin written by PietElite and tyhdefu for the Sponge plugin platform. It is
 based upon LionsArea and [WorldGuard](https://github.com/EngineHub/WorldGuard), and has been designed to be compatible
 with the former and to have the same functionality as the latter. It allows the user to change the handling of various
-behaviour within containers called Hosts. A Host can be a 3-D volume called a zone, worlds, or the entire server. Many
+behaviour within containers called Hosts. A Host can be a 3-D cuboid called a zone, worlds, or the entire server. Many
 different settings may be applied to these Hosts. These settings determine whether players may do things (like break
 blocks, place blocks, PvP with each other, or interact with certain objects) and also determine whether natural
 processes occur around the Host (like ice thawing or leaf decay).

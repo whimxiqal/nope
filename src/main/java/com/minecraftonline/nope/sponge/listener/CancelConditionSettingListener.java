@@ -36,7 +36,7 @@ import org.spongepowered.api.event.Event;
  *
  * @param <E> the type of event to cancel
  */
-class CancelConditionSettingListener<E extends Event & Cancellable>
+public class CancelConditionSettingListener<E extends Event & Cancellable>
     extends SingleSettingListener<E> {
   public CancelConditionSettingListener(@Nonnull SettingKey<?> key,
                                         @Nonnull Class<E> eventClass,

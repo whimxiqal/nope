@@ -38,7 +38,7 @@ import org.spongepowered.api.event.Event;
  *
  * @param <E> the type of event for which to listen
  */
-class PlayerCauseSettingListener<E extends Event> extends SingleSettingListener<E> {
+public class PlayerCauseSettingListener<E extends Event> extends SingleSettingListener<E> {
   public PlayerCauseSettingListener(@Nonnull SettingKey<?> key,
                                     @Nonnull Class<E> eventClass,
                                     @Nonnull BiConsumer<E, Player> handler) {

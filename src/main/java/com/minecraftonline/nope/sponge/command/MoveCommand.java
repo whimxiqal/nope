@@ -26,7 +26,6 @@
 package com.minecraftonline.nope.sponge.command;
 
 import com.minecraftonline.nope.common.host.Host;
-import com.minecraftonline.nope.common.host.VolumeHost;
 import com.minecraftonline.nope.common.permission.Permissions;
 import com.minecraftonline.nope.common.struct.Vector3i;
 import com.minecraftonline.nope.sponge.SpongeNope;
@@ -56,8 +55,8 @@ public class MoveCommand extends CommandNode {
   }
 
 
-  private CommandResult reAddHost(VolumeHost host) {
-    VolumeHost reAdded;
+  private CommandResult reAddHost(CuboidZone host) {
+    CuboidZone reAdded;
     Supplier<CommandResult> fail = () -> {
       SpongeNope.instance().logger().error(String.format("A request to move the host %s was sent. "
               + "The move failed and the original host could not be recovered.",
@@ -65,11 +64,11 @@ public class MoveCommand extends CommandNode {
       return CommandResult.error(formatter().error("Severe: The host in transit could not be recovered"));
     };
     try {
-      reAdded = SpongeNope.instance().getHostTreeAdapter().addZone(
+      reAdded = SpongeNope.instance().getHostSystemAdapter().addZone(
           host.getName(),
           Objects.requireNonNull(host.getWorldKey()).formatted(),
-          new Vector3i(host.getMinX(), host.getMinY(), host.getMinZ()),
-          new Vector3i(host.getMaxX(), host.getMaxY(), host.getMaxZ()),
+          new Vector3i(host.minX(), host.minY(), host.minZ()),
+          new Vector3i(host.maxX(), host.maxY(), host.maxZ()),
           host.getPriority());
       if (reAdded == null) {
         return fail.get();
@@ -86,7 +85,7 @@ public class MoveCommand extends CommandNode {
     Host host = context.requireOne(NopeParameterKeys.HOST);
     Selection selection = context.requireOne(NopeParameterKeys.SELECTION);
 
-    if (!(host instanceof VolumeHost)) {
+    if (!(host instanceof CuboidZone)) {
       return CommandResult.error(formatter().error("You can only move volumetric zones!"));
     }
 
@@ -95,17 +94,17 @@ public class MoveCommand extends CommandNode {
     ServerWorld world = selection.world();
 
     // Remove the host that's moving
-    VolumeHost removed;
+    CuboidZone removed;
     try {
-      removed = SpongeNope.instance().getHostTreeAdapter().removeZone(host.getName());
+      removed = SpongeNope.instance().getHostSystemAdapter().removeZone(host.getName());
     } catch (IllegalArgumentException e) {
       return CommandResult.error(formatter().error("Could not move zone: " + e.getMessage()));
     }
 
     // Add the new one
-    VolumeHost created;
+    CuboidZone created;
     try {
-      created = SpongeNope.instance().getHostTreeAdapter().addZone(
+      created = SpongeNope.instance().getHostSystemAdapter().addZone(
           host.getName(),
           world.world().key().formatted(),
           min,

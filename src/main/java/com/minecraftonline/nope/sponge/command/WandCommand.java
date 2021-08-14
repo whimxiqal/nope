@@ -55,7 +55,6 @@ import com.minecraftonline.nope.sponge.command.general.CommandNode;
 import com.minecraftonline.nope.sponge.key.zonewand.ZoneWandManipulator;
 import com.minecraftonline.nope.common.permission.Permissions;
 import com.minecraftonline.nope.common.setting.SettingLibrary;
-import com.minecraftonline.nope.common.setting.SettingValue;
 import com.minecraftonline.nope.sponge.util.Format;
 import javax.annotation.Nonnull;
 import org.spongepowered.api.Sponge;

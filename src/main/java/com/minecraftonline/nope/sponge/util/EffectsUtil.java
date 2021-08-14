@@ -25,7 +25,7 @@
 
 package com.minecraftonline.nope.sponge.util;
 
-import com.minecraftonline.nope.common.struct.Volume;
+import com.minecraftonline.nope.common.struct.Cuboid;
 import com.minecraftonline.nope.sponge.SpongeNope;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
@@ -45,19 +45,19 @@ public class EffectsUtil {
   /**
    * Display a volume in a world given specific tolerances.
    *
-   * @param volume    the volume whose walls to display
+   * @param cuboid    the volume whose walls to display
    * @param player    the viewer of the display
    * @param proximity the distance away from the viewing location to show
    * @return true the volume was close enough to be at least partially displayed
    */
-  public static boolean showVolume(Volume volume, Player player, int proximity) {
+  public static boolean showVolume(Cuboid cuboid, Player player, int proximity) {
     if (VOLUME_PARTICLE_TASK_EXECUTOR == null) {
       VOLUME_PARTICLE_TASK_EXECUTOR = Sponge.asyncScheduler()
           .createExecutor(SpongeNope.instance().getPluginContainer());
     }
     final int[][] volumePos = new int[][]{
-        {volume.getMinX(), volume.getMinY(), volume.getMinZ()},
-        {volume.getMaxX(), volume.getMaxY(), volume.getMaxZ()}
+        {cuboid.minX(), cuboid.minY(), cuboid.minZ()},
+        {cuboid.maxX(), cuboid.maxY(), cuboid.maxZ()}
     };
     final int[][] playerPos = new int[][]{
         {

@@ -49,7 +49,6 @@
 
 package com.minecraftonline.nope.sponge.command;
 
-import com.minecraftonline.nope.common.host.VolumeHost;
 import com.minecraftonline.nope.common.permission.Permissions;
 import com.minecraftonline.nope.sponge.SpongeNope;
 import com.minecraftonline.nope.sponge.command.general.CommandErrors;
@@ -57,7 +56,7 @@ import com.minecraftonline.nope.sponge.command.general.CommandNode;
 import com.minecraftonline.nope.sponge.command.general.arguments.NopeFlags;
 import com.minecraftonline.nope.sponge.command.general.arguments.NopeParameterKeys;
 import com.minecraftonline.nope.sponge.command.general.arguments.NopeParameters;
-import com.minecraftonline.nope.sponge.listener.DynamicSettingListeners;
+import com.minecraftonline.nope.sponge.listener.dynamic.DynamicSettingListeners;
 import com.minecraftonline.nope.sponge.wand.Selection;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.exception.CommandException;
@@ -93,7 +92,7 @@ public class CreateCommand extends CommandNode {
     int priority = context.requireOne(NopeParameterKeys.PRIORITY);
 
     try {
-      VolumeHost zone = SpongeNope.instance().getHostTreeAdapter().addZone(
+      CuboidZone zone = SpongeNope.instance().getHostSystemAdapter().addZone(
           name,
           selection.getWorldKey().asString(),
           selection.minPosition(),

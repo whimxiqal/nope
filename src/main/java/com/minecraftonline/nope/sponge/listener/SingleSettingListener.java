@@ -31,7 +31,7 @@ import javax.annotation.Nonnull;
 import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.EventListener;
 
-class SingleSettingListener<E extends Event> extends SettingListener<E> {
+public class SingleSettingListener<E extends Event> extends SettingListener<E> {
 
   public SingleSettingListener(@Nonnull SettingKey<?> key,
                                @Nonnull Class<E> eventClass,

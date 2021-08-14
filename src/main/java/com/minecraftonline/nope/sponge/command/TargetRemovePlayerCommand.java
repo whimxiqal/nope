@@ -57,7 +57,6 @@ import com.minecraftonline.nope.sponge.command.general.FlagDescription;
 import com.minecraftonline.nope.common.host.Host;
 import com.minecraftonline.nope.common.permission.Permissions;
 import com.minecraftonline.nope.common.setting.SettingKey;
-import com.minecraftonline.nope.common.setting.SettingValue;
 import com.minecraftonline.nope.sponge.util.Format;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
@@ -82,18 +81,18 @@ class TargetRemovePlayerCommand extends CommandNode {
         GenericArguments.string(Text.of("player")));
     addFlagDescription(FlagDescription.ZONE);
     setExecutor((src, args) -> {
-      Host host = args.<Host>getOne("zone").orElse(NopeCommandRoot.inferHost(src).orElse(null));
-      if (host == null) {
+      Settee settee = args.<Host>getOne("zone").orElse(NopeCommandRoot.inferHost(src).orElse(null));
+      if (settee == null) {
         return CommandResult.empty();
       }
       SettingKey<Object> key = args.requireOne("setting");
 
-      Optional<SettingValue<Object>> value = host.get(key);
+      Optional<SettingValue<Object>> value = settee.get(key);
       if (!value.isPresent()) {
         src.sendMessage(Format.error("The setting ",
             Format.settingKey(key, false),
             " is not set on zone ",
-            Format.host(host)));
+            Format.host(settee)));
         return CommandResult.empty();
       }
 
