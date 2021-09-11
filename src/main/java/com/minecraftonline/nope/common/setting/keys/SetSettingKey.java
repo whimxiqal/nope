@@ -25,12 +25,10 @@
 
 package com.minecraftonline.nope.common.setting.keys;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonPrimitive;
 import com.minecraftonline.nope.common.setting.SettingKey;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.jetbrains.annotations.NotNull;
@@ -49,38 +47,26 @@ public abstract class SetSettingKey<T> extends SettingKey<Set<T>> {
 
   @Override
   public final Object serializeDataGenerified(Set<T> set) {
-    if (set.isEmpty()) {
-      return new JsonPrimitive("empty");
-    }
-    final JsonArray jsonArray = new JsonArray();
-    for (T element : set) {
-      jsonArray.add(elementToJsonGenerified(element));
-    }
-    return jsonArray;
+    List<Object> objects = new LinkedList<>();
+    set.forEach(element -> objects.add(serializeElement(element)));
+    return objects;
   }
 
-  protected abstract JsonElement elementToJsonGenerified(T element);
+  protected abstract Object serializeElement(T element);
 
   @Override
-  public final Set<T> deserializeDataGenerified(Object jsonElement) {
-    if (jsonElement.isJsonArray()) {
-      return Lists.newLinkedList(jsonElement.getAsJsonArray())
-          .stream()
-          .map(this::elementFromJsonGenerified)
-          .collect(Collectors.toSet());
-    } else if (jsonElement.isJsonPrimitive()) {
-      if (jsonElement.getAsString().equalsIgnoreCase("empty")) {
-        return Sets.newHashSet();
-      }
-    }
-    throw new ParseSettingException("Couldn't deserialize the data from setting " + getId());
+  public final Set<T> deserializeDataGenerified(Object serialized) {
+    List<?> objects = (List<?>) serialized;
+    Set<T> set = new HashSet<>();
+    objects.forEach(object -> set.add(deserializeElement(serialized)));
+    return set;
   }
 
-  protected abstract T elementFromJsonGenerified(JsonElement jsonElement);
+  protected abstract T deserializeElement(Object serialized);
 
   @NotNull
   @Override
-  public final String print(Set<T> data) {
+  public final String print(@NotNull Set<T> data) {
     return data.stream()
         .map(this::printElement)
         .sorted()

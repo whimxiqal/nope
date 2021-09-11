@@ -26,10 +26,9 @@
 package com.minecraftonline.nope.common.setting.keys;
 
 import com.google.common.collect.Lists;
-import com.google.gson.JsonPrimitive;
 import com.minecraftonline.nope.common.setting.SettingKey;
 import java.util.List;
-import java.util.Optional;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * A setting to store a "state", which is essentially a boolean but
@@ -43,12 +42,12 @@ public class StateSettingKey extends SettingKey<Boolean> {
 
   @Override
   public Object serializeDataGenerified(Boolean value) {
-    return new JsonPrimitive(value ? "allow" : "deny");
+    return value;
   }
 
   @Override
-  public Boolean deserializeDataGenerified(Object jsonElement) {
-    final String s = jsonElement.getAsString();
+  public Boolean deserializeDataGenerified(Object serialized) {
+    final String s = (String) serialized;
     return parse(s);
   }
 
@@ -68,7 +67,12 @@ public class StateSettingKey extends SettingKey<Boolean> {
   }
 
   @Override
-  public Optional<List<String>> getParsable() {
-    return Optional.of(Lists.newArrayList("allow", "deny"));
+  public List<String> options() {
+    return Lists.newArrayList("allow", "deny");
+  }
+
+  @Override
+  public @NotNull String print(@NotNull Boolean data) {
+    return data ? "allow" : "deny";
   }
 }

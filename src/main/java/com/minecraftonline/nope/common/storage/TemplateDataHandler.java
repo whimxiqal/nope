@@ -1,12 +1,11 @@
 package com.minecraftonline.nope.common.storage;
 
-import com.minecraftonline.nope.common.setting.template.Template;
-import java.util.Collection;
+import com.minecraftonline.nope.common.setting.template.TemplateSet;
 
 public interface TemplateDataHandler {
 
-  void save(Collection<Template> templates);
+  void save(TemplateSet templates);
 
-  Collection<Template> load();
+  TemplateSet load();
 
 }

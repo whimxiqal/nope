@@ -28,41 +28,43 @@ package com.minecraftonline.nope.common.setting.keys;
 import com.google.gson.JsonObject;
 import com.minecraftonline.nope.common.Nope;
 import com.minecraftonline.nope.common.setting.SettingKey;
-import com.minecraftonline.nope.common.setting.SettingLibrary;
-import com.minecraftonline.nope.common.struct.Vector3d;
+import com.minecraftonline.nope.common.setting.SettingKeys;
+import com.minecraftonline.nope.common.math.Vector3d;
+import java.util.Map;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * A setting key that stores a {@link Vector3d} as a value.
  */
 public class Vector3dSettingKey extends SettingKey<Vector3d> {
 
-  public Vector3dSettingKey(String id, Vector3d defaultValue) {
-    super(id, defaultValue);
+  public Vector3dSettingKey(String id, @Nullable Vector3d defaultData, @NotNull Class<Vector3d> type) {
+    super(id, defaultData, type);
   }
 
   @Override
   public Object serializeDataGenerified(Vector3d value) {
     final JsonObject jsonObject = new JsonObject();
-    jsonObject.addProperty("x", value.getX());
-    jsonObject.addProperty("y", value.getY());
-    jsonObject.addProperty("z", value.getZ());
+    jsonObject.addProperty("x", value.posX());
+    jsonObject.addProperty("y", value.posY());
+    jsonObject.addProperty("z", value.posZ());
     return jsonObject;
   }
 
   @Override
-  public Vector3d deserializeDataGenerified(Object jsonElement) {
-    final JsonObject jsonObject = jsonElement.getAsJsonObject();
-    return new Vector3d(
-        jsonObject.get("x").getAsDouble(),
-        jsonObject.get("y").getAsDouble(),
-        jsonObject.get("z").getAsDouble()
+  public Vector3d deserializeDataGenerified(Object serialized) {
+    final Map<String, Double> map = (Map<String, Double>) serialized;
+    return Vector3d.of(
+        map.get("x"),
+        map.get("y"),
+        map.get("z")
     );
   }
 
   @Override
   public Vector3d parse(String s) throws ParseSettingException {
-    String[] parts = s.split(SettingLibrary.SET_SPLIT_REGEX, 3);
+    String[] parts = s.split(SettingKeys.SET_SPLIT_REGEX, 3);
     if (parts.length != 3) {
       throw new ParseSettingException("Expected 3 parts for Vector3d, got " + parts.length);
     }
@@ -75,7 +77,7 @@ public class Vector3dSettingKey extends SettingKey<Vector3d> {
           || Math.abs(y) > Nope.WORLD_DEPTH) {
         throw new ParseSettingException("The magnitudes of these numbers are too high!");
       }
-      return new Vector3d(x, y, z);
+      return Vector3d.of(x, y, z);
     } catch (NumberFormatException e) {
       throw new ParseSettingException("Value at position " + i + ", "
           + "could not be parsed into a double");
@@ -84,7 +86,10 @@ public class Vector3dSettingKey extends SettingKey<Vector3d> {
 
   @NotNull
   @Override
-  public String print(Vector3d data) {
-    return "x:" + data.getX() + ", y: " + data.getY() + ", z: " + data.getZ();
+  public String print(@NotNull Vector3d data) {
+    if (data == null) {
+      return "null";
+    }
+    return "x:" + data.posX() + ", y: " + data.posY() + ", z: " + data.posZ();
   }
 }

@@ -53,7 +53,7 @@ public class EnumSettingKey<E extends Enum<E>> extends SettingKey<E> {
 
   @Override
   public E deserializeDataGenerified(Object serialized) {
-    return parse(serialized.getAsString());
+    return parse((String) serialized);
   }
 
   @Override
@@ -74,10 +74,10 @@ public class EnumSettingKey<E extends Enum<E>> extends SettingKey<E> {
   }
 
   @Override
-  public Optional<List<String>> getParsable() {
-    return Optional.of(Arrays.stream(enumClass.getEnumConstants())
+  public List<String> options() {
+    return Arrays.stream(enumClass.getEnumConstants())
         .map(E::toString)
         .map(String::toLowerCase)
-        .collect(Collectors.toList()));
+        .collect(Collectors.toList());
   }
 }

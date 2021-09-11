@@ -5,6 +5,7 @@ import com.google.common.collect.Sets;
 import com.minecraftonline.nope.common.Nope;
 import com.minecraftonline.nope.common.permission.Permissions;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -29,13 +30,17 @@ public final class Target {
   @Setter
   private boolean indiscriminate = false;
 
-  private boolean whitelist = true;
+  private boolean whitelist;
 
   private Target() {
   }
 
   public static Target all() {
-    return new Target();
+    return Target.blacklisted(Collections.emptyList());
+  }
+
+  public static Target none() {
+    return Target.whitelisted(Collections.emptyList());
   }
 
   public static Target whitelisted(Collection<UUID> collection) {
@@ -61,8 +66,8 @@ public final class Target {
 
   public void blacklist() {
     if (whitelist) {
-      this.users.clear();
       this.whitelist = false;
+      this.users.clear();
     }
   }
 
@@ -87,13 +92,11 @@ public final class Target {
         return false;
       }
     }
-    if (!users.isEmpty()) {
-      if (whitelist && !users.contains(userUuid)) {
-        return false;
-      }
-      if (!whitelist && users.contains(userUuid)) {
-        return false;
-      }
+    if (whitelist && !users.contains(userUuid)) {
+      return false;
+    }
+    if (!whitelist && users.contains(userUuid)) {
+      return false;
     }
     return this.permissions.entrySet().stream().allMatch(entry ->
         Nope.instance().hasPermission(userUuid, entry.getKey()) == entry.getValue());

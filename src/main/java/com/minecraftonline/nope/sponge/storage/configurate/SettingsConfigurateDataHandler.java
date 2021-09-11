@@ -1,11 +1,12 @@
 package com.minecraftonline.nope.sponge.storage.configurate;
 
-import com.minecraftonline.nope.common.host.Domain;
 import com.minecraftonline.nope.common.setting.Setting;
 import com.minecraftonline.nope.common.setting.SettingCollection;
 import com.minecraftonline.nope.common.setting.SettingKey;
-import com.minecraftonline.nope.common.setting.SettingLibrary;
+import com.minecraftonline.nope.common.setting.SettingKeys;
 import com.minecraftonline.nope.common.setting.Target;
+import com.minecraftonline.nope.common.math.Volume;
+import com.minecraftonline.nope.sponge.storage.configurate.serializer.VolumeTypeSerializer;
 import io.leangen.geantyref.TypeToken;
 import java.util.Collection;
 import java.util.LinkedList;
@@ -15,19 +16,22 @@ import java.util.Set;
 import java.util.UUID;
 import org.spongepowered.configurate.CommentedConfigurationNode;
 import org.spongepowered.configurate.ConfigurationNode;
+import org.spongepowered.configurate.ConfigurationOptions;
 import org.spongepowered.configurate.serialize.SerializationException;
 
 public abstract class SettingsConfigurateDataHandler {
 
   protected final CommentedConfigurationNode settingCollectionRoot(SettingCollection settings) throws SerializationException {
-    CommentedConfigurationNode root = CommentedConfigurationNode.root();
+    CommentedConfigurationNode root = CommentedConfigurationNode.root(ConfigurationOptions.defaults()
+        .serializers(builder ->
+            builder.register(Volume.class, new VolumeTypeSerializer())));
     root.node("settings").set(serializeSettings(settings));
     return root;
   }
 
   protected final CommentedConfigurationNode serializeSettings(SettingCollection settings) throws SerializationException {
     CommentedConfigurationNode node = CommentedConfigurationNode.root();
-    for (Setting<?> setting : settings.getAll()) {
+    for (Setting<?> setting : settings.settings()) {
       CommentedConfigurationNode settingNode = node.node(setting.key().id());
       settingNode.comment(setting.key().description());
 
@@ -56,10 +60,10 @@ public abstract class SettingsConfigurateDataHandler {
   protected final Collection<Setting<?>> deserializeSettings(List<? extends ConfigurationNode> settingNodes) throws SerializationException {
     List<Setting<?>> settings = new LinkedList<>();
     for (ConfigurationNode settingNode : settingNodes) {
-      SettingKey<?> key = SettingLibrary.get(settingNode.getString());
+      SettingKey<?> key = SettingKeys.get(settingNode.getString());
       Object data = null;
       if (!settingNode.node("data").virtual()) {
-        data = settingNode.node("data").require(key.valueType());
+        data = settingNode.node("data").require(key.type());
       }
 
       Target target = null;

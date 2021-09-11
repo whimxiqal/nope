@@ -28,11 +28,14 @@ package com.minecraftonline.nope.common.host;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import com.minecraftonline.nope.common.Nope;
 import com.minecraftonline.nope.common.setting.Setting;
 import com.minecraftonline.nope.common.setting.SettingKey;
 import com.minecraftonline.nope.common.setting.Target;
 import com.minecraftonline.nope.common.setting.template.TemplateSet;
 import com.minecraftonline.nope.common.struct.Location;
+import com.minecraftonline.nope.common.math.Volume;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -66,6 +69,8 @@ public class HostSystem {
    */
   protected final HashMap<String, Domain> domains = Maps.newHashMap();
 
+  protected final HashMap<String, Zone> zones = Maps.newHashMap();
+
   @Getter
   @Accessors(fluent = true)
   protected final TemplateSet templates = new TemplateSet();
@@ -76,33 +81,115 @@ public class HostSystem {
   }
 
   @NotNull
-  public Map<String, Host<?>> getHosts() {
-    Map<String, Host<?>> hosts = Maps.newHashMap();
+  public Map<String, Host> hosts() {
+    Map<String, Host> hosts = Maps.newHashMap();
     hosts.put(this.universe.name(), this.universe);
-    this.domains.values().forEach(domain -> {
-      hosts.put(domain.name(), domain);
-      domain.zones().getAll().forEach(zone -> hosts.put(zone.name(), zone));
-    });
+    this.domains.forEach(hosts::put);
+    this.zones.forEach(hosts::put);
     return hosts;
   }
 
+  public Zone addZone(Zone zone) {
+    Zone replaced = zones.put(zone.name().toLowerCase(), zone);
+    Set<VolumeTree> trees = new HashSet<>();
+    zone.volumes.forEach(volume -> {
+      volume.domain().volumes().put(volume, zone, false);
+      trees.add(volume.domain().volumes());
+    });
+    trees.forEach(VolumeTree::construct);
+    return replaced;
+  }
+
+  public void addVolume(Volume volume, Zone zone) {
+    zone.volumes.add(volume);
+    volume.domain().volumes().put(volume, zone, true);
+    zone.save();
+  }
+
+  public void addAllZones(Iterable<Zone> zones) {
+    // Put all zones in the collection of zones for indexing by their name
+    zones.forEach(zone -> this.zones.put(zone.name().toLowerCase(), zone));
+
+    Set<VolumeTree> trees = new HashSet<>();
+    // Add all volumes into volume tree
+    zones.forEach(zone ->
+        zone.volumes.forEach(volume -> {
+          volume.domain().volumes().put(volume, zone, false);
+          trees.add(volume.domain().volumes());
+        }));
+    // Construct all volume trees that were affected
+    trees.forEach(VolumeTree::construct);
+  }
+
+  @Nullable
+  public Zone removeZone(String zoneName) {
+    Zone removed = zones.remove(zoneName.toLowerCase());
+    if (removed != null) {
+      Set<Domain> domains = new HashSet<>();
+      removed.volumes.forEach(volume -> {
+        volume.domain().volumes().remove(volume, false);
+        domains.add(volume.domain());
+      });
+      removed.destroy();
+      domains.forEach(domain -> domain.volumes().construct());
+    }
+    return removed;
+  }
+
+  public Volume removeVolume(Zone zone, int index) {
+    Volume removed = zone.volumes.remove(index);
+    removed.domain().volumes().remove(removed, true);
+    return removed;
+  }
+
+  @Nullable
+  public Zone get(String zoneName) {
+    return zones.get(zoneName);
+  }
+
+  public boolean hasName(String hostName) {
+    return universe.name().equalsIgnoreCase(hostName)
+        || domains().containsKey(hostName.toLowerCase())
+        || zones.containsKey(hostName.toLowerCase());
+  }
+
+  public Collection<Zone> getAll() {
+    return zones.values();
+  }
+
   @NotNull
-  public Set<Host<?>> collectSuperiorHosts(@NotNull Location location) {
-    Set<Host<?>> set = Sets.newHashSet();
+  public Set<Host> collectSuperiorHosts(@NotNull Location location) {
+    Set<Host> set = Sets.newHashSet();
     set.add(universe);
-    set.add(location.getDomain());
+    set.add(location.domain());
 
     // Add all the containing zones and their parents
-    Set<Zone> zones = location.getDomain()
-        .zones()
+    Set<Zone> zones = location.domain()
+        .volumes()
         .containing(location.getBlockX(), location.getBlockY(), location.getBlockZ());
+    set.addAll(zones);
     accumulateParents(zones, set);
     return set;
   }
 
+  private Set<Zone> containingZones(Zone zone, boolean discriminate) {
+    Set<Zone> all = new HashSet<>();
+    boolean first = true;
+    // Only keep the zones which contain every single volume of the given zone
+    for (Volume volume : zone.volumes) {
+      if (first) {
+        all.addAll(volume.domain().volumes().containing(volume, discriminate));
+        first = false;
+      } else {
+        all.retainAll(volume.domain().volumes().containing(volume, discriminate));
+      }
+    }
+    return all;
+  }
+
   @NotNull
-  public Set<Host<?>> collectSuperiorHosts(Host<?> host, boolean discriminate) {
-    Set<Host<?>> set = new HashSet<>();
+  public Set<Host> collectSuperiorHosts(Host host, boolean discriminate) {
+    Set<Host> set = new HashSet<>();
     if (host instanceof Universe) {
       return set;  // Not contained by anything
     }
@@ -114,27 +201,32 @@ public class HostSystem {
     if (!(host instanceof Zone)) {
       throw new IllegalArgumentException("The host of type " + host.getClass().getName() + " is unrecognized.");
     }
+    // Add domains
     Zone zone = (Zone) host;
-    set.add(zone.domain);
+    zone.volumes.forEach(volume -> set.add(volume.domain()));
 
-    Set<Zone> zones = zone.domain.zones().containing(zone, discriminate);
-    accumulateParents(zones, set);
+    // Add zones which contain this entire zone (all of its volumes)
+    Set<Zone> containingZones = containingZones(zone, true);
+    set.addAll(containingZones);
+
+    // Grab all the parents of each containing zone
+    accumulateParents(containingZones, set);
     return set;
   }
 
-  private void accumulateParents(Set<Zone> zones, Set<Host<?>> accumulator) {
-    Domained<?> current;
+  private void accumulateParents(Set<Zone> zones, Set<Host> accumulator) {
+    Zone current;
     for (Zone zone : zones) {
       current = zone;
-      while (!accumulator.contains(current)) {
+      while (current.parent().isPresent() && !accumulator.contains(current.parent().get())) {
+        current = zone.parent().get();
         accumulator.add(current);
-        current = zone.parent();
       }
     }
   }
 
-  public boolean isAssigned(SettingKey<?> key) {
-    return getHosts().values().stream().anyMatch(host -> host.get(key).isPresent());
+  public boolean isAssigned(SettingKey key) {
+    return hosts().values().stream().anyMatch(host -> host.get(key).isPresent());
   }
 
   public <V> V lookupAnonymous(@NotNull SettingKey<V> key,
@@ -145,18 +237,18 @@ public class HostSystem {
   public <V> V lookup(@NotNull final SettingKey<V> key,
                       @Nullable final UUID userUuid,
                       @NotNull final Location location) {
-    LinkedList<Host<?>> hosts = new LinkedList<>();
+    LinkedList<Host> hosts = new LinkedList<>();
 
     if (universe.isSet(key)) {
       hosts.addFirst(universe);
     }
 
-    if (location.getDomain().isSet(key)) {
-      hosts.addFirst(location.getDomain());
+    if (location.domain().isSet(key)) {
+      hosts.addFirst(location.domain());
     }
 
-    location.getDomain()
-        .zones()
+    location.domain()
+        .volumes()
         .containing(location.getBlockX(),
             location.getBlockY(),
             location.getBlockZ())
@@ -165,17 +257,17 @@ public class HostSystem {
         .forEach(hosts::addFirst);
 
     /* Choose a data structure that will optimize searching for highest priority matching */
-    Queue<Host<?>> hostQueue;
-    Comparator<Host<?>> descending = (h1, h2) -> Integer.compare(h2.priority(), h1.priority());
+    Queue<Host> hostQueue;
+    Comparator<Host> descending = (h1, h2) -> Integer.compare(h2.priority(), h1.priority());
     if (hosts.size() > 10) {
       hostQueue = new PriorityQueue<>(hosts.size(), descending);
       hostQueue.addAll(hosts);
     } else {
       hostQueue = new LinkedList<>(hosts);
-      ((LinkedList<Host<?>>) hostQueue).sort(descending);
+      ((LinkedList<Host>) hostQueue).sort(descending);
     }
 
-    Host<?> currentHost;
+    Host currentHost;
     Optional<Setting<V>> currentSetting;
     Target currentTarget;
     boolean targeted = true;
@@ -227,21 +319,21 @@ public class HostSystem {
    * @param key  the key
    * @return a superior with an identical setting
    */
-  public Optional<Host<?>> findIdenticalSuperior(Host<?> host, SettingKey<?> key) {
+  public Optional<Host> findIdenticalSuperior(Host host, SettingKey key) {
     // Check if this host even has a setting
-    Optional<? extends Setting<?>> setting = host.get(key);
+    Optional<? extends Setting> setting = host.get(key);
     if (!setting.isPresent()) {
       return Optional.empty();
     }
-    List<Host<?>> superiors = new LinkedList<>(collectSuperiorHosts(host, true));
+    List<Host> superiors = new LinkedList<>(collectSuperiorHosts(host, true));
     superiors.sort(Comparator.comparingInt(h -> -h.priority()));  // Sort maximum first
-    for (Host<?> superior : superiors) {
+    for (Host superior : superiors) {
       // Continue if this superior doesn't have priority over the desired host
       if (superior.priority() > host.priority()) {
         continue;
       }
 
-      Optional<? extends Setting<?>> superiorSetting = superior.get(key);
+      Optional<? extends Setting> superiorSetting = superior.get(key);
       // Continue if the value is not found on this host
       if (!superiorSetting.isPresent()) {
         continue;
@@ -268,8 +360,16 @@ public class HostSystem {
     return ImmutableMap.copyOf(domains);
   }
 
-  public Domain getDomain(String id) {
+  public Domain domain(String id) {
     return domains.get(id);
+  }
+
+  public Map<String, Zone> zones() {
+    return ImmutableMap.copyOf(zones);
+  }
+
+  public Zone zone(String name) {
+    return zones.get(name);
   }
 
 }

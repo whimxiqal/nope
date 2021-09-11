@@ -1,14 +1,11 @@
 package com.minecraftonline.nope.sponge.storage.configurate;
 
 import com.minecraftonline.nope.common.setting.template.Template;
+import com.minecraftonline.nope.common.setting.template.TemplateSet;
 import com.minecraftonline.nope.common.storage.TemplateDataHandler;
-import java.util.Collection;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import org.spongepowered.configurate.CommentedConfigurationNode;
 import org.spongepowered.configurate.ConfigurateException;
-import org.spongepowered.configurate.ConfigurationNode;
 import org.spongepowered.configurate.loader.ConfigurationLoader;
 import org.spongepowered.configurate.serialize.SerializationException;
 
@@ -21,9 +18,9 @@ public class TemplateConfigurateDataHandler extends SettingsConfigurateDataHandl
   }
 
   @Override
-  public void save(Collection<Template> templates) {
+  public void save(TemplateSet set) {
     CommentedConfigurationNode root = CommentedConfigurationNode.root();
-    for (Template template : templates) {
+    for (Template template : set.templates()) {
       try {
         root.node(template.name(), "description").set(template.description());
         root.node(template.name(), "settings").set(serializeSettings(template));
@@ -39,18 +36,19 @@ public class TemplateConfigurateDataHandler extends SettingsConfigurateDataHandl
   }
 
   @Override
-  public Collection<Template> load() {
-    List<Template> list = new LinkedList<>();
+  public TemplateSet load() {
+    TemplateSet set = new TemplateSet();
+    Template.INITIAL.forEach(set::add);
     try {
       CommentedConfigurationNode root = loader.load();
       for (Map.Entry<Object, CommentedConfigurationNode> entry : root.childrenMap().entrySet()) {
-        list.add(new Template(entry.getKey().toString(),
+        set.add(new Template(entry.getKey().toString(),
             entry.getValue().node("description").getString("Unknown function"),
             deserializeSettings(entry.getValue().node("settings").childrenList())));
       }
     } catch (ConfigurateException e) {
       e.printStackTrace();
     }
-    return list;
+    return set;
   }
 }

@@ -28,29 +28,24 @@ package com.minecraftonline.nope.common.host;
 import com.minecraftonline.nope.common.setting.SettingCollection;
 import com.minecraftonline.nope.common.struct.Container;
 import com.minecraftonline.nope.common.struct.Location;
+import com.minecraftonline.nope.common.struct.Named;
 
 /**
  * A class to store Settings based on graphical locations.
- *
- * @param <P> the type of parent
  */
-public abstract class Host<P extends Host<?>> extends SettingCollection implements Container, Model {
+public abstract class Host extends SettingCollection implements Container, Named {
 
   private final String name;
   protected int priority;
-  private P parent;
 
   /**
    * Default constructor.
    *
    * @param name     the name
-   * @param parent   the parent
    * @param priority the priority
    */
-  public Host(String name, P parent, int priority) {
-    super(dataHandler);
+  public Host(String name, int priority) {
     this.name = name;
-    this.parent = parent;
     this.priority = priority;
   }
 
@@ -69,19 +64,12 @@ public abstract class Host<P extends Host<?>> extends SettingCollection implemen
 
   @Override
   public boolean equals(Object obj) {
-    return obj instanceof Host && ((Host<?>) obj).name.equals(this.name);
+    return obj instanceof Host && ((Host) obj).name.equals(this.name);
   }
 
+  @Override
   public String name() {
     return name;
-  }
-
-  protected void parent(P parent) {
-    this.parent = parent;
-  }
-
-  public P parent() {
-    return parent;
   }
 
   public int priority() {

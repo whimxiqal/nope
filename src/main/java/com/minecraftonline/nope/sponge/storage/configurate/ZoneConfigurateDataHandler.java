@@ -1,21 +1,21 @@
 package com.minecraftonline.nope.sponge.storage.configurate;
 
-import com.minecraftonline.nope.common.host.Domain;
+import com.minecraftonline.nope.common.Nope;
 import com.minecraftonline.nope.common.host.Zone;
 import com.minecraftonline.nope.common.storage.ZoneDataHandler;
-import com.minecraftonline.nope.common.struct.Cuboid;
-import com.minecraftonline.nope.common.struct.Cylinder;
-import com.minecraftonline.nope.common.struct.Sphere;
-import com.minecraftonline.nope.common.struct.Volume;
+import com.minecraftonline.nope.common.math.Cylinder;
+import com.minecraftonline.nope.common.math.Sphere;
+import com.minecraftonline.nope.common.math.Volume;
 import com.minecraftonline.nope.sponge.SpongeNope;
 import java.io.File;
 import java.nio.file.Path;
 import java.util.Collection;
-import java.util.Objects;
-import java.util.function.BiFunction;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
-import java.util.stream.Collectors;
-import org.spongepowered.api.ResourceKey;
+import java.util.function.Supplier;
 import org.spongepowered.configurate.CommentedConfigurationNode;
 import org.spongepowered.configurate.ConfigurateException;
 import org.spongepowered.configurate.ConfigurationNode;
@@ -24,18 +24,21 @@ import org.spongepowered.configurate.serialize.SerializationException;
 
 public class ZoneConfigurateDataHandler extends SettingsConfigurateDataHandler implements ZoneDataHandler {
 
-  private final BiFunction<ResourceKey, String, ConfigurationLoader<CommentedConfigurationNode>> loader;
-  private final BiFunction<ResourceKey, String, Path> filePath;
+  private final Function<String, ConfigurationLoader<CommentedConfigurationNode>> loader;
+  private final Function<String, Path> filePath;
+  private final Supplier<Collection<ConfigurationLoader<CommentedConfigurationNode>>> allLoader;
 
-  public ZoneConfigurateDataHandler(BiFunction<ResourceKey, String, ConfigurationLoader<CommentedConfigurationNode>> loader,
-                                    BiFunction<ResourceKey, String, Path> filePath) {
+  public ZoneConfigurateDataHandler(Function<String, ConfigurationLoader<CommentedConfigurationNode>> loader,
+                                    Function<String, Path> filePath,
+                                    Supplier<Collection<ConfigurationLoader<CommentedConfigurationNode>>> allLoader) {
     this.loader = loader;
     this.filePath = filePath;
+    this.allLoader = allLoader;
   }
 
   @Override
   public void destroy(Zone zone) {
-    File file = filePath.apply(ResourceKey.resolve(zone.domain().id()), zone.name()).toFile();
+    File file = filePath.apply(zone.name()).toFile();
     if (file.exists()) {
       if (!file.delete()) {
         SpongeNope.instance().logger().error("Error when trying to destroy zone "
@@ -49,34 +52,70 @@ public class ZoneConfigurateDataHandler extends SettingsConfigurateDataHandler i
   public void save(Zone zone) {
     try {
       CommentedConfigurationNode root = settingCollectionRoot(zone);
-      root.comment("Settings for Zone " + zone.name());
-      if (zone.parent() instanceof Domain) {
-        root.node("parent", "type").set("world");
-        root.node("parent", "name").set(zone.domain().id());
-      } else {
-        root.node("parent", "type").set("zone");
-        root.node("parent", "name").set(zone.parent().name());
-      }
+      root.node("name").set(zone.name());
+      root.node("settings").comment("Settings for Zone " + zone.name());
+      root.node("priority").set(zone.priority());
+      root.node("parent").set(zone.parent().map(Zone::name).orElse(null));
       CommentedConfigurationNode volumes = root.node("volumes");
-      volumes.set(zone.volumes().stream().map(volume -> {
-        try {
-          if (volume instanceof Cuboid) {
-            return node((Cuboid) volume);
-          } else if (volume instanceof Cylinder) {
-            return node((Cylinder) volume);
-          } else if (volume instanceof Sphere) {
-            return node((Sphere) volume);
-          } else {
-            throw new IllegalStateException("Unknown volume type: " + volume.getClass());
-          }
-        } catch (SerializationException e) {
-          e.printStackTrace();
-          return null;
-        }
-      }).filter(Objects::nonNull).collect(Collectors.toList()));
-      loader.apply(ResourceKey.resolve(zone.domain().id()), zone.name()).save(root);
+      volumes.setList(Volume.class, zone.volumes());
+      loader.apply(zone.name()).save(root);
     } catch (ConfigurateException e) {
       e.printStackTrace();
+    }
+  }
+
+  @Override
+  public Collection<Zone> load() {
+    Map<String, Zone> zones = new HashMap<>();
+    // Need to queue other loaders if the one given does not have their parent loaded yet
+    Map<String, List<ConfigurationLoader<CommentedConfigurationNode>>> queue = new HashMap<>();
+    for (ConfigurationLoader<CommentedConfigurationNode> loader : allLoader.get()) {
+      load(zones, queue, loader);
+    }
+    return zones.values();
+  }
+
+  private void load(Map<String, Zone> zones,
+                    Map<String, List<ConfigurationLoader<CommentedConfigurationNode>>> queue,
+                    ConfigurationLoader<CommentedConfigurationNode> loader) {
+    ConfigurationNode root;
+    String name;
+    // TODO do this for other configurate data handlers...
+    //  i.e. put root and name before its own try/catch clause and add an error log message
+    //  instead of a print stack trace
+    try {
+      root = loader.load();
+      name = root.node("name").require(String.class);
+    } catch (ConfigurateException e) {
+      Nope.instance().logger().error("Error loading Zone: " + e.getMessage());
+      return;
+    }
+
+    try {
+      String parentName = root.node("parent").get(String.class);
+      Zone parent;
+      if (parentName == null) {
+        parent = null;
+      } else if (zones.containsKey(parentName)) {
+        parent = zones.get(parentName);
+      } else {
+        queue.computeIfAbsent(parentName, p -> new LinkedList<>()).add(loader);
+        return;
+      }
+      int priority = root.node("priority").getInt();
+      List<Volume> volumes;
+      try {
+        volumes = root.node("volumes").getList(Volume.class);
+      } catch (Exception e) {
+        Nope.instance().logger().error("Failed parsing volumes for zone: " + name);
+        throw e;
+      }
+      zones.put(name, new Zone(name, parent, priority, volumes));
+      if (queue.containsKey(name)) {
+        queue.get(name).forEach(queuedLoader -> load(zones, queue, queuedLoader));
+      }
+    } catch (ConfigurateException e) {
+      Nope.instance().logger().error(String.format("Error loading Zone %s: " + e.getMessage(), name));
     }
   }
 
@@ -88,21 +127,10 @@ public class ZoneConfigurateDataHandler extends SettingsConfigurateDataHandler i
     return node;
   }
 
-  private ConfigurationNode node(Cuboid cuboid) throws SerializationException {
-    ConfigurationNode node = volumeRoot(cuboid);
-    node.node("type").set("cuboid");
-    node.node("dimensions", "min-x").set(cuboid.minX());
-    node.node("dimensions", "min-y").set(cuboid.minY());
-    node.node("dimensions", "min-z").set(cuboid.minZ());
-    node.node("dimensions", "max-x").set(cuboid.maxX());
-    node.node("dimensions", "max-y").set(cuboid.maxY());
-    node.node("dimensions", "max-z").set(cuboid.maxZ());
-    return node;
-  }
-
-  private ConfigurationNode node(Cylinder cylinder) throws SerializationException {
+  private ConfigurationNode serializeCylinder(Cylinder cylinder) throws SerializationException {
     ConfigurationNode node = volumeRoot(cylinder);
     node.node("type").set("cylinder");
+    node.node("world").set(cylinder.domain().id());
     node.node("dimensions", "pos-x").set(cylinder.posX());
     node.node("dimensions", "min-y").set(cylinder.minY());
     node.node("dimensions", "max-y").set(cylinder.maxY());
@@ -111,9 +139,10 @@ public class ZoneConfigurateDataHandler extends SettingsConfigurateDataHandler i
     return node;
   }
 
-  private ConfigurationNode node(Sphere sphere) throws SerializationException {
+  private ConfigurationNode serializeSphere(Sphere sphere) throws SerializationException {
     ConfigurationNode node = volumeRoot(sphere);
     node.node("type").set("sphere");
+    node.node("world").set(sphere.domain().id());
     node.node("dimensions", "pos-x").set(sphere.posX());
     node.node("dimensions", "pos-y").set(sphere.posY());
     node.node("dimensions", "pos-z").set(sphere.posZ());

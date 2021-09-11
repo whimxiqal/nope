@@ -26,10 +26,10 @@
 package com.minecraftonline.nope.common.setting.keys;
 
 import com.google.gson.JsonPrimitive;
+import com.minecraftonline.nope.common.Nope;
 import com.minecraftonline.nope.common.setting.SettingKey;
-import com.minecraftonline.nope.common.setting.SettingLibrary;
+import com.minecraftonline.nope.common.setting.SettingKeys;
 import com.minecraftonline.nope.common.struct.Location;
-import java.util.UUID;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -44,33 +44,33 @@ public final class LocationSettingKey extends SettingKey<Location> {
   @Override
   public Object serializeDataGenerified(Location data) {
     return new JsonPrimitive(String.join(", ", new String[]{
-        String.valueOf(data.getPosX()),
-        String.valueOf(data.getPosY()),
-        String.valueOf(data.getPosZ()),
-        data.getWorldUuid().toString()
+        String.valueOf(data.posX()),
+        String.valueOf(data.posY()),
+        String.valueOf(data.posZ()),
+        data.domain().id()
     }));
   }
 
   @Override
   public Location deserializeDataGenerified(Object serialized) throws ParseSettingException {
-    return parse(serialized.getAsString());
+    return parse((String) serialized);
   }
 
   @NotNull
   @Override
-  public String print(Location data) {
-    return "world:" + data.getWorldUuid().toString()
+  public String print(@NotNull Location data) {
+    return "world:" + data.domain().id()
         + ", "
-        + "x:" + data.getPosX()
+        + "x:" + data.posX()
         + ", "
-        + "y:" + data.getPosY()
+        + "y:" + data.posY()
         + ", "
-        + "z:" + data.getPosZ();
+        + "z:" + data.posZ();
   }
 
   @Override
   public Location parse(String data) throws ParseSettingException {
-    String[] tokens = data.split(SettingLibrary.SET_SPLIT_REGEX);
+    String[] tokens = data.split(SettingKeys.SET_SPLIT_REGEX);
     if (tokens.length != 4) {
       throw new ParseSettingException("This requires exactly 4 arguments: world and position");
     }
@@ -78,7 +78,7 @@ public final class LocationSettingKey extends SettingKey<Location> {
       return new Location(Integer.parseInt(tokens[0]),
           Integer.parseInt(tokens[1]),
           Integer.parseInt(tokens[2]),
-          UUID.fromString(tokens[3]));
+          Nope.instance().hostSystem().domain(tokens[3]));
     } catch (NumberFormatException e) {
       throw new ParseSettingException("Numbers could not be parsed.");
     }

@@ -6,7 +6,7 @@ import org.apache.logging.log4j.Logger;
 public class SpongeLogger implements com.minecraftonline.nope.common.util.Logger {
 
   private Logger logger() {
-    return SpongeNope.instance().getPluginContainer().logger();
+    return SpongeNope.instance().pluginContainer().logger();
   }
 
   @Override

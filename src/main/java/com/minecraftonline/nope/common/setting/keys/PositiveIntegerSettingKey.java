@@ -37,7 +37,7 @@ public class PositiveIntegerSettingKey extends SettingKey<Integer> {
 
   @Override
   public Integer deserializeDataGenerified(Object serialized) throws ParseSettingException {
-    int integer = serialized.getAsInt();
+    int integer = (int) serialized;
     if (integer < 0) {
       throw new ParseSettingException("Data must be a positive integer");
     }

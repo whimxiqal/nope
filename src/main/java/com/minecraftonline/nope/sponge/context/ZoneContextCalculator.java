@@ -25,46 +25,41 @@
 
 package com.minecraftonline.nope.sponge.context;
 
-import com.minecraftonline.nope.sponge.SpongeNope;
+import com.minecraftonline.nope.common.host.Domain;
 import com.minecraftonline.nope.common.host.Host;
+import com.minecraftonline.nope.common.host.Zone;
+import com.minecraftonline.nope.sponge.SpongeNope;
+import com.minecraftonline.nope.sponge.util.SpongeUtil;
 import java.util.Optional;
-import java.util.Set;
-import javax.annotation.Nonnull;
-import org.spongepowered.api.entity.living.player.Player;
+import java.util.function.Consumer;
+import org.spongepowered.api.entity.living.player.server.ServerPlayer;
+import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.service.context.ContextCalculator;
-import org.spongepowered.api.service.permission.Subject;
 
 /**
  * A context calculator for Nope zones for the purpose of
  * context-intelligent permission use.
  */
-public class ZoneContextCalculator implements ContextCalculator<Subject> {
+public class ZoneContextCalculator implements ContextCalculator {
 
   @Override
-  public void accumulateContexts(@Nonnull Subject target, @Nonnull Set<Context> accumulator) {
-    if (!target.getCommandSource().isPresent()) {
+  public void accumulateContexts(Cause source, Consumer<Context> accumulator) {
+    Optional<ServerPlayer> player = source.first(ServerPlayer.class);
+    if (!player.isPresent()) {
       return;
     }
-    if (!(target.getCommandSource().get() instanceof Player)) {
-      return;
-    }
-    SpongeNope.getInstance().getHostTreeAdapter()
-        .getContainingHosts(((Player) target.getCommandSource().get()).getLocation())
-        .forEach(host -> accumulator.add(host.getContext()));
+    SpongeNope.instance().hostSystem()
+        .collectSuperiorHosts(SpongeUtil.reduceLocation(player.get().serverLocation()))
+        .forEach(host -> accumulator.accept(calculateContext(host)));
   }
 
-  @Override
-  public boolean matches(@Nonnull Context context, @Nonnull Subject target) {
-    if (!target.getCommandSource().isPresent()) {
-      return false;
+  private Context calculateContext(Host host) {
+    if (host instanceof Domain) {
+      return new Context("nope.w." + ((Domain) host).id(), "true");
+    } else if (host instanceof Zone) {
+      return new Context("nope.z." + host.name(), "true");
     }
-    if (!(target.getCommandSource().get() instanceof Player)) {
-      return false;
-    }
-    return Host.contextKeyToName(context.getKey())
-        .flatMap(name -> Optional.of(SpongeNope.getInstance().getHostTreeAdapter().getHosts().get(name)))
-        .filter(host -> host.encompasses((Player) target))
-        .isPresent();
+    return null;
   }
 }

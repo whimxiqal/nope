@@ -27,18 +27,15 @@ package com.minecraftonline.nope.sponge;
 import com.google.inject.Inject;
 import com.minecraftonline.nope.common.Nope;
 import com.minecraftonline.nope.common.setting.SettingKey;
-import com.minecraftonline.nope.common.setting.SettingLibrary;
+import com.minecraftonline.nope.common.setting.SettingKeys;
 import com.minecraftonline.nope.common.struct.Location;
-import com.minecraftonline.nope.common.util.Formatter;
-import com.minecraftonline.nope.sponge.command.NopeCommandRoot;
+import com.minecraftonline.nope.sponge.command.RootCommand;
 import com.minecraftonline.nope.sponge.context.ZoneContextCalculator;
 import com.minecraftonline.nope.sponge.key.NopeKeys;
-import com.minecraftonline.nope.sponge.listener.StaticSettingListeners;
-import com.minecraftonline.nope.sponge.listener.dynamic.DynamicSettingListeners;
+import com.minecraftonline.nope.sponge.listener.dynamic.DynamicHandler;
 import com.minecraftonline.nope.sponge.mixin.collision.CollisionHandler;
-import com.minecraftonline.nope.sponge.movement.PlayerMovementHandler;
+import com.minecraftonline.nope.sponge.storage.yaml.YamlDataHandler;
 import com.minecraftonline.nope.sponge.util.Extra;
-import com.minecraftonline.nope.sponge.util.SpongeFormatter;
 import com.minecraftonline.nope.sponge.util.SpongeLogger;
 import com.minecraftonline.nope.sponge.wand.SelectionHandler;
 import io.leangen.geantyref.TypeToken;
@@ -48,8 +45,6 @@ import java.util.concurrent.TimeUnit;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.TextColor;
 import org.jetbrains.annotations.NotNull;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
@@ -64,17 +59,18 @@ import org.spongepowered.api.event.lifecycle.ConstructPluginEvent;
 import org.spongepowered.api.event.lifecycle.LoadedGameEvent;
 import org.spongepowered.api.event.lifecycle.RefreshGameEvent;
 import org.spongepowered.api.event.lifecycle.RegisterCommandEvent;
-import org.spongepowered.api.event.lifecycle.StoppedGameEvent;
 import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.service.context.ContextService;
 import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.plugin.PluginContainer;
-import org.spongepowered.plugin.jvm.Plugin;
+import org.spongepowered.plugin.builtin.jvm.Plugin;
 
 /**
  * The main class and entrypoint for the entire plugin.
+ *
+ * @author Pieter Svenson
  */
-@Plugin(value = "nope")
+@Plugin("nope")
 public class SpongeNope extends Nope {
 
   @Getter
@@ -82,11 +78,12 @@ public class SpongeNope extends Nope {
   private static SpongeNope instance;
   @Getter
   @Accessors(fluent = true)
-  private final Formatter<Component, TextColor> formatter = new SpongeFormatter();
-  @Getter
   private final SelectionHandler selectionHandler = new SelectionHandler();
-  @Inject
   @Getter
+  @Accessors(fluent = true)
+  private RootCommand rootCommand;
+  @Getter
+  @Accessors(fluent = true)
   private PluginContainer pluginContainer;
   @Inject
   @Getter
@@ -94,14 +91,16 @@ public class SpongeNope extends Nope {
   private Path configDir;
   @Getter
   private CollisionHandler collisionHandler;
-  @Getter
-  private PlayerMovementHandler playerMovementHandler;
+  //  @Getter
+//  private PlayerMovementHandler playerMovementHandler;
   @Getter
   @Setter
   private boolean valid = true;
 
-  public SpongeNope() {
+  @Inject
+  public SpongeNope(final PluginContainer plugin) {
     super(new SpongeLogger());
+    this.pluginContainer = plugin;
   }
 
   public static <V> V calc(@NotNull SettingKey<V> key,
@@ -110,7 +109,7 @@ public class SpongeNope extends Nope {
         location.blockX(),
         location.blockY(),
         location.blockZ(),
-        instance().hostSystem().getDomain(location.worldKey().formatted())
+        instance().hostSystem().domain(location.worldKey().formatted())
     ));
   }
 
@@ -127,20 +126,18 @@ public class SpongeNope extends Nope {
    */
   @Listener
   public void onConstruct(ConstructPluginEvent event) {
-    Extra.printSplashscreen();
-
     // Set general static variables
     Nope.instance(this);
     instance = this;
     path(configDir);
 
-    SettingLibrary.initialize();
+    SettingKeys.initialize();
     if (configDir.toFile().mkdirs()) {
       logger().info("Created directories for Nope configuration");
     }
 
-    collisionHandler = new CollisionHandler();
-    playerMovementHandler = new PlayerMovementHandler();
+//    collisionHandler = new CollisionHandler();
+//    playerMovementHandler = new PlayerMovementHandler();
 
     NopeKeys.ZONE_WAND = Key.builder()
         .type(new TypeToken<Value<Boolean>>() {
@@ -161,11 +158,14 @@ public class SpongeNope extends Nope {
    */
   @Listener
   public void onLoadedGame(LoadedGameEvent event) {
-    loadState();
-    saveStateBackup();
+    Extra.printSplashscreen();
 
-    DynamicSettingListeners.register();
-    StaticSettingListeners.register();
+    data(new YamlDataHandler(configDir));
+    hostSystem(data().loadSystem());
+    hostSystem().addAllZones(data().zones().load());
+
+    DynamicHandler.register();
+//    StaticSettingListeners.register();
 
     Sponge.serviceProvider()
         .provide(ContextService.class)
@@ -176,21 +176,24 @@ public class SpongeNope extends Nope {
   @Listener
   public void onCommandRegistering(RegisterCommandEvent<Command.Parameterized> event) {
     // Register entire Nope command tree
-    NopeCommandRoot commandRoot = new NopeCommandRoot();
+    this.rootCommand = new RootCommand();
     event.register(this.pluginContainer,
-        commandRoot.build(),
-        commandRoot.getPrimaryAlias(),
-        commandRoot.getAliases().subList(1, commandRoot.getAliases().size()).toArray(new String[0]));
-  }
-
-  @Listener
-  public void onServerStopping(StoppedGameEvent event) {
-    saveState();
+        rootCommand.parameterized(),
+        rootCommand.primaryAlias(),
+        rootCommand.aliases().size() > 1
+            ? rootCommand.aliases().subList(1, rootCommand.aliases().size()).toArray(new String[0])
+            : new String[0]);
   }
 
   @Listener
   public void refresh(RefreshGameEvent event) {
     loadState();
+  }
+
+  public void loadState() {
+    hostSystem(data().loadSystem());
+    hostSystem().addAllZones(data().zones().load());
+    templateSet(data().templates().load());
   }
 
   @Override
@@ -203,6 +206,7 @@ public class SpongeNope extends Nope {
     Sponge.asyncScheduler().submit(Task.builder()
         .execute(runnable)
         .interval(interval, intervalUnit)
+        .plugin(this.pluginContainer)
         .build());
   }
 }

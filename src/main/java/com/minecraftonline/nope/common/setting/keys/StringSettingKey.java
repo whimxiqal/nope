@@ -34,4 +34,9 @@ public class StringSettingKey extends SettingKey<String> {
   public StringSettingKey(String id, String defaultValue) {
     super(id, defaultValue);
   }
+
+  @Override
+  public String parse(String data) throws ParseSettingException {
+    return data;
+  }
 }

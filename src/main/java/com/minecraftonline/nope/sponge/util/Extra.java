@@ -27,9 +27,9 @@ package com.minecraftonline.nope.sponge.util;
 import com.minecraftonline.nope.common.setting.SettingKey;
 import com.minecraftonline.nope.sponge.SpongeNope;
 import java.util.function.Supplier;
-import javax.annotation.Nullable;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
+import org.jetbrains.annotations.Nullable;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Event;
@@ -51,70 +51,72 @@ public final class Extra {
     TextComponent.Builder builder = Component.text();
 
     // Line 1
-    builder.append(Component.text("           ").color(SpongeFormatter.WHITE));
-    builder.append(Component.text("   ______    ").color(SpongeFormatter.ERROR));
-    builder.append(Component.text(" ____    ").color(SpongeFormatter.WHITE));
-    builder.append(Component.text(" ______").color(SpongeFormatter.WHITE));
+    builder.append(Component.text("           ").color(Formatter.WHITE));
+    builder.append(Component.text("   ______    ").color(Formatter.ERROR));
+    builder.append(Component.text(" ____    ").color(Formatter.WHITE));
+    builder.append(Component.text(" ______").color(Formatter.WHITE));
     Sponge.server().sendMessage(builder.build());
 
     // Line 2
     builder = Component.text();
-    builder.append(Component.text(" |\\      | ").color(SpongeFormatter.WHITE));
-    builder.append(Component.text("  / ____ \\   ").color(SpongeFormatter.ERROR));
-    builder.append(Component.text("|    \\   ").color(SpongeFormatter.WHITE));
-    builder.append(Component.text("|").color(SpongeFormatter.WHITE));
+    builder.append(Component.text(" |\\      | ").color(Formatter.WHITE));
+    builder.append(Component.text("  / ____ \\   ").color(Formatter.ERROR));
+    builder.append(Component.text("|    \\   ").color(Formatter.WHITE));
+    builder.append(Component.text("|").color(Formatter.WHITE));
     Sponge.server().sendMessage(builder.build());
 
     // Line 3
     builder = Component.text();
-    builder.append(Component.text(" | \\     | ").color(SpongeFormatter.WHITE));
-    builder.append(Component.text(" //\\\\    \\\\  ").color(SpongeFormatter.ERROR));
-    builder.append(Component.text("|     \\  ").color(SpongeFormatter.WHITE));
-    builder.append(Component.text("|").color(SpongeFormatter.WHITE));
+    builder.append(Component.text(" | \\     | ").color(Formatter.WHITE));
+    builder.append(Component.text(" //\\\\    \\\\  ").color(Formatter.ERROR));
+    builder.append(Component.text("|     \\  ").color(Formatter.WHITE));
+    builder.append(Component.text("|      ").color(Formatter.WHITE));
     Sponge.server().sendMessage(builder.build());
 
     // Line 4
     builder = Component.text();
-    builder.append(Component.text(" |  \\    | ").color(SpongeFormatter.WHITE));
-    builder.append(Component.text("||  \\\\    || ").color(SpongeFormatter.ERROR));
-    builder.append(Component.text("|     /  ").color(SpongeFormatter.WHITE));
-    builder.append(Component.text("|____  ").color(SpongeFormatter.WHITE));
-    builder.append(Component.text("   by ").color(SpongeFormatter.DULL));
-    builder.append(Component.text("MinecraftOnline").color(SpongeFormatter.THEME));
+    builder.append(Component.text(" |  \\    | ").color(Formatter.WHITE));
+    builder.append(Component.text("||  \\\\    || ").color(Formatter.ERROR));
+    builder.append(Component.text("|     /  ").color(Formatter.WHITE));
+    builder.append(Component.text("|____  ").color(Formatter.WHITE));
+    builder.append(Component.text("   for ").color(Formatter.DULL));
+    builder.append(Component.text("MinecraftOnline").color(Formatter.THEME));
     Sponge.server().sendMessage(builder.build());
 
     // Line 5
     builder = Component.text();
-    builder.append(Component.text(" |   \\   | ").color(SpongeFormatter.WHITE));
-    builder.append(Component.text("||   \\\\   || ").color(SpongeFormatter.ERROR));
-    builder.append(Component.text("|____/   ").color(SpongeFormatter.WHITE));
-    builder.append(Component.text("|      ").color(SpongeFormatter.WHITE));
-    builder.append(Component.text("      v" + SpongeNope.instance().getPluginContainer().metadata().version())
-        .color(SpongeFormatter.GOLD));
+    builder.append(Component.text(" |   \\   | ").color(Formatter.WHITE));
+    builder.append(Component.text("||   \\\\   || ").color(Formatter.ERROR));
+    builder.append(Component.text("|____/   ").color(Formatter.WHITE));
+    builder.append(Component.text("|      ").color(Formatter.WHITE));
+    builder.append(Component.text("   by  ").color(Formatter.DULL));
+    builder.append(Component.text("Pieter Svenson").color(Formatter.DULL));
     Sponge.server().sendMessage(builder.build());
 
     // Line 6
     builder = Component.text();
-    builder.append(Component.text(" |    \\  | ").color(SpongeFormatter.WHITE));
-    builder.append(Component.text("||    \\\\  || ").color(SpongeFormatter.ERROR));
-    builder.append(Component.text("|        ").color(SpongeFormatter.WHITE));
-    builder.append(Component.text("|").color(SpongeFormatter.WHITE));
+    builder.append(Component.text(" |    \\  | ").color(Formatter.WHITE));
+    builder.append(Component.text("||    \\\\  || ").color(Formatter.ERROR));
+    builder.append(Component.text("|        ").color(Formatter.WHITE));
+    builder.append(Component.text("|      ").color(Formatter.WHITE));
+    builder.append(Component.text("      v" + SpongeNope.instance().pluginContainer().metadata().version())
+        .color(Formatter.GOLD));
     Sponge.server().sendMessage(builder.build());
 
     // Line 7
     builder = Component.text();
-    builder.append(Component.text(" |     \\ | ").color(SpongeFormatter.WHITE));
-    builder.append(Component.text(" \\\\____\\\\//  ").color(SpongeFormatter.ERROR));
-    builder.append(Component.text("|        ").color(SpongeFormatter.WHITE));
-    builder.append(Component.text("|").color(SpongeFormatter.WHITE));
+    builder.append(Component.text(" |     \\ | ").color(Formatter.WHITE));
+    builder.append(Component.text(" \\\\____\\\\//  ").color(Formatter.ERROR));
+    builder.append(Component.text("|        ").color(Formatter.WHITE));
+    builder.append(Component.text("|").color(Formatter.WHITE));
     Sponge.server().sendMessage(builder.build());
 
     // Line 8
     builder = Component.text();
-    builder.append(Component.text(" |      \\| ").color(SpongeFormatter.WHITE));
-    builder.append(Component.text("  \\______/   ").color(SpongeFormatter.ERROR));
-    builder.append(Component.text("|        ").color(SpongeFormatter.WHITE));
-    builder.append(Component.text("|______").color(SpongeFormatter.WHITE));
+    builder.append(Component.text(" |      \\| ").color(Formatter.WHITE));
+    builder.append(Component.text("  \\______/   ").color(Formatter.ERROR));
+    builder.append(Component.text("|        ").color(Formatter.WHITE));
+    builder.append(Component.text("|______").color(Formatter.WHITE));
     Sponge.server().sendMessage(builder.build());
 
   }
@@ -135,7 +137,7 @@ public final class Extra {
     return () -> new RuntimeException(String.format(
         "The relevant location for the dynamic event listener for "
             + "Setting Key %s and event class %s could not be found.",
-        key.getId(),
+        key.id(),
         eventClass.getName())
         +
         (player == null

@@ -3,11 +3,14 @@ package com.minecraftonline.nope.sponge.storage.configurate;
 import com.minecraftonline.nope.common.host.Domain;
 import com.minecraftonline.nope.common.host.HostSystem;
 import com.minecraftonline.nope.common.host.Universe;
+import com.minecraftonline.nope.common.host.Zone;
+import com.minecraftonline.nope.common.setting.SettingKeys;
 import com.minecraftonline.nope.common.storage.DataHandler;
 import com.minecraftonline.nope.common.storage.DomainDataHandler;
 import com.minecraftonline.nope.common.storage.TemplateDataHandler;
 import com.minecraftonline.nope.common.storage.UniverseDataHandler;
 import com.minecraftonline.nope.common.storage.ZoneDataHandler;
+import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
@@ -42,23 +45,19 @@ public abstract class ConfigurateDataHandler implements DataHandler {
     return templateConfigurateDataHandler;
   }
 
+  @Override
   public HostSystem loadSystem() {
     Universe universe = universeDataHandler.load();
     List<Domain> domains = Sponge.server()
         .worldManager()
         .worlds()
         .stream()
-        .map(world -> new Domain(world.properties()
-            .displayName()
-            .map(name -> PlainTextComponentSerializer.plainText().serialize(name))
-            .orElse(world.key().formatted()),
+        .map(world -> new Domain(world.key().formatted().replace(":", "-"),
             world.key().formatted(),
-            universe))
+            universe.getDataOrDefault(SettingKeys.CACHE_SIZE)))
         .collect(Collectors.toList());
     domains.forEach(domainDataHandler::load);
-    HostSystem hostSystem = new HostSystem(universe, domains);
-    loadZones(hostSystem);
-    return hostSystem;
+    return new HostSystem(universe, domains);
   }
 
 }

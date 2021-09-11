@@ -1,7 +1,7 @@
 package com.minecraftonline.nope.sponge.wand;
 
 import com.minecraftonline.nope.common.Nope;
-import com.minecraftonline.nope.common.struct.Vector3i;
+import com.minecraftonline.nope.common.math.Vector3i;
 import java.util.List;
 import java.util.Optional;
 import lombok.AllArgsConstructor;

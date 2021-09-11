@@ -28,8 +28,9 @@ package com.minecraftonline.nope.common.setting.keys;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonPrimitive;
 import com.minecraftonline.nope.common.setting.SettingKey;
-import com.minecraftonline.nope.common.setting.SettingLibrary;
+import com.minecraftonline.nope.common.setting.SettingKeys;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -40,7 +41,7 @@ import org.jetbrains.annotations.NotNull;
  *
  * @param <E> the enum type
  */
-public class EnumSetSettingKey<E extends Enum<E>> extends SetSettingKey<E> {
+public class EnumSetSettingKey<E extends Enum<E>> extends ExhaustiveSetSettingKey<E> {
   private final Class<E> enumClass;
 
   public EnumSetSettingKey(String id, Set<E> defaultValue, Class<E> enumClass) {
@@ -49,19 +50,19 @@ public class EnumSetSettingKey<E extends Enum<E>> extends SetSettingKey<E> {
   }
 
   @Override
-  public JsonElement elementToJsonGenerified(E value) {
+  public Object serializeElement(E value) {
     return new JsonPrimitive(value.name().toLowerCase());
   }
 
   @Override
-  public E elementFromJsonGenerified(JsonElement jsonElement) {
-    return Enum.valueOf(enumClass, jsonElement.getAsString().toUpperCase());
+  public E deserializeElement(Object serialized) {
+    return Enum.valueOf(enumClass, ((String) serialized).toUpperCase());
   }
 
   @Override
   public Set<E> parse(String s) throws SettingKey.ParseSettingException {
     Set<E> set = new HashSet<>();
-    for (String token : s.split(SettingLibrary.SET_SPLIT_REGEX)) {
+    for (String token : s.split(SettingKeys.SET_SPLIT_REGEX)) {
       try {
         set.add(Enum.valueOf(enumClass, token.toUpperCase()));
       } catch (IllegalArgumentException ex) {
@@ -83,5 +84,10 @@ public class EnumSetSettingKey<E extends Enum<E>> extends SetSettingKey<E> {
   @Override
   public String printElement(E element) {
     return element.name().toLowerCase();
+  }
+
+  @Override
+  public Collection<E> allPossible() {
+    return Arrays.asList(enumClass.getEnumConstants());
   }
 }

@@ -25,7 +25,6 @@
 
 package com.minecraftonline.nope.sponge.mixin.collision;
 
-import com.minecraftonline.nope.sponge.util.CollisionUtil;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
@@ -44,7 +43,7 @@ public class CollisionHandler {
    */
   public void disableCollision(Player player) {
     if (disabledCollision.add(player.uniqueId())) {
-      CollisionUtil.disableCollision(player);
+//      CollisionUtil.disableCollision(player);
     }
   }
 
@@ -55,7 +54,7 @@ public class CollisionHandler {
    */
   public void enableCollision(Player player) {
     if (disabledCollision.remove(player.uniqueId())) {
-      CollisionUtil.enableCollision(player);
+//      CollisionUtil.enableCollision(player);
     }
   }
 

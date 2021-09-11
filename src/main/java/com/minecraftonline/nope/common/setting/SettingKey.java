@@ -26,8 +26,9 @@
 package com.minecraftonline.nope.common.setting;
 
 import com.google.gson.Gson;
+import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
+import java.util.Objects;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
@@ -61,6 +62,9 @@ public abstract class SettingKey<T> {
   @Accessors(fluent = true)
   private final T defaultData;
   @Getter
+  @Accessors(fluent = true)
+  private final Class<T> type;
+  @Getter
   @Setter
   @Accessors(fluent = true)
   @Nullable
@@ -88,9 +92,17 @@ public abstract class SettingKey<T> {
   @Setter
   private boolean playerRestrictive = false;
 
-  protected SettingKey(String id, T defaultData) {
+  @SuppressWarnings("unchecked")
+  protected SettingKey(String id, @NotNull T defaultData) {
+    this.id = id;
+    this.defaultData = Objects.requireNonNull(defaultData);
+    this.type = (Class<T>) defaultData.getClass();
+  }
+
+  protected SettingKey(String id, @Nullable T defaultData, @NotNull Class<T> type) {
     this.id = id;
     this.defaultData = defaultData;
+    this.type = Objects.requireNonNull(type);
   }
 
   public final Object serializeData(Object data) {
@@ -116,7 +128,7 @@ public abstract class SettingKey<T> {
    * @return data in a readable form
    */
   @NotNull
-  public String print(T data) {
+  public String print(@NotNull T data) {
     return serializeDataGenerified(data).toString();
   }
 
@@ -129,9 +141,7 @@ public abstract class SettingKey<T> {
    * @return the data object
    * @throws ParseSettingException if data cannot be parsed
    */
-  public T parse(String data) throws ParseSettingException {
-    return new Gson().fromJson(data, valueType());
-  }
+  public abstract T parse(String data) throws ParseSettingException;
 
   /**
    * Get a list of all parsable strings for data stored
@@ -139,22 +149,12 @@ public abstract class SettingKey<T> {
    *
    * @return a list of parsable strings only if there are finite possibilities
    */
-  public Optional<List<String>> getParsable() {
-    return Optional.empty();
-  }
-
-  /**
-   * Get the class type of this object's generic type.
-   *
-   * @return the generic class
-   */
-  @SuppressWarnings("unchecked")
-  public final Class<T> valueType() {
-    return (Class<T>) defaultData.getClass();
+  public List<String> options() {
+    return Collections.emptyList();
   }
 
   public final <X> boolean isType(Class<X> type) {
-    return type.isAssignableFrom(valueType());
+    return type.isAssignableFrom(type());
   }
 
   /**
@@ -164,13 +164,13 @@ public abstract class SettingKey<T> {
    * @return the cast value
    */
   public final T cast(Object object) {
-    if (!valueType().isInstance(object)) {
+    if (!type().isInstance(object)) {
       throw new IllegalArgumentException(String.format(
           "input %s must be of type %s",
           object.getClass().getName(),
-          valueType().getName()));
+          type().getName()));
     }
-    return valueType().cast(object);
+    return type().cast(object);
   }
 
   public Setting<T> getDefaultSetting() {

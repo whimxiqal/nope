@@ -41,12 +41,12 @@ public class EntityTypeSetSettingKey extends SetSettingKey<String> {
   }
 
   @Override
-  protected JsonElement elementToJsonGenerified(String element) {
+  protected Object serializeElement(String element) {
     return new JsonPrimitive(element);
   }
 
   @Override
-  protected String elementFromJsonGenerified(JsonElement jsonElement) {
+  protected String deserializeElement(Object serialized) {
     return null; // TODO implement
   }
 

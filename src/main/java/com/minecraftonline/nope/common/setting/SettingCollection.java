@@ -31,8 +31,10 @@ import com.minecraftonline.nope.common.storage.Persistent;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import org.jetbrains.annotations.NotNull;
 
@@ -101,8 +103,24 @@ public abstract class SettingCollection implements Persistent {
     }
   }
 
+  public final <T> T computeData(SettingKey<T> key, Supplier<T> dataSupplier) {
+    Optional<T> dataOptional = getData(key);
+    if (dataOptional.isPresent()) {
+      return dataOptional.get();
+    } else {
+      T data = dataSupplier.get();
+      setData(key, data);
+      return data;
+    }
+  }
+
+  public final <T> T requireData(SettingKey<T> key) {
+    return getData(key).orElseThrow(() ->
+        new RuntimeException("The setting collection did not have the required data"));
+  }
+
   public final <T> T getDataOrDefault(SettingKey<T> key) {
-    return getData(key).orElse(key.getDefaultData());
+    return getData(key).orElse(key.defaultData());
   }
 
   public final <T> boolean setData(SettingKey<T> key, T data) {
@@ -110,16 +128,16 @@ public abstract class SettingCollection implements Persistent {
   }
 
   public final boolean setDataUnchecked(SettingKey<?> key, Object data) {
-    if (!key.valueType().isInstance(data)) {
+    if (!key.type().isInstance(data)) {
       throw new IllegalArgumentException(String.format(
           "The generic type of the key (%s) does not match the type of the data (%s)",
-          key.valueType().getName(),
+          key.type().getName(),
           data.getClass().getName()));
     }
     return setDataChecked(key, data);
   }
 
-  private final boolean setDataChecked(SettingKey<?> key, Object data) {
+  private boolean setDataChecked(SettingKey<?> key, Object data) {
     if (keys.contains(key)) {
       if (this.data.containsKey(key) && this.data.get(key).equals(data)) {
         return false;
@@ -138,9 +156,20 @@ public abstract class SettingCollection implements Persistent {
     return Optional.ofNullable(targets.get(key));
   }
 
-  public final <T> boolean setTarget(SettingKey<T> key, Target target) {
+  public final <T> Target computeTarget(SettingKey<T> key, Supplier<Target> targetSupplier) {
+    Optional<Target> targetOptional = getTarget(key);
+    if (targetOptional.isPresent()) {
+      return targetOptional.get();
+    } else {
+      Target target = targetSupplier.get();
+      setTarget(key, target);
+      return target;
+    }
+  }
+
+  public final <T> boolean setTarget(SettingKey<T> key, @NotNull Target target) {
     if (keys.contains(key)) {
-      if (this.data.containsKey(key) && this.targets.get(key).equals(target)) {
+      if (this.data.containsKey(key) && target.equals(this.targets.get(key))) {
         return false;
       } else {
         this.targets.put(key, target);
@@ -177,14 +206,14 @@ public abstract class SettingCollection implements Persistent {
     return removed;
   }
 
-  public final Collection<Setting<?>> getAll() {
+  public final Collection<Setting<?>> settings() {
     return keys.stream()
         .map(key -> Setting.ofUnchecked(key, data.get(key), targets.get(key)))
         .collect(Collectors.toList());
   }
 
   public void setAll(SettingCollection settingMap) {
-    settingMap.getAll().forEach(setting -> this.set(setting, false));
+    settingMap.settings().forEach(setting -> this.set(setting, false));
     save();
   }
 

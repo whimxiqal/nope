@@ -28,7 +28,6 @@ package com.minecraftonline.nope.common.setting.keys;
 import com.google.common.collect.Lists;
 import com.minecraftonline.nope.common.setting.SettingKey;
 import java.util.List;
-import java.util.Optional;
 
 /**
  * A setting storing a boolean value.
@@ -53,7 +52,7 @@ public class BooleanSettingKey extends SettingKey<Boolean> {
   }
 
   @Override
-  public Optional<List<String>> getParsable() {
-    return Optional.of(Lists.newArrayList("true", "false", "t", "f"));
+  public List<String> options() {
+    return Lists.newArrayList("true", "false", "t", "f");
   }
 }

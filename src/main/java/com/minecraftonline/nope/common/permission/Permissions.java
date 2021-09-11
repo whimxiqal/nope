@@ -29,15 +29,13 @@ package com.minecraftonline.nope.common.permission;
  */
 public final class Permissions {
 
-  public static final Permission COMMAND_CREATE = Permission.of("nope.command.create");
-  public static final Permission COMMAND_DESTROY = Permission.of("nope.command.destroy");
-  public static final Permission COMMAND_EDIT = Permission.of("nope.command.edit");
-  public static final Permission COMMAND_INFO = Permission.of("nope.command.info");
-  public static final Permission COMMAND_LIST = Permission.of("nope.command.list");
-  public static final Permission COMMAND_SHOW = Permission.of("nope.command.show");
-  public static final Permission COMMAND_TELEPORT = Permission.of("nope.command.teleport");
-  public static final Permission COMMAND_RELOAD = Permission.of("nope.command.reload");
-  public static final Permission COMMAND_SETTING = Permission.of("nope.command.setting");
+  public static final Permission NOPE = Permission.of("nope");
+  public static final Permission CREATE = Permission.of("nope.create");
+  public static final Permission DESTROY = Permission.of("nope.destroy");
+  public static final Permission EDIT = Permission.of("nope.edit");
+  public static final Permission INFO = Permission.of("nope.info");
+  public static final Permission TELEPORT = Permission.of("nope.teleport");
+  public static final Permission RELOAD = Permission.of("nope.reload");
   public static final Permission UNRESTRICTED = Permission.of("nope.unrestricted");
 
   private Permissions() {

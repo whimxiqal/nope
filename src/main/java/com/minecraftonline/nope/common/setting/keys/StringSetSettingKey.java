@@ -25,9 +25,8 @@
 
 package com.minecraftonline.nope.common.setting.keys;
 
-import com.google.gson.JsonElement;
 import com.google.gson.JsonPrimitive;
-import com.minecraftonline.nope.common.setting.SettingLibrary;
+import com.minecraftonline.nope.common.setting.SettingKeys;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
@@ -43,18 +42,18 @@ public class StringSetSettingKey extends SetSettingKey<String> {
   }
 
   @Override
-  public JsonElement elementToJsonGenerified(String value) {
+  public Object serializeElement(String value) {
     return new JsonPrimitive(value);
   }
 
   @Override
-  public String elementFromJsonGenerified(JsonElement jsonElement) {
-    return jsonElement.getAsString();
+  public String deserializeElement(Object serialized) {
+    return (String) serialized;
   }
 
   @Override
   public Set<String> parse(String s) throws ParseSettingException {
-    return new HashSet<>(Arrays.asList(s.split(SettingLibrary.SET_SPLIT_REGEX)));
+    return new HashSet<>(Arrays.asList(s.split(SettingKeys.SET_SPLIT_REGEX)));
   }
 
   @NotNull

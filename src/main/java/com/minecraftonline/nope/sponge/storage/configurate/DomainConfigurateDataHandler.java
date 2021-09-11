@@ -2,7 +2,9 @@ package com.minecraftonline.nope.sponge.storage.configurate;
 
 import com.minecraftonline.nope.common.host.Domain;
 import com.minecraftonline.nope.common.storage.DomainDataHandler;
+import java.util.Objects;
 import java.util.function.Function;
+import org.jetbrains.annotations.NotNull;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.configurate.CommentedConfigurationNode;
 import org.spongepowered.configurate.ConfigurateException;
@@ -17,7 +19,8 @@ public class DomainConfigurateDataHandler extends SettingsConfigurateDataHandler
   }
 
   @Override
-  public void save(Domain domain) {
+  public void save(@NotNull Domain domain) {
+    Objects.requireNonNull(domain);
     try {
       CommentedConfigurationNode root = settingCollectionRoot(domain);
       root.comment("Settings for world " + domain.name());
@@ -28,10 +31,15 @@ public class DomainConfigurateDataHandler extends SettingsConfigurateDataHandler
   }
 
   @Override
-  public void load(Domain domain) {
+  public void load(@NotNull Domain domain) {
     try {
       CommentedConfigurationNode root = loader.apply(ResourceKey.resolve(domain.id())).load();
-      domain.setAll(deserializeSettings(root.node("settings").childrenList()));
+      if (root.node("settings").virtual()) {
+        // No settings, so this file was likely not created yet.
+        root.node("settings").set(null);
+      } else {
+        domain.setAll(deserializeSettings(root.node("settings").childrenList()));
+      }
     } catch (ConfigurateException e) {
       e.printStackTrace();
     }

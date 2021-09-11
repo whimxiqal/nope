@@ -25,14 +25,16 @@
 
 package com.minecraftonline.nope.sponge.listener;
 
-import com.minecraftonline.nope.sponge.SpongeNope;
 import com.minecraftonline.nope.common.setting.Setting;
 import com.minecraftonline.nope.common.setting.SettingKey;
+import com.minecraftonline.nope.sponge.SpongeNope;
+import java.util.Arrays;
 import java.util.Collection;
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.EventListener;
+import org.spongepowered.api.event.EventListenerRegistration;
 import org.spongepowered.api.event.Order;
 
 /**
@@ -42,52 +44,32 @@ import org.spongepowered.api.event.Order;
  * @param <E> the event type for which to listen
  * @see Setting
  * @see SettingKey
- * @see SettingValue
  */
-public class SettingListener<E extends Event> implements EventListener<E> {
+public abstract class SettingListener<E extends Event> implements EventListener<E> {
 
-  private final Collection<SettingKey<?>> keys;
-  private final EventListener<E> listener;
+  private final SettingKey<?>[] keys;
   private final Class<E> eventClass;
 
-  private boolean registered = false;
-
-  public SettingListener(@Nonnull Collection<SettingKey<?>> keys,
-                         @Nonnull Class<E> eventClass,
-                         @Nonnull EventListener<E> listener) {
-    this.keys = keys;
+  public SettingListener(@NotNull Class<E> eventClass,
+                         @NotNull SettingKey<?>... keys) {
     this.eventClass = eventClass;
-    this.listener = listener;
+    this.keys = keys;
   }
 
-  @Override
-  public final void handle(@Nonnull E event) throws Exception {
-    this.listener.handle(event);
-  }
-
-  /**
-   * Register if this SettingKey is currently relevant on the server.
-   * It is relevant if this SettingKey has been assigned to a value,
-   * any of its ancestors have been assigned to a value,
-   * or its default value provides unnatural changes to the behavior
-   * of the game.
-   */
-  public final void registerIfNecessary() {
-    if (this.registered) {
-      return;
-    }
+  public final boolean registerIfAssigned() {
     boolean assigned;
     for (SettingKey<?> key : keys) {
-      assigned = SpongeNope.getInstance().getHostTreeAdapter().isAssigned(key);
+      assigned = SpongeNope.instance().hostSystem().isAssigned(key);
       if (key.isUnnaturalDefault() || assigned) {
-        Sponge.getEventManager().registerListener(SpongeNope.getInstance(),
-            eventClass,
-            Order.EARLY,
-            listener);
-        this.registered = true;
-        return;
+        Sponge.eventManager().registerListener(EventListenerRegistration.builder(eventClass)
+            .listener(this)
+            .plugin(SpongeNope.instance().pluginContainer())
+            .order(Order.EARLY)
+            .build());
+        return true;
       }
     }
+    return false;
   }
 
 }

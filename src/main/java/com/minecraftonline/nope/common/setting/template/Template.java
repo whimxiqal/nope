@@ -30,44 +30,45 @@ import com.google.common.collect.Sets;
 import com.minecraftonline.nope.common.Nope;
 import com.minecraftonline.nope.common.setting.Setting;
 import com.minecraftonline.nope.common.setting.SettingCollection;
-import com.minecraftonline.nope.common.setting.SettingLibrary;
+import com.minecraftonline.nope.common.setting.SettingKeys;
+import com.minecraftonline.nope.common.struct.Named;
 import java.util.Collection;
 import java.util.stream.Stream;
 import lombok.Getter;
 import lombok.experimental.Accessors;
 import org.jetbrains.annotations.NotNull;
 
-public class Template extends SettingCollection {
+public class Template extends SettingCollection implements Named {
 
   public static Collection<Template> INITIAL = Lists.newArrayList(
       new Template("smp-protections",
           "General global protection settings for a generic survival multiplayer server",
-          Setting.of(SettingLibrary.ENDERDRAGON_GRIEF, false),
-          Setting.of(SettingLibrary.ENDERMAN_GRIEF, false),
-          Setting.of(SettingLibrary.EXPLOSION_GRIEF_BLACKLIST,
-              Sets.newHashSet(SettingLibrary.Explosive.values())),
-          Setting.of(SettingLibrary.FIRE_EFFECT, false),
-          Setting.of(SettingLibrary.FIRE_IGNITION, false),
-          Setting.of(SettingLibrary.LAVA_GRIEF, false),
-          Setting.of(SettingLibrary.TNT_IGNITION, false),
-          Setting.of(SettingLibrary.TNT_PLACEMENT, false),
-          Setting.of(SettingLibrary.WATER_GRIEF, false),
-          Setting.of(SettingLibrary.ZOMBIE_GRIEF, false)),
+          Setting.of(SettingKeys.ENDERDRAGON_GRIEF, false),
+          Setting.of(SettingKeys.ENDERMAN_GRIEF, false),
+          Setting.of(SettingKeys.EXPLOSION_GRIEF_BLACKLIST,
+              Sets.newHashSet(SettingKeys.Explosive.values())),
+          Setting.of(SettingKeys.FIRE_EFFECT, false),
+          Setting.of(SettingKeys.FIRE_IGNITION, false),
+          Setting.of(SettingKeys.LAVA_GRIEF, false),
+          Setting.of(SettingKeys.TNT_IGNITION, false),
+          Setting.of(SettingKeys.TNT_PLACEMENT, false),
+          Setting.of(SettingKeys.WATER_GRIEF, false),
+          Setting.of(SettingKeys.ZOMBIE_GRIEF, false)),
       new Template("destructive-player-protections",
           "Protection settings from players attempting to be destructive",
-          Setting.of(SettingLibrary.ARMOR_STAND_DESTROY, false),
-          Setting.of(SettingLibrary.ARMOR_STAND_INTERACT, false),
-          Setting.of(SettingLibrary.ARMOR_STAND_PLACE, false),
-          Setting.of(SettingLibrary.BLOCK_BREAK, false),
-          Setting.of(SettingLibrary.BLOCK_PLACE, false),
-          Setting.of(SettingLibrary.FLOWER_POT_INTERACT, false),
-          Setting.of(SettingLibrary.ITEM_FRAME_DESTROY, false),
-          Setting.of(SettingLibrary.ITEM_FRAME_INTERACT, false),
-          Setting.of(SettingLibrary.ITEM_FRAME_PLACE, false),
-          Setting.of(SettingLibrary.PAINTING_DESTROY, false),
-          Setting.of(SettingLibrary.PAINTING_PLACE, false),
-          Setting.of(SettingLibrary.VEHICLE_DESTROY, false),
-          Setting.of(SettingLibrary.VEHICLE_PLACE, false)));
+          Setting.of(SettingKeys.ARMOR_STAND_DESTROY, false),
+          Setting.of(SettingKeys.ARMOR_STAND_INTERACT, false),
+          Setting.of(SettingKeys.ARMOR_STAND_PLACE, false),
+          Setting.of(SettingKeys.BLOCK_BREAK, false),
+          Setting.of(SettingKeys.BLOCK_PLACE, false),
+          Setting.of(SettingKeys.FLOWER_POT_INTERACT, false),
+          Setting.of(SettingKeys.ITEM_FRAME_DESTROY, false),
+          Setting.of(SettingKeys.ITEM_FRAME_INTERACT, false),
+          Setting.of(SettingKeys.ITEM_FRAME_PLACE, false),
+          Setting.of(SettingKeys.PAINTING_DESTROY, false),
+          Setting.of(SettingKeys.PAINTING_PLACE, false),
+          Setting.of(SettingKeys.VEHICLE_DESTROY, false),
+          Setting.of(SettingKeys.VEHICLE_PLACE, false)));
 
   @Getter
   @Accessors(fluent = true)
@@ -104,6 +105,7 @@ public class Template extends SettingCollection {
 
   @Override
   public void save() {
-    Nope.instance().data().templates().save(Nope.instance().hostSystem().templates().getAll());
+    Nope.instance().data().templates().save(Nope.instance().hostSystem().templates());
   }
+
 }

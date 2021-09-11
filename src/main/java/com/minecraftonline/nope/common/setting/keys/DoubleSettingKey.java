@@ -34,4 +34,9 @@ public class DoubleSettingKey extends SettingKey<Double> {
   public DoubleSettingKey(String id, Double defaultValue) {
     super(id, defaultValue);
   }
+
+  @Override
+  public Double parse(String data) throws ParseSettingException {
+    return Double.parseDouble(data);
+  }
 }
