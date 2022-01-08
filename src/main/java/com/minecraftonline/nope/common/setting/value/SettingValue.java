@@ -2,7 +2,7 @@
  *
  *  * MIT License
  *  *
- *  * Copyright (c) 2021 Pieter Svenson
+ *  * Copyright (c) 2022 Pieter Svenson
  *  *
  *  * Permission is hereby granted, free of charge, to any person obtaining a copy
  *  * of this software and associated documentation files (the "Software"), to deal
@@ -24,28 +24,20 @@
  *
  */
 
-package com.minecraftonline.nope.common.math;
+package com.minecraftonline.nope.common.setting.value;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.Value;
-import lombok.experimental.Accessors;
+import com.minecraftonline.nope.common.setting.SettingKey;
 
-@Value
-@Accessors(fluent = true)
-public class Vector3i {
-  int x;
-  int y;
-  int z;
+public interface SettingValue<T> {
 
-  private Vector3i(int x, int y, int z) {
-    this.x = x;
-    this.y = y;
-    this.z = z;
-  }
+  T get();
 
-  public static Vector3i of(int x, int y, int z) {
-    return new Vector3i(x, y, z);
-  }
+  Object serialize(Object data);
+
+  Object serializeT(T data);
+
+  Object deserialize(Object serialized) throws SettingKey.ParseSettingException;
+
+  T deserializeT(Object serialized) throws SettingKey.ParseSettingException;
 
 }

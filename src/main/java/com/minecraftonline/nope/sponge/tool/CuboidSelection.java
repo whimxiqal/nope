@@ -24,28 +24,35 @@
  *
  */
 
-package com.minecraftonline.nope.common.math;
+package com.minecraftonline.nope.sponge.tool;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.Value;
-import lombok.experimental.Accessors;
+import com.minecraftonline.nope.common.Nope;
+import com.minecraftonline.nope.common.math.Cuboid;
+import com.minecraftonline.nope.sponge.util.Formatter;
+import net.kyori.adventure.text.Component;
+import org.jetbrains.annotations.Nullable;
 
-@Value
-@Accessors(fluent = true)
-public class Vector3i {
-  int x;
-  int y;
-  int z;
+import java.util.List;
 
-  private Vector3i(int x, int y, int z) {
-    this.x = x;
-    this.y = y;
-    this.z = z;
+public class CuboidSelection extends Selection<Cuboid> {
+
+  @Override
+  public Component propsWhenValid() {
+    return Formatter.info("Volume: ___",
+        (Math.abs(position1.x() - position2.x()) + 1)
+            * (Math.abs(position1.y() - position2.y()) + 1)
+            * (Math.abs(position1.z() - position2.z()) + 1));
   }
 
-  public static Vector3i of(int x, int y, int z) {
-    return new Vector3i(x, y, z);
+  @Override
+  public Cuboid construct() {
+    return new Cuboid(domain,
+        Math.min(position1.x(), position2.x()),
+        Math.min(position1.y(), position2.y()),
+        Math.min(position1.z(), position2.z()),
+        Math.max(position1.x(), position2.x()) + 1,
+        Math.max(position1.y(), position2.y()) + 1,
+        Math.max(position1.z(), position2.z()) + 1);
   }
 
 }

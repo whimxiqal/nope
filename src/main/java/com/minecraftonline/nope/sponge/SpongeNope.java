@@ -37,8 +37,8 @@ import com.minecraftonline.nope.sponge.mixin.collision.CollisionHandler;
 import com.minecraftonline.nope.sponge.storage.yaml.YamlDataHandler;
 import com.minecraftonline.nope.sponge.util.Extra;
 import com.minecraftonline.nope.sponge.util.SpongeLogger;
-import com.minecraftonline.nope.sponge.wand.SelectionHandler;
-import io.leangen.geantyref.TypeToken;
+import com.minecraftonline.nope.sponge.tool.SelectionHandler;
+
 import java.nio.file.Path;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -46,19 +46,16 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import org.jetbrains.annotations.NotNull;
-import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.Command;
 import org.spongepowered.api.config.ConfigDir;
 import org.spongepowered.api.data.DataRegistration;
 import org.spongepowered.api.data.Key;
-import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.Listener;
-import org.spongepowered.api.event.lifecycle.ConstructPluginEvent;
-import org.spongepowered.api.event.lifecycle.LoadedGameEvent;
-import org.spongepowered.api.event.lifecycle.RefreshGameEvent;
-import org.spongepowered.api.event.lifecycle.RegisterCommandEvent;
+import org.spongepowered.api.event.lifecycle.*;
+import org.spongepowered.api.item.inventory.ItemStack;
+import org.spongepowered.api.registry.RegistryType;
 import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.service.context.ContextService;
 import org.spongepowered.api.world.server.ServerLocation;
@@ -136,21 +133,27 @@ public class SpongeNope extends Nope {
       logger().info("Created directories for Nope configuration");
     }
 
+    Sponge.eventManager().registerListeners(this.pluginContainer, selectionHandler);
 //    collisionHandler = new CollisionHandler();
 //    playerMovementHandler = new PlayerMovementHandler();
 
-    NopeKeys.ZONE_WAND = Key.builder()
-        .type(new TypeToken<Value<Boolean>>() {
-        })
-        .key(ResourceKey.builder().namespace("nope").value("zonewand").build())
-        .build();
-
-    DataRegistration.builder()
-        .dataKey(NopeKeys.ZONE_WAND)
-        .build();
-
+    DataRegistration.builder().dataKey(NopeKeys.SELECTION_TOOL_CUBOID).build();
   }
 
+  @Listener
+  public void onRegisterDataEvent(RegisterDataEvent event) {
+    NopeKeys.SELECTION_TOOL_CUBOID = Key.from(this.pluginContainer, "cuboid_tool", Boolean.class);
+    event.register(DataRegistration.of(NopeKeys.SELECTION_TOOL_CUBOID, ItemStack.class));
+
+    NopeKeys.SELECTION_TOOL_CYLINDER = Key.from(this.pluginContainer, "cylinder_tool", Boolean.class);
+    event.register(DataRegistration.of(NopeKeys.SELECTION_TOOL_CYLINDER, ItemStack.class));
+
+    NopeKeys.SELECTION_TOOL_SPHERE = Key.from(this.pluginContainer, "sphere_tool", Boolean.class);
+    event.register(DataRegistration.of(NopeKeys.SELECTION_TOOL_SPHERE, ItemStack.class));
+
+    NopeKeys.SELECTION_TOOL_SLAB = Key.from(this.pluginContainer, "slab_tool", Boolean.class);
+    event.register(DataRegistration.of(NopeKeys.SELECTION_TOOL_SLAB, ItemStack.class));
+  }
   /**
    * Nope's server start event hook method.
    *

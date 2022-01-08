@@ -85,9 +85,12 @@ public class ZoneConfigurateDataHandler extends SettingsConfigurateDataHandler i
     //  instead of a print stack trace
     try {
       root = loader.load();
-      name = root.node("name").require(String.class);
+      name = root.node("name").get(String.class);
     } catch (ConfigurateException e) {
       Nope.instance().logger().error("Error loading Zone: " + e.getMessage());
+      return;
+    }
+    if (name == null) {
       return;
     }
 

@@ -33,29 +33,24 @@ import com.minecraftonline.nope.common.setting.template.Template;
 import com.minecraftonline.nope.sponge.SpongeNope;
 import com.minecraftonline.nope.sponge.util.Formatter;
 import com.minecraftonline.nope.sponge.util.SpongeUtil;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
-import java.util.concurrent.CompletableFuture;
-import java.util.function.Function;
-import java.util.function.Predicate;
-import java.util.function.Supplier;
-import java.util.stream.Collectors;
 import net.kyori.adventure.text.Component;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandCompletion;
 import org.spongepowered.api.command.exception.ArgumentParseException;
 import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.command.parameter.Parameter;
-import org.spongepowered.api.command.parameter.managed.ValueUsage;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.util.Nameable;
 import org.spongepowered.api.util.StartsWithPredicate;
 import org.spongepowered.api.world.server.ServerWorld;
+
+import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 /**
  * An enumerating class to centralize different methods for giving
@@ -85,7 +80,6 @@ public class Parameters {
             .collect(Collectors.toList());
       })
       .build();
-
   public static final Parameter.Value<Host> HOST_INFER = Parameter.builder(ParameterKeys.HOST)
       .optional()
       .addParser((parameterKey, reader, context) -> {
@@ -109,7 +103,6 @@ public class Parameters {
             .collect(Collectors.toList());
       })
       .build();
-
   public static final Parameter.Value<Template> TEMPLATE = Parameter.builder(ParameterKeys.TEMPLATE)
       .addParser((parameterKey, reader, context) ->
           Optional.ofNullable(Nope.instance().templateSet().get(reader.parseString())))
@@ -124,7 +117,6 @@ public class Parameters {
             .collect(Collectors.toList());
       })
       .build();
-
   public static final Parameter.Value<Integer> PRIORITY = Parameter.rangedInteger(0, 10000000)
       .key(ParameterKeys.PRIORITY)
       .build();
@@ -207,22 +199,18 @@ public class Parameters {
             .collect(Collectors.toList());
       })
       .build();
-
   public static final Parameter.Value<Integer> POS_X = Parameter.rangedInteger(-Nope.WORLD_RADIUS, Nope.WORLD_RADIUS)
       .key(ParameterKeys.POS_X)
       .usage(key -> "X")
       .build();
-
   public static final Parameter.Value<Integer> POS_Y = Parameter.rangedInteger(-Nope.WORLD_RADIUS, Nope.WORLD_RADIUS)
       .key(ParameterKeys.POS_Y)
       .usage(key -> "Y")
       .build();
-
   public static final Parameter.Value<Integer> POS_Z = Parameter.rangedInteger(-Nope.WORLD_RADIUS, Nope.WORLD_RADIUS)
       .key(ParameterKeys.POS_Z)
       .usage(key -> "Z")
       .build();
-
   public static final Parameter.Value<Integer> POS_X_1 = Parameter.rangedInteger(-Nope.WORLD_RADIUS, Nope.WORLD_RADIUS)
       .key(ParameterKeys.POS_X_1)
       .usage(key -> "first X")
@@ -252,6 +240,31 @@ public class Parameters {
       .usage(key -> "radius")
       .build();
   public static final Parameter.Value<ServerWorld> WORLD = Parameter.world().key(ParameterKeys.WORLD).build();
+  public static final Parameter.Multi CUBOID = Parameter.seqBuilder(Parameters.WORLD)
+      .then(Parameters.POS_X_1)
+      .then(Parameters.POS_Y_1)
+      .then(Parameters.POS_Z_1)
+      .then(Parameters.POS_X_2)
+      .then(Parameters.POS_Y_2)
+      .then(Parameters.POS_Z_2)
+      .optional().build();
+  public static final Parameter.Multi CYLINDER = Parameter.seqBuilder(Parameters.WORLD)
+      .then(Parameters.POS_X)
+      .then(Parameters.POS_Y_1)
+      .then(Parameters.POS_Y_2)
+      .then(Parameters.POS_Z)
+      .then(Parameters.RADIUS)
+      .optional().build();
+  public static final Parameter.Multi SPHERE = Parameter.seqBuilder(Parameters.WORLD)
+      .then(Parameters.POS_X)
+      .then(Parameters.POS_Y)
+      .then(Parameters.POS_Z)
+      .then(Parameters.RADIUS)
+      .optional().build();
+  public static final Parameter.Multi SLAB = Parameter.seqBuilder(Parameters.WORLD)
+      .then(Parameters.POS_Y_1)
+      .then(Parameters.POS_Y_2)
+      .optional().build();
   public static final Parameter.Value<?> INDEX = Parameter.integerNumber().key(ParameterKeys.INDEX).build();
   public static final Parameter.Value<?> INDEX_OPTIONAL = Parameter.integerNumber().key(ParameterKeys.INDEX).optional().build();
 

@@ -27,11 +27,15 @@
 package com.minecraftonline.nope.common.math;
 
 import com.minecraftonline.nope.common.host.Domain;
-import java.util.List;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.experimental.Accessors;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class Cylinder extends Volume {
 
@@ -63,21 +67,17 @@ public class Cylinder extends Volume {
   private final Cuboid circumscribed;
   private final Cuboid inscribed;
 
-  @Builder(builderClassName = "Selection",
-      buildMethodName = "solidify",
-      builderMethodName = "selection",
-      toBuilder = true)
   public Cylinder(Domain domain,
-                  Integer posX,
-                  Integer minY,
-                  Integer maxY,
-                  Integer posZ,
+                  Integer x,
+                  Integer y1,
+                  Integer y2,
+                  Integer z,
                   Double radius) {
     super(domain);
-    this.posX = posX;
-    this.minY = minY;
-    this.maxY = maxY;
-    this.posZ = posZ;
+    this.posX = x;
+    this.minY = Math.min(y1, y2);
+    this.maxY = Math.max(y1, y2);
+    this.posZ = z;
     this.radius = radius;
 
     this.radiusSquared = radius * radius;
@@ -136,10 +136,25 @@ public class Cylinder extends Volume {
   }
 
   @Override
-  public boolean contains(int x, int y, int z) {
+  public boolean containsPoint(double x, double y, double z) {
     return y >= minY
-        && y <= maxY
+        && y < maxY
         && (posX - x) * (posX - x) + (posZ - z) * (posZ - z) <= radiusSquared;
+  }
+
+  @Override
+  public boolean containsBlock(int x, int y, int z) {
+    int posXsquared = (posX - x) * (posX - x);
+    int posXplus1Squared = (posX + 1 - x) * (posX + 1 - x);
+    int posZsquared = (posZ - z) * (posZ - z);
+    int posZplus1Squared = (posZ + 1 - z) * (posZ + 1 - z);
+    return y >= minY
+        && y < maxY
+        && (
+        posXsquared + posZsquared <= radiusSquared
+            || posXplus1Squared + posZsquared <= radiusSquared
+            || posXplus1Squared + posZplus1Squared <= radiusSquared
+            || posXsquared + posZplus1Squared <= radiusSquared);
   }
 
   @Override
@@ -154,7 +169,103 @@ public class Cylinder extends Volume {
 
   @Override
   public List<Vector3d> surfacePointsNear(Vector3d point, double proximity, double density) {
-    return null; // TODO implement
+    if (proximity <= 0) {
+      throw new IllegalArgumentException("Your proximity cannot be negative or 0");
+    }
+    List<Vector3d> points = new LinkedList<>();
+    final double proximitySquared = proximity * proximity;
+    final double separation = 1 / density;
+
+    double distance;
+    double squarePlaneRadius;
+
+    // minY (bottom)
+    distance = Math.abs(point.y() - minY);
+    if (distance <= proximity) {
+      squarePlaneRadius = Math.sqrt(proximitySquared - distance * distance);
+
+      for (int i = (int) -Math.ceil(squarePlaneRadius); i < Math.ceil(squarePlaneRadius); i++) {
+        for (int j = (int) -Math.ceil(squarePlaneRadius); j < Math.ceil(squarePlaneRadius); j++) {
+          tryAddFlatSurfacePoint(points, point.x() + i, minY, point.z() + j);
+          for (double p = separation; p < 1; p += separation) {
+            tryAddFlatSurfacePoint(points, point.x() + i + p, minY, point.z() + j);
+            tryAddFlatSurfacePoint(points, point.x() + i, minY, point.z() + j + p);
+          }
+        }
+      }
+    }
+
+    // maxY (top)
+    distance = Math.abs(point.y() - maxY);
+    if (distance <= proximity) {
+      squarePlaneRadius = Math.sqrt(proximitySquared - distance * distance);
+
+      for (int i = (int) -Math.ceil(squarePlaneRadius); i < Math.ceil(squarePlaneRadius); i++) {
+        for (int j = (int) -Math.ceil(squarePlaneRadius); j < Math.ceil(squarePlaneRadius); j++) {
+          tryAddFlatSurfacePoint(points, point.x() + i, maxY, point.z() + j);
+          for (double p = separation; p < 1; p += separation) {
+            tryAddFlatSurfacePoint(points, point.x() + i + p, maxY, point.z() + j);
+            tryAddFlatSurfacePoint(points, point.x() + i, maxY, point.z() + j + p);
+          }
+        }
+      }
+    }
+
+    // round side
+    distance = Math.sqrt((point.x() - this.posX) * (point.x() - this.posX) + (point.z() - this.posZ) * (point.z() - this.posZ));
+    if (proximity + radius >= distance) {
+      // the two circles are close enough to be touching
+      if (distance + proximity >= radius) {
+        // the proximity circle is not so far inside the cylinder circle to be too far away from borders
+        double radians;
+        if (distance + radius < proximity) {
+          // the proximity circle entirely encapsulates the cylinder circle
+          radians = Math.PI;
+        } else {
+          radians = Math.acos((radiusSquared + distance * distance - proximitySquared)
+              / (2 * radius * distance));
+        }
+        double perimeter = 2 * Math.PI * radius;
+        // thetaInc (theta increment) is the smallest unit of theta
+        double thetaInc = 1 / (radius);  // (2*pi)/(2*pi*r)
+        double thetaStart = Math.atan((point.x() - this.posX()) / (point.z() - this.posZ));
+        if (point.z() < this.posZ) {
+          thetaStart += Math.PI;
+        }
+
+        for (double theta = thetaStart - radians; theta < thetaStart + radians; theta += thetaInc) {
+          for (int y = (int) Math.floor(point.y() - proximity); y <= Math.ceil(point.y() + proximity); y++) {
+            double majorVertZ = posZ + Math.cos(theta) * radius;
+            double majorVertX = posX + Math.sin(theta) * radius;
+            tryAddCurvedSurfacePoint(points, majorVertX, y, majorVertZ);
+            for (double p = separation; p < 1; p += separation) {
+              tryAddCurvedSurfacePoint(points, majorVertX, y + p, majorVertZ);
+              tryAddCurvedSurfacePoint(points, posX + Math.sin(theta + thetaInc * p) * radius,
+                  y,
+                  posZ + Math.cos(theta + thetaInc * p) * radius);
+            }
+          }
+        }
+      }
+    }
+
+    return points.stream()
+        .filter(p -> p.distanceSquared(point) < proximitySquared)
+        .collect(Collectors.toList());
+  }
+
+  private void tryAddFlatSurfacePoint(Collection<Vector3d> points,
+                                      double x, double y, double z) {
+    if ((y == this.minY || y == this.maxY) && (x - posX) * (x - posX) + (z - posZ) * (z - posZ) <= radiusSquared) {
+      points.add(Vector3d.of(x, y, z));
+    }
+  }
+
+  private void tryAddCurvedSurfacePoint(Collection<Vector3d> points,
+                                        double x, double y, double z) {
+    if (y >= this.minY && y <= this.maxY) {
+      points.add(Vector3d.of(x, y, z));
+    }
   }
 
 }

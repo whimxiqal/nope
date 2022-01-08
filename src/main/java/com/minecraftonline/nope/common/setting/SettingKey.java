@@ -26,9 +26,11 @@
 package com.minecraftonline.nope.common.setting;
 
 import com.google.gson.Gson;
+import com.minecraftonline.nope.common.setting.value.SettingValue;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
@@ -44,6 +46,7 @@ import org.jetbrains.annotations.Nullable;
  *
  * @param <T> the type of data which is ultimately keyed under this key
  */
+@Builder
 public abstract class SettingKey<T> {
 
   /**
@@ -92,7 +95,6 @@ public abstract class SettingKey<T> {
   @Setter
   private boolean playerRestrictive = false;
 
-  @SuppressWarnings("unchecked")
   protected SettingKey(String id, @NotNull T defaultData) {
     this.id = id;
     this.defaultData = Objects.requireNonNull(defaultData);

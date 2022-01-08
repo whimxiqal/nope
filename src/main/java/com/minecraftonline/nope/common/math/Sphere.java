@@ -27,11 +27,14 @@
 package com.minecraftonline.nope.common.math;
 
 import com.minecraftonline.nope.common.host.Domain;
-import java.util.List;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.experimental.Accessors;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.LinkedList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class Sphere extends Volume {
 
@@ -55,19 +58,15 @@ public class Sphere extends Volume {
   private final Cuboid circumscribed;
   private final Cuboid inscribed;
 
-  @Builder(builderClassName = "Selection",
-      buildMethodName = "solidify",
-      builderMethodName = "selection",
-      toBuilder = true)
   public Sphere(Domain domain,
-                Integer posX,
-                Integer posY,
-                Integer posZ,
+                Integer x,
+                Integer y,
+                Integer z,
                 Double radius) {
     super(domain);
-    this.posX = posX;
-    this.posY = posY;
-    this.posZ = posZ;
+    this.posX = x;
+    this.posY = y;
+    this.posZ = z;
     this.radius = radius;
 
     this.radiusSquared = radius * radius;
@@ -91,6 +90,12 @@ public class Sphere extends Volume {
         (int) Math.floor(posY + radiusSqrt3Over3),
         (int) Math.floor(posZ + radiusSqrt3Over3));
 
+  }
+
+  private static Vector3d sphericalToCartesian(double x, double y, double z, double rho, double theta, double phi) {
+    return Vector3d.of(x + rho * Math.sin(theta) * Math.sin(phi),
+        y + rho * Math.cos(phi),
+        z + rho * Math.cos(theta) * Math.sin(phi));
   }
 
   public int posX() {
@@ -120,8 +125,23 @@ public class Sphere extends Volume {
   }
 
   @Override
-  public boolean contains(int x, int y, int z) {
+  public boolean containsPoint(double x, double y, double z) {
     return (posX - x) * (posX - x) + (posY - y) * (posY - y) + (posZ - z) * (posZ - z) <= radiusSquared;
+  }
+
+  @Override
+  public boolean containsBlock(int x, int y, int z) {
+    int posXplus1Squared = (posX + 1 - x) * (posX + 1 - x);
+    int posYplus1Squared = (posY + 1 - y) * (posY + 1 - y);
+    int posZplus1Squared = (posZ + 1 - z) * (posZ + 1 - z);
+    return (posX - x) * (posX - x) + (posY - y) * (posY - y) + (posZ - z) * (posZ - z) <= radiusSquared
+        || posXplus1Squared + (posY - y) * (posY - y) + (posZ - z) * (posZ - z) <= radiusSquared
+        || (posX - x) * (posX - x) + posYplus1Squared + (posZ - z) * (posZ - z) <= radiusSquared
+        || (posX - x) * (posX - x) + (posY - y) * (posY - y) + posZplus1Squared <= radiusSquared
+        || posXplus1Squared + posYplus1Squared + (posZ - z) * (posZ - z) <= radiusSquared
+        || posXplus1Squared + (posY - y) * (posY - y) + posZplus1Squared <= radiusSquared
+        || (posX - x) * (posX - x) + posYplus1Squared + posZplus1Squared <= radiusSquared
+        || posXplus1Squared + posYplus1Squared + posZplus1Squared <= radiusSquared;
   }
 
   @Override
@@ -134,7 +154,52 @@ public class Sphere extends Volume {
 
   @Override
   public List<Vector3d> surfacePointsNear(Vector3d point, double proximity, double density) {
-    return null; // TODO implement
+    if (proximity <= 0) {
+      throw new IllegalArgumentException("Your proximity cannot be negative or 0");
+    }
+    List<Vector3d> points = new LinkedList<>();
+    final double proximitySquared = proximity * proximity;
+    final double separation = 1 / density;
+    final double distance = Math.sqrt((point.x() - this.posX) * (point.x() - this.posX)
+        + (point.y() - this.posY) * (point.y() - this.posY)
+        + (point.z() - this.posZ) * (point.z() - this.posZ));
+    final double distToAxisY = Math.sqrt((point.x() - this.posX) * (point.x() - this.posX)
+        + (point.z() - this.posZ) * (point.z() - this.posZ));
+    if (proximity + radius >= distance) {
+      // the two spheres are close enough to be touching
+      if (distance + proximity >= radius) {
+        // the proximity bubble is not so far inside the sphere to be too far away from the surface
+        double perimeter = 2 * Math.PI * radius;
+        // angleInc (angle increment) is the smallest angle unit in radians
+        double angleInc = 1 / (radius);  // (2*pi)/(2*pi*r)
+        double thetaStart = Math.atan((point.x() - this.posX()) / (point.z() - this.posZ));
+        double phiStart = Math.atan(distToAxisY / (point.y() - this.posY));
+        if (point.z() < this.posZ) {
+          thetaStart += Math.PI;
+        }
+        if (phiStart < 0) {
+          phiStart += Math.PI; // keep it positive
+        }
+
+        final double halfThetaRange = Math.min(4 * proximity * Math.PI / radius, 2 * Math.PI) / 2;
+        final double halfPhiRange = Math.min(4 * proximity * Math.PI / radius, Math.PI) / 2;
+        final double minPhi = Math.max(0, phiStart - halfPhiRange);
+        final double maxPhi = Math.min(Math.PI - angleInc, phiStart + halfPhiRange);
+        for (double theta = thetaStart - halfThetaRange; theta < thetaStart + halfThetaRange; theta += angleInc) {
+          for (double phi = minPhi; phi < maxPhi; phi += angleInc) {
+            points.add(sphericalToCartesian(posX, posY, posZ, radius, theta, phi));
+            for (double p = separation; p < 1; p += separation) {
+              points.add(sphericalToCartesian(posX, posY, posZ, radius, theta + angleInc * p, phi));
+              points.add(sphericalToCartesian(posX, posY, posZ, radius, theta, phi + angleInc * p));
+            }
+          }
+        }
+      }
+    }
+
+    return points.stream()
+        .filter(p -> p.distanceSquared(point) < proximitySquared)
+        .collect(Collectors.toList());
   }
 
 }

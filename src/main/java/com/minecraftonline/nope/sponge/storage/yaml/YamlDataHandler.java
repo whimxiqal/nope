@@ -1,5 +1,6 @@
 package com.minecraftonline.nope.sponge.storage.yaml;
 
+import com.minecraftonline.nope.common.Nope;
 import com.minecraftonline.nope.common.math.Volume;
 import com.minecraftonline.nope.sponge.storage.configurate.ConfigurateDataHandler;
 import com.minecraftonline.nope.sponge.storage.configurate.DomainConfigurateDataHandler;
@@ -33,6 +34,16 @@ public class YamlDataHandler extends ConfigurateDataHandler {
                 return Collections.emptyList();
               } else {
                 return Arrays.stream(files)
+                    .filter(file -> {
+                      String[] tokens = file.getName().split("\\.");
+                      String type = tokens[tokens.length - 1].toLowerCase();
+                      if (type.equals("yml") || type.equals("yaml")) {
+                        return true;
+                      } else {
+                        Nope.instance().logger().error("File " + file.getName() + " is unknown");
+                        return false;
+                      }
+                    })
                     .map(file -> yamlLoader(file.toPath()))
                     .collect(Collectors.toList());
               }

@@ -43,6 +43,7 @@ public class Zone extends Host implements Child<Zone>, Destructible {
     volumes().forEach(volume -> volume.domain().volumes()
         .intersecting(this)
         .stream()
+        .filter(other -> !other.equals(this))
         .filter(other -> this.priority() == other.priority())
         .forEach(zone -> zone.setPriority(this.priority + 1)));
   }
@@ -72,7 +73,7 @@ public class Zone extends Host implements Child<Zone>, Destructible {
 
   @Override
   public boolean contains(Location location) {
-    return volumes.stream().anyMatch(volume -> volume.contains(location));
+    return volumes.stream().anyMatch(volume -> volume.containsPoint(location));
   }
 
   @Override

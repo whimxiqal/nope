@@ -25,6 +25,7 @@
 
 package com.minecraftonline.nope.common.setting;
 
+import com.minecraftonline.nope.common.setting.value.SettingValue;
 import java.util.Objects;
 import lombok.Getter;
 import lombok.Setter;
@@ -46,8 +47,7 @@ public class Setting<T> {
   @Getter
   @Setter
   @Accessors(fluent = true)
-  @Nullable
-  private T data;
+  private SettingValue<T> data;
 
   @Getter
   @Setter
@@ -55,41 +55,32 @@ public class Setting<T> {
   @Nullable
   private Target target;
 
-  private Setting(SettingKey<T> key, @Nullable T data, @Nullable Target target) {
+  private Setting(@NotNull SettingKey<T> key, @NotNull SettingValue<T> data, @Nullable Target target) {
     this.key = key;
     this.data = data;
     this.target = target;
   }
 
-  public static <X> Setting<X> of(@NotNull SettingKey<X> key) {
-    return new Setting<>(key, null, null);
-  }
-
   public static <X> Setting<X> of(@NotNull SettingKey<X> key,
-                                  @Nullable X data) {
+                                  @NotNull SettingValue<X> data) {
     return new Setting<>(key, data, null);
   }
 
   public static <X> Setting<X> of(@NotNull SettingKey<X> key,
-                                  @Nullable Target target) {
-    return new Setting<>(key, null, target);
-  }
-
-  public static <X> Setting<X> of(@NotNull SettingKey<X> key,
-                                  @Nullable X data,
+                                  @NotNull SettingValue<X> data,
                                   @Nullable Target target) {
     return new Setting<>(key, data, target);
   }
 
   @SuppressWarnings("unchecked")
   public static <X> Setting<X> ofUnchecked(@NotNull SettingKey<?> key,
-                                           @Nullable X data,
+                                           @NotNull SettingValue<?> data,
                                            @Nullable Target target) {
-    return new Setting<>((SettingKey<X>) key, data, target);
+    return new Setting<>((SettingKey<X>) key, (SettingValue<X>) data, target);
   }
 
   public T requireData() {
-    return Objects.requireNonNull(data);
+    return Objects.requireNonNull(data).get();
   }
 
   public Target requireTarget() {

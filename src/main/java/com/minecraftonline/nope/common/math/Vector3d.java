@@ -26,24 +26,23 @@
 
 package com.minecraftonline.nope.common.math;
 
-import lombok.Getter;
+import lombok.Data;
+import lombok.Value;
 import lombok.experimental.Accessors;
 
-public class Vector3d {
-  @Getter
-  @Accessors(fluent = true)
-  private final double posX;
-  @Getter
-  @Accessors(fluent = true)
-  private final double posY;
-  @Getter
-  @Accessors(fluent = true)
-  private final double posZ;
+import java.util.Objects;
 
-  private Vector3d(double posX, double posY, double posZ) {
-    this.posX = posX;
-    this.posY = posY;
-    this.posZ = posZ;
+@Value
+@Accessors(fluent = true)
+public class Vector3d {
+  double x;
+  double y;
+  double z;
+
+  private Vector3d(double x, double y, double z) {
+    this.x = x;
+    this.y = y;
+    this.z = z;
   }
 
   public static Vector3d of(double x, double y, double z) {
@@ -51,9 +50,9 @@ public class Vector3d {
   }
 
   public double distanceSquared(Vector3d other) {
-    double lengthX = this.posX - other.posX;
-    double lengthY = this.posY - other.posY;
-    double lengthZ = this.posZ - other.posZ;
+    double lengthX = this.x - other.x;
+    double lengthY = this.y - other.y;
+    double lengthZ = this.z - other.z;
     return lengthX * lengthX + lengthY * lengthY + lengthZ * lengthZ;
   }
 
@@ -62,18 +61,43 @@ public class Vector3d {
   }
 
   public Vector3d plus(Vector2d vector2d) {
-    return new Vector3d(posX + vector2d.posX(), posY, posZ + vector2d.posZ());
+    return new Vector3d(x + vector2d.posX(), y, z + vector2d.posZ());
   }
 
   public double magnitude() {
-    return Math.sqrt(posX * posX + posY * posY + posZ * posZ);
+    return Math.sqrt(x * x + y * y + z * z);
   }
 
   public Vector3d normalize() {
     double magnitude = magnitude();
-    return new Vector3d(posX / magnitude, posY / magnitude, posZ / magnitude);
+    return new Vector3d(x / magnitude, y / magnitude, z / magnitude);
   }
 
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+    Vector3d vector3d = (Vector3d) o;
+    return Double.compare(vector3d.x, x) == 0
+        && Double.compare(vector3d.y, y) == 0
+        && Double.compare(vector3d.z, z) == 0;
+  }
 
+  @Override
+  public int hashCode() {
+    return Objects.hash(x, y, z);
+  }
 
+  @Override
+  public String toString() {
+    return "Vector3d{"
+        + "x=" + x
+        + ", y=" + y
+        + ", z=" + z
+        + '}';
+  }
 }

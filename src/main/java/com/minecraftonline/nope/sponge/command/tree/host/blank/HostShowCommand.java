@@ -82,7 +82,7 @@ public class HostShowCommand extends CommandNode {
         ));
       }
     } else {
-      zone.volumes().forEach(volume -> EffectsUtil.show(volume, player));
+      EffectsUtil.show(zone, player);
     }
     return CommandResult.success();
   }

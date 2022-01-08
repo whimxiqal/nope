@@ -3,22 +3,26 @@ package com.minecraftonline.nope.sponge.command.tree.host.blank.edit.volumes.cre
 import com.minecraftonline.nope.common.Nope;
 import com.minecraftonline.nope.common.host.Host;
 import com.minecraftonline.nope.common.host.Zone;
-import com.minecraftonline.nope.common.permission.Permissions;
 import com.minecraftonline.nope.common.math.Cuboid;
 import com.minecraftonline.nope.common.math.Geometry;
+import com.minecraftonline.nope.common.permission.Permissions;
+import com.minecraftonline.nope.sponge.SpongeNope;
 import com.minecraftonline.nope.sponge.command.CommandNode;
 import com.minecraftonline.nope.sponge.command.parameters.ParameterKeys;
 import com.minecraftonline.nope.sponge.command.parameters.Parameters;
+import com.minecraftonline.nope.sponge.tool.CuboidSelection;
+import com.minecraftonline.nope.sponge.util.EffectsUtil;
 import com.minecraftonline.nope.sponge.util.Formatter;
 import com.minecraftonline.nope.sponge.util.SpongeUtil;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Optional;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.world.server.ServerWorld;
+
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Optional;
 
 public class CuboidCommand extends CommandNode {
 
@@ -26,13 +30,7 @@ public class CuboidCommand extends CommandNode {
     super(parent, Permissions.EDIT,
         "Create a new box",
         "box");
-    addParameter(Parameters.WORLD);
-    addParameter(Parameters.POS_X_1);
-    addParameter(Parameters.POS_Y_1);
-    addParameter(Parameters.POS_Z_1);
-    addParameter(Parameters.POS_X_2);
-    addParameter(Parameters.POS_Y_2);
-    addParameter(Parameters.POS_Z_2);
+    addParameter(Parameters.CUBOID);
   }
 
   @Override
@@ -75,26 +73,31 @@ public class CuboidCommand extends CommandNode {
       }
     } else {
       Object cause = context.cause().root();
-      Optional<Cuboid.Selection> selection = Optional.empty();
       if (cause instanceof Player) {
         Player player = (Player) context.cause().root();
+        CuboidSelection selection = SpongeNope.instance()
+            .selectionHandler()
+            .boxDraft(player.uniqueId());
+        if (selection == null) {
+          return CommandResult.error(Formatter.error(
+              "You must either supply the volume specifications for your ___"
+                  + " or use the ___ to make a selection",
+              "box", "box tool"
+          ));
+        }
         List<String> errors = new LinkedList<>();
-        // TODO get selection
-//        selection = SpongeNope.instance()
-//            .selectionHandler()
-//            .draft(player.uniqueId())
-//            .build(errors);
-      }
-      if (selection.isPresent()) {
-        cuboid = selection.get().solidify();
-        if (!cuboid.valid()) {
+        if (!selection.validate(errors)) {
+          errors.forEach(error -> player.sendMessage(Formatter.error(error)));
+        }
+        cuboid = selection.build();
+        if (cuboid == null) {
           return CommandResult.error(Formatter.error(
               "Your ___ selection is invalid", "box"
           ));
         }
       } else {
         return CommandResult.error(Formatter.error(
-            "You must either supply the volume specifications for your ___ or use the ___",
+            "You must supply the volume specifications for your ___",
             "box", "box tool"
         ));
       }
@@ -113,6 +116,9 @@ public class CuboidCommand extends CommandNode {
     context.cause().audience().sendMessage(Formatter.success(
         "A box was created on zone ___", zone.name()
     ));
+    if (context.cause().root() instanceof Player) {
+      EffectsUtil.show(cuboid, (Player) context.cause().root());
+    }
     return CommandResult.success();
 
   }

@@ -24,28 +24,25 @@
  *
  */
 
-package com.minecraftonline.nope.common.math;
+package com.minecraftonline.nope.sponge.tool;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.Value;
-import lombok.experimental.Accessors;
+import com.minecraftonline.nope.common.math.Slab;
+import com.minecraftonline.nope.sponge.util.Formatter;
+import net.kyori.adventure.text.Component;
 
-@Value
-@Accessors(fluent = true)
-public class Vector3i {
-  int x;
-  int y;
-  int z;
+public class SlabSelection extends Selection<Slab> {
 
-  private Vector3i(int x, int y, int z) {
-    this.x = x;
-    this.y = y;
-    this.z = z;
+  @Override
+  protected Component propsWhenValid() {
+    return Formatter.info("Y Bounds, inclusive: {___, ___}",
+        Math.min(position1.y(), position2.y()),
+        Math.max(position1.y(), position2.y()));
   }
 
-  public static Vector3i of(int x, int y, int z) {
-    return new Vector3i(x, y, z);
+  @Override
+  public Slab construct() {
+    return new Slab(domain,
+        Math.min(position1.y(), position2.y()),
+        Math.max(position1.y(), position2.y()));
   }
-
 }

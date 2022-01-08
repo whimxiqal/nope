@@ -37,7 +37,7 @@ public final class SpongeUtil {
   }
 
   public static org.spongepowered.math.vector.Vector3d raiseVector(Vector3d vector) {
-    return new org.spongepowered.math.vector.Vector3d(vector.posX(), vector.posY(), vector.posZ());
+    return new org.spongepowered.math.vector.Vector3d(vector.x(), vector.y(), vector.z());
   }
 
   public static <T> T valueFor(SettingKey<T> key, Entity entity, ServerLocation location) {

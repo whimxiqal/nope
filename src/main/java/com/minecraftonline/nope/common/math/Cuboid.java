@@ -27,14 +27,14 @@
 package com.minecraftonline.nope.common.math;
 
 import com.minecraftonline.nope.common.host.Domain;
+import lombok.Getter;
+import lombok.experimental.Accessors;
+import org.jetbrains.annotations.NotNull;
+
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.experimental.Accessors;
-import org.jetbrains.annotations.NotNull;
 
 public class Cuboid extends Volume {
 
@@ -78,24 +78,21 @@ public class Cuboid extends Volume {
   @Accessors(fluent = true)
   private final double radiusCircumscribedSphere;
 
-  @Builder(builderClassName = "Selection",
-      buildMethodName = "solidify",
-      builderMethodName = "selection",
-      toBuilder = true)
+  // TODO Build a "selection" class in the tool/selection folders, not in the structure class (same with other volumes)
   public Cuboid(Domain domain,
-                Integer minX,
-                Integer minY,
-                Integer minZ,
-                Integer maxX,
-                Integer maxY,
-                Integer maxZ) {
+                Integer x1,
+                Integer y1,
+                Integer z1,
+                Integer x2,
+                Integer y2,
+                Integer z2) {
     super(domain);
-    this.minX = minX;
-    this.minY = minY;
-    this.minZ = minZ;
-    this.maxX = maxX;
-    this.maxY = maxY;
-    this.maxZ = maxZ;
+    this.minX = Math.min(x1, x2);
+    this.minY = Math.min(y1, y2);
+    this.minZ = Math.min(z1, z2);
+    this.maxX = Math.max(x1, x2);
+    this.maxY = Math.max(y1, y2);
+    this.maxZ = Math.max(z1, z2);
     this.lengthX = maxX - minX;
     this.lengthY = maxY - minY;
     this.lengthZ = maxZ - minZ;
@@ -153,13 +150,23 @@ public class Cuboid extends Volume {
   }
 
   @Override
-  public boolean contains(int x, int y, int z) {
+  public boolean containsPoint(double x, double y, double z) {
     return x >= this.minX
-        && x <= this.maxX
+        && x < this.maxX
         && y >= this.minY
-        && y <= this.maxY
+        && y < this.maxY
         && z >= this.minZ
-        && z <= this.maxZ;
+        && z < this.maxZ;
+  }
+
+  @Override
+  public boolean containsBlock(int x, int y, int z) {
+    return x >= this.minX
+        && x < this.maxX
+        && y >= this.minY
+        && y < this.maxY
+        && z >= this.minZ
+        && z < this.maxZ;
   }
 
   @Override
@@ -181,108 +188,103 @@ public class Cuboid extends Volume {
       throw new IllegalArgumentException("Your proximity cannot be negative or 0");
     }
     List<Vector3d> points = new LinkedList<>();
-    double proximitySquared = proximity * proximity;
+    final double proximitySquared = proximity * proximity;
+    final double separation = 1 / density;
 
     double distance;
     double radius;
 
     // minX
-    distance = Math.abs(point.posX() - minX);
+    distance = Math.abs(point.x() - minX);
     if (distance <= proximity) {
       radius = Math.sqrt(proximitySquared - distance * distance);
 
-      double separation = 1 / density;
       for (int i = (int) -Math.ceil(radius); i < Math.ceil(radius); i++) {
         for (int j = (int) -Math.ceil(radius); j < Math.ceil(radius); j++) {
-          tryAddSurfacePoint(points, Dimension.X, minX, point.posY() + i, point.posZ() + j);
-          for (double p = separation; p < 1; p++) {
-            tryAddSurfacePoint(points, Dimension.X, minX, point.posY() + i + p, point.posZ() + j);
-            tryAddSurfacePoint(points, Dimension.X, minX, point.posY() + i, point.posZ() + j + p);
+          tryAddSurfacePoint(points, Dimension.X, minX, point.y() + i, point.z() + j);
+          for (double p = separation; p < 1; p += separation) {
+            tryAddSurfacePoint(points, Dimension.X, minX, point.y() + i + p, point.z() + j);
+            tryAddSurfacePoint(points, Dimension.X, minX, point.y() + i, point.z() + j + p);
           }
         }
       }
     }
 
     // maxX
-    distance = Math.abs(point.posX() - maxX);
+    distance = Math.abs(point.x() - maxX);
     if (distance <= proximity) {
       radius = Math.sqrt(proximitySquared - distance * distance);
 
-      double separation = 1 / density;
       for (int i = (int) -Math.ceil(radius); i < Math.ceil(radius); i++) {
         for (int j = (int) -Math.ceil(radius); j < Math.ceil(radius); j++) {
-          tryAddSurfacePoint(points, Dimension.X, maxX, point.posY() + i, point.posZ() + j);
-          for (double p = separation; p < 1; p++) {
-            tryAddSurfacePoint(points, Dimension.X, maxX, point.posY() + i + p, point.posZ() + j);
-            tryAddSurfacePoint(points, Dimension.X, maxX, point.posY() + i, point.posZ() + j + p);
+          tryAddSurfacePoint(points, Dimension.X, maxX, point.y() + i, point.z() + j);
+          for (double p = separation; p < 1; p += separation) {
+            tryAddSurfacePoint(points, Dimension.X, maxX, point.y() + i + p, point.z() + j);
+            tryAddSurfacePoint(points, Dimension.X, maxX, point.y() + i, point.z() + j + p);
           }
         }
       }
     }
 
     // minY
-    distance = Math.abs(point.posY() - minY);
+    distance = Math.abs(point.y() - minY);
     if (distance <= proximity) {
       radius = Math.sqrt(proximitySquared - distance * distance);
 
-      double separation = 1 / density;
       for (int i = (int) -Math.ceil(radius); i < Math.ceil(radius); i++) {
         for (int j = (int) -Math.ceil(radius); j < Math.ceil(radius); j++) {
-          tryAddSurfacePoint(points, Dimension.Y, point.posX() + i, minY, point.posZ() + j);
-          for (double p = separation; p < 1; p++) {
-            tryAddSurfacePoint(points, Dimension.Y, point.posX() + i + p, minY, point.posZ() + j);
-            tryAddSurfacePoint(points, Dimension.Y, point.posX() + i, minY, point.posZ() + j + p);
+          tryAddSurfacePoint(points, Dimension.Y, point.x() + i, minY, point.z() + j);
+          for (double p = separation; p < 1; p += separation) {
+            tryAddSurfacePoint(points, Dimension.Y, point.x() + i + p, minY, point.z() + j);
+            tryAddSurfacePoint(points, Dimension.Y, point.x() + i, minY, point.z() + j + p);
           }
         }
       }
     }
 
     // maxY
-    distance = Math.abs(point.posY() - maxY);
+    distance = Math.abs(point.y() - maxY);
     if (distance <= proximity) {
       radius = Math.sqrt(proximitySquared - distance * distance);
 
-      double separation = 1 / (double) density;
       for (int i = (int) -Math.ceil(radius); i < Math.ceil(radius); i++) {
         for (int j = (int) -Math.ceil(radius); j < Math.ceil(radius); j++) {
-          tryAddSurfacePoint(points, Dimension.Y, point.posX() + i, maxY, point.posZ() + j);
-          for (double p = separation; p < 1; p++) {
-            tryAddSurfacePoint(points, Dimension.Y, point.posX() + i + p, maxY, point.posZ() + j);
-            tryAddSurfacePoint(points, Dimension.Y, point.posX() + i, maxY, point.posZ() + j + p);
+          tryAddSurfacePoint(points, Dimension.Y, point.x() + i, maxY, point.z() + j);
+          for (double p = separation; p < 1; p += separation) {
+            tryAddSurfacePoint(points, Dimension.Y, point.x() + i + p, maxY, point.z() + j);
+            tryAddSurfacePoint(points, Dimension.Y, point.x() + i, maxY, point.z() + j + p);
           }
         }
       }
     }
 
     // minZ
-    distance = Math.abs(point.posZ() - minZ);
+    distance = Math.abs(point.z() - minZ);
     if (distance <= proximity) {
       radius = Math.sqrt(proximitySquared - distance * distance);
 
-      double separation = 1 / (double) density;
       for (int i = (int) -Math.ceil(radius); i < Math.ceil(radius); i++) {
         for (int j = (int) -Math.ceil(radius); j < Math.ceil(radius); j++) {
-          tryAddSurfacePoint(points, Dimension.Z, point.posX() + i, point.posY() + j, minZ);
-          for (double p = separation; p < 1; p++) {
-            tryAddSurfacePoint(points, Dimension.Z, point.posX() + i + p, point.posY() + j, minZ);
-            tryAddSurfacePoint(points, Dimension.Z, point.posX() + i, point.posY() + j + p, minZ);
+          tryAddSurfacePoint(points, Dimension.Z, point.x() + i, point.y() + j, minZ);
+          for (double p = separation; p < 1; p += separation) {
+            tryAddSurfacePoint(points, Dimension.Z, point.x() + i + p, point.y() + j, minZ);
+            tryAddSurfacePoint(points, Dimension.Z, point.x() + i, point.y() + j + p, minZ);
           }
         }
       }
     }
 
     // minZ
-    distance = Math.abs(point.posZ() - maxZ);
+    distance = Math.abs(point.z() - maxZ);
     if (distance <= proximity) {
       radius = Math.sqrt(proximitySquared - distance * distance);
 
-      double separation = 1 / (double) density;
       for (int i = (int) -Math.ceil(radius); i < Math.ceil(radius); i++) {
         for (int j = (int) -Math.ceil(radius); j < Math.ceil(radius); j++) {
-          tryAddSurfacePoint(points, Dimension.Z, point.posX() + i, point.posY() + j, maxZ);
-          for (double p = separation; p < 1; p++) {
-            tryAddSurfacePoint(points, Dimension.Z, point.posX() + i + p, point.posY() + j, maxZ);
-            tryAddSurfacePoint(points, Dimension.Z, point.posX() + i, point.posY() + j + p, maxZ);
+          tryAddSurfacePoint(points, Dimension.Z, point.x() + i, point.y() + j, maxZ);
+          for (double p = separation; p < 1; p += separation) {
+            tryAddSurfacePoint(points, Dimension.Z, point.x() + i + p, point.y() + j, maxZ);
+            tryAddSurfacePoint(points, Dimension.Z, point.x() + i, point.y() + j + p, maxZ);
           }
         }
       }

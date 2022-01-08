@@ -27,12 +27,10 @@
 package com.minecraftonline.nope.common.host;
 
 import com.minecraftonline.nope.common.Nope;
-import com.minecraftonline.nope.common.math.Cuboid;
-import com.minecraftonline.nope.common.math.Cylinder;
-import com.minecraftonline.nope.common.math.Slab;
-import com.minecraftonline.nope.common.math.Sphere;
-import com.minecraftonline.nope.common.math.Volume;
+import com.minecraftonline.nope.common.math.*;
 import com.minecraftonline.nope.common.util.Logger;
+
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.BeforeEach;
@@ -65,6 +63,7 @@ class VolumeTreeTest {
 
   @Test
   void intersecting() {
+    assert Geometry.intersects(volume1, volume3);
     assert volumeTree.intersecting(volume3).contains(zone1);
     assert !volumeTree.intersecting(volume4).contains(zone1);
   }

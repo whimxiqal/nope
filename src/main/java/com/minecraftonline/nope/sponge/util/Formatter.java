@@ -86,9 +86,9 @@ public final class Formatter {
     LinkedList<String> tokenList = new LinkedList<>(Arrays.asList(message.split(FORMAT_ACCENT_REGEX)));
 
     // Make sure that things can be inserted at the beginning and end (split doesn't cover those cases)
-    if (message.startsWith(FORMAT_ACCENT_REGEX)) {
-      tokenList.addFirst("");
-    }
+//    if (message.startsWith(FORMAT_ACCENT_REGEX)) {
+//      tokenList.addFirst("");
+//    }
     if (message.endsWith(FORMAT_ACCENT_REGEX)) {
       tokenList.addLast("");
     }

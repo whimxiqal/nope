@@ -74,7 +74,7 @@ public abstract class CommandNode implements CommandExecutor {
   private final List<CommandNode> children = Lists.newArrayList();
   @Getter
   @Accessors(fluent = true)
-  private final List<Parameter.Value<?>> parameters = Lists.newArrayList();
+  private final List<Parameter> parameters = Lists.newArrayList();
   @Getter
   @Accessors(fluent = true)
   private final List<Flag> flags = Lists.newArrayList();
@@ -201,6 +201,10 @@ public abstract class CommandNode implements CommandExecutor {
 
   public final void addParameter(Parameter.Value<?> parameter) {
     this.parameters.add(parameter);
+  }
+
+  public final void addParameter(Parameter.Multi parameters) {
+    this.parameters.add(parameters);
   }
 
   /**

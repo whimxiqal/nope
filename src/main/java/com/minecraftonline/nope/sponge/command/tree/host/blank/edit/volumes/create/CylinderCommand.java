@@ -6,9 +6,13 @@ import com.minecraftonline.nope.common.host.Zone;
 import com.minecraftonline.nope.common.permission.Permissions;
 import com.minecraftonline.nope.common.math.Cylinder;
 import com.minecraftonline.nope.common.math.Geometry;
+import com.minecraftonline.nope.sponge.SpongeNope;
 import com.minecraftonline.nope.sponge.command.CommandNode;
 import com.minecraftonline.nope.sponge.command.parameters.ParameterKeys;
 import com.minecraftonline.nope.sponge.command.parameters.Parameters;
+import com.minecraftonline.nope.sponge.tool.CuboidSelection;
+import com.minecraftonline.nope.sponge.tool.CylinderSelection;
+import com.minecraftonline.nope.sponge.util.EffectsUtil;
 import com.minecraftonline.nope.sponge.util.Formatter;
 import com.minecraftonline.nope.sponge.util.SpongeUtil;
 import java.util.LinkedList;
@@ -26,12 +30,7 @@ public class CylinderCommand extends CommandNode {
     super(parent, Permissions.EDIT,
         "Create a new cylinder",
         "cylinder");
-    addParameter(Parameters.WORLD);
-    addParameter(Parameters.POS_X);
-    addParameter(Parameters.POS_Y_1);
-    addParameter(Parameters.POS_Y_2);
-    addParameter(Parameters.POS_Z);
-    addParameter(Parameters.RADIUS);
+    addParameter(Parameters.CYLINDER);
   }
 
   @Override
@@ -71,26 +70,31 @@ public class CylinderCommand extends CommandNode {
       }
     } else {
       Object cause = context.cause().root();
-      Optional<Cylinder.Selection> selection = Optional.empty();
       if (cause instanceof Player) {
         Player player = (Player) context.cause().root();
+        CylinderSelection selection = SpongeNope.instance()
+            .selectionHandler()
+            .cylinderDraft(player.uniqueId());
+        if (selection == null) {
+          return CommandResult.error(Formatter.error(
+              "You must either supply the volume specifications for your ___"
+                  + " or use the ___ to make a selection",
+              "cylinder", "cylinder tool"
+          ));
+        }
         List<String> errors = new LinkedList<>();
-        // TODO get selection
-//        selection = SpongeNope.instance()
-//            .selectionHandler()
-//            .draft(player.uniqueId())
-//            .build(errors);
-      }
-      if (selection.isPresent()) {
-        cylinder = selection.get().solidify();
-        if (!cylinder.valid()) {
+        if (!selection.validate(errors)) {
+          errors.forEach(error -> player.sendMessage(Formatter.error(error)));
+        }
+        cylinder = selection.build();
+        if (cylinder == null) {
           return CommandResult.error(Formatter.error(
               "Your ___ selection is invalid", "cylinder"
           ));
         }
       } else {
         return CommandResult.error(Formatter.error(
-            "You must either supply the volume specifications for your ___ or use the ___",
+            "You must supply the volume specifications for your ___",
             "cylinder", "cylinder tool"
         ));
       }
@@ -109,6 +113,9 @@ public class CylinderCommand extends CommandNode {
     context.cause().audience().sendMessage(Formatter.success(
         "A ___ was created on zone ___", "cylinder", zone.name()
     ));
+    if (context.cause().root() instanceof Player) {
+      EffectsUtil.show(cylinder, (Player) context.cause().root());
+    }
     return CommandResult.success();
 
   }

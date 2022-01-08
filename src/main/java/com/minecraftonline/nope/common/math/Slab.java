@@ -27,9 +27,13 @@
 package com.minecraftonline.nope.common.math;
 
 import com.minecraftonline.nope.common.host.Domain;
-import java.util.List;
 import lombok.Builder;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class Slab extends Volume {
 
@@ -39,16 +43,12 @@ public class Slab extends Volume {
   private final Cuboid circumscribed;
   private final Cuboid inscribed;
 
-  @Builder(builderClassName = "Selection",
-      buildMethodName = "solidify",
-      builderMethodName = "selection",
-      toBuilder = true)
   public Slab(Domain domain,
-              Integer minY,
-              Integer maxY) {
+              Integer y1,
+              Integer y2) {
     super(domain);
-    this.minY = minY;
-    this.maxY = maxY;
+    this.minY = Math.min(y1, y2);
+    this.maxY = Math.max(y1, y2);
 
     circumscribed = new Cuboid(domain,
         Integer.MIN_VALUE,
@@ -80,9 +80,15 @@ public class Slab extends Volume {
   }
 
   @Override
-  public boolean contains(int x, int y, int z) {
+  public boolean containsPoint(double x, double y, double z) {
     return y >= minY
-        && y <= maxY;
+        && y < maxY;
+  }
+
+  @Override
+  public boolean containsBlock(int x, int y, int z) {
+    return y >= minY
+        && y < maxY;
   }
 
   @Override
@@ -94,7 +100,58 @@ public class Slab extends Volume {
 
   @Override
   public List<Vector3d> surfacePointsNear(Vector3d point, double proximity, double density) {
-    return null; // TODO implement
+    if (proximity <= 0) {
+      throw new IllegalArgumentException("Your proximity cannot be negative or 0");
+    }
+    List<Vector3d> points = new LinkedList<>();
+    final double proximitySquared = proximity * proximity;
+    final double separation = 1 / density;
+
+    double distance;
+    double radius;
+
+    // minY
+    distance = Math.abs(point.y() - minY);
+    if (distance <= proximity) {
+      radius = Math.sqrt(proximitySquared - distance * distance);
+
+      for (int i = (int) -Math.ceil(radius); i < Math.ceil(radius); i++) {
+        for (int j = (int) -Math.ceil(radius); j < Math.ceil(radius); j++) {
+          tryAddSurfacePoint(points, point.x() + i, minY, point.z() + j);
+          for (double p = separation; p < 1; p += separation) {
+            tryAddSurfacePoint(points, point.x() + i + p, minY, point.z() + j);
+            tryAddSurfacePoint(points, point.x() + i, minY, point.z() + j + p);
+          }
+        }
+      }
+    }
+
+    // maxY
+    distance = Math.abs(point.y() - maxY);
+    if (distance <= proximity) {
+      radius = Math.sqrt(proximitySquared - distance * distance);
+
+      for (int i = (int) -Math.ceil(radius); i < Math.ceil(radius); i++) {
+        for (int j = (int) -Math.ceil(radius); j < Math.ceil(radius); j++) {
+          tryAddSurfacePoint(points, point.x() + i, maxY, point.z() + j);
+          for (double p = separation; p < 1; p += separation) {
+            tryAddSurfacePoint(points, point.x() + i + p, maxY, point.z() + j);
+            tryAddSurfacePoint(points, point.x() + i, maxY, point.z() + j + p);
+          }
+        }
+      }
+    }
+
+    return points.stream()
+        .filter(p -> p.distanceSquared(point) < proximitySquared)
+        .collect(Collectors.toList());
+  }
+
+  private void tryAddSurfacePoint(Collection<Vector3d> points,
+                                  double x, double y, double z) {
+    if ((y == this.minY || y == this.maxY)) {
+      points.add(Vector3d.of(x, y, z));
+    }
   }
 
 }

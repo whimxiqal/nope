@@ -46,9 +46,9 @@ public class Vector3dSettingKey extends SettingKey<Vector3d> {
   @Override
   public Object serializeDataGenerified(Vector3d value) {
     final JsonObject jsonObject = new JsonObject();
-    jsonObject.addProperty("x", value.posX());
-    jsonObject.addProperty("y", value.posY());
-    jsonObject.addProperty("z", value.posZ());
+    jsonObject.addProperty("x", value.x());
+    jsonObject.addProperty("y", value.y());
+    jsonObject.addProperty("z", value.z());
     return jsonObject;
   }
 
@@ -90,6 +90,6 @@ public class Vector3dSettingKey extends SettingKey<Vector3d> {
     if (data == null) {
       return "null";
     }
-    return "x:" + data.posX() + ", y: " + data.posY() + ", z: " + data.posZ();
+    return "x:" + data.x() + ", y: " + data.y() + ", z: " + data.z();
   }
 }

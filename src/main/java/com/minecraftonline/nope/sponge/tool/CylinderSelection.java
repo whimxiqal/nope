@@ -24,28 +24,42 @@
  *
  */
 
-package com.minecraftonline.nope.common.math;
+package com.minecraftonline.nope.sponge.tool;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.Value;
-import lombok.experimental.Accessors;
+import com.minecraftonline.nope.common.Nope;
+import com.minecraftonline.nope.common.math.Cylinder;
+import com.minecraftonline.nope.common.math.Vector2d;
+import com.minecraftonline.nope.sponge.util.Formatter;
+import net.kyori.adventure.text.Component;
 
-@Value
-@Accessors(fluent = true)
-public class Vector3i {
-  int x;
-  int y;
-  int z;
+import java.util.List;
 
-  private Vector3i(int x, int y, int z) {
-    this.x = x;
-    this.y = y;
-    this.z = z;
+public class CylinderSelection extends Selection<Cylinder> {
+
+  private double radius() {
+    return Math.sqrt((position1.x() - position2.x()) * (position1.x() - position2.x())
+        + (position1.z() - position2.z()) * (position1.z() - position2.z()));
   }
 
-  public static Vector3i of(int x, int y, int z) {
-    return new Vector3i(x, y, z);
+  @Override
+  protected Component propsWhenValid() {
+    double height = Math.abs(position1.y() - position2.y()) + 1;
+    double radius = radius();
+    return Formatter.info("Volume: ~___, Center: {x ___, z ___}, Height: ___, Radius: ___",
+        (int) Math.ceil(Math.PI * radius * radius * height),
+        position1.x(), position1.z(),
+        height,
+        (int) Math.ceil(radius));
+  }
+
+  @Override
+  public Cylinder construct() {
+    return new Cylinder(domain,
+        position1.x(),
+        Math.min(position1.y(), position2.y()),
+        Math.max(position1.y(), position2.y()) + 1,
+        position1.z(),
+        radius());
   }
 
 }

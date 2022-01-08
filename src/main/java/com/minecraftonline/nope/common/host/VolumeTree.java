@@ -28,7 +28,6 @@ package com.minecraftonline.nope.common.host;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import com.minecraftonline.nope.common.Nope;
 import com.minecraftonline.nope.common.math.Cuboid;
 import com.minecraftonline.nope.common.math.Dimension;
 import com.minecraftonline.nope.common.math.Volume;
@@ -92,7 +91,7 @@ public class VolumeTree {
   public Set<Zone> intersecting(Volume volume) {
     Set<Zone> all = new HashSet<>();
     volumes.forEach((v, z) -> {
-      if (Geometry.intersects(v, volume)) {
+      if (Geometry.intersects(v, volume) && v != volume) {
         all.add(z);
       }
     });
@@ -410,7 +409,7 @@ public class VolumeTree {
 
     @Override
     Set<Volume> findVolumes(int x, int y, int z) {
-      return viable.stream().filter(volume -> volume.contains(x, y, z)).collect(Collectors.toSet());
+      return viable.stream().filter(volume -> volume.containsPoint(x, y, z)).collect(Collectors.toSet());
     }
   }
 

@@ -24,41 +24,23 @@
  *
  */
 
-package com.minecraftonline.nope.sponge.command.tree.host.blank;
+package com.minecraftonline.nope.sponge.command.tree;
 
-import com.minecraftonline.nope.common.Nope;
-import com.minecraftonline.nope.common.host.Host;
-import com.minecraftonline.nope.common.host.Zone;
 import com.minecraftonline.nope.common.permission.Permissions;
 import com.minecraftonline.nope.sponge.command.CommandNode;
-import com.minecraftonline.nope.sponge.command.parameters.ParameterKeys;
-import com.minecraftonline.nope.sponge.command.parameters.Parameters;
-import com.minecraftonline.nope.sponge.util.Formatter;
-import org.spongepowered.api.command.CommandResult;
-import org.spongepowered.api.command.exception.CommandException;
-import org.spongepowered.api.command.parameter.CommandContext;
+import com.minecraftonline.nope.sponge.command.FunctionlessCommandNode;
+import com.minecraftonline.nope.sponge.command.tree.tool.CuboidToolCommand;
+import com.minecraftonline.nope.sponge.command.tree.tool.CylinderToolCommand;
+import com.minecraftonline.nope.sponge.command.tree.tool.SlabToolCommand;
+import com.minecraftonline.nope.sponge.command.tree.tool.SphereToolCommand;
 
-public class HostDestroyCommand extends CommandNode {
-  public HostDestroyCommand(CommandNode parent) {
-    super(parent,
-        Permissions.DESTROY,
-        "Destroy a zone",
-        "destroy");
-    prefix(Parameters.HOST);
-  }
-
-  @Override
-  public CommandResult execute(CommandContext context) throws CommandException {
-    Host host = context.requireOne(ParameterKeys.HOST);
-    if (!(host instanceof Zone)) {
-      return CommandResult.error(Formatter.error(
-          "You may only delete hosts of type ___", "zone"
-      ));
-    }
-    Nope.instance().hostSystem().removeZone(host.name());
-    context.cause().audience().sendMessage(Formatter.success(
-        "Zone ___ was destroyed", host.name()
-    ));
-    return CommandResult.success();
+public class ToolCommand extends FunctionlessCommandNode {
+  public ToolCommand(CommandNode parent) {
+    super(parent, Permissions.CREATE,
+        "Spawn a tool for accessibility", "tool");
+    addChild(new CuboidToolCommand(this));
+    addChild(new CylinderToolCommand(this));
+    addChild(new SlabToolCommand(this));
+    addChild(new SphereToolCommand(this));
   }
 }

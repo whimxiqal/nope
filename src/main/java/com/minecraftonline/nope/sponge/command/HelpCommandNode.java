@@ -27,11 +27,6 @@ package com.minecraftonline.nope.sponge.command;
 
 import com.minecraftonline.nope.sponge.SpongeNope;
 import com.minecraftonline.nope.sponge.util.Formatter;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.stream.Collector;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.ComponentBuilder;
 import org.jetbrains.annotations.NotNull;
@@ -41,6 +36,13 @@ import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.service.pagination.PaginationList;
+
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Collector;
+import java.util.stream.Stream;
 
 /**
  * A command node that displays all the following possibilities of any command
@@ -86,6 +88,14 @@ public class HelpCommandNode extends CommandNode {
     // Add parameters as first item in content
     if (!parent.parameters().isEmpty()) {
       contentLines.add(parent.parameters().stream()
+          .flatMap(param -> {
+            if (param instanceof Parameter.Value<?>) {
+              return Stream.of((Parameter.Value<?>) param);
+            } else {
+              return ((Parameter.Multi) param).childParameters().stream()
+                  .map(p -> (Parameter.Value<?>) p);
+            }
+          })
           .map(param -> param.usage(context.cause()))
           .collect(Collector.of(
               () -> Component.text().append(Component.text("> ")).color(Formatter.INFO),

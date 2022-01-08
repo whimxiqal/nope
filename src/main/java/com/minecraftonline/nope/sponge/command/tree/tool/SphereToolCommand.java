@@ -24,40 +24,35 @@
  *
  */
 
-package com.minecraftonline.nope.sponge.command.tree.host.blank;
+package com.minecraftonline.nope.sponge.command.tree.tool;
 
-import com.minecraftonline.nope.common.Nope;
-import com.minecraftonline.nope.common.host.Host;
-import com.minecraftonline.nope.common.host.Zone;
 import com.minecraftonline.nope.common.permission.Permissions;
+import com.minecraftonline.nope.sponge.SpongeNope;
 import com.minecraftonline.nope.sponge.command.CommandNode;
-import com.minecraftonline.nope.sponge.command.parameters.ParameterKeys;
-import com.minecraftonline.nope.sponge.command.parameters.Parameters;
 import com.minecraftonline.nope.sponge.util.Formatter;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.parameter.CommandContext;
+import org.spongepowered.api.entity.living.player.Player;
 
-public class HostDestroyCommand extends CommandNode {
-  public HostDestroyCommand(CommandNode parent) {
-    super(parent,
-        Permissions.DESTROY,
-        "Destroy a zone",
-        "destroy");
-    prefix(Parameters.HOST);
+public class SphereToolCommand extends CommandNode {
+  public SphereToolCommand(CommandNode parent) {
+    super(parent, Permissions.CREATE,
+        "Select the boundaries of a sphere",
+        "sphere");
   }
 
   @Override
   public CommandResult execute(CommandContext context) throws CommandException {
-    Host host = context.requireOne(ParameterKeys.HOST);
-    if (!(host instanceof Zone)) {
+    if (!(context.cause().root() instanceof Player)) {
       return CommandResult.error(Formatter.error(
-          "You may only delete hosts of type ___", "zone"
+          "Only players may execute this command!"
       ));
     }
-    Nope.instance().hostSystem().removeZone(host.name());
-    context.cause().audience().sendMessage(Formatter.success(
-        "Zone ___ was destroyed", host.name()
+    Player player = (Player) context.cause().root();
+    player.inventory().offer(SpongeNope.instance().selectionHandler().sphereTool());
+    player.sendMessage(Formatter.success(
+        "You have been given a ___ tool", "sphere"
     ));
     return CommandResult.success();
   }

@@ -6,9 +6,13 @@ import com.minecraftonline.nope.common.host.Zone;
 import com.minecraftonline.nope.common.permission.Permissions;
 import com.minecraftonline.nope.common.math.Sphere;
 import com.minecraftonline.nope.common.math.Geometry;
+import com.minecraftonline.nope.sponge.SpongeNope;
 import com.minecraftonline.nope.sponge.command.CommandNode;
 import com.minecraftonline.nope.sponge.command.parameters.ParameterKeys;
 import com.minecraftonline.nope.sponge.command.parameters.Parameters;
+import com.minecraftonline.nope.sponge.tool.CylinderSelection;
+import com.minecraftonline.nope.sponge.tool.SphereSelection;
+import com.minecraftonline.nope.sponge.util.EffectsUtil;
 import com.minecraftonline.nope.sponge.util.Formatter;
 import com.minecraftonline.nope.sponge.util.SpongeUtil;
 import java.util.LinkedList;
@@ -26,11 +30,7 @@ public class SphereCommand extends CommandNode{
     super(parent, Permissions.EDIT,
         "Create a new sphere",
         "sphere");
-    addParameter(Parameters.WORLD);
-    addParameter(Parameters.POS_X);
-    addParameter(Parameters.POS_Y);
-    addParameter(Parameters.POS_Z);
-    addParameter(Parameters.RADIUS);
+    addParameter(Parameters.SPHERE);
   }
 
   @Override
@@ -67,26 +67,31 @@ public class SphereCommand extends CommandNode{
       }
     } else {
       Object cause = context.cause().root();
-      Optional<Sphere.Selection> selection = Optional.empty();
       if (cause instanceof Player) {
         Player player = (Player) context.cause().root();
+        SphereSelection selection = SpongeNope.instance()
+            .selectionHandler()
+            .sphereDraft(player.uniqueId());
+        if (selection == null) {
+          return CommandResult.error(Formatter.error(
+              "You must either supply the volume specifications for your ___"
+                  + " or use the ___ to make a selection",
+              "sphere", "sphere tool"
+          ));
+        }
         List<String> errors = new LinkedList<>();
-        // TODO get selection
-//        selection = SpongeNope.instance()
-//            .selectionHandler()
-//            .draft(player.uniqueId())
-//            .build(errors);
-      }
-      if (selection.isPresent()) {
-        sphere = selection.get().solidify();
-        if (!sphere.valid()) {
+        if (!selection.validate(errors)) {
+          errors.forEach(error -> player.sendMessage(Formatter.error(error)));
+        }
+        sphere = selection.build();
+        if (sphere == null) {
           return CommandResult.error(Formatter.error(
               "Your ___ selection is invalid", "sphere"
           ));
         }
       } else {
         return CommandResult.error(Formatter.error(
-            "You must either supply the volume specifications for your ___ or use the ___",
+            "You must supply the volume specifications for your ___",
             "sphere", "sphere tool"
         ));
       }
@@ -106,6 +111,9 @@ public class SphereCommand extends CommandNode{
         "A ___ was created on zone ___",
         "sphere", zone.name()
     ));
+    if (context.cause().root() instanceof Player) {
+      EffectsUtil.show(sphere, (Player) context.cause().root());
+    }
     return CommandResult.success();
 
   }

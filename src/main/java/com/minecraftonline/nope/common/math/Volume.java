@@ -30,18 +30,19 @@ import com.minecraftonline.nope.common.host.Domain;
 import com.minecraftonline.nope.common.host.Domained;
 import com.minecraftonline.nope.common.struct.Location;
 import java.util.List;
+
+import lombok.Data;
 import lombok.Getter;
 import lombok.experimental.Accessors;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+@Accessors(fluent = true)
 public abstract class Volume implements Domained {
 
   @Getter
-  @Accessors(fluent = true)
   protected final Domain domain;
   @Getter
-  @Accessors(fluent = true)
   @Nullable
   private String name;
 
@@ -64,14 +65,20 @@ public abstract class Volume implements Domained {
   @NotNull
   public abstract Cuboid inscribed();
 
-  public final boolean contains(Location location) {
-    return domain.equals(location.domain()) && this.contains(
+  public final boolean containsPoint(Location location) {
+    return domain.equals(location.domain()) && this.containsPoint(
         location.getBlockX(),
         location.getBlockY(),
         location.getBlockZ());
   }
 
-  public abstract boolean contains(int x, int y, int z);
+  public abstract boolean containsPoint(double x, double y, double z);
+
+  public final boolean containsPoint(@NotNull Vector3d vector3d) {
+    return containsPoint(vector3d.x(), vector3d.y(), vector3d.z());
+  }
+
+  public abstract boolean containsBlock(int x, int y, int z);
 
   public abstract boolean valid();
 

@@ -24,6 +24,8 @@
 
 package com.minecraftonline.nope.sponge.key;
 
+import io.leangen.geantyref.TypeToken;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.value.Value;
 
@@ -31,8 +33,8 @@ import org.spongepowered.api.data.value.Value;
  * A utility class to store all {@link Key}s.
  */
 public class NopeKeys {
-  /*
-  Applied to wands to differ them from regular items.
-   */
-  public static Key<Value<Boolean>> ZONE_WAND;
+  public static Key<Value<Boolean>> SELECTION_TOOL_CUBOID;
+  public static Key<Value<Boolean>> SELECTION_TOOL_CYLINDER;
+  public static Key<Value<Boolean>> SELECTION_TOOL_SPHERE;
+  public static Key<Value<Boolean>> SELECTION_TOOL_SLAB;
 }
