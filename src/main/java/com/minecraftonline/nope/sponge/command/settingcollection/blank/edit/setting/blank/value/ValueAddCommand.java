@@ -34,7 +34,7 @@ import com.minecraftonline.nope.common.struct.Named;
 import com.minecraftonline.nope.sponge.command.CommandNode;
 import com.minecraftonline.nope.sponge.command.parameters.ParameterKeys;
 import com.minecraftonline.nope.sponge.command.parameters.Parameters;
-import com.minecraftonline.nope.sponge.listener.dynamic.DynamicHandler;
+import com.minecraftonline.nope.sponge.listenerold.dynamic.DynamicHandler;
 import com.minecraftonline.nope.sponge.util.Formatter;
 import java.util.HashSet;
 import java.util.Set;

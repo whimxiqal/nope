@@ -1,7 +1,8 @@
 /*
+ *
  * MIT License
  *
- * Copyright (c) 2020 MinecraftOnline
+ * Copyright (c) 2022 Pieter Svenson
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -25,164 +26,288 @@
 
 package com.minecraftonline.nope.common.setting;
 
-import com.google.gson.Gson;
-import com.minecraftonline.nope.common.setting.value.SettingValue;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
-import lombok.Builder;
+import java.util.Set;
+import java.util.Stack;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
-public abstract class SettingKey<T> {
+/**
+ * An identifier for a setting. These can be set on a {@link com.minecraftonline.nope.common.host.Host}
+ * in pairing with a {@link SettingValue}.
+ *
+ * @param <T> the type of data that can be retrieved under this setting at any location
+ * @param <V> the type of value that wraps around the data stored at a specific host
+ */
+public abstract class SettingKey<T, V extends SettingValue<T>> {
   @Getter
   @Accessors(fluent = true)
-  @NotNull
-  final String id;
+  private final String id;
   @Getter
   @Accessors(fluent = true)
-  @NotNull
-  final Class<T> type;
+  private final Manager<T> manager;
   @Getter
-  @Setter
   @Accessors(fluent = true)
-  @NotNull
-  String description = null;
+  private final V defaultValue;
   @Getter
-  @Setter
   @Accessors(fluent = true)
-  @NotNull
-  String blurb = null;
+  private final V naturalValue;
   @Getter
-  @Setter
   @Accessors(fluent = true)
-  @NotNull
-  private CategoryType category = CategoryType.MISC;
+  private final String description;
   @Getter
-  @Setter
-  private boolean implemented = true;
+  @Accessors(fluent = true)
+  private final String blurb;
   @Getter
-  @Setter
-  private boolean unnaturalDefault = false;
+  @Accessors(fluent = true)
+  private final Category category;
   @Getter
-  @Setter
-  private boolean global = false;
+  @Accessors(fluent = true)
+  private final boolean implemented;
   @Getter
-  @Setter
-  private boolean playerRestrictive = false;
+  @Accessors(fluent = true)
+  private final boolean global;
+  @Getter
+  @Accessors(fluent = true)
+  private final boolean playerRestrictive;
 
-  protected SettingKey(String id, @NotNull T defaultData) {
+
+  SettingKey(String id, Manager<T> manager,
+             V defaultValue, V naturalValue,
+             String description, String blurb,
+             Category category,
+             boolean implemented,
+             boolean global,
+             boolean playerRestrictive) {
     this.id = id;
-    this.defaultData = Objects.requireNonNull(defaultData);
-    this.type = (Class<T>) defaultData.getClass();
+    this.manager = manager;
+    this.defaultValue = defaultValue;
+    this.naturalValue = naturalValue;
+    this.description = description;
+    this.blurb = blurb;
+    this.category = category;
+    this.implemented = implemented;
+    this.global = global;
+    this.playerRestrictive = playerRestrictive;
   }
 
-  protected SettingKey(String id, @Nullable T defaultData, @NotNull Class<T> type) {
-    this.id = id;
-    this.defaultData = defaultData;
-    this.type = Objects.requireNonNull(type);
-  }
-
-  public final Object serializeData(Object data) {
-    return serializeDataGenerified(cast(data));
-  }
-
-  protected Object serializeDataGenerified(T data) {
-    return data;
-  }
-
-  public final Object deserializeData(Object serialized) throws ParseSettingException {
-    return deserializeDataGenerified(serialized);
-  }
-
-  public T deserializeDataGenerified(Object serialized) throws ParseSettingException {
-    return cast(serialized);
-  }
-
-  /**
-   * Create a readable String version of the data.
-   *
-   * @param data the data to print
-   * @return data in a readable form
-   */
-  @NotNull
-  public String print(@NotNull T data) {
-    return serializeDataGenerified(data).toString();
-  }
-
-  /**
-   * Parse some data in some custom format.
-   * Used for dealing with data from in-game usages of
-   * declaring data.
-   *
-   * @param data string representation of data
-   * @return the data object
-   * @throws ParseSettingException if data cannot be parsed
-   */
-  public abstract T parse(String data) throws ParseSettingException;
-
-  /**
-   * Get a list of all parsable strings for data stored
-   * under this SettingKey.
-   *
-   * @return a list of parsable strings only if there are finite possibilities
-   */
-  public List<String> options() {
-    return Collections.emptyList();
-  }
-
-  public final <X> boolean isType(Class<X> type) {
-    return type.isAssignableFrom(type());
-  }
-
-  /**
-   * Cast the object to this object's generic type.
-   *
-   * @param object the object to convert
-   * @return the cast value
-   */
-  public final T cast(Object object) {
-    if (!type().isInstance(object)) {
-      throw new IllegalArgumentException(String.format(
-          "input %s must be of type %s",
-          object.getClass().getName(),
-          type().getName()));
-    }
-    return type().cast(object);
-  }
-
-  public Setting<T> getDefaultSetting() {
-    return Setting.of(this, this.defaultData);
-  }
-
-  @Override
-  public int hashCode() {
-    return this.id.hashCode();
-  }
-
-  @Override
-  public boolean equals(Object other) {
-    return (other instanceof SettingKey) && ((SettingKey<?>) other).id.equals(this.id);
-  }
-
-  @Override
-  public String toString() {
-    return this.id;
-  }
-
-  /**
-   * Type of {@link SettingKey} for ordering purposes.
-   */
-  public enum CategoryType {
+  enum Category {
     BLOCKS,
     DAMAGE,
     ENTITIES,
     MISC,
     MOVEMENT,
     GLOBAL,
+  }
+
+  public static class Unary<T> extends SettingKey<T, SettingValue.Unary<T>> {
+
+    Unary(String id, Manager<T> manager,
+          T defaultData, T naturalValue,
+          String description, String blurb,
+          Category category,
+          boolean implemented,
+          boolean global, boolean playerRestrictive) {
+      super(id, manager,
+          SettingValue.Unary.of(defaultData), SettingValue.Unary.of(naturalValue),
+          description, blurb,
+          category,
+          implemented,
+          global, playerRestrictive);
+    }
+
+    public static class Builder<T> {
+      private final String id;
+      private final Manager<T> manager;
+      private final T defaultValue;
+      @Setter
+      @Accessors(fluent = true)
+      private T naturalValue;
+      @Setter
+      @Accessors(fluent = true)
+      private String description = "";
+      @Setter
+      @Accessors(fluent = true)
+      private String blurb = "";
+      @Setter
+      @Accessors(fluent = true)
+      private Category category = Category.MISC;
+
+      private boolean implemented = true;
+      private boolean global = false;
+      private boolean playerRestrictive = false;
+
+      public Builder(String id, T defaultValue, Manager<T> manager) {
+        this.id = id;
+        this.manager = manager;
+        this.defaultValue = defaultValue;
+        this.naturalValue = defaultValue;
+      }
+
+      public Builder<T> notImplemented() {
+        this.implemented = false;
+        return this;
+      }
+
+      public Builder<T> global() {
+        this.global = true;
+        return this;
+      }
+
+      public Builder<T> playerRestrictive() {
+        this.playerRestrictive = true;
+        return this;
+      }
+
+      public SettingKey.Unary<T> build() {
+        return new SettingKey.Unary<>(
+            id, manager,
+            defaultValue, naturalValue,
+            description, blurb,
+            category,
+            implemented,
+            global, playerRestrictive
+        );
+      }
+    }
+  }
+
+  public static class Poly<T> extends SettingKey<Set<T>, SettingValue.Poly<T>> {
+
+    Poly(String id, Manager<Set<T>> manager,
+         Set<T> defaultData, Set<T> naturalValue,
+         String description, String blurb,
+         Category category,
+         boolean implemented,
+         boolean global, boolean playerRestrictive) {
+      super(id, manager,
+          SettingValue.Poly.declarative(defaultData),
+          SettingValue.Poly.declarative(naturalValue),
+          description, blurb,
+          category,
+          implemented,
+          global, playerRestrictive);
+    }
+
+    public static class Builder<T> {
+      private final String id;
+      private final Manager<Set<T>> manager;
+      private final Set<T> defaultValue;
+      @Setter
+      @Accessors(fluent = true)
+      private Set<T> naturalValue;
+      @Setter
+      @Accessors(fluent = true)
+      private String description = "";
+      @Setter
+      @Accessors(fluent = true)
+      private String blurb = "";
+      @Setter
+      @Accessors(fluent = true)
+      private Category category = Category.MISC;
+
+      private boolean implemented = true;
+      private boolean global = false;
+      private boolean playerRestrictive = false;
+
+      public Builder(String id, Set<T> defaultValue, Manager<Set<T>> manager) {
+        this.id = id;
+        this.manager = manager;
+        this.defaultValue = defaultValue;
+        this.naturalValue = defaultValue;
+      }
+
+      public void notImplemented() {
+        this.implemented = false;
+      }
+
+      public void global() {
+        this.global = true;
+      }
+
+      public void playerRestrictive() {
+        this.playerRestrictive = true;
+      }
+
+      public SettingKey.Poly<T> build() {
+        return new SettingKey.Poly<>(
+            id, manager,
+            defaultValue, naturalValue,
+            description, blurb,
+            category,
+            implemented,
+            global, playerRestrictive
+        );
+      }
+    }
+  }
+
+  public static abstract class Manager<T> {
+
+    public abstract Class<T> type() throws ParseSettingException;
+
+    /**
+     * Parse some data in some custom format.
+     * Used for dealing with data from in-game usages of
+     * declaring data.
+     *
+     * @param data string representation of data
+     * @return the data object
+     * @throws ParseSettingException if data cannot be parsed
+     */
+    public abstract T parse(String data) throws ParseSettingException;
+
+    public final Object serializeData(Object data) {
+      return serializeDataGenerified(cast(data));
+    }
+
+    protected Object serializeDataGenerified(T data) {
+      return data;
+    }
+
+    public final Object deserializeData(Object serialized) throws ParseSettingException {
+      return deserializeDataGenerified(serialized);
+    }
+
+    public T deserializeDataGenerified(Object serialized) throws ParseSettingException {
+      return cast(serialized);
+    }
+
+    /**
+     * Create a readable String version of the data.
+     *
+     * @param data the data to print
+     * @return data in a readable form
+     */
+    @NotNull
+    public String print(@NotNull T data) {
+      return serializeDataGenerified(data).toString();
+    }
+
+    @NotNull
+    public List<String> options() {
+      return Collections.emptyList();
+    }
+
+    /**
+     * Cast the object to this object's generic type.
+     *
+     * @param object the object to convert
+     * @return the cast value
+     */
+    public final T cast(Object object) {
+      if (!type().isInstance(object)) {
+        throw new IllegalArgumentException(String.format(
+            "input %s must be of type %s",
+            object.getClass().getName(),
+            type().getName()));
+      }
+      return type().cast(object);
+    }
+
   }
 
   /**
@@ -197,4 +322,5 @@ public abstract class SettingKey<T> {
       super(s);
     }
   }
+
 }

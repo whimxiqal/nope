@@ -1,7 +1,8 @@
 /*
+ *
  * MIT License
  *
- * Copyright (c) 2021 MinecraftOnline
+ * Copyright (c) 2022 Pieter Svenson
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,39 +21,25 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
- *
  */
 
-package com.minecraftonline.nope.common.setting.keys;
+package com.minecraftonline.nope.sponge.listener.all;
 
-import com.google.common.collect.Lists;
-import com.minecraftonline.nope.common.setting.SettingKey;
-import java.util.List;
+import com.minecraftonline.nope.common.setting.SettingKeys;
+import com.minecraftonline.nope.sponge.api.SettingEventListener;
+import com.minecraftonline.nope.sponge.api.SettingValueLookupFunction;
+import com.minecraftonline.nope.sponge.listener.SpongeEventUtil;
+import org.spongepowered.api.entity.living.ArmorStand;
+import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.event.entity.AttackEntityEvent;
 
-/**
- * A setting storing a boolean value.
- */
-public class BooleanSettingKey extends SettingKey<Boolean> {
-  public BooleanSettingKey(String id, Boolean defaultValue) {
-    super(id, defaultValue);
-  }
-
+public class ArmorStandDestroyListener implements SettingEventListener<Boolean, AttackEntityEvent> {
   @Override
-  public Boolean parse(String data) throws ParseSettingException {
-    switch (data.toLowerCase()) {
-      case "true":
-      case "t":
-        return true;
-      case "false":
-      case "f":
-        return false;
-      default:
-        throw new ParseSettingException("Allowed values: t, true, f, false");
-    }
-  }
-
-  @Override
-  public List<String> options() {
-    return Lists.newArrayList("true", "false", "t", "f");
+  public void handle(AttackEntityEvent event, SettingValueLookupFunction<Boolean> lookupFunction) {
+    SpongeEventUtil.cancelEntityAttackingEntity(event,
+        lookupFunction,
+        Player.class,
+        ArmorStand.class,
+        true);
   }
 }

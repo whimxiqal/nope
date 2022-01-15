@@ -25,7 +25,6 @@
 
 package com.minecraftonline.nope.common.setting;
 
-import com.minecraftonline.nope.common.setting.value.SettingValue;
 import java.util.Objects;
 import lombok.Getter;
 import lombok.Setter;
@@ -38,16 +37,16 @@ import org.jetbrains.annotations.Nullable;
  *
  * @param <T> the type of value stored
  */
-public class Setting<T> {
+public class Setting<T, V extends SettingValue<T>> {
 
   @Getter
   @Accessors(fluent = true)
-  private final SettingKey<T> key;
+  private final SettingKey<T, V> key;
 
   @Getter
   @Setter
   @Accessors(fluent = true)
-  private SettingValue<T> data;
+  private V value;
 
   @Getter
   @Setter
@@ -55,32 +54,28 @@ public class Setting<T> {
   @Nullable
   private Target target;
 
-  private Setting(@NotNull SettingKey<T> key, @NotNull SettingValue<T> data, @Nullable Target target) {
+  private Setting(@NotNull SettingKey<T, V> key, @Nullable V value, @Nullable Target target) {
     this.key = key;
-    this.data = data;
+    this.value = value;
     this.target = target;
   }
 
-  public static <X> Setting<X> of(@NotNull SettingKey<X> key,
-                                  @NotNull SettingValue<X> data) {
+  public static <X, Y extends SettingValue<X>> Setting<X, Y> of(@NotNull SettingKey<X, Y> key,
+                                  @Nullable Y data) {
     return new Setting<>(key, data, null);
   }
 
-  public static <X> Setting<X> of(@NotNull SettingKey<X> key,
-                                  @NotNull SettingValue<X> data,
+  public static <X, Y extends SettingValue<X>> Setting<X, Y> of(@NotNull SettingKey<X, Y> key,
+                                  @Nullable Y data,
                                   @Nullable Target target) {
     return new Setting<>(key, data, target);
   }
 
   @SuppressWarnings("unchecked")
-  public static <X> Setting<X> ofUnchecked(@NotNull SettingKey<?> key,
+  public static <X, Y extends SettingValue<X>> Setting<X, Y> ofUnchecked(@NotNull SettingKey<?, ?> key,
                                            @NotNull SettingValue<?> data,
                                            @Nullable Target target) {
-    return new Setting<>((SettingKey<X>) key, (SettingValue<X>) data, target);
-  }
-
-  public T requireData() {
-    return Objects.requireNonNull(data).get();
+    return new Setting<>((SettingKey<X, Y>) key, (Y) data, target);
   }
 
   public Target requireTarget() {

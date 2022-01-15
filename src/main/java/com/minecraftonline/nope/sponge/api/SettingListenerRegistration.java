@@ -25,7 +25,7 @@
 
 package com.minecraftonline.nope.sponge.api;
 
-import com.minecraftonline.nope.common.settingnew.SettingKey;
+import com.minecraftonline.nope.common.setting.SettingKey;
 import lombok.Getter;
 import lombok.experimental.Accessors;
 import org.spongepowered.api.event.Event;
@@ -52,18 +52,18 @@ public class SettingListenerRegistration<T, E extends Event> {
 
   @Getter
   @Accessors(fluent = true)
-  private final SettingEventHandler<T, E> settingEventHandler;
+  private final SettingEventListener<T, E> settingEventListener;
 
   public SettingListenerRegistration(SettingKey<T, ?> settingKey,
                                      Class<E> eventClass,
-                                     SettingEventHandler<T, E> settingEventHandler,
                                      Order order,
-                                     PluginContainer plugin) {
+                                     PluginContainer plugin,
+                                     SettingEventListener<T, E> settingEventListener) {
     this.settingKey = settingKey;
     this.eventClass = eventClass;
-    this.settingEventHandler = settingEventHandler;
     this.order = order;
     this.plugin = plugin;
+    this.settingEventListener = settingEventListener;
   }
 
 }

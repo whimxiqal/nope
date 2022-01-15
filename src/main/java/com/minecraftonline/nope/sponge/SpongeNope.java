@@ -26,17 +26,15 @@ package com.minecraftonline.nope.sponge;
 
 import com.google.inject.Inject;
 import com.minecraftonline.nope.common.Nope;
-import com.minecraftonline.nope.common.settingnew.SettingKey;
-import com.minecraftonline.nope.common.settingnew.SettingKeys;
-import com.minecraftonline.nope.common.struct.Location;
+import com.minecraftonline.nope.common.setting.SettingKeys;
 import com.minecraftonline.nope.sponge.api.SettingKeyRegistrationEvent;
 import com.minecraftonline.nope.sponge.api.SettingListenerRegistrationEvent;
 import com.minecraftonline.nope.sponge.command.RootCommand;
 import com.minecraftonline.nope.sponge.context.ZoneContextCalculator;
 import com.minecraftonline.nope.sponge.key.NopeKeys;
-import com.minecraftonline.nope.sponge.listener.dynamic.DynamicHandler;
-import com.minecraftonline.nope.sponge.listenernew.NopeSettingListeners;
-import com.minecraftonline.nope.sponge.listenernew.SettingListenerStore;
+import com.minecraftonline.nope.sponge.listenerold.dynamic.DynamicHandler;
+import com.minecraftonline.nope.sponge.listener.NopeSettingListeners;
+import com.minecraftonline.nope.sponge.listener.SettingListenerStore;
 import com.minecraftonline.nope.sponge.mixin.collision.CollisionHandler;
 import com.minecraftonline.nope.sponge.storage.yaml.YamlDataHandler;
 import com.minecraftonline.nope.sponge.util.Extra;
@@ -49,20 +47,16 @@ import java.util.concurrent.TimeUnit;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
-import org.jetbrains.annotations.NotNull;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.Command;
 import org.spongepowered.api.config.ConfigDir;
 import org.spongepowered.api.data.DataRegistration;
 import org.spongepowered.api.data.Key;
-import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.lifecycle.*;
 import org.spongepowered.api.item.inventory.ItemStack;
-import org.spongepowered.api.registry.RegistryType;
 import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.service.context.ContextService;
-import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.builtin.jvm.Plugin;
 
@@ -102,9 +96,8 @@ public class SpongeNope extends Nope {
   private boolean valid = true;
 
   @Inject
-  public SpongeNope(final PluginContainer plugin) {
+  public SpongeNope() {
     super(new SpongeLogger());
-    this.pluginContainer = plugin;
   }
 
   /**

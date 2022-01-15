@@ -25,12 +25,29 @@
 
 package com.minecraftonline.nope.sponge.api;
 
+import com.minecraftonline.nope.common.setting.SettingKey;
 import com.minecraftonline.nope.common.struct.Location;
+import com.minecraftonline.nope.sponge.SpongeNope;
+import com.minecraftonline.nope.sponge.util.SpongeUtil;
 import java.util.UUID;
+import org.jetbrains.annotations.NotNull;
+import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.world.server.ServerLocation;
 
-@FunctionalInterface
-public interface SettingValueLookupFunction<T> {
+public class SettingValueLookupFunction<T> {
 
-  T lookup(UUID userUuid, Location location);
+  private final SettingKey<T, ?> settingKey;
+
+  public SettingValueLookupFunction(@NotNull SettingKey<T, ?> settingKey) {
+    this.settingKey = settingKey;
+  }
+
+  public T lookup(Entity entity, ServerLocation location) {
+    return SpongeUtil.valueFor(settingKey, entity, location);
+  }
+
+  public T lookup(UUID userUuid, Location location) {
+    return SpongeNope.instance().hostSystem().lookup(settingKey, userUuid, location);
+  }
 
 }

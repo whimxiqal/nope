@@ -1,7 +1,8 @@
 /*
+ *
  * MIT License
  *
- * Copyright (c) 2021 MinecraftOnline
+ * Copyright (c) 2022 Pieter Svenson
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,23 +21,33 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
- *
  */
 
-package com.minecraftonline.nope.common.setting.keys;
+package com.minecraftonline.nope.sponge.listener;
 
-import com.minecraftonline.nope.common.setting.SettingKey;
+import com.google.common.collect.Lists;
+import com.minecraftonline.nope.common.setting.SettingKeys;
+import com.minecraftonline.nope.sponge.SpongeNope;
+import com.minecraftonline.nope.sponge.api.SettingEventListener;
+import com.minecraftonline.nope.sponge.api.SettingListenerRegistration;
+import com.minecraftonline.nope.sponge.listener.all.ArmorStandDestroyListener;
+import java.util.List;
+import org.spongepowered.api.event.Order;
+import org.spongepowered.api.event.entity.AttackEntityEvent;
 
-/**
- * A setting key which stores a string as a value.
- */
-public class StringSettingKey extends SettingKey<String> {
-  public StringSettingKey(String id, String defaultValue) {
-    super(id, defaultValue);
+public class NopeSettingListeners {
+
+  private NopeSettingListeners() {
   }
 
-  @Override
-  public String parse(String data) throws ParseSettingException {
-    return data;
+  public static List<SettingListenerRegistration<?, ?>> get() {
+    return Lists.newArrayList(
+      new SettingListenerRegistration<>(SettingKeys.ARMOR_STAND_DESTROY,
+          AttackEntityEvent.class,
+          Order.DEFAULT,
+          SpongeNope.instance().pluginContainer(),
+          new ArmorStandDestroyListener())
+    );
   }
+
 }

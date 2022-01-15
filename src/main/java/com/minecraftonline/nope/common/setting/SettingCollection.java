@@ -1,7 +1,8 @@
 /*
+ *
  * MIT License
  *
- * Copyright (c) 2020 MinecraftOnline
+ * Copyright (c) 2022 Pieter Svenson
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,7 +21,6 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
- *
  */
 
 package com.minecraftonline.nope.common.setting;
@@ -40,11 +40,11 @@ import org.jetbrains.annotations.NotNull;
 
 public abstract class SettingCollection implements Persistent {
 
-  private final Set<SettingKey<?>> keys = Sets.newHashSet();
-  private final Map<SettingKey<?>, Object> data = Maps.newHashMap();
-  private final Map<SettingKey<?>, Target> targets = Maps.newHashMap();
+  private final Set<SettingKey<?, ?>> keys = Sets.newHashSet();
+  private final Map<SettingKey<?, ?>, SettingValue<?>> data = Maps.newHashMap();
+  private final Map<SettingKey<?, ?>, Target> targets = Maps.newHashMap();
 
-  private Set<Setting<?>> buildSet() {
+  private Set<Setting<?, ?>> buildSet() {
     return keys.stream()
         .map(key -> Setting.ofUnchecked(key, data.get(key), targets.get(key)))
         .collect(Collectors.toSet());
@@ -58,22 +58,22 @@ public abstract class SettingCollection implements Persistent {
     return keys.isEmpty();
   }
 
-  public final boolean isSet(SettingKey<?> key) {
+  public final boolean isSet(SettingKey<?, ?> key) {
     return keys.contains(key);
   }
 
   @NotNull
-  public final Iterator<Setting<?>> iterator() {
+  public final Iterator<Setting<?, ?>> iterator() {
     return buildSet().iterator();
   }
 
-  public final <T> boolean set(Setting<T> setting) {
+  public final <T, V extends SettingValue<T>> boolean set(Setting<T, V> setting) {
     return this.set(setting, true);
   }
 
-  private <T> boolean set(Setting<T> setting, boolean save) {
-    boolean changedData = setData(setting.key(), setting.data());
-    boolean changedTarget = setTarget(setting.key(), setting.target());
+  private <T, V extends SettingValue<T>> boolean set(Setting<T, V> setting, boolean save) {
+    boolean changedData = setValue(setting.key(), setting.value());
+    boolean changedTarget = setTarget(setting.key(), Objects.requireNonNull(setting.target()));
     if (changedData || changedTarget) {
       if (save) {
         save();
@@ -84,8 +84,8 @@ public abstract class SettingCollection implements Persistent {
     }
   }
 
-  public final <T> Optional<Setting<T>> get(SettingKey<T> key) {
-    Optional<T> data = getData(key);
+  public final <T, V extends SettingValue<T>> Optional<Setting<T, V>> get(SettingKey<T, V> key) {
+    Optional<V> data = getValue(key);
     Optional<Target> target = getTarget(key);
     if (!data.isPresent() && !target.isPresent()) {
       return Optional.empty();
@@ -95,68 +95,58 @@ public abstract class SettingCollection implements Persistent {
   }
 
   @SuppressWarnings("unchecked")
-  public final <T> Optional<T> getData(SettingKey<T> key) {
+  public final <T, V extends SettingValue<T>> Optional<V> getValue(SettingKey<T, V> key) {
     if (data.containsKey(key)) {
-      return Optional.ofNullable((T) data.get(key));
+      return Optional.ofNullable((V) data.get(key));
     } else {
       return Optional.empty();
     }
   }
 
-  public final <T> T computeData(SettingKey<T> key, Supplier<T> dataSupplier) {
-    Optional<T> dataOptional = getData(key);
+  public final <T, V extends SettingValue<T>> V computeValue(SettingKey<T, V> key, Supplier<V> valueSupplier) {
+    Optional<V> dataOptional = getValue(key);
     if (dataOptional.isPresent()) {
       return dataOptional.get();
     } else {
-      T data = dataSupplier.get();
-      setData(key, data);
-      return data;
+      V value = valueSupplier.get();
+      setValue(key, value);
+      return value;
     }
   }
 
-  public final <T> T requireData(SettingKey<T> key) {
-    return getData(key).orElseThrow(() ->
+  public final <T, V extends SettingValue<T>> V requireValue(SettingKey<T, V> key) {
+    return getValue(key).orElseThrow(() ->
         new RuntimeException("The setting collection did not have the required data"));
   }
 
-  public final <T> T getDataOrDefault(SettingKey<T> key) {
-    return getData(key).orElse(key.defaultData());
+  public final <T, V extends SettingValue<T>> V getValueOrDefault(SettingKey<T, V> key) {
+    return getValue(key).orElse(key.defaultValue());
   }
 
-  public final <T> boolean setData(SettingKey<T> key, T data) {
-    return this.setDataChecked(key, data);
+  public final <T, V extends SettingValue<T>> boolean setValue(SettingKey<T, V> key, V data) {
+    return this.setValueChecked(key, data);
   }
 
-  public final boolean setDataUnchecked(SettingKey<?> key, Object data) {
-    if (!key.type().isInstance(data)) {
-      throw new IllegalArgumentException(String.format(
-          "The generic type of the key (%s) does not match the type of the data (%s)",
-          key.type().getName(),
-          data.getClass().getName()));
-    }
-    return setDataChecked(key, data);
-  }
-
-  private boolean setDataChecked(SettingKey<?> key, Object data) {
+  private boolean setValueChecked(SettingKey<?, ?> key, SettingValue<?> value) {
     if (keys.contains(key)) {
-      if (this.data.containsKey(key) && this.data.get(key).equals(data)) {
+      if (this.data.containsKey(key) && this.data.get(key).equals(value)) {
         return false;
       } else {
-        this.data.put(key, data);
+        this.data.put(key, value);
         return true;
       }
     }
     keys.add(key);
-    this.data.put(key, data);
+    this.data.put(key, value);
     this.save();
     return true;
   }
 
-  public final <T> Optional<Target> getTarget(SettingKey<T> key) {
+  public final <T, V extends SettingValue<T>> Optional<Target> getTarget(SettingKey<T, V> key) {
     return Optional.ofNullable(targets.get(key));
   }
 
-  public final <T> Target computeTarget(SettingKey<T> key, Supplier<Target> targetSupplier) {
+  public final <T, V extends SettingValue<T>> Target computeTarget(SettingKey<T, V> key, Supplier<Target> targetSupplier) {
     Optional<Target> targetOptional = getTarget(key);
     if (targetOptional.isPresent()) {
       return targetOptional.get();
@@ -167,7 +157,7 @@ public abstract class SettingCollection implements Persistent {
     }
   }
 
-  public final <T> boolean setTarget(SettingKey<T> key, @NotNull Target target) {
+  public final <T, V extends SettingValue<T>> boolean setTarget(SettingKey<T, V> key, @NotNull Target target) {
     if (keys.contains(key)) {
       if (this.data.containsKey(key) && target.equals(this.targets.get(key))) {
         return false;
@@ -182,7 +172,7 @@ public abstract class SettingCollection implements Persistent {
     return true;
   }
 
-  public final boolean remove(SettingKey<?> key) {
+  public final boolean remove(SettingKey<?, ?> key) {
     boolean changed = keys.remove(key);
     data.remove(key);
     targets.remove(key);
@@ -190,7 +180,7 @@ public abstract class SettingCollection implements Persistent {
   }
 
   @SuppressWarnings("unchecked")
-  public final <T> T removeData(SettingKey<T> key) {
+  public final <T, V extends SettingValue<T>> T removeData(SettingKey<T, V> key) {
     T removed = (T) data.remove(key);
     if (!data.containsKey(key) && !targets.containsKey(key)) {
       keys.remove(key);
@@ -198,7 +188,7 @@ public abstract class SettingCollection implements Persistent {
     return removed;
   }
 
-  public final Target removeTarget(SettingKey<?> key) {
+  public final Target removeTarget(SettingKey<?, ?> key) {
     Target removed = targets.remove(key);
     if (!data.containsKey(key) && !targets.containsKey(key)) {
       keys.remove(key);
@@ -206,7 +196,7 @@ public abstract class SettingCollection implements Persistent {
     return removed;
   }
 
-  public final Collection<Setting<?>> settings() {
+  public final Collection<Setting<?, ?>> settings() {
     return keys.stream()
         .map(key -> Setting.ofUnchecked(key, data.get(key), targets.get(key)))
         .collect(Collectors.toList());
@@ -217,7 +207,7 @@ public abstract class SettingCollection implements Persistent {
     save();
   }
 
-  public void setAll(Iterable<Setting<?>> settings) {
+  public void setAll(Iterable<Setting<?, ?>> settings) {
     settings.forEach(setting -> this.set(setting, false));
     save();
   }
@@ -227,5 +217,4 @@ public abstract class SettingCollection implements Persistent {
     data.clear();
     targets.clear();
   }
-
 }

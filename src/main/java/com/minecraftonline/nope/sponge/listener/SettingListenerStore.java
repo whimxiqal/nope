@@ -23,12 +23,13 @@
  * SOFTWARE.
  */
 
-package com.minecraftonline.nope.sponge.listenernew;
+package com.minecraftonline.nope.sponge.listener;
 
-import com.minecraftonline.nope.common.settingnew.SettingKeyStore;
+import com.minecraftonline.nope.common.setting.SettingKeyStore;
 import com.minecraftonline.nope.sponge.SpongeNope;
-import com.minecraftonline.nope.sponge.api.SettingEventHandler;
+import com.minecraftonline.nope.sponge.api.SettingEventListener;
 import com.minecraftonline.nope.sponge.api.SettingListenerRegistration;
+import com.minecraftonline.nope.sponge.api.SettingValueLookupFunction;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -40,7 +41,7 @@ import org.spongepowered.api.event.EventListenerRegistration;
 public class SettingListenerStore {
 
   private final SettingKeyStore settingKeys;
-  private final HashMap<String, List<SettingEventHandler<?, ?>>> settingListeners = new HashMap<>();
+  private final HashMap<String, List<SettingEventListener<?, ?>>> settingListeners = new HashMap<>();
 
   public SettingListenerStore(@NotNull SettingKeyStore settingKeys) {
     this.settingKeys = settingKeys;
@@ -54,16 +55,14 @@ public class SettingListenerStore {
     }
 
     this.settingListeners.computeIfAbsent(registration.settingKey().id(), (k) -> new ArrayList<>(1))
-        .add(registration.settingEventHandler());
+        .add(registration.settingEventListener());
 
     // TODO move this registration so that it only registers if the setting is set somewhere on the server and
     //  the value is set to something other than the default, non game-changing behavior way,
     //  or alternatively if the default value of the setting is game-changing inherently.
     Sponge.eventManager().registerListener(EventListenerRegistration.builder(registration.eventClass())
-        .listener((event) -> {
-          registration.settingEventHandler().handle(event, (userUuid, location) ->
-              SpongeNope.instance().hostSystem().lookup(registration.settingKey(), userUuid, location));
-        })
+        .listener((event) -> registration.settingEventListener()
+            .handle(event, new SettingValueLookupFunction<>(registration.settingKey())))
         .order(registration.order())
         .plugin(registration.plugin())
         .build());

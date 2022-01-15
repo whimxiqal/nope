@@ -25,7 +25,7 @@
 
 package com.minecraftonline.nope.sponge.api;
 
-import com.minecraftonline.nope.common.settingnew.SettingKey;
+import com.minecraftonline.nope.common.setting.SettingKey;
 
 public interface SettingKeyRegistrar {
 

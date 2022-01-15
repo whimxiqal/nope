@@ -46,7 +46,6 @@ import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
-import net.kyori.adventure.util.HSVLike;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.api.Sponge;
@@ -340,7 +339,7 @@ public final class Formatter {
     return CompletableFuture.supplyAsync(() -> {
       TextComponent.Builder main = Component.text();
 
-      String dataString = setting.data() == null
+      String dataString = setting.value() == null
           ? "(Empty)"
           : setting.key().print(setting.requireData());
       if (collection instanceof Host) {

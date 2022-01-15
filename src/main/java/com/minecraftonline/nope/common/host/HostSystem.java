@@ -28,13 +28,13 @@ package com.minecraftonline.nope.common.host;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import com.minecraftonline.nope.common.Nope;
+import com.minecraftonline.nope.common.math.Volume;
 import com.minecraftonline.nope.common.setting.Setting;
 import com.minecraftonline.nope.common.setting.SettingKey;
+import com.minecraftonline.nope.common.setting.SettingValue;
 import com.minecraftonline.nope.common.setting.Target;
 import com.minecraftonline.nope.common.setting.template.TemplateSet;
 import com.minecraftonline.nope.common.struct.Location;
-import com.minecraftonline.nope.common.math.Volume;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -46,6 +46,7 @@ import java.util.Optional;
 import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.Set;
+import java.util.Stack;
 import java.util.UUID;
 import lombok.Getter;
 import lombok.experimental.Accessors;
@@ -229,24 +230,32 @@ public class HostSystem {
     return hosts().values().stream().anyMatch(host -> host.get(key).isPresent());
   }
 
-  public <V> V lookupAnonymous(@NotNull SettingKey<V, ?> key,
+  public <X> X lookupAnonymous(@NotNull SettingKey.Unary<X> key,
                                @NotNull Location location) {
     return lookup(key, null, location);
   }
 
-  public <V> V lookup(@NotNull final SettingKey<V> key,
+  public <X> Set<X> lookupAnonymous(@NotNull SettingKey.Poly<X> key,
+                               @NotNull Location location) {
+    return lookup(key, null, location);
+  }
+
+  public <X> X lookup(@NotNull final SettingKey.Unary<X> key,
                       @Nullable final UUID userUuid,
                       @NotNull final Location location) {
     LinkedList<Host> hosts = new LinkedList<>();
 
+    // add universe
     if (universe.isSet(key)) {
       hosts.addFirst(universe);
     }
 
+    // add domain
     if (location.domain().isSet(key)) {
       hosts.addFirst(location.domain());
     }
 
+    // add zones
     location.domain()
         .volumes()
         .containing(location.getBlockX(),
@@ -256,38 +265,57 @@ public class HostSystem {
         .filter(zone -> zone.isSet(key))
         .forEach(hosts::addFirst);
 
+    // add parents
+    LinkedList<Host> unadded = hosts;
+    hosts = new LinkedList<>();
+    Host current;
+    while (!unadded.isEmpty()) {
+      current = unadded.pop();
+      hosts.add(current);
+      if (current instanceof Zone) {
+        if (((Zone) current).parent().isPresent()) {
+          unadded.add(((Zone) current).parent().get());
+        }
+      }
+    }
+
+    /*
+    If setting data type is one piece of data, then try to find the zone with the highest
+    priority with the setting set.
+
+    If setting data type is a set of data, the build up the resulting value by going from the
+    lowest priority to the highest priority.
+     */
+
+    // first we have to organize it such that we can match up the targets appropriately
     /* Choose a data structure that will optimize searching for highest priority matching */
     Queue<Host> hostQueue;
     Comparator<Host> descending = (h1, h2) -> Integer.compare(h2.priority(), h1.priority());
-    if (hosts.size() > 10) {
-      hostQueue = new PriorityQueue<>(hosts.size(), descending);
-      hostQueue.addAll(hosts);
-    } else {
-      hostQueue = new LinkedList<>(hosts);
-      ((LinkedList<Host>) hostQueue).sort(descending);
-    }
+    hostQueue = new PriorityQueue<>(hosts.size(), descending);
+    hostQueue.addAll(hosts);
+    SettingKey.Unary<X> unaryKey = key;
 
     Host currentHost;
-    Optional<Setting<V>> currentSetting;
+    Optional<Setting<X, SettingValue.Unary<X>>> currentSetting;
     Target currentTarget;
     boolean targeted = true;
     boolean targetSpecified = false;
-    V data;
+    X data;
 
     // Assume targeted until target is set and specifically does not target us
     while (!hostQueue.isEmpty()) {
       currentHost = hostQueue.remove();
-      currentSetting = currentHost.get(key);
+      currentSetting = currentHost.get(unaryKey);
       if (!currentSetting.isPresent()) {
         // This shouldn't happen because we previously found that this host has this setting
         throw new RuntimeException("Error retrieving setting value");
       }
       currentTarget = currentSetting.get().target();
-      data = currentSetting.get().data();
+      data = currentSetting.get().value().get();
       if (currentTarget != null) {
         // Ignore if target has already been specified: the last one takes precedence.
         if (!targetSpecified) {
-          targeted = currentTarget.test(userUuid, key.isPlayerRestrictive());
+          targeted = currentTarget.test(userUuid, key.playerRestrictive());
           targetSpecified = true;
         }
       }
@@ -304,7 +332,114 @@ public class HostSystem {
     }
 
     // No more left, so just do default
-    return key.defaultData();
+    return unaryKey.defaultValue().get();
+
+  }
+
+  public <X> Set<X> lookup(@NotNull final SettingKey.Poly<X> key,
+                      @Nullable final UUID userUuid,
+                      @NotNull final Location location) {
+    LinkedList<Host> hosts = new LinkedList<>();
+
+    // add universe
+    if (universe.isSet(key)) {
+      hosts.addFirst(universe);
+    }
+
+    // add domain
+    if (location.domain().isSet(key)) {
+      hosts.addFirst(location.domain());
+    }
+
+    // add zones
+    location.domain()
+        .volumes()
+        .containing(location.getBlockX(),
+            location.getBlockY(),
+            location.getBlockZ())
+        .stream()
+        .filter(zone -> zone.isSet(key))
+        .forEach(hosts::addFirst);
+
+    // add parents
+    LinkedList<Host> unadded = hosts;
+    hosts = new LinkedList<>();
+    Host current;
+    while (!unadded.isEmpty()) {
+      current = unadded.pop();
+      hosts.add(current);
+      if (current instanceof Zone) {
+        if (((Zone) current).parent().isPresent()) {
+          unadded.add(((Zone) current).parent().get());
+        }
+      }
+    }
+
+    /*
+    If setting data type is one piece of data, then try to find the zone with the highest
+    priority with the setting set.
+
+    If setting data type is a set of data, the build up the resulting value by going from the
+    lowest priority to the highest priority.
+     */
+
+    // first we have to organize it such that we can match up the targets appropriately
+    /* Choose a data structure that will optimize searching for highest priority matching */
+    Queue<Host> hostQueue;
+    Comparator<Host> descending = (h1, h2) -> Integer.compare(h2.priority(), h1.priority());
+    hostQueue = new PriorityQueue<>(hosts.size(), descending);
+    hostQueue.addAll(hosts);
+    SettingKey<Set<X>, SettingValue.Poly<X>> polyKey = key;
+
+    Host currentHost;
+    Optional<Setting<Set<X>, SettingValue.Poly<X>>> currentSetting;
+    Target currentTarget;
+    boolean targeted = true;
+    boolean targetSpecified = false;
+    SettingValue.Poly<X> value;
+    Stack<SettingValue.Poly<X>> values = new Stack<>();
+
+    // Assume targeted until target is set and specifically does not target us
+    while (!hostQueue.isEmpty()) {
+      currentHost = hostQueue.remove();
+      currentSetting = currentHost.get(polyKey);
+      if (!currentSetting.isPresent()) {
+        // This shouldn't happen because we previously found that this host has this setting
+        throw new RuntimeException("Error retrieving setting value");
+      }
+      currentTarget = currentSetting.get().target();
+      if (currentTarget != null) {
+        // Ignore if target has already been specified: the last one takes precedence.
+        if (!targetSpecified) {
+          targeted = currentTarget.test(userUuid, key.playerRestrictive());
+          targetSpecified = true;
+        }
+      }
+      value = currentSetting.get().value();
+      if (value != null) {
+        if (targeted) {
+          values.add(value);
+          // TODO if we ever add a declarative type, it will ignore anything else.
+          //  so, just stop here and continue on to the backwards traversal down below.
+          //  (need to add a check method in SettingValue.Poly for declarative type)
+        }
+        // We have found data (whether targeting us or not)
+        // So continue on anew.
+        targeted = true;
+        targetSpecified = false;
+      }
+    }
+    // lastly, put on the default value
+    values.add(polyKey.defaultValue());
+
+
+    // now apply our values in the appropriate order
+    Set<X> result = new HashSet<>();
+    while (!values.isEmpty()) {
+      values.pop().applyTo(result);
+    }
+    return result;
+
   }
 
   /**
@@ -319,9 +454,9 @@ public class HostSystem {
    * @param key  the key
    * @return a superior with an identical setting
    */
-  public Optional<Host> findIdenticalSuperior(Host host, SettingKey key) {
+  public Optional<Host> findIdenticalSuperior(Host host, SettingKey<?, ?> key) {
     // Check if this host even has a setting
-    Optional<? extends Setting> setting = host.get(key);
+    Optional<? extends Setting<?, ?>> setting = host.get(key);
     if (!setting.isPresent()) {
       return Optional.empty();
     }
@@ -333,7 +468,7 @@ public class HostSystem {
         continue;
       }
 
-      Optional<? extends Setting> superiorSetting = superior.get(key);
+      Optional<? extends Setting<?, ?>> superiorSetting = superior.get(key);
       // Continue if the value is not found on this host
       if (!superiorSetting.isPresent()) {
         continue;
@@ -348,7 +483,7 @@ public class HostSystem {
     }
 
     // We're out of superiors, so check if the default value is this one
-    if (key.getDefaultSetting().equals(setting.get())) {
+    if (key.defaultValue().equals(setting.get().value())) {
       // Return the original host to signify that the default value makes this redundant
       return Optional.of(host);
     } else {

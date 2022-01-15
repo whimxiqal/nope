@@ -35,8 +35,8 @@ public abstract class SettingsConfigurateDataHandler {
       CommentedConfigurationNode settingNode = node.node(setting.key().id());
       settingNode.comment(setting.key().description());
 
-      if (setting.data() != null) {
-        settingNode.node("data").set(setting.key().serializeData(setting.data()));
+      if (setting.value() != null) {
+        settingNode.node("data").set(setting.key().serializeData(setting.value()));
       }
 
       if (setting.target() != null) {

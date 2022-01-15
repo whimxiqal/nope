@@ -1,7 +1,8 @@
 /*
+ *
  * MIT License
  *
- * Copyright (c) 2021 MinecraftOnline
+ * Copyright (c) 2022 Pieter Svenson
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,45 +21,15 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
- *
  */
 
-package com.minecraftonline.nope.common.setting.keys;
+package com.minecraftonline.nope.sponge.api;
 
-import com.google.gson.JsonPrimitive;
-import com.minecraftonline.nope.common.setting.SettingKeys;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
-import org.jetbrains.annotations.NotNull;
+import org.spongepowered.api.event.Event;
 
-/**
- * A setting key to store a set of strings.
- */
-public class StringSetSettingKey extends SetSettingKey<String> {
+@FunctionalInterface
+public interface SettingEventListener<T, E extends Event> {
 
-  public StringSetSettingKey(String id, Set<String> defaultValue) {
-    super(id, defaultValue);
-  }
+  void handle(E event, SettingValueLookupFunction<T> lookupFunction);
 
-  @Override
-  public Object serializeElement(String value) {
-    return new JsonPrimitive(value);
-  }
-
-  @Override
-  public String deserializeElement(Object serialized) {
-    return (String) serialized;
-  }
-
-  @Override
-  public Set<String> parse(String s) throws ParseSettingException {
-    return new HashSet<>(Arrays.asList(s.split(SettingKeys.SET_SPLIT_REGEX)));
-  }
-
-  @NotNull
-  @Override
-  public String printElement(String element) {
-    return element;
-  }
 }
