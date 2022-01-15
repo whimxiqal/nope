@@ -26,13 +26,17 @@ package com.minecraftonline.nope.sponge;
 
 import com.google.inject.Inject;
 import com.minecraftonline.nope.common.Nope;
-import com.minecraftonline.nope.common.setting.SettingKey;
-import com.minecraftonline.nope.common.setting.SettingKeys;
+import com.minecraftonline.nope.common.settingnew.SettingKey;
+import com.minecraftonline.nope.common.settingnew.SettingKeys;
 import com.minecraftonline.nope.common.struct.Location;
+import com.minecraftonline.nope.sponge.api.SettingKeyRegistrationEvent;
+import com.minecraftonline.nope.sponge.api.SettingListenerRegistrationEvent;
 import com.minecraftonline.nope.sponge.command.RootCommand;
 import com.minecraftonline.nope.sponge.context.ZoneContextCalculator;
 import com.minecraftonline.nope.sponge.key.NopeKeys;
 import com.minecraftonline.nope.sponge.listener.dynamic.DynamicHandler;
+import com.minecraftonline.nope.sponge.listenernew.NopeSettingListeners;
+import com.minecraftonline.nope.sponge.listenernew.SettingListenerStore;
 import com.minecraftonline.nope.sponge.mixin.collision.CollisionHandler;
 import com.minecraftonline.nope.sponge.storage.yaml.YamlDataHandler;
 import com.minecraftonline.nope.sponge.util.Extra;
@@ -78,6 +82,9 @@ public class SpongeNope extends Nope {
   private final SelectionHandler selectionHandler = new SelectionHandler();
   @Getter
   @Accessors(fluent = true)
+  private SettingListenerStore settingListeners;
+  @Getter
+  @Accessors(fluent = true)
   private RootCommand rootCommand;
   @Getter
   @Accessors(fluent = true)
@@ -100,22 +107,6 @@ public class SpongeNope extends Nope {
     this.pluginContainer = plugin;
   }
 
-  public static <V> V calc(@NotNull SettingKey<V> key,
-                           @NotNull ServerLocation location) {
-    return instance().hostSystem().lookupAnonymous(key, new Location(
-        location.blockX(),
-        location.blockY(),
-        location.blockZ(),
-        instance().hostSystem().domain(location.worldKey().formatted())
-    ));
-  }
-
-  public static <V> V calc(@NotNull final SettingKey<V> key,
-                           @NotNull final Location location,
-                           @NotNull final User user) {
-    return instance().hostSystem().lookup(key, user.uniqueId(), location);
-  }
-
   /**
    * Pre-initialize hook.
    *
@@ -128,10 +119,36 @@ public class SpongeNope extends Nope {
     instance = this;
     path(configDir);
 
-    SettingKeys.initialize();
     if (configDir.toFile().mkdirs()) {
       logger().info("Created directories for Nope configuration");
     }
+
+
+    // Post setting key and setting listener events
+    SettingKeys.registerTo(instance().settingKeys());
+    Sponge.eventManager().post(new SettingKeyRegistrationEvent(
+        (settingKey) -> {
+          instance().settingKeys().register(settingKey);
+        },
+        event.game(),
+        event.cause(),
+        event.source(),
+        event.context()
+    ));
+    instance().settingKeys().lock();
+
+    this.settingListeners = new SettingListenerStore(settingKeys());
+    NopeSettingListeners.get().forEach(this.settingListeners::register);
+    Sponge.eventManager().post(new SettingListenerRegistrationEvent(
+        registration -> {
+          instance().settingListeners().register(registration);
+        },
+        event.game(),
+        event.cause(),
+        event.source(),
+        event.context()
+    ));
+
 
     Sponge.eventManager().registerListeners(this.pluginContainer, selectionHandler);
 //    collisionHandler = new CollisionHandler();

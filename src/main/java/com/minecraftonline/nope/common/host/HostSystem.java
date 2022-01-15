@@ -229,7 +229,7 @@ public class HostSystem {
     return hosts().values().stream().anyMatch(host -> host.get(key).isPresent());
   }
 
-  public <V> V lookupAnonymous(@NotNull SettingKey<V> key,
+  public <V> V lookupAnonymous(@NotNull SettingKey<V, ?> key,
                                @NotNull Location location) {
     return lookup(key, null, location);
   }

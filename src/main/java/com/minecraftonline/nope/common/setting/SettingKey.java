@@ -37,46 +37,25 @@ import lombok.experimental.Accessors;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-/**
- * The key object associated inside a {@link Setting}.
- *
- * <p>This object is abstract because every different type of data stored
- * as a value under this key may have unique serializing logic, so
- * every different generic type will require its own implementation.
- *
- * @param <T> the type of data which is ultimately keyed under this key
- */
-@Builder
 public abstract class SettingKey<T> {
-
-  /**
-   * The global unique identifier for this key.
-   */
   @Getter
   @Accessors(fluent = true)
-  private final String id;
-
-  /**
-   * The default data of a setting keyed with this object.
-   * This is what determines the behavior associated with this key
-   * if the user does not specify something different.
-   */
+  @NotNull
+  final String id;
   @Getter
   @Accessors(fluent = true)
-  private final T defaultData;
-  @Getter
-  @Accessors(fluent = true)
-  private final Class<T> type;
+  @NotNull
+  final Class<T> type;
   @Getter
   @Setter
   @Accessors(fluent = true)
-  @Nullable
-  private String description = null;
+  @NotNull
+  String description = null;
   @Getter
   @Setter
   @Accessors(fluent = true)
-  @Nullable
-  private String blurb = null;
+  @NotNull
+  String blurb = null;
   @Getter
   @Setter
   @Accessors(fluent = true)

@@ -35,7 +35,7 @@
 //import com.minecraftonline.nope.sponge.listener.PlayerCauseCancelConditionSettingListener;
 //import com.minecraftonline.nope.sponge.listener.PlayerRootCancelConditionSettingListener;
 //import com.minecraftonline.nope.sponge.listener.PlayerRootSettingListener;
-//import com.minecraftonline.nope.sponge.listener.SettingListener;
+//import com.minecraftonline.nope.sponge.listener.SettingEventHandler;
 //import com.minecraftonline.nope.sponge.listener.SingleSettingListener;
 //import com.minecraftonline.nope.sponge.listener.StaticSettingListeners;
 //import com.minecraftonline.nope.sponge.util.Extra;
@@ -119,7 +119,7 @@
 //public final class DynamicSettingListeners {
 //
 //  @DynamicSettingListener
-//  static final SettingListener<AttackEntityEvent> ARMOR_STAND_ATTACK_LISTENER =
+//  static final SettingEventHandler<AttackEntityEvent> ARMOR_STAND_ATTACK_LISTENER =
 //      new CancelConditionSettingListener<>(
 //          SettingKeys.ARMOR_STAND_DESTROY,
 //          AttackEntityEvent.class,
@@ -127,7 +127,7 @@
 //              Player.class,
 //              ArmorStand.class));
 //  @DynamicSettingListener
-//  static final SettingListener<InteractEntityEvent.Secondary> ARMOR_STAND_INTERACT_LISTENER =
+//  static final SettingEventHandler<InteractEntityEvent.Secondary> ARMOR_STAND_INTERACT_LISTENER =
 //      new PlayerRootCancelConditionSettingListener<>(
 //          SettingKeys.ARMOR_STAND_INTERACT,
 //          InteractEntityEvent.Secondary.class,
@@ -136,13 +136,13 @@
 //              player,
 //              event.getTargetEntity().getLocation()));
 //  @DynamicSettingListener
-//  static final SettingListener<SpawnEntityEvent> ARMOR_STAND_PLACE_LISTENER =
+//  static final SettingEventHandler<SpawnEntityEvent> ARMOR_STAND_PLACE_LISTENER =
 //      new CancelConditionSettingListener<>(
 //          SettingKeys.ARMOR_STAND_PLACE,
 //          SpawnEntityEvent.class,
 //          spawnEntityCanceler(SettingKeys.ARMOR_STAND_PLACE, ArmorStand.class));
 //  @DynamicSettingListener
-//  static final SettingListener<ChangeBlockEvent.Break> BLOCK_BREAK_LISTENER =
+//  static final SettingEventHandler<ChangeBlockEvent.Break> BLOCK_BREAK_LISTENER =
 //      new PlayerCauseCancelConditionSettingListener<>(
 //          SettingKeys.BLOCK_BREAK,
 //          ChangeBlockEvent.Break.class,
@@ -156,7 +156,7 @@
 //                          ChangeBlockEvent.Break.class,
 //                          player))))));
 //  @DynamicSettingListener
-//  static final SettingListener<ChangeBlockEvent.Place> BLOCK_PLACE_LISTENER =
+//  static final SettingEventHandler<ChangeBlockEvent.Place> BLOCK_PLACE_LISTENER =
 //      new PlayerCauseCancelConditionSettingListener<>(
 //          SettingKeys.BLOCK_PLACE,
 //          ChangeBlockEvent.Place.class,
@@ -170,8 +170,8 @@
 //                          ChangeBlockEvent.Place.class,
 //                          player))))));
 //  @DynamicSettingListener
-//  static final SettingListener<NotifyNeighborBlockEvent> BLOCK_PROPAGATE_LISTENER =
-//      new SettingListener<>(
+//  static final SettingEventHandler<NotifyNeighborBlockEvent> BLOCK_PROPAGATE_LISTENER =
+//      new SettingEventHandler<>(
 //          Lists.newArrayList(SettingKeys.BLOCK_PROPAGATE_ACROSS,
 //              SettingKeys.BLOCK_PROPAGATE_WITHIN,
 //              SettingKeys.TNT_IGNITION),
@@ -221,7 +221,7 @@
 //          }
 //      );
 //  @DynamicSettingListener
-//  static final SettingListener<ChangeBlockEvent> BLOCK_TRAMPLE =
+//  static final SettingEventHandler<ChangeBlockEvent> BLOCK_TRAMPLE =
 //      new PlayerCauseCancelConditionSettingListener<>(
 //          SettingKeys.BLOCK_TRAMPLE,
 //          ChangeBlockEvent.class,
@@ -241,7 +241,7 @@
 //                      .getState()
 //                      .getType().equals(BlockTypes.DIRT)));
 //  @DynamicSettingListener
-//  static final SettingListener<ChangeBlockEvent> CONCRETE_SOLIDIFICATION_LISTENER =
+//  static final SettingEventHandler<ChangeBlockEvent> CONCRETE_SOLIDIFICATION_LISTENER =
 //      new SingleSettingListener<>(
 //          SettingKeys.CONCRETE_SOLIDIFICATION,
 //          ChangeBlockEvent.class,
@@ -259,7 +259,7 @@
 //            }
 //          }));
 //  @DynamicSettingListener
-//  static final SettingListener<ChangeBlockEvent.Grow> CROP_GROWTH_LISTENER =
+//  static final SettingEventHandler<ChangeBlockEvent.Grow> CROP_GROWTH_LISTENER =
 //      new CancelConditionSettingListener<>(
 //          SettingKeys.CROP_GROWTH,
 //          ChangeBlockEvent.Grow.class,
@@ -276,23 +276,23 @@
 //                              ChangeBlockEvent.Grow.class,
 //                              null)))));
 //  @DynamicSettingListener
-//  static final SettingListener<SpawnEntityEvent> DROP_EXP_LISTENER =
+//  static final SettingEventHandler<SpawnEntityEvent> DROP_EXP_LISTENER =
 //      new CancelConditionSettingListener<>(
 //          SettingKeys.DROP_EXP,
 //          SpawnEntityEvent.class,
 //          spawnEntityCanceler(SettingKeys.DROP_EXP, ExperienceOrb.class));
 //  @DynamicSettingListener
-//  static final SettingListener<ChangeBlockEvent.Break> ENDERDRAGON_GRIEF_BLOCK_LISTENER =
+//  static final SettingEventHandler<ChangeBlockEvent.Break> ENDERDRAGON_GRIEF_BLOCK_LISTENER =
 //      new EntityBreakConditionSettingListener(
 //          SettingKeys.ENDERDRAGON_GRIEF,
 //          EntityTypes.ENDER_DRAGON);
 //  @DynamicSettingListener
-//  static final SettingListener<ChangeBlockEvent.Break> ENDERMAN_GRIEF_BLOCK_LISTENER =
+//  static final SettingEventHandler<ChangeBlockEvent.Break> ENDERMAN_GRIEF_BLOCK_LISTENER =
 //      new EntityBreakConditionSettingListener(
 //          SettingKeys.ENDERMAN_GRIEF,
 //          EntityTypes.ENDERMAN);
 //  @DynamicSettingListener
-//  static final SettingListener<MoveEntityEvent.Teleport> ENDERPEARL_TELEPORT_LISTENER =
+//  static final SettingEventHandler<MoveEntityEvent.Teleport> ENDERPEARL_TELEPORT_LISTENER =
 //      new PlayerRootCancelConditionSettingListener<>(
 //          SettingKeys.ENDERPEARL_TELEPORT,
 //          MoveEntityEvent.Teleport.class,
@@ -308,7 +308,7 @@
 //                      player,
 //                      event.getToTransform().getLocation())));
 //  @DynamicSettingListener
-//  static final SettingListener<DamageEntityEvent> EVP_LISTENER =
+//  static final SettingEventHandler<DamageEntityEvent> EVP_LISTENER =
 //      new CancelConditionSettingListener<>(
 //          SettingKeys.EVP,
 //          DamageEntityEvent.class,
@@ -328,7 +328,7 @@
 //              (Player) event.getTargetEntity(),
 //              event.getTargetEntity().getLocation()));
 //  @DynamicSettingListener
-//  static final SettingListener<ExplosionEvent.Pre> EXPLOSION_DAMAGE_LISTENER =
+//  static final SettingEventHandler<ExplosionEvent.Pre> EXPLOSION_DAMAGE_LISTENER =
 //      new SingleSettingListener<>(
 //          SettingKeys.EXPLOSION_DAMAGE_BLACKLIST,
 //          ExplosionEvent.Pre.class,
@@ -371,7 +371,7 @@
 //          }
 //      );
 //  @DynamicSettingListener
-//  static final SettingListener<ExplosionEvent.Pre> EXPLOSION_GRIEF_LISTENER =
+//  static final SettingEventHandler<ExplosionEvent.Pre> EXPLOSION_GRIEF_LISTENER =
 //      new SingleSettingListener<>(
 //          SettingKeys.EXPLOSION_GRIEF_BLACKLIST,
 //          ExplosionEvent.Pre.class,
@@ -426,7 +426,7 @@
 //   * identifies that it was part of a prior transaction so items get duplicated.
 //   * So, until a better fix is found, this is disabled (No annotation).
 //   */
-//  static final SettingListener<ChangeBlockEvent.Break> EXPLOSION_GRIEF_TRANSACTION_LISTENER =
+//  static final SettingEventHandler<ChangeBlockEvent.Break> EXPLOSION_GRIEF_TRANSACTION_LISTENER =
 //      new SingleSettingListener<>(
 //          SettingKeys.EXPLOSION_GRIEF_BLACKLIST,
 //          ChangeBlockEvent.Break.class,
@@ -474,7 +474,7 @@
 //            });
 //          });
 //  @DynamicSettingListener
-//  static final SettingListener<DamageEntityEvent> FALL_DAMAGE_LISTENER =
+//  static final SettingEventHandler<DamageEntityEvent> FALL_DAMAGE_LISTENER =
 //      new CancelConditionSettingListener<>(
 //          SettingKeys.FALL_DAMAGE,
 //          DamageEntityEvent.class,
@@ -495,7 +495,7 @@
 //                          event.getTargetEntity().getLocation()))
 //              .isPresent());
 //  @DynamicSettingListener
-//  static final SettingListener<ChangeBlockEvent> FIRE_EFFECT_LISTENER =
+//  static final SettingEventHandler<ChangeBlockEvent> FIRE_EFFECT_LISTENER =
 //      new CancelConditionSettingListener<>(
 //          SettingKeys.FIRE_EFFECT,
 //          ChangeBlockEvent.class,
@@ -513,7 +513,7 @@
 //                          ChangeBlockEvent.class,
 //                          null)))));
 //  @DynamicSettingListener
-//  static final SettingListener<ChangeBlockEvent> FIRE_IGNITION_LISTENER =
+//  static final SettingEventHandler<ChangeBlockEvent> FIRE_IGNITION_LISTENER =
 //      new CancelConditionSettingListener<>(
 //          SettingKeys.FIRE_IGNITION,
 //          ChangeBlockEvent.class,
@@ -531,7 +531,7 @@
 //                              ChangeBlockEvent.class,
 //                              (Player) event.getSource())))));
 //  @DynamicSettingListener
-//  static final SettingListener<ChangeBlockEvent> FIRE_NATURAL_IGNITION_LISTENER =
+//  static final SettingEventHandler<ChangeBlockEvent> FIRE_NATURAL_IGNITION_LISTENER =
 //      new CancelConditionSettingListener<>(
 //          SettingKeys.FIRE_NATURAL_IGNITION,
 //          ChangeBlockEvent.class,
@@ -549,7 +549,7 @@
 //                          ChangeBlockEvent.class,
 //                          null)))));
 //  @DynamicSettingListener
-//  static final SettingListener<InteractBlockEvent.Secondary> FLOWER_POT_INTERACT_LISTENER =
+//  static final SettingEventHandler<InteractBlockEvent.Secondary> FLOWER_POT_INTERACT_LISTENER =
 //      new PlayerRootCancelConditionSettingListener<>(
 //          SettingKeys.FLOWER_POT_INTERACT,
 //          InteractBlockEvent.Secondary.class,
@@ -565,7 +565,7 @@
 //                          InteractBlockEvent.Secondary.class,
 //                          player))));
 //  @DynamicSettingListener
-//  static final SettingListener<ChangeBlockEvent> FROSTED_ICE_FORM_LISTENER =
+//  static final SettingEventHandler<ChangeBlockEvent> FROSTED_ICE_FORM_LISTENER =
 //      new CancelConditionSettingListener<>(
 //          SettingKeys.FROSTED_ICE_FORM,
 //          ChangeBlockEvent.class,
@@ -573,7 +573,7 @@
 //              BlockTypes.WATER,
 //              BlockTypes.FROSTED_ICE));
 //  @DynamicSettingListener
-//  static final SettingListener<ChangeBlockEvent> FROSTED_ICE_MELT_LISTENER =
+//  static final SettingEventHandler<ChangeBlockEvent> FROSTED_ICE_MELT_LISTENER =
 //      new CancelConditionSettingListener<>(
 //          SettingKeys.FROSTED_ICE_MELT,
 //          ChangeBlockEvent.class,
@@ -581,7 +581,7 @@
 //              BlockTypes.FROSTED_ICE,
 //              BlockTypes.WATER));
 //  @DynamicSettingListener
-//  static final SettingListener<SpawnEntityEvent> GHAST_FIREBALL_LISTENER =
+//  static final SettingEventHandler<SpawnEntityEvent> GHAST_FIREBALL_LISTENER =
 //      new CancelConditionSettingListener<>(
 //          SettingKeys.GHAST_FIREBALL,
 //          SpawnEntityEvent.class,
@@ -592,7 +592,7 @@
 //                  .getHostTreeAdapter()
 //                  .lookupAnonymous(SettingKeys.GHAST_FIREBALL, entity.getLocation())));
 //  @DynamicSettingListener
-//  static final SettingListener<ChangeBlockEvent> GRASS_GROWTH_LISTENER =
+//  static final SettingEventHandler<ChangeBlockEvent> GRASS_GROWTH_LISTENER =
 //      new CancelConditionSettingListener<>(
 //          SettingKeys.GRASS_GROWTH,
 //          ChangeBlockEvent.class,
@@ -600,7 +600,7 @@
 //              BlockTypes.DIRT,
 //              BlockTypes.GRASS));
 //  @DynamicSettingListener
-//  static final SettingListener<FishingEvent.HookEntity.HookEntity> HOOK_ENTITY_LISTENER =
+//  static final SettingEventHandler<FishingEvent.HookEntity.HookEntity> HOOK_ENTITY_LISTENER =
 //      new CancelConditionSettingListener<>(
 //          SettingKeys.HOOK_ENTITY,
 //          FishingEvent.HookEntity.HookEntity.class,
@@ -617,13 +617,13 @@
 //                event.getTargetEntity().getLocation());
 //          });
 //  @DynamicSettingListener
-//  static final SettingListener<DamageEntityEvent> HVP_LISTENER =
+//  static final SettingEventHandler<DamageEntityEvent> HVP_LISTENER =
 //      new CancelConditionSettingListener<>(
 //          SettingKeys.HVP,
 //          DamageEntityEvent.class,
 //          entityVersusEntityCanceller(SettingKeys.HVP, Hostile.class, Player.class));
 //  @DynamicSettingListener
-//  static final SettingListener<ChangeBlockEvent> ICE_FORM_LISTENER =
+//  static final SettingEventHandler<ChangeBlockEvent> ICE_FORM_LISTENER =
 //      new CancelConditionSettingListener<>(
 //          SettingKeys.ICE_FORM,
 //          ChangeBlockEvent.class,
@@ -631,7 +631,7 @@
 //              BlockTypes.WATER,
 //              BlockTypes.ICE));
 //  @DynamicSettingListener
-//  static final SettingListener<ChangeBlockEvent> ICE_MELT_LISTENER =
+//  static final SettingEventHandler<ChangeBlockEvent> ICE_MELT_LISTENER =
 //      new CancelConditionSettingListener<>(
 //          SettingKeys.ICE_MELT,
 //          ChangeBlockEvent.class,
@@ -639,7 +639,7 @@
 //              BlockTypes.ICE,
 //              BlockTypes.WATER));
 //  @DynamicSettingListener
-//  static final SettingListener<InteractBlockEvent.Secondary> INTERACT_LISTENER =
+//  static final SettingEventHandler<InteractBlockEvent.Secondary> INTERACT_LISTENER =
 //      new PlayerRootCancelConditionSettingListener<>(
 //          SettingKeys.INTERACT,
 //          InteractBlockEvent.Secondary.class,
@@ -658,7 +658,7 @@
 //                  player,
 //                  player.getLocation()));
 //  @DynamicSettingListener
-//  static final SettingListener<DamageEntityEvent> INVINCIBLE_ANIMALS_LISTENER =
+//  static final SettingEventHandler<DamageEntityEvent> INVINCIBLE_ANIMALS_LISTENER =
 //      new CancelConditionSettingListener<>(
 //          SettingKeys.INVINCIBLE_ANIMALS,
 //          DamageEntityEvent.class,
@@ -669,7 +669,7 @@
 //                  SettingKeys.INVINCIBLE_ANIMALS,
 //                  event.getTargetEntity().getLocation()));
 //  @DynamicSettingListener
-//  static final SettingListener<DamageEntityEvent> INVINCIBLE_MOBS_LISTENER =
+//  static final SettingEventHandler<DamageEntityEvent> INVINCIBLE_MOBS_LISTENER =
 //      new CancelConditionSettingListener<>(
 //          SettingKeys.INVINCIBLE_MOBS,
 //          DamageEntityEvent.class,
@@ -681,7 +681,7 @@
 //                  SettingKeys.INVINCIBLE_MOBS,
 //                  event.getTargetEntity().getLocation()));
 //  @DynamicSettingListener
-//  static final SettingListener<DamageEntityEvent> INVINCIBLE_PLAYERS_LISTENER =
+//  static final SettingEventHandler<DamageEntityEvent> INVINCIBLE_PLAYERS_LISTENER =
 //      new CancelConditionSettingListener<>(
 //          SettingKeys.INVINCIBLE_PLAYERS,
 //          DamageEntityEvent.class,
@@ -693,7 +693,7 @@
 //                  (Player) event.getTargetEntity(),
 //                  event.getTargetEntity().getLocation()));
 //  @DynamicSettingListener
-//  static final SettingListener<ClickInventoryEvent.Creative> ITEM_DROP_CREATIVE_LISTENER =
+//  static final SettingEventHandler<ClickInventoryEvent.Creative> ITEM_DROP_CREATIVE_LISTENER =
 //      new PlayerRootSettingListener<>(
 //          SettingKeys.ITEM_DROP,
 //          ClickInventoryEvent.Creative.class,
@@ -710,7 +710,7 @@
 //            }
 //          });
 //  @DynamicSettingListener
-//  static final SettingListener<DropItemEvent.Dispense> ITEM_DROP_LISTENER =
+//  static final SettingEventHandler<DropItemEvent.Dispense> ITEM_DROP_LISTENER =
 //      new PlayerRootCancelConditionSettingListener<>(
 //          SettingKeys.ITEM_DROP,
 //          DropItemEvent.Dispense.class,
@@ -720,7 +720,7 @@
 //                  player,
 //                  player.getLocation()));
 //  @DynamicSettingListener
-//  static final SettingListener<AttackEntityEvent> ITEM_FRAME_ATTACK_LISTENER =
+//  static final SettingEventHandler<AttackEntityEvent> ITEM_FRAME_ATTACK_LISTENER =
 //      new CancelConditionSettingListener<>(
 //          SettingKeys.ITEM_FRAME_DESTROY,
 //          AttackEntityEvent.class,
@@ -728,7 +728,7 @@
 //              Player.class,
 //              ItemFrame.class));
 //  @DynamicSettingListener
-//  static final SettingListener<InteractEntityEvent.Secondary> ITEM_FRAME_INTERACT_LISTENER =
+//  static final SettingEventHandler<InteractEntityEvent.Secondary> ITEM_FRAME_INTERACT_LISTENER =
 //      new PlayerRootCancelConditionSettingListener<>(
 //          SettingKeys.ITEM_FRAME_INTERACT,
 //          InteractEntityEvent.Secondary.class,
@@ -739,13 +739,13 @@
 //                  player,
 //                  event.getTargetEntity().getLocation()));
 //  @DynamicSettingListener
-//  static final SettingListener<SpawnEntityEvent> ITEM_FRAME_PLACE_LISTENER =
+//  static final SettingEventHandler<SpawnEntityEvent> ITEM_FRAME_PLACE_LISTENER =
 //      new CancelConditionSettingListener<>(
 //          SettingKeys.ITEM_FRAME_PLACE,
 //          SpawnEntityEvent.class,
 //          spawnEntityCanceler(SettingKeys.ITEM_FRAME_PLACE, ItemFrame.class));
 //  @DynamicSettingListener
-//  static final SettingListener<ChangeInventoryEvent.Pickup.Pre> ITEM_PICKUP_LISTENER =
+//  static final SettingEventHandler<ChangeInventoryEvent.Pickup.Pre> ITEM_PICKUP_LISTENER =
 //      new PlayerRootCancelConditionSettingListener<>(
 //          SettingKeys.ITEM_PICKUP,
 //          ChangeInventoryEvent.Pickup.Pre.class,
@@ -754,7 +754,7 @@
 //                  player,
 //                  event.getTargetEntity().getLocation()));
 //  @DynamicSettingListener
-//  static final SettingListener<ChangeBlockEvent.Break> LAVA_FLOW_GRIEF_LISTENER =
+//  static final SettingEventHandler<ChangeBlockEvent.Break> LAVA_FLOW_GRIEF_LISTENER =
 //      new SingleSettingListener<>(
 //          SettingKeys.LAVA_GRIEF,
 //          ChangeBlockEvent.Break.class,
@@ -782,7 +782,7 @@
 //          })
 //      );
 //  @DynamicSettingListener
-//  static final SettingListener<ChangeBlockEvent> LAVA_FLOW_LISTENER =
+//  static final SettingEventHandler<ChangeBlockEvent> LAVA_FLOW_LISTENER =
 //      new SingleSettingListener<>(
 //          SettingKeys.LAVA_FLOW,
 //          ChangeBlockEvent.class,
@@ -808,7 +808,7 @@
 //            }
 //          });
 //  @DynamicSettingListener
-//  static final SettingListener<ChangeBlockEvent> LEAF_DECAY_2_LISTENER =
+//  static final SettingEventHandler<ChangeBlockEvent> LEAF_DECAY_2_LISTENER =
 //      new CancelConditionSettingListener<>(
 //          SettingKeys.LEAF_DECAY,
 //          ChangeBlockEvent.class,
@@ -816,7 +816,7 @@
 //              BlockTypes.LEAVES2,
 //              BlockTypes.AIR));
 //  @DynamicSettingListener
-//  static final SettingListener<ChangeBlockEvent> LEAF_DECAY_LISTENER =
+//  static final SettingEventHandler<ChangeBlockEvent> LEAF_DECAY_LISTENER =
 //      new CancelConditionSettingListener<>(
 //          SettingKeys.LEAF_DECAY,
 //          ChangeBlockEvent.class,
@@ -824,7 +824,7 @@
 //              BlockTypes.LEAVES,
 //              BlockTypes.AIR));
 //  @DynamicSettingListener
-//  static final SettingListener<LeashEntityEvent> LEASH_LISTENER =
+//  static final SettingEventHandler<LeashEntityEvent> LEASH_LISTENER =
 //      new PlayerRootCancelConditionSettingListener<>(
 //          SettingKeys.LEASH,
 //          LeashEntityEvent.class,
@@ -832,7 +832,7 @@
 //              player,
 //              event.getTargetEntity().getLocation()));
 //  @DynamicSettingListener
-//  static final SettingListener<SpawnEntityEvent> LIGHTNING_LISTENER =
+//  static final SettingEventHandler<SpawnEntityEvent> LIGHTNING_LISTENER =
 //      new CancelConditionSettingListener<>(
 //          SettingKeys.LIGHTNING,
 //          SpawnEntityEvent.class,
@@ -843,7 +843,7 @@
 //                  .lookupAnonymous(SettingKeys.LIGHTNING,
 //                      spawned.getLocation())));
 //  @DynamicSettingListener
-//  static final SettingListener<ChangeBlockEvent> MUSHROOM_GROWTH_BROWN_BLOCK_LISTENER =
+//  static final SettingEventHandler<ChangeBlockEvent> MUSHROOM_GROWTH_BROWN_BLOCK_LISTENER =
 //      new CancelConditionSettingListener<>(
 //          SettingKeys.MUSHROOM_GROWTH,
 //          ChangeBlockEvent.class,
@@ -851,7 +851,7 @@
 //              BlockTypes.BROWN_MUSHROOM,
 //              BlockTypes.BROWN_MUSHROOM_BLOCK));
 //  @DynamicSettingListener
-//  static final SettingListener<ChangeBlockEvent> MUSHROOM_GROWTH_BROWN_LISTENER =
+//  static final SettingEventHandler<ChangeBlockEvent> MUSHROOM_GROWTH_BROWN_LISTENER =
 //      new CancelConditionSettingListener<>(
 //          SettingKeys.MUSHROOM_GROWTH,
 //          ChangeBlockEvent.class,
@@ -859,7 +859,7 @@
 //              BlockTypes.AIR,
 //              BlockTypes.BROWN_MUSHROOM));
 //  @DynamicSettingListener
-//  static final SettingListener<ChangeBlockEvent> MUSHROOM_GROWTH_RED_BLOCK_LISTENER =
+//  static final SettingEventHandler<ChangeBlockEvent> MUSHROOM_GROWTH_RED_BLOCK_LISTENER =
 //      new CancelConditionSettingListener<>(
 //          SettingKeys.MUSHROOM_GROWTH,
 //          ChangeBlockEvent.class,
@@ -867,7 +867,7 @@
 //              BlockTypes.RED_MUSHROOM,
 //              BlockTypes.RED_MUSHROOM_BLOCK));
 //  @DynamicSettingListener
-//  static final SettingListener<ChangeBlockEvent> MUSHROOM_GROWTH_RED_LISTENER =
+//  static final SettingEventHandler<ChangeBlockEvent> MUSHROOM_GROWTH_RED_LISTENER =
 //      new CancelConditionSettingListener<>(
 //          SettingKeys.MUSHROOM_GROWTH,
 //          ChangeBlockEvent.class,
@@ -875,7 +875,7 @@
 //              BlockTypes.AIR,
 //              BlockTypes.RED_MUSHROOM));
 //  @DynamicSettingListener
-//  static final SettingListener<ChangeBlockEvent> MYCELIUM_SPREAD_LISTENER =
+//  static final SettingEventHandler<ChangeBlockEvent> MYCELIUM_SPREAD_LISTENER =
 //      new CancelConditionSettingListener<>(
 //          SettingKeys.MYCELIUM_SPREAD,
 //          ChangeBlockEvent.class,
@@ -883,7 +883,7 @@
 //              BlockTypes.DIRT,
 //              BlockTypes.MYCELIUM));
 //  @DynamicSettingListener
-//  static final SettingListener<ChangeDataHolderEvent.ValueChange> NATURAL_HEALTH_REGEN =
+//  static final SettingEventHandler<ChangeDataHolderEvent.ValueChange> NATURAL_HEALTH_REGEN =
 //      new CancelConditionSettingListener<>(
 //          SettingKeys.NATURAL_HEALTH_REGEN,
 //          ChangeDataHolderEvent.ValueChange.class,
@@ -904,7 +904,7 @@
 //                      : null,
 //                  ((Player) event.getTargetHolder()).getLocation()));
 //  @DynamicSettingListener
-//  static final SettingListener<AttackEntityEvent> PAINTING_ATTACK_LISTENER =
+//  static final SettingEventHandler<AttackEntityEvent> PAINTING_ATTACK_LISTENER =
 //      new CancelConditionSettingListener<>(
 //          SettingKeys.PAINTING_DESTROY,
 //          AttackEntityEvent.class,
@@ -912,13 +912,13 @@
 //              Player.class,
 //              Painting.class));
 //  @DynamicSettingListener
-//  static final SettingListener<SpawnEntityEvent> PAINTING_PLACE_LISTENER =
+//  static final SettingEventHandler<SpawnEntityEvent> PAINTING_PLACE_LISTENER =
 //      new CancelConditionSettingListener<>(
 //          SettingKeys.PAINTING_PLACE,
 //          SpawnEntityEvent.class,
 //          spawnEntityCanceler(SettingKeys.PAINTING_PLACE, Painting.class));
 //  @DynamicSettingListener
-//  static final SettingListener<MoveEntityEvent> PLAYER_COLLISION_LISTENER =
+//  static final SettingEventHandler<MoveEntityEvent> PLAYER_COLLISION_LISTENER =
 //      new SingleSettingListener<>(
 //          SettingKeys.PLAYER_COLLISION,
 //          MoveEntityEvent.class,
@@ -939,8 +939,8 @@
 //            }
 //          });
 //  @DynamicSettingListener
-//  static final SettingListener<IgniteEntityEvent> PLAYER_ROOT_IGNITE_ENTITY_EVENT_LISTENER =
-//      new SettingListener<>(
+//  static final SettingEventHandler<IgniteEntityEvent> PLAYER_ROOT_IGNITE_ENTITY_EVENT_LISTENER =
+//      new SettingEventHandler<>(
 //          Lists.newArrayList(SettingKeys.PVA, SettingKeys.PVH, SettingKeys.PVP),
 //          IgniteEntityEvent.class,
 //          event -> {
@@ -983,7 +983,7 @@
 //          }
 //      );
 //  @DynamicSettingListener
-//  static final SettingListener<DamageEntityEvent> PVA_LISTENER =
+//  static final SettingEventHandler<DamageEntityEvent> PVA_LISTENER =
 //      new CancelConditionSettingListener<>(
 //          SettingKeys.PVA,
 //          DamageEntityEvent.class,
@@ -995,7 +995,7 @@
 //                  Player.class,
 //                  Squid.class).test(event));
 //  @DynamicSettingListener
-//  static final SettingListener<DamageEntityEvent> PVH_LISTENER =
+//  static final SettingEventHandler<DamageEntityEvent> PVH_LISTENER =
 //      new CancelConditionSettingListener<>(
 //          SettingKeys.PVH,
 //          DamageEntityEvent.class,
@@ -1003,13 +1003,13 @@
 //              Player.class,
 //              Hostile.class));
 //  @DynamicSettingListener
-//  static final SettingListener<DamageEntityEvent> PVP_LISTENER =
+//  static final SettingEventHandler<DamageEntityEvent> PVP_LISTENER =
 //      new CancelConditionSettingListener<>(
 //          SettingKeys.PVP,
 //          DamageEntityEvent.class,
 //          entityVersusEntityCanceller(SettingKeys.PVP, Player.class, Player.class));
 //  @DynamicSettingListener
-//  static final SettingListener<RideEntityEvent.Mount> RIDE_MOUNT_LISTENER =
+//  static final SettingEventHandler<RideEntityEvent.Mount> RIDE_MOUNT_LISTENER =
 //      new PlayerRootCancelConditionSettingListener<>(
 //          SettingKeys.RIDE,
 //          RideEntityEvent.Mount.class,
@@ -1023,7 +1023,7 @@
 //              .lookupAnonymous(SettingKeys.RIDE,
 //                  event.getTargetEntity().getLocation()));
 //  @DynamicSettingListener
-//  static final SettingListener<SleepingEvent.Pre> SLEEP =
+//  static final SettingEventHandler<SleepingEvent.Pre> SLEEP =
 //      new PlayerRootCancelConditionSettingListener<>(
 //          SettingKeys.SLEEP,
 //          SleepingEvent.Pre.class,
@@ -1039,7 +1039,7 @@
 //                          SleepingEvent.Pre.class,
 //                          player)))));
 //  @DynamicSettingListener
-//  static final SettingListener<ChangeBlockEvent> SNOWMAN_TRAIL_LISTENER =
+//  static final SettingEventHandler<ChangeBlockEvent> SNOWMAN_TRAIL_LISTENER =
 //      new CancelConditionSettingListener<>(
 //          SettingKeys.SNOWMAN_TRAILS,
 //          ChangeBlockEvent.class,
@@ -1058,7 +1058,7 @@
 //                              ChangeBlockEvent.class,
 //                              null)))));
 //  @DynamicSettingListener
-//  static final SettingListener<ChangeBlockEvent> SNOW_ACCUMULATION_LISTENER =
+//  static final SettingEventHandler<ChangeBlockEvent> SNOW_ACCUMULATION_LISTENER =
 //      new CancelConditionSettingListener<>(
 //          SettingKeys.SNOW_ACCUMULATION,
 //          ChangeBlockEvent.class,
@@ -1067,7 +1067,7 @@
 //              BlockTypes.AIR,
 //              BlockTypes.SNOW_LAYER).test(event));
 //  @DynamicSettingListener
-//  static final SettingListener<ChangeBlockEvent> SNOW_MELT_LISTENER =
+//  static final SettingEventHandler<ChangeBlockEvent> SNOW_MELT_LISTENER =
 //      new CancelConditionSettingListener<>(
 //          SettingKeys.SNOW_MELT,
 //          ChangeBlockEvent.class,
@@ -1076,25 +1076,25 @@
 //              BlockTypes.SNOW_LAYER,
 //              BlockTypes.AIR).test(event));
 //  @DynamicSettingListener
-//  static final SettingListener<SpawnEntityEvent> SPAWN_ANIMAL_LISTENER =
+//  static final SettingEventHandler<SpawnEntityEvent> SPAWN_ANIMAL_LISTENER =
 //      new CancelConditionSettingListener<>(
 //          SettingKeys.SPAWN_ANIMAL,
 //          SpawnEntityEvent.class,
 //          spawnEntityCanceler(SettingKeys.SPAWN_ANIMAL, Animal.class));
 //  @DynamicSettingListener
-//  static final SettingListener<SpawnEntityEvent> SPAWN_HOSTILE_LISTENER =
+//  static final SettingEventHandler<SpawnEntityEvent> SPAWN_HOSTILE_LISTENER =
 //      new CancelConditionSettingListener<>(
 //          SettingKeys.SPAWN_HOSTILE,
 //          SpawnEntityEvent.class,
 //          spawnEntityCanceler(SettingKeys.SPAWN_HOSTILE, Hostile.class));
 //  @DynamicSettingListener
-//  static final SettingListener<SpawnEntityEvent> SPAWN_MOB_LISTENER =
+//  static final SettingEventHandler<SpawnEntityEvent> SPAWN_MOB_LISTENER =
 //      new CancelConditionSettingListener<>(
 //          SettingKeys.SPAWN_MOB,
 //          SpawnEntityEvent.class,
 //          spawnEntityCanceler(SettingKeys.SPAWN_MOB, Agent.class));
 //  @DynamicSettingListener
-//  static final SettingListener<InteractEntityEvent.Secondary> TNT_CART_IGNITION_LISTENER =
+//  static final SettingEventHandler<InteractEntityEvent.Secondary> TNT_CART_IGNITION_LISTENER =
 //      new PlayerRootCancelConditionSettingListener<>(
 //          SettingKeys.TNT_IGNITION,
 //          InteractEntityEvent.Secondary.class,
@@ -1107,7 +1107,7 @@
 //                  player,
 //                  event.getTargetEntity().getLocation()));
 //  @DynamicSettingListener
-//  static final SettingListener<SpawnEntityEvent> TNT_CART_PLACEMENT_LISTENER =
+//  static final SettingEventHandler<SpawnEntityEvent> TNT_CART_PLACEMENT_LISTENER =
 //      new PlayerRootCancelConditionSettingListener<>(
 //          SettingKeys.TNT_PLACEMENT,
 //          SpawnEntityEvent.class,
@@ -1121,7 +1121,7 @@
 //                          player,
 //                          entity.getLocation())));
 //  @DynamicSettingListener
-//  static final SettingListener<InteractBlockEvent.Secondary> TNT_IGNITION_LISTENER =
+//  static final SettingEventHandler<InteractBlockEvent.Secondary> TNT_IGNITION_LISTENER =
 //      new PlayerRootCancelConditionSettingListener<>(
 //          SettingKeys.TNT_IGNITION,
 //          InteractBlockEvent.Secondary.class,
@@ -1139,7 +1139,7 @@
 //                          InteractBlockEvent.Secondary.class,
 //                          player))));
 //  @DynamicSettingListener
-//  static final SettingListener<ChangeBlockEvent.Place> TNT_PLACEMENT_LISTENER =
+//  static final SettingEventHandler<ChangeBlockEvent.Place> TNT_PLACEMENT_LISTENER =
 //      new PlayerRootCancelConditionSettingListener<>(
 //          SettingKeys.TNT_PLACEMENT,
 //          ChangeBlockEvent.Place.class,
@@ -1159,7 +1159,7 @@
 //                              ChangeBlockEvent.Place.class,
 //                              player)))));
 //  @DynamicSettingListener
-//  static final SettingListener<ConstructEntityEvent.Post> TNT_SPAWN_LISTENER =
+//  static final SettingEventHandler<ConstructEntityEvent.Post> TNT_SPAWN_LISTENER =
 //      new SingleSettingListener<>(
 //          SettingKeys.TNT_IGNITION,
 //          ConstructEntityEvent.Post.class,
@@ -1179,7 +1179,7 @@
 //            }
 //          });
 //  @DynamicSettingListener
-//  static final SettingListener<SpawnEntityEvent> UNSPAWNABLE_MOBS_LISTENER =
+//  static final SettingEventHandler<SpawnEntityEvent> UNSPAWNABLE_MOBS_LISTENER =
 //      new CancelConditionSettingListener<>(
 //          SettingKeys.UNSPAWNABLE_MOBS,
 //          SpawnEntityEvent.class,
@@ -1189,7 +1189,7 @@
 //                  .lookupAnonymous(SettingKeys.UNSPAWNABLE_MOBS, entity.getLocation())
 //                  .contains(entity.getType())));
 //  @DynamicSettingListener
-//  static final SettingListener<UseItemStackEvent.Finish> USE_CHORUS_FRUIT_LISTENER =
+//  static final SettingEventHandler<UseItemStackEvent.Finish> USE_CHORUS_FRUIT_LISTENER =
 //      new SingleSettingListener<>(
 //          SettingKeys.CHORUS_FRUIT_TELEPORT,
 //          UseItemStackEvent.Finish.class,
@@ -1220,7 +1220,7 @@
 //            }
 //          });
 //  @DynamicSettingListener
-//  static final SettingListener<InteractEntityEvent.Secondary> USE_NAME_TAG_LISTENER =
+//  static final SettingEventHandler<InteractEntityEvent.Secondary> USE_NAME_TAG_LISTENER =
 //      new PlayerRootCancelConditionSettingListener<>(
 //          SettingKeys.USE_NAME_TAG,
 //          InteractEntityEvent.Secondary.class,
@@ -1239,7 +1239,7 @@
 //                      player,
 //                      event.getTargetEntity().getLocation())));
 //  @DynamicSettingListener
-//  static final SettingListener<ChangeBlockEvent> VINE_GROWTH_LISTENER =
+//  static final SettingEventHandler<ChangeBlockEvent> VINE_GROWTH_LISTENER =
 //      new CancelConditionSettingListener<>(
 //          SettingKeys.VINE_GROWTH,
 //          ChangeBlockEvent.class,
@@ -1247,7 +1247,7 @@
 //              BlockTypes.AIR,
 //              BlockTypes.VINE));
 //  @DynamicSettingListener
-//  static final SettingListener<ChangeBlockEvent.Break> WATER_FLOW_GRIEF_LISTENER =
+//  static final SettingEventHandler<ChangeBlockEvent.Break> WATER_FLOW_GRIEF_LISTENER =
 //      new SingleSettingListener<>(
 //          SettingKeys.WATER_GRIEF,
 //          ChangeBlockEvent.Break.class,
@@ -1275,7 +1275,7 @@
 //          })
 //      );
 //  @DynamicSettingListener
-//  static final SettingListener<ChangeBlockEvent> WATER_FLOW_LISTENER =
+//  static final SettingEventHandler<ChangeBlockEvent> WATER_FLOW_LISTENER =
 //      new SingleSettingListener<>(
 //          SettingKeys.WATER_FLOW,
 //          ChangeBlockEvent.class,
@@ -1301,7 +1301,7 @@
 //            }
 //          });
 //  @DynamicSettingListener
-//  static final SettingListener<ChangeBlockEvent.Break> ZOMBIE_GRIEF_BLOCK_LISTENER =
+//  static final SettingEventHandler<ChangeBlockEvent.Break> ZOMBIE_GRIEF_BLOCK_LISTENER =
 //      new EntityBreakConditionSettingListener(
 //          SettingKeys.ZOMBIE_GRIEF,
 //          EntityTypes.ZOMBIE);
@@ -1326,7 +1326,7 @@
 //      BlockTypes.WHITE_SHULKER_BOX,
 //      BlockTypes.YELLOW_SHULKER_BOX);
 //  @DynamicSettingListener
-//  static final SettingListener<InteractBlockEvent.Secondary> CHEST_ACCESS_LISTENER =
+//  static final SettingEventHandler<InteractBlockEvent.Secondary> CHEST_ACCESS_LISTENER =
 //      new PlayerRootCancelConditionSettingListener<>(
 //          SettingKeys.CHEST_ACCESS,
 //          InteractBlockEvent.Secondary.class,
@@ -1347,7 +1347,7 @@
 //      EntityTypes.RIDEABLE_MINECART,
 //      EntityTypes.TNT_MINECART);
 //  @DynamicSettingListener
-//  static final SettingListener<InteractEntityEvent.Primary> VEHICLE_DESTROY_LISTENER =
+//  static final SettingEventHandler<InteractEntityEvent.Primary> VEHICLE_DESTROY_LISTENER =
 //      new PlayerRootCancelConditionSettingListener<>(
 //          SettingKeys.VEHICLE_DESTROY,
 //          InteractEntityEvent.Primary.class,
@@ -1360,7 +1360,7 @@
 //                  player,
 //                  event.getTargetEntity().getLocation())));
 //  @DynamicSettingListener
-//  static final SettingListener<SpawnEntityEvent> VEHICLE_PLACE_LISTENER =
+//  static final SettingEventHandler<SpawnEntityEvent> VEHICLE_PLACE_LISTENER =
 //      new PlayerRootCancelConditionSettingListener<>(
 //          SettingKeys.VEHICLE_PLACE,
 //          SpawnEntityEvent.class,
@@ -1378,20 +1378,20 @@
 //  }
 //
 //  /**
-//   * Get all {@link SettingListener}s in the class that are
+//   * Get all {@link SettingEventHandler}s in the class that are
 //   * annotated with {@link DynamicSettingListener} and attempt
-//   * to register it using its {@link SettingListener#registerIfNecessary()}
+//   * to register it using its {@link SettingEventHandler#registerIfNecessary()}
 //   * method.
 //   */
 //  public static void register() {
 //    Arrays.stream(DynamicSettingListeners.class.getDeclaredFields())
 //        .filter(field -> Modifier.isStatic(field.getModifiers()))
-//        .filter(field -> SettingListener.class.isAssignableFrom(field.getType()))
+//        .filter(field -> SettingEventHandler.class.isAssignableFrom(field.getType()))
 //        .filter(field -> Arrays.stream(field.getAnnotations()).anyMatch(annotation ->
 //            annotation instanceof DynamicSettingListener))
 //        .forEach(field -> {
 //          try {
-//            ((SettingListener<?>) field.get(null)).registerIfNecessary();
+//            ((SettingEventHandler<?>) field.get(null)).registerIfNecessary();
 //          } catch (IllegalAccessException e) {
 //            e.printStackTrace();
 //          }
@@ -1479,7 +1479,7 @@
 //  }
 //
 //  /**
-//   * An annotation to mark a method as a dynamic {@link SettingListener}.
+//   * An annotation to mark a method as a dynamic {@link SettingEventHandler}.
 //   */
 //  @Retention(RetentionPolicy.RUNTIME)
 //  @Target(ElementType.FIELD)

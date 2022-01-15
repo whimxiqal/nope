@@ -3,6 +3,7 @@ package com.minecraftonline.nope.common;
 import com.minecraftonline.nope.common.host.HostSystem;
 import com.minecraftonline.nope.common.permission.Permission;
 import com.minecraftonline.nope.common.setting.template.TemplateSet;
+import com.minecraftonline.nope.common.settingnew.SettingKeyStore;
 import com.minecraftonline.nope.common.storage.DataHandler;
 import com.minecraftonline.nope.common.util.Logger;
 import java.nio.file.Path;
@@ -53,6 +54,10 @@ public abstract class Nope {
   @Setter
   @Accessors(fluent = true)
   private TemplateSet templateSet;
+
+  @Getter
+  @Accessors(fluent = true)
+  private SettingKeyStore settingKeys = new SettingKeyStore();
 
   public final boolean hasPermission(UUID playerUuid, Permission permission) {
     return hasPermission(playerUuid, permission.get());
