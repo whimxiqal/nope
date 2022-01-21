@@ -23,30 +23,23 @@
  * SOFTWARE.
  */
 
-package com.minecraftonline.nope.sponge.listener;
+package com.minecraftonline.nope.common.setting.manager;
 
-import com.google.common.collect.Lists;
-import com.minecraftonline.nope.common.setting.SettingKeys;
-import com.minecraftonline.nope.sponge.SpongeNope;
-import com.minecraftonline.nope.sponge.api.SettingEventListener;
-import com.minecraftonline.nope.sponge.api.SettingListenerRegistration;
-import com.minecraftonline.nope.sponge.listener.all.ArmorStandDestroyListener;
-import java.util.List;
-import org.spongepowered.api.event.Order;
-import org.spongepowered.api.event.entity.AttackEntityEvent;
+import com.minecraftonline.nope.common.setting.SettingKey;
+import com.minecraftonline.nope.common.setting.SettingValue;
+import java.util.Map;
+import java.util.Set;
+import org.jetbrains.annotations.NotNull;
 
-public class NopeSettingListeners {
+public class PolyStringKeyManager extends SettingKey.Manager.Poly<String> {
 
-  private NopeSettingListeners() {
+  @Override
+  public String printElement(String element) {
+    return element;
   }
 
-  public static List<SettingListenerRegistration<?, ?>> get() {
-    return Lists.newArrayList(
-      new SettingListenerRegistration<>(SettingKeys.ARMOR_STAND_DESTROY,
-          AttackEntityEvent.class,
-          SpongeNope.instance().pluginContainer(),
-          new ArmorStandDestroyListener())
-    );
+  @Override
+  public String parseElement(String element) {
+    return element;
   }
-
 }

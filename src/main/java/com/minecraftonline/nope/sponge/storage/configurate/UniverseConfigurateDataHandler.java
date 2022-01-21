@@ -2,9 +2,8 @@ package com.minecraftonline.nope.sponge.storage.configurate;
 
 import com.minecraftonline.nope.common.Nope;
 import com.minecraftonline.nope.common.host.Universe;
-import com.minecraftonline.nope.common.setting.Setting;
 import com.minecraftonline.nope.common.storage.UniverseDataHandler;
-import java.util.stream.Collectors;
+import com.minecraftonline.nope.sponge.api.config.SettingValueConfigSerializerRegistrar;
 import org.spongepowered.configurate.CommentedConfigurationNode;
 import org.spongepowered.configurate.ConfigurateException;
 import org.spongepowered.configurate.loader.ConfigurationLoader;
@@ -13,7 +12,9 @@ public class UniverseConfigurateDataHandler extends SettingsConfigurateDataHandl
 
   private final ConfigurationLoader<CommentedConfigurationNode> loader;
 
-  public UniverseConfigurateDataHandler(ConfigurationLoader<CommentedConfigurationNode> loader) {
+  public UniverseConfigurateDataHandler(ConfigurationLoader<CommentedConfigurationNode> loader,
+                                        SettingValueConfigSerializerRegistrar serializerRegistrar) {
+    super(serializerRegistrar);
     this.loader = loader;
   }
 
@@ -33,7 +34,7 @@ public class UniverseConfigurateDataHandler extends SettingsConfigurateDataHandl
     try {
       CommentedConfigurationNode node = loader.load();
       if (!node.virtual()) {
-        universe.setAll(deserializeSettings(node.node("settings").childrenList()));
+        universe.setAll(deserializeSettings(node.node("settings").childrenMap()));
       }
       return universe;
     } catch (ConfigurateException e) {

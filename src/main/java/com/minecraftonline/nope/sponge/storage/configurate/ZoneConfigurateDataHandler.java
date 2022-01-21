@@ -7,6 +7,7 @@ import com.minecraftonline.nope.common.math.Cylinder;
 import com.minecraftonline.nope.common.math.Sphere;
 import com.minecraftonline.nope.common.math.Volume;
 import com.minecraftonline.nope.sponge.SpongeNope;
+import com.minecraftonline.nope.sponge.api.config.SettingValueConfigSerializerRegistrar;
 import java.io.File;
 import java.nio.file.Path;
 import java.util.Collection;
@@ -30,7 +31,9 @@ public class ZoneConfigurateDataHandler extends SettingsConfigurateDataHandler i
 
   public ZoneConfigurateDataHandler(Function<String, ConfigurationLoader<CommentedConfigurationNode>> loader,
                                     Function<String, Path> filePath,
-                                    Supplier<Collection<ConfigurationLoader<CommentedConfigurationNode>>> allLoader) {
+                                    Supplier<Collection<ConfigurationLoader<CommentedConfigurationNode>>> allLoader,
+                                    SettingValueConfigSerializerRegistrar serializerRegistrar) {
+    super(serializerRegistrar);
     this.loader = loader;
     this.filePath = filePath;
     this.allLoader = allLoader;
@@ -56,8 +59,7 @@ public class ZoneConfigurateDataHandler extends SettingsConfigurateDataHandler i
       root.node("settings").comment("Settings for Zone " + zone.name());
       root.node("priority").set(zone.priority());
       root.node("parent").set(zone.parent().map(Zone::name).orElse(null));
-      CommentedConfigurationNode volumes = root.node("volumes");
-      volumes.setList(Volume.class, zone.volumes());
+      root.node("volumes").setList(Volume.class, zone.volumes());
       loader.apply(zone.name()).save(root);
     } catch (ConfigurateException e) {
       e.printStackTrace();
@@ -88,6 +90,7 @@ public class ZoneConfigurateDataHandler extends SettingsConfigurateDataHandler i
       name = root.node("name").get(String.class);
     } catch (ConfigurateException e) {
       Nope.instance().logger().error("Error loading Zone: " + e.getMessage());
+      e.printStackTrace();
       return;
     }
     if (name == null) {
@@ -113,12 +116,16 @@ public class ZoneConfigurateDataHandler extends SettingsConfigurateDataHandler i
         Nope.instance().logger().error("Failed parsing volumes for zone: " + name);
         throw e;
       }
-      zones.put(name, new Zone(name, parent, priority, volumes));
+      Zone zone = new Zone(name, parent, priority, volumes);
+      zone.setAll(deserializeSettings(root.node("settings").childrenMap()));
+      zones.put(name, zone);
       if (queue.containsKey(name)) {
         queue.get(name).forEach(queuedLoader -> load(zones, queue, queuedLoader));
       }
     } catch (ConfigurateException e) {
-      Nope.instance().logger().error(String.format("Error loading Zone %s: " + e.getMessage(), name));
+      Nope.instance().logger().error(String.format("Error loading Zone %s: " + e.getMessage()
+          + ". Is it in the right format?", name));
+      e.printStackTrace();
     }
   }
 

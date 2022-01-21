@@ -25,15 +25,16 @@
 
 package com.minecraftonline.nope.common.setting.manager;
 
-import com.google.common.collect.Lists;
+import com.google.common.collect.ImmutableMap;
 import com.minecraftonline.nope.common.setting.SettingKey;
-import java.util.List;
+import com.minecraftonline.nope.common.setting.SettingValue;
+import java.util.HashMap;
+import java.util.Map;
 import org.jetbrains.annotations.NotNull;
 
-public class BooleanKeyManager extends SettingKey.Manager<Boolean> {
+public class BooleanKeyManager extends SettingKey.Manager.Unary<Boolean> {
 
-  private static final List<String> booleanOptions = Lists.newArrayList("true", "false", "t", "f");
-  private static final List<String> stateOptions = Lists.newArrayList("allow", "deny");
+  private final Map<String, Object> options;
 
   /**
    * Whether to give terminology as in "allow" or "deny"
@@ -42,20 +43,31 @@ public class BooleanKeyManager extends SettingKey.Manager<Boolean> {
   private final boolean useStates;
 
   public BooleanKeyManager() {
-    this.useStates = false;
+    this(false);
   }
 
   public BooleanKeyManager(boolean useStates) {
     this.useStates = useStates;
+    Map<String, String> options = new HashMap<>();
+    if (useStates) {
+      options.put("allow", "Permit users to perform certain behavior");
+      options.put("deny", "Prohibit users from performing certain behaviors");
+    } else {
+      options.put("t", "Enable behavior");
+      options.put("true", "Enable behavior");
+      options.put("f", "Disable behavior");
+      options.put("false", "Disable behavior");
+    }
+    this.options = ImmutableMap.copyOf(options);
   }
 
   @Override
-  public Class<Boolean> type() throws SettingKey.ParseSettingException {
+  public Class<Boolean> dataType() throws SettingKey.ParseSettingException {
     return Boolean.class;
   }
 
   @Override
-  public Boolean parse(String data) throws SettingKey.ParseSettingException {
+  public Boolean parseData(String data) throws SettingKey.ParseSettingException {
     switch (data.toLowerCase()) {
       case "true":
       case "t":
@@ -66,26 +78,22 @@ public class BooleanKeyManager extends SettingKey.Manager<Boolean> {
       case "deny":
         return false;
       default:
-        throw new SettingKey.ParseSettingException("Allowed values: " + String.join(", ", options()));
+        throw new SettingKey.ParseSettingException("Allowed values: "
+            + String.join(", ", elementOptions().keySet()));
     }
   }
 
   @Override
-  @NotNull
-  public List<String> options() {
-    if (useStates) {
-      return stateOptions;
-    } else {
-      return booleanOptions;
-    }
+  public @NotNull Map<String, Object> elementOptions() {
+    return options;
   }
 
   @Override
-  public @NotNull String print(@NotNull Boolean data) {
+  public @NotNull String printValue(@NotNull SettingValue.Unary<Boolean> data) {
     if (useStates) {
-      return data ? "allow" : "deny";
+      return data.get() ? "allow" : "deny";
     } else {
-      return String.valueOf(data);
+      return String.valueOf(data.get());
     }
   }
 }

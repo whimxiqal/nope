@@ -2,6 +2,7 @@ package com.minecraftonline.nope.sponge.storage.yaml;
 
 import com.minecraftonline.nope.common.Nope;
 import com.minecraftonline.nope.common.math.Volume;
+import com.minecraftonline.nope.sponge.api.config.SettingValueConfigSerializerRegistrar;
 import com.minecraftonline.nope.sponge.storage.configurate.ConfigurateDataHandler;
 import com.minecraftonline.nope.sponge.storage.configurate.DomainConfigurateDataHandler;
 import com.minecraftonline.nope.sponge.storage.configurate.TemplateConfigurateDataHandler;
@@ -18,10 +19,10 @@ import org.spongepowered.configurate.yaml.YamlConfigurationLoader;
 
 public class YamlDataHandler extends ConfigurateDataHandler {
 
-  public YamlDataHandler(Path path) {
-    super(new YamlConfig(path),
+  public YamlDataHandler(Path path, SettingValueConfigSerializerRegistrar serializerRegistrar) {
+    super(new YamlConfig(path, serializerRegistrar),
         new DomainConfigurateDataHandler((key) -> yamlLoader(path.resolve(key.namespace())
-            .resolve(key.value() + ".yml"))),
+            .resolve(key.value() + ".yml")), serializerRegistrar),
         new ZoneConfigurateDataHandler((name) -> yamlLoader(path.resolve("zones")
             .resolve(name + ".yml")),
             (name) -> path.resolve("zones")
@@ -47,16 +48,19 @@ public class YamlDataHandler extends ConfigurateDataHandler {
                     .map(file -> yamlLoader(file.toPath()))
                     .collect(Collectors.toList());
               }
-            }),
-        new TemplateConfigurateDataHandler(yamlLoader(path.resolve("templates.yml"))));
+            },
+            serializerRegistrar),
+        new TemplateConfigurateDataHandler(yamlLoader(path.resolve("templates.yml")), serializerRegistrar));
   }
 
   public static YamlConfigurationLoader yamlLoader(Path path) {
     return YamlConfigurationLoader.builder()
-        .defaultOptions(ConfigurationOptions.defaults().serializers(builder ->
-            builder.register(Volume.class, new VolumeTypeSerializer())))
+        .defaultOptions(ConfigurationOptions.defaults()
+            .serializers(builder -> builder.register(Volume.class, new VolumeTypeSerializer())))
         .indent(2)
-        .nodeStyle(NodeStyle.BLOCK).path(path).build();
+        .nodeStyle(NodeStyle.BLOCK)
+        .path(path)
+        .build();
   }
 
 }

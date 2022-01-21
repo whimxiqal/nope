@@ -29,13 +29,18 @@ import com.minecraftonline.nope.common.Nope;
 import com.minecraftonline.nope.common.setting.SettingKeys;
 import com.minecraftonline.nope.sponge.api.SettingKeyRegistrationEvent;
 import com.minecraftonline.nope.sponge.api.SettingListenerRegistrationEvent;
+import com.minecraftonline.nope.sponge.api.config.SettingValueConfigSerializerRegistrar;
+import com.minecraftonline.nope.sponge.api.config.SettingValueConfigSerializerRegistrationEvent;
 import com.minecraftonline.nope.sponge.command.RootCommand;
 import com.minecraftonline.nope.sponge.context.ZoneContextCalculator;
 import com.minecraftonline.nope.sponge.key.NopeKeys;
-import com.minecraftonline.nope.sponge.listenerold.dynamic.DynamicHandler;
 import com.minecraftonline.nope.sponge.listener.NopeSettingListeners;
 import com.minecraftonline.nope.sponge.listener.SettingListenerStore;
 import com.minecraftonline.nope.sponge.mixin.collision.CollisionHandler;
+import com.minecraftonline.nope.sponge.setting.PolyEntitySettingManager;
+import com.minecraftonline.nope.sponge.setting.PolySettingValueConfigSerializer;
+import com.minecraftonline.nope.sponge.setting.SettingValueConfigSerializerRegistrarImpl;
+import com.minecraftonline.nope.sponge.setting.UnarySettingValueConfigSerializer;
 import com.minecraftonline.nope.sponge.storage.yaml.YamlDataHandler;
 import com.minecraftonline.nope.sponge.util.Extra;
 import com.minecraftonline.nope.sponge.util.SpongeLogger;
@@ -80,9 +85,6 @@ public class SpongeNope extends Nope {
   @Getter
   @Accessors(fluent = true)
   private RootCommand rootCommand;
-  @Getter
-  @Accessors(fluent = true)
-  private PluginContainer pluginContainer;
   @Inject
   @Getter
   @ConfigDir(sharedRoot = false)
@@ -94,6 +96,8 @@ public class SpongeNope extends Nope {
   @Getter
   @Setter
   private boolean valid = true;
+
+  private PluginContainer pluginContainer;
 
   @Inject
   public SpongeNope() {
@@ -110,15 +114,16 @@ public class SpongeNope extends Nope {
     // Set general static variables
     Nope.instance(this);
     instance = this;
+    this.pluginContainer = Sponge.pluginManager().plugin("nope").get();
     path(configDir);
 
     if (configDir.toFile().mkdirs()) {
       logger().info("Created directories for Nope configuration");
     }
 
-
     // Post setting key and setting listener events
     SettingKeys.registerTo(instance().settingKeys());
+    applySpongeSettingKeyManagers();
     Sponge.eventManager().post(new SettingKeyRegistrationEvent(
         (settingKey) -> {
           instance().settingKeys().register(settingKey);
@@ -142,26 +147,28 @@ public class SpongeNope extends Nope {
         event.context()
     ));
 
-
-    Sponge.eventManager().registerListeners(this.pluginContainer, selectionHandler);
+    // Register selection handlers
+    Sponge.eventManager().registerListeners(pluginContainer(), selectionHandler);
 //    collisionHandler = new CollisionHandler();
 //    playerMovementHandler = new PlayerMovementHandler();
+  }
 
-    DataRegistration.builder().dataKey(NopeKeys.SELECTION_TOOL_CUBOID).build();
+  private void applySpongeSettingKeyManagers() {
+    SettingKeys.UNSPAWNABLE_MOBS.manager(new PolyEntitySettingManager());
   }
 
   @Listener
   public void onRegisterDataEvent(RegisterDataEvent event) {
-    NopeKeys.SELECTION_TOOL_CUBOID = Key.from(this.pluginContainer, "cuboid_tool", Boolean.class);
+    NopeKeys.SELECTION_TOOL_CUBOID = Key.from(pluginContainer(), "cuboid_tool", Boolean.class);
     event.register(DataRegistration.of(NopeKeys.SELECTION_TOOL_CUBOID, ItemStack.class));
 
-    NopeKeys.SELECTION_TOOL_CYLINDER = Key.from(this.pluginContainer, "cylinder_tool", Boolean.class);
+    NopeKeys.SELECTION_TOOL_CYLINDER = Key.from(pluginContainer(), "cylinder_tool", Boolean.class);
     event.register(DataRegistration.of(NopeKeys.SELECTION_TOOL_CYLINDER, ItemStack.class));
 
-    NopeKeys.SELECTION_TOOL_SPHERE = Key.from(this.pluginContainer, "sphere_tool", Boolean.class);
+    NopeKeys.SELECTION_TOOL_SPHERE = Key.from(pluginContainer(), "sphere_tool", Boolean.class);
     event.register(DataRegistration.of(NopeKeys.SELECTION_TOOL_SPHERE, ItemStack.class));
 
-    NopeKeys.SELECTION_TOOL_SLAB = Key.from(this.pluginContainer, "slab_tool", Boolean.class);
+    NopeKeys.SELECTION_TOOL_SLAB = Key.from(pluginContainer(), "slab_tool", Boolean.class);
     event.register(DataRegistration.of(NopeKeys.SELECTION_TOOL_SLAB, ItemStack.class));
   }
   /**
@@ -173,11 +180,23 @@ public class SpongeNope extends Nope {
   public void onLoadedGame(LoadedGameEvent event) {
     Extra.printSplashscreen();
 
-    data(new YamlDataHandler(configDir));
+    // Collect serializers for setting values
+    SettingValueConfigSerializerRegistrar configRegistrar = new SettingValueConfigSerializerRegistrarImpl();
+    configRegistrar.register(new UnarySettingValueConfigSerializer());
+    configRegistrar.register(new PolySettingValueConfigSerializer());
+    Sponge.eventManager().post(new SettingValueConfigSerializerRegistrationEvent(
+        configRegistrar,
+        event.game(),
+        event.cause(),
+        event.source(),
+        event.context()
+    ));
+
+    data(new YamlDataHandler(configDir, configRegistrar));
     hostSystem(data().loadSystem());
     hostSystem().addAllZones(data().zones().load());
 
-    DynamicHandler.register();
+//    DynamicHandler.register();
 //    StaticSettingListeners.register();
 
     Sponge.serviceProvider()
@@ -190,7 +209,7 @@ public class SpongeNope extends Nope {
   public void onCommandRegistering(RegisterCommandEvent<Command.Parameterized> event) {
     // Register entire Nope command tree
     this.rootCommand = new RootCommand();
-    event.register(this.pluginContainer,
+    event.register(pluginContainer(),
         rootCommand.parameterized(),
         rootCommand.primaryAlias(),
         rootCommand.aliases().size() > 1
@@ -219,7 +238,11 @@ public class SpongeNope extends Nope {
     Sponge.asyncScheduler().submit(Task.builder()
         .execute(runnable)
         .interval(interval, intervalUnit)
-        .plugin(this.pluginContainer)
+        .plugin(pluginContainer())
         .build());
+  }
+
+  public PluginContainer pluginContainer() {
+    return pluginContainer;
   }
 }

@@ -56,14 +56,25 @@ public class SettingListenerRegistration<T, E extends Event> {
 
   public SettingListenerRegistration(SettingKey<T, ?> settingKey,
                                      Class<E> eventClass,
-                                     Order order,
                                      PluginContainer plugin,
                                      SettingEventListener<T, E> settingEventListener) {
     this.settingKey = settingKey;
     this.eventClass = eventClass;
-    this.order = order;
     this.plugin = plugin;
     this.settingEventListener = settingEventListener;
+    this.order = Order.EARLY;
+  }
+
+  public SettingListenerRegistration(SettingKey<T, ?> settingKey,
+                                     Class<E> eventClass,
+                                     PluginContainer plugin,
+                                     SettingEventListener<T, E> settingEventListener,
+                                     Order order) {
+    this.settingKey = settingKey;
+    this.eventClass = eventClass;
+    this.plugin = plugin;
+    this.settingEventListener = settingEventListener;
+    this.order = order;
   }
 
 }

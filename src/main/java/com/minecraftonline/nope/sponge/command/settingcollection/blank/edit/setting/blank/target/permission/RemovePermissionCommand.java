@@ -31,7 +31,7 @@ public class RemovePermissionCommand<T extends SettingCollection> extends Comman
   @Override
   public CommandResult execute(CommandContext context) throws CommandException {
     T collection = context.requireOne(settingCollectionParameterKey);
-    SettingKey<?> key = context.requireOne(ParameterKeys.SETTING_KEY);
+    SettingKey<?, ?> key = context.requireOne(ParameterKeys.SETTING_KEY);
     String permission = context.requireOne(ParameterKeys.PERMISSION);
 
     Optional<Target> targetOptional = collection.getTarget(key);

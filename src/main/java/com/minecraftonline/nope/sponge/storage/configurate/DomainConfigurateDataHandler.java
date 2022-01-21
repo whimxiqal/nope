@@ -2,6 +2,7 @@ package com.minecraftonline.nope.sponge.storage.configurate;
 
 import com.minecraftonline.nope.common.host.Domain;
 import com.minecraftonline.nope.common.storage.DomainDataHandler;
+import com.minecraftonline.nope.sponge.api.config.SettingValueConfigSerializerRegistrar;
 import java.util.Objects;
 import java.util.function.Function;
 import org.jetbrains.annotations.NotNull;
@@ -14,7 +15,9 @@ public class DomainConfigurateDataHandler extends SettingsConfigurateDataHandler
 
   private final Function<ResourceKey, ConfigurationLoader<CommentedConfigurationNode>> loader;
 
-  public DomainConfigurateDataHandler(Function<ResourceKey, ConfigurationLoader<CommentedConfigurationNode>> loader) {
+  public DomainConfigurateDataHandler(Function<ResourceKey, ConfigurationLoader<CommentedConfigurationNode>> loader,
+                                      SettingValueConfigSerializerRegistrar serializerRegistrar) {
+    super(serializerRegistrar);
     this.loader = loader;
   }
 
@@ -38,7 +41,7 @@ public class DomainConfigurateDataHandler extends SettingsConfigurateDataHandler
         // No settings, so this file was likely not created yet.
         root.node("settings").set(null);
       } else {
-        domain.setAll(deserializeSettings(root.node("settings").childrenList()));
+        domain.setAll(deserializeSettings(root.node("settings").childrenMap()));
       }
     } catch (ConfigurateException e) {
       e.printStackTrace();

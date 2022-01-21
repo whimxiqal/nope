@@ -3,6 +3,7 @@ package com.minecraftonline.nope.sponge.storage.configurate;
 import com.minecraftonline.nope.common.setting.template.Template;
 import com.minecraftonline.nope.common.setting.template.TemplateSet;
 import com.minecraftonline.nope.common.storage.TemplateDataHandler;
+import com.minecraftonline.nope.sponge.api.config.SettingValueConfigSerializerRegistrar;
 import java.util.Map;
 import org.spongepowered.configurate.CommentedConfigurationNode;
 import org.spongepowered.configurate.ConfigurateException;
@@ -13,7 +14,9 @@ public class TemplateConfigurateDataHandler extends SettingsConfigurateDataHandl
 
   private final ConfigurationLoader<CommentedConfigurationNode> loader;
 
-  public TemplateConfigurateDataHandler(ConfigurationLoader<CommentedConfigurationNode> loader) {
+  public TemplateConfigurateDataHandler(ConfigurationLoader<CommentedConfigurationNode> loader,
+                                        SettingValueConfigSerializerRegistrar serializerRegistrar) {
+    super(serializerRegistrar);
     this.loader = loader;
   }
 
@@ -44,7 +47,7 @@ public class TemplateConfigurateDataHandler extends SettingsConfigurateDataHandl
       for (Map.Entry<Object, CommentedConfigurationNode> entry : root.childrenMap().entrySet()) {
         set.add(new Template(entry.getKey().toString(),
             entry.getValue().node("description").getString("Unknown function"),
-            deserializeSettings(entry.getValue().node("settings").childrenList())));
+            deserializeSettings(entry.getValue().node("settings").childrenMap())));
       }
     } catch (ConfigurateException e) {
       e.printStackTrace();

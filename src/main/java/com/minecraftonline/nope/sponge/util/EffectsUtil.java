@@ -95,11 +95,11 @@ public final class EffectsUtil {
   private static void ensureTaskExecutor() {
     if (VOLUME_PARTICLE_TASK_EXECUTOR == null) {
       VOLUME_PARTICLE_TASK_EXECUTOR = Sponge.asyncScheduler()
-          .createExecutor(SpongeNope.instance().pluginContainer());
+          .executor(SpongeNope.instance().pluginContainer());
     }
   }
 
-  public static void show(Zone zone, Player player) {
+  public static boolean show(Zone zone, Player player) {
     ensureTaskExecutor();
 
     Location location = SpongeUtil.reduceLocation(player.serverLocation());
@@ -129,7 +129,7 @@ public final class EffectsUtil {
         }
         TaskGroup taskGroup = new TaskGroup();
         taskGroups.put(volume, player, taskGroup);
-        show(points.get(volume).stream()
+        return show(points.get(volume).stream()
             .map(point ->
                 new BoundaryParticle(point, false))
             .collect(Collectors.toList()), player, taskGroup);
@@ -144,7 +144,7 @@ public final class EffectsUtil {
         }
         TaskGroup taskGroup = new TaskGroup();
         taskGroups.put(volume, player, taskGroup);
-        show(points.get(volume).stream()
+        return show(points.get(volume).stream()
             .map(point -> {
               for (Volume other : points.keySet()) {
                 if (!other.equals(volume) && other.containsPoint(point)) {
@@ -157,14 +157,16 @@ public final class EffectsUtil {
       }
     }
 
+    return false;
+
   }
 
-  public static void show(Volume volume, Player player) {
+  public static boolean show(Volume volume, Player player) {
     ensureTaskExecutor();
 
     Location location = SpongeUtil.reduceLocation(player.serverLocation());
     if (!volume.domain().equals(location.domain())) {
-      return;
+      return false;
     }
 
     // Ensure only one animation is happening per user per volume
@@ -181,16 +183,17 @@ public final class EffectsUtil {
         .stream()
         .map(point -> new BoundaryParticle(point, false))
         .collect(Collectors.toList());
-    show(points, player, taskGroup);
+    return show(points, player, taskGroup);
   }
 
-  public static void show(final List<BoundaryParticle> points,
+  public static boolean show(final List<BoundaryParticle> points,
                           final Player player,
                           final TaskGroup taskGroup) {
     if (points.isEmpty()) {
-      return;
+      return false;
     }
     Vector3d playerLocation = SpongeUtil.reduceLocation(player.serverLocation()).vector3d();
+
     Collections.shuffle(points);
     final double bundleRangeSize = ((double) PARTICLE_PROXIMITY) / PARTICLE_SCHEDULE_BUNDLES;
     points.sort(Comparator.comparing(point -> point.position.distanceSquared(playerLocation)));
@@ -224,6 +227,7 @@ public final class EffectsUtil {
       }
       batch.add(point);
     }
+    return true;
   }
 
   private static class TaskGroup {

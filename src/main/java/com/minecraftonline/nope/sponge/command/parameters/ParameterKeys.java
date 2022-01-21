@@ -23,7 +23,8 @@ public class ParameterKeys {
   public static final Parameter.Key<String> DESCRIPTION = Parameter.key("parameter", String.class);
   public static final Parameter.Key<String> REGEX = Parameter.key("regex", String.class);
   public static final Parameter.Key<SettingKey<?, ?>> SETTING_KEY = Parameter.key("setting-key", new TypeToken<SettingKey<?, ?>>(){});
-  public static final Parameter.Key<String> SETTING_DATA = Parameter.key("setting-value", String.class);
+  public static final Parameter.Key<ParameterValueTypes.SettingValueAlterType> SETTING_VALUE_ALTER_TYPE = Parameter.key("alter-type", ParameterValueTypes.SettingValueAlterType.class);
+  public static final Parameter.Key<String> SETTING_VALUE = Parameter.key("setting-value", String.class);
   public static final Parameter.Key<Set<CompletableFuture<GameProfile>>> PLAYER_LIST = Parameter.key("player-list", new TypeToken<Set<CompletableFuture<GameProfile>>>(){});
   public static final Parameter.Key<String> PERMISSION = Parameter.key("permission", String.class);
   public static final Parameter.Key<Boolean> PERMISSION_VALUE = Parameter.key("permission-value", Boolean.class);

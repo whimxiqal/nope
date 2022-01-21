@@ -8,7 +8,7 @@ plugins {
 
 archivesBaseName = 'nope'
 group = 'com.minecraftonline'
-version = '0.8.0'
+version = '1.0.0'
 description = "A protections plugin"
 
 repositories {
@@ -67,15 +67,15 @@ dependencies {
     annotationProcessor "org.spongepowered:spongeapi:8.0.0-SNAPSHOT"
 
     // JUnit
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.2'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.2'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.2'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.2'
 
     // Lombok
-    implementation 'org.projectlombok:lombok:1.18.20'
-    annotationProcessor 'org.projectlombok:lombok:1.18.20'
+    implementation 'org.projectlombok:lombok:1.18.22'
+    annotationProcessor 'org.projectlombok:lombok:1.18.22'
 
-    testImplementation 'org.projectlombok:lombok:1.18.20'
-    testAnnotationProcessor 'org.projectlombok:lombok:1.18.20'
+    testImplementation 'org.projectlombok:lombok:1.18.22'
+    testAnnotationProcessor 'org.projectlombok:lombok:1.18.22'
 
     // IntelliJ Annotations
     implementation 'org.jetbrains:annotations:22.0.0'

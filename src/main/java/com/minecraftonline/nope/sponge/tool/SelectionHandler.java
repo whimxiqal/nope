@@ -8,6 +8,7 @@ import com.minecraftonline.nope.sponge.SpongeNope;
 import com.minecraftonline.nope.sponge.key.NopeKeys;
 import com.minecraftonline.nope.sponge.util.Formatter;
 import com.minecraftonline.nope.sponge.util.SpongeUtil;
+import java.util.Objects;
 import net.kyori.adventure.text.Component;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.HandTypes;
@@ -178,7 +179,6 @@ public class SelectionHandler {
 
   @Listener(order = Order.FIRST)
   public void onSelect(InteractBlockEvent.Secondary event) {
-    Nope.instance().logger().info("Secondary interact");
     Optional<ServerPlayer> playerOptional = event.cause().first(ServerPlayer.class);
     if (!playerOptional.isPresent()) {
       return;
@@ -227,6 +227,16 @@ public class SelectionHandler {
                                Selection<?> selection, Domain domain, Vector3i position,
                                boolean first) {
     final Domain originalDomain = selection.domain();
+
+    if (Objects.equals(selection.domain(), domain)
+        && ((first && Objects.equals(selection.position1, position))
+        || (!first && Objects.equals(selection.position2, position)))) {
+      player.sendMessage(Formatter.success(
+          "Position ___ is already set there",
+          first ? 1 : 2
+      ));
+      return;
+    }
 
     selection.domain(domain);
     if (first) {

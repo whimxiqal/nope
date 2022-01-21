@@ -23,30 +23,20 @@
  * SOFTWARE.
  */
 
-package com.minecraftonline.nope.sponge.listener;
+package com.minecraftonline.nope.sponge.api.config;
 
-import com.google.common.collect.Lists;
-import com.minecraftonline.nope.common.setting.SettingKeys;
-import com.minecraftonline.nope.sponge.SpongeNope;
-import com.minecraftonline.nope.sponge.api.SettingEventListener;
-import com.minecraftonline.nope.sponge.api.SettingListenerRegistration;
-import com.minecraftonline.nope.sponge.listener.all.ArmorStandDestroyListener;
-import java.util.List;
-import org.spongepowered.api.event.Order;
-import org.spongepowered.api.event.entity.AttackEntityEvent;
+import com.minecraftonline.nope.common.setting.SettingKey;
+import com.minecraftonline.nope.common.setting.SettingValue;
+import org.spongepowered.configurate.CommentedConfigurationNode;
+import org.spongepowered.configurate.ConfigurationNode;
+import org.spongepowered.configurate.serialize.SerializationException;
 
-public class NopeSettingListeners {
+public interface SettingValueConfigSerializer<M extends SettingKey.Manager<?, ?>> {
 
-  private NopeSettingListeners() {
-  }
+  Class<M> managerClass();
 
-  public static List<SettingListenerRegistration<?, ?>> get() {
-    return Lists.newArrayList(
-      new SettingListenerRegistration<>(SettingKeys.ARMOR_STAND_DESTROY,
-          AttackEntityEvent.class,
-          SpongeNope.instance().pluginContainer(),
-          new ArmorStandDestroyListener())
-    );
-  }
+  <X, Y extends SettingValue<X>, Z extends SettingKey.Manager<X, Y>> CommentedConfigurationNode serialize(Z manager, Y value) throws SerializationException;
+
+  <X, Y extends SettingValue<X>, Z extends SettingKey.Manager<X, Y>> Y deserialize(Z manager, ConfigurationNode configNode) throws SerializationException;
 
 }

@@ -40,11 +40,11 @@ public final class SpongeUtil {
     return new org.spongepowered.math.vector.Vector3d(vector.x(), vector.y(), vector.z());
   }
 
-  public static <T> T valueFor(SettingKey<T> key, Entity entity, ServerLocation location) {
+  public static <T> T valueFor(SettingKey<T, ?> key, Entity entity, ServerLocation location) {
     return SpongeNope.instance().hostSystem().lookup(key, reduceEntity(entity), reduceLocation(location));
   }
 
-  public static <T> T valueFor(SettingKey<T> key, ServerLocation location) {
+  public static <T> T valueFor(SettingKey<T, ?> key, ServerLocation location) {
     return SpongeNope.instance().hostSystem().lookupAnonymous(key, reduceLocation(location));
   }
 

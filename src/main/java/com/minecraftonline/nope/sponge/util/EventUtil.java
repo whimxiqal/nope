@@ -38,7 +38,7 @@ public final class EventUtil {
   }
 
   public static boolean shouldCancelEntityAttackingEntity(
-      SettingKey<Boolean> key,
+      SettingKey<Boolean, ?> key,
       Class<? extends Entity> sourceClass,
       Class<? extends Entity> sinkClass,
       AttackEntityEvent event,

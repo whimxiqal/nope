@@ -75,14 +75,26 @@ public class HostShowCommand extends CommandNode {
     Optional<Integer> index = context.one(ParameterKeys.INDEX);
     if (index.isPresent()) {
       try {
-        EffectsUtil.show(zone.volumes().get(index.get()), player);
+        if (EffectsUtil.show(zone.volumes().get(index.get()), player)) {
+          player.sendMessage(Formatter.success("Showing boundaries of zone ___, volume ___",
+              zone.name(),
+              index.get()));
+        } else {
+          player.sendMessage(Formatter.error("The boundaries of volume ___ of zone ___ is too far away",
+              index.get(),
+              zone.name()));
+        }
       } catch (IndexOutOfBoundsException e) {
         return CommandResult.error(Formatter.error(
             "Index ___ is out of bounds", index.get()
         ));
       }
     } else {
-      EffectsUtil.show(zone, player);
+      if (EffectsUtil.show(zone, player)) {
+        player.sendMessage(Formatter.success("Showing boundaries of zone ___", zone.name()));
+      } else {
+        player.sendMessage(Formatter.success("The boundaries of zone ___ are too far away", zone.name()));
+      }
     }
     return CommandResult.success();
   }

@@ -23,30 +23,17 @@
  * SOFTWARE.
  */
 
-package com.minecraftonline.nope.sponge.listener;
+package com.minecraftonline.nope.sponge.api.config;
 
-import com.google.common.collect.Lists;
-import com.minecraftonline.nope.common.setting.SettingKeys;
-import com.minecraftonline.nope.sponge.SpongeNope;
-import com.minecraftonline.nope.sponge.api.SettingEventListener;
-import com.minecraftonline.nope.sponge.api.SettingListenerRegistration;
-import com.minecraftonline.nope.sponge.listener.all.ArmorStandDestroyListener;
-import java.util.List;
-import org.spongepowered.api.event.Order;
-import org.spongepowered.api.event.entity.AttackEntityEvent;
+import com.minecraftonline.nope.common.setting.SettingKey;
+import com.minecraftonline.nope.common.setting.SettingValue;
+import org.jetbrains.annotations.NotNull;
 
-public class NopeSettingListeners {
+public interface SettingValueConfigSerializerRegistrar {
 
-  private NopeSettingListeners() {
-  }
+  void register(SettingValueConfigSerializer<?> serializer);
 
-  public static List<SettingListenerRegistration<?, ?>> get() {
-    return Lists.newArrayList(
-      new SettingListenerRegistration<>(SettingKeys.ARMOR_STAND_DESTROY,
-          AttackEntityEvent.class,
-          SpongeNope.instance().pluginContainer(),
-          new ArmorStandDestroyListener())
-    );
-  }
+  @NotNull
+  <T, V extends SettingValue<T>, M extends SettingKey.Manager<T, V>> SettingValueConfigSerializer<M> serializerOf(M manager);
 
 }

@@ -31,6 +31,7 @@ import com.minecraftonline.nope.common.permission.Permissions;
 import com.minecraftonline.nope.common.setting.Setting;
 import com.minecraftonline.nope.common.setting.SettingCollection;
 import com.minecraftonline.nope.common.setting.SettingKey;
+import com.minecraftonline.nope.common.setting.SettingValue;
 import com.minecraftonline.nope.common.setting.Target;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -284,29 +285,29 @@ public final class Formatter {
   }
 
 
-  public static <T> Component settingKey(SettingKey<T> key, boolean verbose) {
+  public static <T, V extends SettingValue<T>> Component settingKey(SettingKey<T, V> key, boolean verbose) {
     TextComponent.Builder idText = Component.text().append(Component.text(key.id()).color(ACCENT));
 
     TextComponent.Builder hoverText = Component.text()
         .append(Component.text(key.id()).color(ACCENT))
         .append(Component.newline());
 
-    if (!key.isImplemented()) {
+    if (!key.implemented()) {
       idText.decorate(TextDecoration.STRIKETHROUGH);
       hoverText.append(Component.text("Not implemented yet!").color(ERROR));
       hoverText.append(Component.newline());
     }
 
-    hoverText.append(keyValue("Type:", key.type().getSimpleName()));
+    hoverText.append(keyValue("Type:", key.manager().valueType().getSimpleName()));
     hoverText.append(Component.newline());
 
-    String defaultData = key.print(key.defaultData());
+    String defaultData = key.manager().printValue(key.defaultValue());
     hoverText.append(keyValue("Default value:", defaultData.isEmpty()
         ? "(Empty)"
         : defaultData));
     hoverText.append(Component.newline());
 
-    hoverText.append(keyValue("Restrictive:", String.valueOf(key.isPlayerRestrictive())));
+    hoverText.append(keyValue("Restrictive:", String.valueOf(key.playerRestrictive())));
     hoverText.append(Component.newline());
 
     hoverText.append(keyValue("Category:", key.category().name().toLowerCase()));
@@ -333,7 +334,7 @@ public final class Formatter {
   }
 
 
-  public static <T> CompletableFuture<List<Component>> setting(Setting<T> setting,
+  public static <T, V extends SettingValue<T>> CompletableFuture<List<Component>> setting(Setting<T, V> setting,
                                                                Subject subject,
                                                                @NotNull SettingCollection collection) {
     return CompletableFuture.supplyAsync(() -> {
@@ -341,7 +342,7 @@ public final class Formatter {
 
       String dataString = setting.value() == null
           ? "(Empty)"
-          : setting.key().print(setting.requireData());
+          : setting.key().manager().printValue(setting.value());
       if (collection instanceof Host) {
         Host host = (Host) collection;
         Host redundancy = Nope.instance().hostSystem().findIdenticalSuperior(host, setting.key())

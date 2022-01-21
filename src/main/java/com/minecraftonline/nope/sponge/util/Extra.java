@@ -131,7 +131,7 @@ public final class Extra {
    * @param player     the player which is in question. Null if anonymous.
    * @return a supplier for the runtime exception
    */
-  public static Supplier<RuntimeException> noLocation(SettingKey<?> key,
+  public static Supplier<RuntimeException> noLocation(SettingKey<?, ?> key,
                                                       Class<? extends Event> eventClass,
                                                       @Nullable Player player) {
     return () -> new RuntimeException(String.format(

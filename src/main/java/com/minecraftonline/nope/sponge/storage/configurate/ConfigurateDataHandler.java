@@ -54,7 +54,7 @@ public abstract class ConfigurateDataHandler implements DataHandler {
         .stream()
         .map(world -> new Domain(world.key().formatted().replace(":", "-"),
             world.key().formatted(),
-            universe.getDataOrDefault(SettingKeys.CACHE_SIZE)))
+            universe.getValueOrDefault(SettingKeys.CACHE_SIZE).get()))
         .collect(Collectors.toList());
     domains.forEach(domainDataHandler::load);
     return new HostSystem(universe, domains);

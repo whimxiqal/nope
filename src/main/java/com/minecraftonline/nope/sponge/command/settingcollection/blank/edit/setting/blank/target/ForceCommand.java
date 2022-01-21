@@ -28,8 +28,8 @@ public class ForceCommand<T extends SettingCollection> extends CommandNode {
   @Override
   public CommandResult execute(CommandContext context) throws CommandException {
     T collection = context.requireOne(settingCollectionParameterKey);
-    SettingKey<?> key = context.requireOne(ParameterKeys.SETTING_KEY);
-    if (!key.isPlayerRestrictive()) {
+    SettingKey<?, ?> key = context.requireOne(ParameterKeys.SETTING_KEY);
+    if (!key.playerRestrictive()) {
       return CommandResult.error(Formatter.error(
           "You may not force a setting with key ___ because it is not player-restrictive in nature",
           key.id()

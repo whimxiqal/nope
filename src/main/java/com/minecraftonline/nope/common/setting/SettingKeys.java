@@ -27,6 +27,8 @@ package com.minecraftonline.nope.common.setting;
 
 import com.google.common.collect.Maps;
 import com.minecraftonline.nope.common.setting.manager.BooleanKeyManager;
+import com.minecraftonline.nope.common.setting.manager.IntegerKeyManager;
+import com.minecraftonline.nope.common.setting.manager.PolyStringKeyManager;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -38,9 +40,12 @@ public class SettingKeys {
 
   private static final BooleanKeyManager BOOLEAN_KEY_MANAGER = new BooleanKeyManager();
   private static final BooleanKeyManager STATE_KEY_MANAGER = new BooleanKeyManager(true);
+  private static final IntegerKeyManager INTEGER_KEY_MANAGER = new IntegerKeyManager();
+
+  private static final PolyStringKeyManager POLY_STRING_KEY_MANAGER = new PolyStringKeyManager();
 
   public static final SettingKey.Unary<Boolean> ARMOR_STAND_DESTROY =
-      new SettingKey.Unary.Builder<>("armor-stand-destroy", true, STATE_KEY_MANAGER)
+      SettingKey.Unary.builder("armor-stand-destroy", true, STATE_KEY_MANAGER)
           .blurb("Armor stand destruction restriction")
           .description("When disabled, armor stands may not be broken by players.")
           .category(SettingKey.Category.ENTITIES)
@@ -48,7 +53,7 @@ public class SettingKeys {
           .build();
 
   public static final SettingKey.Unary<Boolean> ARMOR_STAND_INTERACT =
-      new SettingKey.Unary.Builder<>("armor-stand-interact", true, STATE_KEY_MANAGER)
+      SettingKey.Unary.builder("armor-stand-interact", true, STATE_KEY_MANAGER)
           .blurb("Armor stand interact restriction")
           .description("When disabled, armor stands may not be interacted with by players.")
           .category(SettingKey.Category.ENTITIES)
@@ -56,7 +61,7 @@ public class SettingKeys {
           .build();
 
   public static final SettingKey.Unary<Boolean> ARMOR_STAND_PLACE =
-      new SettingKey.Unary.Builder<>("armor-stand-place", true, STATE_KEY_MANAGER)
+      SettingKey.Unary.builder("armor-stand-place", true, STATE_KEY_MANAGER)
           .blurb("Armor stand placement restriction")
           .description("When disabled, armor stands may not be placed by players.")
           .category(SettingKey.Category.ENTITIES)
@@ -101,6 +106,17 @@ public class SettingKeys {
 //      "block-trample",
 //      true
 //  );
+
+  public static final SettingKey.Unary<Integer> CACHE_SIZE =
+      SettingKey.Unary.builder("cache-size", 75000, INTEGER_KEY_MANAGER)
+          .blurb("Size of world block caches")
+          .description("This is the quantity of block locations to cache for each world. "
+      + "Total memory is roughly this multiplied by 56 bytes, "
+      + "multiplied by the number of worlds. Set 0 to disable caching.")
+          .category(SettingKey.Category.ENTITIES)
+          .playerRestrictive()
+          .build();
+
 //  @Blurb("Size of world block caches")
 //  @Description("This is the quantity of block locations to cache for each world. "
 //      + "Total memory is roughly this multiplied by 56 bytes, "
@@ -708,6 +724,15 @@ public class SettingKeys {
 //      "movement-commands",
 //      Sets.newHashSet()
 //  );
+
+public static final SettingKey.Poly<String> UNSPAWNABLE_MOBS =
+    SettingKey.Poly.builderEmptyDefault("unspawnable-mobs", POLY_STRING_KEY_MANAGER)
+        .blurb("Armor stand placement restriction")
+        .description("When disabled, armor stands may not be placed by players.")
+        .category(SettingKey.Category.ENTITIES)
+        .playerRestrictive()
+        .build();
+
 //  @Blurb("Mobs which are unspawnable")
 //  @Description("These entity types will not be allowed to spawn.")
 //  @Category(SettingKey.CategoryType.ENTITIES)

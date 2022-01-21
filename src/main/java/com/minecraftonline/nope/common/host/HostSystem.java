@@ -230,17 +230,12 @@ public class HostSystem {
     return hosts().values().stream().anyMatch(host -> host.get(key).isPresent());
   }
 
-  public <X> X lookupAnonymous(@NotNull SettingKey.Unary<X> key,
+  public <X> X lookupAnonymous(@NotNull SettingKey<X, ?> key,
                                @NotNull Location location) {
     return lookup(key, null, location);
   }
 
-  public <X> Set<X> lookupAnonymous(@NotNull SettingKey.Poly<X> key,
-                               @NotNull Location location) {
-    return lookup(key, null, location);
-  }
-
-  public <X> X lookup(@NotNull final SettingKey.Unary<X> key,
+  public <X> X lookup(@NotNull final SettingKey<X, ?> key,
                       @Nullable final UUID userUuid,
                       @NotNull final Location location) {
     LinkedList<Host> hosts = new LinkedList<>();
@@ -288,157 +283,8 @@ public class HostSystem {
      */
 
     // first we have to organize it such that we can match up the targets appropriately
-    /* Choose a data structure that will optimize searching for highest priority matching */
-    Queue<Host> hostQueue;
-    Comparator<Host> descending = (h1, h2) -> Integer.compare(h2.priority(), h1.priority());
-    hostQueue = new PriorityQueue<>(hosts.size(), descending);
-    hostQueue.addAll(hosts);
-    SettingKey.Unary<X> unaryKey = key;
 
-    Host currentHost;
-    Optional<Setting<X, SettingValue.Unary<X>>> currentSetting;
-    Target currentTarget;
-    boolean targeted = true;
-    boolean targetSpecified = false;
-    X data;
-
-    // Assume targeted until target is set and specifically does not target us
-    while (!hostQueue.isEmpty()) {
-      currentHost = hostQueue.remove();
-      currentSetting = currentHost.get(unaryKey);
-      if (!currentSetting.isPresent()) {
-        // This shouldn't happen because we previously found that this host has this setting
-        throw new RuntimeException("Error retrieving setting value");
-      }
-      currentTarget = currentSetting.get().target();
-      data = currentSetting.get().value().get();
-      if (currentTarget != null) {
-        // Ignore if target has already been specified: the last one takes precedence.
-        if (!targetSpecified) {
-          targeted = currentTarget.test(userUuid, key.playerRestrictive());
-          targetSpecified = true;
-        }
-      }
-      if (data != null) {
-        if (targeted) {
-          return data;
-        } else {
-          // We have found the data which was specifically not targeted.
-          // So, pass through this data value and continue on anew.
-          targeted = true;
-          targetSpecified = false;
-        }
-      }
-    }
-
-    // No more left, so just do default
-    return unaryKey.defaultValue().get();
-
-  }
-
-  public <X> Set<X> lookup(@NotNull final SettingKey.Poly<X> key,
-                      @Nullable final UUID userUuid,
-                      @NotNull final Location location) {
-    LinkedList<Host> hosts = new LinkedList<>();
-
-    // add universe
-    if (universe.isSet(key)) {
-      hosts.addFirst(universe);
-    }
-
-    // add domain
-    if (location.domain().isSet(key)) {
-      hosts.addFirst(location.domain());
-    }
-
-    // add zones
-    location.domain()
-        .volumes()
-        .containing(location.getBlockX(),
-            location.getBlockY(),
-            location.getBlockZ())
-        .stream()
-        .filter(zone -> zone.isSet(key))
-        .forEach(hosts::addFirst);
-
-    // add parents
-    LinkedList<Host> unadded = hosts;
-    hosts = new LinkedList<>();
-    Host current;
-    while (!unadded.isEmpty()) {
-      current = unadded.pop();
-      hosts.add(current);
-      if (current instanceof Zone) {
-        if (((Zone) current).parent().isPresent()) {
-          unadded.add(((Zone) current).parent().get());
-        }
-      }
-    }
-
-    /*
-    If setting data type is one piece of data, then try to find the zone with the highest
-    priority with the setting set.
-
-    If setting data type is a set of data, the build up the resulting value by going from the
-    lowest priority to the highest priority.
-     */
-
-    // first we have to organize it such that we can match up the targets appropriately
-    /* Choose a data structure that will optimize searching for highest priority matching */
-    Queue<Host> hostQueue;
-    Comparator<Host> descending = (h1, h2) -> Integer.compare(h2.priority(), h1.priority());
-    hostQueue = new PriorityQueue<>(hosts.size(), descending);
-    hostQueue.addAll(hosts);
-    SettingKey<Set<X>, SettingValue.Poly<X>> polyKey = key;
-
-    Host currentHost;
-    Optional<Setting<Set<X>, SettingValue.Poly<X>>> currentSetting;
-    Target currentTarget;
-    boolean targeted = true;
-    boolean targetSpecified = false;
-    SettingValue.Poly<X> value;
-    Stack<SettingValue.Poly<X>> values = new Stack<>();
-
-    // Assume targeted until target is set and specifically does not target us
-    while (!hostQueue.isEmpty()) {
-      currentHost = hostQueue.remove();
-      currentSetting = currentHost.get(polyKey);
-      if (!currentSetting.isPresent()) {
-        // This shouldn't happen because we previously found that this host has this setting
-        throw new RuntimeException("Error retrieving setting value");
-      }
-      currentTarget = currentSetting.get().target();
-      if (currentTarget != null) {
-        // Ignore if target has already been specified: the last one takes precedence.
-        if (!targetSpecified) {
-          targeted = currentTarget.test(userUuid, key.playerRestrictive());
-          targetSpecified = true;
-        }
-      }
-      value = currentSetting.get().value();
-      if (value != null) {
-        if (targeted) {
-          values.add(value);
-          // TODO if we ever add a declarative type, it will ignore anything else.
-          //  so, just stop here and continue on to the backwards traversal down below.
-          //  (need to add a check method in SettingValue.Poly for declarative type)
-        }
-        // We have found data (whether targeting us or not)
-        // So continue on anew.
-        targeted = true;
-        targetSpecified = false;
-      }
-    }
-    // lastly, put on the default value
-    values.add(polyKey.defaultValue());
-
-
-    // now apply our values in the appropriate order
-    Set<X> result = new HashSet<>();
-    while (!values.isEmpty()) {
-      values.pop().applyTo(result);
-    }
-    return result;
+    return key.extractValue(hosts, userUuid, location);
 
   }
 

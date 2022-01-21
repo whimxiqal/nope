@@ -12,8 +12,13 @@ public class Flags {
       .aliases("p", "priority")
       .setParameter(Parameters.PRIORITY)
       .build();
+
   public static final Flag PARENT = Flag.builder()
       .aliases("parent", "t")
       .setParameter(Parameters.PARENT)
       .build();
+
+  public static final Flag ADDITIVE_VALUE_FLAG = Flag.of("additive");
+
+  public static final Flag SUBTRACTIVE_VALUE_FLAG = Flag.of("subtractive");
 }

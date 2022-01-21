@@ -73,7 +73,14 @@ public abstract class SettingCollection implements Persistent {
 
   private <T, V extends SettingValue<T>> boolean set(Setting<T, V> setting, boolean save) {
     boolean changedData = setValue(setting.key(), setting.value());
-    boolean changedTarget = setTarget(setting.key(), Objects.requireNonNull(setting.target()));
+    Target target = setting.target();
+    boolean changedTarget;
+    if (target == null) {
+      Target removedTarget = removeTarget(setting.key());
+      changedTarget = removedTarget != null;
+    } else {
+      changedTarget = setTarget(setting.key(), Objects.requireNonNull(setting.target()));
+    }
     if (changedData || changedTarget) {
       if (save) {
         save();
@@ -124,19 +131,17 @@ public abstract class SettingCollection implements Persistent {
   }
 
   public final <T, V extends SettingValue<T>> boolean setValue(SettingKey<T, V> key, V data) {
-    return this.setValueChecked(key, data);
+    return this.setValueUnchecked(key, data);
   }
 
-  private boolean setValueChecked(SettingKey<?, ?> key, SettingValue<?> value) {
+  public boolean setValueUnchecked(SettingKey<?, ?> key, SettingValue<?> value) {
     if (keys.contains(key)) {
       if (this.data.containsKey(key) && this.data.get(key).equals(value)) {
         return false;
-      } else {
-        this.data.put(key, value);
-        return true;
       }
+    } else {
+      keys.add(key);
     }
-    keys.add(key);
     this.data.put(key, value);
     this.save();
     return true;
@@ -163,6 +168,7 @@ public abstract class SettingCollection implements Persistent {
         return false;
       } else {
         this.targets.put(key, target);
+        save();
         return true;
       }
     }
