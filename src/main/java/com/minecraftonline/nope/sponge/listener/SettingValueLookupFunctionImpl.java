@@ -23,52 +23,32 @@
  * SOFTWARE.
  */
 
-package com.minecraftonline.nope.sponge.api;
+package com.minecraftonline.nope.sponge.listener;
 
-import org.spongepowered.api.Game;
-import org.spongepowered.api.event.Cause;
-import org.spongepowered.api.event.EventContext;
-import org.spongepowered.api.event.lifecycle.LifecycleEvent;
+import com.minecraftonline.nope.common.setting.SettingKey;
+import com.minecraftonline.nope.common.struct.Location;
+import com.minecraftonline.nope.sponge.SpongeNope;
+import com.minecraftonline.nope.sponge.api.event.SettingValueLookupFunction;
+import com.minecraftonline.nope.sponge.util.SpongeUtil;
+import java.util.UUID;
+import org.jetbrains.annotations.NotNull;
+import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.world.server.ServerLocation;
 
-public class SettingListenerRegistrationEvent implements LifecycleEvent {
+public class SettingValueLookupFunctionImpl<T> implements SettingValueLookupFunction<T> {
 
-  private final SettingListenerRegistrar registrar;
-  private final Game game;
-  private final Cause cause;
-  private final Object source;
-  private final EventContext context;
+  private final SettingKey<T, ?> settingKey;
 
-  public SettingListenerRegistrationEvent(SettingListenerRegistrar registrar,
-                                          Game game, Cause cause,
-                                          Object source, EventContext context) {
-    this.registrar = registrar;
-    this.game = game;
-    this.cause = cause;
-    this.source = source;
-    this.context = context;
+  public SettingValueLookupFunctionImpl(@NotNull SettingKey<T, ?> settingKey) {
+    this.settingKey = settingKey;
   }
 
-  public SettingListenerRegistrar registrar() {
-    return registrar;
+  public T lookup(Entity entity, ServerLocation location) {
+    return SpongeUtil.valueFor(settingKey, entity, location);
   }
 
-  @Override
-  public Game game() {
-    return game;
+  public T lookup(UUID userUuid, Location location) {
+    return SpongeNope.instance().hostSystem().lookup(settingKey, userUuid, location);
   }
 
-  @Override
-  public Cause cause() {
-    return cause;
-  }
-
-  @Override
-  public Object source() {
-    return source;
-  }
-
-  @Override
-  public EventContext context() {
-    return context;
-  }
 }

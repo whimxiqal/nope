@@ -292,7 +292,7 @@ public final class Formatter {
         .append(Component.text(key.id()).color(ACCENT))
         .append(Component.newline());
 
-    if (!key.implemented()) {
+    if (!key.functional()) {
       idText.decorate(TextDecoration.STRIKETHROUGH);
       hoverText.append(Component.text("Not implemented yet!").color(ERROR));
       hoverText.append(Component.newline());

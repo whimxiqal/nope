@@ -66,6 +66,14 @@ public class VolumeTree {
   @Getter
   protected int size = 0;
 
+  public VolumeTree(boolean construct) {
+    construct();
+  }
+
+  public VolumeTree() {
+    this(false);
+  }
+
   /**
    * Calculate all zones which have any intersecting volumes
    * with this one.

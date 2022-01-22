@@ -30,7 +30,6 @@ import com.minecraftonline.nope.common.Nope;
 import com.minecraftonline.nope.common.math.*;
 import com.minecraftonline.nope.common.util.Logger;
 
-import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.BeforeEach;
@@ -50,7 +49,7 @@ class VolumeTreeTest {
   void setUp() {
     Nope.instance(new TestNope());
     volumeTree = new VolumeTree();
-    domain = new Domain("domain", "domain", 100);
+    domain = new Domain("domain", 100);
     volume1 = new Cuboid(domain, 0, 0, 0, 10, 10, 10);
     volume2 = new Sphere(domain, 20, 20, 20, 5d);
     zone1 = new Zone("zone1", null, 0, volume1, volume2);

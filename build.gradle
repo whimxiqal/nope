@@ -81,3 +81,17 @@ dependencies {
     implementation 'org.jetbrains:annotations:22.0.0'
 
 }
+
+task spongeApiJar(type: org.gradle.jvm.tasks.Jar) {
+    baseName = 'nope-sponge-api'
+//    version = '0.0'
+//    classifier = "git describe --always".execute().text.trim()
+    from(sourceSets.main.output) {
+        include 'com/minecraftonline/nope/common/**'
+        include 'com/minecraftonline/nope/sponge/api/**'
+    }
+}
+
+jar {
+    dependsOn(spongeApiJar)
+}

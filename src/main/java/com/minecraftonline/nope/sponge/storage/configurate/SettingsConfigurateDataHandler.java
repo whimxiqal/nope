@@ -21,7 +21,6 @@ import org.spongepowered.configurate.CommentedConfigurationNode;
 import org.spongepowered.configurate.ConfigurationNode;
 import org.spongepowered.configurate.ConfigurationOptions;
 import org.spongepowered.configurate.serialize.SerializationException;
-import org.spongepowered.configurate.util.MapFactory;
 
 public abstract class SettingsConfigurateDataHandler {
 

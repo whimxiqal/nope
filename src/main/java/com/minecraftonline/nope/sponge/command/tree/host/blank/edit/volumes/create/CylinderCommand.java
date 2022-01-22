@@ -10,7 +10,6 @@ import com.minecraftonline.nope.sponge.SpongeNope;
 import com.minecraftonline.nope.sponge.command.CommandNode;
 import com.minecraftonline.nope.sponge.command.parameters.ParameterKeys;
 import com.minecraftonline.nope.sponge.command.parameters.Parameters;
-import com.minecraftonline.nope.sponge.tool.CuboidSelection;
 import com.minecraftonline.nope.sponge.tool.CylinderSelection;
 import com.minecraftonline.nope.sponge.util.EffectsUtil;
 import com.minecraftonline.nope.sponge.util.Formatter;

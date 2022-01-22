@@ -23,7 +23,7 @@
  * SOFTWARE.
  */
 
-package com.minecraftonline.nope.sponge.api;
+package com.minecraftonline.nope.sponge.api.setting;
 
 import org.spongepowered.api.Game;
 import org.spongepowered.api.event.Cause;

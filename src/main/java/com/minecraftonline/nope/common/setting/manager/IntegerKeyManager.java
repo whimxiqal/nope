@@ -26,8 +26,6 @@
 package com.minecraftonline.nope.common.setting.manager;
 
 import com.minecraftonline.nope.common.setting.SettingKey;
-import com.minecraftonline.nope.common.setting.SettingValue;
-import org.jetbrains.annotations.NotNull;
 
 public class IntegerKeyManager extends SettingKey.Manager.Unary<Integer> {
 

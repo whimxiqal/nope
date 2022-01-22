@@ -23,13 +23,12 @@
  * SOFTWARE.
  */
 
-package com.minecraftonline.nope.sponge.api;
+package com.minecraftonline.nope.sponge.api.setting;
 
-import org.spongepowered.api.event.Event;
+import com.minecraftonline.nope.common.setting.SettingKey;
 
-@FunctionalInterface
-public interface SettingEventListener<T, E extends Event> {
+public interface SettingKeyRegistrar {
 
-  void handle(E event, SettingValueLookupFunction<T> lookupFunction);
+  void register(SettingKey<?, ?> settingKey);
 
 }

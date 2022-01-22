@@ -31,7 +31,6 @@ import com.minecraftonline.nope.common.host.Domained;
 import com.minecraftonline.nope.common.struct.Location;
 import java.util.List;
 
-import lombok.Data;
 import lombok.Getter;
 import lombok.experimental.Accessors;
 import org.jetbrains.annotations.NotNull;

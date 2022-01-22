@@ -23,7 +23,7 @@
  * SOFTWARE.
  */
 
-package com.minecraftonline.nope.sponge.setting;
+package com.minecraftonline.nope.sponge.config;
 
 import com.minecraftonline.nope.common.setting.SettingKey;
 import com.minecraftonline.nope.common.setting.SettingValue;

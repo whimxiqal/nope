@@ -41,25 +41,41 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.parameter.CommandContext;
+import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.entity.living.player.Player;
 
 public class ListHostCommand extends CommandNode {
+
+  private static final Parameter.Value<String> ALL = Parameter.choices("all")
+      .key("list-host-all")
+      .optional()
+      .build();
+
   public ListHostCommand(CommandNode parent) {
     super(parent, Permissions.INFO,
         "List all hosts that you are currently occupy",
         "list");
-    addChild(new ListAllHostsCommand(this));
+    addParameter(ALL);
   }
 
   @Override
   public CommandResult execute(CommandContext context) throws CommandException {
-    if (!(context.cause().root() instanceof Player)) {
-      return CommandResult.error(Formatter.error("Only players may execute this command"));
+    boolean all = !(context.cause().root() instanceof Player)
+        || context.one(ALL).map(s -> s.equalsIgnoreCase("all")).orElse(false);
+
+    List<Host> hosts;
+    if (all) {
+      hosts = new ArrayList<>(SpongeNope.instance()
+          .hostSystem()
+          .hosts()
+          .values());
+    } else {
+      // Cause must be player
+      Player player = (Player) context.cause().root();
+      hosts = new ArrayList<>(SpongeNope.instance()
+          .hostSystem()
+          .collectSuperiorHosts(SpongeUtil.reduceLocation(player.serverLocation())));
     }
-    Player player = (Player) context.cause().root();
-    List<Host> hosts = new ArrayList<>(SpongeNope.instance()
-        .hostSystem()
-        .collectSuperiorHosts(SpongeUtil.reduceLocation(player.serverLocation())));
     hosts.sort(Comparator.comparing(Host::priority));
     Sponge.serviceProvider().paginationService().builder()
         .title(Component.text("Hosts").color(Formatter.GOLD))

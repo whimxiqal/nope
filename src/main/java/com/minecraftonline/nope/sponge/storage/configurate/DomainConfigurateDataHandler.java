@@ -27,7 +27,7 @@ public class DomainConfigurateDataHandler extends SettingsConfigurateDataHandler
     try {
       CommentedConfigurationNode root = settingCollectionRoot(domain);
       root.comment("Settings for world " + domain.name());
-      loader.apply(ResourceKey.resolve(domain.id())).save(root);
+      loader.apply(ResourceKey.resolve(domain.name())).save(root);
     } catch (ConfigurateException e) {
       e.printStackTrace();
     }
@@ -36,7 +36,7 @@ public class DomainConfigurateDataHandler extends SettingsConfigurateDataHandler
   @Override
   public void load(@NotNull Domain domain) {
     try {
-      CommentedConfigurationNode root = loader.apply(ResourceKey.resolve(domain.id())).load();
+      CommentedConfigurationNode root = loader.apply(ResourceKey.resolve(domain.name())).load();
       if (root.node("settings").virtual()) {
         // No settings, so this file was likely not created yet.
         root.node("settings").set(null);

@@ -23,31 +23,52 @@
  * SOFTWARE.
  */
 
-package com.minecraftonline.nope.sponge.api;
+package com.minecraftonline.nope.sponge.api.event;
 
-import com.minecraftonline.nope.common.setting.SettingKey;
-import com.minecraftonline.nope.common.struct.Location;
-import com.minecraftonline.nope.sponge.SpongeNope;
-import com.minecraftonline.nope.sponge.util.SpongeUtil;
-import java.util.UUID;
-import org.jetbrains.annotations.NotNull;
-import org.spongepowered.api.entity.Entity;
-import org.spongepowered.api.world.server.ServerLocation;
+import org.spongepowered.api.Game;
+import org.spongepowered.api.event.Cause;
+import org.spongepowered.api.event.EventContext;
+import org.spongepowered.api.event.lifecycle.LifecycleEvent;
 
-public class SettingValueLookupFunction<T> {
+public class SettingListenerRegistrationEvent implements LifecycleEvent {
 
-  private final SettingKey<T, ?> settingKey;
+  private final SettingListenerRegistrar registrar;
+  private final Game game;
+  private final Cause cause;
+  private final Object source;
+  private final EventContext context;
 
-  public SettingValueLookupFunction(@NotNull SettingKey<T, ?> settingKey) {
-    this.settingKey = settingKey;
+  public SettingListenerRegistrationEvent(SettingListenerRegistrar registrar,
+                                          Game game, Cause cause,
+                                          Object source, EventContext context) {
+    this.registrar = registrar;
+    this.game = game;
+    this.cause = cause;
+    this.source = source;
+    this.context = context;
   }
 
-  public T lookup(Entity entity, ServerLocation location) {
-    return SpongeUtil.valueFor(settingKey, entity, location);
+  public SettingListenerRegistrar registrar() {
+    return registrar;
   }
 
-  public T lookup(UUID userUuid, Location location) {
-    return SpongeNope.instance().hostSystem().lookup(settingKey, userUuid, location);
+  @Override
+  public Game game() {
+    return game;
   }
 
+  @Override
+  public Cause cause() {
+    return cause;
+  }
+
+  @Override
+  public Object source() {
+    return source;
+  }
+
+  @Override
+  public EventContext context() {
+    return context;
+  }
 }

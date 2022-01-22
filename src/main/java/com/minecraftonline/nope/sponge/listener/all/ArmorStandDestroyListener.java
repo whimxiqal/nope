@@ -25,9 +25,8 @@
 
 package com.minecraftonline.nope.sponge.listener.all;
 
-import com.minecraftonline.nope.common.setting.SettingKeys;
-import com.minecraftonline.nope.sponge.api.SettingEventListener;
-import com.minecraftonline.nope.sponge.api.SettingValueLookupFunction;
+import com.minecraftonline.nope.sponge.api.event.SettingEventListener;
+import com.minecraftonline.nope.sponge.api.event.SettingValueLookupFunction;
 import com.minecraftonline.nope.sponge.listener.SpongeEventUtil;
 import org.spongepowered.api.entity.living.ArmorStand;
 import org.spongepowered.api.entity.living.player.Player;

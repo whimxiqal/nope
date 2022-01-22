@@ -128,7 +128,7 @@ public class VolumeTypeSerializer implements TypeSerializer<Volume> {
       node.node("name").set(obj.name());
     }
     node.node("type").set("box");
-    node.node("world").set(obj.domain().id());
+    node.node("world").set(obj.domain().name());
     node.node("dimensions", "min-x").set(obj.minX());
     node.node("dimensions", "min-y").set(obj.minY());
     node.node("dimensions", "min-z").set(obj.minZ());
@@ -145,7 +145,7 @@ public class VolumeTypeSerializer implements TypeSerializer<Volume> {
       node.node("name").set(obj.name());
     }
     node.node("type").set("cylinder");
-    node.node("world").set(obj.domain().id());
+    node.node("world").set(obj.domain().name());
     node.node("dimensions", "pos-x").set(obj.posX());
     node.node("dimensions", "min-y").set(obj.minY());
     node.node("dimensions", "max-y").set(obj.maxY());
@@ -161,7 +161,7 @@ public class VolumeTypeSerializer implements TypeSerializer<Volume> {
       node.node("name").set(obj.name());
     }
     node.node("type").set("sphere");
-    node.node("world").set(obj.domain().id());
+    node.node("world").set(obj.domain().name());
     node.node("dimensions", "pos-x").set(obj.posX());
     node.node("dimensions", "pos-y").set(obj.posY());
     node.node("dimensions", "pos-z").set(obj.posZ());
@@ -176,7 +176,7 @@ public class VolumeTypeSerializer implements TypeSerializer<Volume> {
       node.node("name").set(obj.name());
     }
     node.node("type").set("slab");
-    node.node("world").set(obj.domain().id());
+    node.node("world").set(obj.domain().name());
     node.node("dimensions", "min-y").set(obj.minY());
     node.node("dimensions", "max-y").set(obj.maxY());
   }

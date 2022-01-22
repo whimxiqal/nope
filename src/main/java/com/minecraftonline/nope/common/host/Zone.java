@@ -25,6 +25,9 @@ public class Zone extends Host implements Child<Zone>, Destructible {
 
   public Zone(String name, @Nullable Zone parent, int priority, Collection<Volume> volumes) {
     super(name, priority);
+    if (name.startsWith("_")) {
+      throw new IllegalArgumentException("A zone name may not start with an underscore");
+    }
     this.parent = parent;
     this.volumes.addAll(volumes);
   }

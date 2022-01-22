@@ -140,7 +140,7 @@ public class ZoneConfigurateDataHandler extends SettingsConfigurateDataHandler i
   private ConfigurationNode serializeCylinder(Cylinder cylinder) throws SerializationException {
     ConfigurationNode node = volumeRoot(cylinder);
     node.node("type").set("cylinder");
-    node.node("world").set(cylinder.domain().id());
+    node.node("world").set(cylinder.domain().name());
     node.node("dimensions", "pos-x").set(cylinder.posX());
     node.node("dimensions", "min-y").set(cylinder.minY());
     node.node("dimensions", "max-y").set(cylinder.maxY());
@@ -152,7 +152,7 @@ public class ZoneConfigurateDataHandler extends SettingsConfigurateDataHandler i
   private ConfigurationNode serializeSphere(Sphere sphere) throws SerializationException {
     ConfigurationNode node = volumeRoot(sphere);
     node.node("type").set("sphere");
-    node.node("world").set(sphere.domain().id());
+    node.node("world").set(sphere.domain().name());
     node.node("dimensions", "pos-x").set(sphere.posX());
     node.node("dimensions", "pos-y").set(sphere.posY());
     node.node("dimensions", "pos-z").set(sphere.posZ());

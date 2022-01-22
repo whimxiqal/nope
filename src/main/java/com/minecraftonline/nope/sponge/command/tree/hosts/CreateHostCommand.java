@@ -27,8 +27,6 @@
 package com.minecraftonline.nope.sponge.command.tree.hosts;
 
 import com.minecraftonline.nope.common.Nope;
-import com.minecraftonline.nope.common.host.Domained;
-import com.minecraftonline.nope.common.host.Host;
 import com.minecraftonline.nope.common.host.Zone;
 import com.minecraftonline.nope.common.permission.Permissions;
 import com.minecraftonline.nope.sponge.command.CommandNode;
@@ -36,12 +34,10 @@ import com.minecraftonline.nope.sponge.command.parameters.Flags;
 import com.minecraftonline.nope.sponge.command.parameters.ParameterKeys;
 import com.minecraftonline.nope.sponge.command.parameters.Parameters;
 import com.minecraftonline.nope.sponge.util.Formatter;
-import java.util.Optional;
 import net.kyori.adventure.text.Component;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.parameter.CommandContext;
-import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 
 public class CreateHostCommand extends CommandNode {
 

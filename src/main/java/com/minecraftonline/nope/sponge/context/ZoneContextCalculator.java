@@ -56,7 +56,7 @@ public class ZoneContextCalculator implements ContextCalculator {
 
   private Context calculateContext(Host host) {
     if (host instanceof Domain) {
-      return new Context("nope.w." + ((Domain) host).id(), "true");
+      return new Context("nope.w." + ((Domain) host).name(), "true");
     } else if (host instanceof Zone) {
       return new Context("nope.z." + host.name(), "true");
     }

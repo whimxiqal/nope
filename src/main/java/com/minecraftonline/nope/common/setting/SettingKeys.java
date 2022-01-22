@@ -25,17 +25,13 @@
 
 package com.minecraftonline.nope.common.setting;
 
-import com.google.common.collect.Maps;
 import com.minecraftonline.nope.common.setting.manager.BooleanKeyManager;
 import com.minecraftonline.nope.common.setting.manager.IntegerKeyManager;
 import com.minecraftonline.nope.common.setting.manager.PolyStringKeyManager;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.NoSuchElementException;
-import org.jetbrains.annotations.NotNull;
 
+@SuppressWarnings("unused")
 public class SettingKeys {
 
   private static final BooleanKeyManager BOOLEAN_KEY_MANAGER = new BooleanKeyManager();
@@ -67,45 +63,44 @@ public class SettingKeys {
           .category(SettingKey.Category.ENTITIES)
           .playerRestrictive()
           .build();
-//
-//  @Blurb("Block break restriction")
-//  @Description("When disabled, blocks may not be broken by players.")
-//  @Category(SettingKey.CategoryType.BLOCKS)
-//  @PlayerRestrictive
-//  public static final SettingKey<Boolean> BLOCK_BREAK = new StateSettingKey(
-//      "block-break",
-//      true
-//  );
-//  @Blurb("Block place restriction")
-//  @Description("When disabled, blocks may not be placed by players.")
-//  @Category(SettingKey.CategoryType.BLOCKS)
-//  @PlayerRestrictive
-//  public static final SettingKey<Boolean> BLOCK_PLACE = new StateSettingKey(
-//      "block-place",
-//      true
-//  );
-//  @Blurb("Inside to outside block updates")
-//  @Description("When disabled, block updates will not affect others across the zone boundary.")
-//  @Category(SettingKey.CategoryType.BLOCKS)
-//  public static final SettingKey<Boolean> BLOCK_PROPAGATE_ACROSS = new BooleanSettingKey(
-//      "block-propagate-across",
-//      true
-//  );
-//  @Blurb("Inside to inside block updates")
-//  @Description("When disabled, block updates will not affect others within the zone.")
-//  @Category(SettingKey.CategoryType.BLOCKS)
-//  public static final SettingKey<Boolean> BLOCK_PROPAGATE_WITHIN = new BooleanSettingKey(
-//      "block-propagate-within",
-//      true
-//  );
-//  @Blurb("Trample restriction")
-//  @Description("When disabled, blocks like farmland may not be trampled.")
-//  @Category(SettingKey.CategoryType.BLOCKS)
-//  @PlayerRestrictive
-//  public static final SettingKey<Boolean> BLOCK_TRAMPLE = new StateSettingKey(
-//      "block-trample",
-//      true
-//  );
+
+  public static final SettingKey.Unary<Boolean> BLOCK_BREAK =
+      SettingKey.Unary.builder("block-break", true, STATE_KEY_MANAGER)
+          .blurb("Block break restriction")
+          .description("When disabled, blocks may not be broken by players.")
+          .category(SettingKey.Category.BLOCKS)
+          .playerRestrictive()
+          .build();
+
+  public static final SettingKey.Unary<Boolean> BLOCK_PLACE =
+      SettingKey.Unary.builder("block-place", true, STATE_KEY_MANAGER)
+          .blurb("Block place restriction")
+          .description("When disabled, blocks may not be placed by players.")
+          .category(SettingKey.Category.BLOCKS)
+          .playerRestrictive()
+          .build();
+
+  public static final SettingKey.Unary<Boolean> BLOCK_PROPAGATE_ACROSS =
+      SettingKey.Unary.builder("block-propagate-across", true, BOOLEAN_KEY_MANAGER)
+          .blurb("Inside to outside block updates")
+          .description("When disabled, block updates will not affect others across the zone boundary")
+          .category(SettingKey.Category.BLOCKS)
+          .build();
+
+  public static final SettingKey.Unary<Boolean> BLOCK_PROPAGATE_WITHIN =
+      SettingKey.Unary.builder("block-propagate-within", true, BOOLEAN_KEY_MANAGER)
+          .blurb("Inside to inside block updates")
+          .description("When disabled, block updates will not affect others within the zone")
+          .category(SettingKey.Category.BLOCKS)
+          .build();
+
+  public static final SettingKey.Unary<Boolean> TRAMPLE =
+      SettingKey.Unary.builder("trample", true, STATE_KEY_MANAGER)
+          .blurb("Farmland trample restriction")
+          .description("When disabled, blocks like farmland may not be trampled")
+          .category(SettingKey.Category.BLOCKS)
+          .playerRestrictive()
+          .build();
 
   public static final SettingKey.Unary<Integer> CACHE_SIZE =
       SettingKey.Unary.builder("cache-size", 75000, INTEGER_KEY_MANAGER)
@@ -115,25 +110,18 @@ public class SettingKeys {
       + "multiplied by the number of worlds. Set 0 to disable caching.")
           .category(SettingKey.Category.ENTITIES)
           .playerRestrictive()
+          .global()
+          .functional()
           .build();
 
-//  @Blurb("Size of world block caches")
-//  @Description("This is the quantity of block locations to cache for each world. "
-//      + "Total memory is roughly this multiplied by 56 bytes, "
-//      + "multiplied by the number of worlds. Set 0 to disable caching.")
-//  @Global
-//  public static final SettingKey<Integer> CACHE_SIZE = new PositiveIntegerSettingKey(
-//      "cache-size",
-//      75000
-//  );
-//  @Blurb("Chest access restriction")
-//  @Description("When disabled, players may not open chests.")
-//  @Category(SettingKey.CategoryType.BLOCKS)
-//  @PlayerRestrictive
-//  public static final SettingKey<Boolean> CHEST_ACCESS = new StateSettingKey(
-//      "chest-access",
-//      true
-//  );
+  public static final SettingKey.Unary<Boolean> CHEST_ACCESS =
+      SettingKey.Unary.builder("chest-access", true, STATE_KEY_MANAGER)
+          .blurb("Chest access restriction")
+          .description("When disabled, players may not open chests")
+          .category(SettingKey.Category.BLOCKS)
+          .playerRestrictive()
+          .build();
+
 //  @Blurb("Chorus fruit teleport restriction")
 //  @Description("When disabled, players may not teleport by eating a chorus fruit.")
 //  @Category(SettingKey.CategoryType.MOVEMENT)

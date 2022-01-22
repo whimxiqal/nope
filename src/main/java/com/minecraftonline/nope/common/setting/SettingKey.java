@@ -21,7 +21,6 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
- *
  */
 
 package com.minecraftonline.nope.common.setting;
@@ -29,13 +28,10 @@ package com.minecraftonline.nope.common.setting;
 import com.google.common.collect.Streams;
 import com.minecraftonline.nope.common.host.Host;
 import com.minecraftonline.nope.common.struct.Location;
-import com.minecraftonline.nope.sponge.SpongeNope;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.PriorityQueue;
@@ -52,52 +48,34 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 /**
- * An identifier for a setting. These can be set on a {@link com.minecraftonline.nope.common.host.Host}
+ * An identifier for a setting. These can be set on a {@link Host}
  * in pairing with a {@link SettingValue}.
  *
  * @param <T> the type of data that can be retrieved under this setting at any location
  * @param <V> the type of value that wraps around the data stored at a specific host
  */
+@Getter
+@Accessors(fluent = true)
 public abstract class SettingKey<T, V extends SettingValue<T>> {
-  @Getter
-  @Accessors(fluent = true)
   private final String id;
-  @Getter
   @Setter
   @NonNull
-  @Accessors(fluent = true)
   private Manager<T, V> manager;
-  @Getter
-  @Accessors(fluent = true)
   private final V defaultValue;
-  @Getter
-  @Accessors(fluent = true)
   private final V naturalValue;
-  @Getter
-  @Accessors(fluent = true)
   private final String description;
-  @Getter
-  @Accessors(fluent = true)
   private final String blurb;
-  @Getter
-  @Accessors(fluent = true)
   private final Category category;
-  @Getter
-  @Accessors(fluent = true)
-  private final boolean implemented;
-  @Getter
-  @Accessors(fluent = true)
+  @Setter
+  private boolean functional;
   private final boolean global;
-  @Getter
-  @Accessors(fluent = true)
   private final boolean playerRestrictive;
-
 
   SettingKey(String id, Manager<T, V> manager,
              V defaultValue, V naturalValue,
              String description, String blurb,
              Category category,
-             boolean implemented,
+             boolean functional,
              boolean global,
              boolean playerRestrictive) {
     this.id = id;
@@ -107,14 +85,10 @@ public abstract class SettingKey<T, V extends SettingValue<T>> {
     this.description = description;
     this.blurb = blurb;
     this.category = category;
-    this.implemented = implemented;
+    this.functional = functional;
     this.global = global;
     this.playerRestrictive = playerRestrictive;
   }
-
-  public abstract T extractValue(@NotNull Collection<Host> hosts,
-                                 @Nullable final UUID userUuid,
-                                 @NotNull final Location location);
 
   public enum Category {
     BLOCKS,
@@ -125,19 +99,23 @@ public abstract class SettingKey<T, V extends SettingValue<T>> {
     GLOBAL,
   }
 
+  public abstract T extractValue(@NotNull Collection<Host> hosts,
+                                 @Nullable final UUID userUuid,
+                                 @NotNull final Location location);
+
   public static class Unary<T> extends SettingKey<T, SettingValue.Unary<T>> {
 
     Unary(String id, Manager<T, SettingValue.Unary<T>> manager,
           T defaultData, T naturalValue,
           String description, String blurb,
           Category category,
-          boolean implemented,
+          boolean functional,
           boolean global, boolean playerRestrictive) {
       super(id, manager,
           SettingValue.Unary.of(defaultData), SettingValue.Unary.of(naturalValue),
           description, blurb,
           category,
-          implemented,
+          functional,
           global, playerRestrictive);
     }
 
@@ -217,7 +195,7 @@ public abstract class SettingKey<T, V extends SettingValue<T>> {
       @Accessors(fluent = true)
       private Category category = Category.MISC;
 
-      private boolean implemented = true;
+      private boolean functional = false;
       private boolean global = false;
       private boolean playerRestrictive = false;
 
@@ -228,8 +206,8 @@ public abstract class SettingKey<T, V extends SettingValue<T>> {
         this.naturalValue = defaultValue;
       }
 
-      public Builder<T> notImplemented() {
-        this.implemented = false;
+      public Builder<T> functional() {
+        this.functional = true;
         return this;
       }
 
@@ -249,7 +227,7 @@ public abstract class SettingKey<T, V extends SettingValue<T>> {
             defaultValue, naturalValue,
             description, blurb,
             category,
-            implemented,
+            functional,
             global, playerRestrictive
         );
       }
@@ -262,14 +240,14 @@ public abstract class SettingKey<T, V extends SettingValue<T>> {
          Set<T> defaultData, Set<T> naturalValue,
          String description, String blurb,
          Category category,
-         boolean implemented,
+         boolean functional,
          boolean global, boolean playerRestrictive) {
       super(id, manager,
           SettingValue.Poly.declarative(defaultData),
           SettingValue.Poly.declarative(naturalValue),
           description, blurb,
           category,
-          implemented,
+          functional,
           global, playerRestrictive);
     }
 
@@ -358,7 +336,7 @@ public abstract class SettingKey<T, V extends SettingValue<T>> {
       @Accessors(fluent = true)
       private Category category = Category.MISC;
 
-      private boolean implemented = true;
+      private boolean functional = false;
       private boolean global = false;
       private boolean playerRestrictive = false;
 
@@ -369,8 +347,8 @@ public abstract class SettingKey<T, V extends SettingValue<T>> {
         this.naturalValue = defaultValue;
       }
 
-      public Builder<T> notImplemented() {
-        this.implemented = false;
+      public Builder<T> functional() {
+        this.functional = true;
         return this;
       }
 
@@ -390,7 +368,7 @@ public abstract class SettingKey<T, V extends SettingValue<T>> {
             defaultValue, naturalValue,
             description, blurb,
             category,
-            implemented,
+            functional,
             global, playerRestrictive
         );
       }
@@ -512,9 +490,7 @@ public abstract class SettingKey<T, V extends SettingValue<T>> {
       @Override
       public final Set<T> parseData(String data) throws ParseSettingException {
         Set<T> set = new HashSet<>();
-        SpongeNope.instance().logger().info("parseData... : " + data);
         for (String token : data.split(SET_SPLIT_REGEX)) {
-          SpongeNope.instance().logger().info("Parsing data: token: " + token);
           try {
             set.add(parseElement(token));
           } catch (IllegalArgumentException ex) {

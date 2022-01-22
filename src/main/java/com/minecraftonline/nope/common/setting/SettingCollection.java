@@ -37,6 +37,7 @@ import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public abstract class SettingCollection implements Persistent {
 
@@ -185,8 +186,9 @@ public abstract class SettingCollection implements Persistent {
     return changed;
   }
 
+  @Nullable
   @SuppressWarnings("unchecked")
-  public final <T, V extends SettingValue<T>> T removeData(SettingKey<T, V> key) {
+  public final <T, V extends SettingValue<T>> T removeValue(SettingKey<T, V> key) {
     T removed = (T) data.remove(key);
     if (!data.containsKey(key) && !targets.containsKey(key)) {
       keys.remove(key);

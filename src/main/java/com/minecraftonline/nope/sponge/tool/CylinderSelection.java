@@ -26,13 +26,9 @@
 
 package com.minecraftonline.nope.sponge.tool;
 
-import com.minecraftonline.nope.common.Nope;
 import com.minecraftonline.nope.common.math.Cylinder;
-import com.minecraftonline.nope.common.math.Vector2d;
 import com.minecraftonline.nope.sponge.util.Formatter;
 import net.kyori.adventure.text.Component;
-
-import java.util.List;
 
 public class CylinderSelection extends Selection<Cylinder> {
 

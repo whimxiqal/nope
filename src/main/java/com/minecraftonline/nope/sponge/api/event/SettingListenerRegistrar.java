@@ -23,7 +23,7 @@
  * SOFTWARE.
  */
 
-package com.minecraftonline.nope.sponge.api;
+package com.minecraftonline.nope.sponge.api.event;
 
 public interface SettingListenerRegistrar {
 

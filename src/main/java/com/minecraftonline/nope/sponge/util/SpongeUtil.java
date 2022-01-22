@@ -14,7 +14,7 @@ import org.spongepowered.api.world.server.ServerWorld;
 public final class SpongeUtil {
 
   public static String worldToId(ServerWorld world) {
-    return world.key().formatted();
+    return "_" + world.key().namespace() + "_" + world.key().value();
   }
 
   public static Location reduceLocation(ServerLocation location) {

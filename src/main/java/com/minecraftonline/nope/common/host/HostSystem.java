@@ -31,8 +31,6 @@ import com.google.common.collect.Sets;
 import com.minecraftonline.nope.common.math.Volume;
 import com.minecraftonline.nope.common.setting.Setting;
 import com.minecraftonline.nope.common.setting.SettingKey;
-import com.minecraftonline.nope.common.setting.SettingValue;
-import com.minecraftonline.nope.common.setting.Target;
 import com.minecraftonline.nope.common.setting.template.TemplateSet;
 import com.minecraftonline.nope.common.struct.Location;
 import java.util.Collection;
@@ -43,10 +41,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.PriorityQueue;
-import java.util.Queue;
 import java.util.Set;
-import java.util.Stack;
 import java.util.UUID;
 import lombok.Getter;
 import lombok.experimental.Accessors;
@@ -78,7 +73,7 @@ public class HostSystem {
 
   public HostSystem(Universe universe, Iterable<Domain> domains) {
     this.universe = universe;
-    domains.forEach(domain -> this.domains.put(domain.id(), domain));
+    domains.forEach(domain -> this.domains.put(domain.name(), domain));
   }
 
   @NotNull
@@ -341,8 +336,13 @@ public class HostSystem {
     return ImmutableMap.copyOf(domains);
   }
 
-  public Domain domain(String id) {
-    return domains.get(id);
+  @NotNull
+  public Domain domain(String name) {
+    Domain domain = domains.get(name);
+    if (domain == null) {
+      throw new IllegalArgumentException("There is no domain called: " + name);
+    }
+    return domain;
   }
 
   public Map<String, Zone> zones() {

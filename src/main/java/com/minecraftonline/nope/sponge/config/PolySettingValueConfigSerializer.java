@@ -23,14 +23,13 @@
  * SOFTWARE.
  */
 
-package com.minecraftonline.nope.sponge.setting;
+package com.minecraftonline.nope.sponge.config;
 
 import com.minecraftonline.nope.common.setting.SettingKey;
 import com.minecraftonline.nope.common.setting.SettingValue;
 import com.minecraftonline.nope.sponge.api.config.SettingValueConfigSerializer;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 import java.util.stream.Collectors;
 import org.spongepowered.configurate.CommentedConfigurationNode;
 import org.spongepowered.configurate.ConfigurationNode;

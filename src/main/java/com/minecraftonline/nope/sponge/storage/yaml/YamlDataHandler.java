@@ -21,8 +21,11 @@ public class YamlDataHandler extends ConfigurateDataHandler {
 
   public YamlDataHandler(Path path, SettingValueConfigSerializerRegistrar serializerRegistrar) {
     super(new YamlConfig(path, serializerRegistrar),
-        new DomainConfigurateDataHandler((key) -> yamlLoader(path.resolve(key.namespace())
-            .resolve(key.value() + ".yml")), serializerRegistrar),
+        new DomainConfigurateDataHandler((key) -> yamlLoader(path.resolve("_"
+            + key.namespace()
+            + "_"
+            + key.value()
+            + ".yml")), serializerRegistrar),
         new ZoneConfigurateDataHandler((name) -> yamlLoader(path.resolve("zones")
             .resolve(name + ".yml")),
             (name) -> path.resolve("zones")

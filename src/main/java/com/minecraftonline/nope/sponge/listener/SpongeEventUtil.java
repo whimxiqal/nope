@@ -25,8 +25,7 @@
 
 package com.minecraftonline.nope.sponge.listener;
 
-import com.minecraftonline.nope.sponge.api.SettingValueLookupFunction;
-import com.minecraftonline.nope.sponge.util.SpongeUtil;
+import com.minecraftonline.nope.sponge.api.event.SettingValueLookupFunction;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.cause.entity.damage.source.EntityDamageSource;
 import org.spongepowered.api.event.cause.entity.damage.source.IndirectEntityDamageSource;

@@ -28,22 +28,18 @@ package com.minecraftonline.nope.sponge.command.tree.host.blank;
 
 import com.minecraftonline.nope.common.host.Host;
 import com.minecraftonline.nope.common.host.Zone;
-import com.minecraftonline.nope.common.math.Vector3d;
-import com.minecraftonline.nope.common.math.Volume;
 import com.minecraftonline.nope.common.permission.Permissions;
 import com.minecraftonline.nope.sponge.command.CommandNode;
 import com.minecraftonline.nope.sponge.command.parameters.ParameterKeys;
 import com.minecraftonline.nope.sponge.command.parameters.Parameters;
 import com.minecraftonline.nope.sponge.util.EffectsUtil;
 import com.minecraftonline.nope.sponge.util.Formatter;
-import com.minecraftonline.nope.sponge.util.SpongeUtil;
 import java.util.Optional;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
-import org.spongepowered.api.world.server.ServerLocation;
 
 public class HostShowCommand extends CommandNode {
 

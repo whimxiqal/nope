@@ -1,7 +1,6 @@
 package com.minecraftonline.nope.sponge.tool;
 
 import com.google.common.collect.Lists;
-import com.minecraftonline.nope.common.Nope;
 import com.minecraftonline.nope.common.host.Domain;
 import com.minecraftonline.nope.common.math.Vector3i;
 import com.minecraftonline.nope.sponge.SpongeNope;
@@ -250,7 +249,7 @@ public class SelectionHandler {
         position.x(),
         position.y(),
         position.z(),
-        selection.domain().id()
+        selection.domain().name()
     ));
 
     if (originalDomain != null && originalDomain != domain) {

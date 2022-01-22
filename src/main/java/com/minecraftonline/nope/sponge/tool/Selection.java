@@ -28,14 +28,12 @@ package com.minecraftonline.nope.sponge.tool;
 
 import com.minecraftonline.nope.common.Nope;
 import com.minecraftonline.nope.common.host.Domain;
-import com.minecraftonline.nope.common.math.Cuboid;
 import com.minecraftonline.nope.common.math.Vector3i;
 import com.minecraftonline.nope.common.math.Volume;
 import lombok.Data;
 import lombok.experimental.Accessors;
 import net.kyori.adventure.text.Component;
 
-import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 

@@ -28,11 +28,9 @@ package com.minecraftonline.nope.sponge.listener;
 import com.google.common.collect.Lists;
 import com.minecraftonline.nope.common.setting.SettingKeys;
 import com.minecraftonline.nope.sponge.SpongeNope;
-import com.minecraftonline.nope.sponge.api.SettingEventListener;
-import com.minecraftonline.nope.sponge.api.SettingListenerRegistration;
+import com.minecraftonline.nope.sponge.api.event.SettingListenerRegistration;
 import com.minecraftonline.nope.sponge.listener.all.ArmorStandDestroyListener;
 import java.util.List;
-import org.spongepowered.api.event.Order;
 import org.spongepowered.api.event.entity.AttackEntityEvent;
 
 public class NopeSettingListeners {

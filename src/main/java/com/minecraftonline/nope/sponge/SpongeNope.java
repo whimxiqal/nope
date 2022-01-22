@@ -27,8 +27,8 @@ package com.minecraftonline.nope.sponge;
 import com.google.inject.Inject;
 import com.minecraftonline.nope.common.Nope;
 import com.minecraftonline.nope.common.setting.SettingKeys;
-import com.minecraftonline.nope.sponge.api.SettingKeyRegistrationEvent;
-import com.minecraftonline.nope.sponge.api.SettingListenerRegistrationEvent;
+import com.minecraftonline.nope.sponge.api.setting.SettingKeyRegistrationEvent;
+import com.minecraftonline.nope.sponge.api.event.SettingListenerRegistrationEvent;
 import com.minecraftonline.nope.sponge.api.config.SettingValueConfigSerializerRegistrar;
 import com.minecraftonline.nope.sponge.api.config.SettingValueConfigSerializerRegistrationEvent;
 import com.minecraftonline.nope.sponge.command.RootCommand;
@@ -38,9 +38,9 @@ import com.minecraftonline.nope.sponge.listener.NopeSettingListeners;
 import com.minecraftonline.nope.sponge.listener.SettingListenerStore;
 import com.minecraftonline.nope.sponge.mixin.collision.CollisionHandler;
 import com.minecraftonline.nope.sponge.setting.PolyEntitySettingManager;
-import com.minecraftonline.nope.sponge.setting.PolySettingValueConfigSerializer;
-import com.minecraftonline.nope.sponge.setting.SettingValueConfigSerializerRegistrarImpl;
-import com.minecraftonline.nope.sponge.setting.UnarySettingValueConfigSerializer;
+import com.minecraftonline.nope.sponge.config.PolySettingValueConfigSerializer;
+import com.minecraftonline.nope.sponge.config.SettingValueConfigSerializerRegistrarImpl;
+import com.minecraftonline.nope.sponge.config.UnarySettingValueConfigSerializer;
 import com.minecraftonline.nope.sponge.storage.yaml.YamlDataHandler;
 import com.minecraftonline.nope.sponge.util.Extra;
 import com.minecraftonline.nope.sponge.util.SpongeLogger;
@@ -97,11 +97,12 @@ public class SpongeNope extends Nope {
   @Setter
   private boolean valid = true;
 
-  private PluginContainer pluginContainer;
+  private final PluginContainer pluginContainer;
 
   @Inject
-  public SpongeNope() {
+  public SpongeNope(final PluginContainer pluginContainer) {
     super(new SpongeLogger());
+    this.pluginContainer = pluginContainer;
   }
 
   /**
@@ -114,7 +115,6 @@ public class SpongeNope extends Nope {
     // Set general static variables
     Nope.instance(this);
     instance = this;
-    this.pluginContainer = Sponge.pluginManager().plugin("nope").get();
     path(configDir);
 
     if (configDir.toFile().mkdirs()) {
@@ -140,6 +140,7 @@ public class SpongeNope extends Nope {
     Sponge.eventManager().post(new SettingListenerRegistrationEvent(
         registration -> {
           instance().settingListeners().register(registration);
+          registration.settingKey().functional(true);
         },
         event.game(),
         event.cause(),

@@ -143,12 +143,16 @@ public class Parameters {
         return Optional.of(key);
       })
       .completer((context, currentInput) -> {
+        Optional<Host> host = context.one(HOST);
+        boolean showGlobal = host.isPresent()
+            && host.get().equals(SpongeNope.instance().hostSystem().universe());
         final Predicate<String> startsWith = new StartsWithPredicate(currentInput);
         return SpongeNope.instance().settingKeys()
             .keys()
             .entrySet()
             .stream()
             .filter(entry -> startsWith.test(entry.getKey()))
+            .filter(entry -> showGlobal || !entry.getValue().global())
             .map(entry -> CommandCompletion.of(entry.getKey(),
                 Formatter.accent(entry.getValue().description())))
             .collect(Collectors.toList());

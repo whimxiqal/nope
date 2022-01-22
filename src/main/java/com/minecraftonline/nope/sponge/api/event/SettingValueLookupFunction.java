@@ -23,19 +23,17 @@
  * SOFTWARE.
  */
 
-package com.minecraftonline.nope.common.setting.manager;
+package com.minecraftonline.nope.sponge.api.event;
 
-import com.minecraftonline.nope.common.setting.SettingKey;
+import com.minecraftonline.nope.common.struct.Location;
+import java.util.UUID;
+import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.world.server.ServerLocation;
 
-public class PolyStringKeyManager extends SettingKey.Manager.Poly<String> {
+public interface SettingValueLookupFunction<T> {
 
-  @Override
-  public String printElement(String element) {
-    return element;
-  }
+  T lookup(Entity entity, ServerLocation location);
 
-  @Override
-  public String parseElement(String element) {
-    return element;
-  }
+  T lookup(UUID userUuid, Location location);
+
 }

@@ -1,3 +1,28 @@
+/*
+ *
+ * MIT License
+ *
+ * Copyright (c) 2022 Pieter Svenson
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
 package com.minecraftonline.nope.common.host;
 
 import com.minecraftonline.nope.common.Nope;
@@ -12,27 +37,21 @@ import lombok.experimental.Accessors;
  */
 public class Domain extends Host implements Domained {
 
-  @Getter
-  @Accessors(fluent = true)
-  private final String id;
-
   @Getter()
   @Accessors(fluent = true)
   private final VolumeTree volumes;
 
-  public Domain(String name, String id, int cacheSize) {
+  public Domain(String name, int cacheSize) {
     super(name, -1);
     if (cacheSize < 0) {
       throw new RuntimeException("The cache size must be greater than 0");
     } else if (cacheSize == 0) {
-      this.volumes = new VolumeTree();
+      this.volumes = new VolumeTree(true);
     } else {
       FlexibleHashQueueVolumeTree flexVolumeTree = new FlexibleHashQueueVolumeTree(cacheSize);
       Nope.instance().scheduleAsyncIntervalTask(flexVolumeTree::trim, 1, TimeUnit.SECONDS);
       this.volumes = flexVolumeTree;
     }
-
-    this.id = id;
   }
 
   @Override
@@ -62,11 +81,11 @@ public class Domain extends Host implements Domained {
       return false;
     }
     Domain domain = (Domain) o;
-    return id.equals(domain.id);
+    return name().equals(domain.name());
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(super.hashCode(), id);
+    return Objects.hash(super.hashCode(), name());
   }
 }

@@ -27,7 +27,6 @@
 package com.minecraftonline.nope.common.math;
 
 import com.minecraftonline.nope.common.host.Domain;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.experimental.Accessors;
 import org.jetbrains.annotations.NotNull;

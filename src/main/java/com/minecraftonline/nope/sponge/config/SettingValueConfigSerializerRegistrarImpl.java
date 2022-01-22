@@ -23,16 +23,14 @@
  * SOFTWARE.
  */
 
-package com.minecraftonline.nope.sponge.setting;
+package com.minecraftonline.nope.sponge.config;
 
 import com.minecraftonline.nope.common.setting.SettingKey;
 import com.minecraftonline.nope.common.setting.SettingValue;
 import com.minecraftonline.nope.sponge.api.config.SettingValueConfigSerializer;
 import com.minecraftonline.nope.sponge.api.config.SettingValueConfigSerializerRegistrar;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import org.jetbrains.annotations.NotNull;
 
 public class SettingValueConfigSerializerRegistrarImpl implements SettingValueConfigSerializerRegistrar {

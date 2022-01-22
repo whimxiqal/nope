@@ -27,7 +27,6 @@
 package com.minecraftonline.nope.common.math;
 
 import com.minecraftonline.nope.common.host.Domain;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.experimental.Accessors;
 import org.jetbrains.annotations.NotNull;
@@ -58,7 +57,7 @@ public class Sphere extends Volume {
   private final Cuboid circumscribed;
   private final Cuboid inscribed;
 
-  public Sphere(Domain domain,
+  public Sphere(@NotNull Domain domain,
                 Integer x,
                 Integer y,
                 Integer z,
@@ -131,17 +130,20 @@ public class Sphere extends Volume {
 
   @Override
   public boolean containsBlock(int x, int y, int z) {
-    int posXplus1Squared = (posX + 1 - x) * (posX + 1 - x);
-    int posYplus1Squared = (posY + 1 - y) * (posY + 1 - y);
-    int posZplus1Squared = (posZ + 1 - z) * (posZ + 1 - z);
-    return (posX - x) * (posX - x) + (posY - y) * (posY - y) + (posZ - z) * (posZ - z) <= radiusSquared
-        || posXplus1Squared + (posY - y) * (posY - y) + (posZ - z) * (posZ - z) <= radiusSquared
-        || (posX - x) * (posX - x) + posYplus1Squared + (posZ - z) * (posZ - z) <= radiusSquared
-        || (posX - x) * (posX - x) + (posY - y) * (posY - y) + posZplus1Squared <= radiusSquared
-        || posXplus1Squared + posYplus1Squared + (posZ - z) * (posZ - z) <= radiusSquared
-        || posXplus1Squared + (posY - y) * (posY - y) + posZplus1Squared <= radiusSquared
-        || (posX - x) * (posX - x) + posYplus1Squared + posZplus1Squared <= radiusSquared
-        || posXplus1Squared + posYplus1Squared + posZplus1Squared <= radiusSquared;
+    final int distSquaredX = (posX - x) * (posX - x);
+    final int distSquaredY = (posX - y) * (posX - y);
+    final int distSquaredZ = (posX - z) * (posX - z);
+    final int distPlus1SquaredX = (posX + 1 - x) * (posX + 1 - x);
+    final int distPlus1SquaredY = (posY + 1 - y) * (posY + 1 - y);
+    final int distPlus1SquaredZ = (posZ + 1 - z) * (posZ + 1 - z);
+    return distSquaredX + distSquaredY + distSquaredZ <= radiusSquared
+        || distPlus1SquaredX + distSquaredY + distSquaredZ <= radiusSquared
+        || distSquaredX + distPlus1SquaredY + distSquaredZ <= radiusSquared
+        || distSquaredX + distSquaredY + distPlus1SquaredZ <= radiusSquared
+        || distPlus1SquaredX + distPlus1SquaredY + distSquaredZ <= radiusSquared
+        || distPlus1SquaredX + distSquaredY + distPlus1SquaredZ <= radiusSquared
+        || distSquaredX + distPlus1SquaredY + distPlus1SquaredZ <= radiusSquared
+        || distPlus1SquaredX + distPlus1SquaredY + distPlus1SquaredZ <= radiusSquared;
   }
 
   @Override

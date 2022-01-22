@@ -26,14 +26,6 @@
 
 package com.minecraftonline.nope.common.math;
 
-import com.minecraftonline.nope.common.math.Cuboid;
-import com.minecraftonline.nope.common.math.Cylinder;
-import com.minecraftonline.nope.common.math.Slab;
-import com.minecraftonline.nope.common.math.Sphere;
-import com.minecraftonline.nope.common.math.Vector2d;
-import com.minecraftonline.nope.common.math.Vector3d;
-import com.minecraftonline.nope.common.math.Volume;
-
 public final class Geometry {
   private Geometry() {
   }

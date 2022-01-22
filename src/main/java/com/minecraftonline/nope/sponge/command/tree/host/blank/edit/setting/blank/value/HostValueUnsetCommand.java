@@ -23,19 +23,15 @@
  * SOFTWARE.
  */
 
-package com.minecraftonline.nope.common.setting.manager;
+package com.minecraftonline.nope.sponge.command.tree.host.blank.edit.setting.blank.value;
 
-import com.minecraftonline.nope.common.setting.SettingKey;
+import com.minecraftonline.nope.common.host.Host;
+import com.minecraftonline.nope.sponge.command.CommandNode;
+import com.minecraftonline.nope.sponge.command.parameters.ParameterKeys;
+import com.minecraftonline.nope.sponge.command.settingcollection.blank.edit.setting.blank.value.ValueUnsetCommand;
 
-public class PolyStringKeyManager extends SettingKey.Manager.Poly<String> {
-
-  @Override
-  public String printElement(String element) {
-    return element;
-  }
-
-  @Override
-  public String parseElement(String element) {
-    return element;
+public class HostValueUnsetCommand extends ValueUnsetCommand<Host> {
+  public HostValueUnsetCommand(CommandNode parent) {
+    super(parent, ParameterKeys.HOST, "host");
   }
 }

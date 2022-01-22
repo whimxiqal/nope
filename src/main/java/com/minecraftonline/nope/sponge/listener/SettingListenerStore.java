@@ -26,10 +26,9 @@
 package com.minecraftonline.nope.sponge.listener;
 
 import com.minecraftonline.nope.common.setting.SettingKeyStore;
-import com.minecraftonline.nope.sponge.SpongeNope;
-import com.minecraftonline.nope.sponge.api.SettingEventListener;
-import com.minecraftonline.nope.sponge.api.SettingListenerRegistration;
-import com.minecraftonline.nope.sponge.api.SettingValueLookupFunction;
+import com.minecraftonline.nope.sponge.api.event.SettingEventListener;
+import com.minecraftonline.nope.sponge.api.event.SettingListenerRegistration;
+import com.minecraftonline.nope.sponge.api.event.SettingValueLookupFunction;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -62,7 +61,7 @@ public class SettingListenerStore {
     //  or alternatively if the default value of the setting is game-changing inherently.
     Sponge.eventManager().registerListener(EventListenerRegistration.builder(registration.eventClass())
         .listener((event) -> registration.settingEventListener()
-            .handle(event, new SettingValueLookupFunction<>(registration.settingKey())))
+            .handle(event, new SettingValueLookupFunctionImpl<>(registration.settingKey())))
         .order(registration.order())
         .plugin(registration.plugin())
         .build());
