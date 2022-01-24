@@ -23,38 +23,46 @@
  * SOFTWARE.
  */
 
-package com.minecraftonline.nope.sponge.setting;
+package com.minecraftonline.nope.common.setting.manager;
 
 import com.minecraftonline.nope.common.setting.SettingKey;
+import com.minecraftonline.nope.common.struct.Described;
+import com.minecraftonline.nope.common.struct.HashAltSet;
+import java.util.Arrays;
 import java.util.Map;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import org.jetbrains.annotations.NotNull;
-import org.spongepowered.api.entity.Entity;
-import org.spongepowered.api.entity.EntityType;
-import org.spongepowered.api.entity.EntityTypes;
-import org.spongepowered.api.registry.RegistryEntry;
 
-public class PolyEntitySettingManager extends SettingKey.Manager.Poly<String> {
+public class PolyAllCapsEnumKeyManager<E extends Enum<E> & Described, S extends HashAltSet<E>> extends SettingKey.Manager.Poly<E, S> {
+
+  private final Class<E> clazz;
+  private final Supplier<S> setConstructor;
+
+  public PolyAllCapsEnumKeyManager(Class<E> clazz, Supplier<S> setConstructor) {
+    this.clazz = clazz;
+    this.setConstructor = setConstructor;
+  }
+
+  @Override
+  @NotNull
+  public String printElement(E element) {
+    return element.name().toLowerCase();
+  }
+
+  @Override
+  public E parseElement(String element) throws SettingKey.ParseSettingException {
+    return Enum.valueOf(clazz, element.toUpperCase());
+  }
+
+  @Override
+  public S createSet() {
+    return this.setConstructor.get();
+  }
 
   @Override
   public @NotNull Map<String, Object> elementOptions() {
-    return EntityTypes.registry().streamEntries()
-        .collect(Collectors.<RegistryEntry<EntityType<? extends Entity>>, String, Object>
-            toMap(entity -> entity.key().value(), entity -> entity.value().asComponent()));
-  }
-
-  @Override
-  public String printElement(String element) {
-    return element;
-  }
-
-  @Override
-  public String parseElement(String element) throws SettingKey.ParseSettingException {
-    return EntityTypes.registry().streamEntries()
-        .map(entity -> entity.key().value())
-        .filter(name -> name.equalsIgnoreCase(element))
-        .findFirst()
-        .orElseThrow(() -> new SettingKey.ParseSettingException("No entity found called " + element))
-        .toLowerCase();
+    return Arrays.stream(clazz.getEnumConstants())
+        .collect(Collectors.toMap(e -> e.name().toLowerCase(), Described::description));
   }
 }

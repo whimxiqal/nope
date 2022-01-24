@@ -33,10 +33,10 @@ import org.jetbrains.annotations.NotNull;
 
 public class SettingKeyStore {
 
-  private final HashMap<String, SettingKey<?, ?>> settingMap = Maps.newHashMap();
+  private final HashMap<String, SettingKey<?, ?, ?>> settingMap = Maps.newHashMap();
   private boolean locked;
 
-  public void register(@NotNull SettingKey<?, ?> settingKey) throws IllegalArgumentException {
+  public void register(@NotNull SettingKey<?, ?, ?> settingKey) throws IllegalArgumentException {
     if (locked) {
       throw new IllegalStateException("The setting key store is locked. "
           + "You may only register keys during the allocated event.");
@@ -54,8 +54,8 @@ public class SettingKeyStore {
    * @return the SettingKey keyed with that id
    * @throws NoSuchElementException if there is no SettingKey with that id
    */
-  public SettingKey<?, ?> get(@NotNull String id) throws NoSuchElementException {
-    SettingKey<?, ?> output = settingMap.get(id);
+  public SettingKey<?, ?, ?> get(@NotNull String id) throws NoSuchElementException {
+    SettingKey<?, ?, ?> output = settingMap.get(id);
     if (output == null) {
       throw new NoSuchElementException(String.format(
           "There is no setting with id '%s'",
@@ -68,7 +68,7 @@ public class SettingKeyStore {
     return settingMap.containsKey(id);
   }
 
-  public Map<String, SettingKey<?, ?>> keys() {
+  public Map<String, SettingKey<?, ?, ?>> keys() {
     return settingMap;
   }
 

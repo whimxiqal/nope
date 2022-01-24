@@ -285,7 +285,7 @@ public final class Formatter {
   }
 
 
-  public static <T, V extends SettingValue<T>> Component settingKey(SettingKey<T, V> key, boolean verbose) {
+  public static <T, V extends SettingValue<T>> Component settingKey(SettingKey<T, V, ?> key, boolean verbose) {
     TextComponent.Builder idText = Component.text().append(Component.text(key.id()).color(ACCENT));
 
     TextComponent.Builder hoverText = Component.text()
@@ -298,10 +298,11 @@ public final class Formatter {
       hoverText.append(Component.newline());
     }
 
-    hoverText.append(keyValue("Type:", key.manager().valueType().getSimpleName()));
+    hoverText.append(keyValue("Type:", "Type goes here"));
+    // TODO Fix this ^
     hoverText.append(Component.newline());
 
-    String defaultData = key.manager().printValue(key.defaultValue());
+    String defaultData = key.manager().printData(key.defaultData());
     hoverText.append(keyValue("Default value:", defaultData.isEmpty()
         ? "(Empty)"
         : defaultData));

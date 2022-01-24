@@ -23,12 +23,22 @@
  * SOFTWARE.
  */
 
-package com.minecraftonline.nope.sponge.api.setting;
+package com.minecraftonline.nope.sponge.listener.dynamic;
 
-import com.minecraftonline.nope.common.setting.SettingKey;
+import com.minecraftonline.nope.sponge.api.event.SettingEventListener;
+import com.minecraftonline.nope.sponge.api.event.SettingValueLookupFunction;
+import com.minecraftonline.nope.sponge.listener.SpongeEventUtil;
+import org.spongepowered.api.entity.living.ArmorStand;
+import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.event.entity.AttackEntityEvent;
 
-public interface SettingKeyRegistrar {
-
-  void register(SettingKey<?, ?, ?> settingKey);
-
+public class ArmorStandDestroyListener implements SettingEventListener<Boolean, AttackEntityEvent> {
+  @Override
+  public void handle(AttackEntityEvent event, SettingValueLookupFunction<Boolean> lookupFunction) {
+    SpongeEventUtil.cancelEntityAttackingEntity(event,
+        lookupFunction,
+        Player.class,
+        ArmorStand.class,
+        true);
+  }
 }

@@ -25,9 +25,9 @@
 
 package com.minecraftonline.nope.common.setting;
 
+import com.minecraftonline.nope.common.struct.HashAltSet;
+import com.minecraftonline.nope.common.struct.AltSet;
 import java.io.Serializable;
-import java.util.HashSet;
-import java.util.Set;
 import lombok.Getter;
 import lombok.experimental.Accessors;
 import org.jetbrains.annotations.NotNull;
@@ -53,94 +53,93 @@ public abstract class SettingValue<T> implements Serializable {
 
   }
 
-  @Accessors(fluent = true)
-  public static class Poly<T> extends SettingValue<Set<T>> implements Serializable  {
-    private final Set<T> additive = new HashSet<>();
-    private final Set<T> subtractive = new HashSet<>();
-    @Getter
-    private Behavior behavior = Behavior.MANIPULATIVE;
+  public abstract static class Poly<T, S extends AltSet<T>>
+      extends SettingValue<S> implements Serializable  {
 
     private Poly() {
     }
 
-    public static <X> Poly<X> additive(@NotNull Set<X> positive) {
-      Poly<X> value = new Poly<>();
-      value.additive.addAll(positive);
-      return value;
-    }
-
-    public static <X> Poly<X> negative(@NotNull Set<X> negative) {
-      Poly<X> value = new Poly<>();
-      value.subtractive.addAll(negative);
-      return value;
-    }
-
-    public static <X> Poly<X> manipulative(@NotNull Set<X> positive, @NotNull Set<X> negative) {
-      Poly<X> value = new Poly<>();
-      value.additive.addAll(positive);
-      value.subtractive.addAll(negative);
-
-      // Remove any shared values... having them in both places doesn't make sense
-      Set<X> sharedValues = new HashSet<>(value.additive);
-      sharedValues.retainAll(value.subtractive);
-      value.additive.removeAll(sharedValues);
-      value.subtractive.removeAll(sharedValues);
+    public static <X, Y extends AltSet<X>> Poly<X, Y> manipulative(@NotNull Y additive,
+                                                                       @NotNull Y subtractive) {
+      Manipulative<X, Y> value = new Manipulative<>(additive, subtractive);
 
       return value;
     }
 
-    public static <X> Poly<X> declarative(@NotNull Set<X> set) {
-      Poly<X> value = new Poly<>();
-      value.behavior = Behavior.DECLARATIVE;
-      value.additive.addAll(set);
-      return value;
+    public static <X, Y extends AltSet<X>> Poly<X, Y> declarative(@NotNull Y set) {
+      return new Declarative<>(set);
     }
 
-    public static <X> Poly<X> empty() {
-      return new Poly<>();
-    }
+    public abstract S applyTo(S set);
 
-    public static <X> Poly<X> combine(Poly<X> first, Poly<X> second) {
-      if (first.behavior != second.behavior) {
-        throw new IllegalArgumentException("The arguments must be of the same declarative type");
+    public abstract S additive();
+
+    public abstract S subtractive();
+
+    public abstract boolean declarative();
+
+    public abstract boolean manipulative();
+
+    private static class Declarative<T, S extends AltSet<T>> extends Poly<T, S> {
+      private final S set;
+
+      Declarative(S set) {
+        this.set = set;
       }
-      Poly<X> value = new Poly<>();
-      value.behavior = first.behavior;
-      value.additive.addAll(first.additive);
-      value.additive.addAll(second.additive);
-      value.subtractive.addAll(first.subtractive);
-      value.subtractive.addAll(second.subtractive);
-      return value;
+
+      @Override
+      public S applyTo(S set) {
+        return this.set;
+      }
+
+      @Override
+      public S additive() {
+        return set;
+      }
+
+      @Override
+      public S subtractive() {
+        throw new UnsupportedOperationException();
+      }
+
+      @Override
+      public boolean declarative() {
+        return true;
+      }
+
+      @Override
+      public boolean manipulative() {
+        return false;
+      }
     }
 
-    public void applyTo(Set<T> set) {
-      if (behavior == Behavior.DECLARATIVE) {
-        set.clear();
-      } else {
+    @Getter
+    @Accessors(fluent = true)
+    private static class Manipulative<T, S extends AltSet<T>> extends Poly<T, S> {
+      private final S additive;
+      private final S subtractive;
+
+      private Manipulative(S additive, S subtractive) {
+        this.additive = additive;
+        this.subtractive = subtractive;
+      }
+
+      @Override
+      public S applyTo(S set) {
+        set.addAll(this.additive);
         set.removeAll(this.subtractive);
+        return set;
       }
-      set.addAll(this.additive);
-    }
 
-    public Set<T> additive() {
-      return new HashSet<>(additive);
-    }
+      @Override
+      public boolean declarative() {
+        return false;
+      }
 
-    public Set<T> subtractive() {
-      return new HashSet<>(subtractive);
-    }
-
-    public boolean declarative() {
-      return behavior == Behavior.DECLARATIVE;
-    }
-
-    public boolean manipulative() {
-      return behavior == Behavior.MANIPULATIVE;
-    }
-
-    public enum Behavior {
-      DECLARATIVE,
-      MANIPULATIVE
+      @Override
+      public boolean manipulative() {
+        return true;
+      }
     }
 
   }

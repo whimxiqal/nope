@@ -225,12 +225,12 @@ public class HostSystem {
     return hosts().values().stream().anyMatch(host -> host.get(key).isPresent());
   }
 
-  public <X> X lookupAnonymous(@NotNull SettingKey<X, ?> key,
+  public <X> X lookupAnonymous(@NotNull SettingKey<X, ?, ?> key,
                                @NotNull Location location) {
     return lookup(key, null, location);
   }
 
-  public <X> X lookup(@NotNull final SettingKey<X, ?> key,
+  public <X> X lookup(@NotNull final SettingKey<X, ?, ?> key,
                       @Nullable final UUID userUuid,
                       @NotNull final Location location) {
     LinkedList<Host> hosts = new LinkedList<>();
@@ -295,7 +295,7 @@ public class HostSystem {
    * @param key  the key
    * @return a superior with an identical setting
    */
-  public Optional<Host> findIdenticalSuperior(Host host, SettingKey<?, ?> key) {
+  public Optional<Host> findIdenticalSuperior(Host host, SettingKey<?, ?, ?> key) {
     // Check if this host even has a setting
     Optional<? extends Setting<?, ?>> setting = host.get(key);
     if (!setting.isPresent()) {
@@ -324,7 +324,7 @@ public class HostSystem {
     }
 
     // We're out of superiors, so check if the default value is this one
-    if (key.defaultValue().equals(setting.get().value())) {
+    if (key.defaultData().equals(setting.get().value())) {
       // Return the original host to signify that the default value makes this redundant
       return Optional.of(host);
     } else {

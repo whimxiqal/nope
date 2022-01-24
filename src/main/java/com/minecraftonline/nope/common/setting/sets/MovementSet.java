@@ -23,12 +23,36 @@
  * SOFTWARE.
  */
 
-package com.minecraftonline.nope.sponge.api.setting;
+package com.minecraftonline.nope.common.setting.sets;
 
-import com.minecraftonline.nope.common.setting.SettingKey;
+import com.minecraftonline.nope.common.struct.Described;
+import com.minecraftonline.nope.common.struct.HashAltSet;
 
-public interface SettingKeyRegistrar {
+public class MovementSet extends HashAltSet.FewEnum<MovementSet.Movement> {
 
-  void register(SettingKey<?, ?, ?> settingKey);
+  public MovementSet() {
+    super(Movement.class);
+  }
 
+  /**
+   * Enumeration for all movement types considered by Nope.
+   */
+  public enum Movement implements Described {
+    ALL("Allow all types of movement"),
+    NATURAL("Allow only natural, vanilla types of movement"),
+    NONE("Don't allow any movement"),
+    UNNATURAL("Allow only unnatural types of movement allowed through some game-modifying cause");
+
+    private final String description;
+
+    Movement(String description) {
+      this.description = description;
+    }
+
+
+    @Override
+    public String description() {
+      return description;
+    }
+  }
 }

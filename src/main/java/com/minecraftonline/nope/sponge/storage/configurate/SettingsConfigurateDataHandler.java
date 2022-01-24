@@ -86,27 +86,8 @@ public abstract class SettingsConfigurateDataHandler {
 
   private <X, Y extends SettingValue<X>> void deserializeSetting(ConfigurationNode settingNode,
                                                                  List<Setting<?, ?>> settings,
-                                                                 SettingKey<X, Y> key)
+                                                                 SettingKey<X, Y, ?> key)
       throws SerializationException {
-    // TODO Have to determine how we are going to think about serialization.
-    //  On the one hand, we want to make sure that setting key managers can serialize and deserialize their values
-    //  accurately and generically, i.e. the methods to do so much be abstract in the manager. This is so that we can
-    //  can call serialize and deserialize here without absolutely knowing that we are using Unary and Poly (our own creation)
-    //  This is all under the understanding and hope that others can create their own settings, and thus setting types,
-    //  although Unary and Poly should really likely be the only ones ever needed.
-    //  So, we could just abstractly create a Setting Key Manager abstract method that says "okay, handle this config node"?
-    //  Wrong, because we also want to keep any Sponge functionality out of the Sponge package to keep a delineation
-    //  between common and implementation-specific things. So, that method cannot exist.
-    //  Proposed solution: have a generic value-serializer and value-deserializer in the manager that takes all possible inputs
-    //  for any value type (Unary or Poly). No matter what, whether Unary or Poly, there will be data missing
-    //  in the places to build the other. As in, the Unary data (one single value) will be given for the Unary value type
-    //  but none of the Poly stuff will be given (add, subtract, behavior type), so they will be null.
-    //  It will be up to the manager to handle the behavior given these data, so the Unary manager will require the Unary data
-    //  and the Poly manager will require the Poly stuff.
-    //  Not a great solution... because it's not what these constructors are supposed to do and it inherently blocks off
-    //  the ability to create more types of settings because Unary and Poly are the only ones it is is built for.
-    //  There needs to be another way using Maps, because we can serialize and deserialize if we know what we are looking
-    //  for in them...
     Y value = serializerRegistrar.serializerOf(key.manager()).deserialize(key.manager(), settingNode.node("value"));
     Target target = null;
     if (!settingNode.node("target").virtual()) {

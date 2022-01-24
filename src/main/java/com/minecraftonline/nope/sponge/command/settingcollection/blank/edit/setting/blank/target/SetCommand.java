@@ -31,7 +31,7 @@ public class SetCommand<T extends SettingCollection> extends CommandNode {
   @Override
   public CommandResult execute(CommandContext context) throws CommandException {
     T collection = context.requireOne(settingCollectionParameterKey);
-    SettingKey<?, ?> key = context.requireOne(ParameterKeys.SETTING_KEY);
+    SettingKey<?, ?, ?> key = context.requireOne(ParameterKeys.SETTING_KEY);
     TargetOption option = context.requireOne(ParameterKeys.TARGET_OPTION);
 
     switch (option) {

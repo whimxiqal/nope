@@ -89,11 +89,11 @@ public class BooleanKeyManager extends SettingKey.Manager.Unary<Boolean> {
   }
 
   @Override
-  public @NotNull String printValue(@NotNull SettingValue.Unary<Boolean> data) {
+  public @NotNull String printData(@NotNull Boolean data) {
     if (useStates) {
-      return data.get() ? "allow" : "deny";
+      return data ? "allow" : "deny";
     } else {
-      return String.valueOf(data.get());
+      return String.valueOf(data);
     }
   }
 }

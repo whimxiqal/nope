@@ -31,15 +31,21 @@ import lombok.experimental.Accessors;
 public final class ParameterValueTypes {
 
   public enum SettingValueAlterType {
-    SET("Sets the value directly"),
-    CONCATENATE("Concatenates elements onto the value"),
-    REMOVE("Removes elements from the value");
+    SET("set", "Sets the value directly"),
+    SET_NOT("setnot", "Sets all except the given values"),
+    CONCATENATE("concatenate", "Concatenates elements onto the value"),
+    REMOVE("remove", "Removes elements from the value");
+
+    @Getter
+    @Accessors(fluent = true)
+    private final String command;
 
     @Getter
     @Accessors(fluent = true)
     private final String description;
 
-    SettingValueAlterType(String description) {
+    SettingValueAlterType(String command, String description) {
+      this.command = command;
       this.description = description;
     }
   }

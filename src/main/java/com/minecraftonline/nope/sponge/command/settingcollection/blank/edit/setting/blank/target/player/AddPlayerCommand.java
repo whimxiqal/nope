@@ -31,13 +31,12 @@ public class AddPlayerCommand<T extends SettingCollection> extends CommandNode {
         "Add a player on the target of a " + collectionName,
         "add");
     this.settingCollectionParameterKey = settingCollectionParameterKey;
-    addParameter(Parameters.PLAYER_LIST);
   }
 
   @Override
   public CommandResult execute(CommandContext context) throws CommandException {
     T collection = context.requireOne(settingCollectionParameterKey);
-    SettingKey<?, ?> key = context.requireOne(ParameterKeys.SETTING_KEY);
+    SettingKey<?, ?, ?> key = context.requireOne(ParameterKeys.SETTING_KEY);
     Collection<CompletableFuture<GameProfile>> players = context.requireOne(ParameterKeys.PLAYER_LIST);
 
     Target target = collection.computeTarget(key, Target::none);

@@ -27,6 +27,7 @@ package com.minecraftonline.nope.sponge.config;
 
 import com.minecraftonline.nope.common.setting.SettingKey;
 import com.minecraftonline.nope.common.setting.SettingValue;
+import com.minecraftonline.nope.common.struct.HashAltSet;
 import com.minecraftonline.nope.sponge.api.config.SettingValueConfigSerializer;
 import java.util.Map;
 import java.util.Objects;
@@ -35,43 +36,56 @@ import org.spongepowered.configurate.CommentedConfigurationNode;
 import org.spongepowered.configurate.ConfigurationNode;
 import org.spongepowered.configurate.serialize.SerializationException;
 
-public class PolySettingValueConfigSerializer implements SettingValueConfigSerializer<SettingKey.Manager.Poly<?>> {
+public class PolySettingValueConfigSerializer implements SettingValueConfigSerializer<SettingKey.Manager.Poly<?, ?>> {
 
   @Override
-  public Class<SettingKey.Manager.Poly<?>> managerClass() {
-    return (Class<SettingKey.Manager.Poly<?>>) (Class<?>) SettingKey.Manager.Poly.class;
+  public Class<SettingKey.Manager.Poly<?, ?>> managerClass() {
+    return (Class<SettingKey.Manager.Poly<?, ?>>) (Class<?>) SettingKey.Manager.Poly.class;
   }
 
   @Override
   public <X,
       Y extends SettingValue<X>,
-      Z extends SettingKey.Manager<X, Y>> CommentedConfigurationNode serialize(Z managerGeneral,
-                                                                               Y valueGeneral)
+      Z extends SettingKey.Manager<X, Y>> CommentedConfigurationNode serialize(Z managerGeneral, Y valueGeneral)
       throws SerializationException {
-    SettingKey.Manager.Poly<X> manager = (SettingKey.Manager.Poly<X>) managerGeneral;
-    SettingValue.Poly<X> value = (SettingValue.Poly<X>) valueGeneral;
-    CommentedConfigurationNode node = CommentedConfigurationNode.root();
-    node.node("type").set(value.behavior().name().toLowerCase());
-    switch (value.behavior()) {
-      case DECLARATIVE:
-        node.node("set").setList(String.class, value.additive().stream()
-            .map(manager::printElement)
-            .collect(Collectors.toList()));
-        return node;
-      case MANIPULATIVE:
-        node.node("adding").setList(String.class, value.additive()
-            .stream()
-            .map(manager::printElement)
-            .collect(Collectors.toList()));
-        node.node("subtracting").setList(String.class, value.subtractive()
-            .stream()
-            .map(manager::printElement)
-            .collect(Collectors.toList()));
-        return node;
-      default:
-        throw new IllegalStateException("Unknown behavior type: " + value.behavior());
+    return serializePoly(managerGeneral, valueGeneral);
+  }
 
+  private <X,
+      Y extends SettingValue<X>,
+      Z extends SettingKey.Manager<X, Y>,
+      S extends HashAltSet<X>> CommentedConfigurationNode serializePoly(Z managerGeneral, Y valueGeneral)
+      throws SerializationException {
+    SettingKey.Manager.Poly<X, S> manager = (SettingKey.Manager.Poly<X, S>) managerGeneral;
+    SettingValue.Poly<X, S> value = (SettingValue.Poly<X, S>) valueGeneral;
+    CommentedConfigurationNode node = CommentedConfigurationNode.root();
+    node.node("type").set(value.declarative() ? "declarative" : "manipulative");
+    if (value.declarative()) {
+      node.node("set").set(serializeSet(manager, value.additive()));
+      return node;
+    } else if (value.manipulative()) {
+      node.node("add").set(serializeSet(manager, value.additive()));
+      node.node("subtract").set(serializeSet(manager, value.additive()));
+      return node;
+    } else {
+      throw new IllegalStateException("Unknown behavior type");
     }
+  }
+
+  private <X,
+      Z extends SettingKey.Manager.Poly<X, S>,
+      S extends HashAltSet<X>> CommentedConfigurationNode serializeSet(Z manager,
+                                                                       S set) throws SerializationException {
+    CommentedConfigurationNode node = CommentedConfigurationNode.root();
+    node.node("values").setList(String.class, set.set().stream()
+        .map(manager::printElement)
+        .collect(Collectors.toList()));
+    if (set.inverted()) {
+      node.node("type").set("all-except");
+    } else {
+      node.node("type").set("all-of");
+    }
+    return node;
   }
 
   @Override
@@ -80,28 +94,45 @@ public class PolySettingValueConfigSerializer implements SettingValueConfigSeria
       Z extends SettingKey.Manager<X, Y>> Y deserialize(Z managerGeneral,
                                                         ConfigurationNode configNode)
       throws SerializationException {
-    SettingKey.Manager.Poly<X> manager = (SettingKey.Manager.Poly<X>) managerGeneral;
+    return deserializePoly(managerGeneral, configNode);
+  }
+
+  private <X,
+      Y extends SettingValue<X>,
+      Z extends SettingKey.Manager<X, Y>,
+      S extends HashAltSet<X>> Y deserializePoly(Z managerGeneral,
+                                                 ConfigurationNode configNode)
+      throws SerializationException {
+    SettingKey.Manager.Poly<X, S> manager = (SettingKey.Manager.Poly<X, S>) managerGeneral;
     Map<Object, ? extends ConfigurationNode> children = configNode.childrenMap();
-    switch (SettingValue.Poly.Behavior.valueOf(children.get("type").require(String.class).toUpperCase())) {
-      case DECLARATIVE:
-        return (Y) SettingValue.Poly
-            .declarative(Objects.requireNonNull(children.get("set").getList(String.class))
-                .stream()
-                .map(manager::parseElement)
-                .collect(Collectors.toSet()));
-      case MANIPULATIVE:
-        return (Y) SettingValue.Poly.manipulative(Objects.requireNonNull(children.get("adding")
-                    .getList(String.class))
-                .stream()
-                .map(manager::parseElement)
-                .collect(Collectors.toSet()),
-            Objects.requireNonNull(children.get("subtracting")
-                    .getList(String.class))
-                .stream()
-                .map(manager::parseElement)
-                .collect(Collectors.toSet()));
-      default:
-        throw new SerializationException("Serialized poly value type could not be read "
-            + "(must be DECLARATIVE or MANIPULATIVE)");
-    }  }
+    String parsedType = children.get("type").require(String.class);
+    if (parsedType.equalsIgnoreCase("declarative")) {
+      return (Y) SettingValue.Poly.declarative(deserializeSet(manager, children.get("set")));
+    } else if (parsedType.equalsIgnoreCase("manipulative")) {
+      return (Y) SettingValue.Poly.manipulative(deserializeSet(manager, children.get("add")),
+         deserializeSet(manager, children.get("subtract")));
+    } else {
+      throw new SerializationException("Serialized poly value type could not be read "
+          + "(must be 'set' or 'alter')");
+    }
+  }
+
+  private <X,
+      Z extends SettingKey.Manager.Poly<X, S>,
+      S extends HashAltSet<X>> S deserializeSet(Z manager,
+                                                ConfigurationNode node) throws SerializationException {
+    S set = manager.createSet();
+    Objects.requireNonNull(node.node("values").getList(String.class)).forEach(s ->
+        set.add(manager.parseElement(s)));
+    String type = Objects.requireNonNull(node.node("type").getString());
+    if (type.equalsIgnoreCase("all-of")) {
+      // pass
+    } else if (type.equalsIgnoreCase("all-except")) {
+      set.invert();
+    } else {
+      throw new SerializationException("Serialized set type could not be read "
+          + "(must be 'all-of' or 'all-except')");
+    }
+    return set;
+  }
 }

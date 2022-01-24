@@ -25,8 +25,10 @@
 
 package com.minecraftonline.nope.common.setting;
 
-import com.google.common.collect.Streams;
+import com.minecraftonline.nope.common.Nope;
 import com.minecraftonline.nope.common.host.Host;
+import com.minecraftonline.nope.common.struct.AltSet;
+import com.minecraftonline.nope.common.struct.HashAltSet;
 import com.minecraftonline.nope.common.struct.Location;
 import java.util.Collection;
 import java.util.Collections;
@@ -41,7 +43,6 @@ import java.util.Stack;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.Getter;
-import lombok.NonNull;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import org.jetbrains.annotations.NotNull;
@@ -56,23 +57,23 @@ import org.jetbrains.annotations.Nullable;
  */
 @Getter
 @Accessors(fluent = true)
-public abstract class SettingKey<T, V extends SettingValue<T>> {
+public abstract class SettingKey<T,
+    V extends SettingValue<T>,
+    M extends SettingKey.Manager<T, V>> {
   private final String id;
-  @Setter
-  @NonNull
-  private Manager<T, V> manager;
-  private final V defaultValue;
-  private final V naturalValue;
+  private final M manager;
+  private final T defaultData;
+  private final T naturalData;
   private final String description;
   private final String blurb;
   private final Category category;
-  @Setter
-  private boolean functional;
   private final boolean global;
   private final boolean playerRestrictive;
+  @Setter
+  private boolean functional;
 
-  SettingKey(String id, Manager<T, V> manager,
-             V defaultValue, V naturalValue,
+  SettingKey(String id, @NotNull M manager,
+             T defaultData, T naturalData,
              String description, String blurb,
              Category category,
              boolean functional,
@@ -80,8 +81,8 @@ public abstract class SettingKey<T, V extends SettingValue<T>> {
              boolean playerRestrictive) {
     this.id = id;
     this.manager = manager;
-    this.defaultValue = defaultValue;
-    this.naturalValue = naturalValue;
+    this.defaultData = defaultData;
+    this.naturalData = naturalData;
     this.description = description;
     this.blurb = blurb;
     this.category = category;
@@ -89,6 +90,10 @@ public abstract class SettingKey<T, V extends SettingValue<T>> {
     this.global = global;
     this.playerRestrictive = playerRestrictive;
   }
+
+  public abstract T extractValue(@NotNull Collection<Host> hosts,
+                                 @Nullable final UUID userUuid,
+                                 @NotNull final Location location);
 
   public enum Category {
     BLOCKS,
@@ -99,20 +104,16 @@ public abstract class SettingKey<T, V extends SettingValue<T>> {
     GLOBAL,
   }
 
-  public abstract T extractValue(@NotNull Collection<Host> hosts,
-                                 @Nullable final UUID userUuid,
-                                 @NotNull final Location location);
+  public static class Unary<T> extends SettingKey<T, SettingValue.Unary<T>, SettingKey.Manager.Unary<T>> {
 
-  public static class Unary<T> extends SettingKey<T, SettingValue.Unary<T>> {
-
-    Unary(String id, Manager<T, SettingValue.Unary<T>> manager,
+    Unary(String id, Manager.Unary<T> manager,
           T defaultData, T naturalValue,
           String description, String blurb,
           Category category,
           boolean functional,
           boolean global, boolean playerRestrictive) {
       super(id, manager,
-          SettingValue.Unary.of(defaultData), SettingValue.Unary.of(naturalValue),
+          defaultData, naturalValue,
           description, blurb,
           category,
           functional,
@@ -121,7 +122,7 @@ public abstract class SettingKey<T, V extends SettingValue<T>> {
 
     public static <X> Builder<X> builder(String id,
                                          X defaultValue,
-                                         Manager<X, SettingValue.Unary<X>> manager) {
+                                         Manager.Unary<X> manager) {
       return new Builder<>(id, defaultValue, manager);
     }
 
@@ -175,12 +176,16 @@ public abstract class SettingKey<T, V extends SettingValue<T>> {
       }
 
       // No more left, so just do default
-      return defaultValue().get();
+      return defaultData();
+    }
+
+    public T getDataOrDefault(Host host) {
+      return host.getValue(this).map(SettingValue.Unary::get).orElse(this.defaultData());
     }
 
     public static class Builder<T> {
       private final String id;
-      private final Manager<T, SettingValue.Unary<T>> manager;
+      private final Manager.Unary<T> manager;
       private final T defaultValue;
       @Setter
       @Accessors(fluent = true)
@@ -199,7 +204,7 @@ public abstract class SettingKey<T, V extends SettingValue<T>> {
       private boolean global = false;
       private boolean playerRestrictive = false;
 
-      private Builder(String id, T defaultValue, Manager<T, SettingValue.Unary<T>> manager) {
+      private Builder(String id, T defaultValue, Manager.Unary<T> manager) {
         this.id = id;
         this.manager = manager;
         this.defaultValue = defaultValue;
@@ -234,47 +239,49 @@ public abstract class SettingKey<T, V extends SettingValue<T>> {
     }
   }
 
-  public static class Poly<T> extends SettingKey<Set<T>, SettingValue.Poly<T>> {
+  public static class Poly<T, S extends AltSet<T>> extends SettingKey<S,
+      SettingValue.Poly<T, S>,
+      SettingKey.Manager.Poly<T, S>> {
 
-    Poly(String id, Manager<Set<T>, SettingValue.Poly<T>> manager,
-         Set<T> defaultData, Set<T> naturalValue,
+    Poly(String id, Manager.Poly<T, S> manager,
+         S defaultData, S naturalValue,
          String description, String blurb,
          Category category,
          boolean functional,
          boolean global, boolean playerRestrictive) {
       super(id, manager,
-          SettingValue.Poly.declarative(defaultData),
-          SettingValue.Poly.declarative(naturalValue),
+          defaultData,
+          naturalValue,
           description, blurb,
           category,
           functional,
           global, playerRestrictive);
     }
 
-    public static <X> Builder<X> builder(String id, Set<X> defaultValue, Manager<Set<X>, SettingValue.Poly<X>> manager) {
-      return new Builder(id, defaultValue, manager);
-    }
-
-    public static <X> Builder<X> builderEmptyDefault(String id, Manager<Set<X>, SettingValue.Poly<X>> manager) {
-      return new Builder<>(id, Collections.emptySet(), manager);
+    public static <X, Y extends HashAltSet<X>> Builder<X, Y> builder(String id,
+                                                                     Y defaultData,
+                                                                     Manager.Poly<X, Y> manager) {
+      return new Builder<>(id, defaultData, manager);
     }
 
     @Override
-    public Set<T> extractValue(@NotNull Collection<Host> hosts, @Nullable UUID userUuid, @NotNull Location location) {
+    public S extractValue(@NotNull Collection<Host> hosts,
+                          @Nullable UUID userUuid,
+                          @NotNull Location location) {
       /* Choose a data structure that will optimize searching for highest priority matching */
       Queue<Host> hostQueue;
       Comparator<Host> descending = (h1, h2) -> Integer.compare(h2.priority(), h1.priority());
-      Stack<SettingValue.Poly<T>> values = new Stack<>();
+      Stack<SettingValue.Poly<T, S>> values = new Stack<>();
       if (hosts.size() >= 1) {
         hostQueue = new PriorityQueue<>(hosts.size(), descending);
         hostQueue.addAll(hosts);
 
         Host currentHost;
-        Optional<Setting<Set<T>, SettingValue.Poly<T>>> currentSetting;
+        Optional<Setting<S, SettingValue.Poly<T, S>>> currentSetting;
         Target currentTarget;
         boolean targeted = true;
         boolean targetSpecified = false;
-        SettingValue.Poly<T> value;
+        SettingValue.Poly<T, S> value;
 
         // Assume targeted until target is set and specifically does not target us
         while (!hostQueue.isEmpty()) {
@@ -308,24 +315,23 @@ public abstract class SettingKey<T, V extends SettingValue<T>> {
         }
       }
       // lastly, put on the default value
-      values.add(defaultValue());
 
 
       // now apply our values in the appropriate order
-      Set<T> result = new HashSet<>();
+      S result = manager().copySet(defaultData());
       while (!values.isEmpty()) {
-        values.pop().applyTo(result);
+        result = manager().copySet(values.pop().applyTo(result));
       }
       return result;
     }
 
-    public static class Builder<T> {
+    public static class Builder<T, S extends HashAltSet<T>> {
       private final String id;
-      private final Manager<Set<T>, SettingValue.Poly<T>> manager;
-      private final Set<T> defaultValue;
+      private final Manager.Poly<T, S> manager;
+      private final S defaultData;
       @Setter
       @Accessors(fluent = true)
-      private Set<T> naturalValue;
+      private S naturalData;
       @Setter
       @Accessors(fluent = true)
       private String description = "";
@@ -340,32 +346,32 @@ public abstract class SettingKey<T, V extends SettingValue<T>> {
       private boolean global = false;
       private boolean playerRestrictive = false;
 
-      private Builder(String id, Set<T> defaultValue, Manager<Set<T>, SettingValue.Poly<T>> manager) {
+      private Builder(String id, S defaultData, Manager.Poly<T, S> manager) {
         this.id = id;
         this.manager = manager;
-        this.defaultValue = defaultValue;
-        this.naturalValue = defaultValue;
+        this.defaultData = defaultData;
+        this.naturalData = defaultData;
       }
 
-      public Builder<T> functional() {
+      public Builder<T, S> functional() {
         this.functional = true;
         return this;
       }
 
-      public Builder<T> global() {
+      public Builder<T, S> global() {
         this.global = true;
         return this;
       }
 
-      public Builder<T> playerRestrictive() {
+      public Builder<T, S> playerRestrictive() {
         this.playerRestrictive = true;
         return this;
       }
 
-      public SettingKey.Poly<T> build() {
+      public SettingKey.Poly<T, S> build() {
         return new SettingKey.Poly<>(
             id, manager,
-            defaultValue, naturalValue,
+            defaultData, naturalData,
             description, blurb,
             category,
             functional,
@@ -377,22 +383,7 @@ public abstract class SettingKey<T, V extends SettingValue<T>> {
 
   public abstract static class Manager<T, V extends SettingValue<T>> {
 
-    public abstract Class<T> dataType() throws ParseSettingException;
-
-    public abstract Class<V> valueType() throws ParseSettingException;
-
-    /**
-     * Parse some data in some custom format.
-     * Used for dealing with data from in-game usages of
-     * declaring data.
-     *
-     * @param data string representation of data
-     * @return the data object
-     * @throws ParseSettingException if data cannot be parsed
-     */
-    public abstract T parseData(String data) throws ParseSettingException;
-
-//    public final Object serializeValue(Object value) {
+    //    public final Object serializeValue(Object value) {
 //      return serializeValueGenerified(castValue(value));
 //    }
 //
@@ -403,43 +394,14 @@ public abstract class SettingKey<T, V extends SettingValue<T>> {
 //    }
 //
 //    public abstract V deserializeValueGenerified(Object serialized) throws ParseSettingException;
+    @NotNull
+    public abstract String printData(@NotNull T value);
 
     @NotNull
     public abstract String printValue(@NotNull V value);
 
-//    @NotNull
-//    public String printData(@NotNull T data) {
-//      return data.toString();
-//    }
-
     public @NotNull Map<String, Object> elementOptions() {
       return Collections.emptyMap();
-    }
-
-    /**
-     * Cast the object to this object's generic type.
-     *
-     * @param object the object to convert
-     * @return the cast value
-     */
-    public final T castData(Object object) {
-      if (!dataType().isInstance(object)) {
-        throw new IllegalArgumentException(String.format(
-            "input %s must be of type %s",
-            object.getClass().getName(),
-            dataType().getName()));
-      }
-      return dataType().cast(object);
-    }
-
-    public final V castValue(Object object) {
-      if (!valueType().isInstance(object)) {
-        throw new IllegalArgumentException(String.format(
-            "input %s must be of type %s",
-            object.getClass().getName(),
-            valueType().getName()));
-      }
-      return valueType().cast(object);
     }
 
     public abstract V parseDeclarativeValue(String settingValue);
@@ -447,14 +409,13 @@ public abstract class SettingKey<T, V extends SettingValue<T>> {
     public abstract static class Unary<T> extends Manager<T, SettingValue.Unary<T>> {
 
       @SuppressWarnings("unchecked")
-      @Override
-      public Class<SettingValue.Unary<T>> valueType() throws ParseSettingException {
-        return (Class<SettingValue.Unary<T>>) (Class<?>) SettingValue.Unary.class;
-      }
+      public abstract Class<T> dataType() throws ParseSettingException;
 
       public final SettingValue.Unary<T> parseValue(String data) throws ParseSettingException {
         return SettingValue.Unary.of(parseData(data));
       }
+
+      public abstract T parseData(String data) throws ParseSettingException;
 
       @Override
       public final SettingValue.Unary<T> parseDeclarativeValue(String settingValue) {
@@ -462,33 +423,27 @@ public abstract class SettingKey<T, V extends SettingValue<T>> {
       }
 
       @Override
-      public @NotNull String printValue(SettingValue.@NotNull Unary<T> value) {
-        return value.get().toString();
+      @NotNull
+      public final String printValue(SettingValue.@NotNull Unary<T> value) {
+        return printData(value.get());
+      }
+
+      @Override
+      public @NotNull String printData(@NotNull T value) {
+        return value.toString();
       }
     }
 
-    public abstract static class Poly<T> extends Manager<Set<T>, SettingValue.Poly<T>> {
+    public abstract static class Poly<T, S extends AltSet<T>> extends Manager<S, SettingValue.Poly<T, S>> {
       public static final String SET_SPLIT_REGEX = "(?<![ ,])(( )+|( *, *))(?![ ,])";
 
       @SuppressWarnings("unchecked")
       @Override
-      public Class<SettingValue.Poly<T>> valueType() throws ParseSettingException {
-        return (Class<SettingValue.Poly<T>>) (Class<?>) SettingValue.Poly.class;
-      }
-
-      @SuppressWarnings("unchecked")
-      @Override
-      public final Class<Set<T>> dataType() throws ParseSettingException {
-        return (Class<Set<T>>) (Class<?>) Set.class;
-      }
-
-      @Override
-      public SettingValue.Poly<T> parseDeclarativeValue(String settingValue) {
+      public SettingValue.Poly<T, S> parseDeclarativeValue(String settingValue) {
         throw new UnsupportedOperationException();
       }
 
-      @Override
-      public final Set<T> parseData(String data) throws ParseSettingException {
+      public final Set<T> parseSet(String data) throws ParseSettingException {
         Set<T> set = new HashSet<>();
         for (String token : data.split(SET_SPLIT_REGEX)) {
           try {
@@ -500,13 +455,13 @@ public abstract class SettingKey<T, V extends SettingValue<T>> {
               if (options.size() <= 8) {
                 errorMessage.append("Allowed types: ")
                     .append(options.stream()
-                        .map(e -> e.toString().toLowerCase())
+                        .map(e -> e.toLowerCase())
                         .collect(Collectors.joining(", ")));
               } else {
                 errorMessage.append("Allowed types: ")
                     .append(options.stream()
                         .limit(8)
-                        .map(e -> e.toString().toLowerCase())
+                        .map(e -> e.toLowerCase())
                         .collect(Collectors.joining(", ")))
                     .append(" ...");
               }
@@ -518,33 +473,35 @@ public abstract class SettingKey<T, V extends SettingValue<T>> {
       }
 
       @Override
-      public @NotNull String printValue(SettingValue.@NotNull Poly<T> value) {
+      public @NotNull String printValue(SettingValue.@NotNull Poly<T, S> value) {
         if (value.declarative()) {
-          if (value.additive().size() == 0) {
-            return "(None)";
-          } else {
-            return value.additive()
-                .stream()
-                .map(this::printElement)
-                .collect(Collectors.joining(", "));
-          }
+          return value.additive().printAll();
         } else {
-          return Streams.concat(value.additive()
-              .stream()
-              .map(this::printElement)
-                  .map(element -> "+" + element),
-              value.subtractive()
-              .stream()
-              .map(this::printElement)
-                  .map(element -> "!" + element))
-              .collect(Collectors.joining(", "));
+          return "add ["
+              + value.additive().printAll() + "], subtract ["
+              + value.subtractive().printAll() + "]";
         }
       }
 
-      public abstract String printElement(T element);
+      @NotNull
+      public String printElement(T element) {
+        return element.toString();
+      }
+
+      @Override
+      public @NotNull String printData(@NotNull S value) {
+        return value.printAll();
+      }
 
       public abstract T parseElement(String element) throws ParseSettingException;
 
+      public abstract S createSet();
+
+      public final S copySet(S set) {
+        S newSet = createSet();
+        newSet.addAll(set);
+        return newSet;
+      }
     }
 
   }

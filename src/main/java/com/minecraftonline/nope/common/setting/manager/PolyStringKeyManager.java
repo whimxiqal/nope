@@ -26,16 +26,54 @@
 package com.minecraftonline.nope.common.setting.manager;
 
 import com.minecraftonline.nope.common.setting.SettingKey;
+import com.minecraftonline.nope.common.struct.HashAltSet;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.function.Supplier;
+import lombok.Setter;
+import lombok.experimental.Accessors;
+import org.jetbrains.annotations.NotNull;
 
-public class PolyStringKeyManager extends SettingKey.Manager.Poly<String> {
+@Accessors(fluent = true)
+public class PolyStringKeyManager<S extends HashAltSet<String>> extends SettingKey.Manager.Poly<String, S> {
+
+  private final Supplier<S> setConstructor;
+  @Setter
+  private Supplier<Map<String, Object>> elementOptions = null;
+  @Setter
+  private Function<String, String> parser = null;
+
+  public PolyStringKeyManager(Supplier<S> setConstructor) {
+    this.setConstructor = setConstructor;
+  }
 
   @Override
+  @NotNull
   public String printElement(String element) {
     return element;
   }
 
   @Override
   public String parseElement(String element) {
-    return element;
+    if (parser == null) {
+      return element;
+    } else {
+      return parser.apply(element);
+    }
   }
+
+  @Override
+  public S createSet() {
+    return this.setConstructor.get();
+  }
+
+  @Override
+  public @NotNull Map<String, Object> elementOptions() {
+    if (this.elementOptions == null) {
+      return super.elementOptions();
+    } else {
+      return this.elementOptions.get();
+    }
+  }
+
 }

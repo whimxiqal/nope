@@ -23,12 +23,10 @@
  * SOFTWARE.
  */
 
-package com.minecraftonline.nope.sponge.api.setting;
+package com.minecraftonline.nope.common.struct;
 
-import com.minecraftonline.nope.common.setting.SettingKey;
+public interface Described {
 
-public interface SettingKeyRegistrar {
-
-  void register(SettingKey<?, ?, ?> settingKey);
+  String description();
 
 }

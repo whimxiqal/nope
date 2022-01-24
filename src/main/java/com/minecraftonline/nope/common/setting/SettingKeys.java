@@ -25,23 +25,19 @@
 
 package com.minecraftonline.nope.common.setting;
 
-import com.minecraftonline.nope.common.setting.manager.BooleanKeyManager;
-import com.minecraftonline.nope.common.setting.manager.IntegerKeyManager;
-import com.minecraftonline.nope.common.setting.manager.PolyStringKeyManager;
+import com.minecraftonline.nope.common.setting.sets.BlockSet;
+import com.minecraftonline.nope.common.setting.sets.EntitySet;
+import com.minecraftonline.nope.common.setting.sets.ExplosiveSet;
+import com.minecraftonline.nope.common.setting.sets.MovementSet;
+import com.minecraftonline.nope.common.struct.AltSet;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
 
 @SuppressWarnings("unused")
 public class SettingKeys {
 
-  private static final BooleanKeyManager BOOLEAN_KEY_MANAGER = new BooleanKeyManager();
-  private static final BooleanKeyManager STATE_KEY_MANAGER = new BooleanKeyManager(true);
-  private static final IntegerKeyManager INTEGER_KEY_MANAGER = new IntegerKeyManager();
-
-  private static final PolyStringKeyManager POLY_STRING_KEY_MANAGER = new PolyStringKeyManager();
-
   public static final SettingKey.Unary<Boolean> ARMOR_STAND_DESTROY =
-      SettingKey.Unary.builder("armor-stand-destroy", true, STATE_KEY_MANAGER)
+      SettingKey.Unary.builder("armor-stand-destroy", true, SettingKeyManagers.STATE_KEY_MANAGER)
           .blurb("Armor stand destruction restriction")
           .description("When disabled, armor stands may not be broken by players.")
           .category(SettingKey.Category.ENTITIES)
@@ -49,7 +45,7 @@ public class SettingKeys {
           .build();
 
   public static final SettingKey.Unary<Boolean> ARMOR_STAND_INTERACT =
-      SettingKey.Unary.builder("armor-stand-interact", true, STATE_KEY_MANAGER)
+      SettingKey.Unary.builder("armor-stand-interact", true, SettingKeyManagers.STATE_KEY_MANAGER)
           .blurb("Armor stand interact restriction")
           .description("When disabled, armor stands may not be interacted with by players.")
           .category(SettingKey.Category.ENTITIES)
@@ -57,7 +53,7 @@ public class SettingKeys {
           .build();
 
   public static final SettingKey.Unary<Boolean> ARMOR_STAND_PLACE =
-      SettingKey.Unary.builder("armor-stand-place", true, STATE_KEY_MANAGER)
+      SettingKey.Unary.builder("armor-stand-place", true, SettingKeyManagers.STATE_KEY_MANAGER)
           .blurb("Armor stand placement restriction")
           .description("When disabled, armor stands may not be placed by players.")
           .category(SettingKey.Category.ENTITIES)
@@ -65,7 +61,7 @@ public class SettingKeys {
           .build();
 
   public static final SettingKey.Unary<Boolean> BLOCK_BREAK =
-      SettingKey.Unary.builder("block-break", true, STATE_KEY_MANAGER)
+      SettingKey.Unary.builder("block-break", true, SettingKeyManagers.STATE_KEY_MANAGER)
           .blurb("Block break restriction")
           .description("When disabled, blocks may not be broken by players.")
           .category(SettingKey.Category.BLOCKS)
@@ -73,7 +69,7 @@ public class SettingKeys {
           .build();
 
   public static final SettingKey.Unary<Boolean> BLOCK_PLACE =
-      SettingKey.Unary.builder("block-place", true, STATE_KEY_MANAGER)
+      SettingKey.Unary.builder("block-place", true, SettingKeyManagers.STATE_KEY_MANAGER)
           .blurb("Block place restriction")
           .description("When disabled, blocks may not be placed by players.")
           .category(SettingKey.Category.BLOCKS)
@@ -81,29 +77,29 @@ public class SettingKeys {
           .build();
 
   public static final SettingKey.Unary<Boolean> BLOCK_PROPAGATE_ACROSS =
-      SettingKey.Unary.builder("block-propagate-across", true, BOOLEAN_KEY_MANAGER)
+      SettingKey.Unary.builder("block-propagate-across", true, SettingKeyManagers.BOOLEAN_KEY_MANAGER)
           .blurb("Inside to outside block updates")
-          .description("When disabled, block updates will not affect others across the zone boundary")
+          .description("When disabled, block updates will not affect others across the zone boundary.")
           .category(SettingKey.Category.BLOCKS)
           .build();
 
   public static final SettingKey.Unary<Boolean> BLOCK_PROPAGATE_WITHIN =
-      SettingKey.Unary.builder("block-propagate-within", true, BOOLEAN_KEY_MANAGER)
+      SettingKey.Unary.builder("block-propagate-within", true, SettingKeyManagers.BOOLEAN_KEY_MANAGER)
           .blurb("Inside to inside block updates")
-          .description("When disabled, block updates will not affect others within the zone")
+          .description("When disabled, block updates will not affect others within the zone.")
           .category(SettingKey.Category.BLOCKS)
           .build();
 
   public static final SettingKey.Unary<Boolean> TRAMPLE =
-      SettingKey.Unary.builder("trample", true, STATE_KEY_MANAGER)
+      SettingKey.Unary.builder("trample", true, SettingKeyManagers.STATE_KEY_MANAGER)
           .blurb("Farmland trample restriction")
-          .description("When disabled, blocks like farmland may not be trampled")
+          .description("When disabled, blocks like farmland may not be trampled.")
           .category(SettingKey.Category.BLOCKS)
           .playerRestrictive()
           .build();
 
   public static final SettingKey.Unary<Integer> CACHE_SIZE =
-      SettingKey.Unary.builder("cache-size", 75000, INTEGER_KEY_MANAGER)
+      SettingKey.Unary.builder("cache-size", 75000, SettingKeyManagers.INTEGER_KEY_MANAGER)
           .blurb("Size of world block caches")
           .description("This is the quantity of block locations to cache for each world. "
       + "Total memory is roughly this multiplied by 56 bytes, "
@@ -115,206 +111,207 @@ public class SettingKeys {
           .build();
 
   public static final SettingKey.Unary<Boolean> CHEST_ACCESS =
-      SettingKey.Unary.builder("chest-access", true, STATE_KEY_MANAGER)
+      SettingKey.Unary.builder("chest-access", true, SettingKeyManagers.STATE_KEY_MANAGER)
           .blurb("Chest access restriction")
-          .description("When disabled, players may not open chests")
+          .description("When disabled, players may not open chests.")
           .category(SettingKey.Category.BLOCKS)
           .playerRestrictive()
           .build();
 
-//  @Blurb("Chorus fruit teleport restriction")
-//  @Description("When disabled, players may not teleport by eating a chorus fruit.")
-//  @Category(SettingKey.CategoryType.MOVEMENT)
-//  @PlayerRestrictive
-//  public static final SettingKey<Boolean> CHORUS_FRUIT_TELEPORT = new StateSettingKey(
-//      "chorus-fruit-teleport",
-//      true
-//  );
-//  @Blurb("Concrete powder solidification")
-//  @Description("When disabled, concrete powder does not solidify into concrete.")
-//  @Category(SettingKey.CategoryType.BLOCKS)
-//  public static final SettingKey<Boolean> CONCRETE_SOLIDIFICATION = new BooleanSettingKey(
-//      "concrete-solidification",
-//      true
-//  );
-//  @Blurb("Crop growth")
-//  @Description("When disabled, crops do not grow.")
-//  @Category(SettingKey.CategoryType.BLOCKS)
-//  @PlayerRestrictive
-//  public static final SettingKey<Boolean> CROP_GROWTH = new BooleanSettingKey(
-//      "crop-growth",
-//      true
-//  );
-//  @Blurb("Entity experience drop")
-//  @Description("When disabled, experience points are never dropped.")
-//  @PlayerRestrictive
-//  public static final SettingKey<Boolean> DROP_EXP = new BooleanSettingKey(
-//      "drop-exp",
-//      false
-//  );
-//  @Blurb("Grief caused by the enderdragon")
-//  @Description("Enables grief caused by the enderdragon.")
-//  @Category(SettingKey.CategoryType.BLOCKS)
-//  public static final SettingKey<Boolean> ENDERDRAGON_GRIEF = new BooleanSettingKey(
-//      "enderdragon-grief",
-//      true
-//  );
-//  @Blurb("Grief caused by endermen")
-//  @Description("When disabled, endermen do not grief blocks by picking them up.")
-//  @Category(SettingKey.CategoryType.BLOCKS)
-//  public static final SettingKey<Boolean> ENDERMAN_GRIEF = new BooleanSettingKey(
-//      "enderman-grief",
-//      true
-//  );
-//  @Blurb("Enderpearl teleport restriction")
-//  @Description("When disabled, enderpearls may not be used for teleportation.")
-//  @Category(SettingKey.CategoryType.MOVEMENT)
-//  @PlayerRestrictive
-//  public static final SettingKey<Boolean> ENDERPEARL_TELEPORT = new StateSettingKey(
-//      "enderpearl-teleport",
-//      true
-//  );
-//  @Blurb("Host entrance restriction")
-//  @Description("Specify which type of movement is allowed by players to enter.")
-//  @Category(SettingKey.CategoryType.MOVEMENT)
-//  @PlayerRestrictive
-//  public static final SettingKey<Movement> ENTRY = new EnumSettingKey<>(
-//      "entry",
-//      Movement.ALL,
-//      Movement.class
-//  );
-//  @Blurb("Message when entry is denied")
-//  @Description("The message that is sent to a player if they are barred from entry.")
-//  @Category(SettingKey.CategoryType.MOVEMENT)
-//  public static final SettingKey<String> ENTRY_DENY_MESSAGE = new StringSettingKey(
-//      "entry-deny-message",
-//      "You are not allowed to go there"
-//  );
-//  @Blurb("Subtitle when entry is denied")
-//  @Description("The subtitle that is sent to a player if they are barred from entry.")
-//  @Category(SettingKey.CategoryType.MOVEMENT)
-//  public static final SettingKey<String> ENTRY_DENY_SUBTITLE = new StringSettingKey(
-//      "entry-deny-subtitle",
-//      ""
-//  );
-//  @Blurb("Title when entry is denied")
-//  @Description("The title that is sent to a player if they are barred from entry.")
-//  @Category(SettingKey.CategoryType.MOVEMENT)
-//  public static final SettingKey<String> ENTRY_DENY_TITLE = new StringSettingKey(
-//      "entry-deny-title",
-//      ""
-//  );
-//  @Blurb("Environment-to-player damage")
-//  @Description("When disabled, the environment cannot inflict damage on players.")
-//  @Category(SettingKey.CategoryType.DAMAGE)
-//  @PlayerRestrictive
-//  public static final SettingKey<Boolean> EVP = new StateSettingKey(
-//      "evp",
-//      true
-//  );
-//  @Blurb("Host exit restriction")
-//  @Description("Specify which type of movement is allowed by players to exit.")
-//  @Category(SettingKey.CategoryType.MOVEMENT)
-//  @PlayerRestrictive
-//  public static final SettingKey<Movement> EXIT = new EnumSettingKey<>(
-//      "exit",
-//      Movement.ALL,
-//      Movement.class
-//  );
-//  @Blurb("Message when exit is denied")
-//  @Description("The message that is sent to the player if they are barred from exiting.")
-//  @Category(SettingKey.CategoryType.MOVEMENT)
-//  public static final SettingKey<String> EXIT_DENY_MESSAGE = new StringSettingKey(
-//      "exit-deny-message",
-//      "You are not allowed to leave here"
-//  );
-//  @Blurb("Subtitle when exit is denied")
-//  @Description("The subtitle that is sent to a player if they are barred from exiting.")
-//  @Category(SettingKey.CategoryType.MOVEMENT)
-//  public static final SettingKey<String> EXIT_DENY_SUBTITLE = new StringSettingKey(
-//      "exit-deny-subtitle",
-//      ""
-//  );
-//  @Blurb("Title when exit is denied")
-//  @Description("The title that is sent to a player if they are barred from exiting.")
-//  @Category(SettingKey.CategoryType.MOVEMENT)
-//  public static final SettingKey<String> EXIT_DENY_TITLE = new StringSettingKey(
-//      "exit-deny-title",
-//      ""
-//  );
-//  @Blurb("Harmless explosions")
-//  @Description("A list of explosives whose explosions do not cause damage.")
-//  @Category(SettingKey.CategoryType.DAMAGE)
-//  public static final SettingKey<Set<Explosive>> EXPLOSION_DAMAGE_BLACKLIST = new EnumSetSettingKey<>(
-//      "explosion-damage-blacklist",
-//      new HashSet<>(),
-//      Explosive.class
-//  );
-//  @Blurb("Nondestructive explosions")
-//  @Description("A list of explosives whose explosions do not grief.")
-//  @Category(SettingKey.CategoryType.BLOCKS)
-//  public static final SettingKey<Set<Explosive>> EXPLOSION_GRIEF_BLACKLIST = new EnumSetSettingKey<>(
-//      "explosion-block-grief-blacklist",
-//      new HashSet<>(),
-//      Explosive.class
-//  );
-//  @Blurb("Fall damage")
-//  @Description("When disabled, players do not experience fall damage.")
-//  @Category(SettingKey.CategoryType.DAMAGE)
-//  public static final SettingKey<Boolean> FALL_DAMAGE = new BooleanSettingKey(
-//      "fall-damage",
-//      false
-//  );
-//  @Blurb("Message upon exit")
-//  @Description("The message to a player when they leave the host.")
-//  @Category(SettingKey.CategoryType.MOVEMENT)
-//  public static final SettingKey<String> FAREWELL = new StringSettingKey(
-//      "farewell",
-//      ""
-//  );
-//  @Blurb("Subtitle upon exit")
-//  @Description("The subtitle that appears to a player when they leave.")
-//  @Category(SettingKey.CategoryType.MOVEMENT)
-//  public static final SettingKey<String> FAREWELL_SUBTITLE = new StringSettingKey(
-//      "farewell-subtitle",
-//      ""
-//  );
-//  @Blurb("Title upon exit")
-//  @Description("The title that appears to a player when they leave.")
-//  @Category(SettingKey.CategoryType.MOVEMENT)
-//  public static final SettingKey<String> FAREWELL_TITLE = new StringSettingKey(
-//      "farewell-title",
-//      ""
-//  );
-//  @Blurb("Fire spread/damage")
-//  @Description("When disabled, fire does not spread or cause block damage.")
-//  @Category(SettingKey.CategoryType.BLOCKS)
-//  public static final SettingKey<Boolean> FIRE_EFFECT = new StateSettingKey(
-//      "fire-effect",
-//      true
-//  );
-//  @Blurb("Fire ignition restriction")
-//  @Description("When disabled, players cannot light fire")
-//  @Category(SettingKey.CategoryType.BLOCKS)
-//  @PlayerRestrictive
-//  public static final SettingKey<Boolean> FIRE_IGNITION = new StateSettingKey(
-//      "fire-ignition",
-//      true
-//  );
-//  @Blurb("Natural fire ignition")
-//  @Description("When disabled, fire is not started naturally.")
-//  public static final SettingKey<Boolean> FIRE_NATURAL_IGNITION = new StateSettingKey(
-//      "fire-natural-ignition",
-//      true
-//  );
-//  @Blurb("Flower pot interaction restriction")
-//  @Description("When disabled, players cannot interact with flower pots.")
-//  @Category(SettingKey.CategoryType.BLOCKS)
-//  @PlayerRestrictive
-//  public static final SettingKey<Boolean> FLOWER_POT_INTERACT = new StateSettingKey(
-//      "flower-pot-interact",
-//      true
-//  );
+  public static final SettingKey.Unary<Boolean> CHORUS_FRUIT_TELEPORT =
+      SettingKey.Unary.builder("chorus-fruit-teleport", true, SettingKeyManagers.STATE_KEY_MANAGER)
+          .blurb("Chorus fruit teleport restriction")
+          .description("When disabled, players may not teleport by eating a chorus fruit.")
+          .category(SettingKey.Category.MOVEMENT)
+          .playerRestrictive()
+          .build();
+
+  public static final SettingKey.Unary<Boolean> CONCRETE_SOLIDIFICATION =
+      SettingKey.Unary.builder("concrete-solidification", true, SettingKeyManagers.BOOLEAN_KEY_MANAGER)
+          .blurb("Concrete powder solidification")
+          .description("When disabled, concrete powder does not solidify into concrete.")
+          .category(SettingKey.Category.BLOCKS)
+          .playerRestrictive()
+          .build();
+
+  public static final SettingKey.Unary<Boolean> CROP_GROWTH =
+      SettingKey.Unary.builder("crop-growth", true, SettingKeyManagers.BOOLEAN_KEY_MANAGER)
+          .blurb("Crop growth")
+          .description("When disabled, crops do not grow.")
+          .category(SettingKey.Category.BLOCKS)
+          .playerRestrictive()
+          .build();
+
+  public static final SettingKey.Unary<Boolean> DROP_EXP =
+      SettingKey.Unary.builder("drop-exp-entity", true, SettingKeyManagers.BOOLEAN_KEY_MANAGER)
+          .blurb("Entity experience drop")
+          .description("When disabled, experience points are never dropped.")
+          .category(SettingKey.Category.MISC)
+          .build();
+
+  public static final SettingKey.Unary<Boolean> ENDERDRAGON_GRIEF =
+      SettingKey.Unary.builder("enderdragon-grief", true, SettingKeyManagers.BOOLEAN_KEY_MANAGER)
+          .blurb("Grief caused by the Enderdragon")
+          .description("Enables grief caused by the Enderdragon.")
+          .category(SettingKey.Category.BLOCKS)
+          .build();
+
+  public static final SettingKey.Unary<Boolean> ENDERMAN_GRIEF =
+      SettingKey.Unary.builder("enderman-grief", true, SettingKeyManagers.BOOLEAN_KEY_MANAGER)
+          .blurb("Grief caused by endermen")
+          .description("When disabled, endermen do not grief blocks by picking them up.")
+          .category(SettingKey.Category.BLOCKS)
+          .build();
+
+  public static final SettingKey.Unary<Boolean> ENDERPEARL_TELEPORT =
+      SettingKey.Unary.builder("enderpearl-teleport", true, SettingKeyManagers.STATE_KEY_MANAGER)
+          .blurb("Enderpearl teleport restriction")
+          .description("When disabled, enderpearls may not be used for teleportation")
+          .category(SettingKey.Category.MOVEMENT)
+          .playerRestrictive()
+          .build();
+
+  public static final SettingKey.Unary<MovementSet.Movement> ENTRY =
+      SettingKey.Unary.builder("entry", MovementSet.Movement.ALL, SettingKeyManagers.MOVEMENT_KEY_MANAGER)
+          .blurb("Host entrance restriction")
+          .description("Specify which type of movement is allowed by players to enter.")
+          .category(SettingKey.Category.MOVEMENT)
+          .playerRestrictive()
+          .build();
+
+  public static final SettingKey.Unary<String> ENTRY_DENY_MESSAGE =
+      SettingKey.Unary.builder("entry-deny-message",
+              "You are not allowed to go there",
+              SettingKeyManagers.STRING_KEY_MANAGER)
+          .blurb("Message when entry is denied")
+          .description("The message that is sent to a player if they are barred from entry.")
+          .category(SettingKey.Category.MOVEMENT)
+          .build();
+
+  public static final SettingKey.Unary<String> ENTRY_DENY_SUBTITLE =
+      SettingKey.Unary.builder("entry-deny-subtitle", "", SettingKeyManagers.STRING_KEY_MANAGER)
+          .blurb("Subtitle when entry is denied")
+          .description("The subtitle that is sent to a player if they are barred from entry.")
+          .category(SettingKey.Category.MOVEMENT)
+          .build();
+
+  public static final SettingKey.Unary<String> ENTRY_DENY_TITLE =
+      SettingKey.Unary.builder("entry-deny-title", "", SettingKeyManagers.STRING_KEY_MANAGER)
+          .blurb("Title when entry is denied")
+          .description("The title that is sent to a player if they are barred from entry.")
+          .category(SettingKey.Category.MOVEMENT)
+          .build();
+
+  public static final SettingKey.Unary<Boolean> EVP =
+      SettingKey.Unary.builder("evp", true, SettingKeyManagers.BOOLEAN_KEY_MANAGER)
+          .blurb("Environment-to-player damage")
+          .description("When disabled, the environment cannot inflict damage on players.")
+          .category(SettingKey.Category.DAMAGE)
+          .build();
+
+  public static final SettingKey.Unary<MovementSet.Movement> EXIT =
+      SettingKey.Unary.builder("exit", MovementSet.Movement.ALL, SettingKeyManagers.MOVEMENT_KEY_MANAGER)
+          .blurb("Host exit restriction")
+          .description("Specify which type of movement is allowed by players to exit.")
+          .category(SettingKey.Category.MOVEMENT)
+          .playerRestrictive()
+          .build();
+
+  public static final SettingKey.Unary<String> EXIT_DENY_MESSAGE =
+      SettingKey.Unary.builder("exit-deny-message",
+              "You are not allowed to leave here",
+              SettingKeyManagers.STRING_KEY_MANAGER)
+          .blurb("Message when exit is denied")
+          .description("The message that is sent to the player if they are barred from exiting.")
+          .category(SettingKey.Category.MOVEMENT)
+          .build();
+
+  public static final SettingKey.Unary<String> EXIT_DENY_SUBTITLE =
+      SettingKey.Unary.builder("exit-deny-subtitle", "", SettingKeyManagers.STRING_KEY_MANAGER)
+          .blurb("Subtitle when exit is denied")
+          .description("The subtitle that is sent to a player if they are barred from exiting")
+          .category(SettingKey.Category.MOVEMENT)
+          .build();
+
+  public static final SettingKey.Unary<String> EXIT_DENY_TITLE =
+      SettingKey.Unary.builder("exit-deny-title", "", SettingKeyManagers.STRING_KEY_MANAGER)
+          .blurb("Title when exit is denied")
+          .description("The title that is sent to a player if they are barred from exiting")
+          .category(SettingKey.Category.MOVEMENT)
+          .build();
+
+  public static final SettingKey.Poly<ExplosiveSet.Explosive, ExplosiveSet> HARMLESS_EXPLOSIVES =
+      SettingKey.Poly.builder("harmless-explosives", new ExplosiveSet(), SettingKeyManagers.POLY_EXPLOSIVE_KEY_MANAGER)
+          .blurb("Explosives causing no entity damage")
+          .description("A list of explosives whose explosions do not cause damage to entities.")
+          .category(SettingKey.Category.DAMAGE)
+          .build();
+
+  public static final SettingKey.Poly<ExplosiveSet.Explosive, ExplosiveSet> NONDESTRUCTIVE_EXPLOSIVES =
+      SettingKey.Poly.builder("nondestructive-explosives", new ExplosiveSet(), SettingKeyManagers.POLY_EXPLOSIVE_KEY_MANAGER)
+          .blurb("Explosives causing no world damage")
+          .description("A list of explosives whose explosions to not cause damage to the world.")
+          .category(SettingKey.Category.BLOCKS)
+          .build();
+
+  public static final SettingKey.Unary<Boolean> FALL_DAMAGE =
+      SettingKey.Unary.builder("fall-damage", true, SettingKeyManagers.BOOLEAN_KEY_MANAGER)
+          .blurb("Fall damage")
+          .description("When disabled, players are not inflicted with damage from falling")
+          .category(SettingKey.Category.DAMAGE)
+          .build();
+
+  public static final SettingKey.Unary<String> FAREWELL =
+      SettingKey.Unary.builder("farewell", "", SettingKeyManagers.STRING_KEY_MANAGER)
+          .blurb("Message upon exit")
+          .description("The message to a player when they leave the host.")
+          .category(SettingKey.Category.MOVEMENT)
+          .build();
+
+  public static final SettingKey.Unary<String> FAREWELL_SUBTITLE =
+      SettingKey.Unary.builder("farewell-subtitle", "", SettingKeyManagers.STRING_KEY_MANAGER)
+          .blurb("Subtitle upon exit")
+          .description("The subtitle that appears to a player when they leave the host.")
+          .category(SettingKey.Category.MOVEMENT)
+          .build();
+
+  public static final SettingKey.Unary<String> FAREWELL_TITLE =
+      SettingKey.Unary.builder("farewell-title", "", SettingKeyManagers.STRING_KEY_MANAGER)
+          .blurb("Title upon exit")
+          .description("The title that appears to a player when they leave the host.")
+          .category(SettingKey.Category.MOVEMENT)
+          .build();
+
+  public static final SettingKey.Unary<Boolean> FIRE_EFFECT =
+      SettingKey.Unary.builder("fire-effect", true, SettingKeyManagers.STATE_KEY_MANAGER)
+          .blurb("Fire spread/damage")
+          .description("When disabled, fire does not spread or cause block damage")
+          .category(SettingKey.Category.BLOCKS)
+          .build();
+
+  public static final SettingKey.Unary<Boolean> FIRE_IGNITION =
+      SettingKey.Unary.builder("fire-ignition", true, SettingKeyManagers.STATE_KEY_MANAGER)
+          .blurb("Fire ignition restriction")
+          .description("When disabled, players cannot light fire")
+          .category(SettingKey.Category.BLOCKS)
+          .playerRestrictive()
+          .build();
+
+  public static final SettingKey.Unary<Boolean> FIRE_NATURAL_IGNITION =
+      SettingKey.Unary.builder("fire-natural-ignition", true, SettingKeyManagers.STATE_KEY_MANAGER)
+          .blurb("Natural fire ignition")
+          .description("When disabled, fire cannot be started naturally.")
+          .category(SettingKey.Category.BLOCKS)
+          .build();
+
+  public static final SettingKey.Poly<String, BlockSet> INTERACTIVE_BLOCKS =
+      SettingKey.Poly.builder("interactive-blocks", AltSet.full(new BlockSet()), SettingKeyManagers.POLY_BLOCK_KEY_MANAGER)
+          .blurb("Interactive blocks")
+          .description("A list of blocks with which that can be interacted.")
+          .category(SettingKey.Category.BLOCKS)
+          .playerRestrictive()
+          .build();
+
 //  @Blurb("Frosted ice formation")
 //  @Description("When disabled, frosted ice does not form.")
 //  @Category(SettingKey.CategoryType.BLOCKS)
@@ -713,8 +710,10 @@ public class SettingKeys {
 //      Sets.newHashSet()
 //  );
 
-public static final SettingKey.Poly<String> UNSPAWNABLE_MOBS =
-    SettingKey.Poly.builderEmptyDefault("unspawnable-mobs", POLY_STRING_KEY_MANAGER)
+public static final SettingKey.Poly<String, EntitySet> SPAWNABLE_ENTITIES =
+    SettingKey.Poly.builder("spawnable-entities",
+            AltSet.full(new EntitySet()),
+            SettingKeyManagers.POLY_ENTITY_KEY_MANAGER)
         .blurb("Armor stand placement restriction")
         .description("When disabled, armor stands may not be placed by players.")
         .category(SettingKey.Category.ENTITIES)
@@ -805,7 +804,7 @@ public static final SettingKey.Poly<String> UNSPAWNABLE_MOBS =
         .filter(field -> SettingKey.class.isAssignableFrom(field.getType()))
         .forEach(field -> {
           try {
-            keyStore.register((SettingKey<?, ?>) field.get(null));
+            keyStore.register((SettingKey<?, ?, ?>) field.get(null));
           } catch (IllegalAccessException e) {
             e.printStackTrace();
           }
@@ -814,30 +813,6 @@ public static final SettingKey.Poly<String> UNSPAWNABLE_MOBS =
       throw new RuntimeException("Tried to initialize SettingLibrary, "
           + "but it did not appear to work");
     }
-  }
-
-  /**
-   * Enumeration for all movement types considered by Nope.
-   */
-  public enum Movement {
-    ALL,
-    NATURAL,
-    NONE,
-    UNNATURAL
-  }
-
-  /**
-   * Enumeration for all explosive types considered by Nope.
-   */
-  public enum Explosive {
-    CREEPER,
-    ENDERCRYSTAL,
-    FIREWORK,
-    LARGEFIREBALL,
-    PRIMEDTNT,
-    TNTMINECART,
-    WITHER,
-    WITHERSKULL
   }
 
 }

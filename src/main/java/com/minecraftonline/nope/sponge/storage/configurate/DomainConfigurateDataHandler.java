@@ -13,9 +13,9 @@ import org.spongepowered.configurate.loader.ConfigurationLoader;
 
 public class DomainConfigurateDataHandler extends SettingsConfigurateDataHandler implements DomainDataHandler {
 
-  private final Function<ResourceKey, ConfigurationLoader<CommentedConfigurationNode>> loader;
+  private final Function<String, ConfigurationLoader<CommentedConfigurationNode>> loader;
 
-  public DomainConfigurateDataHandler(Function<ResourceKey, ConfigurationLoader<CommentedConfigurationNode>> loader,
+  public DomainConfigurateDataHandler(Function<String, ConfigurationLoader<CommentedConfigurationNode>> loader,
                                       SettingValueConfigSerializerRegistrar serializerRegistrar) {
     super(serializerRegistrar);
     this.loader = loader;
@@ -27,7 +27,7 @@ public class DomainConfigurateDataHandler extends SettingsConfigurateDataHandler
     try {
       CommentedConfigurationNode root = settingCollectionRoot(domain);
       root.comment("Settings for world " + domain.name());
-      loader.apply(ResourceKey.resolve(domain.name())).save(root);
+      loader.apply(domain.name()).save(root);
     } catch (ConfigurateException e) {
       e.printStackTrace();
     }
@@ -36,7 +36,7 @@ public class DomainConfigurateDataHandler extends SettingsConfigurateDataHandler
   @Override
   public void load(@NotNull Domain domain) {
     try {
-      CommentedConfigurationNode root = loader.apply(ResourceKey.resolve(domain.name())).load();
+      CommentedConfigurationNode root = loader.apply(domain.name()).load();
       if (root.node("settings").virtual()) {
         // No settings, so this file was likely not created yet.
         root.node("settings").set(null);

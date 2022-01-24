@@ -21,4 +21,5 @@ public class Flags {
   public static final Flag ADDITIVE_VALUE_FLAG = Flag.of("additive");
 
   public static final Flag SUBTRACTIVE_VALUE_FLAG = Flag.of("subtractive");
+
 }

@@ -23,12 +23,48 @@
  * SOFTWARE.
  */
 
-package com.minecraftonline.nope.sponge.api.setting;
+package com.minecraftonline.nope.common.struct;
 
-import com.minecraftonline.nope.common.setting.SettingKey;
+import java.util.Collection;
+import java.util.Set;
+import org.jetbrains.annotations.NotNull;
 
-public interface SettingKeyRegistrar {
+public interface AltSet<T> {
+  static <X extends AltSet<?>> X full(X set) {
+    set.fill();
+    return set;
+  }
 
-  void register(SettingKey<?, ?, ?> settingKey);
+  boolean isEmpty();
+
+  boolean contains(T element);
+
+  boolean add(T element);
+
+  boolean remove(T element);
+
+  boolean containsAll(@NotNull AltSet<T> other);
+
+  void addAll(@NotNull AltSet<T> other);
+
+  boolean addAll(@NotNull Collection<T> other);
+
+  void retainAll(@NotNull AltSet<T> other);
+
+  void removeAll(@NotNull AltSet<T> other);
+
+  boolean removeAll(@NotNull Collection<T> other);
+
+  void clear();
+
+  void fill();
+
+  void invert();
+
+  boolean inverted();
+
+  Set<T> set();
+
+  String printAll();
 
 }

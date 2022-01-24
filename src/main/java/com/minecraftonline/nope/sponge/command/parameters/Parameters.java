@@ -32,6 +32,21 @@ import com.minecraftonline.nope.common.setting.template.Template;
 import com.minecraftonline.nope.sponge.SpongeNope;
 import com.minecraftonline.nope.sponge.util.Formatter;
 import com.minecraftonline.nope.sponge.util.SpongeUtil;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.concurrent.CompletableFuture;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
 import net.kyori.adventure.text.Component;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandCompletion;
@@ -39,17 +54,11 @@ import org.spongepowered.api.command.exception.ArgumentParseException;
 import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.util.Nameable;
 import org.spongepowered.api.util.StartsWithPredicate;
 import org.spongepowered.api.world.server.ServerWorld;
-
-import java.util.*;
-import java.util.concurrent.CompletableFuture;
-import java.util.function.Function;
-import java.util.function.Predicate;
-import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 /**
  * An enumerating class to centralize different methods for giving
@@ -131,10 +140,10 @@ public class Parameters {
         return Optional.of(builder.toString());
       }).build();
   public static final Parameter.Value<String> REGEX = Parameter.string().key(ParameterKeys.REGEX).build();
-  public static final Parameter.Value<SettingKey<?, ?>> SETTING_KEY = Parameter.builder(ParameterKeys.SETTING_KEY)
+  public static final Parameter.Value<SettingKey<?, ?, ?>> SETTING_KEY = Parameter.builder(ParameterKeys.SETTING_KEY)
       .addParser((parameterKey, reader, context) -> {
         String id = reader.parseString();
-        SettingKey<?, ?> key = SpongeNope.instance().settingKeys().get(id);
+        SettingKey<?, ?, ?> key = SpongeNope.instance().settingKeys().get(id);
         if (key == null) {
           throw new ArgumentParseException(Formatter.error(
               "___ is not a setting key", id
@@ -158,63 +167,74 @@ public class Parameters {
             .collect(Collectors.toList());
       }).build();
   public static final Parameter.Value<ParameterValueTypes.SettingValueAlterType> SETTING_VALUE_ALTER_TYPE =
-      Parameter.enumValue(ParameterValueTypes.SettingValueAlterType.class)
+      Parameter.choices(ParameterValueTypes.SettingValueAlterType.class,
+              Arrays.stream(ParameterValueTypes.SettingValueAlterType.values())
+                  .collect(Collectors.toMap(ParameterValueTypes.SettingValueAlterType::command,
+                      t -> t)))
           .key(ParameterKeys.SETTING_VALUE_ALTER_TYPE)
           .completer((context, currentInput) -> {
-            SettingKey<?, ?> settingKey = context.requireOne(ParameterKeys.SETTING_KEY);
+            SettingKey<?, ?, ?> settingKey = context.requireOne(ParameterKeys.SETTING_KEY);
             ParameterValueTypes.SettingValueAlterType[] options;
             if (settingKey instanceof SettingKey.Poly) {
               options = ParameterValueTypes.SettingValueAlterType.values();
             } else {
-              options = new ParameterValueTypes.SettingValueAlterType[] {ParameterValueTypes.SettingValueAlterType.SET};
+              options = new ParameterValueTypes.SettingValueAlterType[]{
+                  ParameterValueTypes.SettingValueAlterType.SET
+              };
             }
             final Predicate<String> startsWith = new StartsWithPredicate(currentInput);
             return Arrays.stream(options)
-                .filter(option -> startsWith.test(option.name().toLowerCase()))
-                .map(option -> CommandCompletion.of(option.name().toLowerCase(), Formatter.info(option.description())))
+                .filter(option -> startsWith.test(option.command()))
+                .map(option -> CommandCompletion.of(option.command(), Formatter.info(option.description())))
                 .collect(Collectors.toList());
           })
           .build();
   public static final Parameter.Value<String> SETTING_VALUE = Parameter.remainingJoinedStrings()
       .key(ParameterKeys.SETTING_VALUE)
       .completer((context, currentInput) -> {
-        SettingKey<?, ?> settingKey = context.requireOne(ParameterKeys.SETTING_KEY);
+        SettingKey<?, ?, ?> settingKey = context.requireOne(ParameterKeys.SETTING_KEY);
         Map<String, Object> options = settingKey.manager().elementOptions();
-        Predicate<String> startsWith;
+        final Predicate<String> startsWith;
         if (settingKey instanceof SettingKey.Poly) {
-          SettingKey.Poly<?> polyKey = (SettingKey.Poly<?>) settingKey;
+          SettingKey.Poly<?, ?> polyKey = (SettingKey.Poly<?, ?>) settingKey;
           String[] tokensSoFar = currentInput.split(SettingKey.Manager.Poly.SET_SPLIT_REGEX);
+          List<String> completedTokens = new LinkedList<>();
           for (int i = 0; i < tokensSoFar.length - 1; i++) {
             if (!options.containsKey(tokensSoFar[i].toLowerCase())) {
               return Collections.emptyList();
             }
+            completedTokens.add(tokensSoFar[i]);
           }
           if (currentInput.endsWith(" ")) {
             startsWith = new StartsWithPredicate("");
           } else {
             startsWith = new StartsWithPredicate(tokensSoFar[tokensSoFar.length - 1]);
           }
+          return options.entrySet().stream()
+              .filter(entry -> startsWith.test(entry.getKey()))
+              .map(entry -> {
+                Object value = entry.getValue();
+                return CommandCompletion.of(entry.getKey(),
+                    Formatter.accent(String.join(", ", completedTokens) + ", ").append(
+                        value instanceof Component
+                            ? (Component) value
+                            : Formatter.accent(value.toString())));
+              })
+              .collect(Collectors.toList());
         } else {
           startsWith = new StartsWithPredicate(currentInput);
+          return options.entrySet().stream()
+              .filter(entry -> startsWith.test(entry.getKey()))
+              .map(entry -> {
+                Object value = entry.getValue();
+                return CommandCompletion.of(entry.getKey(),
+                    value instanceof Component
+                        ? (Component) value
+                        : Formatter.accent(value.toString()));
+              })
+              .collect(Collectors.toList());
         }
-        return options.entrySet().stream()
-            .filter(entry -> startsWith.test(entry.getKey()))
-            .map(entry -> {
-              Object value = entry.getValue();
-              return CommandCompletion.of(entry.getKey(),
-                  value instanceof Component
-                      ? (Component) value
-                      : Formatter.accent(value.toString()));
-            })
-            .collect(Collectors.toList());
       })
-//          .manager()
-//          .
-//          .manager()
-//          .elementOptions()
-//          .stream()
-//          .map(string -> CommandCompletion.of(string, Component.empty()))
-//          .collect(Collectors.toList()))
       .build();
   public static final Parameter.Value<Set<CompletableFuture<GameProfile>>> PLAYER_LIST = set(name -> Sponge.server()
           .gameProfileManager()
@@ -222,6 +242,20 @@ public class Parameters {
       () -> Sponge.server().onlinePlayers().stream().map(Nameable::name).collect(Collectors.toSet()),
       ParameterKeys.PLAYER_LIST,
       "players")
+      .build();
+  public static final Parameter.Value<ServerPlayer> PLAYER_OPTIONAL = Parameter.player()
+      .key(ParameterKeys.PLAYER_OPTIONAL)
+      .optional()
+      .terminal()
+      .completer((context, currentInput) -> {
+        final Predicate<String> startsWith = new StartsWithPredicate(currentInput);
+        return Sponge.server().onlinePlayers()
+            .stream()
+            .map(Nameable::name)
+            .filter(startsWith)
+            .map(CommandCompletion::of)
+            .collect(Collectors.toList());
+      })
       .build();
   public static final Parameter.Value<String> PERMISSION = Parameter.string().key(ParameterKeys.PERMISSION).build();
   public static final Parameter.Value<Boolean> PERMISSION_VALUE = Parameter.bool().key(ParameterKeys.PERMISSION_VALUE).build();

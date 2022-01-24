@@ -23,12 +23,17 @@
  * SOFTWARE.
  */
 
-package com.minecraftonline.nope.sponge.api.setting;
+package com.minecraftonline.nope.sponge.storage.hocon;
 
-import com.minecraftonline.nope.common.setting.SettingKey;
+import com.minecraftonline.nope.sponge.api.config.SettingValueConfigSerializerRegistrar;
+import com.minecraftonline.nope.sponge.storage.configurate.UniverseConfigurateDataHandler;
+import java.nio.file.Path;
 
-public interface SettingKeyRegistrar {
+public class HoconConfig extends UniverseConfigurateDataHandler {
 
-  void register(SettingKey<?, ?, ?> settingKey);
+    public HoconConfig(Path path, SettingValueConfigSerializerRegistrar serializerRegistrar) {
+      super(HoconDataHandler.hoconLoader(path.resolve("server.conf")),
+          serializerRegistrar);
+    }
 
 }

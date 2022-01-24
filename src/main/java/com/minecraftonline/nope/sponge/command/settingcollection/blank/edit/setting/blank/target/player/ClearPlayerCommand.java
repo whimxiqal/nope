@@ -29,7 +29,7 @@ public class ClearPlayerCommand<T extends SettingCollection> extends CommandNode
   @Override
   public CommandResult execute(CommandContext context) throws CommandException {
     T collection = context.requireOne(settingCollectionParameterKey);
-    SettingKey<?, ?> key = context.requireOne(ParameterKeys.SETTING_KEY);
+    SettingKey<?, ?, ?> key = context.requireOne(ParameterKeys.SETTING_KEY);
 
     Optional<Target> target = collection.getTarget(key);
     if (target.isPresent()) {

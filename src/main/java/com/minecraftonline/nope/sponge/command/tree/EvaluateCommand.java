@@ -23,53 +23,57 @@
  * SOFTWARE.
  */
 
-package com.minecraftonline.nope.sponge.command.settingcollection.blank.edit.setting.blank.value;
+package com.minecraftonline.nope.sponge.command.tree;
 
+import com.minecraftonline.nope.common.Nope;
+import com.minecraftonline.nope.common.permission.Permission;
 import com.minecraftonline.nope.common.permission.Permissions;
-import com.minecraftonline.nope.common.setting.SettingCollection;
 import com.minecraftonline.nope.common.setting.SettingKey;
-import com.minecraftonline.nope.common.struct.Named;
 import com.minecraftonline.nope.sponge.command.CommandNode;
 import com.minecraftonline.nope.sponge.command.parameters.ParameterKeys;
+import com.minecraftonline.nope.sponge.command.parameters.Parameters;
 import com.minecraftonline.nope.sponge.util.Formatter;
-import net.kyori.adventure.identity.Identity;
+import com.minecraftonline.nope.sponge.util.SpongeUtil;
+import java.util.Optional;
+import org.jetbrains.annotations.NotNull;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.command.parameter.Parameter;
+import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 
-public class ValueUnsetCommand<T extends SettingCollection & Named>  extends CommandNode {
+public class EvaluateCommand extends CommandNode {
 
-  private final Parameter.Key<T> settingCollectionParameterKey;
-
-  private final String collectionName;
-
-  public ValueUnsetCommand(CommandNode parent,
-                      Parameter.Key<T> settingCollectionParameterKey,
-                      String collectionName) {
-    super(parent, Permissions.EDIT,
-        "Unset the value of a setting on a " + collectionName,
-        "unset");
-    this.settingCollectionParameterKey = settingCollectionParameterKey;
-    this.collectionName = collectionName;
+  public EvaluateCommand(CommandNode parent) {
+    super(parent, Permissions.INFO,
+        "Evaluate the value for some setting",
+        "evaluate");
+    addParameter(Parameters.SETTING_KEY);
+    addParameter(Parameters.PLAYER_OPTIONAL);
   }
 
   @Override
   public CommandResult execute(CommandContext context) throws CommandException {
-    SettingKey<?, ?, ?> settingKey = context.requireOne(ParameterKeys.SETTING_KEY);
-    T collection = context.requireOne(settingCollectionParameterKey);
-    if (collection.removeValue(settingKey) == null) {
-      context.sendMessage(Identity.nil(),
-          Formatter.error("Setting ___ is not set on " + collectionName + " ___",
-              settingKey.id(),
-              collection.name()));
+    SettingKey<?, ?, ?> key = context.requireOne(ParameterKeys.SETTING_KEY);
+    Optional<ServerPlayer> playerOptional = context.one(ParameterKeys.PLAYER_OPTIONAL);
+    ServerPlayer player;
+    if (playerOptional.isPresent()) {
+      player = playerOptional.get();
     } else {
-      context.sendMessage(Identity.nil(),
-          Formatter.success("Value of setting ___ was removed on " + collectionName + " ___",
-              settingKey.id(),
-              collection.name()));
-      collection.save();
+      if (context.cause().root() instanceof ServerPlayer) {
+        player = (ServerPlayer) context.cause().root();
+      } else {
+        return CommandResult.error(Formatter.error("You must specify a player"));
+      }
     }
+
+    player.sendMessage(Formatter.success("Value for setting ___ at ___, ___, ___ in ___ is ___",
+        key.id(),
+        player.serverLocation().blockX(),
+        player.serverLocation().blockY(),
+        player.serverLocation().blockZ(),
+        player.serverLocation().world().key().formatted(),
+        SpongeUtil.valueFor(key, player)));
     return CommandResult.success();
   }
 }

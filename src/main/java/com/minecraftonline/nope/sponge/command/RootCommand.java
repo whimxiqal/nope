@@ -1,5 +1,6 @@
 package com.minecraftonline.nope.sponge.command;
 
+import com.minecraftonline.nope.sponge.command.tree.EvaluateCommand;
 import com.minecraftonline.nope.sponge.command.tree.HostCommand;
 import com.minecraftonline.nope.sponge.command.tree.HostsCommand;
 import com.minecraftonline.nope.sponge.command.tree.TemplateCommand;
@@ -14,6 +15,7 @@ public class RootCommand extends CommandNode {
   public RootCommand() {
     super(null, null,
         "Root for all Nope commands", "nope");
+    addChild(new EvaluateCommand(this));
     addChild(new HostCommand(this));
     addChild(new HostsCommand(this));
     addChild(new TemplateCommand(this));

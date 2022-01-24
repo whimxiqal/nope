@@ -36,7 +36,7 @@ public class SettingListenerRegistration<T, E extends Event> {
 
   @Getter
   @Accessors(fluent = true)
-  private final SettingKey<T, ?> settingKey;
+  private final SettingKey<? extends T, ?, ?> settingKey;
 
   @Getter
   @Accessors(fluent = true)
@@ -54,7 +54,7 @@ public class SettingListenerRegistration<T, E extends Event> {
   @Accessors(fluent = true)
   private final SettingEventListener<T, E> settingEventListener;
 
-  public SettingListenerRegistration(SettingKey<T, ?> settingKey,
+  public SettingListenerRegistration(SettingKey<? extends T, ?, ?> settingKey,
                                      Class<E> eventClass,
                                      PluginContainer plugin,
                                      SettingEventListener<T, E> settingEventListener) {
@@ -65,7 +65,7 @@ public class SettingListenerRegistration<T, E extends Event> {
     this.order = Order.EARLY;
   }
 
-  public SettingListenerRegistration(SettingKey<T, ?> settingKey,
+  public SettingListenerRegistration(SettingKey<? extends T, ?, ?> settingKey,
                                      Class<E> eventClass,
                                      PluginContainer plugin,
                                      SettingEventListener<T, E> settingEventListener,

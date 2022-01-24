@@ -23,12 +23,39 @@
  * SOFTWARE.
  */
 
-package com.minecraftonline.nope.sponge.api.setting;
+package com.minecraftonline.nope.common.setting.sets;
 
-import com.minecraftonline.nope.common.setting.SettingKey;
+import com.minecraftonline.nope.common.struct.Described;
+import com.minecraftonline.nope.common.struct.HashAltSet;
 
-public interface SettingKeyRegistrar {
+public class ExplosiveSet extends HashAltSet.FewEnum<ExplosiveSet.Explosive> {
 
-  void register(SettingKey<?, ?, ?> settingKey);
+  public ExplosiveSet() {
+    super(Explosive.class);
+  }
 
+  /**
+   * Enumeration for all explosive types considered by Nope.
+   */
+  public enum Explosive implements Described {
+    CREEPER("Explosion caused by creeper"),
+    ENDERCRYSTAL("Explosion caused by endercrystal"),
+    FIREWORK("Explosion caused by firework"),
+    LARGEFIREBALL("Explosion caused by large fireball"),
+    PRIMEDTNT("Explosion caused by primed TNT"),
+    TNTMINECART("Explosion caused by TNT minecart"),
+    WITHER("Explosion caused by Wither"),
+    WITHERSKULL("Explosion caused by Wither skull");
+
+    private final String description;
+
+    Explosive(String description) {
+      this.description = description;
+    }
+
+    @Override
+    public String description() {
+      return description;
+    }
+  }
 }

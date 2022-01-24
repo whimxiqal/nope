@@ -4,6 +4,7 @@ import com.minecraftonline.nope.common.host.Domain;
 import com.minecraftonline.nope.common.host.HostSystem;
 import com.minecraftonline.nope.common.host.Universe;
 import com.minecraftonline.nope.common.setting.SettingKeys;
+import com.minecraftonline.nope.common.setting.SettingValue;
 import com.minecraftonline.nope.common.storage.DataHandler;
 import com.minecraftonline.nope.common.storage.DomainDataHandler;
 import com.minecraftonline.nope.common.storage.TemplateDataHandler;
@@ -52,7 +53,7 @@ public abstract class ConfigurateDataHandler implements DataHandler {
         .map(world -> new Domain("_" + world.key()
             .formatted()
             .replace(":", "_"),
-            universe.getValueOrDefault(SettingKeys.CACHE_SIZE).get()))
+            SettingKeys.CACHE_SIZE.getDataOrDefault(universe)))
         .collect(Collectors.toList());
     domains.forEach(domainDataHandler::load);
     return new HostSystem(universe, domains);

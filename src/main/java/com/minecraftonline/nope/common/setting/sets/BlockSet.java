@@ -23,22 +23,9 @@
  * SOFTWARE.
  */
 
-package com.minecraftonline.nope.sponge.listener.all;
+package com.minecraftonline.nope.common.setting.sets;
 
-import com.minecraftonline.nope.sponge.api.event.SettingEventListener;
-import com.minecraftonline.nope.sponge.api.event.SettingValueLookupFunction;
-import com.minecraftonline.nope.sponge.listener.SpongeEventUtil;
-import org.spongepowered.api.entity.living.ArmorStand;
-import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.event.entity.AttackEntityEvent;
+import com.minecraftonline.nope.common.struct.HashAltSet;
 
-public class ArmorStandDestroyListener implements SettingEventListener<Boolean, AttackEntityEvent> {
-  @Override
-  public void handle(AttackEntityEvent event, SettingValueLookupFunction<Boolean> lookupFunction) {
-    SpongeEventUtil.cancelEntityAttackingEntity(event,
-        lookupFunction,
-        Player.class,
-        ArmorStand.class,
-        true);
-  }
+public class BlockSet extends HashAltSet.Infinite<String> {
 }

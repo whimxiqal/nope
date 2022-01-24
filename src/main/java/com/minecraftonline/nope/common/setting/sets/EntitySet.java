@@ -23,12 +23,9 @@
  * SOFTWARE.
  */
 
-package com.minecraftonline.nope.sponge.api.setting;
+package com.minecraftonline.nope.common.setting.sets;
 
-import com.minecraftonline.nope.common.setting.SettingKey;
+import com.minecraftonline.nope.common.struct.HashAltSet;
 
-public interface SettingKeyRegistrar {
-
-  void register(SettingKey<?, ?, ?> settingKey);
-
+public class EntitySet extends HashAltSet.Infinite<String> {
 }

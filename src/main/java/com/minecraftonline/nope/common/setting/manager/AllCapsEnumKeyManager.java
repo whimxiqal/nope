@@ -23,12 +23,43 @@
  * SOFTWARE.
  */
 
-package com.minecraftonline.nope.sponge.api.setting;
+package com.minecraftonline.nope.common.setting.manager;
 
 import com.minecraftonline.nope.common.setting.SettingKey;
+import com.minecraftonline.nope.common.setting.SettingValue;
+import com.minecraftonline.nope.common.struct.Described;
+import java.util.Arrays;
+import java.util.Map;
+import java.util.stream.Collectors;
+import org.jetbrains.annotations.NotNull;
 
-public interface SettingKeyRegistrar {
+public class AllCapsEnumKeyManager<E extends Enum<E> & Described> extends SettingKey.Manager.Unary<E> {
 
-  void register(SettingKey<?, ?, ?> settingKey);
+  private final Class<E> clazz;
+
+  public AllCapsEnumKeyManager(Class<E> clazz) {
+    this.clazz = clazz;
+  }
+
+  @Override
+  public Class<E> dataType() throws SettingKey.ParseSettingException {
+    return clazz;
+  }
+
+  @Override
+  public E parseData(String data) throws SettingKey.ParseSettingException {
+    return Enum.valueOf(clazz, data.toUpperCase());
+  }
+
+  @Override
+  public @NotNull Map<String, Object> elementOptions() {
+    return Arrays.stream(clazz.getEnumConstants())
+        .collect(Collectors.toMap(e -> e.name().toLowerCase(), Described::description));
+  }
+
+  @Override
+  public @NotNull String printData(@NotNull E value) {
+    return value.name().toLowerCase();
+  }
 
 }

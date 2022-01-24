@@ -23,12 +23,18 @@
  * SOFTWARE.
  */
 
-package com.minecraftonline.nope.sponge.api.setting;
+package com.minecraftonline.nope.common.setting.manager;
 
 import com.minecraftonline.nope.common.setting.SettingKey;
 
-public interface SettingKeyRegistrar {
+public class StringKeyManager extends SettingKey.Manager.Unary<String> {
+  @Override
+  public Class<String> dataType() throws SettingKey.ParseSettingException {
+    return String.class;
+  }
 
-  void register(SettingKey<?, ?, ?> settingKey);
-
+  @Override
+  public String parseData(String data) throws SettingKey.ParseSettingException {
+    return data;
+  }
 }
