@@ -7,6 +7,7 @@ import com.minecraftonline.nope.common.setting.SettingCollection;
 import com.minecraftonline.nope.common.setting.SettingKey;
 import com.minecraftonline.nope.common.setting.SettingValue;
 import com.minecraftonline.nope.common.setting.Target;
+import com.minecraftonline.nope.sponge.SpongeNope;
 import com.minecraftonline.nope.sponge.api.config.SettingValueConfigSerializerRegistrar;
 import com.minecraftonline.nope.sponge.storage.configurate.serializer.VolumeTypeSerializer;
 import io.leangen.geantyref.TypeToken;
@@ -77,9 +78,16 @@ public abstract class SettingsConfigurateDataHandler {
   protected final Collection<Setting<?, ?>> deserializeSettings(Map<Object, ? extends ConfigurationNode> settingNodes) throws SerializationException {
     List<Setting<?, ?>> settings = new LinkedList<>();
     for (Map.Entry<Object, ? extends ConfigurationNode> entry : settingNodes.entrySet()) {
-      deserializeSetting(entry.getValue(), settings, Nope.instance()
-          .settingKeys()
-          .get(Objects.requireNonNull((String) entry.getKey())));
+      String keyId = Objects.requireNonNull((String) entry.getKey());
+      if (Nope.instance().settingKeys().containsId(keyId)) {
+        deserializeSetting(entry.getValue(), settings, Nope.instance()
+            .settingKeys()
+            .get(keyId));
+      } else {
+        SpongeNope.instance().logger().error("Cannot deserialize setting "
+            + keyId
+            + " because no setting exists with that ID");
+      }
     }
     return settings;
   }

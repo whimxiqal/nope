@@ -23,35 +23,35 @@
  * SOFTWARE.
  */
 
-package com.minecraftonline.nope.sponge.command.parameters;
+package com.minecraftonline.nope.common.setting.sets;
 
-import lombok.Getter;
-import lombok.experimental.Accessors;
+import com.minecraftonline.nope.common.struct.Described;
+import com.minecraftonline.nope.common.struct.HashAltSet;
 
-public final class ParameterValueTypes {
+public class DamageCauseSet extends HashAltSet.FewEnum<DamageCauseSet.DamageCause> {
 
-  public enum SettingValueAlterType {
-    SET("set", "Sets the value directly"),
-    SET_NOT("setnot", "Sets all except the given values"),
-    CONCATENATE("add", "Adds elements onto the targeted list of values"),
-    REMOVE("remove", "Removes elements from the targeted list of values"),
-    NONE("none", "Sets an empty list of values"),
-    ALL("all", "Sets a full list of values");
-
-    @Getter
-    @Accessors(fluent = true)
-    private final String command;
-
-    @Getter
-    @Accessors(fluent = true)
-    private final String description;
-
-    SettingValueAlterType(String command, String description) {
-      this.command = command;
-      this.description = description;
-    }
+  public DamageCauseSet() {
+    super(DamageCauseSet.DamageCause.class);
   }
 
-  private ParameterValueTypes() {
+  /**
+   * Enumeration for all explosive types considered by Nope.
+   */
+  public enum DamageCause implements Described {
+    PLAYERS("Damage caused by other players"),
+    FALL("Damage caused from falling down"),
+    ENTITY("Damage caused by some entity"),
+    MISC("Miscellaneous damage");
+
+    private final String description;
+
+    DamageCause(String description) {
+      this.description = description;
+    }
+
+    @Override
+    public String description() {
+      return description;
+    }
   }
 }

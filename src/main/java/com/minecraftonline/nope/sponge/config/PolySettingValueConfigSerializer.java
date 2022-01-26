@@ -65,7 +65,7 @@ public class PolySettingValueConfigSerializer implements SettingValueConfigSeria
       return node;
     } else if (value.manipulative()) {
       node.node("add").set(serializeSet(manager, value.additive()));
-      node.node("subtract").set(serializeSet(manager, value.additive()));
+      node.node("subtract").set(serializeSet(manager, value.subtractive()));
       return node;
     } else {
       throw new IllegalStateException("Unknown behavior type");

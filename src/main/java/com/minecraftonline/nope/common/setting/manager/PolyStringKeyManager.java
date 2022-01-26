@@ -27,23 +27,26 @@ package com.minecraftonline.nope.common.setting.manager;
 
 import com.minecraftonline.nope.common.setting.SettingKey;
 import com.minecraftonline.nope.common.struct.HashAltSet;
+import java.util.Collection;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import lombok.Setter;
+import lombok.Value;
 import lombok.experimental.Accessors;
 import org.jetbrains.annotations.NotNull;
 
 @Accessors(fluent = true)
 public class PolyStringKeyManager<S extends HashAltSet<String>> extends SettingKey.Manager.Poly<String, S> {
 
-  private final Supplier<S> setConstructor;
+  private final Supplier<? extends S> setConstructor;
   @Setter
   private Supplier<Map<String, Object>> elementOptions = null;
   @Setter
   private Function<String, String> parser = null;
 
-  public PolyStringKeyManager(Supplier<S> setConstructor) {
+  public PolyStringKeyManager(Supplier<? extends S> setConstructor) {
     this.setConstructor = setConstructor;
   }
 
@@ -68,7 +71,7 @@ public class PolyStringKeyManager<S extends HashAltSet<String>> extends SettingK
   }
 
   @Override
-  public @NotNull Map<String, Object> elementOptions() {
+  public @NotNull Map<String, Object> elementOptionsWithoutGroups() {
     if (this.elementOptions == null) {
       return super.elementOptions();
     } else {

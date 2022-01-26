@@ -31,7 +31,6 @@ import com.minecraftonline.nope.common.setting.SettingCollection;
 import com.minecraftonline.nope.common.setting.SettingKey;
 import com.minecraftonline.nope.common.setting.SettingValue;
 import com.minecraftonline.nope.common.struct.AltSet;
-import com.minecraftonline.nope.common.struct.HashAltSet;
 import com.minecraftonline.nope.common.struct.Named;
 import com.minecraftonline.nope.sponge.SpongeNope;
 import com.minecraftonline.nope.sponge.command.CommandNode;
@@ -77,7 +76,7 @@ public class ValueCommand<T extends SettingCollection & Named> extends CommandNo
   private <X, Y extends SettingValue<X>> CommandResult executeGenerified(SettingKey<X, Y, ?> settingKey, CommandContext context) {
     T collection = context.requireOne(settingCollectionParameterKey);
     ParameterValueTypes.SettingValueAlterType alterType = context.requireOne(ParameterKeys.SETTING_VALUE_ALTER_TYPE);
-    String settingValue = context.requireOne(ParameterKeys.SETTING_VALUE);
+    Optional<String> settingValue = context.one(ParameterKeys.SETTING_VALUE);
     boolean additive = context.hasFlag(Flags.ADDITIVE_VALUE_FLAG);
     boolean subtractive = context.hasFlag(Flags.SUBTRACTIVE_VALUE_FLAG);
 
@@ -94,7 +93,10 @@ public class ValueCommand<T extends SettingCollection & Named> extends CommandNo
     } else if (additive || subtractive) {
       return CommandResult.error(Formatter.error("You may not alter this value in an additive or subtractive way"));
     } else {
-      Y newValue =  settingKey.manager().parseDeclarativeValue(settingValue);
+      if (!settingValue.isPresent()) {
+        return CommandResult.error(Formatter.error("You must provide a value to update this setting"));
+      }
+      Y newValue = settingKey.manager().parseDeclarativeValue(settingValue.get());
       return success(context, collection, settingKey, newValue);
     }
   }
@@ -103,7 +105,7 @@ public class ValueCommand<T extends SettingCollection & Named> extends CommandNo
                                                                     CommandContext context,
                                                                     T collection,
                                                                     ParameterValueTypes.SettingValueAlterType alterType,
-                                                                    String settingValue,
+                                                                    Optional<String> settingValueOptional,
                                                                     boolean additive,
                                                                     boolean subtractive) {
     try {
@@ -112,8 +114,18 @@ public class ValueCommand<T extends SettingCollection & Named> extends CommandNo
             + "and subtractive values at the same time"));
       }
       Y inputSet = polyKey.manager().createSet();
-
-      inputSet.addAll(polyKey.manager().parseSet(settingValue));
+      if (alterType == ParameterValueTypes.SettingValueAlterType.ALL) {
+        inputSet.fill();
+        alterType = ParameterValueTypes.SettingValueAlterType.SET;
+      } else if (alterType == ParameterValueTypes.SettingValueAlterType.NONE) {
+        alterType = ParameterValueTypes.SettingValueAlterType.SET;
+      } else {
+        if (settingValueOptional.isPresent()) {
+          inputSet.addAll(polyKey.manager().parseSet(settingValueOptional.get()));
+        } else {
+          return CommandResult.error(Formatter.error("You must specify values to update in this way"));
+        }
+      }
       Optional<SettingValue.Poly<X, Y>> currentValue = collection.getValue(polyKey);
       Y additiveSet;
       Y subtractiveSet;
@@ -159,8 +171,8 @@ public class ValueCommand<T extends SettingCollection & Named> extends CommandNo
             additiveSet.removeAll(inputSet);
             newValue = SettingValue.Poly.manipulative(additiveSet,
                 currentValue.filter(SettingValue.Poly::manipulative)
-                .map(SettingValue.Poly::subtractive)
-                .orElse(polyKey.manager().createSet()));
+                    .map(SettingValue.Poly::subtractive)
+                    .orElse(polyKey.manager().createSet()));
             break;
           default:
             throw new CommandException(Formatter.error("Unknown setting value alter type: " + alterType));
@@ -227,7 +239,7 @@ public class ValueCommand<T extends SettingCollection & Named> extends CommandNo
               }
             }
             additiveSet.addAll(inputSet);
-            newValue = SettingValue.Poly.declarative(inputSet);
+            newValue = SettingValue.Poly.declarative(additiveSet);
             break;
           case REMOVE:
             if (!currentValue.isPresent()
@@ -255,9 +267,9 @@ public class ValueCommand<T extends SettingCollection & Named> extends CommandNo
   }
 
   private <X, Y extends SettingValue<X>> CommandResult success(CommandContext context,
-                                T collection,
-                                SettingKey<X, Y, ?> key,
-                                Y value) {
+                                                               T collection,
+                                                               SettingKey<X, Y, ?> key,
+                                                               Y value) {
     collection.setValue(key, value);
     context.sendMessage(Identity.nil(),
         Formatter.success("Set value of ___ on " + this.collectionName + " ___: ___",
@@ -268,6 +280,7 @@ public class ValueCommand<T extends SettingCollection & Named> extends CommandNo
       context.sendMessage(Identity.nil(),
           Formatter.warn("This setting may not work yet so your change may have no effect."));
     }
+    SpongeNope.instance().settingListeners().registerAll();
     return CommandResult.success();
   }
 }

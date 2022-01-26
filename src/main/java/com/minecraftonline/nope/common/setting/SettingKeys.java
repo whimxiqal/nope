@@ -25,10 +25,11 @@
 
 package com.minecraftonline.nope.common.setting;
 
-import com.minecraftonline.nope.common.setting.sets.BlockSet;
-import com.minecraftonline.nope.common.setting.sets.EntitySet;
+import com.minecraftonline.nope.common.setting.sets.BlockChangeSet;
+import com.minecraftonline.nope.common.setting.sets.DamageCauseSet;
 import com.minecraftonline.nope.common.setting.sets.ExplosiveSet;
 import com.minecraftonline.nope.common.setting.sets.MovementSet;
+import com.minecraftonline.nope.common.setting.sets.StringSet;
 import com.minecraftonline.nope.common.struct.AltSet;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
@@ -36,42 +37,10 @@ import java.util.Arrays;
 @SuppressWarnings("unused")
 public class SettingKeys {
 
-  public static final SettingKey.Unary<Boolean> ARMOR_STAND_DESTROY =
-      SettingKey.Unary.builder("armor-stand-destroy", true, SettingKeyManagers.STATE_KEY_MANAGER)
-          .blurb("Armor stand destruction restriction")
-          .description("When disabled, armor stands may not be broken by players.")
-          .category(SettingKey.Category.ENTITIES)
-          .playerRestrictive()
-          .build();
-
-  public static final SettingKey.Unary<Boolean> ARMOR_STAND_INTERACT =
-      SettingKey.Unary.builder("armor-stand-interact", true, SettingKeyManagers.STATE_KEY_MANAGER)
-          .blurb("Armor stand interact restriction")
-          .description("When disabled, armor stands may not be interacted with by players.")
-          .category(SettingKey.Category.ENTITIES)
-          .playerRestrictive()
-          .build();
-
-  public static final SettingKey.Unary<Boolean> ARMOR_STAND_PLACE =
-      SettingKey.Unary.builder("armor-stand-place", true, SettingKeyManagers.STATE_KEY_MANAGER)
-          .blurb("Armor stand placement restriction")
-          .description("When disabled, armor stands may not be placed by players.")
-          .category(SettingKey.Category.ENTITIES)
-          .playerRestrictive()
-          .build();
-
-  public static final SettingKey.Unary<Boolean> BLOCK_BREAK =
-      SettingKey.Unary.builder("block-break", true, SettingKeyManagers.STATE_KEY_MANAGER)
-          .blurb("Block break restriction")
-          .description("When disabled, blocks may not be broken by players.")
-          .category(SettingKey.Category.BLOCKS)
-          .playerRestrictive()
-          .build();
-
-  public static final SettingKey.Unary<Boolean> BLOCK_PLACE =
-      SettingKey.Unary.builder("block-place", true, SettingKeyManagers.STATE_KEY_MANAGER)
-          .blurb("Block place restriction")
-          .description("When disabled, blocks may not be placed by players.")
+  public static final SettingKey.Poly<BlockChangeSet.BlockChange, BlockChangeSet> BLOCK_CHANGE =
+      SettingKey.Poly.builder("block-change", AltSet.full(new BlockChangeSet()), SettingKeyManagers.POLY_BLOCK_CHANGE_KEY_MANAGER)
+          .blurb("How blocks may be changed")
+          .description("A list of ways that blocks may be changed.")
           .category(SettingKey.Category.BLOCKS)
           .playerRestrictive()
           .build();
@@ -130,14 +99,6 @@ public class SettingKeys {
       SettingKey.Unary.builder("concrete-solidification", true, SettingKeyManagers.BOOLEAN_KEY_MANAGER)
           .blurb("Concrete powder solidification")
           .description("When disabled, concrete powder does not solidify into concrete.")
-          .category(SettingKey.Category.BLOCKS)
-          .playerRestrictive()
-          .build();
-
-  public static final SettingKey.Unary<Boolean> CROP_GROWTH =
-      SettingKey.Unary.builder("crop-growth", true, SettingKeyManagers.BOOLEAN_KEY_MANAGER)
-          .blurb("Crop growth")
-          .description("When disabled, crops do not grow.")
           .category(SettingKey.Category.BLOCKS)
           .playerRestrictive()
           .build();
@@ -202,13 +163,6 @@ public class SettingKeys {
           .category(SettingKey.Category.MOVEMENT)
           .build();
 
-  public static final SettingKey.Unary<Boolean> EVP =
-      SettingKey.Unary.builder("evp", true, SettingKeyManagers.BOOLEAN_KEY_MANAGER)
-          .blurb("Environment-to-player damage")
-          .description("When disabled, the environment cannot inflict damage on players.")
-          .category(SettingKey.Category.DAMAGE)
-          .build();
-
   public static final SettingKey.Unary<MovementSet.Movement> EXIT =
       SettingKey.Unary.builder("exit", MovementSet.Movement.ALL, SettingKeyManagers.MOVEMENT_KEY_MANAGER)
           .blurb("Host exit restriction")
@@ -241,14 +195,18 @@ public class SettingKeys {
           .build();
 
   public static final SettingKey.Poly<ExplosiveSet.Explosive, ExplosiveSet> HARMLESS_EXPLOSIVES =
-      SettingKey.Poly.builder("harmless-explosives", new ExplosiveSet(), SettingKeyManagers.POLY_EXPLOSIVE_KEY_MANAGER)
+      SettingKey.Poly.builder("harmless-explosives",
+              new ExplosiveSet(),
+              SettingKeyManagers.POLY_EXPLOSIVE_KEY_MANAGER)
           .blurb("Explosives causing no entity damage")
           .description("A list of explosives whose explosions do not cause damage to entities.")
           .category(SettingKey.Category.DAMAGE)
           .build();
 
   public static final SettingKey.Poly<ExplosiveSet.Explosive, ExplosiveSet> NONDESTRUCTIVE_EXPLOSIVES =
-      SettingKey.Poly.builder("nondestructive-explosives", new ExplosiveSet(), SettingKeyManagers.POLY_EXPLOSIVE_KEY_MANAGER)
+      SettingKey.Poly.builder("nondestructive-explosives",
+              new ExplosiveSet(),
+              SettingKeyManagers.POLY_EXPLOSIVE_KEY_MANAGER)
           .blurb("Explosives causing no world damage")
           .description("A list of explosives whose explosions to not cause damage to the world.")
           .category(SettingKey.Category.BLOCKS)
@@ -304,488 +262,256 @@ public class SettingKeys {
           .category(SettingKey.Category.BLOCKS)
           .build();
 
-  public static final SettingKey.Poly<String, BlockSet> INTERACTIVE_BLOCKS =
-      SettingKey.Poly.builder("interactive-blocks", AltSet.full(new BlockSet()), SettingKeyManagers.POLY_BLOCK_KEY_MANAGER)
+  public static final SettingKey.Poly<String, StringSet> INTERACTIVE_BLOCKS =
+      SettingKey.Poly.builder("interactive-blocks",
+              AltSet.full(new StringSet()),
+              SettingKeyManagers.POLY_BLOCK_KEY_MANAGER)
           .blurb("Interactive blocks")
           .description("A list of blocks with which that can be interacted.")
           .category(SettingKey.Category.BLOCKS)
           .playerRestrictive()
           .build();
 
-//  @Blurb("Frosted ice formation")
-//  @Description("When disabled, frosted ice does not form.")
-//  @Category(SettingKey.CategoryType.BLOCKS)
-//  public static final SettingKey<Boolean> FROSTED_ICE_FORM = new StateSettingKey(
-//      "frosted-ice-form",
-//      true
-//  );
-//  @Blurb("Frosted ice melt")
-//  @Description("When disabled, frosted ice does not melt.")
-//  @Category(SettingKey.CategoryType.BLOCKS)
-//  public static final SettingKey<Boolean> FROSTED_ICE_MELT = new StateSettingKey(
-//      "frosted-ice-melt",
-//      true
-//  );
-//  @Blurb("Ghast production of fireballs")
-//  @Description("When disabled, ghasts do not shoot fireballs.")
-//  @Category(SettingKey.CategoryType.ENTITIES)
-//  public static final SettingKey<Boolean> GHAST_FIREBALL = new StateSettingKey(
-//      "ghast-fireball",
-//      true
-//  );
-//  @Blurb("Grass growth")
-//  @Description("When disabled, grass does not grow naturally.")
-//  @Category(SettingKey.CategoryType.BLOCKS)
-//  @PlayerRestrictive
-//  public static final SettingKey<Boolean> GRASS_GROWTH = new StateSettingKey(
-//      "grass-growth",
-//      true
-//  );
-//  @Blurb("Message upon entry")
-//  @Description("The message to a player when they enter")
-//  @Category(SettingKey.CategoryType.MOVEMENT)
-//  public static final SettingKey<String> GREETING = new StringSettingKey(
-//      "greeting",
-//      ""
-//  );
-//  @Blurb("Subtitle upon entry")
-//  @Description("The subtitle that appears to a player when they enter.")
-//  @Category(SettingKey.CategoryType.MOVEMENT)
-//  public static final SettingKey<String> GREETING_SUBTITLE = new StringSettingKey(
-//      "greeting-subtitle",
-//      ""
-//  );
-//  @Blurb("Title upon entry")
-//  @Description("The title that appears to a player when they enter.")
-//  @Category(SettingKey.CategoryType.MOVEMENT)
-//  public static final SettingKey<String> GREETING_TITLE = new StringSettingKey(
-//      "greeting-title",
-//      ""
-//  );
-//  @Blurb("Fishing hook to entity attachment")
-//  @Description("When disabled, entities cannot be hooked with a fishing hook.")
-//  @Category(SettingKey.CategoryType.ENTITIES)
-//  @PlayerRestrictive
-//  public static final SettingKey<Boolean> HOOK_ENTITY = new StateSettingKey(
-//      "hook-entity",
-//      true
-//  );
-//  @Blurb("Hostile to player damage")
-//  @Description("When disabled, hostile creatures cannot inflict damage on players.")
-//  @Category(SettingKey.CategoryType.DAMAGE)
-//  public static final SettingKey<Boolean> HVP = new StateSettingKey(
-//      "hvp",
-//      true
-//  );
-//  @Blurb("Ice formation")
-//  @Description("When disabled, ice does not form.")
-//  @Category(SettingKey.CategoryType.BLOCKS)
-//  public static final SettingKey<Boolean> ICE_FORM = new BooleanSettingKey(
-//      "ice-form",
-//      true
-//  );
-//  @Blurb("Ice melt")
-//  @Description("When disabled, ice does not melt.")
-//  @Category(SettingKey.CategoryType.BLOCKS)
-//  public static final SettingKey<Boolean> ICE_MELT = new BooleanSettingKey(
-//      "ice-melt",
-//      true
-//  );
-//  @Blurb("General interaction restriction")
-//  @Description("When disabled, players may not interact with any blocks.")
-//  @Category(SettingKey.CategoryType.BLOCKS)
-//  @PlayerRestrictive
-//  public static final SettingKey<Boolean> INTERACT = new StateSettingKey(
-//      "interact",
-//      true
-//  );
-//  @Blurb("Animal invincibility")
-//  @Description("When disabled, animals are invincible.")
-//  @Category(SettingKey.CategoryType.DAMAGE)
-//  public static final SettingKey<Boolean> INVINCIBLE_ANIMALS = new BooleanSettingKey(
-//      "invincible-animals",
-//      false
-//  );
-//  @Blurb("All mob invincibility")
-//  @Description("When disabled, mobs cannot take damage.")
-//  @Category(SettingKey.CategoryType.DAMAGE)
-//  public static final SettingKey<Boolean> INVINCIBLE_MOBS = new BooleanSettingKey(
-//      "invincible-mobs",
-//      false
-//  );
-//  @Blurb("Player invincibility")
-//  @Description("When enabled, players cannot take damage.")
-//  @Category(SettingKey.CategoryType.DAMAGE)
-//  public static final SettingKey<Boolean> INVINCIBLE_PLAYERS = new BooleanSettingKey(
-//      "invincible-players",
-//      false
-//  );
-//  @Blurb("Item drop restriction")
-//  @Description("When disabled, players cannot drop items.")
-//  @PlayerRestrictive
-//  public static final SettingKey<Boolean> ITEM_DROP = new BooleanSettingKey(
-//      "item-drop",
-//      true
-//  );
-//  @Blurb("Item frame destruction restriction")
-//  @Description("When disabled, item frames may not be attacked by players.")
-//  @Category(SettingKey.CategoryType.ENTITIES)
-//  @PlayerRestrictive
-//  public static final SettingKey<Boolean> ITEM_FRAME_DESTROY = new StateSettingKey(
-//      "item-frame-destroy",
-//      true
-//  );
-//  @Blurb("Item frame interaction restriction")
-//  @Description("When disabled, item frames may not be interacted with by a player.")
-//  @Category(SettingKey.CategoryType.ENTITIES)
-//  @PlayerRestrictive
-//  public static final SettingKey<Boolean> ITEM_FRAME_INTERACT = new StateSettingKey(
-//      "item-frame-interact",
-//      true
-//  );
-//  @Blurb("Item frame placement restriction")
-//  @Description("When disabled, item frames may not be placed.")
-//  @Category(SettingKey.CategoryType.ENTITIES)
-//  @PlayerRestrictive
-//  public static final SettingKey<Boolean> ITEM_FRAME_PLACE = new StateSettingKey(
-//      "item-frame-place",
-//      true
-//  );
-//  @Blurb("Item pickup restriction")
-//  @Description("When disabled, players cannot pick up items.")
-//  @PlayerRestrictive
-//  public static final SettingKey<Boolean> ITEM_PICKUP = new StateSettingKey(
-//      "item-pickup",
-//      true
-//  );
-//  @Blurb("Lava flow")
-//  @Description("When disabled, lava does not spread.")
-//  @Category(SettingKey.CategoryType.BLOCKS)
-//  public static final SettingKey<Boolean> LAVA_FLOW = new BooleanSettingKey(
-//      "lava-flow",
-//      true
-//  );
-//  @Blurb("Grief caused by lava")
-//  @Description("When disabled, lava does not break blocks.")
-//  @Category(SettingKey.CategoryType.BLOCKS)
-//  public static final SettingKey<Boolean> LAVA_GRIEF = new BooleanSettingKey(
-//      "lava-grief",
-//      true
-//  );
-//  @Blurb("Leaf decay")
-//  @Description("When disabled, leaf will not decay naturally.")
-//  @Category(SettingKey.CategoryType.BLOCKS)
-//  public static final SettingKey<Boolean> LEAF_DECAY = new StateSettingKey(
-//      "leaf-decay",
-//      true
-//  );
-//  @Blurb("Putting leads on entities restriction")
-//  @Description("When disabled, players cannot put leads on entities.")
-//  @Category(SettingKey.CategoryType.BLOCKS)
-//  @PlayerRestrictive
-//  public static final SettingKey<Boolean> LEASH = new StateSettingKey(
-//      "leash",
-//      true
-//  );
-//  @Blurb("Lightning strikes")
-//  @Description("When disabled, lightning cannot strike.")
-//  @Category(SettingKey.CategoryType.BLOCKS)
-//  public static final SettingKey<Boolean> LIGHTNING = new BooleanSettingKey(
-//      "lightning",
-//      true
-//  );
-//  @Blurb("Mushroom growth")
-//  @Description("When disabled, mushrooms do not grow.")
-//  @Category(SettingKey.CategoryType.BLOCKS)
-//  @PlayerRestrictive
-//  public static final SettingKey<Boolean> MUSHROOM_GROWTH = new BooleanSettingKey(
-//      "mushroom-growth",
-//      true
-//  );
-//  @Blurb("Mycelium spread")
-//  @Description("When disabled, mycelium does not spread.")
-//  @Category(SettingKey.CategoryType.BLOCKS)
-//  public static final SettingKey<Boolean> MYCELIUM_SPREAD = new BooleanSettingKey(
-//      "mycelium-spread",
-//      true
-//  );
-//  @Blurb("Player health regeneration")
-//  @Description("When disabled, player health does not regenerate naturally.")
-//  @PlayerRestrictive
-//  public static final SettingKey<Boolean> NATURAL_HEALTH_REGEN = new BooleanSettingKey(
-//      "natural-health-regen",
-//      true
-//  );
-//  @Blurb("Player hunger drain")
-//  @Description("When disabled, player hunger does not drain naturally.")
-//  @NotImplemented
-//  public static final SettingKey<Boolean> NATURAL_HUNGER_DRAIN = new BooleanSettingKey(
-//      "natural-hunger-drain",
-//      true
-//  );
-//  @Blurb("Painting destruction restriction")
-//  @Description("When disabled, paintings may not be broken by players.")
-//  @Category(SettingKey.CategoryType.ENTITIES)
-//  @PlayerRestrictive
-//  public static final SettingKey<Boolean> PAINTING_DESTROY = new StateSettingKey(
-//      "painting-destroy",
-//      true
-//  );
-//  @Blurb("Painting placement restriction")
-//  @Description("When disabled, paintings may not be placed.")
-//  @Category(SettingKey.CategoryType.ENTITIES)
-//  @PlayerRestrictive
-//  public static final SettingKey<Boolean> PAINTING_PLACE = new StateSettingKey(
-//      "painting-place",
-//      true
-//  );
-//  @Blurb("Player collision")
-//  @Description("When disabled, all interactions caused by player collision are cancelled.")
-//  @Category(SettingKey.CategoryType.ENTITIES)
-//  public static final SettingKey<Boolean> PLAYER_COLLISION = new StateSettingKey(
-//      "player-collision",
-//      true
-//  );
-//  @Blurb("Player to animal damage")
-//  @Description("When disabled, players cannot inflict damage on animals.")
-//  @Category(SettingKey.CategoryType.DAMAGE)
-//  @PlayerRestrictive
-//  public static final SettingKey<Boolean> PVA = new StateSettingKey(
-//      "pva",
-//      true
-//  );
-//  @Blurb("Player to hostile mob damage")
-//  @Description("When disabled, players cannot inflict damage on hostile creatures.")
-//  @Category(SettingKey.CategoryType.DAMAGE)
-//  @PlayerRestrictive
-//  public static final SettingKey<Boolean> PVH = new StateSettingKey(
-//      "pvh",
-//      true
-//  );
-//  @Blurb("Player to player damage")
-//  @Description("When disabled, players cannot inflict damage on other players.")
-//  @Category(SettingKey.CategoryType.DAMAGE)
-//  @PlayerRestrictive
-//  public static final SettingKey<Boolean> PVP = new StateSettingKey(
-//      "pvp",
-//      true
-//  );
-//  @Blurb("Plugins which are considered restricted")
-//  @Description("The plugins that cannot break restrictive setting rules.")
-//  @NotImplemented
-//  public static final SettingKey<Set<String>> RESTRICTED_PLUGINS = new StringSetSettingKey(
-//      "restricted-plugins",
-//      new HashSet<>()
-//  );
-//  @Blurb("Players' ability to ride entities")
-//  @Description("When disabled, players cannot ride other entities.")
-//  @Category(SettingKey.CategoryType.ENTITIES)
-//  @PlayerRestrictive
-//  public static final SettingKey<Boolean> RIDE = new StateSettingKey(
-//      "ride",
-//      true
-//  );
-//  public static final String SET_SPLIT_REGEX = "(?<![ ,])(( )+|( *, *))(?![ ,])";
-//  @Blurb("Players' ability to sleep")
-//  @Description("When disabled, players cannot sleep.")
-//  @PlayerRestrictive
-//  public static final SettingKey<Boolean> SLEEP = new StateSettingKey(
-//      "sleep",
-//      true
-//  );
-//  @Blurb("Snowman snow trail creation")
-//  @Description("When disabled, snowmen do not make snow trails.")
-//  @Category(SettingKey.CategoryType.BLOCKS)
-//  public static final SettingKey<Boolean> SNOWMAN_TRAILS = new StateSettingKey(
-//      "snowman-trails",
-//      true
-//  );
-//  @Blurb("Snowfall snow placement")
-//  @Description("When disabled, snow does not accumulate naturally.")
-//  @Category(SettingKey.CategoryType.BLOCKS)
-//  public static final SettingKey<Boolean> SNOW_ACCUMULATION = new StateSettingKey(
-//      "snow-accumulation",
-//      true
-//  );
-//  @Blurb("Snow melt")
-//  @Description("When disabled, snow does not melt.")
-//  @Category(SettingKey.CategoryType.BLOCKS)
-//  public static final SettingKey<Boolean> SNOW_MELT = new StateSettingKey(
-//      "snow-melt",
-//      true
-//  );
-//  @Blurb("Animal spawning")
-//  @Description("When disabled, animals cannot spawn.")
-//  @Category(SettingKey.CategoryType.ENTITIES)
-//  @PlayerRestrictive
-//  public static final SettingKey<Boolean> SPAWN_ANIMAL = new StateSettingKey(
-//      "spawn-animal",
-//      true
-//  );
-//  @Blurb("Hostile mob spawning")
-//  @Description("When disabled, hostile mobs cannot spawn.")
-//  @Category(SettingKey.CategoryType.ENTITIES)
-//  @PlayerRestrictive
-//  public static final SettingKey<Boolean> SPAWN_HOSTILE = new StateSettingKey(
-//      "spawn-hostile",
-//      true
-//  );
-//  @Blurb("All mob spawning")
-//  @Description("When disabled, no mobs can spawn.")
-//  @Category(SettingKey.CategoryType.ENTITIES)
-//  @PlayerRestrictive
-//  public static final SettingKey<Boolean> SPAWN_MOB = new StateSettingKey(
-//      "spawn-mob",
-//      true
-//  );
-//  @Blurb("SQL data source name")
-//  @Description("The Data Source name of the SQL database to be used if SQL is the storage type.")
-//  @NotImplemented
-//  @Global
-//  public static final SettingKey<String> SQL_DSN = new StringSettingKey(
-//      "sql-dsn",
-//      "jdbc:mysql://localhost/nope"
-//  );
-//  @Blurb("SQL password")
-//  @Description("The password for the SQL database to be used if SQL is the storage type.")
-//  @NotImplemented
-//  @Global
-//  public static final SettingKey<String> SQL_PASSWORD = new StringSettingKey(
-//      "sql-password",
-//      "nope"
-//  );
-//  @Blurb("SQL table prefix")
-//  @Description("The table prefix to be placed before SQL tables if SQL is the storage type.")
-//  @NotImplemented
-//  @Global
-//  public static final SettingKey<String> SQL_TABLE_PREFIX = new StringSettingKey(
-//      "sql-table-prefix",
-//      "nope"
-//  );
-//  @Blurb("SQL username")
-//  @Description("The username for the SQL database to be used if SQL is the storage type.")
-//  @NotImplemented
-//  @Global
-//  public static final SettingKey<String> SQL_USERNAME = new StringSettingKey(
-//      "sql-username",
-//      "nope"
-//  );
-//  @Blurb("Storage type")
-//  @Description("The type of storage to persist Nope server state.")
-//  @NotImplemented
-//  @Global
-//  public static final SettingKey<Storage> STORAGE_TYPE = new EnumSettingKey<>(
-//      "storage-type",
-//      Storage.SQLITE,
-//      Storage.class
-//  );
-//  @Blurb("Location at which to teleport")
-//  @Description("The designated point of access to the zone via teleport.")
-//  public static final SettingKey<Vector3d> TELEPORT_LOCATION = new Vector3dSettingKey(
-//      "teleport-location",
-//      null,
-//      Vector3d.class
-//  );
-//  @Blurb("TNT ignition restriction")
-//  @Description("When disabled, tnt may not be activated.")
-//  @PlayerRestrictive
-//  public static final SettingKey<Boolean> TNT_IGNITION = new StateSettingKey(
-//      "tnt-ignition",
-//      true
-//  );
-//  @Blurb("TNT placement restriction")
-//  @Description("When disabled, tnt may not be placed.")
-//  @Category(SettingKey.CategoryType.BLOCKS)
-//  @PlayerRestrictive
-//  public static final SettingKey<Boolean> TNT_PLACEMENT = new StateSettingKey(
-//      "tnt-placement",
-//      true
-//  );
-//  @Blurb("Commands which directly cause movement")
-//  @Description("These commands will be considered unnatural methods of teleportation.")
-//  @PlayerRestrictive
-//  @Global
-//  public static final SettingKey<Set<String>> MOVEMENT_COMMANDS = new StringSetSettingKey(
-//      "movement-commands",
-//      Sets.newHashSet()
-//  );
+  public static final SettingKey.Unary<Boolean> FROSTED_ICE_FORM =
+      SettingKey.Unary.builder("frosted-ice-form", true, SettingKeyManagers.BOOLEAN_KEY_MANAGER)
+          .blurb("Frosted ice formation")
+          .description("When disabled, frost ice does not form.")
+          .category(SettingKey.Category.BLOCKS)
+          .build();
 
-public static final SettingKey.Poly<String, EntitySet> SPAWNABLE_ENTITIES =
-    SettingKey.Poly.builder("spawnable-entities",
-            AltSet.full(new EntitySet()),
-            SettingKeyManagers.POLY_ENTITY_KEY_MANAGER)
-        .blurb("Armor stand placement restriction")
-        .description("When disabled, armor stands may not be placed by players.")
-        .category(SettingKey.Category.ENTITIES)
-        .playerRestrictive()
-        .build();
+  public static final SettingKey.Unary<Boolean> FROSTED_ICE_MELT =
+      SettingKey.Unary.builder("frosted-ice-melt", true, SettingKeyManagers.BOOLEAN_KEY_MANAGER)
+          .blurb("Frosted ice melt")
+          .description("When disabled, frosted ice does not melt")
+          .category(SettingKey.Category.BLOCKS)
+          .build();
 
-//  @Blurb("Mobs which are unspawnable")
-//  @Description("These entity types will not be allowed to spawn.")
-//  @Category(SettingKey.CategoryType.ENTITIES)
-//  @PlayerRestrictive
-//  public static final SettingKey<Set<String>> UNSPAWNABLE_MOBS = new StringSetSettingKey(
-//      "unspawnable-mobs",
-//      Sets.newHashSet()
-//  );
-//  @Blurb("Name tag use")
-//  @Description("When disabled, players may not use a name tag to rename an entity")
-//  @PlayerRestrictive
-//  public static final SettingKey<Boolean> USE_NAME_TAG = new StateSettingKey(
-//      "use-name-tag",
-//      true
-//  );
-//  @Blurb("Vehicle destruction restriction")
-//  @Description("When disabled, players may not break vehicles.")
-//  @Category(SettingKey.CategoryType.ENTITIES)
-//  @PlayerRestrictive
-//  public static final SettingKey<Boolean> VEHICLE_DESTROY = new StateSettingKey(
-//      "vehicle-destroy",
-//      true
-//  );
-//  @Blurb("Vehicle placement restriction")
-//  @Description("When disabled, players may not place vehicles.")
-//  @Category(SettingKey.CategoryType.ENTITIES)
-//  @PlayerRestrictive
-//  public static final SettingKey<Boolean> VEHICLE_PLACE = new StateSettingKey(
-//      "vehicle-place",
-//      true
-//  );
-//  @Blurb("Vine growth")
-//  @Description("When disabled, vines do not grow naturally.")
-//  @Category(SettingKey.CategoryType.BLOCKS)
-//  public static final SettingKey<Boolean> VINE_GROWTH = new StateSettingKey(
-//      "vine-growth",
-//      true
-//  );
-//  @Blurb("Item type used as the Nope Wand")
-//  @Description("The type of item to be used as the Nope Wand.")
-//  @Global
-//  public static final SettingKey<String> WAND_ITEM = new StringSettingKey(
-//      "wand-item",
-//      "minecraft:stick"
-//  );
-//  @Blurb("Water flow")
-//  @Description("When disabled, water cannot flow")
-//  @Category(SettingKey.CategoryType.BLOCKS)
-//  public static final SettingKey<Boolean> WATER_FLOW = new BooleanSettingKey(
-//      "water-flow",
-//      true
-//  );
-//  @Blurb("Grief caused by water")
-//  @Description("When disabled, water cannot break blocks")
-//  @Category(SettingKey.CategoryType.BLOCKS)
-//  public static final SettingKey<Boolean> WATER_GRIEF = new BooleanSettingKey(
-//      "water-grief",
-//      true
-//  );
-//  @Blurb("Grief caused by zombies")
-//  @Description("When disabled, zombies cannot break blocks.")
-//  @Category(SettingKey.CategoryType.BLOCKS)
-//  public static final SettingKey<Boolean> ZOMBIE_GRIEF = new BooleanSettingKey(
-//      "zombie-grief",
-//      true
-//  );
+  public static final SettingKey.Unary<Boolean> GRASS_GROWTH =
+      SettingKey.Unary.builder("grass-growth", true, SettingKeyManagers.BOOLEAN_KEY_MANAGER)
+          .blurb("Grass growth")
+          .description("When disabled, grass cannot grow naturally")
+          .category(SettingKey.Category.BLOCKS)
+          .build();
+
+  public static final SettingKey.Unary<String> GREETING =
+      SettingKey.Unary.builder("greeting", "", SettingKeyManagers.STRING_KEY_MANAGER)
+          .blurb("Message upon entry")
+          .description("The message to a player when they enter")
+          .category(SettingKey.Category.MOVEMENT)
+          .build();
+
+  public static final SettingKey.Unary<String> GREETING_SUBTITLE =
+      SettingKey.Unary.builder("greeting-subtitle", "", SettingKeyManagers.STRING_KEY_MANAGER)
+          .blurb("Subtitle upon entry")
+          .description("The subtitle that appears to a player when they enter")
+          .category(SettingKey.Category.MOVEMENT)
+          .build();
+
+  public static final SettingKey.Unary<String> GREETING_TITLE =
+      SettingKey.Unary.builder("greeting-title", "", SettingKeyManagers.STRING_KEY_MANAGER)
+          .blurb("Title upon entry")
+          .description("The title that appears to a player when they enter")
+          .category(SettingKey.Category.MOVEMENT)
+          .build();
+
+  public static final SettingKey.Poly<String, StringSet> HOOKABLE_ENTITIES =
+      SettingKey.Poly.builder("hookable-entities",
+          AltSet.full(new StringSet()),
+          SettingKeyManagers.POLY_ENTITY_KEY_MANAGER)
+          .blurb("Entities that can be hooked")
+          .description("A list of entities that can be hooked with a fishing rod")
+          .category(SettingKey.Category.ENTITIES)
+          .playerRestrictive()
+          .build();
+
+  public static final SettingKey.Unary<Boolean> ICE_FORM =
+      SettingKey.Unary.builder("ice-form", true, SettingKeyManagers.BOOLEAN_KEY_MANAGER)
+          .blurb("Ice formation")
+          .description("When disabled, ice does not form.")
+          .category(SettingKey.Category.BLOCKS)
+          .build();
+
+  public static final SettingKey.Unary<Boolean> ICE_MELT =
+      SettingKey.Unary.builder("ice-melt", true, SettingKeyManagers.BOOLEAN_KEY_MANAGER)
+          .blurb("Ice melt")
+          .description("When disabled, ice does not melt.")
+          .category(SettingKey.Category.BLOCKS)
+          .build();
+
+  public static final SettingKey.Poly<String, StringSet> INVINCIBLE_ENTITIES =
+      SettingKey.Poly.builder("invincible-entities",
+              new StringSet(),
+              SettingKeyManagers.POLY_ENTITY_KEY_MANAGER)
+          .blurb("Entity invincibility")
+          .description("List of entities which cannot be damaged or destroyed.")
+          .category(SettingKey.Category.DAMAGE)
+          .build();
+  public static final SettingKey.Unary<Boolean> ITEM_DROP =
+      SettingKey.Unary.builder("item-drop", true, SettingKeyManagers.BOOLEAN_KEY_MANAGER)
+          .blurb("Item drop restriction")
+          .description("When disabled, players may not drop items.")
+          .playerRestrictive()
+          .build();
+  public static final SettingKey.Poly<String, StringSet> INTERACTIVE_ENTITIES =
+      SettingKey.Poly.builder("interactive-entities",
+              AltSet.full(new StringSet()),
+              SettingKeyManagers.POLY_ENTITY_KEY_MANAGER)
+          .blurb("Entity interactivity")
+          .description("List of entities that can be interacted with.")
+          .category(SettingKey.Category.DAMAGE)
+          .build();
+  public static final SettingKey.Poly<String, StringSet> SPAWNABLE_ENTITIES =
+      SettingKey.Poly.builder("spawnable-entities",
+              AltSet.full(new StringSet()),
+              SettingKeyManagers.POLY_ENTITY_KEY_MANAGER)
+          .blurb("Spawnable entities")
+          .description("List of entities which can be spawned")
+          .category(SettingKey.Category.ENTITIES)
+          .playerRestrictive()
+          .build();
+
+  public static SettingKey.Unary<Boolean> ITEM_PICKUP =
+      SettingKey.Unary.builder("item-pickup", true, SettingKeyManagers.STATE_KEY_MANAGER)
+          .blurb("Item pickup restriction")
+          .description("When disabled, players cannot pick up items.")
+          .playerRestrictive()
+          .build();
+
+  public static SettingKey.Unary<Boolean> LAVA_FLOW =
+      SettingKey.Unary.builder("lava-flow", true, SettingKeyManagers.BOOLEAN_KEY_MANAGER)
+          .blurb("Lava flow")
+          .description("When disabled, lava does not spread")
+          .category(SettingKey.Category.BLOCKS)
+          .build();
+
+  public static SettingKey.Unary<Boolean> LAVA_GRIEF =
+      SettingKey.Unary.builder("lava-grief", true, SettingKeyManagers.BOOLEAN_KEY_MANAGER)
+          .blurb("Grief caused by lava")
+          .description("When disabled, lava does not break blocks")
+          .category(SettingKey.Category.BLOCKS)
+          .build();
+
+  public static final SettingKey.Unary<Boolean> LEAF_DECAY =
+      SettingKey.Unary.builder("leaf-decay", true, SettingKeyManagers.BOOLEAN_KEY_MANAGER)
+          .blurb("Leaf decay")
+          .description("When disabled, leaves will not decay naturally.")
+          .category(SettingKey.Category.BLOCKS)
+          .build();
+
+  public static final SettingKey.Poly<String, StringSet> LEASHABLE_ENTITIES =
+      SettingKey.Poly.builder("leashable-entities",
+              AltSet.full(new StringSet()),
+              SettingKeyManagers.POLY_ENTITY_KEY_MANAGER)
+          .blurb("Entities that can have leads")
+          .description("A list of entities which can have leads attached to them")
+          .category(SettingKey.Category.BLOCKS)
+          .playerRestrictive()
+          .build();
+
+  public static final SettingKey.Unary<Boolean> LIGHTNING =
+      SettingKey.Unary.builder("lightning", true, SettingKeyManagers.BOOLEAN_KEY_MANAGER)
+          .blurb("Lightning strikes")
+          .description("When disabled, lightning cannot strike.")
+          .build();
+
+  public static final SettingKey.Poly<String, StringSet> GROWABLES =
+      SettingKey.Poly.builder("growables",
+          AltSet.full(new StringSet()),
+          SettingKeyManagers.POLY_GROWABLE_KEY_MANAGER)
+          .blurb("Growable blocks")
+          .description("A list of blocks that can grow")
+          .category(SettingKey.Category.BLOCKS)
+          .playerRestrictive()
+          .build();
+
+  public static final SettingKey.Unary<Boolean> MYCELIUM_SPREAD =
+      SettingKey.Unary.builder("mycelium-spread", true, SettingKeyManagers.BOOLEAN_KEY_MANAGER)
+          .blurb("Mycelium spread")
+          .description("When disabled, mycelium does not spread")
+          .category(SettingKey.Category.BLOCKS)
+          .build();
+
+  public static final SettingKey.Unary<Boolean> HEALTH_REGEN =
+      SettingKey.Unary.builder("health-regen", true, SettingKeyManagers.BOOLEAN_KEY_MANAGER)
+          .blurb("Health regen")
+          .description("When disabled, players do not regenerate health")
+          .category(SettingKey.Category.DAMAGE)
+          .playerRestrictive()
+          .build();
+
+  public static final SettingKey.Unary<Boolean> HUNGER_DRAIN =
+      SettingKey.Unary.builder("hunger-drain", true, SettingKeyManagers.BOOLEAN_KEY_MANAGER)
+          .blurb("Player hunger drain")
+          .description("When disabled, player hunger does not drain naturally.")
+          .playerRestrictive()
+          .build();
+
+  public static final SettingKey.Unary<Boolean> PLAYER_COLLISION =
+      SettingKey.Unary.builder("player-collision", true, SettingKeyManagers.BOOLEAN_KEY_MANAGER)
+          .blurb("Collision between players")
+          .description("When disabled, players do not collide")
+          .category(SettingKey.Category.MOVEMENT)
+          .build();
+
+  public static final SettingKey.Poly<DamageCauseSet.DamageCause, DamageCauseSet> PLAYER_DAMAGE_SOURCE =
+      SettingKey.Poly.builder("player-damage-source",
+              AltSet.full(new DamageCauseSet()),
+              SettingKeyManagers.POLY_DAMAGE_SOURCE_KEY_MANAGER)
+          .blurb("Damage sources to players")
+          .description("A list of damage sources that may inflict damage to players")
+          .category(SettingKey.Category.DAMAGE)
+          .build();
+
+  public static final SettingKey.Unary<Boolean> RIDE =
+      SettingKey.Unary.builder("ride", true, SettingKeyManagers.STATE_KEY_MANAGER)
+          .blurb("Ability to ride entities")
+          .description("When disabled, players may not ride entities")
+          .category(SettingKey.Category.ENTITIES)
+          .playerRestrictive()
+          .build();
+
+  public static final SettingKey.Unary<Boolean> SLEEP =
+      SettingKey.Unary.builder("sleep", true, SettingKeyManagers.STATE_KEY_MANAGER)
+          .blurb("Ability to sleep")
+          .description("When disabled, players may not sleep.")
+          .playerRestrictive()
+          .build();
+
+  public static final SettingKey.Unary<Boolean> TNT_IGNITION =
+      SettingKey.Unary.builder("tnt-ignition", true, SettingKeyManagers.STATE_KEY_MANAGER)
+          .blurb("TNT ignition")
+          .description("When disabled, TNT may not be primed.")
+          .category(SettingKey.Category.BLOCKS)
+          .playerRestrictive()
+          .build();
+
+  public static final SettingKey.Unary<Boolean> USE_NAME_TAG =
+      SettingKey.Unary.builder("use-name-tag", true, SettingKeyManagers.STATE_KEY_MANAGER)
+          .blurb("use-name-tag")
+          .description("When disabled, players may not use name tags")
+          .playerRestrictive()
+          .build();
+
+  public static SettingKey.Unary<Boolean> WATER_FLOW =
+      SettingKey.Unary.builder("water-flow", true, SettingKeyManagers.BOOLEAN_KEY_MANAGER)
+          .blurb("Lava flow")
+          .description("When disabled, lava does not spread")
+          .category(SettingKey.Category.BLOCKS)
+          .build();
+
+  public static SettingKey.Unary<Boolean> WATER_GRIEF =
+      SettingKey.Unary.builder("water-grief", true, SettingKeyManagers.BOOLEAN_KEY_MANAGER)
+          .blurb("Grief caused by lava")
+          .description("When disabled, lava does not break blocks")
+          .category(SettingKey.Category.BLOCKS)
+          .build();
+
+  public static final SettingKey.Unary<Boolean> ZOMBIE_GRIEF =
+      SettingKey.Unary.builder("zombie-grief", true, SettingKeyManagers.BOOLEAN_KEY_MANAGER)
+          .blurb("Grief caused by zombies")
+          .description("When disabled, zombies do not grief blocks by picking them up.")
+          .category(SettingKey.Category.BLOCKS)
+          .build();
 
   /**
    * Private constructor because its not supposed to be instantiated.

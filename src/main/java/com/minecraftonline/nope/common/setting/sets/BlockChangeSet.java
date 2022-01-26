@@ -25,7 +25,32 @@
 
 package com.minecraftonline.nope.common.setting.sets;
 
+import com.minecraftonline.nope.common.struct.Described;
 import com.minecraftonline.nope.common.struct.HashAltSet;
 
-public class BlockSet extends HashAltSet.Infinite<String> {
+public class BlockChangeSet extends HashAltSet.FewEnum<BlockChangeSet.BlockChange> {
+
+  public BlockChangeSet() {
+    super(BlockChangeSet.BlockChange.class);
+  }
+
+  /**
+   * Enumeration for all explosive types considered by Nope.
+   */
+  public enum BlockChange implements Described {
+    BREAK("Whether blocks can be replaced with air"),
+    PLACE("Whether blocks can replace air"),
+    ALTER("Whether blocks can changed to other blocks or change internally");
+
+    private final String description;
+
+    BlockChange(String description) {
+      this.description = description;
+    }
+
+    @Override
+    public String description() {
+      return description;
+    }
+  }
 }

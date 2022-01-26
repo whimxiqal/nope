@@ -8,8 +8,13 @@ import com.minecraftonline.nope.common.math.Cuboid;
 import com.minecraftonline.nope.common.math.Cylinder;
 import com.minecraftonline.nope.common.math.Sphere;
 import io.leangen.geantyref.TypeToken;
+import java.lang.reflect.Type;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Supplier;
+import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.profile.GameProfile;
@@ -48,4 +53,5 @@ public class ParameterKeys {
   public static final Parameter.Key<Double> RADIUS = Parameter.key("radius", Double.class);
   public static final Parameter.Key<ServerWorld> WORLD = Parameter.key("world", ServerWorld.class);
   public static final Parameter.Key<Integer> INDEX = Parameter.key("index", Integer.class);
+  public static final Parameter.Key<SettingKey.Category> SETTING_CATEGORY = Parameter.key("setting-category", SettingKey.Category.class);
 }

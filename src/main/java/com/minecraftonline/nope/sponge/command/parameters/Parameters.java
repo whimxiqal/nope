@@ -167,11 +167,7 @@ public class Parameters {
             .collect(Collectors.toList());
       }).build();
   public static final Parameter.Value<ParameterValueTypes.SettingValueAlterType> SETTING_VALUE_ALTER_TYPE =
-      Parameter.choices(ParameterValueTypes.SettingValueAlterType.class,
-              Arrays.stream(ParameterValueTypes.SettingValueAlterType.values())
-                  .collect(Collectors.toMap(ParameterValueTypes.SettingValueAlterType::command,
-                      t -> t)))
-          .key(ParameterKeys.SETTING_VALUE_ALTER_TYPE)
+      Parameter.builder(ParameterKeys.SETTING_VALUE_ALTER_TYPE)
           .completer((context, currentInput) -> {
             SettingKey<?, ?, ?> settingKey = context.requireOne(ParameterKeys.SETTING_KEY);
             ParameterValueTypes.SettingValueAlterType[] options;
@@ -185,40 +181,66 @@ public class Parameters {
             final Predicate<String> startsWith = new StartsWithPredicate(currentInput);
             return Arrays.stream(options)
                 .filter(option -> startsWith.test(option.command()))
-                .map(option -> CommandCompletion.of(option.command(), Formatter.info(option.description())))
+                .map(option -> CommandCompletion.of(option.command(), Formatter.accent(option.description())))
                 .collect(Collectors.toList());
           })
+          .addParser((parameterKey, reader, context) -> {
+            SettingKey<?, ?, ?> settingKey = context.requireOne(ParameterKeys.SETTING_KEY);
+            String token = reader.parseString();
+            ParameterValueTypes.SettingValueAlterType alterType =
+                Arrays.stream(ParameterValueTypes.SettingValueAlterType.values())
+                    .filter(v -> v.command().equalsIgnoreCase(token))
+                    .findFirst()
+                    .orElseThrow(() -> new ArgumentParseException(Formatter.error("Invalid command"),
+                        token,
+                        0));
+            if (!(settingKey instanceof SettingKey.Poly)
+                && (alterType != ParameterValueTypes.SettingValueAlterType.SET)) {
+              throw new ArgumentParseException(
+                  Formatter.error("You may only use the set command with this type of setting"),
+                  token,
+                  0);
+            } else {
+              return Optional.of(alterType);
+            }
+          })
           .build();
+
   public static final Parameter.Value<String> SETTING_VALUE = Parameter.remainingJoinedStrings()
       .key(ParameterKeys.SETTING_VALUE)
+      .optional()
+      .terminal()
       .completer((context, currentInput) -> {
         SettingKey<?, ?, ?> settingKey = context.requireOne(ParameterKeys.SETTING_KEY);
         Map<String, Object> options = settingKey.manager().elementOptions();
         final Predicate<String> startsWith;
         if (settingKey instanceof SettingKey.Poly) {
           SettingKey.Poly<?, ?> polyKey = (SettingKey.Poly<?, ?>) settingKey;
-          String[] tokensSoFar = currentInput.split(SettingKey.Manager.Poly.SET_SPLIT_REGEX);
+          String[] tokensSoFar = currentInput.split(SettingKey.Manager.Poly.SET_SPLIT_REGEX, -1);
           List<String> completedTokens = new LinkedList<>();
-          for (int i = 0; i < tokensSoFar.length - 1; i++) {
-            if (!options.containsKey(tokensSoFar[i].toLowerCase())) {
-              return Collections.emptyList();
+          if (tokensSoFar.length > 0) {
+            for (int i = 0; i < tokensSoFar.length - 1; i++) {
+              if (!options.containsKey(tokensSoFar[i].toLowerCase())) {
+                return Collections.emptyList();
+              }
+              completedTokens.add(tokensSoFar[i]);
             }
-            completedTokens.add(tokensSoFar[i]);
-          }
-          if (currentInput.endsWith(" ")) {
-            startsWith = new StartsWithPredicate("");
-          } else {
             startsWith = new StartsWithPredicate(tokensSoFar[tokensSoFar.length - 1]);
+          } else {
+            // I don't think this should ever happen
+            startsWith = new StartsWithPredicate("");
           }
           return options.entrySet().stream()
               .filter(entry -> startsWith.test(entry.getKey()))
               .map(entry -> {
-                Object value = entry.getValue();
-                return CommandCompletion.of(entry.getKey(),
-                    Formatter.accent(String.join(", ", completedTokens) + ", ").append(
-                        value instanceof Component
-                            ? (Component) value
-                            : Formatter.accent(value.toString())));
+                final Object value = entry.getValue();
+                final String preface = completedTokens.stream()
+                    .map(s -> s + ", ")
+                    .collect(Collectors.joining(""));
+                return CommandCompletion.of(preface + entry.getKey(),
+                    value instanceof Component
+                        ? (Component) value
+                        : Formatter.accent(value.toString()));
               })
               .collect(Collectors.toList());
         } else {
@@ -356,6 +378,10 @@ public class Parameters {
       .optional().build();
   public static final Parameter.Value<?> INDEX = Parameter.integerNumber().key(ParameterKeys.INDEX).build();
   public static final Parameter.Value<?> INDEX_OPTIONAL = Parameter.integerNumber().key(ParameterKeys.INDEX).optional().build();
+  public static final Parameter.Value<?> SETTING_CATEGORY = Parameter.enumValue(SettingKey.Category.class)
+      .key(ParameterKeys.SETTING_CATEGORY)
+      .optional()
+      .build();
 
   public static <T> Parameter.Value.Builder<Set<T>> set(Function<String, T> parser,
                                                         Supplier<Set<String>> options,

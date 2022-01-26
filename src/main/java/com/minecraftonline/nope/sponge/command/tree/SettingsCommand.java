@@ -23,22 +23,20 @@
  * SOFTWARE.
  */
 
-package com.minecraftonline.nope.sponge.listener.dynamic;
+package com.minecraftonline.nope.sponge.command.tree;
 
-import com.minecraftonline.nope.sponge.api.event.SettingEventListener;
-import com.minecraftonline.nope.sponge.api.event.SettingValueLookupFunction;
-import com.minecraftonline.nope.sponge.listener.SpongeEventUtil;
-import org.spongepowered.api.entity.living.ArmorStand;
-import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.event.entity.AttackEntityEvent;
+import com.minecraftonline.nope.common.permission.Permission;
+import com.minecraftonline.nope.common.permission.Permissions;
+import com.minecraftonline.nope.sponge.command.CommandNode;
+import com.minecraftonline.nope.sponge.command.FunctionlessCommandNode;
+import com.minecraftonline.nope.sponge.command.tree.settings.ListSettingsCommand;
+import org.jetbrains.annotations.NotNull;
 
-public class ArmorStandDestroyListener implements SettingEventListener<Boolean, AttackEntityEvent> {
-  @Override
-  public void handle(AttackEntityEvent event, SettingValueLookupFunction<Boolean> lookupFunction) {
-    SpongeEventUtil.cancelEntityAttackingEntity(event,
-        lookupFunction,
-        Player.class,
-        ArmorStand.class,
-        true);
+public class SettingsCommand extends FunctionlessCommandNode {
+  public SettingsCommand(CommandNode parent) {
+    super(parent, Permissions.INFO,
+        "Get information about possible settings",
+        "settings");
+    addChild(new ListSettingsCommand(this));
   }
 }

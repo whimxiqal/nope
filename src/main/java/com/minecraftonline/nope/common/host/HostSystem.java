@@ -221,7 +221,7 @@ public class HostSystem {
     }
   }
 
-  public boolean isAssigned(SettingKey key) {
+  public boolean isAssigned(SettingKey<?, ?, ?> key) {
     return hosts().values().stream().anyMatch(host -> host.get(key).isPresent());
   }
 

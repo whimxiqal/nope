@@ -31,10 +31,11 @@ import com.minecraftonline.nope.common.setting.manager.IntegerKeyManager;
 import com.minecraftonline.nope.common.setting.manager.PolyAllCapsEnumKeyManager;
 import com.minecraftonline.nope.common.setting.manager.PolyStringKeyManager;
 import com.minecraftonline.nope.common.setting.manager.StringKeyManager;
-import com.minecraftonline.nope.common.setting.sets.BlockSet;
-import com.minecraftonline.nope.common.setting.sets.EntitySet;
+import com.minecraftonline.nope.common.setting.sets.BlockChangeSet;
+import com.minecraftonline.nope.common.setting.sets.DamageCauseSet;
 import com.minecraftonline.nope.common.setting.sets.ExplosiveSet;
 import com.minecraftonline.nope.common.setting.sets.MovementSet;
+import com.minecraftonline.nope.common.setting.sets.StringSet;
 
 public class SettingKeyManagers {
 
@@ -45,9 +46,20 @@ public class SettingKeyManagers {
   public static final AllCapsEnumKeyManager<MovementSet.Movement> MOVEMENT_KEY_MANAGER =
       new AllCapsEnumKeyManager<>(MovementSet.Movement.class);
 
-  public static final PolyStringKeyManager<EntitySet> POLY_ENTITY_KEY_MANAGER = new PolyStringKeyManager<>(EntitySet::new);
-  public static final PolyStringKeyManager<BlockSet> POLY_BLOCK_KEY_MANAGER = new PolyStringKeyManager<>(BlockSet::new);
-  public static final PolyAllCapsEnumKeyManager<ExplosiveSet.Explosive, ExplosiveSet> POLY_EXPLOSIVE_KEY_MANAGER =
+  public static final PolyStringKeyManager<StringSet> POLY_ENTITY_KEY_MANAGER =
+      new PolyStringKeyManager<>(StringSet::new);
+  public static final PolyStringKeyManager<StringSet> POLY_BLOCK_KEY_MANAGER =
+      new PolyStringKeyManager<>(StringSet::new);
+  public static final PolyStringKeyManager<StringSet> POLY_GROWABLE_KEY_MANAGER =
+      new PolyStringKeyManager<>(StringSet::new);
+  public static final PolyAllCapsEnumKeyManager<BlockChangeSet.BlockChange, BlockChangeSet>
+      POLY_BLOCK_CHANGE_KEY_MANAGER =
+      new PolyAllCapsEnumKeyManager<>(BlockChangeSet.BlockChange.class, BlockChangeSet::new);
+  public static final PolyAllCapsEnumKeyManager<DamageCauseSet.DamageCause, DamageCauseSet>
+      POLY_DAMAGE_SOURCE_KEY_MANAGER =
+      new PolyAllCapsEnumKeyManager<>(DamageCauseSet.DamageCause.class, DamageCauseSet::new);
+  public static final PolyAllCapsEnumKeyManager<ExplosiveSet.Explosive, ExplosiveSet>
+      POLY_EXPLOSIVE_KEY_MANAGER =
       new PolyAllCapsEnumKeyManager<>(ExplosiveSet.Explosive.class, ExplosiveSet::new);
 
   private SettingKeyManagers() {

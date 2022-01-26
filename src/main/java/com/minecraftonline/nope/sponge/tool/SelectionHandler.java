@@ -1,28 +1,32 @@
 package com.minecraftonline.nope.sponge.tool;
 
 import com.google.common.collect.Lists;
+import com.minecraftonline.nope.common.Nope;
 import com.minecraftonline.nope.common.host.Domain;
 import com.minecraftonline.nope.common.math.Vector3i;
 import com.minecraftonline.nope.sponge.SpongeNope;
 import com.minecraftonline.nope.sponge.key.NopeKeys;
 import com.minecraftonline.nope.sponge.util.Formatter;
 import com.minecraftonline.nope.sponge.util.SpongeUtil;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
+import java.util.UUID;
 import net.kyori.adventure.text.Component;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.HandTypes;
+import org.spongepowered.api.data.value.ValueContainer;
+import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.entity.Item;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.Order;
 import org.spongepowered.api.event.block.InteractBlockEvent;
+import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.world.server.ServerLocation;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
 
 public class SelectionHandler {
 
@@ -47,6 +51,13 @@ public class SelectionHandler {
     return slabDrafts.get(playerUuid);
   }
 
+  public boolean isTool(ValueContainer stack) {
+    return isBoxTool(stack)
+        || isCylinderTool(stack)
+        || isSlabTool(stack)
+        || isSphereTool(stack);
+  }
+
   public ItemStack boxTool() {
     ItemStack itemStack = ItemStack.builder()
         .itemType(ItemTypes.STICK)
@@ -63,7 +74,7 @@ public class SelectionHandler {
     return itemStack;
   }
 
-  public boolean isBoxTool(ItemStack stack) {
+  public boolean isBoxTool(ValueContainer stack) {
     return stack.get(NopeKeys.SELECTION_TOOL_CUBOID).isPresent();
   }
 
@@ -87,7 +98,7 @@ public class SelectionHandler {
     return itemStack;
   }
 
-  public boolean isCylinderTool(ItemStack stack) {
+  public boolean isCylinderTool(ValueContainer stack) {
     return stack.get(NopeKeys.SELECTION_TOOL_CYLINDER).isPresent();
   }
 
@@ -107,7 +118,7 @@ public class SelectionHandler {
     return itemStack;
   }
 
-  public boolean isSphereTool(ItemStack stack) {
+  public boolean isSphereTool(ValueContainer stack) {
     return stack.get(NopeKeys.SELECTION_TOOL_SPHERE).isPresent();
   }
 
@@ -126,7 +137,7 @@ public class SelectionHandler {
     return itemStack;
   }
 
-  public boolean isSlabTool(ItemStack stack) {
+  public boolean isSlabTool(ValueContainer stack) {
     return stack.get(NopeKeys.SELECTION_TOOL_SLAB).isPresent();
   }
 
@@ -268,6 +279,21 @@ public class SelectionHandler {
       selection.errors().forEach(error -> player.sendMessage(Formatter.error(error)));
       if (selection.validate()) {
         player.sendMessage(selection.description());
+      }
+    }
+  }
+
+  @Listener(order = Order.FIRST)
+  public void onDrop(SpawnEntityEvent event) {
+    for (Entity entity : event.entities()) {
+      if (entity.isRemoved()) {
+        continue;
+      }
+      if (entity instanceof Item) {
+        Item item = (Item) entity;
+        if (isTool(item.item().get())) {
+          item.remove();
+        }
       }
     }
   }

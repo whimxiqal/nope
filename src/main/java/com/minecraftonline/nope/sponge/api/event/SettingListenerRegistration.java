@@ -26,9 +26,12 @@
 package com.minecraftonline.nope.sponge.api.event;
 
 import com.minecraftonline.nope.common.setting.SettingKey;
+import com.minecraftonline.nope.sponge.listener.SettingValueLookupFunctionImpl;
 import lombok.Getter;
 import lombok.experimental.Accessors;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.Event;
+import org.spongepowered.api.event.EventListenerRegistration;
 import org.spongepowered.api.event.Order;
 import org.spongepowered.plugin.PluginContainer;
 
@@ -75,6 +78,15 @@ public class SettingListenerRegistration<T, E extends Event> {
     this.plugin = plugin;
     this.settingEventListener = settingEventListener;
     this.order = order;
+  }
+
+  public void registerToSponge() {
+    Sponge.eventManager().registerListener(EventListenerRegistration.builder(this.eventClass())
+        .listener((event) -> this.settingEventListener()
+            .handle(event, new SettingValueLookupFunctionImpl<>(this.settingKey())))
+        .order(this.order())
+        .plugin(this.plugin())
+        .build());
   }
 
 }

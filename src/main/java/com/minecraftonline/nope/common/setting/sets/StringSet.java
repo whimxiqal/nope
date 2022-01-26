@@ -27,5 +27,5 @@ package com.minecraftonline.nope.common.setting.sets;
 
 import com.minecraftonline.nope.common.struct.HashAltSet;
 
-public class EntitySet extends HashAltSet.Infinite<String> {
+public class StringSet extends HashAltSet.Infinite<String> {
 }

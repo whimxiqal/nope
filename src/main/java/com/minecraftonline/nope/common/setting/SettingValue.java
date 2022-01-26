@@ -122,6 +122,10 @@ public abstract class SettingValue<T> implements Serializable {
       private Manipulative(S additive, S subtractive) {
         this.additive = additive;
         this.subtractive = subtractive;
+
+        // Cannot have values in both, so remove one from the other
+        // For convention's sake, we go with additive terms to keep
+        this.subtractive.removeAll(additive);
       }
 
       @Override

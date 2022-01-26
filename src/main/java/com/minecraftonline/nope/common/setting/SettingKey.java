@@ -33,6 +33,7 @@ import com.minecraftonline.nope.common.struct.Location;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
@@ -41,6 +42,7 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.Stack;
 import java.util.UUID;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import lombok.Getter;
 import lombok.Setter;
@@ -95,13 +97,14 @@ public abstract class SettingKey<T,
                                  @Nullable final UUID userUuid,
                                  @NotNull final Location location);
 
+  public abstract String type();
+
   public enum Category {
     BLOCKS,
     DAMAGE,
     ENTITIES,
     MISC,
     MOVEMENT,
-    GLOBAL,
   }
 
   public static class Unary<T> extends SettingKey<T, SettingValue.Unary<T>, SettingKey.Manager.Unary<T>> {
@@ -177,6 +180,11 @@ public abstract class SettingKey<T,
 
       // No more left, so just do default
       return defaultData();
+    }
+
+    @Override
+    public String type() {
+      return "Single Value";
     }
 
     public T getDataOrDefault(Host host) {
@@ -325,6 +333,11 @@ public abstract class SettingKey<T,
       return result;
     }
 
+    @Override
+    public String type() {
+      return "Multiple Value";
+    }
+
     public static class Builder<T, S extends HashAltSet<T>> {
       private final String id;
       private final Manager.Poly<T, S> manager;
@@ -436,6 +449,8 @@ public abstract class SettingKey<T,
 
     public abstract static class Poly<T, S extends AltSet<T>> extends Manager<S, SettingValue.Poly<T, S>> {
       public static final String SET_SPLIT_REGEX = "(?<![ ,])(( )+|( *, *))(?![ ,])";
+      private final Map<String, Set<T>> groups = new HashMap<>();
+      private final Map<String, String> groupDescriptions = new HashMap<>();
 
       @SuppressWarnings("unchecked")
       @Override
@@ -446,27 +461,31 @@ public abstract class SettingKey<T,
       public final Set<T> parseSet(String data) throws ParseSettingException {
         Set<T> set = new HashSet<>();
         for (String token : data.split(SET_SPLIT_REGEX)) {
-          try {
-            set.add(parseElement(token));
-          } catch (IllegalArgumentException ex) {
-            StringBuilder errorMessage = new StringBuilder(token + " is not a valid element. ");
-            Set<String> options = elementOptions().keySet();
-            if (options.size() > 0) {
-              if (options.size() <= 8) {
-                errorMessage.append("Allowed types: ")
-                    .append(options.stream()
-                        .map(e -> e.toLowerCase())
-                        .collect(Collectors.joining(", ")));
-              } else {
-                errorMessage.append("Allowed types: ")
-                    .append(options.stream()
-                        .limit(8)
-                        .map(e -> e.toLowerCase())
-                        .collect(Collectors.joining(", ")))
-                    .append(" ...");
+          if (groups.containsKey(token)) {
+            set.addAll(groups.get(token));
+          } else {
+            try {
+              set.add(parseElement(token));
+            } catch (IllegalArgumentException ex) {
+              StringBuilder errorMessage = new StringBuilder(token + " is not a valid element. ");
+              Set<String> options = elementOptions().keySet();
+              if (options.size() > 0) {
+                if (options.size() <= 6) {
+                  errorMessage.append("Allowed types: ")
+                      .append(options.stream()
+                          .map(e -> e.toLowerCase())
+                          .collect(Collectors.joining(", ")));
+                } else {
+                  errorMessage.append("Allowed types: ")
+                      .append(options.stream()
+                          .limit(8)
+                          .map(e -> e.toLowerCase())
+                          .collect(Collectors.joining(", ")))
+                      .append(" ...");
+                }
               }
+              throw new SettingKey.ParseSettingException(errorMessage.toString());
             }
-            throw new SettingKey.ParseSettingException(errorMessage.toString());
           }
         }
         return set;
@@ -475,11 +494,11 @@ public abstract class SettingKey<T,
       @Override
       public @NotNull String printValue(SettingValue.@NotNull Poly<T, S> value) {
         if (value.declarative()) {
-          return value.additive().printAll();
+          return printSetGrouped(value.additive());
         } else {
           return "add ["
-              + value.additive().printAll() + "], subtract ["
-              + value.subtractive().printAll() + "]";
+              + printSetGrouped(value.additive()) + "], subtract ["
+              + printSetGrouped(value.subtractive()) + "]";
         }
       }
 
@@ -490,8 +509,53 @@ public abstract class SettingKey<T,
 
       @Override
       public @NotNull String printData(@NotNull S value) {
-        return value.printAll();
+        return printSetGrouped(value);
       }
+
+      public final void addGroup(String id, String description, Set<T> group) {
+        this.groups.put(id, group);
+        this.groupDescriptions.put(id, description);
+      }
+
+      public final String printSetGrouped(S set) {
+        Set<T> originalSet = new HashSet<>(set.set());
+        Set<String> helper = new HashSet<>();
+        for (Map.Entry<String, Set<T>> group : groups.entrySet()) {
+          Set<T> groupValues = group.getValue();
+          if (set.set().containsAll(groupValues)) {
+            helper.add(group.getKey());
+            originalSet.removeAll(groupValues);
+          }
+        }
+        // add whatever is left (not yet grouped) into the helper set
+        originalSet.stream().map(Object::toString).forEach(helper::add);
+
+        String setString = String.join(", ", helper);
+        if (set.inverted()) {
+          if (set.isEmpty()) {
+            return "all";
+          } else {
+            return "(all except) " + setString;
+          }
+        } else {
+          if (set.isEmpty()) {
+            return "none";
+          } else {
+            return setString;
+          }
+        }
+      }
+
+      @Override
+      public final @NotNull Map<String, Object> elementOptions() {
+        Map<String, Object> map = new HashMap<>();
+        map.putAll(groupDescriptions);
+        map.putAll(elementOptionsWithoutGroups());
+        return map;
+      }
+
+      @NotNull
+      public abstract Map<String, Object> elementOptionsWithoutGroups();
 
       public abstract T parseElement(String element) throws ParseSettingException;
 
@@ -502,6 +566,8 @@ public abstract class SettingKey<T,
         newSet.addAll(set);
         return newSet;
       }
+
+
     }
 
   }

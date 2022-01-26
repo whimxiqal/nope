@@ -26,8 +26,6 @@ package com.minecraftonline.nope.sponge;
 
 import com.google.inject.Inject;
 import com.minecraftonline.nope.common.Nope;
-import com.minecraftonline.nope.common.setting.SettingKey;
-import com.minecraftonline.nope.common.setting.SettingKeyManagers;
 import com.minecraftonline.nope.common.setting.SettingKeys;
 import com.minecraftonline.nope.sponge.api.config.SettingValueConfigSerializerRegistrar;
 import com.minecraftonline.nope.sponge.api.config.SettingValueConfigSerializerRegistrationEvent;
@@ -42,6 +40,7 @@ import com.minecraftonline.nope.sponge.key.NopeKeys;
 import com.minecraftonline.nope.sponge.listener.NopeSettingListeners;
 import com.minecraftonline.nope.sponge.listener.SettingListenerStore;
 import com.minecraftonline.nope.sponge.mixin.collision.CollisionHandler;
+import com.minecraftonline.nope.sponge.setting.manager.SpongeSettingKeyManagerUtil;
 import com.minecraftonline.nope.sponge.storage.hocon.HoconDataHandler;
 import com.minecraftonline.nope.sponge.tool.SelectionHandler;
 import com.minecraftonline.nope.sponge.util.Extra;
@@ -49,20 +48,14 @@ import com.minecraftonline.nope.sponge.util.SpongeLogger;
 import java.nio.file.Path;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.block.BlockType;
-import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.command.Command;
 import org.spongepowered.api.config.ConfigDir;
 import org.spongepowered.api.data.DataRegistration;
 import org.spongepowered.api.data.Key;
-import org.spongepowered.api.entity.Entity;
-import org.spongepowered.api.entity.EntityType;
-import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.lifecycle.ConstructPluginEvent;
 import org.spongepowered.api.event.lifecycle.LoadedGameEvent;
@@ -70,7 +63,6 @@ import org.spongepowered.api.event.lifecycle.RefreshGameEvent;
 import org.spongepowered.api.event.lifecycle.RegisterCommandEvent;
 import org.spongepowered.api.event.lifecycle.RegisterDataEvent;
 import org.spongepowered.api.item.inventory.ItemStack;
-import org.spongepowered.api.registry.RegistryEntry;
 import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.service.context.ContextService;
 import org.spongepowered.plugin.PluginContainer;
@@ -133,7 +125,6 @@ public class SpongeNope extends Nope {
 
     // Post setting key and setting listener events
     SettingKeys.registerTo(instance().settingKeys());
-    applySpongeSettingKeyManagers();
     Sponge.eventManager().post(new SettingKeyRegistrationEvent(
         (settingKey) -> {
           instance().settingKeys().register(settingKey);
@@ -147,12 +138,12 @@ public class SpongeNope extends Nope {
 
     this.settingListeners = new SettingListenerStore(settingKeys());
     NopeSettingListeners.get().forEach(listener -> {
-      this.settingListeners.register(listener);
+      this.settingListeners.stage(listener);
       listener.settingKey().functional(true);
     });
     Sponge.eventManager().post(new SettingListenerRegistrationEvent(
         registration -> {
-          instance().settingListeners().register(registration);
+          instance().settingListeners().stage(registration);
           registration.settingKey().functional(true);
         },
         event.game(),
@@ -165,33 +156,6 @@ public class SpongeNope extends Nope {
     Sponge.eventManager().registerListeners(pluginContainer(), selectionHandler);
 //    collisionHandler = new CollisionHandler();
 //    playerMovementHandler = new PlayerMovementHandler();
-  }
-
-  private void applySpongeSettingKeyManagers() {
-    SettingKeyManagers.POLY_ENTITY_KEY_MANAGER.elementOptions(
-        () -> EntityTypes.registry().streamEntries()
-            .collect(Collectors.<RegistryEntry<EntityType<? extends Entity>>, String, Object>
-                toMap(entity -> entity.key().value(), entity -> entity.value().asComponent())));
-    SettingKeyManagers.POLY_ENTITY_KEY_MANAGER.parser(element ->
-        EntityTypes.registry().streamEntries()
-            .map(entity -> entity.key().value())
-            .filter(name -> name.equalsIgnoreCase(element))
-            .findFirst()
-            .orElseThrow(() -> new SettingKey.ParseSettingException("No entity found called " + element))
-            .toLowerCase()
-    );
-    SettingKeyManagers.POLY_BLOCK_KEY_MANAGER.elementOptions(
-        () -> BlockTypes.registry().streamEntries()
-            .collect(Collectors.<RegistryEntry<BlockType>, String, Object>
-                toMap(entity -> entity.key().value(), entity -> entity.value().asComponent())));
-    SettingKeyManagers.POLY_BLOCK_KEY_MANAGER.parser(element ->
-        BlockTypes.registry().streamEntries()
-            .map(block -> block.key().value())
-            .filter(name -> name.equalsIgnoreCase(element))
-            .findFirst()
-            .orElseThrow(() -> new SettingKey.ParseSettingException("No block found called " + element))
-            .toLowerCase()
-    );
   }
 
   @Listener
@@ -218,6 +182,8 @@ public class SpongeNope extends Nope {
   public void onLoadedGame(LoadedGameEvent event) {
     Extra.printSplashscreen();
 
+    SpongeSettingKeyManagerUtil.updateSettingKeyManagers();
+
     // Collect serializers for setting values
     SettingValueConfigSerializerRegistrar configRegistrar = new SettingValueConfigSerializerRegistrarImpl();
     configRegistrar.register(new UnarySettingValueConfigSerializer());
@@ -233,6 +199,7 @@ public class SpongeNope extends Nope {
     data(new HoconDataHandler(configDir, configRegistrar));
     hostSystem(data().loadSystem());
     hostSystem().addAllZones(data().zones().load());
+    settingListeners.registerAll();
 
 //    DynamicHandler.register();
 //    StaticSettingListeners.register();

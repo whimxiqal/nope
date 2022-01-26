@@ -25,46 +25,52 @@
 
 package com.minecraftonline.nope.sponge.listener;
 
+import com.minecraftonline.nope.common.setting.SettingKey;
 import com.minecraftonline.nope.common.setting.SettingKeyStore;
-import com.minecraftonline.nope.sponge.api.event.SettingEventListener;
+import com.minecraftonline.nope.sponge.SpongeNope;
 import com.minecraftonline.nope.sponge.api.event.SettingListenerRegistration;
-import com.minecraftonline.nope.sponge.api.event.SettingValueLookupFunction;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import org.jetbrains.annotations.NotNull;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.Event;
-import org.spongepowered.api.event.EventListenerRegistration;
 
 public class SettingListenerStore {
 
   private final SettingKeyStore settingKeys;
-  private final HashMap<String, List<SettingEventListener<?, ?>>> settingListeners = new HashMap<>();
+  private final HashMap<String, List<SettingListenerRegistration<?, ?>>> settingListeners = new HashMap<>();
+  private List<SettingKey<?, ?, ?>> unregisteredKeys = new LinkedList<>();
 
   public SettingListenerStore(@NotNull SettingKeyStore settingKeys) {
     this.settingKeys = settingKeys;
   }
 
-  public <T, E extends Event> void register(SettingListenerRegistration<T, E> registration) {
-
+  public <T, E extends Event> void stage(SettingListenerRegistration<T, E> registration) {
     if (!settingKeys.containsId(registration.settingKey().id())) {
       throw new IllegalStateException(String.format("Cannot register setting listener because "
           + "setting key %s is not registered.", registration.settingKey().id()));
     }
 
     this.settingListeners.computeIfAbsent(registration.settingKey().id(), (k) -> new ArrayList<>(1))
-        .add(registration.settingEventListener());
+        .add(registration);
+    this.unregisteredKeys.add(registration.settingKey());
+  }
 
-    // TODO move this registration so that it only registers if the setting is set somewhere on the server and
-    //  the value is set to something other than the default, non game-changing behavior way,
-    //  or alternatively if the default value of the setting is game-changing inherently.
-    Sponge.eventManager().registerListener(EventListenerRegistration.builder(registration.eventClass())
-        .listener((event) -> registration.settingEventListener()
-            .handle(event, new SettingValueLookupFunctionImpl<>(registration.settingKey())))
-        .order(registration.order())
-        .plugin(registration.plugin())
-        .build());
+  public void registerAll() {
+    List<SettingKey<?, ?, ?>> stillUnregistered = new LinkedList<>();
+    for (SettingKey<?, ?, ?> key : unregisteredKeys) {
+      if (SpongeNope.instance().hostSystem().isAssigned(key)) {
+        settingListeners.get(key.id()).forEach(SettingListenerRegistration::registerToSponge);
+      } else {
+        stillUnregistered.add(key);
+      }
+    }
+    final int count = unregisteredKeys.size() - stillUnregistered.size();
+    if (count > 0) {
+      SpongeNope.instance().logger().info("Registered " + count + " listener(s)");
+    }
+    unregisteredKeys = stillUnregistered;
   }
 
 }

@@ -298,8 +298,7 @@ public final class Formatter {
       hoverText.append(Component.newline());
     }
 
-    hoverText.append(keyValue("Type:", "Type goes here"));
-    // TODO Fix this ^
+    hoverText.append(keyValue("Type:", key.type()));
     hoverText.append(Component.newline());
 
     String defaultData = key.manager().printData(key.defaultData());

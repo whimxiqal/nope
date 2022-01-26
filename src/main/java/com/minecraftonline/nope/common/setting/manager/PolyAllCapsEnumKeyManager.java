@@ -25,11 +25,14 @@
 
 package com.minecraftonline.nope.common.setting.manager;
 
+import com.google.common.collect.Sets;
 import com.minecraftonline.nope.common.setting.SettingKey;
 import com.minecraftonline.nope.common.struct.Described;
 import com.minecraftonline.nope.common.struct.HashAltSet;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import org.jetbrains.annotations.NotNull;
@@ -61,7 +64,7 @@ public class PolyAllCapsEnumKeyManager<E extends Enum<E> & Described, S extends 
   }
 
   @Override
-  public @NotNull Map<String, Object> elementOptions() {
+  public @NotNull Map<String, Object> elementOptionsWithoutGroups() {
     return Arrays.stream(clazz.getEnumConstants())
         .collect(Collectors.toMap(e -> e.name().toLowerCase(), Described::description));
   }

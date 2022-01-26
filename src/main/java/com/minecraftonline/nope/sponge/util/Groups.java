@@ -26,9 +26,14 @@
 package com.minecraftonline.nope.sponge.util;
 
 import com.google.common.collect.Sets;
+import com.minecraftonline.nope.common.struct.AltSet;
 import java.util.Set;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.BlockTypes;
+import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.entity.EntityType;
+import org.spongepowered.api.entity.EntityTypes;
+import org.spongepowered.api.registry.RegistryEntry;
 
 /**
  * A utility class to hold useful groups of {@link BlockTypes}.
@@ -57,6 +62,14 @@ public final class Groups {
       BlockTypes.LILY_PAD.get(),
       BlockTypes.WHEAT.get(),
       BlockTypes.DANDELION.get()
+  );
+  public static final Set<EntityType<?>> DECORATIVE_ENTITIES = Sets.newHashSet(
+      EntityTypes.PAINTING.get(),
+      EntityTypes.ARMOR_STAND.get()
+  );
+  public static final Set<EntityType<?>> VEHICLES = Sets.newHashSet(
+      EntityTypes.BOAT.get(),
+      EntityTypes.MINECART.get()
   );
 
   private Groups() {

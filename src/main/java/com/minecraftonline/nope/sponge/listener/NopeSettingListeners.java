@@ -29,11 +29,11 @@ import com.google.common.collect.Lists;
 import com.minecraftonline.nope.common.setting.SettingKeys;
 import com.minecraftonline.nope.sponge.SpongeNope;
 import com.minecraftonline.nope.sponge.api.event.SettingListenerRegistration;
-import com.minecraftonline.nope.sponge.listener.dynamic.ArmorStandDestroyListener;
+import com.minecraftonline.nope.sponge.listener.dynamic.BlockChangeListener;
 import com.minecraftonline.nope.sponge.listener.dynamic.InteractiveBlocksListener;
 import java.util.List;
+import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.event.block.InteractBlockEvent;
-import org.spongepowered.api.event.entity.AttackEntityEvent;
 
 public class NopeSettingListeners {
 
@@ -42,10 +42,10 @@ public class NopeSettingListeners {
 
   public static List<SettingListenerRegistration<?, ?>> get() {
     return Lists.newArrayList(
-        new SettingListenerRegistration<>(SettingKeys.ARMOR_STAND_DESTROY,
-            AttackEntityEvent.class,
+        new SettingListenerRegistration<>(SettingKeys.BLOCK_CHANGE,
+            ChangeBlockEvent.All.class,
             SpongeNope.instance().pluginContainer(),
-            new ArmorStandDestroyListener()),
+            new BlockChangeListener()),
         new SettingListenerRegistration<>(SettingKeys.INTERACTIVE_BLOCKS,
             InteractBlockEvent.Secondary.class,
             SpongeNope.instance().pluginContainer(),
