@@ -23,31 +23,30 @@
  * SOFTWARE.
  */
 
-package com.minecraftonline.nope.sponge.listener;
+package com.minecraftonline.nope.sponge.listener.dynamic;
 
-import com.minecraftonline.nope.common.setting.SettingKey;
-import com.minecraftonline.nope.common.struct.Location;
-import com.minecraftonline.nope.sponge.SpongeNope;
+import com.minecraftonline.nope.common.permission.Permissions;
+import com.minecraftonline.nope.common.struct.AltSet;
+import com.minecraftonline.nope.sponge.api.event.SettingEventListener;
 import com.minecraftonline.nope.sponge.api.event.SettingValueLookupFunction;
-import com.minecraftonline.nope.sponge.util.SpongeUtil;
-import java.util.UUID;
-import org.jetbrains.annotations.NotNull;
-import org.spongepowered.api.world.server.ServerLocation;
+import org.spongepowered.api.entity.EntityTypes;
+import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.entity.living.player.server.ServerPlayer;
+import org.spongepowered.api.event.entity.DamageEntityEvent;
 
-public class SettingValueLookupFunctionImpl<T> implements SettingValueLookupFunction<T> {
-
-  private final SettingKey<? extends T, ?, ?> settingKey;
-
-  public SettingValueLookupFunctionImpl(@NotNull SettingKey<? extends T, ?, ?> settingKey) {
-    this.settingKey = settingKey;
+public class InvincibleEntitiesListener implements SettingEventListener<AltSet<String>, DamageEntityEvent> {
+  @Override
+  public void handle(DamageEntityEvent event, SettingValueLookupFunction<AltSet<String>> lookupFunction) {
+    if (event.source() instanceof ServerPlayer) {
+      ServerPlayer playerCause = (ServerPlayer) event.source();
+      if (playerCause.hasPermission(Permissions.UNRESTRICTED.get())) {
+        // This player can damage whatever they want
+        return;
+      }
+    }
+    final String entityName = EntityTypes.registry().valueKey(event.entity().type()).value();
+    if (lookupFunction.lookup(event.entity(), event.entity().serverLocation()).contains(entityName)) {
+      event.setCancelled(true);
+    }
   }
-
-  public T lookup(Object cause, ServerLocation location) {
-    return SpongeUtil.valueFor(settingKey, cause, location);
-  }
-
-  public T lookup(UUID userUuid, Location location) {
-    return SpongeNope.instance().hostSystem().lookup(settingKey, userUuid, location);
-  }
-
 }

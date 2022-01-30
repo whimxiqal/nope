@@ -28,24 +28,44 @@ package com.minecraftonline.nope.sponge.listener.dynamic;
 import com.minecraftonline.nope.common.struct.AltSet;
 import com.minecraftonline.nope.sponge.api.event.SettingEventListener;
 import com.minecraftonline.nope.sponge.api.event.SettingValueLookupFunction;
-import java.util.Optional;
 import org.spongepowered.api.block.BlockTypes;
+import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.event.block.InteractBlockEvent;
+import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.world.server.ServerLocation;
 
-public class InteractiveBlocksListener implements SettingEventListener<AltSet<String>, InteractBlockEvent.Secondary> {
+public class SpawnableEntitiesListener implements SettingEventListener<AltSet<String>, SpawnEntityEvent.Pre> {
   @Override
-  public void handle(InteractBlockEvent.Secondary event,
+  public void handle(SpawnEntityEvent.Pre event,
                      SettingValueLookupFunction<AltSet<String>> lookupFunction) {
-    final Optional<ServerLocation> location = event.block().location();
-    if (location.isPresent()) {
-      final Optional<Player> player = event.cause().first(Player.class);
-      if (player.isPresent()) {
-        final String blockName = BlockTypes.registry().valueKey(event.block().state().type()).value();
-        if (!lookupFunction.lookup(player.get(), location.get()).contains(blockName)
-            || !lookupFunction.lookup(player.get(), player.get().serverLocation()).contains(blockName)) {
+    final Object rootCause = event.cause().root();
+    final Player player;
+    if (rootCause instanceof Player) {
+      player = (Player) rootCause;
+    } else {
+      player = null;
+    }
+
+    ServerLocation location;
+    AltSet<String> set;
+    String entityName;
+    for (Entity entity : event.entities()) {
+      location = entity.serverLocation();
+      set = lookupFunction.lookup(player, location);
+      entityName = EntityTypes.registry().valueKey(entity.type()).value();
+      if (!set.contains(entityName)) {
+        event.setCancelled(true);
+        return;
+      }
+
+      // If it was spawned by a player, then even if the spawning location is allowed for the
+      //  entity type, make sure that the player can be spawning from their location.
+      if (player != null) {
+        set = lookupFunction.lookup(player, player.serverLocation());
+        if (!set.contains(entityName)) {
           event.setCancelled(true);
+          return;
         }
       }
     }

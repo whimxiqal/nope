@@ -25,27 +25,27 @@
 
 package com.minecraftonline.nope.sponge.listener.dynamic;
 
-import com.minecraftonline.nope.common.struct.AltSet;
 import com.minecraftonline.nope.sponge.api.event.SettingEventListener;
 import com.minecraftonline.nope.sponge.api.event.SettingValueLookupFunction;
+import com.minecraftonline.nope.sponge.util.Groups;
 import java.util.Optional;
-import org.spongepowered.api.block.BlockTypes;
-import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.event.block.InteractBlockEvent;
+import org.spongepowered.api.block.transaction.BlockTransaction;
+import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.world.server.ServerLocation;
 
-public class InteractiveBlocksListener implements SettingEventListener<AltSet<String>, InteractBlockEvent.Secondary> {
+public class ConcreteSolidificationListener implements SettingEventListener<Boolean, ChangeBlockEvent.All> {
   @Override
-  public void handle(InteractBlockEvent.Secondary event,
-                     SettingValueLookupFunction<AltSet<String>> lookupFunction) {
-    final Optional<ServerLocation> location = event.block().location();
-    if (location.isPresent()) {
-      final Optional<Player> player = event.cause().first(Player.class);
-      if (player.isPresent()) {
-        final String blockName = BlockTypes.registry().valueKey(event.block().state().type()).value();
-        if (!lookupFunction.lookup(player.get(), location.get()).contains(blockName)
-            || !lookupFunction.lookup(player.get(), player.get().serverLocation()).contains(blockName)) {
-          event.setCancelled(true);
+  public void handle(ChangeBlockEvent.All event,
+                     SettingValueLookupFunction<Boolean> lookupFunction) {
+    for (BlockTransaction transaction : event.transactions()) {
+      if (Groups.CONCRETE_POWDER.contains(transaction.original().state().type())) {
+        if (Groups.CONCRETE.contains(transaction.finalReplacement().state().type())) {
+          final Optional<ServerLocation> originalOptional = transaction.original().location();
+          final Optional<ServerLocation> finalOptional = transaction.finalReplacement().location();
+          if ((originalOptional.isPresent() && !lookupFunction.lookup(null, originalOptional.get()))
+              || (finalOptional.isPresent() && !lookupFunction.lookup(null, finalOptional.get()))) {
+            transaction.setValid(false);
+          }
         }
       }
     }

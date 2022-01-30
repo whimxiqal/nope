@@ -27,26 +27,25 @@ package com.minecraftonline.nope.common.setting.sets;
 
 import com.minecraftonline.nope.common.struct.Described;
 import com.minecraftonline.nope.common.struct.HashAltSet;
+import java.util.Locale;
 
-public class BlockChangeSet extends HashAltSet.FewEnum<BlockChangeSet.BlockChange> {
+public class MobGriefSet extends HashAltSet.FewEnum<MobGriefSet.MobGrief> {
 
-  public BlockChangeSet() {
-    super(BlockChangeSet.BlockChange.class);
+  public MobGriefSet() {
+    super(MobGrief.class);
   }
 
   /**
-   * Enumeration for all explosive types considered by Nope.
+   * Enumeration for all movement types considered by Nope.
    */
-  public enum BlockChange implements Described {
-    BREAK("Whether blocks can be replaced with air"),
-    PLACE("Whether blocks can replace air"),
-    MODIFY("Whether blocks can changed to other blocks or change internally"),
-    GROW("Whether blocks may be grown"),
-    DECAY("Whether blocks may decay");
+  public enum MobGrief implements Described {
+    ENDERDRAGON("Grief caused by the Enderdragon"),
+    ENDERMEN("Grief caused by endermen"),
+    ZOMBIES("Grief caused by zombies");
 
     private final String description;
 
-    BlockChange(String description) {
+    MobGrief(String description) {
       this.description = description;
     }
 

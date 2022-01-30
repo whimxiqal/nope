@@ -114,10 +114,10 @@ public class ValueCommand<T extends SettingCollection & Named> extends CommandNo
             + "and subtractive values at the same time"));
       }
       Y inputSet = polyKey.manager().createSet();
-      if (alterType == ParameterValueTypes.SettingValueAlterType.ALL) {
+      if (alterType == ParameterValueTypes.SettingValueAlterType.SET_ALL) {
         inputSet.fill();
         alterType = ParameterValueTypes.SettingValueAlterType.SET;
-      } else if (alterType == ParameterValueTypes.SettingValueAlterType.NONE) {
+      } else if (alterType == ParameterValueTypes.SettingValueAlterType.SET_NONE) {
         alterType = ParameterValueTypes.SettingValueAlterType.SET;
       } else {
         if (settingValueOptional.isPresent()) {
@@ -272,7 +272,7 @@ public class ValueCommand<T extends SettingCollection & Named> extends CommandNo
                                                                Y value) {
     collection.setValue(key, value);
     context.sendMessage(Identity.nil(),
-        Formatter.success("Set value of ___ on " + this.collectionName + " ___: ___",
+        Formatter.success("Set value of ___ on " + this.collectionName + " ___ to ___",
             key.id(),
             collection.name(),
             key.manager().printValue(value)));

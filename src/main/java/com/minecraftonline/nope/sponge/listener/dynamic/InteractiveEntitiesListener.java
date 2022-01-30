@@ -23,31 +23,26 @@
  * SOFTWARE.
  */
 
-package com.minecraftonline.nope.sponge.listener;
+package com.minecraftonline.nope.sponge.listener.dynamic;
 
-import com.minecraftonline.nope.common.setting.SettingKey;
-import com.minecraftonline.nope.common.struct.Location;
-import com.minecraftonline.nope.sponge.SpongeNope;
+import com.minecraftonline.nope.common.struct.AltSet;
+import com.minecraftonline.nope.sponge.api.event.SettingEventListener;
 import com.minecraftonline.nope.sponge.api.event.SettingValueLookupFunction;
-import com.minecraftonline.nope.sponge.util.SpongeUtil;
-import java.util.UUID;
-import org.jetbrains.annotations.NotNull;
-import org.spongepowered.api.world.server.ServerLocation;
+import org.spongepowered.api.block.BlockTypes;
+import org.spongepowered.api.entity.EntityTypes;
+import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.event.entity.InteractEntityEvent;
 
-public class SettingValueLookupFunctionImpl<T> implements SettingValueLookupFunction<T> {
-
-  private final SettingKey<? extends T, ?, ?> settingKey;
-
-  public SettingValueLookupFunctionImpl(@NotNull SettingKey<? extends T, ?, ?> settingKey) {
-    this.settingKey = settingKey;
+public class InteractiveEntitiesListener implements SettingEventListener<AltSet<String>, InteractEntityEvent.Secondary> {
+  @Override
+  public void handle(InteractEntityEvent.Secondary event, SettingValueLookupFunction<AltSet<String>> lookupFunction) {
+    if (event.source() instanceof Player) {
+      final Player player = (Player) event.source();
+      final String entityName = EntityTypes.registry().valueKey(event.entity().type()).value();
+      if (!lookupFunction.lookup(player, event.entity().serverLocation()).contains(entityName)
+          || !lookupFunction.lookup(player, player.serverLocation()).contains(entityName)) {
+        event.setCancelled(true);
+      }
+    }
   }
-
-  public T lookup(Object cause, ServerLocation location) {
-    return SpongeUtil.valueFor(settingKey, cause, location);
-  }
-
-  public T lookup(UUID userUuid, Location location) {
-    return SpongeNope.instance().hostSystem().lookup(settingKey, userUuid, location);
-  }
-
 }

@@ -417,6 +417,10 @@ public abstract class SettingKey<T,
       return Collections.emptyMap();
     }
 
+    public @NotNull Map<String, Object> elementSuggestions() {
+      return elementOptions();
+    }
+
     public abstract V parseDeclarativeValue(String settingValue);
 
     public abstract static class Unary<T> extends Manager<T, SettingValue.Unary<T>> {

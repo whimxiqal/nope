@@ -39,6 +39,7 @@ import com.minecraftonline.nope.sponge.context.ZoneContextCalculator;
 import com.minecraftonline.nope.sponge.key.NopeKeys;
 import com.minecraftonline.nope.sponge.listener.NopeSettingListeners;
 import com.minecraftonline.nope.sponge.listener.SettingListenerStore;
+import com.minecraftonline.nope.sponge.listener.always.MovementListener;
 import com.minecraftonline.nope.sponge.mixin.collision.CollisionHandler;
 import com.minecraftonline.nope.sponge.setting.manager.SpongeSettingKeyManagerUtil;
 import com.minecraftonline.nope.sponge.storage.hocon.HoconDataHandler;
@@ -123,39 +124,6 @@ public class SpongeNope extends Nope {
       logger().info("Created directories for Nope configuration");
     }
 
-    // Post setting key and setting listener events
-    SettingKeys.registerTo(instance().settingKeys());
-    Sponge.eventManager().post(new SettingKeyRegistrationEvent(
-        (settingKey) -> {
-          instance().settingKeys().register(settingKey);
-        },
-        event.game(),
-        event.cause(),
-        event.source(),
-        event.context()
-    ));
-    instance().settingKeys().lock();
-
-    this.settingListeners = new SettingListenerStore(settingKeys());
-    NopeSettingListeners.get().forEach(listener -> {
-      this.settingListeners.stage(listener);
-      listener.settingKey().functional(true);
-    });
-    Sponge.eventManager().post(new SettingListenerRegistrationEvent(
-        registration -> {
-          instance().settingListeners().stage(registration);
-          registration.settingKey().functional(true);
-        },
-        event.game(),
-        event.cause(),
-        event.source(),
-        event.context()
-    ));
-
-    // Register selection handlers
-    Sponge.eventManager().registerListeners(pluginContainer(), selectionHandler);
-//    collisionHandler = new CollisionHandler();
-//    playerMovementHandler = new PlayerMovementHandler();
   }
 
   @Listener
@@ -180,8 +148,6 @@ public class SpongeNope extends Nope {
    */
   @Listener
   public void onLoadedGame(LoadedGameEvent event) {
-    Extra.printSplashscreen();
-
     SpongeSettingKeyManagerUtil.updateSettingKeyManagers();
 
     // Collect serializers for setting values
@@ -196,18 +162,51 @@ public class SpongeNope extends Nope {
         event.context()
     ));
 
+    // Create setting keys
+    SettingKeys.registerTo(instance().settingKeys());
+    Sponge.eventManager().post(new SettingKeyRegistrationEvent(
+        (settingKey) -> {
+          instance().settingKeys().register(settingKey);
+        },
+        event.game(),
+        event.cause(),
+        event.source(),
+        event.context()
+    ));
+    instance().settingKeys().lock();
+
+    // Load data
     data(new HoconDataHandler(configDir, configRegistrar));
     hostSystem(data().loadSystem());
     hostSystem().addAllZones(data().zones().load());
-    settingListeners.registerAll();
 
-//    DynamicHandler.register();
-//    StaticSettingListeners.register();
+    // Create setting listeners
+    this.settingListeners = new SettingListenerStore(settingKeys());
+    NopeSettingListeners.register();
+    Sponge.eventManager().post(new SettingListenerRegistrationEvent(
+        registration -> {
+          instance().settingListeners().stage(registration);
+          registration.settingKey().functional(true);
+        },
+        event.game(),
+        event.cause(),
+        event.source(),
+        event.context()
+    ));
+
+    // Register selection handlers
+    Sponge.eventManager().registerListeners(pluginContainer(), selectionHandler);
+//    collisionHandler = new CollisionHandler();
+//    playerMovementHandler = new PlayerMovementHandler();
+    settingListeners.registerAll();
+    Sponge.eventManager().registerListeners(this.pluginContainer, new MovementListener());
 
     Sponge.serviceProvider()
         .provide(ContextService.class)
         .ifPresent(service -> service.registerContextCalculator(new ZoneContextCalculator()));
 
+    // Finally, we announce that Nope is live!
+    Extra.printSplashscreen();
   }
 
   @Listener

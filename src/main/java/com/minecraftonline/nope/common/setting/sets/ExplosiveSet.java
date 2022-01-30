@@ -39,9 +39,9 @@ public class ExplosiveSet extends HashAltSet.FewEnum<ExplosiveSet.Explosive> {
    */
   public enum Explosive implements Described {
     CREEPER("Explosion caused by creeper"),
-    ENDERCRYSTAL("Explosion caused by endercrystal"),
+    ENDCRYSTAL("Explosion caused by endercrystal"),
     FIREWORK("Explosion caused by firework"),
-    LARGEFIREBALL("Explosion caused by large fireball"),
+    EXPLOSIVEFIREBALL("Explosion caused by large fireball"),
     PRIMEDTNT("Explosion caused by primed TNT"),
     TNTMINECART("Explosion caused by TNT minecart"),
     WITHER("Explosion caused by Wither"),
@@ -56,6 +56,11 @@ public class ExplosiveSet extends HashAltSet.FewEnum<ExplosiveSet.Explosive> {
     @Override
     public String description() {
       return description;
+    }
+
+    @Override
+    public String toString() {
+      return name().toLowerCase();
     }
   }
 }

@@ -25,27 +25,43 @@
 
 package com.minecraftonline.nope.sponge.listener.dynamic;
 
-import com.minecraftonline.nope.common.struct.AltSet;
 import com.minecraftonline.nope.sponge.api.event.SettingEventListener;
 import com.minecraftonline.nope.sponge.api.event.SettingValueLookupFunction;
 import java.util.Optional;
 import org.spongepowered.api.block.BlockTypes;
+import org.spongepowered.api.block.transaction.BlockTransaction;
 import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.event.block.InteractBlockEvent;
+import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.world.server.ServerLocation;
 
-public class InteractiveBlocksListener implements SettingEventListener<AltSet<String>, InteractBlockEvent.Secondary> {
+public class FrostedIceFormListener implements SettingEventListener<Boolean, ChangeBlockEvent.All> {
   @Override
-  public void handle(InteractBlockEvent.Secondary event,
-                     SettingValueLookupFunction<AltSet<String>> lookupFunction) {
-    final Optional<ServerLocation> location = event.block().location();
-    if (location.isPresent()) {
-      final Optional<Player> player = event.cause().first(Player.class);
-      if (player.isPresent()) {
-        final String blockName = BlockTypes.registry().valueKey(event.block().state().type()).value();
-        if (!lookupFunction.lookup(player.get(), location.get()).contains(blockName)
-            || !lookupFunction.lookup(player.get(), player.get().serverLocation()).contains(blockName)) {
-          event.setCancelled(true);
+  public void handle(ChangeBlockEvent.All event,
+                     SettingValueLookupFunction<Boolean> lookupFunction) {
+    final Object eventCause = event.cause().root();
+    if (eventCause instanceof Player) {
+      Player player = (Player) eventCause;
+      Optional<ServerLocation> blockLocation;
+      for (BlockTransaction transaction : event.transactions()) {
+        blockLocation = transaction.finalReplacement().location();
+        if (blockLocation.isPresent()) {
+          if (transaction.original().state().type().equals(BlockTypes.WATER.get())
+          && transaction.finalReplacement().state().type().equals(BlockTypes.FROSTED_ICE.get())
+              && (!lookupFunction.lookup(player, blockLocation.get())
+              || !lookupFunction.lookup(player, player.serverLocation()))) {
+            transaction.invalidate();
+          }
+        }
+      }
+    } else {
+      Optional<ServerLocation> blockLocation;
+      for (BlockTransaction transaction : event.transactions()) {
+        blockLocation = transaction.finalReplacement().location();
+        if (blockLocation.isPresent()) {
+          if (transaction.finalReplacement().state().type().equals(BlockTypes.FIRE.get())
+              && !lookupFunction.lookup(null, blockLocation.get())) {
+            transaction.invalidate();
+          }
         }
       }
     }

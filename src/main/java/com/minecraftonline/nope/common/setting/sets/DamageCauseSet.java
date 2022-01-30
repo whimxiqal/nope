@@ -53,5 +53,10 @@ public class DamageCauseSet extends HashAltSet.FewEnum<DamageCauseSet.DamageCaus
     public String description() {
       return description;
     }
+
+    @Override
+    public String toString() {
+      return name().toLowerCase();
+    }
   }
 }

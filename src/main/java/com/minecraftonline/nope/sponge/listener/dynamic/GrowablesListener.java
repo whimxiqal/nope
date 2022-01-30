@@ -30,23 +30,32 @@ import com.minecraftonline.nope.sponge.api.event.SettingEventListener;
 import com.minecraftonline.nope.sponge.api.event.SettingValueLookupFunction;
 import java.util.Optional;
 import org.spongepowered.api.block.BlockTypes;
+import org.spongepowered.api.block.transaction.BlockTransaction;
+import org.spongepowered.api.block.transaction.Operations;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.event.block.InteractBlockEvent;
 import org.spongepowered.api.world.server.ServerLocation;
 
-public class InteractiveBlocksListener implements SettingEventListener<AltSet<String>, InteractBlockEvent.Secondary> {
+public class GrowablesListener implements SettingEventListener<AltSet<String>, ChangeBlockEvent.All> {
   @Override
-  public void handle(InteractBlockEvent.Secondary event,
+  public void handle(ChangeBlockEvent.All event,
                      SettingValueLookupFunction<AltSet<String>> lookupFunction) {
-    final Optional<ServerLocation> location = event.block().location();
-    if (location.isPresent()) {
-      final Optional<Player> player = event.cause().first(Player.class);
-      if (player.isPresent()) {
-        final String blockName = BlockTypes.registry().valueKey(event.block().state().type()).value();
-        if (!lookupFunction.lookup(player.get(), location.get()).contains(blockName)
-            || !lookupFunction.lookup(player.get(), player.get().serverLocation()).contains(blockName)) {
-          event.setCancelled(true);
-        }
+    final Optional<Player> player = event.cause().first(Player.class);
+    final Player playerOrNull = player.orElse(null);
+    for (BlockTransaction transaction : event.transactions()) {
+      final String crop = BlockTypes.registry().valueKey(transaction.finalReplacement().state().type()).value();
+      if (transaction.original()
+          .location()
+          .map(loc -> !lookupFunction.lookup(playerOrNull, loc).contains(crop))
+          .orElse(false)
+          || transaction.finalReplacement()
+          .location()
+          .map(loc -> !lookupFunction.lookup(playerOrNull, loc).contains(crop))
+          .orElse(false)
+          || player.map(p -> !lookupFunction.lookup(playerOrNull, p.serverLocation()).contains(crop))
+          .orElse(false)) {
+        transaction.setValid(false);
       }
     }
   }

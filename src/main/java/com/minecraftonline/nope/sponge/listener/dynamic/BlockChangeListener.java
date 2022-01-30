@@ -28,45 +28,49 @@ package com.minecraftonline.nope.sponge.listener.dynamic;
 import com.minecraftonline.nope.common.setting.sets.BlockChangeSet;
 import com.minecraftonline.nope.sponge.api.event.SettingEventListener;
 import com.minecraftonline.nope.sponge.api.event.SettingValueLookupFunction;
+import com.minecraftonline.nope.sponge.listener.SpongeEventUtil;
 import java.util.Optional;
-import org.spongepowered.api.block.BlockTypes;
+import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.transaction.BlockTransaction;
+import org.spongepowered.api.block.transaction.Operations;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
+import org.spongepowered.api.world.server.ServerLocation;
 
 public class BlockChangeListener implements SettingEventListener<BlockChangeSet, ChangeBlockEvent.All> {
   @Override
   public void handle(ChangeBlockEvent.All event, SettingValueLookupFunction<BlockChangeSet> lookupFunction) {
     for (BlockTransaction transaction : event.transactions()) {
-      final boolean originallyAir = transaction.original().state().type().equals(BlockTypes.AIR.get());
-      final boolean finallyAir = transaction.finalReplacement().state().type().equals(BlockTypes.AIR.get());
       final BlockChangeSet.BlockChange blockChangeType;
-      if (originallyAir) {
-        if (finallyAir) {
-          return;
-        } else {
-          blockChangeType = BlockChangeSet.BlockChange.PLACE;
-        }
+      if (transaction.operation().equals(Operations.BREAK.get())) {
+        blockChangeType = BlockChangeSet.BlockChange.BREAK;
+      } else if (transaction.operation().equals(Operations.PLACE.get())) {
+        blockChangeType = BlockChangeSet.BlockChange.PLACE;
+      } else if (transaction.operation().equals(Operations.MODIFY.get())) {
+        blockChangeType = BlockChangeSet.BlockChange.MODIFY;
+      } else if (transaction.operation().equals(Operations.GROWTH.get())) {
+        blockChangeType = BlockChangeSet.BlockChange.GROW;
+      } else if (transaction.operation().equals(Operations.DECAY.get())) {
+        blockChangeType = BlockChangeSet.BlockChange.DECAY;
       } else {
-        if (finallyAir) {
-          blockChangeType = BlockChangeSet.BlockChange.BREAK;
-        } else {
-          blockChangeType = BlockChangeSet.BlockChange.ALTER;
-        }
+        return;
       }
-      final Optional<Player> player = event.cause().first(Player.class);
-      final Player playerOrNull = player.orElse(null);
-      if (transaction.original()
-          .location()
-          .map(loc -> !lookupFunction.lookup(playerOrNull, loc).contains(blockChangeType))
-          .orElse(false)
-          || transaction.finalReplacement()
-          .location()
-          .map(loc -> !lookupFunction.lookup(playerOrNull, loc).contains(blockChangeType))
-          .orElse(false)
-          || player.map(p -> !lookupFunction.lookup(playerOrNull, p.serverLocation()).contains(blockChangeType))
-          .orElse(false)) {
-        transaction.setValid(false);
+      if (SpongeEventUtil.invalidateTransactionIfNeeded(event.cause(),
+          transaction,
+          (cause, location) ->
+              !lookupFunction.lookup(cause, location).contains(blockChangeType))) {
+        return;
+      } else if (blockChangeType == BlockChangeSet.BlockChange.GROW) {
+        // If the origin of some growth is banned from growing anything, then we still must invalidate
+        Optional<BlockSnapshot> growthOrigin = event.context().get(EventContextKeys.GROWTH_ORIGIN);
+        if (growthOrigin.isPresent()) {
+          Optional<ServerLocation> location = growthOrigin.get().location();
+          if (location.isPresent()
+              && !lookupFunction.lookup(event.cause().root(), location.get()).contains(blockChangeType)) {
+            transaction.setValid(false);
+          }
+        }
       }
     }
   }

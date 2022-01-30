@@ -119,6 +119,8 @@ public final class Extra {
     builder.append(Component.text("|______").color(Formatter.WHITE));
     Sponge.server().sendMessage(builder.build());
 
+    Sponge.server().sendMessage(Component.space());
+
   }
 
   /**

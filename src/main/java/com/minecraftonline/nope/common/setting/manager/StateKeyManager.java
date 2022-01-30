@@ -23,41 +23,30 @@
  * SOFTWARE.
  */
 
-package com.minecraftonline.nope.common.setting.sets;
+package com.minecraftonline.nope.common.setting.manager;
 
-import com.minecraftonline.nope.common.struct.Described;
-import com.minecraftonline.nope.common.struct.HashAltSet;
+import java.util.Map;
+import java.util.stream.Collectors;
+import org.jetbrains.annotations.NotNull;
 
-public class BlockChangeSet extends HashAltSet.FewEnum<BlockChangeSet.BlockChange> {
+public class StateKeyManager extends BooleanKeyManager {
 
-  public BlockChangeSet() {
-    super(BlockChangeSet.BlockChange.class);
+  private final Map<String, Object> suggestions;
+
+  public StateKeyManager() {
+    super();
+    this.suggestions = this.options.entrySet().stream()
+        .filter(entry -> entry.getKey().equals("true") || entry.getKey().equals("false"))
+        .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
   }
 
-  /**
-   * Enumeration for all explosive types considered by Nope.
-   */
-  public enum BlockChange implements Described {
-    BREAK("Whether blocks can be replaced with air"),
-    PLACE("Whether blocks can replace air"),
-    MODIFY("Whether blocks can changed to other blocks or change internally"),
-    GROW("Whether blocks may be grown"),
-    DECAY("Whether blocks may decay");
+  @Override
+  public @NotNull Map<String, Object> elementSuggestions() {
+    return suggestions;
+  }
 
-    private final String description;
-
-    BlockChange(String description) {
-      this.description = description;
-    }
-
-    @Override
-    public String description() {
-      return description;
-    }
-
-    @Override
-    public String toString() {
-      return name().toLowerCase();
-    }
+  @Override
+  public @NotNull String printData(@NotNull Boolean data) {
+    return data ? "allow" : "deny";
   }
 }

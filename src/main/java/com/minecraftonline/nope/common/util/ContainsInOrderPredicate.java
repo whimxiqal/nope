@@ -23,41 +23,23 @@
  * SOFTWARE.
  */
 
-package com.minecraftonline.nope.common.setting.sets;
+package com.minecraftonline.nope.common.util;
 
-import com.minecraftonline.nope.common.struct.Described;
-import com.minecraftonline.nope.common.struct.HashAltSet;
+import com.minecraftonline.nope.common.Nope;
+import java.util.function.Predicate;
+import java.util.regex.Pattern;
 
-public class BlockChangeSet extends HashAltSet.FewEnum<BlockChangeSet.BlockChange> {
+public class ContainsInOrderPredicate implements Predicate<String> {
 
-  public BlockChangeSet() {
-    super(BlockChangeSet.BlockChange.class);
+  private final Pattern pattern;
+
+  public ContainsInOrderPredicate(String string) {
+    this.pattern = Pattern.compile(".*" + String.join(".*", string.split("")) + ".*");
   }
 
-  /**
-   * Enumeration for all explosive types considered by Nope.
-   */
-  public enum BlockChange implements Described {
-    BREAK("Whether blocks can be replaced with air"),
-    PLACE("Whether blocks can replace air"),
-    MODIFY("Whether blocks can changed to other blocks or change internally"),
-    GROW("Whether blocks may be grown"),
-    DECAY("Whether blocks may decay");
-
-    private final String description;
-
-    BlockChange(String description) {
-      this.description = description;
-    }
-
-    @Override
-    public String description() {
-      return description;
-    }
-
-    @Override
-    public String toString() {
-      return name().toLowerCase();
-    }
+  @Override
+  public boolean test(String s) {
+    return pattern.matcher(s).matches();
   }
+
 }

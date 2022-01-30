@@ -25,42 +25,47 @@
 
 package com.minecraftonline.nope.common.setting;
 
-import com.minecraftonline.nope.common.setting.manager.AllCapsEnumKeyManager;
 import com.minecraftonline.nope.common.setting.manager.BooleanKeyManager;
 import com.minecraftonline.nope.common.setting.manager.IntegerKeyManager;
 import com.minecraftonline.nope.common.setting.manager.PolyAllCapsEnumKeyManager;
 import com.minecraftonline.nope.common.setting.manager.PolyStringKeyManager;
+import com.minecraftonline.nope.common.setting.manager.StateKeyManager;
 import com.minecraftonline.nope.common.setting.manager.StringKeyManager;
+import com.minecraftonline.nope.common.setting.manager.ToggleKeyManager;
 import com.minecraftonline.nope.common.setting.sets.BlockChangeSet;
 import com.minecraftonline.nope.common.setting.sets.DamageCauseSet;
 import com.minecraftonline.nope.common.setting.sets.ExplosiveSet;
+import com.minecraftonline.nope.common.setting.sets.MobGriefSet;
 import com.minecraftonline.nope.common.setting.sets.MovementSet;
 import com.minecraftonline.nope.common.setting.sets.StringSet;
 
 public class SettingKeyManagers {
 
   public static final BooleanKeyManager BOOLEAN_KEY_MANAGER = new BooleanKeyManager();
-  public static final BooleanKeyManager STATE_KEY_MANAGER = new BooleanKeyManager(true);
   public static final IntegerKeyManager INTEGER_KEY_MANAGER = new IntegerKeyManager();
-  public static final StringKeyManager STRING_KEY_MANAGER = new StringKeyManager();
-  public static final AllCapsEnumKeyManager<MovementSet.Movement> MOVEMENT_KEY_MANAGER =
-      new AllCapsEnumKeyManager<>(MovementSet.Movement.class);
-
-  public static final PolyStringKeyManager<StringSet> POLY_ENTITY_KEY_MANAGER =
-      new PolyStringKeyManager<>(StringSet::new);
-  public static final PolyStringKeyManager<StringSet> POLY_BLOCK_KEY_MANAGER =
-      new PolyStringKeyManager<>(StringSet::new);
-  public static final PolyStringKeyManager<StringSet> POLY_GROWABLE_KEY_MANAGER =
-      new PolyStringKeyManager<>(StringSet::new);
   public static final PolyAllCapsEnumKeyManager<BlockChangeSet.BlockChange, BlockChangeSet>
       POLY_BLOCK_CHANGE_KEY_MANAGER =
       new PolyAllCapsEnumKeyManager<>(BlockChangeSet.BlockChange.class, BlockChangeSet::new);
+  public static final PolyStringKeyManager<StringSet> POLY_BLOCK_KEY_MANAGER =
+      new PolyStringKeyManager<>(StringSet::new);
   public static final PolyAllCapsEnumKeyManager<DamageCauseSet.DamageCause, DamageCauseSet>
       POLY_DAMAGE_SOURCE_KEY_MANAGER =
       new PolyAllCapsEnumKeyManager<>(DamageCauseSet.DamageCause.class, DamageCauseSet::new);
+  public static final PolyStringKeyManager<StringSet> POLY_ENTITY_KEY_MANAGER =
+      new PolyStringKeyManager<>(StringSet::new);
   public static final PolyAllCapsEnumKeyManager<ExplosiveSet.Explosive, ExplosiveSet>
       POLY_EXPLOSIVE_KEY_MANAGER =
       new PolyAllCapsEnumKeyManager<>(ExplosiveSet.Explosive.class, ExplosiveSet::new);
+  public static final PolyStringKeyManager<StringSet> POLY_GROWABLE_KEY_MANAGER =
+      new PolyStringKeyManager<>(StringSet::new);
+  public static final PolyAllCapsEnumKeyManager<MobGriefSet.MobGrief, MobGriefSet>
+      POLY_MOB_GRIEF_KEY_MANAGER =
+      new PolyAllCapsEnumKeyManager<>(MobGriefSet.MobGrief.class, MobGriefSet::new);
+  public static final PolyAllCapsEnumKeyManager<MovementSet.Movement, MovementSet> POLY_MOVEMENT_KEY_MANAGER =
+      new PolyAllCapsEnumKeyManager<>(MovementSet.Movement.class, MovementSet::new);
+  public static final StateKeyManager STATE_KEY_MANAGER = new StateKeyManager();
+  public static final StringKeyManager STRING_KEY_MANAGER = new StringKeyManager();
+  public static final ToggleKeyManager TOGGLE_KEY_MANAGER = new ToggleKeyManager();
 
   private SettingKeyManagers() {
   }

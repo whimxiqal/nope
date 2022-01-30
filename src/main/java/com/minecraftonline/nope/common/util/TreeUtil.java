@@ -23,41 +23,32 @@
  * SOFTWARE.
  */
 
-package com.minecraftonline.nope.common.setting.sets;
+package com.minecraftonline.nope.common.util;
 
-import com.minecraftonline.nope.common.struct.Described;
-import com.minecraftonline.nope.common.struct.HashAltSet;
+import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.function.Function;
 
-public class BlockChangeSet extends HashAltSet.FewEnum<BlockChangeSet.BlockChange> {
+public final class TreeUtil {
 
-  public BlockChangeSet() {
-    super(BlockChangeSet.BlockChange.class);
+  private TreeUtil() {
   }
 
-  /**
-   * Enumeration for all explosive types considered by Nope.
-   */
-  public enum BlockChange implements Described {
-    BREAK("Whether blocks can be replaced with air"),
-    PLACE("Whether blocks can replace air"),
-    MODIFY("Whether blocks can changed to other blocks or change internally"),
-    GROW("Whether blocks may be grown"),
-    DECAY("Whether blocks may decay");
+  public static <N, T> List<T> getAllInTree(N root,
+                                            Function<N, T> valueFunction,
+                                            Function<N, Collection<N>> childrenFunction) {
+    final LinkedList<T> all = new LinkedList<>();
 
-    private final String description;
-
-    BlockChange(String description) {
-      this.description = description;
+    // add all entities that are riding each other to the entities list
+    final LinkedList<N> queue = new LinkedList<>();
+    queue.add(root);
+    N current;
+    while (!queue.isEmpty()) {
+      current = queue.pop();
+      queue.addAll(childrenFunction.apply(current));
+      all.add(valueFunction.apply(current));
     }
-
-    @Override
-    public String description() {
-      return description;
-    }
-
-    @Override
-    public String toString() {
-      return name().toLowerCase();
-    }
+    return all;
   }
 }

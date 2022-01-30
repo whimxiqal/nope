@@ -1,13 +1,27 @@
 package com.minecraftonline.nope.sponge.util;
 
 import com.minecraftonline.nope.common.Nope;
+import com.minecraftonline.nope.common.host.Domain;
 import com.minecraftonline.nope.common.math.Vector3d;
 import com.minecraftonline.nope.common.setting.SettingKey;
+import com.minecraftonline.nope.common.setting.sets.ExplosiveSet;
+import com.minecraftonline.nope.common.setting.sets.MovementSet;
 import com.minecraftonline.nope.common.struct.Location;
 import com.minecraftonline.nope.sponge.SpongeNope;
 import java.util.UUID;
 import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.entity.explosive.EndCrystal;
+import org.spongepowered.api.entity.explosive.Explosive;
+import org.spongepowered.api.entity.explosive.fused.PrimedTNT;
+import org.spongepowered.api.entity.living.monster.Creeper;
+import org.spongepowered.api.entity.living.monster.boss.Wither;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.entity.projectile.explosive.FireworkRocket;
+import org.spongepowered.api.entity.projectile.explosive.WitherSkull;
+import org.spongepowered.api.entity.projectile.explosive.fireball.ExplosiveFireball;
+import org.spongepowered.api.entity.vehicle.minecart.TNTMinecart;
+import org.spongepowered.api.event.cause.entity.MovementType;
+import org.spongepowered.api.event.cause.entity.MovementTypes;
 import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.server.ServerWorld;
 
@@ -24,16 +38,24 @@ public final class SpongeUtil {
         Nope.instance().hostSystem().domain(worldToId(location.world())));
   }
 
+  public static UUID reduceCause(Object cause) {
+    if (cause instanceof Player) {
+      return reducePlayer((Player) cause);
+    } else {
+      return null;
+    }
+  }
+
   public static UUID reducePlayer(Player player) {
     return player.uniqueId();
   }
 
   public static UUID reduceEntity(Entity entity) {
-    if (entity instanceof Player) {
-      return reducePlayer((Player) entity);
-    } else {
-      return null;
-    }
+    return reduceCause(entity);
+  }
+
+  public static Domain reduceWorld(ServerWorld world) {
+    return SpongeNope.instance().hostSystem().domain(worldToId(world));
   }
 
   public static org.spongepowered.math.vector.Vector3d raiseVector(Vector3d vector) {
@@ -44,8 +66,12 @@ public final class SpongeUtil {
     return SpongeNope.instance().hostSystem().lookup(key, reduceEntity(entity), reduceLocation(entity.serverLocation()));
   }
 
-  public static <T> T valueFor(SettingKey<T, ?, ?> key, Entity entity, ServerLocation location) {
-    return SpongeNope.instance().hostSystem().lookup(key, reduceEntity(entity), reduceLocation(location));
+  public static <T> T valueFor(SettingKey<T, ?, ?> key, Object cause, ServerLocation location) {
+    return SpongeNope.instance().hostSystem().lookup(key, reduceCause(cause), reduceLocation(location));
+  }
+
+  public static <T> T valueFor(SettingKey<T, ?, ?> key, Object cause, Location location) {
+    return SpongeNope.instance().hostSystem().lookup(key, reduceCause(cause), location);
   }
 
   public static <T> T valueFor(SettingKey<T, ?, ?> key, ServerLocation location) {
@@ -53,5 +79,49 @@ public final class SpongeUtil {
   }
 
   private SpongeUtil() {
+  }
+
+  public static MovementSet.Movement reduceMovementType(MovementType movementType) {
+    if (movementType.equals(MovementTypes.CHORUS_FRUIT.get())) {
+      return MovementSet.Movement.CHORUSFRUIT;
+    } else if (movementType.equals(MovementTypes.COMMAND.get())) {
+      return MovementSet.Movement.COMMAND;
+    } else if (movementType.equals(MovementTypes.END_GATEWAY.get())) {
+      return MovementSet.Movement.ENDGATEWAY;
+    } else if (movementType.equals(MovementTypes.ENDER_PEARL.get())) {
+      return MovementSet.Movement.ENDERPEARL;
+    } else if (movementType.equals(MovementTypes.ENTITY_TELEPORT.get())) {
+      return MovementSet.Movement.ENTITYTELEPORT;
+    } else if (movementType.equals(MovementTypes.NATURAL.get())) {
+      return MovementSet.Movement.NATURAL;
+    } else if (movementType.equals(MovementTypes.PLUGIN.get())) {
+      return MovementSet.Movement.PLUGIN;
+    } else if (movementType.equals(MovementTypes.PORTAL.get())) {
+      return MovementSet.Movement.PORTAL;
+    } else {
+      throw new IllegalArgumentException("Unknown movement type: " + movementType);
+    }
+  }
+
+  public static ExplosiveSet.Explosive reduceExplosive(Explosive explosive) {
+    if (explosive instanceof Creeper) {
+      return ExplosiveSet.Explosive.CREEPER;
+    } else if (explosive instanceof EndCrystal) {
+      return ExplosiveSet.Explosive.ENDCRYSTAL;
+    } else if (explosive instanceof ExplosiveFireball) {
+      return ExplosiveSet.Explosive.EXPLOSIVEFIREBALL;
+    } else if (explosive instanceof FireworkRocket) {
+      return ExplosiveSet.Explosive.FIREWORK;
+    } else if (explosive instanceof PrimedTNT) {
+      return ExplosiveSet.Explosive.PRIMEDTNT;
+    } else if (explosive instanceof TNTMinecart) {
+      return ExplosiveSet.Explosive.TNTMINECART;
+    } else if (explosive instanceof Wither) {
+      return ExplosiveSet.Explosive.WITHER;
+    } else if (explosive instanceof WitherSkull) {
+      return ExplosiveSet.Explosive.WITHERSKULL;
+    } else {
+      throw new IllegalArgumentException("Unknown explosive type: " + explosive);
+    }
   }
 }

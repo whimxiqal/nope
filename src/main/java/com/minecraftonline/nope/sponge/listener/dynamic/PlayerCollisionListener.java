@@ -23,41 +23,21 @@
  * SOFTWARE.
  */
 
-package com.minecraftonline.nope.common.setting.sets;
+package com.minecraftonline.nope.sponge.listener.dynamic;
 
-import com.minecraftonline.nope.common.struct.Described;
-import com.minecraftonline.nope.common.struct.HashAltSet;
+import com.minecraftonline.nope.sponge.api.event.SettingEventListener;
+import com.minecraftonline.nope.sponge.api.event.SettingValueLookupFunction;
+import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.event.entity.CollideEntityEvent;
 
-public class BlockChangeSet extends HashAltSet.FewEnum<BlockChangeSet.BlockChange> {
-
-  public BlockChangeSet() {
-    super(BlockChangeSet.BlockChange.class);
-  }
-
-  /**
-   * Enumeration for all explosive types considered by Nope.
-   */
-  public enum BlockChange implements Described {
-    BREAK("Whether blocks can be replaced with air"),
-    PLACE("Whether blocks can replace air"),
-    MODIFY("Whether blocks can changed to other blocks or change internally"),
-    GROW("Whether blocks may be grown"),
-    DECAY("Whether blocks may decay");
-
-    private final String description;
-
-    BlockChange(String description) {
-      this.description = description;
-    }
-
-    @Override
-    public String description() {
-      return description;
-    }
-
-    @Override
-    public String toString() {
-      return name().toLowerCase();
+public class PlayerCollisionListener implements SettingEventListener<Boolean, CollideEntityEvent> {
+  @Override
+  public void handle(CollideEntityEvent event, SettingValueLookupFunction<Boolean> lookupFunction) {
+    for (Entity entity : event.entities()) {
+      if (!lookupFunction.lookup(entity, entity.serverLocation())) {
+        event.setCancelled(true);
+        return;
+      }
     }
   }
 }

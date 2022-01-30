@@ -65,7 +65,7 @@ public class SpongeSettingKeyManagerUtil {
     addEntityGroup("ambient", "Ambient living creatures", entity ->
         entity.category().equals(EntityCategories.AMBIENT.get())
         || entity.category().equals(EntityCategories.WATER_AMBIENT.get()));
-    addEntityGroup("ambient", "Non-living decorative entities", Groups.DECORATIVE_ENTITIES::contains);
+    addEntityGroup("decorative", "Non-living decorative entities", Groups.DECORATIVE_ENTITIES::contains);
     addEntityGroup("vehicles", "Vehicles", Groups.VEHICLES::contains);
 
     SettingKeyManagers.POLY_BLOCK_KEY_MANAGER.elementOptions(

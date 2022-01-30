@@ -25,28 +25,29 @@
 
 package com.minecraftonline.nope.sponge.listener.dynamic;
 
+import com.minecraftonline.nope.common.setting.sets.ExplosiveSet;
 import com.minecraftonline.nope.common.struct.AltSet;
 import com.minecraftonline.nope.sponge.api.event.SettingEventListener;
 import com.minecraftonline.nope.sponge.api.event.SettingValueLookupFunction;
+import com.minecraftonline.nope.sponge.util.SpongeUtil;
 import java.util.Optional;
-import org.spongepowered.api.block.BlockTypes;
-import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.event.block.InteractBlockEvent;
-import org.spongepowered.api.world.server.ServerLocation;
+import org.spongepowered.api.entity.explosive.Explosive;
+import org.spongepowered.api.event.world.ExplosionEvent;
+import org.spongepowered.api.world.explosion.Explosion;
 
-public class InteractiveBlocksListener implements SettingEventListener<AltSet<String>, InteractBlockEvent.Secondary> {
+public class DestructiveExplosivesExplosionListener implements SettingEventListener<AltSet<ExplosiveSet.Explosive>, ExplosionEvent.Pre> {
   @Override
-  public void handle(InteractBlockEvent.Secondary event,
-                     SettingValueLookupFunction<AltSet<String>> lookupFunction) {
-    final Optional<ServerLocation> location = event.block().location();
-    if (location.isPresent()) {
-      final Optional<Player> player = event.cause().first(Player.class);
-      if (player.isPresent()) {
-        final String blockName = BlockTypes.registry().valueKey(event.block().state().type()).value();
-        if (!lookupFunction.lookup(player.get(), location.get()).contains(blockName)
-            || !lookupFunction.lookup(player.get(), player.get().serverLocation()).contains(blockName)) {
-          event.setCancelled(true);
-        }
+  public void handle(ExplosionEvent.Pre event,
+                     SettingValueLookupFunction<AltSet<ExplosiveSet.Explosive>> lookupFunction) {
+    final Object rootCause = event.cause().root();
+    final Optional<Explosive> sourceExplosive = event.explosion().sourceExplosive();
+    if (sourceExplosive.isPresent()) {
+      final ExplosiveSet.Explosive explosive = SpongeUtil.reduceExplosive(sourceExplosive.get());
+      if (!lookupFunction.lookup(rootCause, sourceExplosive.get().serverLocation()).contains(explosive)) {
+        event.setExplosion(Explosion.builder()
+            .from(event.explosion())
+            .shouldBreakBlocks(false)
+            .build());
       }
     }
   }

@@ -27,37 +27,24 @@ package com.minecraftonline.nope.common.setting.manager;
 
 import com.google.common.collect.ImmutableMap;
 import com.minecraftonline.nope.common.setting.SettingKey;
-import com.minecraftonline.nope.common.setting.SettingValue;
 import java.util.HashMap;
 import java.util.Map;
 import org.jetbrains.annotations.NotNull;
 
 public class BooleanKeyManager extends SettingKey.Manager.Unary<Boolean> {
 
-  private final Map<String, Object> options;
-
-  /**
-   * Whether to give terminology as in "allow" or "deny"
-   * versus "true" or "false".
-   */
-  private final boolean useStates;
+  protected final Map<String, Object> options;
 
   public BooleanKeyManager() {
-    this(false);
-  }
-
-  public BooleanKeyManager(boolean useStates) {
-    this.useStates = useStates;
     Map<String, String> options = new HashMap<>();
-    if (useStates) {
-      options.put("allow", "Permit users to perform certain behavior");
-      options.put("deny", "Prohibit users from performing certain behaviors");
-    } else {
-      options.put("t", "Enable behavior");
-      options.put("true", "Enable behavior");
-      options.put("f", "Disable behavior");
-      options.put("false", "Disable behavior");
-    }
+    options.put("t", "Enable behavior");
+    options.put("true", "Enable behavior");
+    options.put("allow", "Enable behavior");
+    options.put("on", "Enable behavior");
+    options.put("f", "Disable behavior");
+    options.put("false", "Disable behavior");
+    options.put("deny", "Disable behavior");
+    options.put("off", "Disable behavior");
     this.options = ImmutableMap.copyOf(options);
   }
 
@@ -72,10 +59,12 @@ public class BooleanKeyManager extends SettingKey.Manager.Unary<Boolean> {
       case "true":
       case "t":
       case "allow":
+      case "on":
         return true;
       case "false":
       case "f":
       case "deny":
+      case "off":
         return false;
       default:
         throw new SettingKey.ParseSettingException("Allowed values: "
@@ -90,10 +79,6 @@ public class BooleanKeyManager extends SettingKey.Manager.Unary<Boolean> {
 
   @Override
   public @NotNull String printData(@NotNull Boolean data) {
-    if (useStates) {
-      return data ? "allow" : "deny";
-    } else {
-      return String.valueOf(data);
-    }
+    return String.valueOf(data);
   }
 }

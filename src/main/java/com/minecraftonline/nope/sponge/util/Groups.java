@@ -71,6 +71,42 @@ public final class Groups {
       EntityTypes.BOAT.get(),
       EntityTypes.MINECART.get()
   );
+  public static final Set<BlockType> CONCRETE_POWDER = Sets.newHashSet(
+      BlockTypes.WHITE_CONCRETE_POWDER.get(),
+      BlockTypes.ORANGE_CONCRETE_POWDER.get(),
+      BlockTypes.MAGENTA_CONCRETE_POWDER.get(),
+      BlockTypes.LIGHT_BLUE_CONCRETE_POWDER.get(),
+      BlockTypes.YELLOW_CONCRETE_POWDER.get(),
+      BlockTypes.LIME_CONCRETE_POWDER.get(),
+      BlockTypes.PINK_CONCRETE_POWDER.get(),
+      BlockTypes.GRAY_CONCRETE_POWDER.get(),
+      BlockTypes.LIGHT_GRAY_CONCRETE_POWDER.get(),
+      BlockTypes.CYAN_CONCRETE_POWDER.get(),
+      BlockTypes.PURPLE_CONCRETE_POWDER.get(),
+      BlockTypes.BLUE_CONCRETE_POWDER.get(),
+      BlockTypes.BROWN_CONCRETE_POWDER.get(),
+      BlockTypes.GREEN_CONCRETE_POWDER.get(),
+      BlockTypes.RED_CONCRETE_POWDER.get(),
+      BlockTypes.BLACK_CONCRETE_POWDER.get()
+  );
+  public static final Set<BlockType> CONCRETE = Sets.newHashSet(
+      BlockTypes.WHITE_CONCRETE.get(),
+      BlockTypes.ORANGE_CONCRETE.get(),
+      BlockTypes.MAGENTA_CONCRETE.get(),
+      BlockTypes.LIGHT_BLUE_CONCRETE.get(),
+      BlockTypes.YELLOW_CONCRETE.get(),
+      BlockTypes.LIME_CONCRETE.get(),
+      BlockTypes.PINK_CONCRETE.get(),
+      BlockTypes.GRAY_CONCRETE.get(),
+      BlockTypes.LIGHT_GRAY_CONCRETE.get(),
+      BlockTypes.CYAN_CONCRETE.get(),
+      BlockTypes.PURPLE_CONCRETE.get(),
+      BlockTypes.BLUE_CONCRETE.get(),
+      BlockTypes.BROWN_CONCRETE.get(),
+      BlockTypes.GREEN_CONCRETE.get(),
+      BlockTypes.RED_CONCRETE.get(),
+      BlockTypes.BLACK_CONCRETE.get()
+  );
 
   private Groups() {
   }

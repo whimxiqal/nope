@@ -26,10 +26,17 @@
 package com.minecraftonline.nope.sponge.listener;
 
 import com.minecraftonline.nope.sponge.api.event.SettingValueLookupFunction;
+import java.util.Optional;
+import java.util.function.BiFunction;
+import java.util.function.Function;
+import org.spongepowered.api.block.transaction.BlockTransaction;
 import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.cause.entity.damage.source.EntityDamageSource;
 import org.spongepowered.api.event.cause.entity.damage.source.IndirectEntityDamageSource;
 import org.spongepowered.api.event.entity.AttackEntityEvent;
+import org.spongepowered.api.world.server.ServerLocation;
 
 public class SpongeEventUtil {
 
@@ -65,6 +72,26 @@ public class SpongeEventUtil {
         sink.serverLocation())) {
       event.setCancelled(true);
     }
+  }
+
+  public static boolean invalidateTransactionIfNeeded(Cause eventCause,
+                                                   BlockTransaction transaction,
+                                                   BiFunction<Object, ServerLocation, Boolean> shouldInvalidateWith) {
+    final Optional<Player> player = eventCause.first(Player.class);
+    final Player playerOrNull = player.orElse(null);
+    if (transaction.original()
+        .location()
+        .map(loc -> shouldInvalidateWith.apply(playerOrNull, loc))
+        .orElse(false)
+        || transaction.finalReplacement()
+        .location()
+        .map(loc -> shouldInvalidateWith.apply(playerOrNull, loc))
+        .orElse(false)
+        || player.map(p -> shouldInvalidateWith.apply(p, p.serverLocation())).orElse(false)) {
+      transaction.invalidate();
+      return true;
+    }
+    return false;
   }
 
 }

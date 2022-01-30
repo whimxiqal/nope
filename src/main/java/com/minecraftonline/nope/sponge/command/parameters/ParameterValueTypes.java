@@ -31,12 +31,12 @@ import lombok.experimental.Accessors;
 public final class ParameterValueTypes {
 
   public enum SettingValueAlterType {
-    SET("set", "Sets the value directly"),
-    SET_NOT("setnot", "Sets all except the given values"),
     CONCATENATE("add", "Adds elements onto the targeted list of values"),
     REMOVE("remove", "Removes elements from the targeted list of values"),
-    NONE("none", "Sets an empty list of values"),
-    ALL("all", "Sets a full list of values");
+    SET("set", "Sets the value directly"),
+    SET_ALL("setall", "Sets a full list of values"),
+    SET_NONE("setnone", "Sets an empty list of values"),
+    SET_NOT("setnot", "Sets all except the given values");
 
     @Getter
     @Accessors(fluent = true)

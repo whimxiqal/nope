@@ -29,6 +29,7 @@ import com.minecraftonline.nope.common.host.Host;
 import com.minecraftonline.nope.common.host.Zone;
 import com.minecraftonline.nope.common.setting.SettingKey;
 import com.minecraftonline.nope.common.setting.template.Template;
+import com.minecraftonline.nope.common.util.ContainsInOrderPredicate;
 import com.minecraftonline.nope.sponge.SpongeNope;
 import com.minecraftonline.nope.sponge.util.Formatter;
 import com.minecraftonline.nope.sponge.util.SpongeUtil;
@@ -77,7 +78,7 @@ public class Parameters {
         return Optional.of(host);
       })
       .completer((context, currentInput) -> {
-        final Predicate<String> startsWith = new StartsWithPredicate(currentInput);
+        final Predicate<String> startsWith = new ContainsInOrderPredicate(currentInput);
         return SpongeNope.instance().hostSystem()
             .hosts()
             .entrySet()
@@ -155,7 +156,7 @@ public class Parameters {
         Optional<Host> host = context.one(HOST);
         boolean showGlobal = host.isPresent()
             && host.get().equals(SpongeNope.instance().hostSystem().universe());
-        final Predicate<String> startsWith = new StartsWithPredicate(currentInput);
+        final Predicate<String> startsWith = new ContainsInOrderPredicate(currentInput);
         return SpongeNope.instance().settingKeys()
             .keys()
             .entrySet()
@@ -212,7 +213,7 @@ public class Parameters {
       .terminal()
       .completer((context, currentInput) -> {
         SettingKey<?, ?, ?> settingKey = context.requireOne(ParameterKeys.SETTING_KEY);
-        Map<String, Object> options = settingKey.manager().elementOptions();
+        Map<String, Object> options = settingKey.manager().elementSuggestions();
         final Predicate<String> startsWith;
         if (settingKey instanceof SettingKey.Poly) {
           SettingKey.Poly<?, ?> polyKey = (SettingKey.Poly<?, ?>) settingKey;
@@ -225,7 +226,7 @@ public class Parameters {
               }
               completedTokens.add(tokensSoFar[i]);
             }
-            startsWith = new StartsWithPredicate(tokensSoFar[tokensSoFar.length - 1]);
+            startsWith = new ContainsInOrderPredicate(tokensSoFar[tokensSoFar.length - 1]);
           } else {
             // I don't think this should ever happen
             startsWith = new StartsWithPredicate("");
@@ -244,7 +245,7 @@ public class Parameters {
               })
               .collect(Collectors.toList());
         } else {
-          startsWith = new StartsWithPredicate(currentInput);
+          startsWith = new ContainsInOrderPredicate(currentInput);
           return options.entrySet().stream()
               .filter(entry -> startsWith.test(entry.getKey()))
               .map(entry -> {

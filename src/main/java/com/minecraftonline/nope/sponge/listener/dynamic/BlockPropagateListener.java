@@ -23,41 +23,28 @@
  * SOFTWARE.
  */
 
-package com.minecraftonline.nope.common.setting.sets;
+package com.minecraftonline.nope.sponge.listener.dynamic;
 
-import com.minecraftonline.nope.common.struct.Described;
-import com.minecraftonline.nope.common.struct.HashAltSet;
+import com.minecraftonline.nope.common.Nope;
+import com.minecraftonline.nope.sponge.api.event.SettingEventListener;
+import com.minecraftonline.nope.sponge.api.event.SettingValueLookupFunction;
+import java.util.Optional;
+import org.spongepowered.api.block.transaction.NotificationTicket;
+import org.spongepowered.api.event.block.NotifyNeighborBlockEvent;
+import org.spongepowered.api.world.server.ServerLocation;
 
-public class BlockChangeSet extends HashAltSet.FewEnum<BlockChangeSet.BlockChange> {
-
-  public BlockChangeSet() {
-    super(BlockChangeSet.BlockChange.class);
-  }
-
-  /**
-   * Enumeration for all explosive types considered by Nope.
-   */
-  public enum BlockChange implements Described {
-    BREAK("Whether blocks can be replaced with air"),
-    PLACE("Whether blocks can replace air"),
-    MODIFY("Whether blocks can changed to other blocks or change internally"),
-    GROW("Whether blocks may be grown"),
-    DECAY("Whether blocks may decay");
-
-    private final String description;
-
-    BlockChange(String description) {
-      this.description = description;
-    }
-
-    @Override
-    public String description() {
-      return description;
-    }
-
-    @Override
-    public String toString() {
-      return name().toLowerCase();
+public class BlockPropagateListener implements SettingEventListener<Boolean, NotifyNeighborBlockEvent> {
+  @Override
+  public void handle(NotifyNeighborBlockEvent event, SettingValueLookupFunction<Boolean> lookupFunction) {
+    for (NotificationTicket ticket : event.tickets()) {
+      final ServerLocation start = ticket.notifier().serverLocation();
+      final Optional<ServerLocation> endOptional = ticket.target().location();
+      if (endOptional.isPresent()) {
+        if (!lookupFunction.lookup(null, start) || !lookupFunction.lookup(null, endOptional.get())) {
+          event.setCancelled(true);
+          return;
+        }
+      }
     }
   }
 }

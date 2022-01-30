@@ -23,41 +23,28 @@
  * SOFTWARE.
  */
 
-package com.minecraftonline.nope.common.setting.sets;
+package com.minecraftonline.nope.sponge.listener.dynamic;
 
-import com.minecraftonline.nope.common.struct.Described;
-import com.minecraftonline.nope.common.struct.HashAltSet;
+import com.minecraftonline.nope.common.struct.AltSet;
+import com.minecraftonline.nope.sponge.api.event.SettingEventListener;
+import com.minecraftonline.nope.sponge.api.event.SettingValueLookupFunction;
+import org.spongepowered.api.entity.EntityTypes;
+import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.event.action.FishingEvent;
 
-public class BlockChangeSet extends HashAltSet.FewEnum<BlockChangeSet.BlockChange> {
-
-  public BlockChangeSet() {
-    super(BlockChangeSet.BlockChange.class);
-  }
-
-  /**
-   * Enumeration for all explosive types considered by Nope.
-   */
-  public enum BlockChange implements Described {
-    BREAK("Whether blocks can be replaced with air"),
-    PLACE("Whether blocks can replace air"),
-    MODIFY("Whether blocks can changed to other blocks or change internally"),
-    GROW("Whether blocks may be grown"),
-    DECAY("Whether blocks may decay");
-
-    private final String description;
-
-    BlockChange(String description) {
-      this.description = description;
+public class HookableEntitiesListener implements SettingEventListener<AltSet<String>, FishingEvent.HookEntity> {
+  @Override
+  public void handle(FishingEvent.HookEntity event, SettingValueLookupFunction<AltSet<String>> lookupFunction) {
+    final Player player;
+    if (event.source() instanceof Player) {
+      player = (Player) event.source();
+    } else {
+      player = null;
     }
-
-    @Override
-    public String description() {
-      return description;
-    }
-
-    @Override
-    public String toString() {
-      return name().toLowerCase();
+    String entityName = EntityTypes.registry().valueKey(event.entity().type()).value();
+    if (!lookupFunction.lookup(event.source(), event.entity().serverLocation()).contains(entityName)
+        || (player != null && !lookupFunction.lookup(player, player.serverLocation()).contains(entityName))) {
+      event.setCancelled(true);
     }
   }
 }

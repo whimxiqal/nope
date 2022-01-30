@@ -68,7 +68,7 @@ public class SettingListenerStore {
     }
     final int count = unregisteredKeys.size() - stillUnregistered.size();
     if (count > 0) {
-      SpongeNope.instance().logger().info("Registered " + count + " listener(s)");
+      SpongeNope.instance().logger().info("Registered " + count + " dynamic listener(s)");
     }
     unregisteredKeys = stillUnregistered;
   }

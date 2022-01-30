@@ -55,6 +55,13 @@ public class Location {
     this.domain = domain;
   }
 
+  public Location(double x, double y, double z, Domain domain) {
+    this.posX = x;
+    this.posY = y;
+    this.posZ = z;
+    this.domain = domain;
+  }
+
   public int getBlockX() {
     return (int) Math.floor(posX);
   }
