@@ -42,6 +42,8 @@ import com.minecraftonline.nope.sponge.listener.dynamic.HookableEntitiesListener
 import com.minecraftonline.nope.sponge.listener.dynamic.InteractiveBlocksListener;
 import com.minecraftonline.nope.sponge.listener.dynamic.InteractiveEntitiesListener;
 import com.minecraftonline.nope.sponge.listener.dynamic.InvincibleEntitiesListener;
+import com.minecraftonline.nope.sponge.listener.dynamic.ItemDropListener;
+import com.minecraftonline.nope.sponge.listener.dynamic.ItemPickupListener;
 import com.minecraftonline.nope.sponge.listener.dynamic.PlayerCollisionListener;
 import com.minecraftonline.nope.sponge.listener.dynamic.SpawnableEntitiesListener;
 import com.minecraftonline.nope.sponge.listener.dynamic.SpecificBlockChangeListener;
@@ -55,6 +57,8 @@ import org.spongepowered.api.event.entity.CollideEntityEvent;
 import org.spongepowered.api.event.entity.DamageEntityEvent;
 import org.spongepowered.api.event.entity.InteractEntityEvent;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
+import org.spongepowered.api.event.item.inventory.ChangeInventoryEvent;
+import org.spongepowered.api.event.item.inventory.DropItemEvent;
 import org.spongepowered.api.event.world.ExplosionEvent;
 
 public class NopeSettingListeners {
@@ -120,6 +124,12 @@ public class NopeSettingListeners {
     one(SettingKeys.INVINCIBLE_ENTITIES,
         DamageEntityEvent.class,
         new InvincibleEntitiesListener());
+    one(SettingKeys.ITEM_DROP,
+        DropItemEvent.Pre.class,
+        new ItemDropListener.DropItemPre());
+    one(SettingKeys.ITEM_PICKUP,
+        ChangeInventoryEvent.Pickup.class,
+        new ItemPickupListener());
     one(SettingKeys.HARMFUL_EXPLOSIVES,
         DamageEntityEvent.class,
         new HarmfulExplosivesDamageListener());
