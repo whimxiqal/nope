@@ -237,8 +237,7 @@ public final class EffectsUtil {
   }
 
   private static class TaskGroup {
-
-    List<ScheduledTaskFuture<?>> tasks = new LinkedList<>();
+    final List<ScheduledTaskFuture<?>> tasks = new LinkedList<>();
 
     void add(ScheduledTaskFuture<?> task) {
       this.tasks.add(task);

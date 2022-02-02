@@ -167,9 +167,7 @@ public class SpongeNope extends Nope {
     // Create setting keys
     SettingKeys.registerTo(instance().settingKeys());
     Sponge.eventManager().post(new SettingKeyRegistrationEvent(
-        (settingKey) -> {
-          instance().settingKeys().register(settingKey);
-        },
+        (settingKey) -> instance().settingKeys().register(settingKey),
         event.game(),
         event.cause(),
         event.source(),

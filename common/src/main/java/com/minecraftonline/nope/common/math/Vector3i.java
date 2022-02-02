@@ -26,8 +26,6 @@
 
 package com.minecraftonline.nope.common.math;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
 import lombok.Value;
 import lombok.experimental.Accessors;
 

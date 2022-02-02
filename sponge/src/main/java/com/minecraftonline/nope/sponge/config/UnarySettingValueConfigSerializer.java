@@ -36,11 +36,13 @@ import org.spongepowered.configurate.serialize.SerializationException;
 public class UnarySettingValueConfigSerializer implements SettingValueConfigSerializer<SettingKey.Manager.Unary<?>> {
 
   @Override
+  @SuppressWarnings("unchecked")
   public Class<SettingKey.Manager.Unary<?>> managerClass() {
     return (Class<SettingKey.Manager.Unary<?>>) (Class<?>) SettingKey.Manager.Unary.class;
   }
 
   @Override
+  @SuppressWarnings("unchecked")
   public <X,
       Y extends SettingValue<X>,
       Z extends SettingKey.Manager<X, Y>> CommentedConfigurationNode serialize(Z managerGeneral,
@@ -53,6 +55,7 @@ public class UnarySettingValueConfigSerializer implements SettingValueConfigSeri
   }
 
   @Override
+  @SuppressWarnings("unchecked")
   public <X,
       Y extends SettingValue<X>,
       Z extends SettingKey.Manager<X, Y>> Y deserialize(Z managerGeneral,

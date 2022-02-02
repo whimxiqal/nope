@@ -93,7 +93,7 @@ public abstract class SettingsConfigurateDataHandler {
     return node;
   }
 
-  private final <T, V extends SettingValue<T>> void serializeSetting(CommentedConfigurationNode settingNode,
+  private <T, V extends SettingValue<T>> void serializeSetting(CommentedConfigurationNode settingNode,
                                                                      Setting<T, V> setting)
       throws SerializationException {
     settingNode.node("value")

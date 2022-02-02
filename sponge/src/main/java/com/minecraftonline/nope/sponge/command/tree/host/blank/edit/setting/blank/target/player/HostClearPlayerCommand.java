@@ -27,14 +27,50 @@
 package com.minecraftonline.nope.sponge.command.tree.host.blank.edit.setting.blank.target.player;
 
 import com.minecraftonline.nope.common.host.Host;
+import com.minecraftonline.nope.common.permission.Permissions;
+import com.minecraftonline.nope.common.setting.SettingKey;
+import com.minecraftonline.nope.common.setting.Target;
 import com.minecraftonline.nope.sponge.command.CommandNode;
 import com.minecraftonline.nope.sponge.command.parameters.ParameterKeys;
-import com.minecraftonline.nope.sponge.command.settingcollection.blank.edit.setting.blank.target.player.ClearPlayerCommand;
+import com.minecraftonline.nope.sponge.command.parameters.Parameters;
+import com.minecraftonline.nope.sponge.util.Formatter;
+import java.util.Optional;
+import org.spongepowered.api.command.CommandResult;
+import org.spongepowered.api.command.exception.CommandException;
+import org.spongepowered.api.command.parameter.CommandContext;
 
-public class HostClearPlayerCommand extends ClearPlayerCommand<Host> {
+public class HostClearPlayerCommand extends CommandNode {
 
   public HostClearPlayerCommand(CommandNode parent) {
-    super(parent, ParameterKeys.HOST, "host");
+    super(parent, Permissions.EDIT,
+        "Set a permission on the target of a host",
+        "clear", "reset");
   }
 
+  @Override
+  public CommandResult execute(CommandContext context) throws CommandException {
+    Host host = context.requireOne(Parameters.HOST);
+    SettingKey<?, ?, ?> key = context.requireOne(ParameterKeys.SETTING_KEY);
+
+    Optional<Target> target = host.getTarget(key);
+    if (target.isPresent()) {
+      if (target.get().users().isEmpty()) {
+        context.cause().audience().sendMessage(Formatter.warn(
+            "There are no players on this target"
+        ));
+      } else {
+        target.get().users().clear();
+        context.cause().audience().sendMessage(Formatter.success(
+            "All players were cleared from the target on key ___", key.id()
+        ));
+        if (target.get().isWhitelist()) {
+          target.get().blacklist();
+          context.cause().audience().sendMessage(Formatter.success(
+              "The target type was set to ___", "blacklist"
+          ));
+        }
+      }
+    }
+    return CommandResult.success();
+  }
 }

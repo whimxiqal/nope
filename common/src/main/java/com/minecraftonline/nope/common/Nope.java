@@ -77,7 +77,7 @@ public abstract class Nope {
 
   @Getter
   @Accessors(fluent = true)
-  private SettingKeyStore settingKeys = new SettingKeyStore();
+  private final SettingKeyStore settingKeys = new SettingKeyStore();
 
   public final boolean hasPermission(UUID playerUuid, Permission permission) {
     return hasPermission(playerUuid, permission.get());

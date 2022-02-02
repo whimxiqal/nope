@@ -27,12 +27,41 @@
 package com.minecraftonline.nope.sponge.command.tree.host.blank.edit.setting.blank.value;
 
 import com.minecraftonline.nope.common.host.Host;
+import com.minecraftonline.nope.common.permission.Permissions;
+import com.minecraftonline.nope.common.setting.SettingKey;
 import com.minecraftonline.nope.sponge.command.CommandNode;
 import com.minecraftonline.nope.sponge.command.parameters.ParameterKeys;
-import com.minecraftonline.nope.sponge.command.settingcollection.blank.edit.setting.blank.value.ValueUnsetCommand;
+import com.minecraftonline.nope.sponge.command.parameters.Parameters;
+import com.minecraftonline.nope.sponge.util.Formatter;
+import net.kyori.adventure.identity.Identity;
+import org.spongepowered.api.command.CommandResult;
+import org.spongepowered.api.command.exception.CommandException;
+import org.spongepowered.api.command.parameter.CommandContext;
 
-public class HostValueUnsetCommand extends ValueUnsetCommand<Host> {
+public class HostValueUnsetCommand extends CommandNode {
+
   public HostValueUnsetCommand(CommandNode parent) {
-    super(parent, ParameterKeys.HOST, "host");
+    super(parent, Permissions.EDIT,
+        "Unset the value of a setting on a host",
+        "unset");
+  }
+
+  @Override
+  public CommandResult execute(CommandContext context) throws CommandException {
+    SettingKey<?, ?, ?> settingKey = context.requireOne(ParameterKeys.SETTING_KEY);
+    Host host = context.requireOne(Parameters.HOST);
+    if (host.removeValue(settingKey) == null) {
+      context.sendMessage(Identity.nil(),
+          Formatter.error("Setting ___ is not set on host ___",
+              settingKey.id(),
+              host.name()));
+    } else {
+      context.sendMessage(Identity.nil(),
+          Formatter.success("Value of setting ___ was removed on host ___",
+              settingKey.id(),
+              host.name()));
+      host.save();
+    }
+    return CommandResult.success();
   }
 }

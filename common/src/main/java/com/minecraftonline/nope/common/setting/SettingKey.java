@@ -477,13 +477,13 @@ public abstract class SettingKey<T,
                 if (options.size() <= 6) {
                   errorMessage.append("Allowed types: ")
                       .append(options.stream()
-                          .map(e -> e.toLowerCase())
+                          .map(String::toLowerCase)
                           .collect(Collectors.joining(", ")));
                 } else {
                   errorMessage.append("Allowed types: ")
                       .append(options.stream()
                           .limit(8)
-                          .map(e -> e.toLowerCase())
+                          .map(String::toLowerCase)
                           .collect(Collectors.joining(", ")))
                       .append(" ...");
                 }

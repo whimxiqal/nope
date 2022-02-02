@@ -27,12 +27,63 @@
 package com.minecraftonline.nope.sponge.command.tree.host.blank.edit.setting.blank.target.player;
 
 import com.minecraftonline.nope.common.host.Host;
+import com.minecraftonline.nope.common.permission.Permissions;
+import com.minecraftonline.nope.common.setting.SettingKey;
+import com.minecraftonline.nope.common.setting.Target;
+import com.minecraftonline.nope.sponge.SpongeNope;
 import com.minecraftonline.nope.sponge.command.CommandNode;
 import com.minecraftonline.nope.sponge.command.parameters.ParameterKeys;
-import com.minecraftonline.nope.sponge.command.settingcollection.blank.edit.setting.blank.target.player.AddPlayerCommand;
+import com.minecraftonline.nope.sponge.util.Formatter;
+import java.util.Collection;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.command.CommandResult;
+import org.spongepowered.api.command.exception.CommandException;
+import org.spongepowered.api.command.parameter.CommandContext;
+import org.spongepowered.api.profile.GameProfile;
+import org.spongepowered.api.scheduler.Task;
 
-public class HostAddPlayerCommand extends AddPlayerCommand<Host> {
+public class HostAddPlayerCommand extends CommandNode {
+
   public HostAddPlayerCommand(CommandNode parent) {
-    super(parent, ParameterKeys.HOST, "host");
+    super(parent, Permissions.EDIT,
+        "Add a player on the target of a host",
+        "add");
+  }
+
+  @Override
+  public CommandResult execute(CommandContext context) throws CommandException {
+    Host host = context.requireOne(ParameterKeys.HOST);
+    SettingKey<?, ?, ?> key = context.requireOne(ParameterKeys.SETTING_KEY);
+    Collection<CompletableFuture<GameProfile>> players = context.requireOne(ParameterKeys.PLAYER_LIST);
+
+    Target target = host.computeTarget(key, Target::none);
+    String listType = target.isWhitelist() ? "whitelist" : "blacklist";
+    Sponge.asyncScheduler().submit(Task.builder().execute(() -> {
+          GameProfile profile;
+          for (CompletableFuture<GameProfile> player : players) {
+            try {
+              profile = player.get();
+            } catch (InterruptedException | ExecutionException e) {
+              e.printStackTrace();
+              continue;
+            }
+            if (target.users().add(profile.uuid())) {
+              context.cause().audience().sendMessage(Formatter.success(
+                  "Added user ___ to the ___ on ___ ",
+                  profile.name().orElse(profile.uuid().toString()), listType, key.id()
+              ));
+            } else {
+              context.cause().audience().sendMessage(Formatter.warn(
+                  "Could not add user ___ to the ___ on ___ ",
+                  profile.name().orElse(profile.uuid().toString()), listType, key.id()
+              ));
+            }
+          }
+        })
+        .plugin(SpongeNope.instance().pluginContainer())
+        .build());
+    return CommandResult.success();
   }
 }

@@ -61,9 +61,7 @@ public abstract class SettingValue<T> implements Serializable {
 
     public static <X, Y extends AltSet<X>> Poly<X, Y> manipulative(@NotNull Y additive,
                                                                        @NotNull Y subtractive) {
-      Manipulative<X, Y> value = new Manipulative<>(additive, subtractive);
-
-      return value;
+      return new Manipulative<>(additive, subtractive);
     }
 
     public static <X, Y extends AltSet<X>> Poly<X, Y> declarative(@NotNull Y set) {

@@ -49,6 +49,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.JoinConfiguration;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandResult;
@@ -116,7 +117,8 @@ public class HostInfoCommand extends CommandNode {
   public CommandResult execute(CommandContext context) throws CommandException {
     Host host = context.requireOne(Parameters.HOST);
 
-    Component header = Component.join(Component.newline(), HostInfoCommand.extras(host))
+    Component header = Component.join(JoinConfiguration.separator(Component.newline()),
+            HostInfoCommand.extras(host))
         .append(Component.newline())
         .append(Component.newline())
         .append(Component.text()

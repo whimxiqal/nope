@@ -48,6 +48,7 @@ public class SettingValueConfigSerializerRegistrarImpl implements SettingValueCo
 
   @Override
   @NotNull
+  @SuppressWarnings("unchecked")
   public <T, V extends SettingValue<T>, M extends SettingKey.Manager<T, V>> SettingValueConfigSerializer<M> serializerOf(M manager) {
     try {
       return (SettingValueConfigSerializer<M>) serializers.stream()

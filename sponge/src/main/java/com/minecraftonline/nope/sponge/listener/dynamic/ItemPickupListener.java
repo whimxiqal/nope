@@ -29,7 +29,6 @@ package com.minecraftonline.nope.sponge.listener.dynamic;
 import com.minecraftonline.nope.sponge.api.event.SettingEventListener;
 import com.minecraftonline.nope.sponge.api.event.SettingValueLookupFunction;
 import org.spongepowered.api.event.item.inventory.ChangeInventoryEvent;
-import org.spongepowered.api.item.inventory.Carrier;
 import org.spongepowered.api.world.Locatable;
 
 public class ItemPickupListener implements SettingEventListener<Boolean, ChangeInventoryEvent.Pickup> {

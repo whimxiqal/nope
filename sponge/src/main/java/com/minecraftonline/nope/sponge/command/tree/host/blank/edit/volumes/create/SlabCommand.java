@@ -79,7 +79,7 @@ public class SlabCommand extends CommandNode {
         && posY2.isPresent()) {
       slab = new Slab(Nope.instance().hostSystem().domain(SpongeUtil.worldToId(world.get())),
           Math.min(posY1.get(), posY2.get()),
-          Math.max(posY2.get(), posY2.get()));
+          Math.max(posY1.get(), posY2.get()));
       if (!slab.valid()) {
         return CommandResult.error(Formatter.error(
             "Your designated ___ is invalid", "slab"

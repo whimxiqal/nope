@@ -32,7 +32,6 @@ import lombok.Getter;
 import lombok.experimental.Accessors;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.Event;
-import org.spongepowered.api.event.EventListenerRegistration;
 import org.spongepowered.api.event.Order;
 import org.spongepowered.plugin.PluginContainer;
 

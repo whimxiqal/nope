@@ -30,6 +30,7 @@ import com.minecraftonline.nope.sponge.SpongeNope;
 import com.minecraftonline.nope.sponge.util.Formatter;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.ComponentBuilder;
+import net.kyori.adventure.text.JoinConfiguration;
 import org.jetbrains.annotations.NotNull;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandResult;
@@ -83,7 +84,7 @@ public class HelpCommandNode extends CommandNode {
     List<Component> headerLines = new LinkedList<>();
     headerLines.add(Formatter.keyValue("Usage", parent.fullCommand(context.cause())));
     headerLines.add(Formatter.keyValue("Desc", parent.description()));
-    paginationBuilder.header(Component.join(Component.newline(), headerLines));
+    paginationBuilder.header(Component.join(JoinConfiguration.separator(Component.newline()), headerLines));
 
     List<Component> contentLines = new LinkedList<>();
     // Add parameters as first item in content

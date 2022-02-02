@@ -50,15 +50,13 @@ public abstract class ItemDropListener<E extends Event>
       Optional<Carrier> carrier = event.cause().first(Carrier.class);
       if (!lookupFunction.lookup(locatable, locatable.serverLocation())) {
         event.droppedItems().clear();
-        carrier.ifPresent(c -> {
-          event.originalDroppedItems().forEach(snapshot -> {
-            InventoryTransactionResult result = c.inventory().offer(snapshot.createStack());
-            if (result.type() != InventoryTransactionResult.Type.SUCCESS && c instanceof Audience) {
-              ((Audience) c).sendMessage(Formatter.error("You cannot drop items here and "
-                  + "there was a problem trying to return your item(s) to you"));
-            }
-          });
-        });
+        carrier.ifPresent(c -> event.originalDroppedItems().forEach(snapshot -> {
+          InventoryTransactionResult result = c.inventory().offer(snapshot.createStack());
+          if (result.type() != InventoryTransactionResult.Type.SUCCESS && c instanceof Audience) {
+            ((Audience) c).sendMessage(Formatter.error("You cannot drop items here and "
+                + "there was a problem trying to return your item(s) to you"));
+          }
+        }));
         // TODO schedule this for later because someone else may have re-added the items
         //  that we removed here, so we shouldn't be giving them back.
 //        carrier.ifPresent(c -> Sponge.server().scheduler().submit(Task.builder()

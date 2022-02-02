@@ -73,8 +73,8 @@ public class HostSystem {
   public Map<String, Host> hosts() {
     Map<String, Host> hosts = new HashMap<>();
     hosts.put(this.universe.name(), this.universe);
-    this.domains.forEach(hosts::put);
-    this.zones.forEach(hosts::put);
+    hosts.putAll(this.domains);
+    hosts.putAll(this.zones);
     return hosts;
   }
 

@@ -27,14 +27,54 @@
 package com.minecraftonline.nope.sponge.command.tree.host.blank.edit.setting.blank.target;
 
 import com.minecraftonline.nope.common.host.Host;
+import com.minecraftonline.nope.common.permission.Permissions;
+import com.minecraftonline.nope.common.setting.SettingKey;
+import com.minecraftonline.nope.common.setting.Target;
 import com.minecraftonline.nope.sponge.command.CommandNode;
 import com.minecraftonline.nope.sponge.command.parameters.ParameterKeys;
-import com.minecraftonline.nope.sponge.command.settingcollection.blank.edit.setting.blank.target.SetCommand;
+import com.minecraftonline.nope.sponge.command.parameters.Parameters;
+import com.minecraftonline.nope.sponge.command.parameters.TargetOption;
+import com.minecraftonline.nope.sponge.util.Formatter;
+import org.spongepowered.api.command.CommandResult;
+import org.spongepowered.api.command.exception.CommandException;
+import org.spongepowered.api.command.parameter.CommandContext;
 
-public class HostSetCommand extends SetCommand<Host> {
+public class HostSetCommand extends CommandNode {
 
   public HostSetCommand(CommandNode parent) {
-    super(parent, ParameterKeys.HOST, "host");
+    super(parent, Permissions.EDIT,
+        "Set a permission on the target of a host",
+        "set");
+    addParameter(Parameters.TARGET_OPTION);
+  }
+
+  @Override
+  public CommandResult execute(CommandContext context) throws CommandException {
+    Host host = context.requireOne(Parameters.HOST);
+    SettingKey<?, ?, ?> key = context.requireOne(ParameterKeys.SETTING_KEY);
+    TargetOption option = context.requireOne(ParameterKeys.TARGET_OPTION);
+
+    switch (option) {
+      case ALL:
+        host.setTarget(key, Target.all());
+        context.cause().audience().sendMessage(Formatter.success(
+            "Setting ___ now targets all users", key.id()
+        ));
+        break;
+      case NONE:
+        host.setTarget(key, Target.none());
+        context.cause().audience().sendMessage(Formatter.success(
+            "Setting ___ now targets no one", key.id()
+        ));
+        break;
+      case EMPTY:
+      default:
+        host.removeTarget(key);
+        context.cause().audience().sendMessage(Formatter.success(
+            "Target removed from setting ___", key.id()
+        ));
+    }
+    return CommandResult.success();
   }
 
 }

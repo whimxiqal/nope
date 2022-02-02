@@ -27,14 +27,42 @@
 package com.minecraftonline.nope.sponge.command.tree.host.blank.edit.setting.blank.target.permission;
 
 import com.minecraftonline.nope.common.host.Host;
+import com.minecraftonline.nope.common.permission.Permissions;
+import com.minecraftonline.nope.common.setting.SettingKey;
+import com.minecraftonline.nope.common.setting.Target;
 import com.minecraftonline.nope.sponge.command.CommandNode;
 import com.minecraftonline.nope.sponge.command.parameters.ParameterKeys;
-import com.minecraftonline.nope.sponge.command.settingcollection.blank.edit.setting.blank.target.permission.ClearPermissionCommand;
+import com.minecraftonline.nope.sponge.util.Formatter;
+import java.util.Optional;
+import org.spongepowered.api.command.CommandResult;
+import org.spongepowered.api.command.exception.CommandException;
+import org.spongepowered.api.command.parameter.CommandContext;
 
-public class HostClearPermissionCommand extends ClearPermissionCommand<Host> {
+public class HostClearPermissionCommand extends CommandNode {
 
   public HostClearPermissionCommand(CommandNode parent) {
-    super(parent, ParameterKeys.HOST, "host");
+    super(parent, Permissions.EDIT,
+        "Set a permission on the target of a host",
+        "clear", "reset");
+  }
+
+  @Override
+  public CommandResult execute(CommandContext context) throws CommandException {
+    Host host = context.requireOne(ParameterKeys.HOST);
+    SettingKey<?, ?, ?> key = context.requireOne(ParameterKeys.SETTING_KEY);
+
+    Optional<Target> target = host.getTarget(key);
+    if (target.isPresent()) {
+      target.get().permissions().clear();
+      context.cause().audience().sendMessage(Formatter.success(
+          "All permissions cleared on key ___", key.id()
+      ));
+      return CommandResult.success();
+    } else {
+      return CommandResult.error(Formatter.error(
+          "There is no target on key ___", key.id()
+      ));
+    }
   }
 
 }

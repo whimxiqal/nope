@@ -29,7 +29,6 @@ package com.minecraftonline.nope.sponge.listener;
 import com.minecraftonline.nope.sponge.api.event.SettingValueLookupFunction;
 import java.util.Optional;
 import java.util.function.BiFunction;
-import java.util.function.Function;
 import org.spongepowered.api.block.transaction.BlockTransaction;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.Player;

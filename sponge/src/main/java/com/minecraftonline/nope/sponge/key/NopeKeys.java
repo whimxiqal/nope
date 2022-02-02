@@ -26,8 +26,6 @@
 
 package com.minecraftonline.nope.sponge.key;
 
-import io.leangen.geantyref.TypeToken;
-import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.value.Value;
 

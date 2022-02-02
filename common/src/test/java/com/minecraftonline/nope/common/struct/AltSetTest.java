@@ -213,18 +213,6 @@ class AltSetTest {
     Assertions.assertTrue(set1.contains(5));
   }
 
-  @Test
-  void clear() {
-  }
-
-  @Test
-  void fill() {
-  }
-
-  @Test
-  void isUber() {
-  }
-
   enum Animal {
     CAT,
     DOG,

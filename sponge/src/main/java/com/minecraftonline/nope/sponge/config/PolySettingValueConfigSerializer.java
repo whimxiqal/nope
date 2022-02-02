@@ -40,6 +40,7 @@ import org.spongepowered.configurate.serialize.SerializationException;
 public class PolySettingValueConfigSerializer implements SettingValueConfigSerializer<SettingKey.Manager.Poly<?, ?>> {
 
   @Override
+  @SuppressWarnings("unchecked")
   public Class<SettingKey.Manager.Poly<?, ?>> managerClass() {
     return (Class<SettingKey.Manager.Poly<?, ?>>) (Class<?>) SettingKey.Manager.Poly.class;
   }
@@ -52,6 +53,7 @@ public class PolySettingValueConfigSerializer implements SettingValueConfigSeria
     return serializePoly(managerGeneral, valueGeneral);
   }
 
+  @SuppressWarnings("unchecked")
   private <X,
       Y extends SettingValue<X>,
       Z extends SettingKey.Manager<X, Y>,
@@ -98,6 +100,7 @@ public class PolySettingValueConfigSerializer implements SettingValueConfigSeria
     return deserializePoly(managerGeneral, configNode);
   }
 
+  @SuppressWarnings("unchecked")
   private <X,
       Y extends SettingValue<X>,
       Z extends SettingKey.Manager<X, Y>,

@@ -81,14 +81,6 @@ class VolumeTreeTest {
     assert !volumeTree.containing(-1, 1, 1).contains(zone1);
   }
 
-  @Test
-  void testContaining() {
-  }
-
-  @Test
-  void put() {
-  }
-
   private static class TestNope extends Nope {
 
     public TestNope() {
