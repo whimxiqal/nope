@@ -1,0 +1,76 @@
+/*
+ * MIT License
+ *
+ * Copyright (c) Pieter Svenson
+ * Copyright (c) MinecraftOnline
+ * Copyright (c) contributors
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
+package com.minecraftonline.nope.sponge.storage.configurate;
+
+import com.minecraftonline.nope.common.host.Domain;
+import com.minecraftonline.nope.common.storage.DomainDataHandler;
+import com.minecraftonline.nope.sponge.api.config.SettingValueConfigSerializerRegistrar;
+import java.util.Objects;
+import java.util.function.Function;
+import org.jetbrains.annotations.NotNull;
+import org.spongepowered.configurate.CommentedConfigurationNode;
+import org.spongepowered.configurate.ConfigurateException;
+import org.spongepowered.configurate.loader.ConfigurationLoader;
+
+public class DomainConfigurateDataHandler extends SettingsConfigurateDataHandler implements DomainDataHandler {
+
+  private final Function<String, ConfigurationLoader<CommentedConfigurationNode>> loader;
+
+  public DomainConfigurateDataHandler(Function<String, ConfigurationLoader<CommentedConfigurationNode>> loader,
+                                      SettingValueConfigSerializerRegistrar serializerRegistrar) {
+    super(serializerRegistrar);
+    this.loader = loader;
+  }
+
+  @Override
+  public void save(@NotNull Domain domain) {
+    Objects.requireNonNull(domain);
+    try {
+      CommentedConfigurationNode root = settingCollectionRoot(domain);
+      root.comment("Settings for world " + domain.name());
+      loader.apply(domain.name()).save(root);
+    } catch (ConfigurateException e) {
+      e.printStackTrace();
+    }
+  }
+
+  @Override
+  public void load(@NotNull Domain domain) {
+    try {
+      CommentedConfigurationNode root = loader.apply(domain.name()).load();
+      if (root.node("settings").virtual()) {
+        // No settings, so this file was likely not created yet.
+        root.node("settings").set(null);
+      } else {
+        domain.setAll(deserializeSettings(root.node("settings").childrenMap()));
+      }
+    } catch (ConfigurateException e) {
+      e.printStackTrace();
+    }
+  }
+
+}

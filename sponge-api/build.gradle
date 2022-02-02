@@ -1,0 +1,80 @@
+import org.spongepowered.gradle.plugin.config.PluginLoaders
+import org.spongepowered.plugin.metadata.model.PluginDependency
+
+plugins {
+    id 'java-library'
+    id 'org.spongepowered.gradle.plugin' version '2.0.0'
+    id 'com.github.johnrengelman.shadow' version '7.0.0'
+}
+
+repositories {
+    mavenCentral()
+}
+
+sponge {
+    apiVersion("8.0.0-SNAPSHOT")
+    license("LICENSE")
+    loader {
+        name(PluginLoaders.JAVA_PLAIN)
+        version("1.0")
+    }
+    plugin("nope") {
+        displayName("Nope")
+        entrypoint("com.minecraftonline.nope.sponge.SpongeNope")
+        description("A protections plugin")
+        links {
+            homepage("https://spongepowered.org")
+            source("https://spongepowered.org/source")
+            issues("https://spongepowered.org/issues")
+        }
+        contributor("PietElite") {
+            description("Author")
+        }
+        dependency("spongeapi") {
+            loadOrder(PluginDependency.LoadOrder.AFTER)
+            optional(false)
+        }
+    }
+}
+
+java {
+    sourceCompatibility = JavaVersion.toVersion(8)
+    targetCompatibility = JavaVersion.toVersion(8)
+}
+
+tasks.withType(JavaCompile.class).configureEach {
+    options.encoding = "utf-8"
+}
+
+// Make sure all tasks which produce archives (jar, sources jar, javadoc jar, etc) produce more consistent output
+tasks.withType(AbstractArchiveTask.class).configureEach {
+    reproducibleFileOrder = true
+    preserveFileTimestamps = false
+}
+//////////////////////////
+
+test {
+    useJUnitPlatform()
+}
+
+dependencies {
+    implementation project(':common')
+    // Sponge
+    compileOnly "org.spongepowered:spongeapi:8.0.0-SNAPSHOT"
+    annotationProcessor "org.spongepowered:spongeapi:8.0.0-SNAPSHOT"
+
+    // Lombok
+    implementation 'org.projectlombok:lombok:1.18.22'
+    annotationProcessor 'org.projectlombok:lombok:1.18.22'
+
+    testImplementation 'org.projectlombok:lombok:1.18.22'
+    testAnnotationProcessor 'org.projectlombok:lombok:1.18.22'
+
+    // IntelliJ Annotations
+    implementation 'org.jetbrains:annotations:22.0.0'
+
+}
+
+shadowJar {
+    archiveFileName = "Nope-SpongeApi-${project.version}.jar"
+}

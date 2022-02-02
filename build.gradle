@@ -1,97 +1,35 @@
-import org.spongepowered.gradle.plugin.config.PluginLoaders
-import org.spongepowered.plugin.metadata.model.PluginDependency
-
 plugins {
-    id 'java-library'
-    id 'org.spongepowered.gradle.plugin' version '2.0.0'
+    id 'org.cadixdev.licenser' version '0.6.1' apply false
 }
 
-archivesBaseName = 'nope'
-group = 'com.minecraftonline'
-version = '1.0.0'
-description = "A protections plugin"
+defaultTasks 'licenseFormat', 'build'
 
-repositories {
-    mavenCentral()
-}
+subprojects {
+    apply plugin: 'java'
+    apply plugin: 'maven-publish'
+    apply plugin: 'org.cadixdev.licenser'
 
-sponge {
-    apiVersion("8.0.0-SNAPSHOT")
-    license("LICENSE")
-    loader {
-        name(PluginLoaders.JAVA_PLAIN)
-        version("1.0")
+    group = 'com.minecraftonline'
+    version = '1.0.0-SNAPSHOT'
+
+    sourceCompatibility = 1.8
+    targetCompatibility = 1.8
+
+    tasks.withType(JavaCompile) {
+        options.encoding = 'UTF-8'
     }
-    plugin("nope") {
-        displayName("Nope")
-        entrypoint("com.minecraftonline.nope.sponge.SpongeNope")
-        description("A protections plugin")
-        links {
-            homepage("https://spongepowered.org")
-            source("https://spongepowered.org/source")
-            issues("https://spongepowered.org/issues")
-        }
-        contributor("PietElite") {
-            description("Author")
-        }
-        dependency("spongeapi") {
-            loadOrder(PluginDependency.LoadOrder.AFTER)
-            optional(false)
-        }
+
+    jar {
+        from '../LICENSE.txt'
     }
-}
 
-java {
-    sourceCompatibility = JavaVersion.toVersion(8)
-    targetCompatibility = JavaVersion.toVersion(8)
-}
-
-tasks.withType(JavaCompile.class).configureEach {
-    options.encoding = "utf-8"
-}
-
-// Make sure all tasks which produce archives (jar, sources jar, javadoc jar, etc) produce more consistent output
-tasks.withType(AbstractArchiveTask.class).configureEach {
-    reproducibleFileOrder = true
-    preserveFileTimestamps = false
-}
-//////////////////////////
-
-test {
-    useJUnitPlatform()
-}
-
-dependencies {
-    // Sponge
-    implementation "org.spongepowered:spongeapi:8.0.0-SNAPSHOT"
-    annotationProcessor "org.spongepowered:spongeapi:8.0.0-SNAPSHOT"
-
-    // JUnit
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.2'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.2'
-
-    // Lombok
-    implementation 'org.projectlombok:lombok:1.18.22'
-    annotationProcessor 'org.projectlombok:lombok:1.18.22'
-
-    testImplementation 'org.projectlombok:lombok:1.18.22'
-    testAnnotationProcessor 'org.projectlombok:lombok:1.18.22'
-
-    // IntelliJ Annotations
-    implementation 'org.jetbrains:annotations:22.0.0'
-
-}
-
-task spongeApiJar(type: org.gradle.jvm.tasks.Jar) {
-    baseName = 'nope-sponge-api'
-//    version = '0.0'
-//    classifier = "git describe --always".execute().text.trim()
-    from(sourceSets.main.output) {
-        include 'com/minecraftonline/nope/common/**'
-        include 'com/minecraftonline/nope/sponge/api/**'
+    license {
+        header = rootProject.file('HEADER.txt')
+        include '**/*.java'
+        newLine = true
     }
-}
 
-jar {
-    dependsOn(spongeApiJar)
+    repositories {
+        mavenCentral()
+    }
 }
