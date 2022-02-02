@@ -39,14 +39,11 @@ public final class Validate {
   /**
    * Ensures that the input is in the kebab case format.
    *
-   * @param s            the input string
-   * @param errorMessage the error message to throw if fails
+   * @param name            the input string
    * @throws IllegalArgumentException the exception to throw if fails
    */
-  public static void checkKebabCase(String s, String errorMessage) throws IllegalArgumentException {
-    if (Pattern.compile(".*[^a-z\\-].*").matcher(s).find()) {
-      throw new IllegalArgumentException(errorMessage);
-    }
+  public static boolean invalidSettingCollectionName(String name) throws IllegalArgumentException {
+    return !Pattern.compile("[a-zA-Z0-9\\-()& _]*").matcher(name).matches();
   }
 
   /**
@@ -58,7 +55,7 @@ public final class Validate {
    */
   public static void checkConfigFormat(String s, String errorMessage)
       throws IllegalArgumentException {
-    if (Pattern.compile(".*[^a-z\\-\\.].*").matcher(s).find()) {
+    if (Pattern.compile("[^a-z\\-\\.]*").matcher(s).find()) {
       throw new IllegalArgumentException(errorMessage);
     }
   }

@@ -427,7 +427,6 @@ public abstract class SettingKey<T,
 
     public abstract static class Unary<T> extends Manager<T, SettingValue.Unary<T>> {
 
-      @SuppressWarnings("unchecked")
       public abstract Class<T> dataType() throws ParseSettingException;
 
       public final SettingValue.Unary<T> parseValue(String data) throws ParseSettingException {
@@ -458,7 +457,6 @@ public abstract class SettingKey<T,
       private final Map<String, Set<T>> groups = new HashMap<>();
       private final Map<String, String> groupDescriptions = new HashMap<>();
 
-      @SuppressWarnings("unchecked")
       @Override
       public SettingValue.Poly<T, S> parseDeclarativeValue(String settingValue) {
         throw new UnsupportedOperationException();

@@ -41,6 +41,7 @@ import com.minecraftonline.nope.sponge.command.parameters.Parameters;
 import com.minecraftonline.nope.sponge.util.Formatter;
 import java.util.Optional;
 import net.kyori.adventure.identity.Identity;
+import org.jetbrains.annotations.Nullable;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.parameter.CommandContext;
@@ -89,7 +90,9 @@ public class ValueCommand<T extends SettingCollection & Named> extends CommandNo
 
     if (settingKey instanceof SettingKey.Poly) {
       SettingKey.Poly<?, ?> polyKey = (SettingKey.Poly<?, ?>) settingKey;
-      return executeWithPolyKey(polyKey, context, collection, alterType, settingValue, additive, subtractive);
+      return executeWithPolyKey(polyKey, context, collection, alterType,
+          settingValue.orElse(null),
+          additive, subtractive);
     } else if (additive || subtractive) {
       return CommandResult.error(Formatter.error("You may not alter this value in an additive or subtractive way"));
     } else {
@@ -105,7 +108,7 @@ public class ValueCommand<T extends SettingCollection & Named> extends CommandNo
                                                                     CommandContext context,
                                                                     T collection,
                                                                     ParameterValueTypes.SettingValueAlterType alterType,
-                                                                    Optional<String> settingValueOptional,
+                                                                    @Nullable String settingValueOptional,
                                                                     boolean additive,
                                                                     boolean subtractive) {
     try {
@@ -120,8 +123,8 @@ public class ValueCommand<T extends SettingCollection & Named> extends CommandNo
       } else if (alterType == ParameterValueTypes.SettingValueAlterType.SET_NONE) {
         alterType = ParameterValueTypes.SettingValueAlterType.SET;
       } else {
-        if (settingValueOptional.isPresent()) {
-          inputSet.addAll(polyKey.manager().parseSet(settingValueOptional.get()));
+        if (settingValueOptional != null) {
+          inputSet.addAll(polyKey.manager().parseSet(settingValueOptional));
         } else {
           return CommandResult.error(Formatter.error("You must specify values to update in this way"));
         }

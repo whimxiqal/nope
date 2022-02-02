@@ -34,60 +34,34 @@ import com.minecraftonline.nope.common.math.Cylinder;
 import com.minecraftonline.nope.common.math.Slab;
 import com.minecraftonline.nope.common.math.Sphere;
 import com.minecraftonline.nope.common.math.Volume;
+import com.minecraftonline.nope.common.permission.Permissions;
+import com.minecraftonline.nope.sponge.SpongeNope;
 import com.minecraftonline.nope.sponge.command.CommandNode;
-import com.minecraftonline.nope.sponge.command.parameters.ParameterKeys;
 import com.minecraftonline.nope.sponge.command.parameters.Parameters;
-import com.minecraftonline.nope.sponge.command.settingcollection.blank.InfoCommand;
-import com.minecraftonline.nope.sponge.command.settingcollection.blank.info.SettingInfoCommand;
-import com.minecraftonline.nope.sponge.command.settingcollection.blank.info.setting.blank.TargetInfoCommand;
-import com.minecraftonline.nope.sponge.command.settingcollection.blank.info.setting.blank.ValueInfoCommand;
-import com.minecraftonline.nope.sponge.command.settingcollection.blank.info.setting.blank.target.PermissionTargetInfoCommand;
-import com.minecraftonline.nope.sponge.command.settingcollection.blank.info.setting.blank.target.PlayerTargetInfoCommand;
 import com.minecraftonline.nope.sponge.command.tree.host.blank.info.HostInfoVolumesCommand;
+import com.minecraftonline.nope.sponge.command.tree.host.blank.info.SettingInfoCommand;
 import com.minecraftonline.nope.sponge.util.Formatter;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.TextDecoration;
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.command.CommandResult;
+import org.spongepowered.api.command.exception.CommandException;
+import org.spongepowered.api.command.parameter.CommandContext;
+import org.spongepowered.api.scheduler.Task;
 
-public class HostInfoCommand extends InfoCommand<Host> {
+public class HostInfoCommand extends CommandNode {
   public HostInfoCommand(CommandNode parent) {
-    super(parent, ParameterKeys.HOST, "host",
-        Formatter.THEME, Formatter.ACCENT, HostInfoCommand::extras);
+    super(parent, Permissions.INFO, "Get info about a host", "info");
     prefix(Parameters.HOST);
     addChild(new HostInfoVolumesCommand(this));
-
-    // Children here instead of in classes
-    SettingInfoCommand<Host> settingInfoCommand = new SettingInfoCommand<>(this,
-        ParameterKeys.HOST,
-        "host",
-        Formatter.THEME, Formatter.ACCENT);
-    addChild(settingInfoCommand);
-
-    TargetInfoCommand<Host> targetInfoCommand = new TargetInfoCommand<>(settingInfoCommand,
-        ParameterKeys.HOST,
-        "host",
-        Formatter.THEME, Formatter.ACCENT);
-    settingInfoCommand.addChild(targetInfoCommand);
-
-    ValueInfoCommand<Host> valueInfoCommand = new ValueInfoCommand<>(settingInfoCommand,
-        ParameterKeys.HOST,
-        "host",
-        Formatter.THEME, Formatter.ACCENT);
-    settingInfoCommand.addChild(valueInfoCommand);
-
-    PermissionTargetInfoCommand<Host> permissionTargetInfoCommand = new PermissionTargetInfoCommand<>(targetInfoCommand,
-        ParameterKeys.HOST,
-        "host",
-        Formatter.THEME, Formatter.ACCENT);
-    targetInfoCommand.addChild(permissionTargetInfoCommand);
-
-    PlayerTargetInfoCommand<Host> playerTargetInfoCommand = new PlayerTargetInfoCommand<>(targetInfoCommand,
-        ParameterKeys.HOST,
-        "host",
-        Formatter.THEME, Formatter.ACCENT);
-    targetInfoCommand.addChild(playerTargetInfoCommand);
-
+    addChild(new SettingInfoCommand(this));
   }
 
   private static Collection<Component> extras(Host host) {
@@ -136,5 +110,40 @@ public class HostInfoCommand extends InfoCommand<Host> {
           .build());
     }
     return extras;
+  }
+
+  @Override
+  public CommandResult execute(CommandContext context) throws CommandException {
+    Host host = context.requireOne(Parameters.HOST);
+
+    Component header = Component.join(Component.newline(), HostInfoCommand.extras(host))
+        .append(Component.newline())
+        .append(Component.newline())
+        .append(Component.text()
+            .append(Component.text("Settings")
+                .color(Formatter.DULL)
+                .decorate(TextDecoration.UNDERLINED))
+            .build());
+    Sponge.asyncScheduler().submit(Task.builder().execute(() ->
+            Formatter.paginator(host.name())
+                .header(header)
+                .contents(host.settings().isEmpty()
+                    ? Collections.singleton(Component.text("None").color(Formatter.DULL))
+                    : host.settings().stream()
+                    .flatMap(setting -> {
+                      try {
+                        return Formatter.setting(setting, context.cause().subject(), host)
+                            .get()
+                            .stream();
+                      } catch (InterruptedException | ExecutionException e) {
+                        e.printStackTrace();
+                        return Stream.empty();
+                      }
+                    }).collect(Collectors.toList()))
+                .sendTo(context.cause().audience()))
+        .plugin(SpongeNope.instance().pluginContainer())
+        .build());
+
+    return CommandResult.success();
   }
 }

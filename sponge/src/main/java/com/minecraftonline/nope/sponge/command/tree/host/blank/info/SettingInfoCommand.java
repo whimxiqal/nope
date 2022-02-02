@@ -22,44 +22,39 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
+ *
  */
 
-package com.minecraftonline.nope.sponge.command.settingcollection.blank.info.setting.blank.target;
+package com.minecraftonline.nope.sponge.command.tree.host.blank.info;
 
+import com.minecraftonline.nope.common.host.Host;
 import com.minecraftonline.nope.common.permission.Permissions;
 import com.minecraftonline.nope.common.setting.SettingCollection;
 import com.minecraftonline.nope.common.struct.Named;
 import com.minecraftonline.nope.sponge.command.CommandNode;
+import com.minecraftonline.nope.sponge.command.parameters.Parameters;
+import com.minecraftonline.nope.sponge.command.tree.host.blank.info.blank.TargetInfoCommand;
+import com.minecraftonline.nope.sponge.command.tree.host.blank.info.blank.ValueInfoCommand;
 import net.kyori.adventure.text.format.TextColor;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.command.parameter.Parameter;
 
-public class PlayerTargetInfoCommand<T extends SettingCollection & Named> extends CommandNode {
+public class SettingInfoCommand extends CommandNode {
 
-  private final Parameter.Key<T> settingCollectionParameterKey;
-  private final String collectionName;
-  private final TextColor collectionPrimaryTheme;
-  private final TextColor collectionSecondaryTheme;
-
-  public PlayerTargetInfoCommand(CommandNode parent,
-                            Parameter.Key<T> settingCollectionParameterKey,
-                            String collectionName,
-                            TextColor collectionPrimaryTheme,
-                            TextColor collectionSecondaryTheme) {
+  public SettingInfoCommand(CommandNode parent) {
     super(parent, Permissions.EDIT,
-        "Get info of the players in the target of a setting of a " + collectionName,
-        "player", "user");
-    this.settingCollectionParameterKey = settingCollectionParameterKey;
-    this.collectionName = collectionName;
-    this.collectionPrimaryTheme = collectionPrimaryTheme;
-    this.collectionSecondaryTheme = collectionSecondaryTheme;
+        "Get info on a setting of a host",
+        "setting");
+    addParameter(Parameters.SETTING_KEY);
+    addChild(new TargetInfoCommand(this));
+    addChild(new ValueInfoCommand(this));
   }
 
   @Override
   public CommandResult execute(CommandContext context) throws CommandException {
-    T collection = context.requireOne(settingCollectionParameterKey);
+    Host host = context.requireOne(Parameters.HOST);
 
     return CommandResult.success();
   }

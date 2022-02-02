@@ -114,4 +114,8 @@ public class Zone extends Host implements Child<Zone>, Destructible {
     Nope.instance().data().zones().save(this);
   }
 
+  public Zone shallowCopy(String newName) {
+    return new Zone(newName, parent, priority, volumes);
+  }
+
 }

@@ -24,22 +24,32 @@
  * SOFTWARE.
  */
 
-package com.minecraftonline.nope.sponge.command.tree.template.blank;
+package com.minecraftonline.nope.sponge.command.tree.host.blank.info.blank.target;
 
+import com.minecraftonline.nope.common.host.Host;
 import com.minecraftonline.nope.common.permission.Permissions;
+import com.minecraftonline.nope.common.setting.SettingCollection;
+import com.minecraftonline.nope.common.struct.Named;
 import com.minecraftonline.nope.sponge.command.CommandNode;
-import com.minecraftonline.nope.sponge.command.FunctionlessCommandNode;
 import com.minecraftonline.nope.sponge.command.parameters.Parameters;
-import com.minecraftonline.nope.sponge.command.tree.template.blank.edit.TargetCommand;
+import net.kyori.adventure.text.format.TextColor;
+import org.spongepowered.api.command.CommandResult;
+import org.spongepowered.api.command.exception.CommandException;
+import org.spongepowered.api.command.parameter.CommandContext;
+import org.spongepowered.api.command.parameter.Parameter;
 
-public class EditCommand extends FunctionlessCommandNode {
-  public EditCommand(CommandNode parent) {
-    super(parent,
-        Permissions.EDIT,
-        "Set settings on a template",
-        "edit", "e");
-    prefix(Parameters.TEMPLATE);
-    addChild(new TargetCommand(this));
+public class PlayerTargetInfoCommand extends CommandNode {
+
+  public PlayerTargetInfoCommand(CommandNode parent) {
+    super(parent, Permissions.EDIT,
+        "Get info of the players in the target of a setting of a host",
+        "player", "user");
   }
 
+  @Override
+  public CommandResult execute(CommandContext context) throws CommandException {
+    Host host = context.requireOne(Parameters.HOST);
+
+    return CommandResult.success();
+  }
 }

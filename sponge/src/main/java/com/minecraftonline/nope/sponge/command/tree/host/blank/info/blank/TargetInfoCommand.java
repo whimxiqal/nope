@@ -24,44 +24,36 @@
  * SOFTWARE.
  */
 
-package com.minecraftonline.nope.sponge.command.settingcollection.blank.info;
+package com.minecraftonline.nope.sponge.command.tree.host.blank.info.blank;
 
+import com.minecraftonline.nope.common.host.Host;
 import com.minecraftonline.nope.common.permission.Permissions;
 import com.minecraftonline.nope.common.setting.SettingCollection;
 import com.minecraftonline.nope.common.struct.Named;
 import com.minecraftonline.nope.sponge.command.CommandNode;
 import com.minecraftonline.nope.sponge.command.parameters.Parameters;
+import com.minecraftonline.nope.sponge.command.tree.host.blank.info.blank.target.PermissionTargetInfoCommand;
+import com.minecraftonline.nope.sponge.command.tree.host.blank.info.blank.target.PlayerTargetInfoCommand;
 import net.kyori.adventure.text.format.TextColor;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.command.parameter.Parameter;
 
-public class SettingInfoCommand<T extends SettingCollection & Named> extends CommandNode {
+public class TargetInfoCommand extends CommandNode {
 
-  private final Parameter.Key<T> settingCollectionParameterKey;
-  private final String collectionName;
-  private final TextColor collectionPrimaryTheme;
-  private final TextColor collectionSecondaryTheme;
-
-  public SettingInfoCommand(CommandNode parent,
-                            Parameter.Key<T> settingCollectionParameterKey,
-                            String collectionName,
-                            TextColor collectionPrimaryTheme,
-                            TextColor collectionSecondaryTheme) {
+  public TargetInfoCommand(CommandNode parent) {
     super(parent, Permissions.EDIT,
-        "Get info on a setting of a " + collectionName,
-        "setting");
-    this.settingCollectionParameterKey = settingCollectionParameterKey;
-    this.collectionName = collectionName;
-    this.collectionPrimaryTheme = collectionPrimaryTheme;
-    this.collectionSecondaryTheme = collectionSecondaryTheme;
-    addParameter(Parameters.SETTING_KEY);
+        "Get info of a target of a setting of a host",
+        "target");
+    prefix(Parameters.SETTING_KEY);
+    addChild(new PermissionTargetInfoCommand(this));
+    addChild(new PlayerTargetInfoCommand(this));
   }
 
   @Override
   public CommandResult execute(CommandContext context) throws CommandException {
-    T collection = context.requireOne(settingCollectionParameterKey);
+    Host host = context.requireOne(Parameters.HOST);
 
     return CommandResult.success();
   }

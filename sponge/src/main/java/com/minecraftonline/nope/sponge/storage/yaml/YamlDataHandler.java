@@ -31,7 +31,6 @@ import com.minecraftonline.nope.common.math.Volume;
 import com.minecraftonline.nope.sponge.api.config.SettingValueConfigSerializerRegistrar;
 import com.minecraftonline.nope.sponge.storage.configurate.ConfigurateDataHandler;
 import com.minecraftonline.nope.sponge.storage.configurate.DomainConfigurateDataHandler;
-import com.minecraftonline.nope.sponge.storage.configurate.TemplateConfigurateDataHandler;
 import com.minecraftonline.nope.sponge.storage.configurate.ZoneConfigurateDataHandler;
 import com.minecraftonline.nope.sponge.storage.configurate.serializer.VolumeTypeSerializer;
 import java.io.File;
@@ -75,8 +74,7 @@ public class YamlDataHandler extends ConfigurateDataHandler {
                     .collect(Collectors.toList());
               }
             },
-            serializerRegistrar),
-        new TemplateConfigurateDataHandler(yamlLoader(path.resolve("templates.yml")), serializerRegistrar));
+            serializerRegistrar));
   }
 
   public static YamlConfigurationLoader yamlLoader(Path path) {

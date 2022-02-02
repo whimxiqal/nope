@@ -31,7 +31,6 @@ import com.minecraftonline.nope.common.math.Volume;
 import com.minecraftonline.nope.sponge.api.config.SettingValueConfigSerializerRegistrar;
 import com.minecraftonline.nope.sponge.storage.configurate.ConfigurateDataHandler;
 import com.minecraftonline.nope.sponge.storage.configurate.DomainConfigurateDataHandler;
-import com.minecraftonline.nope.sponge.storage.configurate.TemplateConfigurateDataHandler;
 import com.minecraftonline.nope.sponge.storage.configurate.ZoneConfigurateDataHandler;
 import com.minecraftonline.nope.sponge.storage.configurate.serializer.VolumeTypeSerializer;
 import java.io.File;
@@ -74,8 +73,7 @@ public class HoconDataHandler extends ConfigurateDataHandler {
                     .collect(Collectors.toList());
               }
             },
-            serializerRegistrar),
-        new TemplateConfigurateDataHandler(hoconLoader(path.resolve("templates.conf")), serializerRegistrar));
+            serializerRegistrar));
   }
 
   public static HoconConfigurationLoader hoconLoader(Path path) {

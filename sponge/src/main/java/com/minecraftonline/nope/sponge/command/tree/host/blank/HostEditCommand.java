@@ -31,6 +31,7 @@ import com.minecraftonline.nope.sponge.command.CommandNode;
 import com.minecraftonline.nope.sponge.command.FunctionlessCommandNode;
 import com.minecraftonline.nope.sponge.command.parameters.Parameters;
 import com.minecraftonline.nope.sponge.command.tree.host.blank.edit.HostSettingCommand;
+import com.minecraftonline.nope.sponge.command.tree.host.blank.edit.NameCommand;
 import com.minecraftonline.nope.sponge.command.tree.host.blank.edit.PriorityCommand;
 import com.minecraftonline.nope.sponge.command.tree.host.blank.edit.VolumesCommand;
 
@@ -42,6 +43,7 @@ public class HostEditCommand extends FunctionlessCommandNode {
         "edit");
     prefix(Parameters.HOST);
     addChild(new HostSettingCommand(this));
+    addChild(new NameCommand(this));
     addChild(new PriorityCommand(this));
     addChild(new VolumesCommand(this));
   }

@@ -27,10 +27,6 @@
 package com.minecraftonline.nope.common.storage;
 
 import com.minecraftonline.nope.common.host.HostSystem;
-import com.minecraftonline.nope.common.storage.DomainDataHandler;
-import com.minecraftonline.nope.common.storage.TemplateDataHandler;
-import com.minecraftonline.nope.common.storage.UniverseDataHandler;
-import com.minecraftonline.nope.common.storage.ZoneDataHandler;
 
 public interface DataHandler {
 
@@ -39,8 +35,6 @@ public interface DataHandler {
   DomainDataHandler domains();
 
   ZoneDataHandler zones();
-
-  TemplateDataHandler templates();
 
   HostSystem loadSystem();
 

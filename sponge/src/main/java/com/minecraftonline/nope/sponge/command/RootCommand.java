@@ -31,7 +31,6 @@ import com.minecraftonline.nope.sponge.command.tree.HostCommand;
 import com.minecraftonline.nope.sponge.command.tree.HostsCommand;
 import com.minecraftonline.nope.sponge.command.tree.ReloadCommand;
 import com.minecraftonline.nope.sponge.command.tree.SettingsCommand;
-import com.minecraftonline.nope.sponge.command.tree.TemplateCommand;
 import com.minecraftonline.nope.sponge.command.tree.ToolCommand;
 import com.minecraftonline.nope.sponge.util.Formatter;
 import org.spongepowered.api.command.CommandResult;
@@ -48,7 +47,6 @@ public class RootCommand extends CommandNode {
     addChild(new HostsCommand(this));
     addChild(new ReloadCommand(this));
     addChild(new SettingsCommand(this));
-    addChild(new TemplateCommand(this));
     addChild(new ToolCommand(this));
   }
 

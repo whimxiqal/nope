@@ -32,7 +32,6 @@ import com.minecraftonline.nope.common.math.Cuboid;
 import com.minecraftonline.nope.common.math.Cylinder;
 import com.minecraftonline.nope.common.math.Sphere;
 import com.minecraftonline.nope.common.setting.SettingKey;
-import com.minecraftonline.nope.common.setting.template.Template;
 import io.leangen.geantyref.TypeToken;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
@@ -74,7 +73,6 @@ public class ParameterKeys {
   public static final Parameter.Key<ParameterValueTypes.SettingValueAlterType> SETTING_VALUE_ALTER_TYPE = Parameter.key("alter-type", ParameterValueTypes.SettingValueAlterType.class);
   public static final Parameter.Key<Sphere> SPHERE = Parameter.key("sphere", Sphere.class);
   public static final Parameter.Key<TargetOption> TARGET_OPTION = Parameter.key("target-option", TargetOption.class);
-  public static final Parameter.Key<Template> TEMPLATE = Parameter.key("template", Template.class);
   public static final Parameter.Key<ServerWorld> WORLD = Parameter.key("world", ServerWorld.class);
   public static final Parameter.Key<Zone> ZONE = Parameter.key("zone", Zone.class);
 }

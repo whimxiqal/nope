@@ -30,6 +30,7 @@ import com.minecraftonline.nope.common.setting.SettingCollection;
 import com.minecraftonline.nope.common.struct.Container;
 import com.minecraftonline.nope.common.struct.Location;
 import com.minecraftonline.nope.common.struct.Named;
+import com.minecraftonline.nope.common.util.Validate;
 
 /**
  * A class to store Settings based on graphical locations.
@@ -46,6 +47,9 @@ public abstract class Host extends SettingCollection implements Container, Named
    * @param priority the priority
    */
   public Host(String name, int priority) {
+    if (Validate.invalidSettingCollectionName(name)) {
+      throw new IllegalArgumentException("Invalid host name");
+    }
     this.name = name;
     this.priority = priority;
   }
@@ -76,4 +80,5 @@ public abstract class Host extends SettingCollection implements Container, Named
   public int priority() {
     return priority;
   }
+
 }

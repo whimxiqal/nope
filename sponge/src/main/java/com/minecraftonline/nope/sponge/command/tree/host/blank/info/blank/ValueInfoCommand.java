@@ -24,7 +24,33 @@
  * SOFTWARE.
  */
 
-package com.minecraftonline.nope.sponge.command.tree.template.blank.edit.target.permission;
+package com.minecraftonline.nope.sponge.command.tree.host.blank.info.blank;
 
-public class AddCommand {
+import com.minecraftonline.nope.common.host.Host;
+import com.minecraftonline.nope.common.permission.Permissions;
+import com.minecraftonline.nope.common.setting.SettingCollection;
+import com.minecraftonline.nope.common.struct.Named;
+import com.minecraftonline.nope.sponge.command.CommandNode;
+import com.minecraftonline.nope.sponge.command.parameters.Parameters;
+import net.kyori.adventure.text.format.TextColor;
+import org.spongepowered.api.command.CommandResult;
+import org.spongepowered.api.command.exception.CommandException;
+import org.spongepowered.api.command.parameter.CommandContext;
+import org.spongepowered.api.command.parameter.Parameter;
+
+public class ValueInfoCommand extends CommandNode {
+
+  public ValueInfoCommand(CommandNode parent) {
+    super(parent, Permissions.EDIT,
+        "Get info on the value of a setting of a host",
+        "value");
+    prefix(Parameters.SETTING_KEY);
+  }
+
+  @Override
+  public CommandResult execute(CommandContext context) throws CommandException {
+    Host host = context.requireOne(Parameters.HOST);
+
+    return CommandResult.success();
+  }
 }

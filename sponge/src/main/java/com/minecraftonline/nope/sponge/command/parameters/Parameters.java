@@ -30,7 +30,6 @@ import com.minecraftonline.nope.common.Nope;
 import com.minecraftonline.nope.common.host.Host;
 import com.minecraftonline.nope.common.host.Zone;
 import com.minecraftonline.nope.common.setting.SettingKey;
-import com.minecraftonline.nope.common.setting.template.Template;
 import com.minecraftonline.nope.common.util.ContainsInOrderPredicate;
 import com.minecraftonline.nope.sponge.SpongeNope;
 import com.minecraftonline.nope.sponge.util.Formatter;
@@ -344,20 +343,6 @@ public class Parameters {
           .build();
   public static final Parameter.Value<TargetOption> TARGET_OPTION = Parameter.enumValue(TargetOption.class)
       .key(ParameterKeys.TARGET_OPTION).build();
-  public static final Parameter.Value<Template> TEMPLATE = Parameter.builder(ParameterKeys.TEMPLATE)
-      .addParser((parameterKey, reader, context) ->
-          Optional.ofNullable(Nope.instance().templateSet().get(reader.parseString())))
-      .completer((context, currentInput) -> {
-        final Predicate<String> startsWith = new StartsWithPredicate(currentInput);
-        return Nope.instance().templateSet()
-            .templates()
-            .stream()
-            .filter(template -> startsWith.test(template.name()))
-            .map(template -> CommandCompletion.of(template.name(),
-                Component.text(template.description())))
-            .collect(Collectors.toList());
-      })
-      .build();
   public static final Parameter.Value<ServerWorld> WORLD = Parameter.world().key(ParameterKeys.WORLD).build();
   public static final Parameter.Multi CUBOID = Parameter.seqBuilder(Parameters.WORLD)
       .then(Parameters.POS_X_1)

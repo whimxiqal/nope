@@ -24,18 +24,32 @@
  * SOFTWARE.
  */
 
-package com.minecraftonline.nope.sponge.command.tree.template.blank.edit.target;
+package com.minecraftonline.nope.sponge.command.tree.host.blank.info.blank.target;
 
+import com.minecraftonline.nope.common.host.Host;
 import com.minecraftonline.nope.common.permission.Permissions;
+import com.minecraftonline.nope.common.setting.SettingCollection;
+import com.minecraftonline.nope.common.struct.Named;
 import com.minecraftonline.nope.sponge.command.CommandNode;
-import com.minecraftonline.nope.sponge.command.FunctionlessCommandNode;
+import com.minecraftonline.nope.sponge.command.parameters.Parameters;
+import net.kyori.adventure.text.format.TextColor;
+import org.spongepowered.api.command.CommandResult;
+import org.spongepowered.api.command.exception.CommandException;
+import org.spongepowered.api.command.parameter.CommandContext;
+import org.spongepowered.api.command.parameter.Parameter;
 
-public class PermissionCommand extends FunctionlessCommandNode {
+public class PermissionTargetInfoCommand extends CommandNode {
 
-  public PermissionCommand(CommandNode parent) {
+  public PermissionTargetInfoCommand(CommandNode parent) {
     super(parent, Permissions.EDIT,
-        "Set a permission on the target of a template",
-        "permission", "perm", "p");
+        "Get info of the permissions in a target of a setting of a host",
+        "permission", "perm");
   }
 
+  @Override
+  public CommandResult execute(CommandContext context) throws CommandException {
+    Host host = context.requireOne(Parameters.HOST);
+
+    return CommandResult.success();
+  }
 }

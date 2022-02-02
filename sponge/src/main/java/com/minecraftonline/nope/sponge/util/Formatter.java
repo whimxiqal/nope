@@ -52,6 +52,7 @@ import net.kyori.adventure.text.format.TextDecoration;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.service.pagination.PaginationList;
 import org.spongepowered.api.service.permission.Subject;
 
 /**
@@ -419,6 +420,13 @@ public final class Formatter {
       builder.append(value);
     }
     return builder.build();
+  }
+
+  public static PaginationList.Builder paginator(String title) {
+    return Sponge.serviceProvider().paginationService()
+        .builder()
+        .padding(Component.text("=").color(Formatter.THEME))
+        .title(Component.text(title).color(Formatter.GOLD));
   }
 
 }

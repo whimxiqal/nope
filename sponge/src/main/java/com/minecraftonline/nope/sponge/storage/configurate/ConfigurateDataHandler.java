@@ -32,7 +32,6 @@ import com.minecraftonline.nope.common.host.Universe;
 import com.minecraftonline.nope.common.setting.SettingKeys;
 import com.minecraftonline.nope.common.storage.DataHandler;
 import com.minecraftonline.nope.common.storage.DomainDataHandler;
-import com.minecraftonline.nope.common.storage.TemplateDataHandler;
 import com.minecraftonline.nope.common.storage.UniverseDataHandler;
 import com.minecraftonline.nope.common.storage.ZoneDataHandler;
 import java.util.List;
@@ -46,7 +45,6 @@ public abstract class ConfigurateDataHandler implements DataHandler {
   private final UniverseConfigurateDataHandler universeDataHandler;
   private final DomainConfigurateDataHandler domainDataHandler;
   private final ZoneConfigurateDataHandler zoneDataHandler;
-  private final TemplateConfigurateDataHandler templateConfigurateDataHandler;
 
   @Override
   public UniverseDataHandler universe() {
@@ -61,11 +59,6 @@ public abstract class ConfigurateDataHandler implements DataHandler {
   @Override
   public ZoneDataHandler zones() {
     return zoneDataHandler;
-  }
-
-  @Override
-  public TemplateDataHandler templates() {
-    return templateConfigurateDataHandler;
   }
 
   @Override

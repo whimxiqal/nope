@@ -24,41 +24,48 @@
  * SOFTWARE.
  */
 
-package com.minecraftonline.nope.sponge.command.tree.template.blank.create;
+package com.minecraftonline.nope.sponge.command.tree.host.blank.edit;
 
+import com.minecraftonline.nope.common.host.Host;
+import com.minecraftonline.nope.common.host.Zone;
 import com.minecraftonline.nope.common.permission.Permissions;
-import com.minecraftonline.nope.common.setting.template.Template;
+import com.minecraftonline.nope.common.util.Validate;
+import com.minecraftonline.nope.sponge.SpongeNope;
 import com.minecraftonline.nope.sponge.command.CommandNode;
 import com.minecraftonline.nope.sponge.command.parameters.ParameterKeys;
 import com.minecraftonline.nope.sponge.command.parameters.Parameters;
 import com.minecraftonline.nope.sponge.util.Formatter;
-import net.kyori.adventure.text.Component;
+import net.kyori.adventure.identity.Identity;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.parameter.CommandContext;
 
-public class CreateCommand extends CommandNode {
+public class NameCommand extends CommandNode {
 
-  public CreateCommand(CommandNode parent) {
-    super(parent,
-        Permissions.EDIT,
-        "Create a template of settings",
-        "create", "c");
-    prefix(Parameters.TEMPLATE);
+  public NameCommand(CommandNode parent) {
+    super(parent, Permissions.EDIT,
+        "Edit the name of a host",
+        "name");
     addParameter(Parameters.NAME);
-    addParameter(Parameters.DESCRIPTION);
   }
 
   @Override
   public CommandResult execute(CommandContext context) throws CommandException {
+    Host host = context.requireOne(ParameterKeys.HOST);
+    if (!(host instanceof Zone)) {
+      return CommandResult.error(Formatter.error("You may only rename zones"));
+    }
+    Zone zone = (Zone) host;
+
     String name = context.requireOne(ParameterKeys.NAME);
-    String description = context.requireOne(ParameterKeys.DESCRIPTION);
-    Template template = new Template(name, description);
-    context.cause()
-        .audience()
-        .sendMessage(Formatter.success("Created template ",
-            Component.text(template.name())));
+    if (Validate.invalidSettingCollectionName(name)) {
+      return CommandResult.error(Formatter.error("Zones can only have names with numbers, letters, and some special characters"));
+    }
+
+    Zone newZone = zone.shallowCopy(name);
+    SpongeNope.instance().hostSystem().removeZone(zone.name());
+    SpongeNope.instance().hostSystem().addZone(newZone);
+    context.sendMessage(Identity.nil(), Formatter.success("Zone name ___ changed to ___", zone.name(), newZone.name()));
     return CommandResult.success();
   }
-
 }

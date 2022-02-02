@@ -231,7 +231,6 @@ public class SpongeNope extends Nope {
   public void loadState() {
     hostSystem(data().loadSystem());
     hostSystem().addAllZones(data().zones().load());
-    templateSet(data().templates().load());
   }
 
   @Override

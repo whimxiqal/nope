@@ -29,7 +29,6 @@ package com.minecraftonline.nope.common.host;
 import com.minecraftonline.nope.common.math.Volume;
 import com.minecraftonline.nope.common.setting.Setting;
 import com.minecraftonline.nope.common.setting.SettingKey;
-import com.minecraftonline.nope.common.setting.template.TemplateSet;
 import com.minecraftonline.nope.common.struct.Location;
 import java.util.Collection;
 import java.util.Comparator;
@@ -64,10 +63,6 @@ public class HostSystem {
   protected final HashMap<String, Domain> domains = new HashMap<>();
 
   protected final HashMap<String, Zone> zones = new HashMap<>();
-
-  @Getter
-  @Accessors(fluent = true)
-  protected final TemplateSet templates = new TemplateSet();
 
   public HostSystem(Universe universe, Iterable<Domain> domains) {
     this.universe = universe;
