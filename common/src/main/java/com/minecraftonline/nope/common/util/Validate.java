@@ -43,20 +43,22 @@ public final class Validate {
    * @throws IllegalArgumentException the exception to throw if fails
    */
   public static boolean invalidSettingCollectionName(String name) throws IllegalArgumentException {
-    return !Pattern.compile("[a-zA-Z0-9\\-()& _]*").matcher(name).matches();
+    return !Pattern.compile("^[a-zA-Z0-9\\-()& _]*$").matcher(name).matches();
   }
 
   /**
    * Ensures that the input is in the kebab case format, but also allows periods.
    *
    * @param s            the input string
-   * @param errorMessage the error message to throw if fails
    * @throws IllegalArgumentException the exception to throw if fails
    */
-  public static void checkConfigFormat(String s, String errorMessage)
+  public static void checkPermissionName(String s)
       throws IllegalArgumentException {
-    if (Pattern.compile("[^a-z\\-\\.]*").matcher(s).find()) {
-      throw new IllegalArgumentException(errorMessage);
+    if (!Pattern.compile("^[a-z\\-.]*$").matcher(s).matches()) {
+      throw new IllegalArgumentException(
+          "Invalid permission id: \""
+              + s
+              + "\". Valid ids only contain characters 'a-z', '-', and '.'.");
     }
   }
 

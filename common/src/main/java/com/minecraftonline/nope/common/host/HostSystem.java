@@ -137,9 +137,7 @@ public class HostSystem {
   }
 
   public boolean hasName(String hostName) {
-    return universe.name().equalsIgnoreCase(hostName)
-        || domains().containsKey(hostName.toLowerCase())
-        || zones.containsKey(hostName.toLowerCase());
+    return host(hostName).isPresent();
   }
 
   public Collection<Zone> getAll() {
@@ -331,9 +329,9 @@ public class HostSystem {
 
   @NotNull
   public Domain domain(String name) {
-    Domain domain = domains.get(name);
+    Domain domain = domains.get(name.toLowerCase());
     if (domain == null) {
-      throw new IllegalArgumentException("There is no domain called: " + name);
+      throw new IllegalArgumentException("There is no domain called: " + name.toLowerCase());
     }
     return domain;
   }
@@ -346,4 +344,13 @@ public class HostSystem {
     return zones.get(name);
   }
 
+  public Optional<Host> host(String name) {
+    if (name.equalsIgnoreCase(universe.name())) {
+      return Optional.of(universe);
+    } else if (domains.containsKey(name.toLowerCase())) {
+      return Optional.of(domains.get(name.toLowerCase()));
+    } else {
+      return Optional.ofNullable(zones.get(name.toLowerCase()));
+    }
+  }
 }

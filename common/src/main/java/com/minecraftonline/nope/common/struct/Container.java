@@ -26,10 +26,18 @@
 
 package com.minecraftonline.nope.common.struct;
 
-import com.minecraftonline.nope.common.struct.Location;
-
+/**
+ * An object that contains {@link Location}s.
+ */
 public interface Container {
 
+  /**
+   * True if this container contains this location,
+   * false if this location is outside this container.
+   *
+   * @param location the location
+   * @return true if this contains the location
+   */
   boolean contains(Location location);
 
 }

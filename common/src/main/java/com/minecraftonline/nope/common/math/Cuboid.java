@@ -35,6 +35,10 @@ import lombok.Getter;
 import lombok.experimental.Accessors;
 import org.jetbrains.annotations.NotNull;
 
+/**
+ * A representation of a (rectangular) <a href=https://en.wikipedia.org/wiki/Cuboid>Cuboid</a>.
+ */
+@SuppressWarnings("AbbreviationAsWordInName")
 public class Cuboid extends Volume {
 
   private final Integer minX;
@@ -77,7 +81,19 @@ public class Cuboid extends Volume {
   @Accessors(fluent = true)
   private final double radiusCircumscribedSphere;
 
-  // TODO Build a "selection" class in the tool/selection folders, not in the structure class (same with other volumes)
+  /**
+   * General constructor.
+   * The first and second set of co-ordinate values do not have
+   * to be organized. As in, the x1 value need not be less than the x2 value.
+   *
+   * @param domain the domain
+   * @param x1     first x value
+   * @param y1     first y value
+   * @param z1     first z value
+   * @param x2     second x value
+   * @param y2     second y value
+   * @param z2     second z value
+   */
   public Cuboid(Domain domain,
                 Integer x1,
                 Integer y1,
@@ -114,26 +130,56 @@ public class Cuboid extends Volume {
     this.radiusCircumscribedSphere = Math.sqrt(lengthX * lengthX + lengthY * lengthY + lengthZ * lengthZ);
   }
 
+  /**
+   * The minimum X value.
+   *
+   * @return min x
+   */
   public int minX() {
     return minX;
   }
 
+  /**
+   * The minimum Y value.
+   *
+   * @return min y
+   */
   public int minY() {
     return minY;
   }
 
+  /**
+   * The minimum Z value.
+   *
+   * @return min z
+   */
   public int minZ() {
     return minZ;
   }
 
+  /**
+   * The maximum X value.
+   *
+   * @return max x
+   */
   public int maxX() {
     return maxX;
   }
 
+  /**
+   * The maximum Y value.
+   *
+   * @return max y
+   */
   public int maxY() {
     return maxY;
   }
 
+  /**
+   * The maximum Z value.
+   *
+   * @return max z
+   */
   public int maxZ() {
     return maxZ;
   }

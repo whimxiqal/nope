@@ -35,6 +35,7 @@ import com.minecraftonline.nope.common.setting.SettingCollection;
 import com.minecraftonline.nope.common.setting.SettingKey;
 import com.minecraftonline.nope.common.setting.SettingValue;
 import com.minecraftonline.nope.common.setting.Target;
+import com.minecraftonline.nope.sponge.SpongeNope;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Arrays;
@@ -71,9 +72,56 @@ public final class Formatter {
   public static final TextColor SEPARATOR = TextColor.color(64, 64, 64);
   public static final Component SPACE = Component.text(" ");
   public static final TextColor SUCCESS = TextColor.color(11, 181, 38);
-  public static final TextColor THEME = TextColor.color(85, 53, 166);
-  public static final TextColor URL = TextColor.color(0, 57, 214);
+  public static final TextColor THEME = TextColor.color(161, 95, 232);
+  public static final TextColor URL = TextColor.color(66, 105, 224);
   public static final TextColor WARN = TextColor.color(255, 157, 10);
+  public static final Component WELCOME =
+      Component.text()
+          .append(Component.newline())
+          .append(Component.text("======================================="))
+          .color(DULL)
+          .append(Component.newline())
+          .append(Component.text("Nope v" + SpongeNope.instance()
+                  .pluginContainer()
+                  .metadata()
+                  .version()
+                  .toString())
+              .color(THEME))
+          .append(Component.text(" by").color(DULL))
+          .append(Component.text(" PietElite").color(ACCENT))
+          .append(Component.newline()).append(Component.newline())
+          .append(Component.text("Read the source code ")
+              .color(INFO)
+              .append(SpongeNope.instance()
+                  .pluginContainer()
+                  .metadata()
+                  .links()
+                  .source()
+                  .map(url -> url("here", url.toExternalForm()))
+                  .orElse(Component.text("in our repository")))
+              .append(Component.text(" and submit"))
+              .append(Component.newline())
+              .append(Component.text("any bug reports or suggestions "))
+              .append(SpongeNope.instance()
+                  .pluginContainer()
+                  .metadata()
+                  .links()
+                  .issues()
+                  .map(url -> url("here", url.toExternalForm()))
+                  .orElse(Component.text("on our issue tracker"))))
+          .append(Component.newline()).append(Component.newline())
+          .append(Component.text("Learn how to use Nope with the ")
+              .color(DULL)
+              .append(commandSuggest("help",
+                  "/nope help",
+                  Component.text("Learn how to use the Nope commands")
+                      .color(ACCENT)
+                      .append(Component.newline())
+                      .append(Component.text("Tip: You can always put \"?\" or \"help\""
+                          + " at the end of any command to learn how it works!"))))
+              .append(Component.text(" command.").color(DULL)))
+          .build();
+
   public static final TextColor WHITE = TextColor.color(255, 255, 255);
 
   public static Component prefix() {
@@ -84,15 +132,7 @@ public final class Formatter {
   }
 
   private static Component formattedMessage(TextColor color, String message, boolean prefix, Object... accented) {
-    LinkedList<String> tokenList = new LinkedList<>(Arrays.asList(message.split(FORMAT_ACCENT_REGEX)));
-
-    // Make sure that things can be inserted at the beginning and end (split doesn't cover those cases)
-//    if (message.startsWith(FORMAT_ACCENT_REGEX)) {
-//      tokenList.addFirst("");
-//    }
-    if (message.endsWith(FORMAT_ACCENT_REGEX)) {
-      tokenList.addLast("");
-    }
+    LinkedList<String> tokenList = new LinkedList<>(Arrays.asList(message.split(FORMAT_ACCENT_REGEX, -1)));
 
     TextComponent.Builder builder = Component.text();
     if (prefix) {
@@ -110,91 +150,73 @@ public final class Formatter {
     return builder.build();
   }
 
-
   public static Component success(String message) {
     return success(Component.text(message));
   }
-
 
   public static Component success(String message, Object... insertions) {
     return formattedMessage(SUCCESS, message, true, insertions);
   }
 
-
   public static Component success(Component message) {
     return prefix().append(message).color(SUCCESS);
   }
-
 
   public static Component error(String message) {
     return error(Component.text(message));
   }
 
-
   public static Component error(String message, Object... insertions) {
     return formattedMessage(ERROR, message, true, insertions);
   }
-
 
   public static Component error(Component message) {
     return prefix().append(message).color(ERROR);
   }
 
-
   public static Component warn(String message) {
     return warn(Component.text(message));
   }
-
 
   public static Component warn(String message, Object... insertions) {
     return formattedMessage(WARN, message, true, insertions);
   }
 
-
   public static Component warn(Component message) {
     return prefix().append(message).color(WARN);
   }
-
 
   public static Component info(String message) {
     return info(Component.text(message));
   }
 
-
   public static Component info(String message, Object... insertions) {
     return formattedMessage(INFO, message, true, insertions);
   }
-
 
   public static Component info(Component message) {
     return prefix().append(message).color(INFO);
   }
 
-
   public static Component accent(String message) {
     return Component.text(message).color(ACCENT);
   }
-
 
   public static Component accent(String message, Object... insertions) {
     return formattedMessage(WHITE, message, false, insertions);
   }
 
-
   public static Component keyValue(String key, String value) {
     return keyValue(key, Component.text(value));
   }
-
 
   public static Component keyValue(String key, Component value) {
     return keyValue(ACCENT, key, value);
   }
 
-
   public static Component keyValue(TextColor keyColor, String key, String value) {
     return keyValue(keyColor, key, Component.text(value));
   }
-
 
   public static Component keyValue(TextColor keyColor, String key, Component value) {
     return Component.text()
@@ -204,17 +226,14 @@ public final class Formatter {
         .build();
   }
 
-
   public static Component hover(String label, String onHover) {
     return hover(Component.text(label).decorate(TextDecoration.ITALIC),
         Component.text(onHover));
   }
 
-
   public static Component hover(Component label, Component onHover) {
     return label.hoverEvent(HoverEvent.showText(onHover));
   }
-
 
   public static Component url(@NotNull String label, @NotNull String url) {
     TextComponent.Builder textBuilder = Component.text();
@@ -231,20 +250,17 @@ public final class Formatter {
     return textBuilder.build();
   }
 
-
   public static Component commandSuggest(@NotNull String label,
                                          @NotNull String command,
                                          @Nullable Component hoverMessage) {
     return command(label, command, hoverMessage, true, true);
   }
 
-
   public static Component command(@NotNull String label,
                                   @NotNull String command,
                                   @Nullable Component hoverMessage) {
     return command(label, command, hoverMessage, true, false);
   }
-
 
   public static Component command(@NotNull String label,
                                   @NotNull String command,
@@ -267,12 +283,12 @@ public final class Formatter {
             : ClickEvent.runCommand(command));
 
     if (hoverMessage != null) {
-      builder.hoverEvent(HoverEvent.showText(hoverMessage.append(Component.text("\n" + command))));
+      builder.hoverEvent(HoverEvent.showText(hoverMessage.color(ACCENT)
+          .append(Component.text("\n" + command).color(DULL))));
     }
 
     return builder.build();
   }
-
 
   public static Component host(@NotNull Host host) {
     String name = host.name();
@@ -284,7 +300,6 @@ public final class Formatter {
         false
     );
   }
-
 
   public static <T, V extends SettingValue<T>> Component settingKey(SettingKey<T, V, ?> key, boolean verbose) {
     TextComponent.Builder idText = Component.text().append(Component.text(key.id()).color(ACCENT));
@@ -333,7 +348,6 @@ public final class Formatter {
 
     return builder.build();
   }
-
 
   public static <T, V extends SettingValue<T>> CompletableFuture<List<Component>> setting(Setting<T, V> setting,
                                                                                           Subject subject,
@@ -429,4 +443,7 @@ public final class Formatter {
         .title(Component.text(title).color(Formatter.GOLD));
   }
 
+  public static void dull(String s) {
+    formattedMessage(DULL, s, false);
+  }
 }

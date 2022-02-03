@@ -48,7 +48,7 @@ public class HostShowCommand extends CommandNode {
         "Show the boundaries of volumes",
         "show");
     prefix(Parameters.HOST);
-    addParameter(Parameters.INDEX_OPTIONAL);
+    addParameter(Parameters.VOLUME_INDEX_OPTIONAL);
   }
 
   @Override
@@ -68,7 +68,7 @@ public class HostShowCommand extends CommandNode {
     }
     Zone zone = (Zone) host;
 
-    Optional<Integer> index = context.one(ParameterKeys.INDEX);
+    Optional<Integer> index = context.one(ParameterKeys.VOLUME_INDEX);
     if (index.isPresent()) {
       try {
         if (EffectsUtil.show(zone.volumes().get(index.get()), player)) {

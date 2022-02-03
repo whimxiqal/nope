@@ -29,7 +29,7 @@ package com.minecraftonline.nope.common.setting.sets;
 import com.minecraftonline.nope.common.struct.HashAltSet;
 import java.util.Collection;
 
-public class FewStringSet extends HashAltSet.FewLimited<String> {
+public class FewStringSet extends HashAltSet.FewStandard<String> {
   public FewStringSet(Collection<String> options) {
     super(options);
   }

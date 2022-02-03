@@ -34,19 +34,13 @@ import lombok.experimental.Accessors;
 /**
  * A generic Minecraft location.
  */
+@Getter
+@Accessors(fluent = true)
 public class Location {
 
-  @Getter
-  @Accessors(fluent = true)
   private final double posX;
-  @Getter
-  @Accessors(fluent = true)
   private final double posY;
-  @Getter
-  @Accessors(fluent = true)
   private final double posZ;
-  @Getter
-  @Accessors(fluent = true)
   private final Domain domain;
 
   public Location(int x, int y, int z, Domain domain) {

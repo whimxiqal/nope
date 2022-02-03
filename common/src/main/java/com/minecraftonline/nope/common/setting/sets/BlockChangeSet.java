@@ -29,8 +29,14 @@ package com.minecraftonline.nope.common.setting.sets;
 import com.minecraftonline.nope.common.struct.Described;
 import com.minecraftonline.nope.common.struct.HashAltSet;
 
+/**
+ * A set of all possible block changes acknowledged by Nope.
+ */
 public class BlockChangeSet extends HashAltSet.FewEnum<BlockChangeSet.BlockChange> {
 
+  /**
+   * Default constructor.
+   */
   public BlockChangeSet() {
     super(BlockChange.class);
   }

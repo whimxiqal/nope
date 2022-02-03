@@ -26,15 +26,40 @@
 
 package com.minecraftonline.nope.common.util;
 
+import java.util.Arrays;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
+/**
+ * A {@link Predicate} that tells whether the tested strings contain letters
+ * in the same order as provided in the original constructor's string.
+ * <b>The letters do not have to consecutive.</b>
+ * This is supposed to allow for more lenient tab-completion.
+ */
 public class ContainsInOrderPredicate implements Predicate<String> {
 
   private final Pattern pattern;
 
-  public ContainsInOrderPredicate(String string) {
-    this.pattern = Pattern.compile(".*" + String.join(".*", string.split("")) + ".*");
+  /**
+   * Generic constructor.
+   * The series of letters in the input string here will be checked against
+   * all the strings in the tests to see if those test strings
+   * contain these letters in the given order.
+   *
+   * @param letters the input string
+   */
+  public ContainsInOrderPredicate(String letters) {
+    if (letters.isEmpty()) {
+      this.pattern = Pattern.compile(".*");
+    } else {
+      this.pattern = Pattern.compile(".*" + Arrays.stream(letters.substring(0,
+                  Math.min(letters.length(), 32))
+              .split(""))
+          .map(letter -> "[" + letter.toLowerCase() + letter.toUpperCase() + "]")
+          .collect(Collectors.joining(".*"))
+          + ".*");
+    }
   }
 
   @Override

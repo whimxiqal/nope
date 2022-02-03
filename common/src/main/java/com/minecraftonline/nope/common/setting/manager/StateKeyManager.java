@@ -38,7 +38,7 @@ public class StateKeyManager extends BooleanKeyManager {
   public StateKeyManager() {
     super();
     this.suggestions = this.options.entrySet().stream()
-        .filter(entry -> entry.getKey().equals("true") || entry.getKey().equals("false"))
+        .filter(entry -> entry.getKey().equals("allow") || entry.getKey().equals("deny"))
         .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
   }
 

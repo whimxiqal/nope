@@ -29,22 +29,36 @@ package com.minecraftonline.nope.common.setting.manager;
 import com.minecraftonline.nope.common.setting.SettingKey;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 import org.jetbrains.annotations.NotNull;
 
+/**
+ * A manager for a {@link SettingKey.Unary} holding a {@link Boolean}.
+ */
 public class BooleanKeyManager extends SettingKey.Manager.Unary<Boolean> {
 
   protected final Map<String, Object> options;
+  private final Map<String, Object> suggestions;
 
+  /**
+   * Default constructor.
+   */
   public BooleanKeyManager() {
     this.options = new HashMap<>();
     options.put("t", "Enable behavior");
     options.put("true", "Enable behavior");
-    options.put("allow", "Enable behavior");
+    options.put("allow", "Permit behavior");
     options.put("on", "Enable behavior");
+    options.put("enable", "Enable behavior");
     options.put("f", "Disable behavior");
     options.put("false", "Disable behavior");
-    options.put("deny", "Disable behavior");
+    options.put("deny", "Prohibit behavior");
     options.put("off", "Disable behavior");
+    options.put("disable", "Disable behavior");
+
+    this.suggestions = this.options.entrySet().stream()
+        .filter(entry -> entry.getKey().equals("true") || entry.getKey().equals("false"))
+        .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
   }
 
   @Override
@@ -73,7 +87,12 @@ public class BooleanKeyManager extends SettingKey.Manager.Unary<Boolean> {
 
   @Override
   public @NotNull Map<String, Object> elementOptions() {
-    return options;
+    return this.options;
+  }
+
+  @Override
+  public @NotNull Map<String, Object> elementSuggestions() {
+    return this.suggestions;
   }
 
   @Override

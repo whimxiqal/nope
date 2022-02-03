@@ -37,6 +37,9 @@ import org.spongepowered.api.block.transaction.BlockTransaction;
 import org.spongepowered.api.entity.explosive.Explosive;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
 
+/**
+ *
+ */
 public class DestructiveExplosivesBlockListener implements SettingEventListener<AltSet<ExplosiveSet.Explosive>, ChangeBlockEvent.All> {
   @Override
   public void handle(ChangeBlockEvent.All event,

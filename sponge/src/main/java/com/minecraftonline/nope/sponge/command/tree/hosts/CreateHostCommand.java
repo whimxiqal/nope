@@ -27,6 +27,7 @@
 package com.minecraftonline.nope.sponge.command.tree.hosts;
 
 import com.minecraftonline.nope.common.Nope;
+import com.minecraftonline.nope.common.host.Host;
 import com.minecraftonline.nope.common.host.Zone;
 import com.minecraftonline.nope.common.permission.Permissions;
 import com.minecraftonline.nope.sponge.command.CommandNode;
@@ -34,6 +35,7 @@ import com.minecraftonline.nope.sponge.command.parameters.Flags;
 import com.minecraftonline.nope.sponge.command.parameters.ParameterKeys;
 import com.minecraftonline.nope.sponge.command.parameters.Parameters;
 import com.minecraftonline.nope.sponge.util.Formatter;
+import java.util.Optional;
 import net.kyori.adventure.text.Component;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.exception.CommandException;
@@ -46,18 +48,19 @@ public class CreateHostCommand extends CommandNode {
         Permissions.CREATE,
         "Create a zone",
         "create");
-    addParameter(Parameters.NAME);
+    addParameter(Parameters.HOST_NAME);
     addFlag(Flags.PARENT);
     addFlag(Flags.PRIORITY);
   }
 
   @Override
   public CommandResult execute(CommandContext context) throws CommandException {
-    String name = context.requireOne(ParameterKeys.NAME);
-    if (Nope.instance().hostSystem().hasName(name)) {
+    String name = context.requireOne(ParameterKeys.HOST_NAME);
+
+    Optional<Host> existingHost = Nope.instance().hostSystem().host(name);
+    if (existingHost.isPresent()) {
       return CommandResult.error(Formatter.error(
-          "A host already exists with the name ___", name
-      ));
+          "A host already exists with the name ___", existingHost.get().name()));
     }
     Zone parent = context.one(ParameterKeys.PARENT).orElse(null);
     int priority = context.one(ParameterKeys.PRIORITY).orElse(0);

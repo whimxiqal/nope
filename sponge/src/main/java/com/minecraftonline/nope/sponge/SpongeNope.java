@@ -42,7 +42,6 @@ import com.minecraftonline.nope.sponge.key.NopeKeys;
 import com.minecraftonline.nope.sponge.listener.NopeSettingListeners;
 import com.minecraftonline.nope.sponge.listener.SettingListenerStore;
 import com.minecraftonline.nope.sponge.listener.always.MovementListener;
-import com.minecraftonline.nope.sponge.mixin.collision.CollisionHandler;
 import com.minecraftonline.nope.sponge.setting.manager.SpongeSettingKeyManagerUtil;
 import com.minecraftonline.nope.sponge.storage.hocon.HoconDataHandler;
 import com.minecraftonline.nope.sponge.tool.SelectionHandler;
@@ -52,8 +51,8 @@ import java.nio.file.Path;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import lombok.Getter;
-import lombok.Setter;
 import lombok.experimental.Accessors;
+import org.bstats.sponge.Metrics;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.Command;
 import org.spongepowered.api.config.ConfigDir;
@@ -77,37 +76,30 @@ import org.spongepowered.plugin.builtin.jvm.Plugin;
  * @author Pieter Svenson
  */
 @Plugin("nope")
+@Getter
+@Accessors(fluent = true)
 public class SpongeNope extends Nope {
 
   @Getter
   @Accessors(fluent = true)
   private static SpongeNope instance;
-  @Getter
-  @Accessors(fluent = true)
   private final SelectionHandler selectionHandler = new SelectionHandler();
   private final PluginContainer pluginContainer;
-  @Getter
-  @Accessors(fluent = true)
   private SettingListenerStore settingListeners;
-  @Getter
-  @Accessors(fluent = true)
   private RootCommand rootCommand;
   @Inject
-  @Getter
   @ConfigDir(sharedRoot = false)
   private Path configDir;
-  @Getter
-  private CollisionHandler collisionHandler;
-  //  @Getter
-//  private PlayerMovementHandler playerMovementHandler;
-  @Getter
-  @Setter
   private boolean valid = true;
 
+  // B stats
+  private final Metrics metrics;
+
   @Inject
-  public SpongeNope(final PluginContainer pluginContainer) {
+  public SpongeNope(final PluginContainer pluginContainer, final Metrics.Factory metricsFactory) {
     super(new SpongeLogger());
     this.pluginContainer = pluginContainer;
+    this.metrics = metricsFactory.make(14163);
   }
 
   /**
@@ -185,7 +177,7 @@ public class SpongeNope extends Nope {
     NopeSettingListeners.register();
     Sponge.eventManager().post(new SettingListenerRegistrationEvent(
         registration -> {
-          instance().settingListeners().stage(registration);
+          settingListeners().stage(registration);
           registration.settingKey().functional(true);
         },
         event.game(),
@@ -245,7 +237,4 @@ public class SpongeNope extends Nope {
         .build());
   }
 
-  public PluginContainer pluginContainer() {
-    return pluginContainer;
-  }
 }

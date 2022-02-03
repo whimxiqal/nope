@@ -39,12 +39,16 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import net.kyori.adventure.text.Component;
+import org.jetbrains.annotations.Nullable;
 import org.spongepowered.api.data.Keys;
+import org.spongepowered.api.data.type.HandType;
 import org.spongepowered.api.data.type.HandTypes;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.Item;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
+import org.spongepowered.api.event.Cancellable;
+import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.Order;
 import org.spongepowered.api.event.block.InteractBlockEvent;
@@ -77,185 +81,202 @@ public class SelectionHandler {
   }
 
   public boolean isTool(ValueContainer stack) {
-    return isBoxTool(stack)
-        || isCylinderTool(stack)
-        || isSlabTool(stack)
-        || isSphereTool(stack);
+    return toolType(stack) != null;
   }
 
-  public ItemStack boxTool() {
-    ItemStack itemStack = ItemStack.builder()
-        .itemType(ItemTypes.STICK)
-        .build();
-    itemStack.offer(Keys.CUSTOM_NAME, Component.text("Nope Tool: ").color(Formatter.THEME)
-        .append(Component.text("Box").color(Formatter.ACCENT)));
-    itemStack.offer(Keys.LORE, Lists.newArrayList(
-        Formatter.accent("A tool to select a ___",
-            "box"),
-        Formatter.accent("___ to select the ___ position", "Left-click", "first"),
-        Formatter.accent("___ to select the ___ position", "Right-click", "second"),
-        Formatter.accent("These will be the corners of the box")));
-    itemStack.offer(NopeKeys.SELECTION_TOOL_CUBOID, true);
-    return itemStack;
+  @Nullable
+  public Selection.Type toolType(ValueContainer stack) {
+    for (Selection.Type type : Selection.Type.values()) {
+      if (isTool(stack, type)) {
+        return type;
+      }
+    }
+    return null;
   }
 
-  public boolean isBoxTool(ValueContainer stack) {
-    return stack.get(NopeKeys.SELECTION_TOOL_CUBOID).isPresent();
+  public boolean isTool(ValueContainer stack, Selection.Type type) {
+    switch (type) {
+      case CUBOID:
+        return stack.get(NopeKeys.SELECTION_TOOL_CUBOID).isPresent();
+      case CYLINDER:
+        return stack.get(NopeKeys.SELECTION_TOOL_CYLINDER).isPresent();
+      case SLAB:
+        return stack.get(NopeKeys.SELECTION_TOOL_SLAB).isPresent();
+      case SPHERE:
+        return stack.get(NopeKeys.SELECTION_TOOL_SPHERE).isPresent();
+      default:
+        return false;
+    }
   }
 
-  public ItemStack cylinderTool() {
-    ItemStack itemStack = ItemStack.builder()
-        .itemType(ItemTypes.STICK)
-        .build();
-    itemStack.offer(Keys.CUSTOM_NAME, Component.text("Nope Tool: ").color(Formatter.THEME)
-        .append(Component.text("Cylinder").color(Formatter.ACCENT)));
-    itemStack.offer(Keys.LORE, Lists.newArrayList(
-        Formatter.accent("A tool to select a ___",
-            "cylinder"),
-        Formatter.accent("___ to select the ___ position", "Left-click", "first"),
-        Formatter.accent("___ to select the ___ position", "Right-click", "second"),
-        Formatter.accent("___ position defines the ___", "First", "center"),
-        Formatter.accent("___ is the distance between ___ and ___ positions in x-z plane",
-            "Radius", "first", "second"),
-        Formatter.accent("___ is the distance between ___ and ___ positions in y axis",
-            "Height", "first", "second")));
-    itemStack.offer(NopeKeys.SELECTION_TOOL_CYLINDER, true);
-    return itemStack;
-  }
-
-  public boolean isCylinderTool(ValueContainer stack) {
-    return stack.get(NopeKeys.SELECTION_TOOL_CYLINDER).isPresent();
-  }
-
-  public ItemStack sphereTool() {
-    ItemStack itemStack = ItemStack.builder()
-        .itemType(ItemTypes.STICK)
-        .build();
-    itemStack.offer(Keys.CUSTOM_NAME, Component.text("Nope Tool: ").color(Formatter.THEME)
-        .append(Component.text("Sphere").color(Formatter.ACCENT)));
-    itemStack.offer(Keys.LORE, Lists.newArrayList(
-        Formatter.accent("A tool to select a ___",
-            "sphere"),
-        Formatter.accent("___ to select the ___ position", "Left-click", "first"),
-        Formatter.accent("___ to select the ___ position", "Right-click", "second"),
-        Formatter.accent("___ is the distance between ___ and ___ positions in y axis", "Height", "first", "second")));
-    itemStack.offer(NopeKeys.SELECTION_TOOL_SPHERE, true);
-    return itemStack;
-  }
-
-  public boolean isSphereTool(ValueContainer stack) {
-    return stack.get(NopeKeys.SELECTION_TOOL_SPHERE).isPresent();
-  }
-
-  public ItemStack slabTool() {
-    ItemStack itemStack = ItemStack.builder()
-        .itemType(ItemTypes.STICK)
-        .build();
-    itemStack.offer(Keys.CUSTOM_NAME, Component.text("Nope Tool: ").color(Formatter.THEME)
-        .append(Component.text("Slab").color(Formatter.ACCENT)));
-    itemStack.offer(Keys.LORE, Lists.newArrayList(
-        Formatter.accent("A tool to select a ___",
-            "slab"),
-        Formatter.accent("___ to select the ___ position", "Left-click", "first"),
-        Formatter.accent("___ to select the ___ position", "Right-click", "second")));
-    itemStack.offer(NopeKeys.SELECTION_TOOL_SLAB, true);
-    return itemStack;
-  }
-
-  public boolean isSlabTool(ValueContainer stack) {
-    return stack.get(NopeKeys.SELECTION_TOOL_SLAB).isPresent();
+  public ItemStack createTool(Selection.Type type) {
+    ItemStack itemStack;
+    switch (type) {
+      case CUBOID:
+        itemStack = ItemStack.builder()
+            .itemType(ItemTypes.STICK)
+            .build();
+        itemStack.offer(Keys.CUSTOM_NAME, Component.text("Nope Tool: ").color(Formatter.THEME)
+            .append(Component.text("Box").color(Formatter.ACCENT)));
+        itemStack.offer(Keys.LORE, Lists.newArrayList(
+            Formatter.accent("A tool to select a ___",
+                "box"),
+            Formatter.accent("___ to select the ___ position", "Left-click", "first"),
+            Formatter.accent("___ to select the ___ position", "Right-click", "second"),
+            Formatter.accent("These will be the corners of the box")));
+        Formatter.dull("Sneak and left- or right-click to rotate the type of tool");
+        itemStack.offer(NopeKeys.SELECTION_TOOL_CUBOID, true);
+        return itemStack;
+      case CYLINDER:
+        itemStack = ItemStack.builder()
+            .itemType(ItemTypes.STICK)
+            .build();
+        itemStack.offer(Keys.CUSTOM_NAME, Component.text("Nope Tool: ").color(Formatter.THEME)
+            .append(Component.text("Cylinder").color(Formatter.ACCENT)));
+        itemStack.offer(Keys.LORE, Lists.newArrayList(
+            Formatter.accent("A tool to select a ___",
+                "cylinder"),
+            Formatter.accent("___ to select the ___ position", "Left-click", "first"),
+            Formatter.accent("___ to select the ___ position", "Right-click", "second"),
+            Formatter.accent("___ position defines the ___", "First", "center"),
+            Formatter.accent("___ is the distance between ___ and", "Radius", "first"),
+            Formatter.accent("   ___ positions in the x-z plane", "second"),
+            Formatter.accent("___ is the distance between ___ and ", "Height", "first"),
+            Formatter.accent("   ___ positions on the y axis", "second")));
+        itemStack.offer(NopeKeys.SELECTION_TOOL_CYLINDER, true);
+        return itemStack;
+      case SPHERE:
+        itemStack = ItemStack.builder()
+            .itemType(ItemTypes.STICK)
+            .build();
+        itemStack.offer(Keys.CUSTOM_NAME, Component.text("Nope Tool: ").color(Formatter.THEME)
+            .append(Component.text("Sphere").color(Formatter.ACCENT)));
+        itemStack.offer(Keys.LORE, Lists.newArrayList(
+            Formatter.accent("A tool to select a ___",
+                "sphere"),
+            Formatter.accent("___ to select the ___ position", "Left-click", "first"),
+            Formatter.accent("___ to select the ___ position", "Right-click", "second"),
+            Formatter.accent("___ is the distance between ___ and", "Height", "first"),
+            Formatter.accent("   ___ positions on the y axis", "second")));
+        itemStack.offer(NopeKeys.SELECTION_TOOL_SPHERE, true);
+        return itemStack;
+      case SLAB:
+        itemStack = ItemStack.builder()
+            .itemType(ItemTypes.STICK)
+            .build();
+        itemStack.offer(Keys.CUSTOM_NAME, Component.text("Nope Tool: ").color(Formatter.THEME)
+            .append(Component.text("Slab").color(Formatter.ACCENT)));
+        itemStack.offer(Keys.LORE, Lists.newArrayList(
+            Formatter.accent("A tool to select a ___",
+                "slab"),
+            Formatter.accent("___ to select the ___ y value", "Left-click", "first"),
+            Formatter.accent("___ to select the ___ y value", "Right-click", "second")));
+        itemStack.offer(NopeKeys.SELECTION_TOOL_SLAB, true);
+        return itemStack;
+      default:
+        throw new IllegalArgumentException("Unknown type: " + type);
+    }
   }
 
   @Listener(order = Order.FIRST)
   public void onSelect(InteractBlockEvent.Primary.Start event) {
-    Optional<ServerPlayer> playerOptional = event.cause().first(ServerPlayer.class);
-    if (!playerOptional.isPresent()) {
-      return;
-    }
-
-    ServerPlayer player = playerOptional.get();
-    Optional<ServerLocation> locationOptional = event.block().location();
-    if (!locationOptional.isPresent()) {
-      return;
-    }
-    ServerLocation location = locationOptional.get();
-
-    ItemStack itemStack = player.itemInHand(HandTypes.MAIN_HAND);
-    if (isBoxTool(itemStack)) {
-      updateSelection(player,
-          boxDrafts.computeIfAbsent(player.uniqueId(), uuid -> new CuboidSelection()),
-          SpongeNope.instance().hostSystem().domain(SpongeUtil.worldToId(location.world())),
-          Vector3i.of(location.blockX(), location.blockY(), location.blockZ()),
-          true);
-      event.setCancelled(true);
-    } else if (isCylinderTool(itemStack)) {
-      updateSelection(player,
-          cylinderDrafts.computeIfAbsent(player.uniqueId(), uuid -> new CylinderSelection()),
-          SpongeNope.instance().hostSystem().domain(SpongeUtil.worldToId(location.world())),
-          Vector3i.of(location.blockX(), location.blockY(), location.blockZ()),
-          true);
-      event.setCancelled(true);
-    } else if (isSphereTool(itemStack)) {
-      updateSelection(player,
-          sphereDrafts.computeIfAbsent(player.uniqueId(), uuid -> new SphereSelection()),
-          SpongeNope.instance().hostSystem().domain(SpongeUtil.worldToId(location.world())),
-          Vector3i.of(location.blockX(), location.blockY(), location.blockZ()),
-          true);
-      event.setCancelled(true);
-    } else if (isSlabTool(itemStack)) {
-      updateSelection(player,
-          slabDrafts.computeIfAbsent(player.uniqueId(), uuid -> new SlabSelection()),
-          SpongeNope.instance().hostSystem().domain(SpongeUtil.worldToId(location.world())),
-          Vector3i.of(location.blockX(), location.blockY(), location.blockZ()),
-          true);
-      event.setCancelled(true);
-    }
+    onSelect(event, true);
   }
 
   @Listener(order = Order.FIRST)
   public void onSelect(InteractBlockEvent.Secondary event) {
+    Optional<HandType> handType = event.context().get(EventContextKeys.USED_HAND);
+    if (handType.isPresent() && handType.get().equals(HandTypes.MAIN_HAND.get())) {
+      onSelect(event, false);
+    }
+  }
+
+  private <E extends InteractBlockEvent & Cancellable> void onSelect(E event,
+                                                                     boolean first) {
     Optional<ServerPlayer> playerOptional = event.cause().first(ServerPlayer.class);
     if (!playerOptional.isPresent()) {
       return;
     }
-
     ServerPlayer player = playerOptional.get();
-    Optional<ServerLocation> locationOptional = event.block().location();
-    if (!locationOptional.isPresent()) {
+    ItemStack itemStack = player.itemInHand(HandTypes.MAIN_HAND);
+    Selection.Type toolType = toolType(itemStack);
+    if (toolType == null) {
       return;
     }
-    ServerLocation location = locationOptional.get();
-
-    ItemStack itemStack = player.itemInHand(HandTypes.MAIN_HAND);
-    if (isBoxTool(itemStack)) {
-      updateSelection(player,
-          boxDrafts.computeIfAbsent(player.uniqueId(), uuid -> new CuboidSelection()),
-          SpongeNope.instance().hostSystem().domain(SpongeUtil.worldToId(location.world())),
-          Vector3i.of(location.blockX(), location.blockY(), location.blockZ()),
-          false);
-      event.setCancelled(true);
-    } else if (isCylinderTool(itemStack)) {
-      updateSelection(player,
-          cylinderDrafts.computeIfAbsent(player.uniqueId(), uuid -> new CylinderSelection()),
-          SpongeNope.instance().hostSystem().domain(SpongeUtil.worldToId(location.world())),
-          Vector3i.of(location.blockX(), location.blockY(), location.blockZ()),
-          false);
-      event.setCancelled(true);
-    } else if (isSphereTool(itemStack)) {
-      updateSelection(player,
-          sphereDrafts.computeIfAbsent(player.uniqueId(), uuid -> new SphereSelection()),
-          SpongeNope.instance().hostSystem().domain(SpongeUtil.worldToId(location.world())),
-          Vector3i.of(location.blockX(), location.blockY(), location.blockZ()),
-          false);
-      event.setCancelled(true);
-    } else if (isSlabTool(itemStack)) {
-      updateSelection(player,
-          slabDrafts.computeIfAbsent(player.uniqueId(), uuid -> new SlabSelection()),
-          SpongeNope.instance().hostSystem().domain(SpongeUtil.worldToId(location.world())),
-          Vector3i.of(location.blockX(), location.blockY(), location.blockZ()),
-          false);
-      event.setCancelled(true);
+    if (player.sneaking().get()) {
+      if (first) {
+        switch (toolType) {
+          case CUBOID:
+            player.setItemInHand(HandTypes.MAIN_HAND, createTool(Selection.Type.CYLINDER));
+            break;
+          case CYLINDER:
+            player.setItemInHand(HandTypes.MAIN_HAND, createTool(Selection.Type.SPHERE));
+            break;
+          case SPHERE:
+            player.setItemInHand(HandTypes.MAIN_HAND, createTool(Selection.Type.SLAB));
+            break;
+          case SLAB:
+            player.setItemInHand(HandTypes.MAIN_HAND, createTool(Selection.Type.CUBOID));
+            break;
+          default:
+        }
+      } else {
+        switch (toolType) {
+          case CUBOID:
+            player.setItemInHand(HandTypes.MAIN_HAND, createTool(Selection.Type.SLAB));
+            break;
+          case CYLINDER:
+            player.setItemInHand(HandTypes.MAIN_HAND, createTool(Selection.Type.CUBOID));
+            break;
+          case SPHERE:
+            player.setItemInHand(HandTypes.MAIN_HAND, createTool(Selection.Type.CYLINDER));
+            break;
+          case SLAB:
+            player.setItemInHand(HandTypes.MAIN_HAND, createTool(Selection.Type.SPHERE));
+            break;
+          default:
+        }
+      }
+    } else {
+      Optional<ServerLocation> locationOptional = event.block().location();
+      if (!locationOptional.isPresent()) {
+        return;
+      }
+      ServerLocation location = locationOptional.get();
+      switch (toolType) {
+        case CUBOID:
+          updateSelection(player,
+              boxDrafts.computeIfAbsent(player.uniqueId(), uuid -> new CuboidSelection()),
+              SpongeNope.instance().hostSystem().domain(SpongeUtil.worldToId(location.world())),
+              Vector3i.of(location.blockX(), location.blockY(), location.blockZ()),
+              first);
+          break;
+        case CYLINDER:
+          updateSelection(player,
+              cylinderDrafts.computeIfAbsent(player.uniqueId(), uuid -> new CylinderSelection()),
+              SpongeNope.instance().hostSystem().domain(SpongeUtil.worldToId(location.world())),
+              Vector3i.of(location.blockX(), location.blockY(), location.blockZ()),
+              first);
+          break;
+        case SPHERE:
+          updateSelection(player,
+              sphereDrafts.computeIfAbsent(player.uniqueId(), uuid -> new SphereSelection()),
+              SpongeNope.instance().hostSystem().domain(SpongeUtil.worldToId(location.world())),
+              Vector3i.of(location.blockX(), location.blockY(), location.blockZ()),
+              first);
+          break;
+        case SLAB:
+          updateSelection(player,
+              slabDrafts.computeIfAbsent(player.uniqueId(), uuid -> new SlabSelection()),
+              SpongeNope.instance().hostSystem().domain(SpongeUtil.worldToId(location.world())),
+              Vector3i.of(location.blockX(), location.blockY(), location.blockZ()),
+              first);
+          break;
+        default:
+      }
     }
+    event.setCancelled(true);
+
   }
 
   private void updateSelection(ServerPlayer player,

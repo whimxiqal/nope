@@ -28,8 +28,19 @@ package com.minecraftonline.nope.common.host;
 
 import java.util.Optional;
 
+/**
+ * An object representing a child of a {@link Host}.
+ *
+ * @param <P> the type of host
+ */
 public interface Child<P extends Host> {
 
+  /**
+   * Return an optional of the parent, implying that this child
+   * need not actually have a parent.
+   *
+   * @return the parent
+   */
   Optional<P> parent();
 
 }

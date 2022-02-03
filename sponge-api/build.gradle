@@ -60,21 +60,25 @@ test {
 dependencies {
     implementation project(':common')
     // Sponge
-    compileOnly "org.spongepowered:spongeapi:8.0.0-SNAPSHOT"
+    shadow "org.spongepowered:spongeapi:8.0.0-SNAPSHOT"
     annotationProcessor "org.spongepowered:spongeapi:8.0.0-SNAPSHOT"
 
     // Lombok
-    implementation 'org.projectlombok:lombok:1.18.22'
+    shadow 'org.projectlombok:lombok:1.18.22'
     annotationProcessor 'org.projectlombok:lombok:1.18.22'
 
-    testImplementation 'org.projectlombok:lombok:1.18.22'
+    testCompileOnly 'org.projectlombok:lombok:1.18.22'
     testAnnotationProcessor 'org.projectlombok:lombok:1.18.22'
 
     // IntelliJ Annotations
-    implementation 'org.jetbrains:annotations:22.0.0'
+    shadow 'org.jetbrains:annotations:22.0.0'
 
 }
 
 shadowJar {
     archiveFileName = "Nope-SpongeApi-${project.version}.jar"
+
+    dependencies {
+        exclude(dependency('org.projectlombok:lombok'))
+    }
 }

@@ -35,26 +35,14 @@ import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.Order;
 import org.spongepowered.plugin.PluginContainer;
 
+@Getter
+@Accessors(fluent = true)
 public class SettingListenerRegistration<T, E extends Event> {
 
-  @Getter
-  @Accessors(fluent = true)
   private final SettingKey<? extends T, ?, ?> settingKey;
-
-  @Getter
-  @Accessors(fluent = true)
   private final Class<E> eventClass;
-
-  @Getter
-  @Accessors(fluent = true)
   private final Order order;
-
-  @Getter
-  @Accessors(fluent = true)
   private final PluginContainer plugin;
-
-  @Getter
-  @Accessors(fluent = true)
   private final SettingEventListener<T, E> settingEventListener;
 
   public SettingListenerRegistration(SettingKey<? extends T, ?, ?> settingKey,

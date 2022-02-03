@@ -49,10 +49,7 @@ public class Permission {
    *                                  (kebab case with periods)
    */
   public static Permission of(@NotNull final String perm) throws IllegalArgumentException {
-    Validate.checkConfigFormat(perm,
-        "Invalid permission id: "
-            + perm
-            + ". Valid ids only contain characters 'a-z', '-', and '.'.");
+    Validate.checkPermissionName(perm);
     return new Permission(perm);
   }
 

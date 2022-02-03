@@ -26,6 +26,7 @@
 
 package com.minecraftonline.nope.sponge.listener.dynamic;
 
+import com.minecraftonline.nope.common.setting.SettingKeys;
 import com.minecraftonline.nope.common.setting.sets.BlockChangeSet;
 import com.minecraftonline.nope.sponge.api.event.SettingEventListener;
 import com.minecraftonline.nope.sponge.api.event.SettingValueLookupFunction;
@@ -38,6 +39,11 @@ import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.world.server.ServerLocation;
 
+/**
+ * Block change listener.
+ *
+ * @see SettingKeys#BLOCK_CHANGE
+ */
 public class BlockChangeListener implements SettingEventListener<BlockChangeSet, ChangeBlockEvent.All> {
   @Override
   public void handle(ChangeBlockEvent.All event, SettingValueLookupFunction<BlockChangeSet> lookupFunction) {

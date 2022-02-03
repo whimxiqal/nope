@@ -39,8 +39,16 @@ import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.parameter.CommandContext;
 
+/**
+ * Command to add a permission target to a host setting.
+ */
 public class HostAddPermissionCommand extends CommandNode {
 
+  /**
+   * Generic constructor.
+   *
+   * @param parent parent command
+   */
   public HostAddPermissionCommand(CommandNode parent) {
     super(parent, Permissions.EDIT,
         "Set a permission on the target of a host",

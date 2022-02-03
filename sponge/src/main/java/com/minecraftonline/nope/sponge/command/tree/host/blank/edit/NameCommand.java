@@ -46,7 +46,7 @@ public class NameCommand extends CommandNode {
     super(parent, Permissions.EDIT,
         "Edit the name of a host",
         "name");
-    addParameter(Parameters.NAME);
+    addParameter(Parameters.HOST_NAME);
   }
 
   @Override
@@ -57,11 +57,7 @@ public class NameCommand extends CommandNode {
     }
     Zone zone = (Zone) host;
 
-    String name = context.requireOne(ParameterKeys.NAME);
-    if (Validate.invalidSettingCollectionName(name)) {
-      return CommandResult.error(Formatter.error("Zones can only have names with numbers, letters, and some special characters"));
-    }
-
+    String name = context.requireOne(ParameterKeys.HOST_NAME);
     Zone newZone = zone.shallowCopy(name);
     SpongeNope.instance().hostSystem().removeZone(zone.name());
     SpongeNope.instance().hostSystem().addZone(newZone);

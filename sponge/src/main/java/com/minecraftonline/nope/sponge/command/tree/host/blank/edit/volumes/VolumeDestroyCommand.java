@@ -42,12 +42,12 @@ public class VolumeDestroyCommand extends CommandNode {
     super(parent, Permissions.EDIT,
         "Destroy a volume by index",
         "destroy");
-    addParameter(Parameters.INDEX);
+    addParameter(Parameters.VOLUME_INDEX);
   }
 
   @Override
   public CommandResult execute(CommandContext context) throws CommandException {
-    int index = context.one(ParameterKeys.INDEX).orElseThrow(() -> new CommandException(Formatter.error(
+    int index = context.one(ParameterKeys.VOLUME_INDEX).orElseThrow(() -> new CommandException(Formatter.error(
         "You must supply a volume index"
     )));
     Host host = context.requireOne(ParameterKeys.HOST);

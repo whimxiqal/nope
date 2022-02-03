@@ -65,7 +65,7 @@ public class ListSettingsCommand extends CommandNode {
             .contents(Arrays.stream(SettingKey.Category.values())
                 .map(c -> c.name().toLowerCase())
                 .map(c -> Formatter.command(c,
-                    this.fullCommand(context.cause()) + " " + c,
+                    this.fullCommand(context) + " " + c,
                     Formatter.accent("View settings in category ___", c)))
                 .collect(Collectors.toList()))
             .sendTo(context.cause().audience());

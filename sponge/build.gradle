@@ -23,9 +23,9 @@ sponge {
         entrypoint("com.minecraftonline.nope.sponge.SpongeNope")
         description("A protections plugin")
         links {
-            homepage("https://spongepowered.org")
-            source("https://spongepowered.org/source")
-            issues("https://spongepowered.org/issues")
+            homepage("https://github.com/pietelite")
+            source("https://github.com/pietelite/nope")
+            issues("https://github.com/pietelite/nope/issues")
         }
         contributor("PietElite") {
             description("Author")
@@ -61,7 +61,7 @@ dependencies {
     implementation project(':common')
     implementation project(':sponge-api')
     // Sponge
-    compileOnly "org.spongepowered:spongeapi:8.0.0-SNAPSHOT"
+    shadow "org.spongepowered:spongeapi:8.0.0-SNAPSHOT"
     annotationProcessor "org.spongepowered:spongeapi:8.0.0-SNAPSHOT"
 
     // JUnit
@@ -69,17 +69,26 @@ dependencies {
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.2'
 
     // Lombok
-    implementation 'org.projectlombok:lombok:1.18.22'
+    shadow 'org.projectlombok:lombok:1.18.22'
     annotationProcessor 'org.projectlombok:lombok:1.18.22'
 
     testImplementation 'org.projectlombok:lombok:1.18.22'
     testAnnotationProcessor 'org.projectlombok:lombok:1.18.22'
 
     // IntelliJ Annotations
-    implementation 'org.jetbrains:annotations:22.0.0'
+    shadow 'org.jetbrains:annotations:22.0.0'
+
+    // bStats
+    implementation 'org.bstats:bstats-sponge:3.0.0'
 
 }
 
 shadowJar {
     archiveFileName = "Nope-Sponge-${project.version}.jar"
+
+    dependencies {
+        exclude(dependency('org.projectlombok:lombok'))
+    }
+
+    relocate 'org.bstats', 'com.minecraftonline'
 }

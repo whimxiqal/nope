@@ -31,6 +31,7 @@ import com.minecraftonline.nope.common.host.Host;
 import com.minecraftonline.nope.common.host.Zone;
 import com.minecraftonline.nope.common.setting.SettingKey;
 import com.minecraftonline.nope.common.util.ContainsInOrderPredicate;
+import com.minecraftonline.nope.common.util.Validate;
 import com.minecraftonline.nope.sponge.SpongeNope;
 import com.minecraftonline.nope.sponge.util.Formatter;
 import com.minecraftonline.nope.sponge.util.SpongeUtil;
@@ -49,6 +50,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import net.kyori.adventure.text.Component;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandCompletion;
@@ -87,12 +89,12 @@ public class Parameters {
         return Optional.of(host);
       })
       .completer((context, currentInput) -> {
-        final Predicate<String> startsWith = new ContainsInOrderPredicate(currentInput);
+        final Predicate<String> inOrder = new ContainsInOrderPredicate(currentInput);
         return SpongeNope.instance().hostSystem()
             .hosts()
             .entrySet()
             .stream()
-            .filter(entry -> startsWith.test(entry.getKey()))
+            .filter(entry -> inOrder.test(entry.getKey()))
             .map(entry -> CommandCompletion.of(entry.getKey(),
                 Formatter.host(entry.getValue())))
             .collect(Collectors.toList());
@@ -121,10 +123,23 @@ public class Parameters {
             .collect(Collectors.toList());
       })
       .build();
-  public static final Parameter.Value<?> INDEX = Parameter.integerNumber().key(ParameterKeys.INDEX).build();
-  public static final Parameter.Value<?> INDEX_OPTIONAL = Parameter.integerNumber().key(ParameterKeys.INDEX).optional().build();
-  public static final Parameter.Value<String> NAME = Parameter.string()
-      .key(ParameterKeys.NAME)
+  public static final Parameter.Value<String> HOST_NAME = Parameter.string()
+      .key(ParameterKeys.HOST_NAME)
+      .addParser((parameterKey, reader, context) -> {
+        String name = reader.parseString();
+        if (Validate.invalidSettingCollectionName(name)) {
+          throw new ArgumentParseException(
+              Formatter.error("Zones can only have names with numbers, letters, and some special characters"),
+              name,
+              0);
+        }
+        if (name.equalsIgnoreCase("help")) {
+          throw new ArgumentParseException(Formatter.error("You cannot name a zone \"help\""),
+              name,
+              0);
+        }
+        return Optional.of(name);
+      })
       .build();
   public static final Parameter.Value<Zone> PARENT = Parameter.builder(ParameterKeys.PARENT)
       .addParser((parameterKey, reader, context) -> {
@@ -239,12 +254,12 @@ public class Parameters {
         Optional<Host> host = context.one(HOST);
         boolean showGlobal = host.isPresent()
             && host.get().equals(SpongeNope.instance().hostSystem().universe());
-        final Predicate<String> startsWith = new ContainsInOrderPredicate(currentInput);
+        final Predicate<String> inOrder = new ContainsInOrderPredicate(currentInput);
         return SpongeNope.instance().settingKeys()
             .keys()
             .entrySet()
             .stream()
-            .filter(entry -> startsWith.test(entry.getKey()))
+            .filter(entry -> inOrder.test(entry.getKey()))
             .filter(entry -> showGlobal || !entry.getValue().global())
             .map(entry -> CommandCompletion.of(entry.getKey(),
                 Formatter.accent(entry.getValue().description())))
@@ -259,7 +274,6 @@ public class Parameters {
         Map<String, Object> options = settingKey.manager().elementSuggestions();
         final Predicate<String> startsWith;
         if (settingKey instanceof SettingKey.Poly) {
-          SettingKey.Poly<?, ?> polyKey = (SettingKey.Poly<?, ?>) settingKey;
           String[] tokensSoFar = currentInput.split(SettingKey.Manager.Poly.SET_SPLIT_REGEX, -1);
           List<String> completedTokens = new LinkedList<>();
           if (tokensSoFar.length > 0) {
@@ -343,6 +357,25 @@ public class Parameters {
           .build();
   public static final Parameter.Value<TargetOption> TARGET_OPTION = Parameter.enumValue(TargetOption.class)
       .key(ParameterKeys.TARGET_OPTION).build();
+  public static final Parameter.Value<Integer> VOLUME_INDEX = Parameter.integerNumber()
+      .key(ParameterKeys.VOLUME_INDEX)
+      .completer((context, currentInput) -> {
+        final Predicate<String> startsWith = new StartsWithPredicate(currentInput);
+        Host host = context.requireOne(HOST);
+        if (host instanceof Zone) {
+          Zone zone = (Zone) host;
+          return IntStream.range(0, zone.volumes().size()).boxed()
+              .filter(integer -> startsWith.test(String.valueOf(integer)))
+              .map(integer -> CommandCompletion.of(String.valueOf(integer)
+                  // TODO add an info method to volumes to give insight as to what they are
+                  /*, zone.volumes().get(integer).info */))
+              .collect(Collectors.toList());
+        } else {
+          return Collections.emptyList();
+        }
+      })
+      .build();
+  public static final Parameter.Value<Integer> VOLUME_INDEX_OPTIONAL = Parameter.integerNumber().key(ParameterKeys.VOLUME_INDEX).optional().build();
   public static final Parameter.Value<ServerWorld> WORLD = Parameter.world().key(ParameterKeys.WORLD).build();
   public static final Parameter.Multi CUBOID = Parameter.seqBuilder(Parameters.WORLD)
       .then(Parameters.POS_X_1)

@@ -103,8 +103,8 @@ class AltSetTest {
     set1.add(4);
     Assertions.assertTrue(set2.containsAll(set1));
 
-    AltSet<Integer> setA = HashAltSet.limited(100);
-    HashAltSet<Integer> setB = HashAltSet.limited(100);
+    AltSet<Integer> setA = HashAltSet.finite(100);
+    HashAltSet<Integer> setB = HashAltSet.finite(100);
     // Fill set B with "all the numbers" (it has no idea what they actually are)
     setB.fill();
     Assertions.assertFalse(setA.containsAll(setB));

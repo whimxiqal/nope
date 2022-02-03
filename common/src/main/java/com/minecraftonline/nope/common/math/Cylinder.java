@@ -27,18 +27,13 @@
 package com.minecraftonline.nope.common.math;
 
 import com.minecraftonline.nope.common.host.Domain;
-import com.minecraftonline.nope.common.math.Cuboid;
-import com.minecraftonline.nope.common.math.Vector2d;
-import com.minecraftonline.nope.common.math.Vector3d;
-import com.minecraftonline.nope.common.math.Volume;
-import lombok.Getter;
-import lombok.experimental.Accessors;
-import org.jetbrains.annotations.NotNull;
-
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
+import lombok.Getter;
+import lombok.experimental.Accessors;
+import org.jetbrains.annotations.NotNull;
 
 public class Cylinder extends Volume {
 

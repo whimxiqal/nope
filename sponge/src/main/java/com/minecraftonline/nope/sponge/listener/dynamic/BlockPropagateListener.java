@@ -26,6 +26,7 @@
 
 package com.minecraftonline.nope.sponge.listener.dynamic;
 
+import com.minecraftonline.nope.common.setting.SettingKeys;
 import com.minecraftonline.nope.sponge.api.event.SettingEventListener;
 import com.minecraftonline.nope.sponge.api.event.SettingValueLookupFunction;
 import java.util.Optional;
@@ -33,6 +34,11 @@ import org.spongepowered.api.block.transaction.NotificationTicket;
 import org.spongepowered.api.event.block.NotifyNeighborBlockEvent;
 import org.spongepowered.api.world.server.ServerLocation;
 
+/**
+ * Block propagate listener.
+ *
+ * @see SettingKeys#BLOCK_CHANGE
+ */
 public class BlockPropagateListener implements SettingEventListener<Boolean, NotifyNeighborBlockEvent> {
   @Override
   public void handle(NotifyNeighborBlockEvent event, SettingValueLookupFunction<Boolean> lookupFunction) {

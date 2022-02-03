@@ -28,9 +28,17 @@ package com.minecraftonline.nope.sponge.command;
 
 import com.minecraftonline.nope.sponge.SpongeNope;
 import com.minecraftonline.nope.sponge.util.Formatter;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collector;
+import java.util.stream.Stream;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.ComponentBuilder;
 import net.kyori.adventure.text.JoinConfiguration;
+import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.event.ClickEvent;
+import net.kyori.adventure.text.event.HoverEvent;
 import org.jetbrains.annotations.NotNull;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandResult;
@@ -38,13 +46,6 @@ import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.service.pagination.PaginationList;
-
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.stream.Collector;
-import java.util.stream.Stream;
 
 /**
  * A command node that displays all the following possibilities of any command
@@ -61,9 +62,10 @@ public class HelpCommandNode extends CommandNode {
     super(parent,
         parent.permission(),
         "Helpful info for this command",
-        "help",
+        "?",
         false);
-    addAliases("?");
+    addAliases("help");
+    terminal();
     Objects.requireNonNull(parent);
   }
 
@@ -82,8 +84,14 @@ public class HelpCommandNode extends CommandNode {
         .title(Component.text("Help Menu", Formatter.GOLD));
 
     List<Component> headerLines = new LinkedList<>();
-    headerLines.add(Formatter.keyValue("Usage", parent.fullCommand(context.cause())));
-    headerLines.add(Formatter.keyValue("Desc", parent.description()));
+    headerLines.add(Component.text("Usage: ")
+        .color(Formatter.GOLD)
+        .append(Component.text(parent.fullCommand(context))
+            .color(Formatter.DULL)));
+    headerLines.add(Component.text("Desc: ")
+        .color(Formatter.GOLD)
+        .append(Component.text(parent.description())
+            .color(Formatter.DULL)));
     paginationBuilder.header(Component.join(JoinConfiguration.separator(Component.newline()), headerLines));
 
     List<Component> contentLines = new LinkedList<>();
@@ -100,27 +108,35 @@ public class HelpCommandNode extends CommandNode {
           })
           .map(param -> param.usage(context.cause()))
           .collect(Collector.of(
-              () -> Component.text().append(Component.text("> ")).color(Formatter.INFO),
-              (builder, usageString) -> builder.append(Component.text(usageString)),
+              () -> Component.text()
+                  .append(Component.text("> ").color(Formatter.THEME))
+                  .append(Component.text(parent.primaryAlias())
+                      .color(Formatter.ACCENT)),
+              (builder, usageString) -> builder.append(Component.text(" ("
+                      + usageString
+                      + ")")
+                  .color(Formatter.ACCENT)),
               (s1, s2) -> s1,
               ComponentBuilder::build)));
     }
-    // Add children next, with suffix, if present
+    // Add children next, with suffix (prefix of child), if present
     parent.children().stream()
         .filter(child -> child.hasPermission(context.subject()))
+        .filter(child -> child.helpCommand() != null)
         .forEach(child -> {
-          Optional<Parameter.Value<?>> prefix = child.prefix();
-          if (prefix.isPresent()) {
-            contentLines.add(Formatter.keyValue("> "
-                    + prefix.get().usage(context.cause())
-                    + " "
-                    + child.primaryAlias(),
-                child.description()));
-          } else {
-            contentLines.add(Formatter.keyValue("> "
-                    + child.primaryAlias(),
-                child.description()));
-          }
+          TextComponent.Builder component = Component.text()
+              .append(Component.text("> ").color(Formatter.THEME));
+          child.prefix().ifPresent(value -> component.append(Component.text("("
+                  + value.usage(context.cause())
+                  + ") ")
+              .color(Formatter.DULL)));
+          component.append(Component.text(child.primaryAlias() + " ").color(Formatter.ACCENT))
+              .clickEvent(ClickEvent.suggestCommand(Objects.requireNonNull(child.helpCommand())
+                  .fullCommand(context)))
+              .hoverEvent(HoverEvent.showText(Component.text("Learn how to use ")
+                  .append(Component.text(child.fullCommand(context)).color(Formatter.ACCENT))))
+              .append(Component.text(child.description()).color(Formatter.INFO));
+          contentLines.add(component.build());
         });
     paginationBuilder.contents(contentLines);
 

@@ -33,6 +33,7 @@ import com.minecraftonline.nope.sponge.command.tree.ReloadCommand;
 import com.minecraftonline.nope.sponge.command.tree.SettingsCommand;
 import com.minecraftonline.nope.sponge.command.tree.ToolCommand;
 import com.minecraftonline.nope.sponge.util.Formatter;
+import net.kyori.adventure.identity.Identity;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.parameter.CommandContext;
@@ -52,9 +53,7 @@ public class RootCommand extends CommandNode {
 
   @Override
   public CommandResult execute(CommandContext context) throws CommandException {
-    context.cause().audience().sendMessage(Formatter.success(
-        "Nope command!"
-    ));
+    context.sendMessage(Identity.nil(), Formatter.WELCOME);
     return CommandResult.success();
   }
 }

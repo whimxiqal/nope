@@ -33,10 +33,21 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import org.jetbrains.annotations.NotNull;
 
+/**
+ * A manager for a {@link SettingKey} that holds enums as values.
+ * It is assumed for serialization purposes that the enums are all uppercase.
+ *
+ * @param <E> the enum type
+ */
 public class AllCapsEnumKeyManager<E extends Enum<E> & Described> extends SettingKey.Manager.Unary<E> {
 
   private final Class<E> clazz;
 
+  /**
+   * Default constructor.
+   *
+   * @param clazz the enum class, in which the enum has only all-uppercase fields
+   */
   public AllCapsEnumKeyManager(Class<E> clazz) {
     this.clazz = clazz;
   }

@@ -29,6 +29,7 @@ package com.minecraftonline.nope.sponge.command.tree.tool;
 import com.minecraftonline.nope.common.permission.Permissions;
 import com.minecraftonline.nope.sponge.SpongeNope;
 import com.minecraftonline.nope.sponge.command.CommandNode;
+import com.minecraftonline.nope.sponge.tool.Selection;
 import com.minecraftonline.nope.sponge.util.Formatter;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.exception.CommandException;
@@ -50,7 +51,7 @@ public class CuboidToolCommand extends CommandNode {
       ));
     }
     Player player = (Player) context.cause().root();
-    player.inventory().offer(SpongeNope.instance().selectionHandler().boxTool());
+    player.inventory().offer(SpongeNope.instance().selectionHandler().createTool(Selection.Type.CUBOID));
     player.sendMessage(Formatter.success(
         "You have been given a ___ tool", "box"
     ));

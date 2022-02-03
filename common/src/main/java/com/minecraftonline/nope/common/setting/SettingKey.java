@@ -27,12 +27,10 @@
 package com.minecraftonline.nope.common.setting;
 
 import com.minecraftonline.nope.common.host.Host;
-import com.minecraftonline.nope.common.setting.Setting;
-import com.minecraftonline.nope.common.setting.SettingValue;
-import com.minecraftonline.nope.common.setting.Target;
 import com.minecraftonline.nope.common.struct.AltSet;
 import com.minecraftonline.nope.common.struct.HashAltSet;
 import com.minecraftonline.nope.common.struct.Location;
+import com.minecraftonline.nope.common.struct.Named;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -63,7 +61,7 @@ import org.jetbrains.annotations.Nullable;
 @Accessors(fluent = true)
 public abstract class SettingKey<T,
     V extends SettingValue<T>,
-    M extends SettingKey.Manager<T, V>> {
+    M extends SettingKey.Manager<T, V>> implements Named {
   private final String id;
   private final M manager;
   private final T defaultData;
@@ -100,6 +98,11 @@ public abstract class SettingKey<T,
                                  @NotNull final Location location);
 
   public abstract String type();
+
+  @Override
+  public String name() {
+    return id;
+  }
 
   public enum Category {
     BLOCKS,
@@ -250,8 +253,8 @@ public abstract class SettingKey<T,
   }
 
   public static class Poly<T, S extends AltSet<T>> extends SettingKey<S,
-        SettingValue.Poly<T, S>,
-        Manager.Poly<T, S>> {
+      SettingValue.Poly<T, S>,
+      Manager.Poly<T, S>> {
 
     Poly(String id, Manager.Poly<T, S> manager,
          S defaultData, S naturalValue,
@@ -521,6 +524,15 @@ public abstract class SettingKey<T,
         this.groupDescriptions.put(id, description);
       }
 
+      /**
+       * Print the set, like {@link AltSet#printAll()}. However,
+       * combine any values in a group into one single instance of
+       * only their group name.
+       *
+       * @param set the set to print
+       * @return the printed string
+       * @see #addGroup(String, String, Set)
+       */
       public final String printSetGrouped(S set) {
         Set<T> originalSet = new HashSet<>(set.set());
         Set<String> helper = new HashSet<>();

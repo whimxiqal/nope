@@ -29,6 +29,7 @@ package com.minecraftonline.nope.sponge.command;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.minecraftonline.nope.common.permission.Permission;
+import com.minecraftonline.nope.common.struct.Named;
 import com.minecraftonline.nope.sponge.SpongeNope;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -46,8 +47,8 @@ import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.api.command.Command;
-import org.spongepowered.api.command.CommandCause;
 import org.spongepowered.api.command.CommandExecutor;
+import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.command.parameter.managed.Flag;
 import org.spongepowered.api.service.permission.Subject;
@@ -89,9 +90,6 @@ public abstract class CommandNode implements CommandExecutor {
   private Supplier<Component> comment = () -> null;
   @Accessors(fluent = true)
   private Command.Parameterized parameterized;
-  @Getter
-  @Setter
-  @Accessors(fluent = true)
   private boolean terminal = false;
 
   /**
@@ -145,11 +143,22 @@ public abstract class CommandNode implements CommandExecutor {
 
   // Getters and Setters
 
+  /**
+   * Get the primary alias for this command.
+   *
+   * @return the primary alias
+   */
   @NotNull
   public final String primaryAlias() {
     return aliases.get(0);
   }
 
+  /**
+   * Get all aliases for this command that are not the primary alias.
+   *
+   * @return the secondary aliases
+   * @see #primaryAlias()
+   */
   @NotNull
   public final String[] secondaryAliases() {
     if (aliases.size() <= 1) {
@@ -159,10 +168,22 @@ public abstract class CommandNode implements CommandExecutor {
     }
   }
 
+  /**
+   * Check if a player has permission for this command, given their UUID.
+   *
+   * @param playerUuid the player's UUID
+   * @return true if the player has permission
+   */
   public final boolean hasPermission(UUID playerUuid) {
     return this.permission == null || SpongeNope.instance().hasPermission(playerUuid, this.permission);
   }
 
+  /**
+   * Check if some subject has permission for this command.
+   *
+   * @param subject the subject
+   * @return true if they have permission
+   */
   public final boolean hasPermission(Subject subject) {
     return this.permission == null || subject.hasPermission(this.permission.get());
   }
@@ -176,35 +197,47 @@ public abstract class CommandNode implements CommandExecutor {
     this.aliases.addAll(Arrays.asList(aliases));
   }
 
-  public final void addChild(@NotNull CommandNode child) {
+  protected final void addChild(@NotNull CommandNode child) {
     this.children.add(child);
   }
 
+  /**
+   * Get the comment on this command.
+   *
+   * @return the comment
+   */
   @Nullable
-  public Component getComment() {
+  public final Component getComment() {
     return this.comment.get();
   }
 
-  public void setComment(@NotNull Supplier<Component> comment) {
+  /**
+   * Set the comment on this command.
+   *
+   * @param comment the new comment
+   */
+  public final void setComment(@NotNull Supplier<Component> comment) {
     this.comment = comment;
   }
 
+  /**
+   * Determine if this command is the root in its own command tree.
+   *
+   * @return true if root
+   */
   public final boolean isRoot() {
     return parent == null;
   }
 
-  public final void addFlag(Flag flag/*, String description*/) {
+  protected final void addFlag(Flag flag/*, String description*/) {
     this.flags.add(flag);
-//    this.flagDescriptions.add(new FlagDescription(flag.aliases().iterator().next(),
-//        description,
-//        flag.associatedParameter().isPresent()));
   }
 
-  public final void addParameter(Parameter.Value<?> parameter) {
+  protected final void addParameter(Parameter.Value<?> parameter) {
     this.parameters.add(parameter);
   }
 
-  public final void addParameter(Parameter.Multi parameters) {
+  protected final void addParameter(Parameter.Multi parameters) {
     this.parameters.add(parameters);
   }
 
@@ -212,27 +245,33 @@ public abstract class CommandNode implements CommandExecutor {
    * Get the full command string by traversing backwards through
    * the command tree and concatenating each parent class.
    *
+   * @param context the cause requesting this full command
    * @return the fully qualified command
    */
   @NotNull
-  public final String fullCommand(@Nullable CommandCause cause) {
+  public final String fullCommand(@NotNull CommandContext context) {
     StringBuilder command = new StringBuilder();
     CommandNode cur = this;
     while (cur != null /* is null if is parent of root command */) {
       command.insert(0, cur.primaryAlias() + " ");
       if (cur.prefix != null) {
-        if (cause == null) {
-          command.insert(0, cur.prefix.key().key() + " ");
+        Optional<?> prefixValue = context.one(cur.prefix.key());
+        if (prefixValue.isPresent() && prefixValue.get() instanceof Named) {
+          command.insert(0, ((Named) prefixValue.get()).name() + " ");
         } else {
-          command.insert(0, cur.prefix.usage(cause) + " ");
+          command.insert(0, "___ ");
         }
-
       }
       cur = cur.parent;
     }
     return "/" + command.substring(0, command.length() - 1);
   }
 
+  /**
+   * Turn this command node into something that Sponge understands.
+   *
+   * @return the parameterized command
+   */
   public final Command.Parameterized parameterized() {
 
     // Cache parameterized build
@@ -275,15 +314,24 @@ public abstract class CommandNode implements CommandExecutor {
       builder.permission(permission.get());
     }
 
+    builder.terminal(this.terminal);
+
     this.parameterized = builder.build();
     return this.parameterized;
   }
 
-  public final Optional<Parameter.Value<?>> prefix() {
+  protected final Optional<Parameter.Value<?>> prefix() {
     return Optional.ofNullable(prefix);
   }
 
   private Parameter asSubCommand() {
     return Parameter.subcommand(this.parameterized(), this.primaryAlias(), this.secondaryAliases());
+  }
+
+  /**
+   * Set this command as "terminal".
+   */
+  public final void terminal() {
+    this.terminal = true;
   }
 }

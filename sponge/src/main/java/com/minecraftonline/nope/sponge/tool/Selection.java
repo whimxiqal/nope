@@ -117,4 +117,11 @@ public abstract class Selection<T extends Volume> {
   public final boolean isComplete() {
     return domain != null && position1 != null && position2 != null;
   }
+
+  public enum Type {
+    CUBOID,
+    CYLINDER,
+    SLAB,
+    SPHERE
+  }
 }

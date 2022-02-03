@@ -34,13 +34,19 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import org.jetbrains.annotations.NotNull;
 
+/**
+ * An implementation of {@link AltSet} using a {@link HashSet}
+ * as its underlying data structure.
+ *
+ * @param <T> the element type to store in this set
+ */
 public abstract class HashAltSet<T> implements AltSet<T> {
 
-  private static final int MAX_SIZE_BEFORE_UBER = 8;
+  public static final int STANDARD_MAX_SIZE = 8;
 
   protected final int maxSize;
   /**
-   * This set is "normal" when uber is false because this object
+   * This set is "normal" when "inverted" is false because this object
    * works the same way as a normal HashSet.
    * This set is "subtractive" from everything when uber if true
    * because this object works negatively from all terms in uber mode.
@@ -52,38 +58,69 @@ public abstract class HashAltSet<T> implements AltSet<T> {
     this.maxSize = maxSize;
   }
 
+  /**
+   * Create a set that can hold an infinite amount of elements,
+   * like all {@link Integer}s or {@link String}s.
+   *
+   * @param <X> the type stored in the set
+   * @return a new set
+   */
   public static <X> HashAltSet<X> infinite() {
-    return new HashAltSet.Infinite<>();
+    return new UnboundedAlternate<>();
   }
 
-  public static <X> HashAltSet<X> limited(int maxSize) {
-    if (maxSize <= MAX_SIZE_BEFORE_UBER) {
+  /**
+   * Create a set that can only hold a finite number of elements.
+   * This value may not be less than or equal to this class's
+   * <code>STANDARD_MAX_SIZE</code> unless you use {@link #finite(int, Supplier)}.
+   *
+   * @param maxSize set the maximum number of elements that can be held in this set
+   * @param <X>     the type stored in the set
+   * @return a new set
+   */
+  public static <X> HashAltSet<X> finite(int maxSize) {
+    if (maxSize <= STANDARD_MAX_SIZE) {
       throw new IllegalArgumentException("If the max size is below "
-          + MAX_SIZE_BEFORE_UBER
+          + STANDARD_MAX_SIZE
           + ", you must specify a supplier for all possible elements");
     }
-    return limitedLarge(maxSize);
+    return finiteLarge(maxSize);
   }
 
-  public static <X> HashAltSet<X> limited(int maxSize, Supplier<Collection<X>> elements) {
-    if (maxSize <= MAX_SIZE_BEFORE_UBER) {
-      return limitedSmall(elements.get());
+  /**
+   * Create a set that can only hold a finite number of elements.
+   *
+   * @param maxSize  set the maximum number of elements that can be held in this set
+   * @param elements a getter for all possible elements in this set
+   * @param <X>      the type stored in the set
+   * @return a new set
+   */
+  public static <X> HashAltSet<X> finite(int maxSize, Supplier<Collection<X>> elements) {
+    if (maxSize <= STANDARD_MAX_SIZE) {
+      return finiteSmall(elements.get());
     } else {
-      return limitedLarge(maxSize);
+      return finiteLarge(maxSize);
     }
   }
 
-  private static <X> HashAltSet<X> limitedSmall(Collection<X> elements) {
-    return new HashAltSet.NeverUber<>(elements.size(), elements);
+  private static <X> HashAltSet<X> finiteSmall(Collection<X> elements) {
+    return new Standard<>(elements.size(), elements);
   }
 
-  private static <X> HashAltSet<X> limitedLarge(int maxSize) {
-    return new HashAltSet.MaybeUber<>(maxSize);
+  private static <X> HashAltSet<X> finiteLarge(int maxSize) {
+    return new Alternate<>(maxSize);
   }
 
+  /**
+   * Create a set that stores enums.
+   *
+   * @param clazz the enum class
+   * @param <E>   the type of enum
+   * @return a new set
+   */
   public static <E extends Enum<E>> HashAltSet<E> ofEnum(Class<E> clazz) {
     E[] enums = clazz.getEnumConstants();
-    return limited(enums.length, () -> Arrays.asList(enums));
+    return finite(enums.length, () -> Arrays.asList(enums));
   }
 
   @Override
@@ -158,9 +195,9 @@ public abstract class HashAltSet<T> implements AltSet<T> {
   }
 
   @Override
-  public boolean addAll(@NotNull Collection<T> other) {
+  public boolean addAll(@NotNull Collection<T> collection) {
     boolean success = true;
-    for (T element : other) {
+    for (T element : collection) {
       if (!add(element)) {
         success = false;
       }
@@ -217,9 +254,9 @@ public abstract class HashAltSet<T> implements AltSet<T> {
   }
 
   @Override
-  public boolean removeAll(@NotNull Collection<T> other) {
+  public boolean removeAll(@NotNull Collection<T> collection) {
     boolean success = true;
-    for (T element : other) {
+    for (T element : collection) {
       if (!remove(element)) {
         success = false;
       }
@@ -284,24 +321,17 @@ public abstract class HashAltSet<T> implements AltSet<T> {
     return this.printAll();
   }
 
-//  public void copyFrom(HashAltSet<T> other) {
-//    if (!compatibleWith(other)) {
-//      throw new IllegalArgumentException("You can not copy from an Alt Set with a different max size");
-//    }
-//    this.set.clear();
-//    this.set.addAll(other.set);
-//    this.inverted = other.inverted;
-//  }
-
-//  private boolean compatibleWith(HashAltSet<T> other) {
-//    return this.maxSize == other.maxSize;
-//  }
-
-  private static class NeverUber<T> extends HashAltSet<T> {
+  /**
+   * An {@link AltSet} that works effectively just like a {@link HashSet}.
+   * In other words, it cannot be inverted.
+   *
+   * @param <T> the type stored in the set
+   */
+  public static class Standard<T> extends HashAltSet<T> {
 
     private final Collection<T> options;
 
-    private NeverUber(int maxSize, Collection<T> options) {
+    private Standard(int maxSize, Collection<T> options) {
       super(maxSize);
       this.options = options;
     }
@@ -314,9 +344,16 @@ public abstract class HashAltSet<T> implements AltSet<T> {
 
   }
 
-  private static class MaybeUber<T> extends HashAltSet<T> {
+  /**
+   * An {@link AltSet} that can hold only a finite quantity of values.
+   * This type is designed to possible hold many values, though, because
+   * this type can alternate between an inverted and non-inverted state.
+   *
+   * @param <T> the type stored in the set
+   */
+  private static class Alternate<T> extends HashAltSet<T> {
 
-    private MaybeUber(int maxSize) {
+    private Alternate(int maxSize) {
       super(maxSize);
     }
 
@@ -328,36 +365,57 @@ public abstract class HashAltSet<T> implements AltSet<T> {
 
   }
 
-  public static class Infinite<T> extends MaybeUber<T> {
-    public Infinite() {
+  /**
+   * An {@link AltSet} that can hold an infinite quantity of values.
+   *
+   * @param <T> the type stored in the set
+   */
+  public static class UnboundedAlternate<T> extends Alternate<T> {
+
+    /**
+     * General constructor that sets the "max size" to infinity.
+     */
+    public UnboundedAlternate() {
       super(Integer.MAX_VALUE);
     }
   }
 
-  public abstract static class FewLimited<T> extends NeverUber<T> {
-    public FewLimited(Collection<T> options) {
+  /**
+   * A standard {@link AltSet} that can only hold a few number of values.
+   * This number is determined by <code>HashAltSet.STANDARD_MAX_SIZE</code>
+   *
+   * @param <T> the type stored in the set
+   */
+  public abstract static class FewStandard<T> extends Standard<T> {
+
+    /**
+     * General constructor that ensures there are only a few possible values to put in the set.
+     *
+     * @param options the possible values to store in this set
+     */
+    public FewStandard(Collection<T> options) {
       super(options.size(), options);
-      if (maxSize > MAX_SIZE_BEFORE_UBER) {
+      if (maxSize > STANDARD_MAX_SIZE) {
         throw new IllegalArgumentException("You may not make a Small Limited Alt Set with more than "
-            + MAX_SIZE_BEFORE_UBER + " possible options.");
+            + STANDARD_MAX_SIZE + " possible options.");
       }
     }
   }
 
-  public static class FewEnum<E extends Enum<E>> extends FewLimited<E> {
+  /**
+   * A set designed to be able to store only a few enums.
+   *
+   * @param <E> the type of enum stored in the set
+   */
+  public static class FewEnum<E extends Enum<E>> extends FewStandard<E> {
+
+    /**
+     * General constructor.
+     *
+     * @param clazz the enum class
+     */
     public FewEnum(Class<E> clazz) {
       super(Arrays.asList(clazz.getEnumConstants()));
-    }
-  }
-
-  public static class ManyLimited<T> extends MaybeUber<T> {
-    private ManyLimited(int maxSize) {
-      super(maxSize);
-      if (maxSize <= MAX_SIZE_BEFORE_UBER) {
-        throw new IllegalArgumentException("You may not make a Large Limited Alt Set with less "
-            + "than or equal to"
-            + MAX_SIZE_BEFORE_UBER + " possible options.");
-      }
     }
   }
 
