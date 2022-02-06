@@ -16,3 +16,7 @@ dependencies {
     // IntelliJ Annotations
     implementation 'org.jetbrains:annotations:22.0.0'
 }
+
+test {
+    useJUnitPlatform()
+}

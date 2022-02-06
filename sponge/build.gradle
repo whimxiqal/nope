@@ -20,8 +20,8 @@ sponge {
     }
     plugin("nope") {
         displayName("Nope")
-        entrypoint("com.minecraftonline.nope.sponge.SpongeNope")
-        description("A protections plugin")
+        entrypoint("me.pietelite.nope.sponge.SpongeNope")
+        description("A powerful protections plugin")
         links {
             homepage("https://github.com/pietelite")
             source("https://github.com/pietelite/nope")
