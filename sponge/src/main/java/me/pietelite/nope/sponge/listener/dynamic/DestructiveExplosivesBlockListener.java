@@ -26,30 +26,36 @@ package me.pietelite.nope.sponge.listener.dynamic;
 
 import me.pietelite.nope.common.setting.sets.ExplosiveSet;
 import me.pietelite.nope.common.struct.AltSet;
+import me.pietelite.nope.sponge.api.event.SettingEventContext;
 import me.pietelite.nope.sponge.api.event.SettingEventListener;
-import me.pietelite.nope.sponge.api.event.SettingValueLookupFunction;
+import me.pietelite.nope.sponge.api.event.SettingEventReport;
 import me.pietelite.nope.sponge.listener.SpongeEventUtil;
 import me.pietelite.nope.sponge.util.SpongeUtil;
 import java.util.Optional;
 import org.spongepowered.api.block.transaction.BlockTransaction;
 import org.spongepowered.api.entity.explosive.Explosive;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
+import org.spongepowered.api.registry.RegistryTypes;
 
 /**
  *
  */
 public class DestructiveExplosivesBlockListener implements SettingEventListener<AltSet<ExplosiveSet.Explosive>, ChangeBlockEvent.All> {
   @Override
-  public void handle(ChangeBlockEvent.All event,
-                     SettingValueLookupFunction<AltSet<ExplosiveSet.Explosive>> lookupFunction) {
-    final Optional<Explosive> sourceExplosive = event.cause().first(Explosive.class);
+  public void handle(SettingEventContext<AltSet<ExplosiveSet.Explosive>, ChangeBlockEvent.All> context) {
+    final Optional<Explosive> sourceExplosive = context.event().cause().first(Explosive.class);
     if (sourceExplosive.isPresent()) {
       final ExplosiveSet.Explosive explosive = SpongeUtil.reduceExplosive(sourceExplosive.get());
-      for (BlockTransaction transaction : event.transactions()) {
-        SpongeEventUtil.invalidateTransactionIfNeeded(event.cause(),
+      for (BlockTransaction transaction : context.event().transactions()) {
+        if (SpongeEventUtil.invalidateTransactionIfNeeded(context.event().cause(),
             transaction,
             (cause, location) ->
-                !lookupFunction.lookup(cause, location).contains(explosive));
+                !context.lookup(cause, location).contains(explosive))) {
+          context.report(SettingEventReport.restricted()
+              .source(context.event().source())
+              .target(explosive.name())
+              .build());
+        }
       }
     }
   }

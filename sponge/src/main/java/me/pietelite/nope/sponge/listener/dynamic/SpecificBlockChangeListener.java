@@ -26,7 +26,9 @@ package me.pietelite.nope.sponge.listener.dynamic;
 
 import me.pietelite.nope.common.Nope;
 import me.pietelite.nope.common.struct.SingleValueSet;
+import me.pietelite.nope.sponge.api.event.SettingEventContext;
 import me.pietelite.nope.sponge.api.event.SettingEventListener;
+import me.pietelite.nope.sponge.api.event.SettingEventReport;
 import me.pietelite.nope.sponge.api.event.SettingValueLookupFunction;
 import java.util.Collections;
 import java.util.Optional;
@@ -35,6 +37,7 @@ import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.transaction.BlockTransaction;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
+import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.world.server.ServerLocation;
 
 public class SpecificBlockChangeListener implements SettingEventListener<Boolean, ChangeBlockEvent.All> {
@@ -80,9 +83,8 @@ public class SpecificBlockChangeListener implements SettingEventListener<Boolean
   }
 
   @Override
-  public void handle(ChangeBlockEvent.All event,
-                     SettingValueLookupFunction<Boolean> lookupFunction) {
-    final Object eventCause = event.cause().root();
+  public void handle(SettingEventContext<Boolean, ChangeBlockEvent.All> context) {
+    final Object eventCause = context.event().cause().root();
     final Player player;
     if (eventCause instanceof Player) {
       if (environmentCauseOnly) {
@@ -93,14 +95,17 @@ public class SpecificBlockChangeListener implements SettingEventListener<Boolean
       player = null;
     }
     Optional<ServerLocation> blockLocation;
-    for (BlockTransaction transaction : event.transactions()) {
+    for (BlockTransaction transaction : context.event().transactions()) {
       blockLocation = transaction.finalReplacement().location();
       if (blockLocation.isPresent()) {
         if ((originalBlocks.isEmpty() || originalBlocks.contains(transaction.original().state().type()))
             && (finalBlocks.isEmpty() || finalBlocks.contains(transaction.finalReplacement().state().type()))
-            && (!lookupFunction.lookup(eventCause, blockLocation.get())
-            || (player != null && !lookupFunction.lookup(player, player.serverLocation())))) {
+            && (!context.lookup(eventCause, blockLocation.get())
+            || (player != null && !context.lookup(player, player.serverLocation())))) {
           transaction.invalidate();
+          context.report(SettingEventReport.restricted()
+              .target(transaction.original().state().type().key(RegistryTypes.BLOCK_TYPE).formatted())
+              .build());
         }
       }
     }

@@ -204,7 +204,7 @@ public class HostSystem {
     for (Zone zone : zones) {
       current = zone;
       while (current.parent().isPresent() && !accumulator.contains(current.parent().get())) {
-        current = zone.parent().get();
+        current = current.parent().get();
         accumulator.add(current);
       }
     }
@@ -214,12 +214,12 @@ public class HostSystem {
     return hosts().values().stream().anyMatch(host -> host.get(key).isPresent());
   }
 
-  public <X> X lookupAnonymous(@NotNull SettingKey<X, ?, ?> key,
+  public <X> Evaluation<X> lookupAnonymous(@NotNull SettingKey<X, ?, ?> key,
                                @NotNull Location location) {
     return lookup(key, null, location);
   }
 
-  public <X> X lookup(@NotNull final SettingKey<X, ?, ?> key,
+  public <X> Evaluation<X> lookup(@NotNull final SettingKey<X, ?, ?> key,
                       @Nullable final UUID userUuid,
                       @NotNull final Location location) {
     LinkedList<Host> hosts = new LinkedList<>();
@@ -257,19 +257,7 @@ public class HostSystem {
         }
       }
     }
-
-    /*
-    If setting data type is one piece of data, then try to find the zone with the highest
-    priority with the setting set.
-
-    If setting data type is a set of data, the build up the resulting value by going from the
-    lowest priority to the highest priority.
-     */
-
-    // first we have to organize it such that we can match up the targets appropriately
-
     return key.extractValue(hosts, userUuid, location);
-
   }
 
   /**

@@ -25,29 +25,51 @@
  *
  */
 
-package me.pietelite.nope.sponge.util;
+package me.pietelite.nope.common.host;
 
-import java.util.UUID;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
 import me.pietelite.nope.common.setting.SettingKey;
-import me.pietelite.nope.common.struct.Location;
-import me.pietelite.nope.sponge.api.event.SettingValueLookupFunction;
-import org.spongepowered.api.world.server.ServerLocation;
 
-public class SettingValueLookupFunctionImpl<T> implements SettingValueLookupFunction<T> {
+public class Evaluation<T> extends LinkedList<Evaluation<T>.EvaluationStage> {
 
-  private final SettingKey<? extends T, ?, ?> key;
+  private final SettingKey<T, ?, ?> settingKey;
 
-  public SettingValueLookupFunctionImpl(SettingKey<? extends T, ?, ?> key) {
-    this.key = key;
+  public Evaluation(SettingKey<T, ?, ?> settingKey) {
+    this.settingKey = settingKey;
   }
 
-  @Override
-  public T lookup(Object cause, ServerLocation location) {
-    return SpongeUtil.valueFor(key, cause, location);
+  public T result() {
+    if (isEmpty()) {
+      return settingKey.defaultData();
+    }
+    return getLast().value;
   }
 
-  @Override
-  public T lookup(UUID userUuid, Location location) {
-    return SpongeUtil.valueFor(key, userUuid, location);
+  public EvaluationStage add(Host host, T value) {
+    EvaluationStage stage = new EvaluationStage(host, value);
+    this.add(stage);
+    return stage;
   }
+
+  public class EvaluationStage {
+
+    private final Host host;
+    private final T value;
+
+    public EvaluationStage(Host host, T value) {
+      this.host = host;
+      this.value = value;
+    }
+
+    public Host host() {
+      return host;
+    }
+
+    public T value() {
+      return value;
+    }
+  }
+
 }

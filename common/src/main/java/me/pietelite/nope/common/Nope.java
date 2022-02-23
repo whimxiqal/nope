@@ -24,6 +24,7 @@
 
 package me.pietelite.nope.common;
 
+import me.pietelite.nope.common.debug.DebugManager;
 import me.pietelite.nope.common.host.HostSystem;
 import me.pietelite.nope.common.permission.Permission;
 import me.pietelite.nope.common.setting.SettingKeyStore;
@@ -76,6 +77,10 @@ public abstract class Nope {
   @Getter
   @Accessors(fluent = true)
   private final SettingKeyStore settingKeys = new SettingKeyStore();
+
+  @Getter
+  @Accessors(fluent = true)
+  private final DebugManager debugManager = new DebugManager();
 
   public final boolean hasPermission(UUID playerUuid, Permission permission) {
     return hasPermission(playerUuid, permission.get());

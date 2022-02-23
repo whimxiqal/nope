@@ -24,17 +24,20 @@
 
 package me.pietelite.nope.sponge.listener.dynamic;
 
+import me.pietelite.nope.sponge.api.event.SettingEventContext;
 import me.pietelite.nope.sponge.api.event.SettingEventListener;
+import me.pietelite.nope.sponge.api.event.SettingEventReport;
 import me.pietelite.nope.sponge.api.event.SettingValueLookupFunction;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.entity.CollideEntityEvent;
 
 public class PlayerCollisionListener implements SettingEventListener<Boolean, CollideEntityEvent> {
   @Override
-  public void handle(CollideEntityEvent event, SettingValueLookupFunction<Boolean> lookupFunction) {
-    for (Entity entity : event.entities()) {
-      if (!lookupFunction.lookup(entity, entity.serverLocation())) {
-        event.setCancelled(true);
+  public void handle(SettingEventContext<Boolean, CollideEntityEvent> context) {
+    for (Entity entity : context.event().entities()) {
+      if (!context.lookup(entity, entity.serverLocation())) {
+        context.event().setCancelled(true);
+        context.report(SettingEventReport.restricted().build());
         return;
       }
     }

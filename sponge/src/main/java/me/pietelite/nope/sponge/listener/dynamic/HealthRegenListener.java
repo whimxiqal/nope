@@ -2,6 +2,8 @@
  * MIT License
  *
  * Copyright (c) Pieter Svenson
+ * Copyright (c) MinecraftOnline
+ * Copyright (c) contributors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,35 +22,34 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
+ *
  */
 
 package me.pietelite.nope.sponge.listener.dynamic;
 
-import me.pietelite.nope.common.setting.SettingKeys;
+import java.util.Optional;
+import me.pietelite.nope.common.Nope;
 import me.pietelite.nope.sponge.api.event.SettingEventContext;
 import me.pietelite.nope.sponge.api.event.SettingEventListener;
-import me.pietelite.nope.sponge.api.event.SettingValueLookupFunction;
-import java.util.Optional;
-import org.spongepowered.api.block.transaction.NotificationTicket;
-import org.spongepowered.api.event.block.NotifyNeighborBlockEvent;
-import org.spongepowered.api.world.server.ServerLocation;
+import me.pietelite.nope.sponge.api.event.SettingEventReport;
+import org.spongepowered.api.data.Keys;
+import org.spongepowered.api.data.value.Value;
+import org.spongepowered.api.entity.living.player.server.ServerPlayer;
+import org.spongepowered.api.event.data.ChangeDataHolderEvent;
 
-/**
- * Block propagate listener.
- *
- * @see SettingKeys#BLOCK_CHANGE
- */
-public class BlockPropagateListener implements SettingEventListener<Boolean, NotifyNeighborBlockEvent> {
+public class HealthRegenListener implements SettingEventListener<Boolean, ChangeDataHolderEvent.ValueChange> {
   @Override
-  public void handle(SettingEventContext<Boolean, NotifyNeighborBlockEvent> context) {
-    for (NotificationTicket ticket : context.event().tickets()) {
-      final ServerLocation start = ticket.notifier().serverLocation();
-      final Optional<ServerLocation> endOptional = ticket.target().location();
-      if (endOptional.isPresent()) {
-        if (!context.lookup(null, start) || !context.lookup(null, endOptional.get())) {
-          context.event().setCancelled(true);
-          return;
-        }
+  public void handle(SettingEventContext<Boolean, ChangeDataHolderEvent.ValueChange> context) {
+    if (context.event().targetHolder() instanceof ServerPlayer) {
+      ServerPlayer player = (ServerPlayer) context.event().targetHolder();
+      Optional<Value.Immutable<Double>> changedHealth = context.event().endResult().successfulValue(Keys.HEALTH);
+      if (changedHealth.isPresent()
+          && (changedHealth.get().get() > player.get(Keys.HEALTH).get())
+          && !context.lookup(player, player.serverLocation())) {
+        context.event().setCancelled(true);
+        context.report(SettingEventReport.restricted()
+            .target(player.name())
+            .build());
       }
     }
   }

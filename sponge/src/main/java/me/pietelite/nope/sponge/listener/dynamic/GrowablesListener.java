@@ -26,7 +26,9 @@ package me.pietelite.nope.sponge.listener.dynamic;
 
 import me.pietelite.nope.common.Nope;
 import me.pietelite.nope.common.struct.AltSet;
+import me.pietelite.nope.sponge.api.event.SettingEventContext;
 import me.pietelite.nope.sponge.api.event.SettingEventListener;
+import me.pietelite.nope.sponge.api.event.SettingEventReport;
 import me.pietelite.nope.sponge.api.event.SettingValueLookupFunction;
 import java.util.Optional;
 import org.spongepowered.api.block.BlockTypes;
@@ -36,23 +38,23 @@ import org.spongepowered.api.event.block.ChangeBlockEvent;
 
 public class GrowablesListener implements SettingEventListener<AltSet<String>, ChangeBlockEvent.All> {
   @Override
-  public void handle(ChangeBlockEvent.All event,
-                     SettingValueLookupFunction<AltSet<String>> lookupFunction) {
-    final Optional<Player> player = event.cause().first(Player.class);
+  public void handle(SettingEventContext<AltSet<String>, ChangeBlockEvent.All> context) {
+    final Optional<Player> player = context.event().cause().first(Player.class);
     final Player playerOrNull = player.orElse(null);
-    for (BlockTransaction transaction : event.transactions()) {
+    for (BlockTransaction transaction : context.event().transactions()) {
       final String crop = BlockTypes.registry().valueKey(transaction.finalReplacement().state().type()).value();
       if (transaction.original()
           .location()
-          .map(loc -> !lookupFunction.lookup(playerOrNull, loc).contains(crop))
+          .map(loc -> !context.lookup(playerOrNull, loc).contains(crop))
           .orElse(false)
           || transaction.finalReplacement()
           .location()
-          .map(loc -> !lookupFunction.lookup(playerOrNull, loc).contains(crop))
+          .map(loc -> !context.lookup(playerOrNull, loc).contains(crop))
           .orElse(false)
-          || player.map(p -> !lookupFunction.lookup(playerOrNull, p.serverLocation()).contains(crop))
+          || player.map(p -> !context.lookup(playerOrNull, p.serverLocation()).contains(crop))
           .orElse(false)) {
         transaction.setValid(false);
+        context.report(SettingEventReport.restricted().build());
       }
     }
   }

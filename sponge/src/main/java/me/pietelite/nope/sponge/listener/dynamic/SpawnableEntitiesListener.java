@@ -25,8 +25,11 @@
 package me.pietelite.nope.sponge.listener.dynamic;
 
 import me.pietelite.nope.common.struct.AltSet;
+import me.pietelite.nope.sponge.api.event.SettingEventContext;
 import me.pietelite.nope.sponge.api.event.SettingEventListener;
+import me.pietelite.nope.sponge.api.event.SettingEventReport;
 import me.pietelite.nope.sponge.api.event.SettingValueLookupFunction;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.entity.living.player.Player;
@@ -35,9 +38,8 @@ import org.spongepowered.api.world.server.ServerLocation;
 
 public class SpawnableEntitiesListener implements SettingEventListener<AltSet<String>, SpawnEntityEvent.Pre> {
   @Override
-  public void handle(SpawnEntityEvent.Pre event,
-                     SettingValueLookupFunction<AltSet<String>> lookupFunction) {
-    final Object rootCause = event.cause().root();
+  public void handle(SettingEventContext<AltSet<String>, SpawnEntityEvent.Pre> context) {
+    final Object rootCause = context.event().cause().root();
     final Player player;
     if (rootCause instanceof Player) {
       player = (Player) rootCause;
@@ -47,22 +49,27 @@ public class SpawnableEntitiesListener implements SettingEventListener<AltSet<St
 
     ServerLocation location;
     AltSet<String> set;
-    String entityName;
-    for (Entity entity : event.entities()) {
+    ResourceKey entityKey;
+    for (Entity entity : context.event().entities()) {
       location = entity.serverLocation();
-      set = lookupFunction.lookup(player, location);
-      entityName = EntityTypes.registry().valueKey(entity.type()).value();
-      if (!set.contains(entityName)) {
-        event.setCancelled(true);
+      set = context.lookup(player, location);
+      entityKey = EntityTypes.registry().valueKey(entity.type());
+      SettingEventReport report = SettingEventReport.restricted()
+          .target(entityKey.formatted())
+          .build();
+      if (!set.contains(entityKey.value())) {
+        context.event().setCancelled(true);
+        context.report(report);
         return;
       }
 
       // If it was spawned by a player, then even if the spawning location is allowed for the
       //  entity type, make sure that the player can be spawning from their location.
       if (player != null) {
-        set = lookupFunction.lookup(player, player.serverLocation());
-        if (!set.contains(entityName)) {
-          event.setCancelled(true);
+        set = context.lookup(player, player.serverLocation());
+        if (!set.contains(entityKey.value())) {
+          context.event().setCancelled(true);
+          context.report(report);
           return;
         }
       }

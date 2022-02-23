@@ -24,25 +24,31 @@
 
 package me.pietelite.nope.sponge.listener.dynamic;
 
+import java.util.Optional;
 import me.pietelite.nope.common.setting.sets.ExplosiveSet;
 import me.pietelite.nope.common.struct.AltSet;
+import me.pietelite.nope.sponge.api.event.SettingEventContext;
 import me.pietelite.nope.sponge.api.event.SettingEventListener;
-import me.pietelite.nope.sponge.api.event.SettingValueLookupFunction;
+import me.pietelite.nope.sponge.api.event.SettingEventReport;
 import me.pietelite.nope.sponge.util.SpongeUtil;
-import java.util.Optional;
 import org.spongepowered.api.entity.explosive.Explosive;
 import org.spongepowered.api.event.entity.DamageEntityEvent;
+import org.spongepowered.api.registry.RegistryTypes;
 
 public class HarmfulExplosivesDamageListener implements SettingEventListener<AltSet<ExplosiveSet.Explosive>, DamageEntityEvent> {
   @Override
-  public void handle(DamageEntityEvent event,
-                     SettingValueLookupFunction<AltSet<ExplosiveSet.Explosive>> lookupFunction) {
-    final Optional<Explosive> sourceExplosive = event.cause().first(Explosive.class);
+  public void handle(SettingEventContext<AltSet<ExplosiveSet.Explosive>, DamageEntityEvent> context) {
+    final Optional<Explosive> sourceExplosive = context.event().cause().first(Explosive.class);
     if (sourceExplosive.isPresent()) {
       final ExplosiveSet.Explosive explosive = SpongeUtil.reduceExplosive(sourceExplosive.get());
-      if (!lookupFunction.lookup(null, sourceExplosive.get().serverLocation()).contains(explosive)
-          || !lookupFunction.lookup(null, event.entity().serverLocation()).contains(explosive)) {
-        event.setCancelled(true);
+      if (!context.lookup(null, sourceExplosive.get().serverLocation()).contains(explosive)
+          || !context.lookup(null, context.event().entity().serverLocation()).contains(explosive)) {
+        context.event().setCancelled(true);
+        context.report(SettingEventReport.restricted().target(context.event()
+            .entity()
+            .type()
+            .key(RegistryTypes.ENTITY_TYPE)
+            .formatted()).build());
       }
     }
   }

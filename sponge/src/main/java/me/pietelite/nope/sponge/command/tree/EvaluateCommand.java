@@ -24,14 +24,20 @@
 
 package me.pietelite.nope.sponge.command.tree;
 
+import java.util.LinkedList;
+import java.util.List;
+import java.util.stream.Collectors;
+import me.pietelite.nope.common.host.Evaluation;
 import me.pietelite.nope.common.permission.Permissions;
 import me.pietelite.nope.common.setting.SettingKey;
+import me.pietelite.nope.sponge.SpongeNope;
 import me.pietelite.nope.sponge.command.CommandNode;
 import me.pietelite.nope.sponge.command.parameters.ParameterKeys;
 import me.pietelite.nope.sponge.command.parameters.Parameters;
 import me.pietelite.nope.sponge.util.Formatter;
 import me.pietelite.nope.sponge.util.SpongeUtil;
 import java.util.Optional;
+import net.kyori.adventure.text.Component;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.parameter.CommandContext;
@@ -50,6 +56,10 @@ public class EvaluateCommand extends CommandNode {
   @Override
   public CommandResult execute(CommandContext context) throws CommandException {
     SettingKey<?, ?, ?> key = context.requireOne(ParameterKeys.SETTING_KEY);
+    return executeHelper(context, key);
+  }
+
+  private <X> CommandResult executeHelper(CommandContext context, SettingKey<X, ?, ?> key) {
     Optional<ServerPlayer> playerOptional = context.one(ParameterKeys.PLAYER_OPTIONAL);
     ServerPlayer player;
     if (playerOptional.isPresent()) {
@@ -61,14 +71,33 @@ public class EvaluateCommand extends CommandNode {
         return CommandResult.error(Formatter.error("You must specify a player"));
       }
     }
+    Evaluation<X> evaluation = SpongeNope.instance().hostSystem().lookup(key,
+        player.uniqueId(),
+        SpongeUtil.reduceLocation(player.serverLocation()));
 
-    player.sendMessage(Formatter.success("Value for setting ___ at ___, ___, ___ in ___ is ___",
-        key.id(),
-        player.serverLocation().blockX(),
-        player.serverLocation().blockY(),
-        player.serverLocation().blockZ(),
-        player.serverLocation().world().key().formatted(),
-        SpongeUtil.valueFor(key, player)));
+    List<Component> contents = new LinkedList<>();
+    contents.add(Formatter.accent("(default)")
+        .append(Formatter.dull(" "))
+        .append(Component.text(key.manager().printData(key.defaultData())).color(Formatter.WHITE)));
+    evaluation.stream()
+        .map(stage -> Formatter.host(stage.host())
+            .append(Formatter.dull(" -> "))
+            .append(Component.text(key.manager().printData(stage.value()))))
+        .forEach(contents::add);
+
+    Formatter.paginator(Component.text("Evaluation of ")
+            .color(Formatter.GOLD)
+            .append(Formatter.accent(key.id()))
+            .append(Component.text(" of ").color(Formatter.GOLD))
+            .append(Formatter.accent(player.name())))
+        .header(Formatter.accent("at ___, ___, ___ in ___",
+            player.serverLocation().blockX(),
+            player.serverLocation().blockY(),
+            player.serverLocation().blockZ(),
+            player.serverLocation().world().key().formatted()))
+        .contents(contents)
+        .sendTo(player);
+
     return CommandResult.success();
   }
 }

@@ -90,19 +90,23 @@ public final class SpongeUtil {
   }
 
   public static <T> T valueFor(SettingKey<T, ?, ?> key, Entity entity) {
-    return SpongeNope.instance().hostSystem().lookup(key, reduceEntity(entity), reduceLocation(entity.serverLocation()));
+    return SpongeNope.instance().hostSystem().lookup(key,
+        reduceEntity(entity),
+        reduceLocation(entity.serverLocation())).result();
   }
 
   public static <T> T valueFor(SettingKey<T, ?, ?> key, Object cause, ServerLocation location) {
-    return SpongeNope.instance().hostSystem().lookup(key, reduceCause(cause), reduceLocation(location));
+    return SpongeNope.instance().hostSystem().lookup(key,
+        reduceCause(cause),
+        reduceLocation(location)).result();
   }
 
   public static <T> T valueFor(SettingKey<T, ?, ?> key, Object cause, Location location) {
-    return SpongeNope.instance().hostSystem().lookup(key, reduceCause(cause), location);
+    return SpongeNope.instance().hostSystem().lookup(key, reduceCause(cause), location).result();
   }
 
   public static <T> T valueFor(SettingKey<T, ?, ?> key, ServerLocation location) {
-    return SpongeNope.instance().hostSystem().lookupAnonymous(key, reduceLocation(location));
+    return SpongeNope.instance().hostSystem().lookupAnonymous(key, reduceLocation(location)).result();
   }
 
   public static MovementSet.Movement reduceMovementType(MovementType movementType) {

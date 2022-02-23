@@ -24,27 +24,32 @@
 
 package me.pietelite.nope.sponge.listener.dynamic;
 
+import me.pietelite.nope.common.Nope;
 import me.pietelite.nope.common.permission.Permissions;
 import me.pietelite.nope.common.struct.AltSet;
+import me.pietelite.nope.sponge.api.event.SettingEventContext;
 import me.pietelite.nope.sponge.api.event.SettingEventListener;
+import me.pietelite.nope.sponge.api.event.SettingEventReport;
 import me.pietelite.nope.sponge.api.event.SettingValueLookupFunction;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.entity.DamageEntityEvent;
 
 public class InvincibleEntitiesListener implements SettingEventListener<AltSet<String>, DamageEntityEvent> {
   @Override
-  public void handle(DamageEntityEvent event, SettingValueLookupFunction<AltSet<String>> lookupFunction) {
-    if (event.source() instanceof ServerPlayer) {
-      ServerPlayer playerCause = (ServerPlayer) event.source();
+  public void handle(SettingEventContext<AltSet<String>, DamageEntityEvent> context) {
+    if (context.event().source() instanceof ServerPlayer) {
+      ServerPlayer playerCause = (ServerPlayer) context.event().source();
       if (playerCause.hasPermission(Permissions.UNRESTRICTED.get())) {
         // This player can damage whatever they want
         return;
       }
     }
-    final String entityName = EntityTypes.registry().valueKey(event.entity().type()).value();
-    if (lookupFunction.lookup(event.entity(), event.entity().serverLocation()).contains(entityName)) {
-      event.setCancelled(true);
+    final ResourceKey entityKey = EntityTypes.registry().valueKey(context.event().entity().type());
+    if (context.lookup(context.event().entity(), context.event().entity().serverLocation()).contains(entityKey.value())) {
+      context.event().setCancelled(true);
+      context.report(SettingEventReport.restricted().target(entityKey.formatted()).build());
     }
   }
 }

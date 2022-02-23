@@ -57,8 +57,7 @@ public class ListSettingsCommand extends CommandNode {
       sendSettings(context, category.get());
     } else {
       if (context.cause().root() instanceof ServerPlayer) {
-        Sponge.serviceProvider().paginationService().builder()
-            .title(Component.text("Setting Categories").color(Formatter.GOLD))
+        Formatter.paginator("Setting Categories")
             .header(Formatter.accent("Choose a category"))
             .contents(Arrays.stream(SettingKey.Category.values())
                 .map(c -> c.name().toLowerCase())
@@ -75,13 +74,13 @@ public class ListSettingsCommand extends CommandNode {
   }
 
   private void sendSettings(CommandContext context, SettingKey.Category category) {
-    Sponge.serviceProvider().paginationService().builder()
-        .title(Component.text(category.name().toUpperCase() + " Settings").color(Formatter.GOLD))
+    Formatter.paginator(category.name().toUpperCase() + " Settings")
         .contents(SpongeNope.instance().settingKeys()
             .keys()
             .values()
             .stream()
             .filter(settingKey -> settingKey.category().equals(category))
+            .sorted()
             .map(settingKey -> Formatter.settingKey(settingKey, true))
             .collect(Collectors.toList()))
         .sendTo(context.cause().audience());

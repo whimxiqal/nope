@@ -40,6 +40,7 @@ import java.util.stream.Collectors;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
+import me.pietelite.nope.common.host.Evaluation;
 import me.pietelite.nope.common.host.Host;
 import me.pietelite.nope.common.struct.AltSet;
 import me.pietelite.nope.common.struct.HashAltSet;
@@ -91,9 +92,9 @@ public abstract class SettingKey<T,
     this.playerRestrictive = playerRestrictive;
   }
 
-  public abstract T extractValue(@NotNull Collection<Host> hosts,
-                                 @Nullable final UUID userUuid,
-                                 @NotNull final Location location);
+  public abstract Evaluation<T> extractValue(@NotNull Collection<Host> hosts,
+                                          @Nullable final UUID userUuid,
+                                          @NotNull final Location location);
 
   public abstract String type();
 
@@ -138,13 +139,14 @@ public abstract class SettingKey<T,
     }
 
     @Override
-    public T extractValue(@NotNull Collection<Host> hosts,
+    public Evaluation<T> extractValue(@NotNull Collection<Host> hosts,
                           @Nullable final UUID userUuid,
                           @NotNull final Location location) {
 
       /* Choose a data structure that will optimize searching for highest priority matching */
       Queue<Host> hostQueue;
       Comparator<Host> descending = (h1, h2) -> Integer.compare(h2.priority(), h1.priority());
+      Evaluation<T> evaluation = new Evaluation<>(this);
       if (hosts.size() >= 1) {
         hostQueue = new PriorityQueue<>(hosts.size(), descending);
         hostQueue.addAll(hosts);
@@ -173,7 +175,8 @@ public abstract class SettingKey<T,
             // the active target acts here
             if ((activeTarget == null ? Target.all() : activeTarget)
                 .test(userUuid, playerRestrictive())) {
-              return data;
+              evaluation.add(currentHost, data);
+              return evaluation;
             } else {
               // We have found the data which was specifically not targeted.
               // So, pass through this data value and continue on anew.
@@ -184,7 +187,7 @@ public abstract class SettingKey<T,
       }
 
       // No more left, so just do default
-      return defaultData();
+      return evaluation;
     }
 
     @Override
@@ -278,13 +281,15 @@ public abstract class SettingKey<T,
     }
 
     @Override
-    public S extractValue(@NotNull Collection<Host> hosts,
+    public Evaluation<S> extractValue(@NotNull Collection<Host> hosts,
                           @Nullable UUID userUuid,
                           @NotNull Location location) {
       /* Choose a data structure that will optimize searching for highest priority matching */
       Queue<Host> hostQueue;
       Comparator<Host> descending = (h1, h2) -> Integer.compare(h2.priority(), h1.priority());
       Stack<SettingValue.Poly<T, S>> values = new Stack<>();
+      Stack<Host> valuedHosts = new Stack<>();
+      Evaluation<S> evaluation = new Evaluation<>(this);
       if (hosts.size() >= 1) {
         hostQueue = new PriorityQueue<>(hosts.size(), descending);
         hostQueue.addAll(hosts);
@@ -312,6 +317,7 @@ public abstract class SettingKey<T,
             if ((activeTarget == null ? Target.all() : activeTarget)
                 .test(userUuid, playerRestrictive())) {
               values.add(value);
+              valuedHosts.add(currentHost);
               // TODO if we ever add a declarative type, it will ignore anything else.
               //  so, just stop here and continue on to the backwards traversal down below.
               //  (need to add a check method in SettingValue.Poly for declarative type)
@@ -327,8 +333,9 @@ public abstract class SettingKey<T,
       S result = manager().copySet(defaultData());
       while (!values.isEmpty()) {
         result = manager().copySet(values.pop().applyTo(result));
+        evaluation.add(valuedHosts.pop(), result);
       }
-      return result;
+      return evaluation;
     }
 
     @Override

@@ -172,6 +172,7 @@ public class Parameters {
       .build();
   public static final Parameter.Value<String> PERMISSION = Parameter.string().key(ParameterKeys.PERMISSION).build();
   public static final Parameter.Value<Boolean> PERMISSION_VALUE = Parameter.bool().key(ParameterKeys.PERMISSION_VALUE).build();
+  public static final Parameter.Value<ServerPlayer> PLAYER = Parameter.player().key(ParameterKeys.PLAYER).build();
   public static final Parameter.Value<Set<CompletableFuture<GameProfile>>> PLAYER_LIST = set(name -> Sponge.server()
           .gameProfileManager()
           .profile(name),
@@ -357,6 +358,7 @@ public class Parameters {
             }
           })
           .build();
+  public static final Parameter.Value<String> STRING = Parameter.string().key(ParameterKeys.VALUE).build();
   public static final Parameter.Value<TargetOption> TARGET_OPTION = Parameter.enumValue(TargetOption.class)
       .key(ParameterKeys.TARGET_OPTION).build();
   public static final Parameter.Value<Integer> VOLUME_INDEX = Parameter.integerNumber()

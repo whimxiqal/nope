@@ -24,6 +24,7 @@
 
 package me.pietelite.nope.sponge.listener.dynamic;
 
+import me.pietelite.nope.sponge.api.event.SettingEventContext;
 import me.pietelite.nope.sponge.api.event.SettingEventListener;
 import me.pietelite.nope.sponge.api.event.SettingValueLookupFunction;
 import me.pietelite.nope.sponge.util.Formatter;
@@ -40,15 +41,15 @@ public abstract class ItemDropListener<E extends Event>
 
   public static class DropItemPre extends ItemDropListener<DropItemEvent.Pre> {
     @Override
-    public void handle(DropItemEvent.Pre event, SettingValueLookupFunction<Boolean> lookupFunction) {
-      if (!(event.source() instanceof Locatable)) {
+    public void handle(SettingEventContext<Boolean, DropItemEvent.Pre> context) {
+      if (!(context.event().source() instanceof Locatable)) {
         return;
       }
-      Locatable locatable = (Locatable) event.source();
-      Optional<Carrier> carrier = event.cause().first(Carrier.class);
-      if (!lookupFunction.lookup(locatable, locatable.serverLocation())) {
-        event.droppedItems().clear();
-        carrier.ifPresent(c -> event.originalDroppedItems().forEach(snapshot -> {
+      Locatable locatable = (Locatable) context.event().source();
+      Optional<Carrier> carrier = context.event().cause().first(Carrier.class);
+      if (!context.lookup(locatable, locatable.serverLocation())) {
+        context.event().droppedItems().clear();
+        carrier.ifPresent(c -> context.event().originalDroppedItems().forEach(snapshot -> {
           InventoryTransactionResult result = c.inventory().offer(snapshot.createStack());
           if (result.type() != InventoryTransactionResult.Type.SUCCESS && c instanceof Audience) {
             ((Audience) c).sendMessage(Formatter.error("You cannot drop items here and "

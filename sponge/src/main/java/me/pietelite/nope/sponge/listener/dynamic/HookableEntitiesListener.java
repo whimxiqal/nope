@@ -24,26 +24,34 @@
 
 package me.pietelite.nope.sponge.listener.dynamic;
 
+import me.pietelite.nope.common.setting.sets.ExplosiveSet;
 import me.pietelite.nope.common.struct.AltSet;
+import me.pietelite.nope.sponge.api.event.SettingEventContext;
 import me.pietelite.nope.sponge.api.event.SettingEventListener;
+import me.pietelite.nope.sponge.api.event.SettingEventReport;
 import me.pietelite.nope.sponge.api.event.SettingValueLookupFunction;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.action.FishingEvent;
+import org.spongepowered.api.event.entity.DamageEntityEvent;
 
 public class HookableEntitiesListener implements SettingEventListener<AltSet<String>, FishingEvent.HookEntity> {
   @Override
-  public void handle(FishingEvent.HookEntity event, SettingValueLookupFunction<AltSet<String>> lookupFunction) {
+  public void handle(SettingEventContext<AltSet<String>, FishingEvent.HookEntity> context) {
     final Player player;
-    if (event.source() instanceof Player) {
-      player = (Player) event.source();
+    if (context.event().source() instanceof Player) {
+      player = (Player) context.event().source();
     } else {
       player = null;
     }
-    String entityName = EntityTypes.registry().valueKey(event.entity().type()).value();
-    if (!lookupFunction.lookup(event.source(), event.entity().serverLocation()).contains(entityName)
-        || (player != null && !lookupFunction.lookup(player, player.serverLocation()).contains(entityName))) {
-      event.setCancelled(true);
+    ResourceKey entityKey = EntityTypes.registry().valueKey(context.event().entity().type());
+    if (!context.lookup(context.event().source(), context.event().entity().serverLocation()).contains(entityKey.value())
+        || (player != null && !context.lookup(player, player.serverLocation()).contains(entityKey.value()))) {
+      context.event().setCancelled(true);
+      context.report(SettingEventReport.restricted()
+          .target(entityKey.formatted())
+          .build());
     }
   }
 }

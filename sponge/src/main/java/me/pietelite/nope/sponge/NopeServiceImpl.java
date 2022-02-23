@@ -29,7 +29,7 @@ package me.pietelite.nope.sponge;
 
 import me.pietelite.nope.sponge.api.event.SettingListenerRegistration;
 import me.pietelite.nope.sponge.api.service.NopeService;
-import me.pietelite.nope.sponge.util.SettingValueLookupFunctionImpl;
+import me.pietelite.nope.sponge.listener.SettingEventContextImpl;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.EventListenerRegistration;
@@ -39,7 +39,7 @@ public class NopeServiceImpl implements NopeService {
   public <T, E extends Event> void registerSettingListener(SettingListenerRegistration<T, E> registration) {
     Sponge.eventManager().registerListener(EventListenerRegistration.builder(registration.eventClass())
         .listener(event -> registration.settingEventListener()
-            .handle(event, new SettingValueLookupFunctionImpl<>(registration.settingKey())))
+            .handle(new SettingEventContextImpl<T, E>(event, registration.settingKey())))
         .plugin(registration.plugin())
         .order(registration.order())
         .build());

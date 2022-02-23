@@ -62,6 +62,8 @@ public class SettingKeyManagers {
       new PolyAllCapsEnumKeyManager<>(MobGriefSet.MobGrief.class, MobGriefSet::new);
   public static final PolyAllCapsEnumKeyManager<MovementSet.Movement, MovementSet> POLY_MOVEMENT_KEY_MANAGER =
       new PolyAllCapsEnumKeyManager<>(MovementSet.Movement.class, MovementSet::new);
+  public static final PolyStringKeyManager<StringSet> POLY_PLUGIN_MANAGER =
+      new PolyStringKeyManager<>(StringSet::new);
   public static final StateKeyManager STATE_KEY_MANAGER = new StateKeyManager();
   public static final StringKeyManager STRING_KEY_MANAGER = new StringKeyManager();
   public static final ToggleKeyManager TOGGLE_KEY_MANAGER = new ToggleKeyManager();

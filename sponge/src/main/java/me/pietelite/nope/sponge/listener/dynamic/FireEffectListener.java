@@ -24,7 +24,9 @@
 
 package me.pietelite.nope.sponge.listener.dynamic;
 
+import me.pietelite.nope.sponge.api.event.SettingEventContext;
 import me.pietelite.nope.sponge.api.event.SettingEventListener;
+import me.pietelite.nope.sponge.api.event.SettingEventReport;
 import me.pietelite.nope.sponge.api.event.SettingValueLookupFunction;
 import java.util.Optional;
 import java.util.Random;
@@ -39,13 +41,12 @@ public class FireEffectListener implements SettingEventListener<Boolean, ChangeB
   private final Random random = new Random();
 
   @Override
-  public void handle(ChangeBlockEvent.All event,
-                     SettingValueLookupFunction<Boolean> lookupFunction) {
+  public void handle(SettingEventContext<Boolean, ChangeBlockEvent.All> context) {
     Optional<ServerLocation> location;
-    final Object eventCause = event.cause().root();
+    final Object eventCause = context.event().cause().root();
     if (eventCause instanceof LocatableBlock) {
       LocatableBlock block = (LocatableBlock) eventCause;
-      for (BlockTransaction transaction : event.transactions()) {
+      for (BlockTransaction transaction : context.event().transactions()) {
         boolean fireAging = false;
         if (block.blockState().type().equals(BlockTypes.FIRE.get())) {
           // It's caused by fire
@@ -74,8 +75,9 @@ public class FireEffectListener implements SettingEventListener<Boolean, ChangeB
             }
           }
           // Otherwise, just invalidate the transaction (unless it's just the fire aging itself)
-          if (!fireAging && !lookupFunction.lookup(null, block.serverLocation())) {
+          if (!fireAging && !context.lookup(null, block.serverLocation())) {
             transaction.invalidate();
+            context.report(SettingEventReport.restricted().build());
           }
         }
       }

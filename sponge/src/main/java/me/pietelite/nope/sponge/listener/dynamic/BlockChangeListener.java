@@ -27,8 +27,9 @@ package me.pietelite.nope.sponge.listener.dynamic;
 import me.pietelite.nope.common.Nope;
 import me.pietelite.nope.common.setting.SettingKeys;
 import me.pietelite.nope.common.setting.sets.BlockChangeSet;
+import me.pietelite.nope.sponge.api.event.SettingEventContext;
 import me.pietelite.nope.sponge.api.event.SettingEventListener;
-import me.pietelite.nope.sponge.api.event.SettingValueLookupFunction;
+import me.pietelite.nope.sponge.api.event.SettingEventReport;
 import me.pietelite.nope.sponge.listener.SpongeEventUtil;
 import java.util.Optional;
 import org.spongepowered.api.block.BlockSnapshot;
@@ -36,6 +37,8 @@ import org.spongepowered.api.block.transaction.BlockTransaction;
 import org.spongepowered.api.block.transaction.Operations;
 import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
+import org.spongepowered.api.registry.RegistryTypes;
+import org.spongepowered.api.world.explosion.Explosion;
 import org.spongepowered.api.world.server.ServerLocation;
 
 /**
@@ -45,8 +48,8 @@ import org.spongepowered.api.world.server.ServerLocation;
  */
 public class BlockChangeListener implements SettingEventListener<BlockChangeSet, ChangeBlockEvent.All> {
   @Override
-  public void handle(ChangeBlockEvent.All event, SettingValueLookupFunction<BlockChangeSet> lookupFunction) {
-    for (BlockTransaction transaction : event.transactions()) {
+  public void handle(SettingEventContext<BlockChangeSet, ChangeBlockEvent.All> context) {
+    for (BlockTransaction transaction : context.event().transactions()) {
       final BlockChangeSet.BlockChange blockChangeType;
       if (transaction.operation().equals(Operations.BREAK.get())) {
         blockChangeType = BlockChangeSet.BlockChange.BREAK;
@@ -61,22 +64,28 @@ public class BlockChangeListener implements SettingEventListener<BlockChangeSet,
       } else {
         return;
       }
-      if (SpongeEventUtil.invalidateTransactionIfNeeded(event.source(),
+      if (SpongeEventUtil.invalidateTransactionIfNeeded(context.event().source(),
           transaction,
-          (cause, location) ->
-              !lookupFunction.lookup(cause, location).contains(blockChangeType))) {
-        return;
+          (cause, location) -> !context.lookup(cause, location).contains(blockChangeType))) {
+        context.report(SettingEventReport.restricted()
+            .source(context.event().source())
+            .target(transaction.original().state().type().key(RegistryTypes.BLOCK_TYPE).formatted())
+            .build());
       } else if (blockChangeType == BlockChangeSet.BlockChange.GROW) {
         // If the origin of some growth is banned from growing anything, then we still must invalidate
-        Optional<BlockSnapshot> growthOrigin = event.context().get(EventContextKeys.GROWTH_ORIGIN);
+        Optional<BlockSnapshot> growthOrigin = context.event().context().get(EventContextKeys.GROWTH_ORIGIN);
         if (growthOrigin.isPresent()) {
           Optional<ServerLocation> location = growthOrigin.get().location();
           if (location.isPresent()
-              && !lookupFunction.lookup(event.cause().root(), location.get()).contains(blockChangeType)) {
+              && !context.lookup(context.event().source(), location.get()).contains(blockChangeType)) {
             transaction.setValid(false);
+            context.report(SettingEventReport.restricted()
+                .target(growthOrigin.get().state().type().key(RegistryTypes.BLOCK_TYPE).formatted())
+                .build());
           }
         }
       }
     }
   }
+
 }

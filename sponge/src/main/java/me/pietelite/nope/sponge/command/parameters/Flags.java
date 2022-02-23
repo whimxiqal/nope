@@ -27,10 +27,6 @@ package me.pietelite.nope.sponge.command.parameters;
 import org.spongepowered.api.command.parameter.managed.Flag;
 
 public class Flags {
-  public static final Flag HOST_INFER_FLAG = Flag.builder()
-      .aliases("z", "zone")
-      .setParameter(Parameters.HOST_INFER)
-      .build();
 
   public static final Flag PRIORITY = Flag.builder()
       .aliases("p", "priority")
@@ -42,10 +38,23 @@ public class Flags {
       .setParameter(Parameters.PARENT)
       .build();
 
+  public static final Flag PLAYER = Flag.builder()
+      .aliases("player")
+      .setParameter(Parameters.PLAYER)
+      .build();
+
+  public static final Flag SETTING_KEY = Flag.builder()
+      .aliases("setting")
+      .setParameter(Parameters.SETTING_KEY)
+      .build();
+
+  public static final Flag TARGET = Flag.builder()
+      .aliases("target")
+      .setParameter(Parameters.STRING)
+      .build();
+
   public static final Flag ADDITIVE_VALUE_FLAG = Flag.of("additive");
-
   public static final Flag SUBTRACTIVE_VALUE_FLAG = Flag.of("subtractive");
-
   public static final Flag OPEN_EDITOR = Flag.of("editor", "e");
 
 }

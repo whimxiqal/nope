@@ -30,6 +30,7 @@ import me.pietelite.nope.sponge.command.tree.HostsCommand;
 import me.pietelite.nope.sponge.command.tree.ReloadCommand;
 import me.pietelite.nope.sponge.command.tree.SettingsCommand;
 import me.pietelite.nope.sponge.command.tree.ToolCommand;
+import me.pietelite.nope.sponge.command.tree.VerboseCommand;
 import me.pietelite.nope.sponge.util.Formatter;
 import net.kyori.adventure.identity.Identity;
 import org.spongepowered.api.command.CommandResult;
@@ -47,6 +48,7 @@ public class RootCommand extends CommandNode {
     addChild(new ReloadCommand(this));
     addChild(new SettingsCommand(this));
     addChild(new ToolCommand(this));
+    addChild(new VerboseCommand(this));
   }
 
   @Override

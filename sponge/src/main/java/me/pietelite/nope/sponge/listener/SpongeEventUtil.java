@@ -83,9 +83,9 @@ public class SpongeEventUtil {
         .location()
         .map(loc -> shouldInvalidateWith.apply(eventSource, loc))
         .orElse(false)
-        || (eventSource instanceof Locatable)
+        || ((eventSource instanceof Locatable)
         ? shouldInvalidateWith.apply(eventSource, ((Locatable) eventSource).serverLocation())
-        : false) {
+        : false)) {
       transaction.invalidate();
       return true;
     }

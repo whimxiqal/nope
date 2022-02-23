@@ -27,11 +27,16 @@ package me.pietelite.nope.sponge.listener.always;
 import com.google.common.collect.Sets;
 import me.pietelite.nope.common.Nope;
 import me.pietelite.nope.common.host.Host;
+import me.pietelite.nope.common.setting.SettingKey;
 import me.pietelite.nope.common.setting.SettingKeys;
 import me.pietelite.nope.common.setting.sets.MovementSet;
+import me.pietelite.nope.common.struct.AltSet;
 import me.pietelite.nope.common.struct.Location;
 import me.pietelite.nope.common.util.TreeUtil;
 import me.pietelite.nope.sponge.SpongeNope;
+import me.pietelite.nope.sponge.api.event.SettingEventContext;
+import me.pietelite.nope.sponge.api.event.SettingEventReport;
+import me.pietelite.nope.sponge.listener.SettingEventContextImpl;
 import me.pietelite.nope.sponge.util.SpongeUtil;
 import java.util.HashSet;
 import java.util.List;
@@ -104,7 +109,7 @@ public class MovementListener {
       // Check for MOVE setting
       if (!SpongeUtil.valueFor(SettingKeys.MOVE, entity, firstLocation).contains(movementType)
           || !SpongeUtil.valueFor(SettingKeys.MOVE, entity, lastLocation).contains(movementType)) {
-        cancelMovement(event, movementType, firstWorld, entity);
+        cancelMovement(event, movementType, firstWorld, entity, SettingKeys.MOVE);
       }
 
       // Check for EXIT and ENTRY
@@ -120,7 +125,7 @@ public class MovementListener {
       // Cannot exit if we are walking out of a host and EXIT is disallowed at the origin
       if (!firstHosts.isEmpty()
           && !SpongeUtil.valueFor(SettingKeys.EXIT, entity, firstLocation).contains(movementType)) {
-        cancelMovement(event, movementType, firstWorld, entity);
+        cancelMovement(event, movementType, firstWorld, entity, SettingKeys.EXIT);
         if (entity instanceof Audience) {
           trySendMessage((Audience) entity, SpongeUtil.valueFor(SettingKeys.EXIT_DENY_MESSAGE, entity, lastLocation));
           trySendTitle((Audience) entity, SpongeUtil.valueFor(SettingKeys.EXIT_DENY_TITLE, entity, lastLocation));
@@ -132,7 +137,7 @@ public class MovementListener {
       // Cannot enter if we are walking into a host and ENTRY is disallowed at the destination
       if (!lastHosts.isEmpty()
           && !SpongeUtil.valueFor(SettingKeys.ENTRY, entity, lastLocation).contains(movementType)) {
-        cancelMovement(event, movementType, firstWorld, entity);
+        cancelMovement(event, movementType, firstWorld, entity, SettingKeys.ENTRY);
         if (entity instanceof Audience) {
           trySendMessage((Audience) entity, SpongeUtil.valueFor(SettingKeys.ENTRY_DENY_MESSAGE, entity, lastLocation));
           trySendTitle((Audience) entity, SpongeUtil.valueFor(SettingKeys.ENTRY_DENY_TITLE, entity, lastLocation));
@@ -187,7 +192,8 @@ public class MovementListener {
   private void cancelMovement(MoveEntityEvent event,
                               MovementSet.Movement movementType,
                               ServerWorld returnWorld,
-                              Entity entity) {
+                              Entity entity,
+                              SettingKey<? extends AltSet<MovementSet.Movement>, ?, ?> settingKey) {
     event.setCancelled(true);
     event.setDestinationPosition(event.originalPosition());
     entity.remove(Keys.VEHICLE);
@@ -198,5 +204,8 @@ public class MovementListener {
           event.originalPosition().y(),
           event.originalPosition().z()));
     }
+    SettingEventContext<AltSet<MovementSet.Movement>, MoveEntityEvent> context =
+        new SettingEventContextImpl<>(event, settingKey);
+    context.report(SettingEventReport.restricted().build());
   }
 }

@@ -24,18 +24,21 @@
 
 package me.pietelite.nope.sponge.listener.dynamic;
 
+import me.pietelite.nope.sponge.api.event.SettingEventContext;
 import me.pietelite.nope.sponge.api.event.SettingEventListener;
+import me.pietelite.nope.sponge.api.event.SettingEventReport;
 import me.pietelite.nope.sponge.api.event.SettingValueLookupFunction;
 import org.spongepowered.api.event.item.inventory.ChangeInventoryEvent;
 import org.spongepowered.api.world.Locatable;
 
 public class ItemPickupListener implements SettingEventListener<Boolean, ChangeInventoryEvent.Pickup> {
   @Override
-  public void handle(ChangeInventoryEvent.Pickup event, SettingValueLookupFunction<Boolean> lookupFunction) {
-    if (event.source() instanceof Locatable) {
-      final Locatable locatable = (Locatable) event.source();
-      if (!lookupFunction.lookup(event.source(), locatable.serverLocation())) {
-        event.setCancelled(true);
+  public void handle(SettingEventContext<Boolean, ChangeInventoryEvent.Pickup> context) {
+    if (context.event().source() instanceof Locatable) {
+      final Locatable locatable = (Locatable) context.event().source();
+      if (!context.lookup(context.event().source(), locatable.serverLocation())) {
+        context.event().setCancelled(true);
+        context.report(SettingEventReport.restricted().build());
       }
     }
   }

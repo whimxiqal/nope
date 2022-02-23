@@ -453,8 +453,8 @@ public final class Formatter {
         .title(title);
   }
 
-  public static void dull(String s) {
-    formattedMessage(DULL, s, false);
+  public static Component dull(String s) {
+    return formattedMessage(DULL, s, false);
   }
 
   public static void sendSettingEditor(Audience audience, Host host, int page) {

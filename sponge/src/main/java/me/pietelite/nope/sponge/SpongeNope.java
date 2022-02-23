@@ -229,7 +229,7 @@ public class SpongeNope extends Nope {
   @Override
   public boolean hasPermission(UUID playerUuid, String permission) {
     if (playerUuid == null) {
-      return true;
+      return false;
     } else {
       return Sponge.server().player(playerUuid).map(player -> player.hasPermission(permission)).orElse(false);
     }

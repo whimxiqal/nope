@@ -29,6 +29,6 @@ import org.spongepowered.api.event.Event;
 @FunctionalInterface
 public interface SettingEventListener<T, E extends Event> {
 
-  void handle(E event, SettingValueLookupFunction<T> lookupFunction);
+  void handle(SettingEventContext<T, E> context);
 
 }

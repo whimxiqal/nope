@@ -25,9 +25,12 @@
 package me.pietelite.nope.sponge.listener.dynamic;
 
 import me.pietelite.nope.common.struct.AltSet;
+import me.pietelite.nope.sponge.api.event.SettingEventContext;
 import me.pietelite.nope.sponge.api.event.SettingEventListener;
+import me.pietelite.nope.sponge.api.event.SettingEventReport;
 import me.pietelite.nope.sponge.api.event.SettingValueLookupFunction;
 import java.util.Optional;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.block.InteractBlockEvent;
@@ -35,16 +38,18 @@ import org.spongepowered.api.world.server.ServerLocation;
 
 public class InteractiveBlocksListener implements SettingEventListener<AltSet<String>, InteractBlockEvent.Secondary> {
   @Override
-  public void handle(InteractBlockEvent.Secondary event,
-                     SettingValueLookupFunction<AltSet<String>> lookupFunction) {
-    final Optional<ServerLocation> location = event.block().location();
+  public void handle(SettingEventContext<AltSet<String>, InteractBlockEvent.Secondary> context) {
+    final Optional<ServerLocation> location = context.event().block().location();
     if (location.isPresent()) {
-      final Optional<Player> player = event.cause().first(Player.class);
+      final Optional<Player> player = context.event().cause().first(Player.class);
       if (player.isPresent()) {
-        final String blockName = BlockTypes.registry().valueKey(event.block().state().type()).value();
-        if (!lookupFunction.lookup(player.get(), location.get()).contains(blockName)
-            || !lookupFunction.lookup(player.get(), player.get().serverLocation()).contains(blockName)) {
-          event.setCancelled(true);
+        final ResourceKey blockKey = BlockTypes.registry().valueKey(context.event().block().state().type());
+        if (!context.lookup(player.get(), location.get()).contains(blockKey.value())
+            || !context.lookup(player.get(), player.get().serverLocation()).contains(blockKey.value())) {
+          context.event().setCancelled(true);
+          context.report(SettingEventReport.restricted()
+              .target(blockKey.formatted())
+              .build());
         }
       }
     }

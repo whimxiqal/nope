@@ -44,6 +44,8 @@ public class ParameterKeys {
   public static final Parameter.Key<Cylinder> CYLINDER = Parameter.key("cylinder", Cylinder.class);
   public static final Parameter.Key<String> DESCRIPTION = Parameter.key("parameter", String.class);
   public static final Parameter.Key<Host> HOST = Parameter.key("host", Host.class);
+  public static final Parameter.Key<ServerPlayer> PLAYER = Parameter.key("player", ServerPlayer.class);
+  public static final Parameter.Key<String> VALUE = Parameter.key("value", String.class);
   public static final Parameter.Key<Integer> VOLUME_INDEX = Parameter.key("index", Integer.class);
   public static final Parameter.Key<String> HOST_NAME = Parameter.key("name", String.class);
   public static final Parameter.Key<Zone> PARENT = Parameter.key("parent", Zone.class);

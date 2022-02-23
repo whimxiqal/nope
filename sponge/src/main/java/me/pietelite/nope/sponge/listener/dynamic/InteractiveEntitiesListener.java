@@ -25,6 +25,7 @@
 package me.pietelite.nope.sponge.listener.dynamic;
 
 import me.pietelite.nope.common.struct.AltSet;
+import me.pietelite.nope.sponge.api.event.SettingEventContext;
 import me.pietelite.nope.sponge.api.event.SettingEventListener;
 import me.pietelite.nope.sponge.api.event.SettingValueLookupFunction;
 import org.spongepowered.api.entity.EntityTypes;
@@ -33,13 +34,13 @@ import org.spongepowered.api.event.entity.InteractEntityEvent;
 
 public class InteractiveEntitiesListener implements SettingEventListener<AltSet<String>, InteractEntityEvent.Secondary> {
   @Override
-  public void handle(InteractEntityEvent.Secondary event, SettingValueLookupFunction<AltSet<String>> lookupFunction) {
-    if (event.source() instanceof Player) {
-      final Player player = (Player) event.source();
-      final String entityName = EntityTypes.registry().valueKey(event.entity().type()).value();
-      if (!lookupFunction.lookup(player, event.entity().serverLocation()).contains(entityName)
-          || !lookupFunction.lookup(player, player.serverLocation()).contains(entityName)) {
-        event.setCancelled(true);
+  public void handle(SettingEventContext<AltSet<String>, InteractEntityEvent.Secondary> context) {
+    if (context.event().source() instanceof Player) {
+      final Player player = (Player) context.event().source();
+      final String entityName = EntityTypes.registry().valueKey(context.event().entity().type()).value();
+      if (!context.lookup(player, context.event().entity().serverLocation()).contains(entityName)
+          || !context.lookup(player, player.serverLocation()).contains(entityName)) {
+        context.event().setCancelled(true);
       }
     }
   }

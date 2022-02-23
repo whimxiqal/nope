@@ -24,6 +24,8 @@
 
 package me.pietelite.nope.common.setting;
 
+import java.lang.reflect.Modifier;
+import java.util.Arrays;
 import me.pietelite.nope.common.setting.sets.BlockChangeSet;
 import me.pietelite.nope.common.setting.sets.DamageCauseSet;
 import me.pietelite.nope.common.setting.sets.ExplosiveSet;
@@ -31,13 +33,13 @@ import me.pietelite.nope.common.setting.sets.MobGriefSet;
 import me.pietelite.nope.common.setting.sets.MovementSet;
 import me.pietelite.nope.common.setting.sets.StringSet;
 import me.pietelite.nope.common.struct.AltSet;
-import java.lang.reflect.Modifier;
-import java.util.Arrays;
 
 public class SettingKeys {
 
   public static final SettingKey.Poly<BlockChangeSet.BlockChange, BlockChangeSet> BLOCK_CHANGE =
-      SettingKey.Poly.builder("block-change", AltSet.full(new BlockChangeSet()), SettingKeyManagers.POLY_BLOCK_CHANGE_KEY_MANAGER)
+      SettingKey.Poly.builder("block-change",
+              AltSet.full(new BlockChangeSet()),
+              SettingKeyManagers.POLY_BLOCK_CHANGE_KEY_MANAGER)
           .blurb("How blocks may be changed")
           .description("A list of ways that blocks may be changed.")
           .category(SettingKey.Category.BLOCKS)
@@ -81,7 +83,9 @@ public class SettingKeys {
           .category(SettingKey.Category.MISC)
           .build();
   public static final SettingKey.Poly<MovementSet.Movement, MovementSet> ENTRY =
-      SettingKey.Poly.builder("entry", AltSet.full(new MovementSet()), SettingKeyManagers.POLY_MOVEMENT_KEY_MANAGER)
+      SettingKey.Poly.builder("entry",
+              AltSet.full(new MovementSet()),
+              SettingKeyManagers.POLY_MOVEMENT_KEY_MANAGER)
           .blurb("Host entrance restriction")
           .description("Specify which type of movement is allowed by players to enter.")
           .category(SettingKey.Category.MOVEMENT)
@@ -112,7 +116,9 @@ public class SettingKeys {
           .functional()
           .build();
   public static final SettingKey.Poly<MovementSet.Movement, MovementSet> EXIT =
-      SettingKey.Poly.builder("exit", AltSet.full(new MovementSet()), SettingKeyManagers.POLY_MOVEMENT_KEY_MANAGER)
+      SettingKey.Poly.builder("exit",
+              AltSet.full(new MovementSet()),
+              SettingKeyManagers.POLY_MOVEMENT_KEY_MANAGER)
           .blurb("Host exit restriction")
           .description("Specify which type of movement is allowed by players to exit.")
           .category(SettingKey.Category.MOVEMENT)
@@ -374,6 +380,11 @@ public class SettingKeys {
           .blurb("Damage sources to players")
           .description("A list of damage sources that may inflict damage to players")
           .category(SettingKey.Category.DAMAGE)
+          .build();
+  public static final SettingKey.Poly<String, StringSet> IGNORED_PLUGINS =
+      SettingKey.Poly.builder("ignored-plugins", new StringSet(), SettingKeyManagers.POLY_PLUGIN_MANAGER)
+          .blurb("Plugins unaffected by Nope")
+          .description("A list of all plugins that Nope does not affect")
           .build();
   public static final SettingKey.Unary<Boolean> RIDE =
       SettingKey.Unary.builder("ride", true, SettingKeyManagers.STATE_KEY_MANAGER)

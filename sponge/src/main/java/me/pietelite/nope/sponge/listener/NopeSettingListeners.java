@@ -37,6 +37,7 @@ import me.pietelite.nope.sponge.listener.dynamic.FireEffectListener;
 import me.pietelite.nope.sponge.listener.dynamic.GrowablesListener;
 import me.pietelite.nope.sponge.listener.dynamic.HarmfulExplosivesDamageListener;
 import me.pietelite.nope.sponge.listener.dynamic.HarmfulExplosivesExplosionListener;
+import me.pietelite.nope.sponge.listener.dynamic.HealthRegenListener;
 import me.pietelite.nope.sponge.listener.dynamic.HookableEntitiesListener;
 import me.pietelite.nope.sponge.listener.dynamic.InteractiveBlocksListener;
 import me.pietelite.nope.sponge.listener.dynamic.InteractiveEntitiesListener;
@@ -52,6 +53,7 @@ import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.action.FishingEvent;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.event.block.InteractBlockEvent;
+import org.spongepowered.api.event.data.ChangeDataHolderEvent;
 import org.spongepowered.api.event.entity.CollideEntityEvent;
 import org.spongepowered.api.event.entity.DamageEntityEvent;
 import org.spongepowered.api.event.entity.InteractEntityEvent;
@@ -102,6 +104,9 @@ public class NopeSettingListeners {
     one(SettingKeys.GROWABLES,
         ChangeBlockEvent.All.class,
         new GrowablesListener());
+    one(SettingKeys.HEALTH_REGEN,
+        ChangeDataHolderEvent.ValueChange.class,
+        new HealthRegenListener());
     one(SettingKeys.HOOKABLE_ENTITIES,
         FishingEvent.HookEntity.class,
         new HookableEntitiesListener());

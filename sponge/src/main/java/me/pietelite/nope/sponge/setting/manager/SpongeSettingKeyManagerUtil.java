@@ -26,9 +26,11 @@ package me.pietelite.nope.sponge.setting.manager;
 
 import me.pietelite.nope.common.setting.SettingKey;
 import me.pietelite.nope.common.setting.SettingKeyManagers;
+import me.pietelite.nope.common.setting.SettingKeys;
 import me.pietelite.nope.sponge.util.Groups;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.data.Keys;
@@ -78,6 +80,7 @@ public class SpongeSettingKeyManagerUtil {
             .orElseThrow(() -> new SettingKey.ParseSettingException("No block found called " + element))
             .toLowerCase()
     );
+
     SettingKeyManagers.POLY_GROWABLE_KEY_MANAGER.elementOptions(
         () -> BlockTypes.registry().streamEntries()
             .filter(entry -> entry.value().defaultState().get(Keys.GROWTH_STAGE).isPresent())
@@ -92,6 +95,16 @@ public class SpongeSettingKeyManagerUtil {
             .orElseThrow(() -> new SettingKey.ParseSettingException("No plant found called " + element))
             .toLowerCase()
     );
+
+    SettingKeyManagers.POLY_PLUGIN_MANAGER.elementOptions(
+        () -> Sponge.pluginManager().plugins().stream().collect(Collectors.toMap(
+            plugin -> plugin.metadata().id(),
+            plugin -> plugin.metadata().description().orElse("")
+        )));
+    SettingKeyManagers.POLY_PLUGIN_MANAGER.parser(plugin ->
+        Sponge.pluginManager().plugin(plugin)
+            .orElseThrow(() -> new SettingKey.ParseSettingException("No plugin found called " + plugin))
+            .metadata().id());
   }
 
   private static void addEntityGroup(String id, String description, Predicate<EntityType<?>> filter) {

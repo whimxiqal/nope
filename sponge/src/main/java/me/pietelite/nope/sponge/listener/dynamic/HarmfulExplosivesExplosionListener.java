@@ -26,27 +26,30 @@ package me.pietelite.nope.sponge.listener.dynamic;
 
 import me.pietelite.nope.common.setting.sets.ExplosiveSet;
 import me.pietelite.nope.common.struct.AltSet;
+import me.pietelite.nope.sponge.api.event.SettingEventContext;
 import me.pietelite.nope.sponge.api.event.SettingEventListener;
+import me.pietelite.nope.sponge.api.event.SettingEventReport;
 import me.pietelite.nope.sponge.api.event.SettingValueLookupFunction;
 import me.pietelite.nope.sponge.util.SpongeUtil;
 import java.util.Optional;
 import org.spongepowered.api.entity.explosive.Explosive;
+import org.spongepowered.api.event.entity.DamageEntityEvent;
 import org.spongepowered.api.event.world.ExplosionEvent;
 import org.spongepowered.api.world.explosion.Explosion;
 
 public class HarmfulExplosivesExplosionListener implements SettingEventListener<AltSet<ExplosiveSet.Explosive>, ExplosionEvent.Pre> {
   @Override
-  public void handle(ExplosionEvent.Pre event,
-                     SettingValueLookupFunction<AltSet<ExplosiveSet.Explosive>> lookupFunction) {
-    final Object rootCause = event.cause().root();
-    final Optional<Explosive> sourceExplosive = event.explosion().sourceExplosive();
+  public void handle(SettingEventContext<AltSet<ExplosiveSet.Explosive>, ExplosionEvent.Pre> context) {
+    final Object rootCause = context.event().cause().root();
+    final Optional<Explosive> sourceExplosive = context.event().explosion().sourceExplosive();
     if (sourceExplosive.isPresent()) {
       final ExplosiveSet.Explosive explosive = SpongeUtil.reduceExplosive(sourceExplosive.get());
-      if (!lookupFunction.lookup(rootCause, sourceExplosive.get().serverLocation()).contains(explosive)) {
-        event.setExplosion(Explosion.builder()
-            .from(event.explosion())
+      if (!context.lookup(rootCause, sourceExplosive.get().serverLocation()).contains(explosive)) {
+        context.event().setExplosion(Explosion.builder()
+            .from(context.event().explosion())
             .shouldDamageEntities(false)
             .build());
+        context.report(SettingEventReport.restricted().build());
       }
     }
   }

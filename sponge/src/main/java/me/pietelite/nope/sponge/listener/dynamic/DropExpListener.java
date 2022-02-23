@@ -24,7 +24,9 @@
 
 package me.pietelite.nope.sponge.listener.dynamic;
 
+import me.pietelite.nope.sponge.api.event.SettingEventContext;
 import me.pietelite.nope.sponge.api.event.SettingEventListener;
+import me.pietelite.nope.sponge.api.event.SettingEventReport;
 import me.pietelite.nope.sponge.api.event.SettingValueLookupFunction;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityTypes;
@@ -32,11 +34,12 @@ import org.spongepowered.api.event.entity.SpawnEntityEvent;
 
 public class DropExpListener implements SettingEventListener<Boolean, SpawnEntityEvent.Pre> {
   @Override
-  public void handle(SpawnEntityEvent.Pre event, SettingValueLookupFunction<Boolean> lookupFunction) {
-    for (Entity entity : event.entities()) {
+  public void handle(SettingEventContext<Boolean, SpawnEntityEvent.Pre> context) {
+    for (Entity entity : context.event().entities()) {
       if (entity.type().equals(EntityTypes.EXPERIENCE_ORB.get())) {
-        if (!lookupFunction.lookup(null, entity.serverLocation())) {
-          event.setCancelled(true);
+        if (!context.lookup(null, entity.serverLocation())) {
+          context.event().setCancelled(true);
+          context.report(SettingEventReport.restricted().build());
           return;
         }
       }

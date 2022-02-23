@@ -24,7 +24,9 @@
 
 package me.pietelite.nope.sponge.listener.dynamic;
 
+import me.pietelite.nope.sponge.api.event.SettingEventContext;
 import me.pietelite.nope.sponge.api.event.SettingEventListener;
+import me.pietelite.nope.sponge.api.event.SettingEventReport;
 import me.pietelite.nope.sponge.api.event.SettingValueLookupFunction;
 import java.util.Optional;
 import org.spongepowered.api.block.BlockTypes;
@@ -35,31 +37,31 @@ import org.spongepowered.api.world.server.ServerLocation;
 
 public class FrostedIceFormListener implements SettingEventListener<Boolean, ChangeBlockEvent.All> {
   @Override
-  public void handle(ChangeBlockEvent.All event,
-                     SettingValueLookupFunction<Boolean> lookupFunction) {
-    final Object eventCause = event.cause().root();
+  public void handle(SettingEventContext<Boolean, ChangeBlockEvent.All> context) {
+    final Object eventCause = context.event().cause().root();
     if (eventCause instanceof Player) {
       Player player = (Player) eventCause;
       Optional<ServerLocation> blockLocation;
-      for (BlockTransaction transaction : event.transactions()) {
+      for (BlockTransaction transaction : context.event().transactions()) {
         blockLocation = transaction.finalReplacement().location();
         if (blockLocation.isPresent()) {
           if (transaction.original().state().type().equals(BlockTypes.WATER.get())
           && transaction.finalReplacement().state().type().equals(BlockTypes.FROSTED_ICE.get())
-              && (!lookupFunction.lookup(player, blockLocation.get())
-              || !lookupFunction.lookup(player, player.serverLocation()))) {
+              && (!context.lookup(player, blockLocation.get())
+              || !context.lookup(player, player.serverLocation()))) {
             transaction.invalidate();
           }
         }
       }
     } else {
       Optional<ServerLocation> blockLocation;
-      for (BlockTransaction transaction : event.transactions()) {
+      for (BlockTransaction transaction : context.event().transactions()) {
         blockLocation = transaction.finalReplacement().location();
         if (blockLocation.isPresent()) {
           if (transaction.finalReplacement().state().type().equals(BlockTypes.FIRE.get())
-              && !lookupFunction.lookup(null, blockLocation.get())) {
+              && !context.lookup(null, blockLocation.get())) {
             transaction.invalidate();
+            context.report(SettingEventReport.restricted().build());
           }
         }
       }

@@ -2,6 +2,8 @@
  * MIT License
  *
  * Copyright (c) Pieter Svenson
+ * Copyright (c) MinecraftOnline
+ * Copyright (c) contributors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,33 +22,13 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
+ *
  */
 
-package me.pietelite.nope.sponge.listener;
+package me.pietelite.nope.sponge.api.event;
 
-import me.pietelite.nope.common.setting.SettingKey;
-import me.pietelite.nope.common.struct.Location;
-import me.pietelite.nope.sponge.SpongeNope;
-import me.pietelite.nope.sponge.api.event.SettingValueLookupFunction;
-import me.pietelite.nope.sponge.util.SpongeUtil;
-import java.util.UUID;
-import org.jetbrains.annotations.NotNull;
-import org.spongepowered.api.world.server.ServerLocation;
+public interface SettingEventReporter {
 
-public class SettingValueLookupFunctionImpl<T> implements SettingValueLookupFunction<T> {
-
-  private final SettingKey<? extends T, ?, ?> settingKey;
-
-  public SettingValueLookupFunctionImpl(@NotNull SettingKey<? extends T, ?, ?> settingKey) {
-    this.settingKey = settingKey;
-  }
-
-  public T lookup(Object cause, ServerLocation location) {
-    return SpongeUtil.valueFor(settingKey, cause, location);
-  }
-
-  public T lookup(UUID userUuid, Location location) {
-    return SpongeNope.instance().hostSystem().lookup(settingKey, userUuid, location);
-  }
+  void report(SettingEventReport report);
 
 }
