@@ -40,6 +40,8 @@ import org.spongepowered.api.world.server.ServerLocation;
  */
 public interface SettingValueLookupFunction<T> {
 
+  T lookup(ServerLocation location);
+
   /**
    * Look up the requested value using the cause of an event and a specific location.
    * If the cause is found to be a {@link org.spongepowered.api.entity.living.player.Player},

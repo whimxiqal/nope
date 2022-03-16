@@ -29,7 +29,6 @@ import java.util.Arrays;
 import me.pietelite.nope.common.setting.sets.BlockChangeSet;
 import me.pietelite.nope.common.setting.sets.DamageCauseSet;
 import me.pietelite.nope.common.setting.sets.ExplosiveSet;
-import me.pietelite.nope.common.setting.sets.MobGriefSet;
 import me.pietelite.nope.common.setting.sets.MovementSet;
 import me.pietelite.nope.common.setting.sets.StringSet;
 import me.pietelite.nope.common.struct.AltSet;
@@ -272,6 +271,11 @@ public class SettingKeys {
           .description("When disabled, ice does not melt.")
           .category(SettingKey.Category.BLOCKS)
           .build();
+  public static final SettingKey.Poly<String, StringSet> IGNORED_PLUGINS =
+      SettingKey.Poly.builder("ignored-plugins", new StringSet(), SettingKeyManagers.POLY_PLUGIN_MANAGER)
+          .blurb("Plugins unaffected by Nope")
+          .description("A list of all plugins that Nope does not affect")
+          .build();
   public static final SettingKey.Poly<String, StringSet> INTERACTIVE_BLOCKS =
       SettingKey.Poly.builder("interactive-blocks",
               AltSet.full(new StringSet()),
@@ -315,12 +319,6 @@ public class SettingKeys {
           .description("When disabled, lava does not spread")
           .category(SettingKey.Category.BLOCKS)
           .build();
-  public static final SettingKey.Unary<Boolean> LAVA_GRIEF =
-      SettingKey.Unary.builder("lava-grief", true, SettingKeyManagers.TOGGLE_KEY_MANAGER)
-          .blurb("Grief caused by lava")
-          .description("When disabled, lava does not break blocks")
-          .category(SettingKey.Category.BLOCKS)
-          .build();
   public static final SettingKey.Unary<Boolean> LEAF_DECAY =
       SettingKey.Unary.builder("leaf-decay", true, SettingKeyManagers.TOGGLE_KEY_MANAGER)
           .blurb("Leaf decay")
@@ -348,10 +346,10 @@ public class SettingKeys {
           .category(SettingKey.Category.MISC)
           .playerRestrictive()
           .build();
-  public static final SettingKey.Poly<MobGriefSet.MobGrief, MobGriefSet> MOB_GRIEF =
-      SettingKey.Poly.builder("mob-grief", AltSet.full(new MobGriefSet()), SettingKeyManagers.POLY_MOB_GRIEF_KEY_MANAGER)
-          .blurb("Mobs that can grief")
-          .description("A list of all mobs that can grief")
+  public static final SettingKey.Poly<String, StringSet> BLOCK_CHANGING_MOBS =
+      SettingKey.Poly.builder("mob-grief", AltSet.full(new StringSet()), SettingKeyManagers.POLY_ENTITY_KEY_MANAGER)
+          .blurb("Mobs that can change blocks")
+          .description("A list of all mobs that can change blocks")
           .category(SettingKey.Category.ENTITIES)
           .build();
   public static final SettingKey.Poly<MovementSet.Movement, MovementSet> MOVE =
@@ -381,11 +379,6 @@ public class SettingKeys {
           .description("A list of damage sources that may inflict damage to players")
           .category(SettingKey.Category.DAMAGE)
           .build();
-  public static final SettingKey.Poly<String, StringSet> IGNORED_PLUGINS =
-      SettingKey.Poly.builder("ignored-plugins", new StringSet(), SettingKeyManagers.POLY_PLUGIN_MANAGER)
-          .blurb("Plugins unaffected by Nope")
-          .description("A list of all plugins that Nope does not affect")
-          .build();
   public static final SettingKey.Unary<Boolean> RIDE =
       SettingKey.Unary.builder("ride", true, SettingKeyManagers.STATE_KEY_MANAGER)
           .blurb("Ability to ride entities")
@@ -413,7 +406,6 @@ public class SettingKeys {
           .blurb("TNT ignition")
           .description("When disabled, TNT may not be primed.")
           .category(SettingKey.Category.BLOCKS)
-          .playerRestrictive()
           .build();
   public static final SettingKey.Unary<Boolean> TRAMPLE =
       SettingKey.Unary.builder("trample", true, SettingKeyManagers.STATE_KEY_MANAGER)
@@ -428,16 +420,10 @@ public class SettingKeys {
           .description("When disabled, players may not use name tags")
           .playerRestrictive()
           .build();
-  public static SettingKey.Unary<Boolean> WATER_FLOW =
+  public static final SettingKey.Unary<Boolean> WATER_FLOW =
       SettingKey.Unary.builder("water-flow", true, SettingKeyManagers.TOGGLE_KEY_MANAGER)
           .blurb("Lava flow")
           .description("When disabled, lava does not spread")
-          .category(SettingKey.Category.BLOCKS)
-          .build();
-  public static SettingKey.Unary<Boolean> WATER_GRIEF =
-      SettingKey.Unary.builder("water-grief", true, SettingKeyManagers.TOGGLE_KEY_MANAGER)
-          .blurb("Grief caused by lava")
-          .description("When disabled, lava does not break blocks")
           .category(SettingKey.Category.BLOCKS)
           .build();
 

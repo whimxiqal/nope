@@ -57,8 +57,13 @@ public class SettingEventReport {
     return new Builder(Action.RESTRICTED);
   }
 
+  public static Builder prevented() {
+    return new Builder(Action.PREVENTED);
+  }
+
   public enum Action {
-    RESTRICTED
+    RESTRICTED,
+    PREVENTED
   }
 
   public static class Builder {

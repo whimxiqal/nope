@@ -61,8 +61,13 @@ public class SettingEventContextImpl<T, E extends Event> implements SettingEvent
   }
 
   @Override
-  public T lookup(Object cause, ServerLocation location) {
-    return SpongeUtil.valueFor(settingKey, cause, location);
+  public T lookup(ServerLocation location) {
+    return lookup(event.source(), location);
+  }
+
+  @Override
+  public T lookup(Object rootCause, ServerLocation location) {
+    return SpongeUtil.valueFor(settingKey, rootCause, location);
   }
 
   @Override
@@ -83,6 +88,20 @@ public class SettingEventContextImpl<T, E extends Event> implements SettingEvent
                     Component.text("Report").color(Formatter.GOLD).decorate(TextDecoration.BOLD),
                     settingKey.id(),
                     Optional.ofNullable(report.source()).orElse(event.source().toString()))
+                .hoverEvent(HoverEvent.showText(
+                    Component.text("Report").color(Formatter.GOLD)
+                        .append(Component.newline())
+                        .append(Formatter.accent("Event Class: ___",
+                            event.getClass().getSimpleName()))
+                        .append(Optional.ofNullable(report.target())
+                            .map(target -> Component.newline().append(Formatter.accent("Target: ___", target)))
+                            .orElse(Component.empty()))
+                )));
+            break;
+          case PREVENTED:
+            player.sendMessage(Formatter.info("___ (___): prevented",
+                    Component.text("Report").color(Formatter.GOLD).decorate(TextDecoration.BOLD),
+                    settingKey.id())
                 .hoverEvent(HoverEvent.showText(
                     Component.text("Report").color(Formatter.GOLD)
                         .append(Component.newline())

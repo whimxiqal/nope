@@ -2,6 +2,8 @@
  * MIT License
  *
  * Copyright (c) Pieter Svenson
+ * Copyright (c) MinecraftOnline
+ * Copyright (c) contributors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,41 +22,29 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
+ *
  */
 
-package me.pietelite.nope.common.setting.sets;
+package me.pietelite.nope.sponge.listener.dynamic;
 
-import me.pietelite.nope.common.struct.Described;
-import me.pietelite.nope.common.struct.HashAltSet;
+import java.util.Optional;
+import me.pietelite.nope.sponge.api.event.SettingEventContext;
+import me.pietelite.nope.sponge.api.event.SettingEventListener;
+import org.spongepowered.api.data.type.HandTypes;
+import org.spongepowered.api.entity.living.player.server.ServerPlayer;
+import org.spongepowered.api.event.entity.InteractEntityEvent;
+import org.spongepowered.api.item.ItemTypes;
 
-public class MobGriefSet extends HashAltSet.FewEnum<MobGriefSet.MobGrief> {
-
-  public MobGriefSet() {
-    super(MobGrief.class);
-  }
-
-  /**
-   * Enumeration for all movement types considered by Nope.
-   */
-  public enum MobGrief implements Described {
-    ENDERDRAGON("Grief caused by the Enderdragon"),
-    ENDERMEN("Grief caused by endermen"),
-    ZOMBIES("Grief caused by zombies");
-
-    private final String description;
-
-    MobGrief(String description) {
-      this.description = description;
-    }
-
-    @Override
-    public String description() {
-      return description;
-    }
-
-    @Override
-    public String toString() {
-      return name().toLowerCase();
+public class UseNameTagListener implements SettingEventListener<Boolean, InteractEntityEvent.Secondary> {
+  @Override
+  public void handle(SettingEventContext<Boolean, InteractEntityEvent.Secondary> context) {
+    if (context.event().source() instanceof ServerPlayer) {
+      ServerPlayer player = (ServerPlayer) context.event().source();
+      if (player.itemInHand(HandTypes.MAIN_HAND).type().equals(ItemTypes.NAME_TAG.get())) {
+        if (!context.lookup(context.event().entity().serverLocation())) {
+          context.event().setCancelled(true);
+        }
+      }
     }
   }
 }

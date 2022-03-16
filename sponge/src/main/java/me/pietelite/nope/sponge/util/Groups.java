@@ -36,29 +36,6 @@ import org.spongepowered.api.entity.EntityTypes;
  */
 public final class Groups {
 
-  public static final Set<BlockType> LIQUID_GRIEFABLE = Sets.newHashSet(
-      BlockTypes.BEETROOTS.get(),
-      BlockTypes.BROWN_MUSHROOM.get(),
-      BlockTypes.CARROTS.get(),
-      BlockTypes.DEAD_BUSH.get(),
-      BlockTypes.MELON_STEM.get(),
-      BlockTypes.NETHER_WART.get(),
-      BlockTypes.POTATOES.get(),
-      BlockTypes.PUMPKIN_STEM.get(),
-      BlockTypes.POPPY.get(),
-      BlockTypes.RED_MUSHROOM.get(),
-      BlockTypes.ACACIA_SAPLING.get(),
-      BlockTypes.BAMBOO_SAPLING.get(),
-      BlockTypes.BIRCH_SAPLING.get(),
-      BlockTypes.JUNGLE_SAPLING.get(),
-      BlockTypes.DARK_OAK_SAPLING.get(),
-      BlockTypes.OAK_SAPLING.get(),
-      BlockTypes.SNOW.get(),
-      BlockTypes.TALL_GRASS.get(),
-      BlockTypes.LILY_PAD.get(),
-      BlockTypes.WHEAT.get(),
-      BlockTypes.DANDELION.get()
-  );
   public static final Set<EntityType<?>> DECORATIVE_ENTITIES = Sets.newHashSet(
       EntityTypes.PAINTING.get(),
       EntityTypes.ARMOR_STAND.get()
@@ -102,6 +79,14 @@ public final class Groups {
       BlockTypes.GREEN_CONCRETE.get(),
       BlockTypes.RED_CONCRETE.get(),
       BlockTypes.BLACK_CONCRETE.get()
+  );
+  public static final Set<BlockType> LEAVES = Sets.newHashSet(
+      BlockTypes.ACACIA_LEAVES.get(),
+      BlockTypes.BIRCH_LEAVES.get(),
+      BlockTypes.DARK_OAK_LEAVES.get(),
+      BlockTypes.JUNGLE_LEAVES.get(),
+      BlockTypes.OAK_LEAVES.get(),
+      BlockTypes.SPRUCE_LEAVES.get()
   );
 
   private Groups() {

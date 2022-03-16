@@ -29,34 +29,22 @@ import me.pietelite.nope.common.setting.SettingKeys;
 import me.pietelite.nope.sponge.SpongeNope;
 import me.pietelite.nope.sponge.api.event.SettingEventListener;
 import me.pietelite.nope.sponge.api.event.SettingListenerRegistration;
-import me.pietelite.nope.sponge.listener.dynamic.BlockChangeListener;
-import me.pietelite.nope.sponge.listener.dynamic.DestructiveExplosivesBlockListener;
-import me.pietelite.nope.sponge.listener.dynamic.DestructiveExplosivesExplosionListener;
-import me.pietelite.nope.sponge.listener.dynamic.DropExpListener;
-import me.pietelite.nope.sponge.listener.dynamic.FireEffectListener;
-import me.pietelite.nope.sponge.listener.dynamic.GrowablesListener;
-import me.pietelite.nope.sponge.listener.dynamic.HarmfulExplosivesDamageListener;
-import me.pietelite.nope.sponge.listener.dynamic.HarmfulExplosivesExplosionListener;
-import me.pietelite.nope.sponge.listener.dynamic.HealthRegenListener;
-import me.pietelite.nope.sponge.listener.dynamic.HookableEntitiesListener;
-import me.pietelite.nope.sponge.listener.dynamic.InteractiveBlocksListener;
-import me.pietelite.nope.sponge.listener.dynamic.InteractiveEntitiesListener;
-import me.pietelite.nope.sponge.listener.dynamic.InvincibleEntitiesListener;
-import me.pietelite.nope.sponge.listener.dynamic.ItemDropListener;
-import me.pietelite.nope.sponge.listener.dynamic.ItemPickupListener;
-import me.pietelite.nope.sponge.listener.dynamic.PlayerCollisionListener;
-import me.pietelite.nope.sponge.listener.dynamic.SpawnableEntitiesListener;
-import me.pietelite.nope.sponge.listener.dynamic.SpecificBlockChangeListener;
+import me.pietelite.nope.sponge.listener.dynamic.*;
 import me.pietelite.nope.sponge.util.Groups;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.action.FishingEvent;
+import org.spongepowered.api.event.action.LightningEvent;
+import org.spongepowered.api.event.action.SleepingEvent;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.event.block.InteractBlockEvent;
 import org.spongepowered.api.event.data.ChangeDataHolderEvent;
 import org.spongepowered.api.event.entity.CollideEntityEvent;
 import org.spongepowered.api.event.entity.DamageEntityEvent;
 import org.spongepowered.api.event.entity.InteractEntityEvent;
+import org.spongepowered.api.event.entity.LeashEntityEvent;
+import org.spongepowered.api.event.entity.MoveEntityEvent;
+import org.spongepowered.api.event.entity.RideEntityEvent;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.event.item.inventory.ChangeInventoryEvent;
 import org.spongepowered.api.event.item.inventory.DropItemEvent;
@@ -71,6 +59,9 @@ public class NopeSettingListeners {
     one(SettingKeys.BLOCK_CHANGE,
         ChangeBlockEvent.All.class,
         new BlockChangeListener());
+    one(SettingKeys.BLOCK_CHANGING_MOBS,
+        ChangeBlockEvent.All.class,
+        new GriefingMobsListener());
     one(SettingKeys.CONCRETE_SOLIDIFICATION,
         ChangeBlockEvent.All.class,
         SpecificBlockChangeListener.manyToMany(Groups.CONCRETE_POWDER, Groups.CONCRETE));
@@ -110,6 +101,9 @@ public class NopeSettingListeners {
     one(SettingKeys.HOOKABLE_ENTITIES,
         FishingEvent.HookEntity.class,
         new HookableEntitiesListener());
+    one(SettingKeys.HUNGER_DRAIN,
+        ChangeDataHolderEvent.ValueChange.class,
+        new HungerDrainListener());
     one(SettingKeys.ICE_FORM,
         ChangeBlockEvent.All.class,
         SpecificBlockChangeListener.oneToOne(BlockTypes.WATER.get(),
@@ -134,21 +128,62 @@ public class NopeSettingListeners {
     one(SettingKeys.ITEM_PICKUP,
         ChangeInventoryEvent.Pickup.class,
         new ItemPickupListener());
+    one(SettingKeys.LEAF_DECAY,
+        ChangeBlockEvent.All.class,
+        new LeafDecayListener());
+    one(SettingKeys.LEASHABLE_ENTITIES,
+        LeashEntityEvent.class,
+        new LeashableEntitiesListener());
     one(SettingKeys.HARMFUL_EXPLOSIVES,
         DamageEntityEvent.class,
         new HarmfulExplosivesDamageListener());
     one(SettingKeys.HARMFUL_EXPLOSIVES,
         ExplosionEvent.Pre.class,
         new HarmfulExplosivesExplosionListener());
+    one(SettingKeys.LIGHTNING,
+        LightningEvent.Pre.class,
+        new LightningListener());
+    one(SettingKeys.LEAF_DECAY,
+        ChangeBlockEvent.All.class,
+        new LeafDecayListener());
+    one(SettingKeys.LAVA_FLOW,
+        ChangeBlockEvent.All.class,
+        SpecificBlockChangeListener.forFinal(BlockTypes.LAVA.get()));
     one(SettingKeys.MYCELIUM_SPREAD,
         ChangeBlockEvent.All.class,
         SpecificBlockChangeListener.oneToOne(BlockTypes.DIRT.get(), BlockTypes.MYCELIUM.get()));
+    one(SettingKeys.RIDE,
+        RideEntityEvent.Mount.class,
+        new RideMountListener());
+    one(SettingKeys.RIDE,
+        MoveEntityEvent.class,
+        new RideMoveListener());
     one(SettingKeys.PLAYER_COLLISION,
         CollideEntityEvent.class,
         new PlayerCollisionListener());
+    one(SettingKeys.SLEEP,
+        SleepingEvent.Pre.class,
+        new SleepListener());
     one(SettingKeys.SPAWNABLE_ENTITIES,
         SpawnEntityEvent.Pre.class,
         new SpawnableEntitiesListener());
+    one(SettingKeys.TNT_IGNITION,
+        InteractBlockEvent.Secondary.class,
+        new TntIgnitionInteractListener());
+    one(SettingKeys.TNT_IGNITION,
+        SpawnEntityEvent.class,
+        new TntIgnitionSpawnListener());
+    one(SettingKeys.TRAMPLE,
+        ChangeBlockEvent.All.class,
+        SpecificBlockChangeListener.oneToOne(BlockTypes.DIRT.get(), BlockTypes.FARMLAND.get()));
+    one(SettingKeys.USE_NAME_TAG,
+        InteractEntityEvent.Secondary.class,
+        new UseNameTagListener());
+    one(SettingKeys.WATER_FLOW,
+        ChangeBlockEvent.All.class,
+        SpecificBlockChangeListener.forFinal(BlockTypes.WATER.get()));
+
+    IgniteNetherPortalListener.stage();
   }
 
   private static <T, E extends Event> void one(SettingKey<? extends T, ?, ?> settingKey,

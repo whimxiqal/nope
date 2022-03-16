@@ -34,7 +34,6 @@ import me.pietelite.nope.common.setting.manager.ToggleKeyManager;
 import me.pietelite.nope.common.setting.sets.BlockChangeSet;
 import me.pietelite.nope.common.setting.sets.DamageCauseSet;
 import me.pietelite.nope.common.setting.sets.ExplosiveSet;
-import me.pietelite.nope.common.setting.sets.MobGriefSet;
 import me.pietelite.nope.common.setting.sets.MovementSet;
 import me.pietelite.nope.common.setting.sets.StringSet;
 
@@ -57,9 +56,6 @@ public class SettingKeyManagers {
       new PolyAllCapsEnumKeyManager<>(ExplosiveSet.Explosive.class, ExplosiveSet::new);
   public static final PolyStringKeyManager<StringSet> POLY_GROWABLE_KEY_MANAGER =
       new PolyStringKeyManager<>(StringSet::new);
-  public static final PolyAllCapsEnumKeyManager<MobGriefSet.MobGrief, MobGriefSet>
-      POLY_MOB_GRIEF_KEY_MANAGER =
-      new PolyAllCapsEnumKeyManager<>(MobGriefSet.MobGrief.class, MobGriefSet::new);
   public static final PolyAllCapsEnumKeyManager<MovementSet.Movement, MovementSet> POLY_MOVEMENT_KEY_MANAGER =
       new PolyAllCapsEnumKeyManager<>(MovementSet.Movement.class, MovementSet::new);
   public static final PolyStringKeyManager<StringSet> POLY_PLUGIN_MANAGER =
