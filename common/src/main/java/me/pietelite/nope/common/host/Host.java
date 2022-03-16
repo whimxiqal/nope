@@ -25,7 +25,6 @@
 package me.pietelite.nope.common.host;
 
 import me.pietelite.nope.common.setting.SettingCollection;
-import me.pietelite.nope.common.setting.SettingKey;
 import me.pietelite.nope.common.struct.Container;
 import me.pietelite.nope.common.struct.Location;
 import me.pietelite.nope.common.struct.Named;

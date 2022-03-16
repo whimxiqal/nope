@@ -24,12 +24,11 @@
 
 package me.pietelite.nope.sponge.setting.manager;
 
-import me.pietelite.nope.common.setting.SettingKey;
-import me.pietelite.nope.common.setting.SettingKeyManagers;
-import me.pietelite.nope.common.setting.SettingKeys;
-import me.pietelite.nope.sponge.util.Groups;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import me.pietelite.nope.common.setting.SettingKey;
+import me.pietelite.nope.common.setting.SettingKeyManagers;
+import me.pietelite.nope.sponge.util.Groups;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.BlockTypes;
@@ -64,7 +63,7 @@ public class SpongeSettingKeyManagerUtil {
         entity.category().equals(EntityCategories.MONSTER.get()));
     addEntityGroup("ambient", "Ambient living creatures", entity ->
         entity.category().equals(EntityCategories.AMBIENT.get())
-        || entity.category().equals(EntityCategories.WATER_AMBIENT.get()));
+            || entity.category().equals(EntityCategories.WATER_AMBIENT.get()));
     addEntityGroup("decorative", "Non-living decorative entities", Groups.DECORATIVE_ENTITIES::contains);
     addEntityGroup("vehicles", "Vehicles", Groups.VEHICLES::contains);
 

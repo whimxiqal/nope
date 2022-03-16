@@ -24,13 +24,13 @@
 
 package me.pietelite.nope.sponge.context;
 
+import java.util.Optional;
+import java.util.function.Consumer;
 import me.pietelite.nope.common.host.Domain;
 import me.pietelite.nope.common.host.Host;
 import me.pietelite.nope.common.host.Zone;
 import me.pietelite.nope.sponge.SpongeNope;
 import me.pietelite.nope.sponge.util.SpongeUtil;
-import java.util.Optional;
-import java.util.function.Consumer;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.service.context.Context;
@@ -55,7 +55,7 @@ public class ZoneContextCalculator implements ContextCalculator {
 
   private Context calculateContext(Host host) {
     if (host instanceof Domain) {
-      return new Context("nope.w." + ((Domain) host).name(), "true");
+      return new Context("nope.w." + host.name(), "true");
     } else if (host instanceof Zone) {
       return new Context("nope.z." + host.name(), "true");
     }

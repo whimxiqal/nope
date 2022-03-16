@@ -29,6 +29,9 @@ import org.spongepowered.api.service.context.Context;
 
 public final class Hosts {
 
+  private Hosts() {
+  }
+
   public static String nameToContextKey(String name) {
     return "nope.host." + name;
   }
@@ -57,8 +60,5 @@ public final class Hosts {
       return false;
     }
     return key.startsWith("nope.host.");
-  }
-
-  private Hosts() {
   }
 }

@@ -27,7 +27,6 @@ package me.pietelite.nope.sponge.listener.dynamic;
 import me.pietelite.nope.common.struct.AltSet;
 import me.pietelite.nope.sponge.api.event.SettingEventContext;
 import me.pietelite.nope.sponge.api.event.SettingEventListener;
-import me.pietelite.nope.sponge.api.event.SettingValueLookupFunction;
 import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.entity.InteractEntityEvent;

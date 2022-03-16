@@ -93,8 +93,8 @@ public abstract class SettingKey<T,
   }
 
   public abstract Evaluation<T> extractValue(@NotNull Collection<Host> hosts,
-                                          @Nullable final UUID userUuid,
-                                          @NotNull final Location location);
+                                             @Nullable final UUID userUuid,
+                                             @NotNull final Location location);
 
   public abstract String type();
 
@@ -140,8 +140,8 @@ public abstract class SettingKey<T,
 
     @Override
     public Evaluation<T> extractValue(@NotNull Collection<Host> hosts,
-                          @Nullable final UUID userUuid,
-                          @NotNull final Location location) {
+                                      @Nullable final UUID userUuid,
+                                      @NotNull final Location location) {
 
       /* Choose a data structure that will optimize searching for highest priority matching */
       Queue<Host> hostQueue;
@@ -282,8 +282,8 @@ public abstract class SettingKey<T,
 
     @Override
     public Evaluation<S> extractValue(@NotNull Collection<Host> hosts,
-                          @Nullable UUID userUuid,
-                          @NotNull Location location) {
+                                      @Nullable UUID userUuid,
+                                      @NotNull Location location) {
       /* Choose a data structure that will optimize searching for highest priority matching */
       Queue<Host> hostQueue;
       Comparator<Host> descending = (h1, h2) -> Integer.compare(h2.priority(), h1.priority());

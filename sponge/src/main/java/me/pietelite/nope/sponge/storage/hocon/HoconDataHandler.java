@@ -24,6 +24,11 @@
 
 package me.pietelite.nope.sponge.storage.hocon;
 
+import java.io.File;
+import java.nio.file.Path;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.stream.Collectors;
 import me.pietelite.nope.common.Nope;
 import me.pietelite.nope.common.math.Volume;
 import me.pietelite.nope.sponge.api.config.SettingValueConfigSerializerRegistrar;
@@ -31,11 +36,6 @@ import me.pietelite.nope.sponge.storage.configurate.ConfigurateDataHandler;
 import me.pietelite.nope.sponge.storage.configurate.DomainConfigurateDataHandler;
 import me.pietelite.nope.sponge.storage.configurate.ZoneConfigurateDataHandler;
 import me.pietelite.nope.sponge.storage.configurate.serializer.VolumeTypeSerializer;
-import java.io.File;
-import java.nio.file.Path;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.stream.Collectors;
 import org.spongepowered.configurate.ConfigurationOptions;
 import org.spongepowered.configurate.hocon.HoconConfigurationLoader;
 

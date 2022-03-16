@@ -44,6 +44,12 @@ public class SettingKeys {
           .category(SettingKey.Category.BLOCKS)
           .playerRestrictive()
           .build();
+  public static final SettingKey.Poly<String, StringSet> BLOCK_CHANGING_MOBS =
+      SettingKey.Poly.builder("mob-grief", AltSet.full(new StringSet()), SettingKeyManagers.POLY_ENTITY_KEY_MANAGER)
+          .blurb("Mobs that can change blocks")
+          .description("A list of all mobs that can change blocks")
+          .category(SettingKey.Category.ENTITIES)
+          .build();
   public static final SettingKey.Unary<Boolean> BLOCK_PROPAGATE =
       SettingKey.Unary.builder("block-propagate", true, SettingKeyManagers.TOGGLE_KEY_MANAGER)
           .blurb("Block updates to neighbors")
@@ -345,12 +351,6 @@ public class SettingKeys {
           .description("When disabled, players cannot light nether portals")
           .category(SettingKey.Category.MISC)
           .playerRestrictive()
-          .build();
-  public static final SettingKey.Poly<String, StringSet> BLOCK_CHANGING_MOBS =
-      SettingKey.Poly.builder("mob-grief", AltSet.full(new StringSet()), SettingKeyManagers.POLY_ENTITY_KEY_MANAGER)
-          .blurb("Mobs that can change blocks")
-          .description("A list of all mobs that can change blocks")
-          .category(SettingKey.Category.ENTITIES)
           .build();
   public static final SettingKey.Poly<MovementSet.Movement, MovementSet> MOVE =
       SettingKey.Poly.builder("move", AltSet.full(new MovementSet()), SettingKeyManagers.POLY_MOVEMENT_KEY_MANAGER)

@@ -24,11 +24,10 @@
 
 package me.pietelite.nope.common.setting.manager;
 
-import java.util.Comparator;
-import me.pietelite.nope.common.setting.SettingKey;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
+import me.pietelite.nope.common.setting.SettingKey;
 import org.jetbrains.annotations.NotNull;
 
 /**

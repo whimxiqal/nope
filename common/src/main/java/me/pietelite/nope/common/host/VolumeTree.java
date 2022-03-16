@@ -24,10 +24,6 @@
 
 package me.pietelite.nope.common.host;
 
-import me.pietelite.nope.common.math.Cuboid;
-import me.pietelite.nope.common.math.Dimension;
-import me.pietelite.nope.common.math.Geometry;
-import me.pietelite.nope.common.math.Volume;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -41,6 +37,10 @@ import java.util.stream.Collectors;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import me.pietelite.nope.common.math.Cuboid;
+import me.pietelite.nope.common.math.Dimension;
+import me.pietelite.nope.common.math.Geometry;
+import me.pietelite.nope.common.math.Volume;
 import org.jetbrains.annotations.NotNull;
 
 /**

@@ -34,7 +34,16 @@ import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.entity.living.player.Player;
 
+/**
+ * A command to create a tool for selecting the boundaries of a {@link me.pietelite.nope.common.math.Cuboid}.
+ */
 public class CuboidToolCommand extends CommandNode {
+
+  /**
+   * Generic constructor.
+   *
+   * @param parent parent node
+   */
   public CuboidToolCommand(CommandNode parent) {
     super(parent, Permissions.CREATE,
         "Select the corners of a new box",

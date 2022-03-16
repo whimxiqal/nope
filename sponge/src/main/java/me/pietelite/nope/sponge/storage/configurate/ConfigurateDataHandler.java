@@ -24,6 +24,9 @@
 
 package me.pietelite.nope.sponge.storage.configurate;
 
+import java.util.List;
+import java.util.stream.Collectors;
+import lombok.AllArgsConstructor;
 import me.pietelite.nope.common.host.Domain;
 import me.pietelite.nope.common.host.HostSystem;
 import me.pietelite.nope.common.host.Universe;
@@ -32,11 +35,12 @@ import me.pietelite.nope.common.storage.DataHandler;
 import me.pietelite.nope.common.storage.DomainDataHandler;
 import me.pietelite.nope.common.storage.UniverseDataHandler;
 import me.pietelite.nope.common.storage.ZoneDataHandler;
-import java.util.List;
-import java.util.stream.Collectors;
-import lombok.AllArgsConstructor;
 import org.spongepowered.api.Sponge;
 
+/**
+ * A {@link DataHandler} for managing the plugin with Configurate
+ * (org.spongepowered.configurate.).
+ */
 @AllArgsConstructor
 public abstract class ConfigurateDataHandler implements DataHandler {
 

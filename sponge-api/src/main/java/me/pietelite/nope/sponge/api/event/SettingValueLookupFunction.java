@@ -27,9 +27,9 @@
 
 package me.pietelite.nope.sponge.api.event;
 
+import java.util.UUID;
 import me.pietelite.nope.common.setting.Setting;
 import me.pietelite.nope.common.struct.Location;
-import java.util.UUID;
 import org.spongepowered.api.world.server.ServerLocation;
 
 /**

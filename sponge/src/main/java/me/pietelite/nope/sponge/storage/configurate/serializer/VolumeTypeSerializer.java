@@ -24,13 +24,13 @@
 
 package me.pietelite.nope.sponge.storage.configurate.serializer;
 
+import java.lang.reflect.Type;
 import me.pietelite.nope.common.Nope;
 import me.pietelite.nope.common.math.Cuboid;
 import me.pietelite.nope.common.math.Cylinder;
 import me.pietelite.nope.common.math.Slab;
 import me.pietelite.nope.common.math.Sphere;
 import me.pietelite.nope.common.math.Volume;
-import java.lang.reflect.Type;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.configurate.ConfigurationNode;
 import org.spongepowered.configurate.serialize.SerializationException;

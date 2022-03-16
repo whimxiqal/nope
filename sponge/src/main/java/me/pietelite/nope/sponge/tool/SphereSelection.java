@@ -28,7 +28,7 @@ import me.pietelite.nope.common.math.Sphere;
 import me.pietelite.nope.sponge.util.Formatter;
 import net.kyori.adventure.text.Component;
 
-public class SphereSelection extends Selection<Sphere>  {
+public class SphereSelection extends Selection<Sphere> {
 
   private double radius() {
     return Math.sqrt((position1.x() - position2.x()) * (position1.x() - position2.x())

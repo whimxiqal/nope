@@ -76,9 +76,9 @@ public final class Formatter {
   public static final TextColor GOLD = TextColor.color(222, 185, 0);
   public static final TextColor INFO = TextColor.color(255, 191, 245);
   public static final TextComponent SPACE = Component.text(" ");
-  public static final TextComponent TWO_SPACES = Component.text("  ");
   public static final TextColor SUCCESS = TextColor.color(11, 181, 38);
   public static final TextColor THEME = TextColor.color(161, 95, 232);
+  public static final TextComponent TWO_SPACES = Component.text("  ");
   public static final TextColor URL = TextColor.color(66, 105, 224);
   public static final TextColor WARN = TextColor.color(255, 157, 10);
   public static final Component WELCOME =
@@ -643,7 +643,7 @@ public final class Formatter {
                 .hoverEvent(HoverEvent.showText(accent("Change value type of ___ to ___", key.id(), "Declarative")))
                 .clickEvent(ClickEvent.runCommand(String.format("/nope host %s edit setting %s value -e setdefault",
                     host.name(), key.id()))))
-                .append(Component.text("/").color(DULL))
+            .append(Component.text("/").color(DULL))
             .append(Component.text("M").color(GOLD).decorate(TextDecoration.BOLD))
             .append(Component.text("]").color(DARK))
             .append(SPACE)
@@ -661,13 +661,13 @@ public final class Formatter {
                 .clickEvent(ClickEvent.suggestCommand(String.format("/nope host %s edit setting %s value -e --additive remove ",
                     host.name(), key.id()))))
             .append(Component.text("]").color(DARK))
-                    .append(Component.text("[").color(DARK))
+            .append(Component.text("[").color(DARK))
             .append(Component.text("x").color(WARN)
                 .hoverEvent(HoverEvent.showText(accent("Clear all from ___ set of ___ on ___", "additive", key.id(), host.name())))
                 .clickEvent(ClickEvent.runCommand(String.format("/nope host %s edit setting %s value -e --additive setnone ",
                     host.name(), key.id()))))
             .append(Component.text("]").color(DARK))
-                            .append(Component.text("[").color(DARK))
+            .append(Component.text("[").color(DARK))
             .append(Component.text("o").color(WHITE)
                 .hoverEvent(HoverEvent.showText(accent("Set all possible values in ___ set of ___ on ___", "additive", key.id(), host.name())))
                 .clickEvent(ClickEvent.runCommand(String.format("/nope host %s edit setting %s value -e --additive setall ",

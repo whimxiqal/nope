@@ -32,7 +32,6 @@ import me.pietelite.nope.sponge.api.event.SettingEventContext;
 import me.pietelite.nope.sponge.api.event.SettingEventListener;
 import me.pietelite.nope.sponge.api.event.SettingEventReport;
 import org.spongepowered.api.entity.Entity;
-import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.SpawnType;
 import org.spongepowered.api.event.cause.entity.SpawnTypes;

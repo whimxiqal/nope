@@ -25,17 +25,17 @@
 package me.pietelite.nope.sponge.tool;
 
 import com.google.common.collect.Lists;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.UUID;
 import me.pietelite.nope.common.host.Domain;
 import me.pietelite.nope.common.math.Vector3i;
 import me.pietelite.nope.sponge.SpongeNope;
 import me.pietelite.nope.sponge.key.NopeKeys;
 import me.pietelite.nope.sponge.util.Formatter;
 import me.pietelite.nope.sponge.util.SpongeUtil;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.UUID;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.api.data.Keys;

@@ -24,15 +24,12 @@
 
 package me.pietelite.nope.common.setting.manager;
 
-import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.Map;
+import java.util.function.Supplier;
 import me.pietelite.nope.common.setting.SettingKey;
 import me.pietelite.nope.common.struct.Described;
 import me.pietelite.nope.common.struct.HashAltSet;
-import java.util.Arrays;
-import java.util.Map;
-import java.util.function.Supplier;
-import java.util.stream.Collectors;
 import org.jetbrains.annotations.NotNull;
 
 public class PolyAllCapsEnumKeyManager<E extends Enum<E> & Described, S extends HashAltSet<E>> extends SettingKey.Manager.Poly<E, S> {

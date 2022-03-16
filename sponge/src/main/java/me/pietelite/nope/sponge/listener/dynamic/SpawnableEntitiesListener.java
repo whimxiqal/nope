@@ -28,7 +28,6 @@ import me.pietelite.nope.common.struct.AltSet;
 import me.pietelite.nope.sponge.api.event.SettingEventContext;
 import me.pietelite.nope.sponge.api.event.SettingEventListener;
 import me.pietelite.nope.sponge.api.event.SettingEventReport;
-import me.pietelite.nope.sponge.api.event.SettingValueLookupFunction;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityTypes;

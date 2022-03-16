@@ -24,6 +24,7 @@
 
 package me.pietelite.nope.sponge.command.tree.host.blank.edit.setting.blank.target.player;
 
+import java.util.Optional;
 import me.pietelite.nope.common.host.Host;
 import me.pietelite.nope.common.permission.Permissions;
 import me.pietelite.nope.common.setting.SettingKey;
@@ -32,7 +33,6 @@ import me.pietelite.nope.sponge.command.CommandNode;
 import me.pietelite.nope.sponge.command.parameters.ParameterKeys;
 import me.pietelite.nope.sponge.command.parameters.Parameters;
 import me.pietelite.nope.sponge.util.Formatter;
-import java.util.Optional;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.parameter.CommandContext;

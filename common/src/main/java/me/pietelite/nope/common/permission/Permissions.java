@@ -29,14 +29,14 @@ package me.pietelite.nope.common.permission;
  */
 public final class Permissions {
 
-  public static final Permission NOPE = Permission.of("nope");
   public static final Permission CREATE = Permission.of("nope.create");
-  public static final Permission DESTROY = Permission.of("nope.destroy");
   public static final Permission DEBUG = Permission.of("nope.debug");
+  public static final Permission DESTROY = Permission.of("nope.destroy");
   public static final Permission EDIT = Permission.of("nope.edit");
   public static final Permission INFO = Permission.of("nope.info");
-  public static final Permission TELEPORT = Permission.of("nope.teleport");
+  public static final Permission NOPE = Permission.of("nope");
   public static final Permission RELOAD = Permission.of("nope.reload");
+  public static final Permission TELEPORT = Permission.of("nope.teleport");
   public static final Permission UNRESTRICTED = Permission.of("nope.unrestricted");
 
   private Permissions() {

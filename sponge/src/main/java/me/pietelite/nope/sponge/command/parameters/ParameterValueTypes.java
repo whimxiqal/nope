@@ -29,6 +29,9 @@ import lombok.experimental.Accessors;
 
 public final class ParameterValueTypes {
 
+  private ParameterValueTypes() {
+  }
+
   public enum SettingValueAlterType {
     CONCATENATE("add", "Adds elements onto the targeted list of values"),
     REMOVE("remove", "Removes elements from the targeted list of values"),
@@ -49,8 +52,5 @@ public final class ParameterValueTypes {
       this.command = command;
       this.description = description;
     }
-  }
-
-  private ParameterValueTypes() {
   }
 }

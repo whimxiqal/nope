@@ -24,13 +24,11 @@
 
 package me.pietelite.nope.sponge.listener.dynamic;
 
-import me.pietelite.nope.common.Nope;
 import me.pietelite.nope.common.permission.Permissions;
 import me.pietelite.nope.common.struct.AltSet;
 import me.pietelite.nope.sponge.api.event.SettingEventContext;
 import me.pietelite.nope.sponge.api.event.SettingEventListener;
 import me.pietelite.nope.sponge.api.event.SettingEventReport;
-import me.pietelite.nope.sponge.api.event.SettingValueLookupFunction;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;

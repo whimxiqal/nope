@@ -27,7 +27,6 @@
 
 package me.pietelite.nope.sponge.listener.dynamic;
 
-import java.util.Optional;
 import me.pietelite.nope.sponge.api.event.SettingEventContext;
 import me.pietelite.nope.sponge.api.event.SettingEventListener;
 import org.spongepowered.api.data.type.HandTypes;

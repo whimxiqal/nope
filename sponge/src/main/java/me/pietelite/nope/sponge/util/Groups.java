@@ -36,13 +36,23 @@ import org.spongepowered.api.entity.EntityTypes;
  */
 public final class Groups {
 
-  public static final Set<EntityType<?>> DECORATIVE_ENTITIES = Sets.newHashSet(
-      EntityTypes.PAINTING.get(),
-      EntityTypes.ARMOR_STAND.get()
-  );
-  public static final Set<EntityType<?>> VEHICLES = Sets.newHashSet(
-      EntityTypes.BOAT.get(),
-      EntityTypes.MINECART.get()
+  public static final Set<BlockType> CONCRETE = Sets.newHashSet(
+      BlockTypes.WHITE_CONCRETE.get(),
+      BlockTypes.ORANGE_CONCRETE.get(),
+      BlockTypes.MAGENTA_CONCRETE.get(),
+      BlockTypes.LIGHT_BLUE_CONCRETE.get(),
+      BlockTypes.YELLOW_CONCRETE.get(),
+      BlockTypes.LIME_CONCRETE.get(),
+      BlockTypes.PINK_CONCRETE.get(),
+      BlockTypes.GRAY_CONCRETE.get(),
+      BlockTypes.LIGHT_GRAY_CONCRETE.get(),
+      BlockTypes.CYAN_CONCRETE.get(),
+      BlockTypes.PURPLE_CONCRETE.get(),
+      BlockTypes.BLUE_CONCRETE.get(),
+      BlockTypes.BROWN_CONCRETE.get(),
+      BlockTypes.GREEN_CONCRETE.get(),
+      BlockTypes.RED_CONCRETE.get(),
+      BlockTypes.BLACK_CONCRETE.get()
   );
   public static final Set<BlockType> CONCRETE_POWDER = Sets.newHashSet(
       BlockTypes.WHITE_CONCRETE_POWDER.get(),
@@ -62,23 +72,9 @@ public final class Groups {
       BlockTypes.RED_CONCRETE_POWDER.get(),
       BlockTypes.BLACK_CONCRETE_POWDER.get()
   );
-  public static final Set<BlockType> CONCRETE = Sets.newHashSet(
-      BlockTypes.WHITE_CONCRETE.get(),
-      BlockTypes.ORANGE_CONCRETE.get(),
-      BlockTypes.MAGENTA_CONCRETE.get(),
-      BlockTypes.LIGHT_BLUE_CONCRETE.get(),
-      BlockTypes.YELLOW_CONCRETE.get(),
-      BlockTypes.LIME_CONCRETE.get(),
-      BlockTypes.PINK_CONCRETE.get(),
-      BlockTypes.GRAY_CONCRETE.get(),
-      BlockTypes.LIGHT_GRAY_CONCRETE.get(),
-      BlockTypes.CYAN_CONCRETE.get(),
-      BlockTypes.PURPLE_CONCRETE.get(),
-      BlockTypes.BLUE_CONCRETE.get(),
-      BlockTypes.BROWN_CONCRETE.get(),
-      BlockTypes.GREEN_CONCRETE.get(),
-      BlockTypes.RED_CONCRETE.get(),
-      BlockTypes.BLACK_CONCRETE.get()
+  public static final Set<EntityType<?>> DECORATIVE_ENTITIES = Sets.newHashSet(
+      EntityTypes.PAINTING.get(),
+      EntityTypes.ARMOR_STAND.get()
   );
   public static final Set<BlockType> LEAVES = Sets.newHashSet(
       BlockTypes.ACACIA_LEAVES.get(),
@@ -87,6 +83,10 @@ public final class Groups {
       BlockTypes.JUNGLE_LEAVES.get(),
       BlockTypes.OAK_LEAVES.get(),
       BlockTypes.SPRUCE_LEAVES.get()
+  );
+  public static final Set<EntityType<?>> VEHICLES = Sets.newHashSet(
+      EntityTypes.BOAT.get(),
+      EntityTypes.MINECART.get()
   );
 
   private Groups() {

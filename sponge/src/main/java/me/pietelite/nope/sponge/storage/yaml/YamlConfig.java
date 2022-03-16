@@ -24,9 +24,9 @@
 
 package me.pietelite.nope.sponge.storage.yaml;
 
+import java.nio.file.Path;
 import me.pietelite.nope.sponge.api.config.SettingValueConfigSerializerRegistrar;
 import me.pietelite.nope.sponge.storage.configurate.UniverseConfigurateDataHandler;
-import java.nio.file.Path;
 
 public class YamlConfig extends UniverseConfigurateDataHandler {
 

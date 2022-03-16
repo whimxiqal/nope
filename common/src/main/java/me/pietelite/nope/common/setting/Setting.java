@@ -60,20 +60,20 @@ public class Setting<T, V extends SettingValue<T>> {
   }
 
   public static <X, Y extends SettingValue<X>> Setting<X, Y> of(@NotNull SettingKey<X, Y, ?> key,
-                                                                                                                                          @Nullable Y data) {
+                                                                @Nullable Y data) {
     return new Setting<>(key, data, null);
   }
 
   public static <X, Y extends SettingValue<X>> Setting<X, Y> of(@NotNull SettingKey<X, Y, ?> key,
-                                                                                                                                          @Nullable Y data,
-                                                                                                                                          @Nullable Target target) {
+                                                                @Nullable Y data,
+                                                                @Nullable Target target) {
     return new Setting<>(key, data, target);
   }
 
   @SuppressWarnings("unchecked")
   public static <X, Y extends SettingValue<X>> Setting<X, Y> ofUnchecked(@NotNull SettingKey<?, ?, ?> key,
-                                                                                                                                                   @NotNull SettingValue<?> data,
-                                                                                                                                                   @Nullable Target target) {
+                                                                         @NotNull SettingValue<?> data,
+                                                                         @Nullable Target target) {
     return new Setting<>((SettingKey<X, Y, ?>) key, (Y) data, target);
   }
 

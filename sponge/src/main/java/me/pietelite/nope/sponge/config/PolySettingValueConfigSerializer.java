@@ -24,13 +24,13 @@
 
 package me.pietelite.nope.sponge.config;
 
+import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
 import me.pietelite.nope.common.setting.SettingKey;
 import me.pietelite.nope.common.setting.SettingValue;
 import me.pietelite.nope.common.struct.AltSet;
 import me.pietelite.nope.sponge.api.config.SettingValueConfigSerializer;
-import java.util.Map;
-import java.util.Objects;
-import java.util.stream.Collectors;
 import org.spongepowered.configurate.CommentedConfigurationNode;
 import org.spongepowered.configurate.ConfigurationNode;
 import org.spongepowered.configurate.serialize.SerializationException;
@@ -76,7 +76,7 @@ public class PolySettingValueConfigSerializer implements SettingValueConfigSeria
   private <X,
       Z extends SettingKey.Manager.Poly<X, S>,
       S extends AltSet<X>> CommentedConfigurationNode serializeSet(Z manager,
-                                                                       S set) throws SerializationException {
+                                                                   S set) throws SerializationException {
     CommentedConfigurationNode node = CommentedConfigurationNode.root();
     node.node("values").setList(String.class, set.set().stream()
         .map(manager::printElement)
@@ -103,7 +103,7 @@ public class PolySettingValueConfigSerializer implements SettingValueConfigSeria
       Y extends SettingValue<X>,
       Z extends SettingKey.Manager<X, Y>,
       S extends AltSet<X>> Y deserializePoly(Z managerGeneral,
-                                                 ConfigurationNode configNode)
+                                             ConfigurationNode configNode)
       throws SerializationException {
     SettingKey.Manager.Poly<X, S> manager = (SettingKey.Manager.Poly<X, S>) managerGeneral;
     Map<Object, ? extends ConfigurationNode> children = configNode.childrenMap();
@@ -112,7 +112,7 @@ public class PolySettingValueConfigSerializer implements SettingValueConfigSeria
       return (Y) SettingValue.Poly.declarative(deserializeSet(manager, children.get("set")));
     } else if (parsedType.equalsIgnoreCase("manipulative")) {
       return (Y) SettingValue.Poly.manipulative(deserializeSet(manager, children.get("add")),
-         deserializeSet(manager, children.get("subtract")));
+          deserializeSet(manager, children.get("subtract")));
     } else {
       throw new SerializationException("Serialized poly value type could not be read "
           + "(must be 'set' or 'alter')");
@@ -122,7 +122,7 @@ public class PolySettingValueConfigSerializer implements SettingValueConfigSeria
   private <X,
       Z extends SettingKey.Manager.Poly<X, S>,
       S extends AltSet<X>> S deserializeSet(Z manager,
-                                                ConfigurationNode node) throws SerializationException {
+                                            ConfigurationNode node) throws SerializationException {
     S set = manager.createSet();
     Objects.requireNonNull(node.node("values").getList(String.class)).forEach(s ->
         set.add(manager.parseElement(s)));

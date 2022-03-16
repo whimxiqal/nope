@@ -24,10 +24,6 @@
 
 package me.pietelite.nope.common.host;
 
-import me.pietelite.nope.common.math.Volume;
-import me.pietelite.nope.common.setting.Setting;
-import me.pietelite.nope.common.setting.SettingKey;
-import me.pietelite.nope.common.struct.Location;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -40,6 +36,10 @@ import java.util.Set;
 import java.util.UUID;
 import lombok.Getter;
 import lombok.experimental.Accessors;
+import me.pietelite.nope.common.math.Volume;
+import me.pietelite.nope.common.setting.Setting;
+import me.pietelite.nope.common.setting.SettingKey;
+import me.pietelite.nope.common.struct.Location;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -215,13 +215,13 @@ public class HostSystem {
   }
 
   public <X> Evaluation<X> lookupAnonymous(@NotNull SettingKey<X, ?, ?> key,
-                               @NotNull Location location) {
+                                           @NotNull Location location) {
     return lookup(key, null, location);
   }
 
   public <X> Evaluation<X> lookup(@NotNull final SettingKey<X, ?, ?> key,
-                      @Nullable final UUID userUuid,
-                      @NotNull final Location location) {
+                                  @Nullable final UUID userUuid,
+                                  @NotNull final Location location) {
     LinkedList<Host> hosts = new LinkedList<>();
 
     // add universe

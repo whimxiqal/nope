@@ -38,8 +38,8 @@ public class SettingKeyRegistrationEvent implements LifecycleEvent {
   private final EventContext context;
 
   public SettingKeyRegistrationEvent(SettingKeyRegistrar registrar,
-                                          Game game, Cause cause,
-                                          Object source, EventContext context) {
+                                     Game game, Cause cause,
+                                     Object source, EventContext context) {
     this.registrar = registrar;
     this.game = game;
     this.cause = cause;

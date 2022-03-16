@@ -24,15 +24,19 @@
 
 package me.pietelite.nope.common.math;
 
-import me.pietelite.nope.common.host.Domain;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.Getter;
 import lombok.experimental.Accessors;
+import me.pietelite.nope.common.host.Domain;
 import org.jetbrains.annotations.NotNull;
 
+/**
+ * A volume in the geometric shape of a cylinder in which the axis
+ * points in Minecraft's Y axis.
+ */
 public class Cylinder extends Volume {
 
   private final Integer posX;
@@ -63,6 +67,16 @@ public class Cylinder extends Volume {
   private final Cuboid circumscribed;
   private final Cuboid inscribed;
 
+  /**
+   * Generic constructor.
+   *
+   * @param domain the domain in which this cylinder belongs
+   * @param x      the x location of the central axis
+   * @param y1     one boundary on the y-axis, inclusive
+   * @param y2     another boundary on the y-axis, inclusive
+   * @param z      the z location of the central axis
+   * @param radius the radius in the x-z plane
+   */
   public Cylinder(Domain domain,
                   Integer x,
                   Integer y1,
@@ -101,22 +115,47 @@ public class Cylinder extends Volume {
         (int) Math.floor(posZ + radiusSqrt2Over2));
   }
 
+  /**
+   * The x location of the central axis.
+   *
+   * @return x position
+   */
   public int posX() {
     return this.posX;
   }
 
+  /**
+   * The minimum y boundary.
+   *
+   * @return y value
+   */
   public int minY() {
     return this.minY;
   }
 
+  /**
+   * The maximum y boundary.
+   *
+   * @return y value
+   */
   public int maxY() {
     return this.maxY;
   }
 
+  /**
+   * The z location of the central axis.
+   *
+   * @return z position
+   */
   public int posZ() {
     return this.posZ;
   }
 
+  /**
+   * The radius of the cylinder (in the x-z plane).
+   *
+   * @return the radius
+   */
   public double radius() {
     return this.radius;
   }
@@ -210,7 +249,9 @@ public class Cylinder extends Volume {
     }
 
     // round side
-    distance = Math.sqrt((point.x() - this.posX) * (point.x() - this.posX) + (point.z() - this.posZ) * (point.z() - this.posZ));
+    distance = Math.sqrt((point.x() - this.posX)
+        * (point.x() - this.posX) + (point.z() - this.posZ)
+        * (point.z() - this.posZ));
     if (proximity + radius >= distance) {
       // the two circles are close enough to be touching
       if (distance + proximity >= radius) {
@@ -223,7 +264,6 @@ public class Cylinder extends Volume {
           radians = Math.acos((radiusSquared + distance * distance - proximitySquared)
               / (2 * radius * distance));
         }
-        double perimeter = 2 * Math.PI * radius;
         // thetaInc (theta increment) is the smallest unit of theta
         double thetaInc = 1 / (radius);  // (2*pi)/(2*pi*r)
         double thetaStart = Math.atan((point.x() - this.posX()) / (point.z() - this.posZ));
@@ -254,7 +294,8 @@ public class Cylinder extends Volume {
 
   private void tryAddFlatSurfacePoint(Collection<Vector3d> points,
                                       double x, double y, double z) {
-    if ((y == this.minY || y == this.maxY) && (x - posX) * (x - posX) + (z - posZ) * (z - posZ) <= radiusSquared) {
+    if ((y == this.minY || y == this.maxY)
+        && (x - posX) * (x - posX) + (z - posZ) * (z - posZ) <= radiusSquared) {
       points.add(Vector3d.of(x, y, z));
     }
   }

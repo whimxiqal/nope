@@ -24,11 +24,10 @@
 
 package me.pietelite.nope.sponge.listener.dynamic;
 
+import java.util.Optional;
 import me.pietelite.nope.sponge.api.event.SettingEventContext;
 import me.pietelite.nope.sponge.api.event.SettingEventListener;
-import me.pietelite.nope.sponge.api.event.SettingValueLookupFunction;
 import me.pietelite.nope.sponge.util.Formatter;
-import java.util.Optional;
 import net.kyori.adventure.audience.Audience;
 import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.item.inventory.DropItemEvent;

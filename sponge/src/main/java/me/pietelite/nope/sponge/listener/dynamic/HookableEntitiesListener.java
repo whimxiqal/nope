@@ -24,17 +24,14 @@
 
 package me.pietelite.nope.sponge.listener.dynamic;
 
-import me.pietelite.nope.common.setting.sets.ExplosiveSet;
 import me.pietelite.nope.common.struct.AltSet;
 import me.pietelite.nope.sponge.api.event.SettingEventContext;
 import me.pietelite.nope.sponge.api.event.SettingEventListener;
 import me.pietelite.nope.sponge.api.event.SettingEventReport;
-import me.pietelite.nope.sponge.api.event.SettingValueLookupFunction;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.action.FishingEvent;
-import org.spongepowered.api.event.entity.DamageEntityEvent;
 
 public class HookableEntitiesListener implements SettingEventListener<AltSet<String>, FishingEvent.HookEntity> {
   @Override

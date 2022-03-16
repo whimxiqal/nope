@@ -35,7 +35,6 @@ import me.pietelite.nope.sponge.command.parameters.Flags;
 import me.pietelite.nope.sponge.command.parameters.ParameterKeys;
 import me.pietelite.nope.sponge.command.parameters.Parameters;
 import me.pietelite.nope.sponge.util.Formatter;
-import net.kyori.adventure.identity.Identity;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.parameter.CommandContext;

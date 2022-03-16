@@ -41,6 +41,14 @@ public class SettingEventReport {
     this.target = target;
   }
 
+  public static Builder restricted() {
+    return new Builder(Action.RESTRICTED);
+  }
+
+  public static Builder prevented() {
+    return new Builder(Action.PREVENTED);
+  }
+
   public Action action() {
     return action;
   }
@@ -51,14 +59,6 @@ public class SettingEventReport {
 
   public String target() {
     return target;
-  }
-
-  public static Builder restricted() {
-    return new Builder(Action.RESTRICTED);
-  }
-
-  public static Builder prevented() {
-    return new Builder(Action.PREVENTED);
   }
 
   public enum Action {

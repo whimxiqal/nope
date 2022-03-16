@@ -27,7 +27,6 @@ package me.pietelite.nope.sponge.listener.dynamic;
 import me.pietelite.nope.sponge.api.event.SettingEventContext;
 import me.pietelite.nope.sponge.api.event.SettingEventListener;
 import me.pietelite.nope.sponge.api.event.SettingEventReport;
-import me.pietelite.nope.sponge.api.event.SettingValueLookupFunction;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.entity.CollideEntityEvent;
 

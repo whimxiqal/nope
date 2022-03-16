@@ -24,12 +24,11 @@
 
 package me.pietelite.nope.sponge.listener.dynamic;
 
+import java.util.Optional;
 import me.pietelite.nope.common.struct.AltSet;
 import me.pietelite.nope.sponge.api.event.SettingEventContext;
 import me.pietelite.nope.sponge.api.event.SettingEventListener;
 import me.pietelite.nope.sponge.api.event.SettingEventReport;
-import me.pietelite.nope.sponge.api.event.SettingValueLookupFunction;
-import java.util.Optional;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.entity.living.player.Player;

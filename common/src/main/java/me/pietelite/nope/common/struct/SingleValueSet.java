@@ -81,7 +81,7 @@ public class SingleValueSet<T> implements Set<T> {
 
   @Override
   public Object @NotNull [] toArray() {
-    return new Object[] {value};
+    return new Object[]{value};
   }
 
   @Override

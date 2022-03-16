@@ -24,10 +24,10 @@
 
 package me.pietelite.nope.common.setting;
 
-import me.pietelite.nope.common.struct.AltSet;
 import java.io.Serializable;
 import lombok.Getter;
 import lombok.experimental.Accessors;
+import me.pietelite.nope.common.struct.AltSet;
 import org.jetbrains.annotations.NotNull;
 
 public abstract class SettingValue<T> implements Serializable {
@@ -52,13 +52,13 @@ public abstract class SettingValue<T> implements Serializable {
   }
 
   public abstract static class Poly<T, S extends AltSet<T>>
-      extends SettingValue<S> implements Serializable  {
+      extends SettingValue<S> implements Serializable {
 
     private Poly() {
     }
 
     public static <X, Y extends AltSet<X>> Poly<X, Y> manipulative(@NotNull Y additive,
-                                                                       @NotNull Y subtractive) {
+                                                                   @NotNull Y subtractive) {
       return new Manipulative<>(additive, subtractive);
     }
 

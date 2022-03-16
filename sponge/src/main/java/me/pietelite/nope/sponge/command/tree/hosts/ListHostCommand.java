@@ -24,16 +24,16 @@
 
 package me.pietelite.nope.sponge.command.tree.hosts;
 
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.stream.Collectors;
 import me.pietelite.nope.common.host.Host;
 import me.pietelite.nope.common.permission.Permissions;
 import me.pietelite.nope.sponge.SpongeNope;
 import me.pietelite.nope.sponge.command.CommandNode;
 import me.pietelite.nope.sponge.util.Formatter;
 import me.pietelite.nope.sponge.util.SpongeUtil;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.stream.Collectors;
 import net.kyori.adventure.text.Component;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandResult;

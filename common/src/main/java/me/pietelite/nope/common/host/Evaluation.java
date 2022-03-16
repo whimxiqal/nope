@@ -27,9 +27,7 @@
 
 package me.pietelite.nope.common.host;
 
-import java.util.ArrayList;
 import java.util.LinkedList;
-import java.util.List;
 import me.pietelite.nope.common.setting.SettingKey;
 
 public class Evaluation<T> extends LinkedList<Evaluation<T>.EvaluationStage> {

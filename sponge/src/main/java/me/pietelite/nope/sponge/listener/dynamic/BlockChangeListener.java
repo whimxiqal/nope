@@ -24,21 +24,19 @@
 
 package me.pietelite.nope.sponge.listener.dynamic;
 
-import me.pietelite.nope.common.Nope;
+import java.util.Optional;
 import me.pietelite.nope.common.setting.SettingKeys;
 import me.pietelite.nope.common.setting.sets.BlockChangeSet;
 import me.pietelite.nope.sponge.api.event.SettingEventContext;
 import me.pietelite.nope.sponge.api.event.SettingEventListener;
 import me.pietelite.nope.sponge.api.event.SettingEventReport;
 import me.pietelite.nope.sponge.listener.SpongeEventUtil;
-import java.util.Optional;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.transaction.BlockTransaction;
 import org.spongepowered.api.block.transaction.Operations;
 import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.registry.RegistryTypes;
-import org.spongepowered.api.world.explosion.Explosion;
 import org.spongepowered.api.world.server.ServerLocation;
 
 /**

@@ -24,12 +24,12 @@
 
 package me.pietelite.nope.sponge.config;
 
+import java.util.LinkedList;
+import java.util.List;
 import me.pietelite.nope.common.setting.SettingKey;
 import me.pietelite.nope.common.setting.SettingValue;
 import me.pietelite.nope.sponge.api.config.SettingValueConfigSerializer;
 import me.pietelite.nope.sponge.api.config.SettingValueConfigSerializerRegistrar;
-import java.util.LinkedList;
-import java.util.List;
 import org.jetbrains.annotations.NotNull;
 
 public class SettingValueConfigSerializerRegistrarImpl implements SettingValueConfigSerializerRegistrar {

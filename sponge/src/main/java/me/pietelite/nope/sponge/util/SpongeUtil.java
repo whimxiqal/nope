@@ -24,6 +24,7 @@
 
 package me.pietelite.nope.sponge.util;
 
+import java.util.UUID;
 import me.pietelite.nope.common.Nope;
 import me.pietelite.nope.common.host.Domain;
 import me.pietelite.nope.common.math.Vector3d;
@@ -32,7 +33,6 @@ import me.pietelite.nope.common.setting.sets.ExplosiveSet;
 import me.pietelite.nope.common.setting.sets.MovementSet;
 import me.pietelite.nope.common.struct.Location;
 import me.pietelite.nope.sponge.SpongeNope;
-import java.util.UUID;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.explosive.EndCrystal;
 import org.spongepowered.api.entity.explosive.Explosive;

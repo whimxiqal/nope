@@ -25,11 +25,9 @@
 package me.pietelite.nope.sponge.listener;
 
 import java.util.function.BiFunction;
-import me.pietelite.nope.common.Nope;
 import me.pietelite.nope.sponge.api.event.SettingValueLookupFunction;
 import org.spongepowered.api.block.transaction.BlockTransaction;
 import org.spongepowered.api.entity.Entity;
-import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.cause.entity.damage.source.EntityDamageSource;
 import org.spongepowered.api.event.cause.entity.damage.source.IndirectEntityDamageSource;
 import org.spongepowered.api.event.entity.AttackEntityEvent;

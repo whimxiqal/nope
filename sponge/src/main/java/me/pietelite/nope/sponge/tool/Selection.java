@@ -24,16 +24,15 @@
 
 package me.pietelite.nope.sponge.tool;
 
+import java.util.LinkedList;
+import java.util.List;
+import lombok.Data;
+import lombok.experimental.Accessors;
 import me.pietelite.nope.common.Nope;
 import me.pietelite.nope.common.host.Domain;
 import me.pietelite.nope.common.math.Vector3i;
 import me.pietelite.nope.common.math.Volume;
-import lombok.Data;
-import lombok.experimental.Accessors;
 import net.kyori.adventure.text.Component;
-
-import java.util.LinkedList;
-import java.util.List;
 
 @Data
 @Accessors(fluent = true)
@@ -102,6 +101,7 @@ public abstract class Selection<T extends Volume> {
     }
     return null;
   }
+
   public final boolean validate() {
     return validate(new LinkedList<>());
   }

@@ -24,15 +24,15 @@
 
 package me.pietelite.nope.common.host;
 
-import me.pietelite.nope.common.Nope;
-import me.pietelite.nope.common.math.Volume;
-import me.pietelite.nope.common.storage.Destructible;
-import me.pietelite.nope.common.struct.Location;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
+import me.pietelite.nope.common.Nope;
+import me.pietelite.nope.common.math.Volume;
+import me.pietelite.nope.common.storage.Destructible;
+import me.pietelite.nope.common.struct.Location;
 import org.jetbrains.annotations.Nullable;
 
 public class Zone extends Host implements Child<Zone>, Destructible {

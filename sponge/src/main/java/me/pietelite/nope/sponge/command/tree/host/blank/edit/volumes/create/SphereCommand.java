@@ -24,12 +24,15 @@
 
 package me.pietelite.nope.sponge.command.tree.host.blank.edit.volumes.create;
 
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Optional;
 import me.pietelite.nope.common.Nope;
 import me.pietelite.nope.common.host.Host;
 import me.pietelite.nope.common.host.Zone;
-import me.pietelite.nope.common.permission.Permissions;
-import me.pietelite.nope.common.math.Sphere;
 import me.pietelite.nope.common.math.Geometry;
+import me.pietelite.nope.common.math.Sphere;
+import me.pietelite.nope.common.permission.Permissions;
 import me.pietelite.nope.sponge.SpongeNope;
 import me.pietelite.nope.sponge.command.CommandNode;
 import me.pietelite.nope.sponge.command.parameters.ParameterKeys;
@@ -38,16 +41,13 @@ import me.pietelite.nope.sponge.tool.SphereSelection;
 import me.pietelite.nope.sponge.util.EffectsUtil;
 import me.pietelite.nope.sponge.util.Formatter;
 import me.pietelite.nope.sponge.util.SpongeUtil;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Optional;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.world.server.ServerWorld;
 
-public class SphereCommand extends CommandNode{
+public class SphereCommand extends CommandNode {
 
   public SphereCommand(CommandNode parent) {
     super(parent, Permissions.EDIT,

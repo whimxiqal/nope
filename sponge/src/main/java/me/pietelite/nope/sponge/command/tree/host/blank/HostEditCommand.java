@@ -29,9 +29,9 @@ import me.pietelite.nope.sponge.command.CommandNode;
 import me.pietelite.nope.sponge.command.FunctionlessCommandNode;
 import me.pietelite.nope.sponge.command.parameters.Parameters;
 import me.pietelite.nope.sponge.command.tree.host.blank.edit.ClearCommand;
-import me.pietelite.nope.sponge.command.tree.host.blank.edit.SettingCommand;
 import me.pietelite.nope.sponge.command.tree.host.blank.edit.NameCommand;
 import me.pietelite.nope.sponge.command.tree.host.blank.edit.PriorityCommand;
+import me.pietelite.nope.sponge.command.tree.host.blank.edit.SettingCommand;
 import me.pietelite.nope.sponge.command.tree.host.blank.edit.SettingsCommand;
 import me.pietelite.nope.sponge.command.tree.host.blank.edit.VolumesCommand;
 

@@ -36,7 +36,6 @@ import me.pietelite.nope.sponge.api.SpongeNopeApi;
 import me.pietelite.nope.sponge.api.config.SettingValueConfigSerializerRegistrar;
 import me.pietelite.nope.sponge.api.config.SettingValueConfigSerializerRegistrationEvent;
 import me.pietelite.nope.sponge.api.event.SettingListenerRegistrationEvent;
-import me.pietelite.nope.sponge.api.service.NopeService;
 import me.pietelite.nope.sponge.api.setting.SettingKeyRegistrationEvent;
 import me.pietelite.nope.sponge.command.RootCommand;
 import me.pietelite.nope.sponge.config.PolySettingValueConfigSerializer;
@@ -61,14 +60,12 @@ import org.spongepowered.api.data.Key;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.lifecycle.ConstructPluginEvent;
 import org.spongepowered.api.event.lifecycle.LoadedGameEvent;
-import org.spongepowered.api.event.lifecycle.ProvideServiceEvent;
 import org.spongepowered.api.event.lifecycle.RefreshGameEvent;
 import org.spongepowered.api.event.lifecycle.RegisterCommandEvent;
 import org.spongepowered.api.event.lifecycle.RegisterDataEvent;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.service.context.ContextService;
-import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.builtin.jvm.Plugin;
 
@@ -89,12 +86,12 @@ public class SpongeNope extends Nope {
   private final PluginContainer pluginContainer;
   // B stats
   private final Metrics metrics;
+  private final boolean valid = true;
   private SettingListenerStore settingListeners;
   private RootCommand rootCommand;
   @Inject
   @ConfigDir(sharedRoot = false)
   private Path configDir;
-  private final boolean valid = true;
 
   @Inject
   public SpongeNope(final PluginContainer pluginContainer, final Metrics.Factory metricsFactory) {

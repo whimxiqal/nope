@@ -24,15 +24,13 @@
 
 package me.pietelite.nope.sponge.listener.dynamic;
 
-import me.pietelite.nope.common.Nope;
+import java.util.Collections;
+import java.util.Optional;
+import java.util.Set;
 import me.pietelite.nope.common.struct.SingleValueSet;
 import me.pietelite.nope.sponge.api.event.SettingEventContext;
 import me.pietelite.nope.sponge.api.event.SettingEventListener;
 import me.pietelite.nope.sponge.api.event.SettingEventReport;
-import me.pietelite.nope.sponge.api.event.SettingValueLookupFunction;
-import java.util.Collections;
-import java.util.Optional;
-import java.util.Set;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.transaction.BlockTransaction;
 import org.spongepowered.api.entity.living.player.Player;
@@ -49,6 +47,7 @@ public class SpecificBlockChangeListener implements SettingEventListener<Boolean
   private SpecificBlockChangeListener(Set<BlockType> originalBlocks, Set<BlockType> finalBlocks) {
     this(originalBlocks, finalBlocks, false);
   }
+
   private SpecificBlockChangeListener(Set<BlockType> originalBlocks, Set<BlockType> finalBlocks, boolean environmentCauseOnly) {
     this.originalBlocks = originalBlocks;
     this.finalBlocks = finalBlocks;

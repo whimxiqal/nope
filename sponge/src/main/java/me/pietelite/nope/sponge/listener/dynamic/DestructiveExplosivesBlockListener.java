@@ -24,6 +24,7 @@
 
 package me.pietelite.nope.sponge.listener.dynamic;
 
+import java.util.Optional;
 import me.pietelite.nope.common.setting.sets.ExplosiveSet;
 import me.pietelite.nope.common.struct.AltSet;
 import me.pietelite.nope.sponge.api.event.SettingEventContext;
@@ -31,11 +32,9 @@ import me.pietelite.nope.sponge.api.event.SettingEventListener;
 import me.pietelite.nope.sponge.api.event.SettingEventReport;
 import me.pietelite.nope.sponge.listener.SpongeEventUtil;
 import me.pietelite.nope.sponge.util.SpongeUtil;
-import java.util.Optional;
 import org.spongepowered.api.block.transaction.BlockTransaction;
 import org.spongepowered.api.entity.explosive.Explosive;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
-import org.spongepowered.api.registry.RegistryTypes;
 
 /**
  *

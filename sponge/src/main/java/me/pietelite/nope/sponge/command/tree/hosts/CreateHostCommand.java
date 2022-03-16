@@ -24,6 +24,7 @@
 
 package me.pietelite.nope.sponge.command.tree.hosts;
 
+import java.util.Optional;
 import me.pietelite.nope.common.Nope;
 import me.pietelite.nope.common.host.Host;
 import me.pietelite.nope.common.host.Zone;
@@ -33,14 +34,21 @@ import me.pietelite.nope.sponge.command.parameters.Flags;
 import me.pietelite.nope.sponge.command.parameters.ParameterKeys;
 import me.pietelite.nope.sponge.command.parameters.Parameters;
 import me.pietelite.nope.sponge.util.Formatter;
-import java.util.Optional;
 import net.kyori.adventure.text.Component;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.parameter.CommandContext;
 
+/**
+ * Command for creating a {@link Host}, which can only ever be a {@link Zone}.
+ */
 public class CreateHostCommand extends CommandNode {
 
+  /**
+   * Generic constructor.
+   *
+   * @param parent parent node
+   */
   public CreateHostCommand(CommandNode parent) {
     super(parent,
         Permissions.CREATE,

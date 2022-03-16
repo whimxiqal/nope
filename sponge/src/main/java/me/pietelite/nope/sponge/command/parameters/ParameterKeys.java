@@ -24,15 +24,15 @@
 
 package me.pietelite.nope.sponge.command.parameters;
 
+import io.leangen.geantyref.TypeToken;
+import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import me.pietelite.nope.common.host.Host;
 import me.pietelite.nope.common.host.Zone;
 import me.pietelite.nope.common.math.Cuboid;
 import me.pietelite.nope.common.math.Cylinder;
 import me.pietelite.nope.common.math.Sphere;
 import me.pietelite.nope.common.setting.SettingKey;
-import io.leangen.geantyref.TypeToken;
-import java.util.Set;
-import java.util.concurrent.CompletableFuture;
 import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.profile.GameProfile;
@@ -44,13 +44,11 @@ public class ParameterKeys {
   public static final Parameter.Key<Cylinder> CYLINDER = Parameter.key("cylinder", Cylinder.class);
   public static final Parameter.Key<String> DESCRIPTION = Parameter.key("parameter", String.class);
   public static final Parameter.Key<Host> HOST = Parameter.key("host", Host.class);
-  public static final Parameter.Key<ServerPlayer> PLAYER = Parameter.key("player", ServerPlayer.class);
-  public static final Parameter.Key<String> VALUE = Parameter.key("value", String.class);
-  public static final Parameter.Key<Integer> VOLUME_INDEX = Parameter.key("index", Integer.class);
   public static final Parameter.Key<String> HOST_NAME = Parameter.key("name", String.class);
   public static final Parameter.Key<Zone> PARENT = Parameter.key("parent", Zone.class);
   public static final Parameter.Key<String> PERMISSION = Parameter.key("permission", String.class);
   public static final Parameter.Key<Boolean> PERMISSION_VALUE = Parameter.key("permission-value", Boolean.class);
+  public static final Parameter.Key<ServerPlayer> PLAYER = Parameter.key("player", ServerPlayer.class);
   public static final Parameter.Key<Set<CompletableFuture<GameProfile>>> PLAYER_LIST = Parameter.key("player-list", new TypeToken<Set<CompletableFuture<GameProfile>>>() {
   });
   public static final Parameter.Key<ServerPlayer> PLAYER_OPTIONAL = Parameter.key("player", ServerPlayer.class);
@@ -73,6 +71,8 @@ public class ParameterKeys {
   public static final Parameter.Key<ParameterValueTypes.SettingValueAlterType> SETTING_VALUE_ALTER_TYPE = Parameter.key("alter-type", ParameterValueTypes.SettingValueAlterType.class);
   public static final Parameter.Key<Sphere> SPHERE = Parameter.key("sphere", Sphere.class);
   public static final Parameter.Key<TargetOption> TARGET_OPTION = Parameter.key("target-option", TargetOption.class);
+  public static final Parameter.Key<String> VALUE = Parameter.key("value", String.class);
+  public static final Parameter.Key<Integer> VOLUME_INDEX = Parameter.key("index", Integer.class);
   public static final Parameter.Key<ServerWorld> WORLD = Parameter.key("world", ServerWorld.class);
   public static final Parameter.Key<Zone> ZONE = Parameter.key("zone", Zone.class);
 }

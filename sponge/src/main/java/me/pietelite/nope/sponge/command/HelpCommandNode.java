@@ -24,13 +24,13 @@
 
 package me.pietelite.nope.sponge.command;
 
-import me.pietelite.nope.sponge.SpongeNope;
-import me.pietelite.nope.sponge.util.Formatter;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collector;
 import java.util.stream.Stream;
+import me.pietelite.nope.sponge.SpongeNope;
+import me.pietelite.nope.sponge.util.Formatter;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.ComponentBuilder;
 import net.kyori.adventure.text.JoinConfiguration;

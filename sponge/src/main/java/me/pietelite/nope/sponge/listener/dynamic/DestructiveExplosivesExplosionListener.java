@@ -24,17 +24,15 @@
 
 package me.pietelite.nope.sponge.listener.dynamic;
 
+import java.util.Optional;
 import me.pietelite.nope.common.setting.sets.ExplosiveSet;
 import me.pietelite.nope.common.struct.AltSet;
 import me.pietelite.nope.sponge.api.event.SettingEventContext;
 import me.pietelite.nope.sponge.api.event.SettingEventListener;
 import me.pietelite.nope.sponge.api.event.SettingEventReport;
-import me.pietelite.nope.sponge.api.event.SettingValueLookupFunction;
 import me.pietelite.nope.sponge.util.SpongeUtil;
-import java.util.Optional;
 import org.spongepowered.api.entity.explosive.Explosive;
 import org.spongepowered.api.event.world.ExplosionEvent;
-import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.world.explosion.Explosion;
 
 public class DestructiveExplosivesExplosionListener implements SettingEventListener<AltSet<ExplosiveSet.Explosive>, ExplosionEvent.Pre> {

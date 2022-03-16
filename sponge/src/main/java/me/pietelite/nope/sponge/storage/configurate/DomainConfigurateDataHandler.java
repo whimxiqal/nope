@@ -24,11 +24,11 @@
 
 package me.pietelite.nope.sponge.storage.configurate;
 
+import java.util.Objects;
+import java.util.function.Function;
 import me.pietelite.nope.common.host.Domain;
 import me.pietelite.nope.common.storage.DomainDataHandler;
 import me.pietelite.nope.sponge.api.config.SettingValueConfigSerializerRegistrar;
-import java.util.Objects;
-import java.util.function.Function;
 import org.jetbrains.annotations.NotNull;
 import org.spongepowered.configurate.CommentedConfigurationNode;
 import org.spongepowered.configurate.ConfigurateException;

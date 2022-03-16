@@ -24,12 +24,11 @@
 
 package me.pietelite.nope.sponge.listener.dynamic;
 
+import java.util.Optional;
+import java.util.Random;
 import me.pietelite.nope.sponge.api.event.SettingEventContext;
 import me.pietelite.nope.sponge.api.event.SettingEventListener;
 import me.pietelite.nope.sponge.api.event.SettingEventReport;
-import me.pietelite.nope.sponge.api.event.SettingValueLookupFunction;
-import java.util.Optional;
-import java.util.Random;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.block.transaction.BlockTransaction;
 import org.spongepowered.api.event.block.ChangeBlockEvent;

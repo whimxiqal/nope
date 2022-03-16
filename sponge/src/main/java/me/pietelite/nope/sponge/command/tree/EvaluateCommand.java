@@ -26,7 +26,7 @@ package me.pietelite.nope.sponge.command.tree;
 
 import java.util.LinkedList;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Optional;
 import me.pietelite.nope.common.host.Evaluation;
 import me.pietelite.nope.common.permission.Permissions;
 import me.pietelite.nope.common.setting.SettingKey;
@@ -36,7 +36,6 @@ import me.pietelite.nope.sponge.command.parameters.ParameterKeys;
 import me.pietelite.nope.sponge.command.parameters.Parameters;
 import me.pietelite.nope.sponge.util.Formatter;
 import me.pietelite.nope.sponge.util.SpongeUtil;
-import java.util.Optional;
 import net.kyori.adventure.text.Component;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.exception.CommandException;

@@ -24,8 +24,8 @@
 
 package me.pietelite.nope.common.setting.sets;
 
-import me.pietelite.nope.common.struct.HashAltSet;
 import java.util.Collection;
+import me.pietelite.nope.common.struct.HashAltSet;
 
 public class FewStringSet extends HashAltSet.FewStandard<String> {
   public FewStringSet(Collection<String> options) {

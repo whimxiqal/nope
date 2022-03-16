@@ -24,13 +24,12 @@
 
 package me.pietelite.nope.common.math;
 
+import java.util.List;
+import lombok.Getter;
+import lombok.experimental.Accessors;
 import me.pietelite.nope.common.host.Domain;
 import me.pietelite.nope.common.host.Domained;
 import me.pietelite.nope.common.struct.Location;
-import java.util.List;
-
-import lombok.Getter;
-import lombok.experimental.Accessors;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

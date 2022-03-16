@@ -25,7 +25,9 @@
 package me.pietelite.nope.sponge.listener.always;
 
 import com.google.common.collect.Sets;
-import me.pietelite.nope.common.Nope;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import me.pietelite.nope.common.host.Host;
 import me.pietelite.nope.common.setting.SettingKey;
 import me.pietelite.nope.common.setting.SettingKeys;
@@ -38,9 +40,6 @@ import me.pietelite.nope.sponge.api.event.SettingEventContext;
 import me.pietelite.nope.sponge.api.event.SettingEventReport;
 import me.pietelite.nope.sponge.listener.SettingEventContextImpl;
 import me.pietelite.nope.sponge.util.SpongeUtil;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.title.TitlePart;

@@ -24,14 +24,14 @@
 
 package me.pietelite.nope.sponge.listener;
 
-import me.pietelite.nope.common.setting.SettingKey;
-import me.pietelite.nope.common.setting.SettingKeyStore;
-import me.pietelite.nope.sponge.SpongeNope;
-import me.pietelite.nope.sponge.api.event.SettingListenerRegistration;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import me.pietelite.nope.common.setting.SettingKey;
+import me.pietelite.nope.common.setting.SettingKeyStore;
+import me.pietelite.nope.sponge.SpongeNope;
+import me.pietelite.nope.sponge.api.event.SettingListenerRegistration;
 import org.jetbrains.annotations.NotNull;
 import org.spongepowered.api.event.Event;
 

@@ -24,8 +24,8 @@
 
 package me.pietelite.nope.common.storage;
 
-import me.pietelite.nope.common.host.Zone;
 import java.util.Collection;
+import me.pietelite.nope.common.host.Zone;
 
 public interface ZoneDataHandler {
 

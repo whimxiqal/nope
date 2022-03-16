@@ -24,10 +24,9 @@
 
 package me.pietelite.nope.common.math;
 
+import java.util.Objects;
 import lombok.Value;
 import lombok.experimental.Accessors;
-
-import java.util.Objects;
 
 @Value
 @Accessors(fluent = true)

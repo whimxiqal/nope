@@ -24,13 +24,13 @@
 
 package me.pietelite.nope.common.setting.manager;
 
-import me.pietelite.nope.common.setting.SettingKey;
-import me.pietelite.nope.common.struct.HashAltSet;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import lombok.Setter;
 import lombok.experimental.Accessors;
+import me.pietelite.nope.common.setting.SettingKey;
+import me.pietelite.nope.common.struct.HashAltSet;
 import org.jetbrains.annotations.NotNull;
 
 @Accessors(fluent = true)

@@ -24,8 +24,6 @@
 
 package me.pietelite.nope.common.setting;
 
-import me.pietelite.nope.common.Nope;
-import me.pietelite.nope.common.permission.Permissions;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -36,6 +34,8 @@ import java.util.UUID;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
+import me.pietelite.nope.common.Nope;
+import me.pietelite.nope.common.permission.Permissions;
 
 /**
  * The arbiter for determining whether a setting affects a player.
@@ -106,7 +106,7 @@ public final class Target {
   /**
    * Decides whether a user is targeted.
    *
-   * @param userUuid the user's uuid
+   * @param userUuid          the user's uuid
    * @param playerRestrictive true if the setting key is restrictive in nature
    * @return true if the user is targeted by this setting value
    */

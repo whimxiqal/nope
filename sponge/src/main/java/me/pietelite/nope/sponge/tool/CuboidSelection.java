@@ -28,6 +28,9 @@ import me.pietelite.nope.common.math.Cuboid;
 import me.pietelite.nope.sponge.util.Formatter;
 import net.kyori.adventure.text.Component;
 
+/**
+ * A selection of a cuboid.
+ */
 public class CuboidSelection extends Selection<Cuboid> {
 
   @Override

@@ -32,7 +32,6 @@ public interface SettingValueConfigSerializerRegistrar {
 
   void register(SettingValueConfigSerializer<?> serializer);
 
-  @NotNull
-  <T, V extends SettingValue<T>, M extends SettingKey.Manager<T, V>> SettingValueConfigSerializer<M> serializerOf(M manager);
+  @NotNull <T, V extends SettingValue<T>, M extends SettingKey.Manager<T, V>> SettingValueConfigSerializer<M> serializerOf(M manager);
 
 }
