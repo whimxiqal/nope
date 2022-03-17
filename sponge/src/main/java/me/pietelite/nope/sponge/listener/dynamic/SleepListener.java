@@ -31,12 +31,15 @@ import me.pietelite.nope.sponge.api.event.SettingEventContext;
 import me.pietelite.nope.sponge.api.event.SettingEventListener;
 import org.spongepowered.api.event.action.SleepingEvent;
 
+/**
+ * Implements {@link me.pietelite.nope.common.setting.SettingKeys#SLEEP}.
+ */
 public class SleepListener implements SettingEventListener<Boolean, SleepingEvent.Pre> {
   @Override
   public void handle(SettingEventContext<Boolean, SleepingEvent.Pre> context) {
     context.event().bed().location().ifPresent(loc -> {
-      if (context.lookup(loc)) {
-        context.event().setCancelled(false);
+      if (!context.lookup(loc)) {
+        context.event().setCancelled(true);
       }
     });
   }
