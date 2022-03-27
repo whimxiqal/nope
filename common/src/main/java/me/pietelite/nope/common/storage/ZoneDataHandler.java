@@ -27,6 +27,9 @@ package me.pietelite.nope.common.storage;
 import java.util.Collection;
 import me.pietelite.nope.common.host.Zone;
 
+/**
+ * A general interface for handling {@link Zone} persistent data.
+ */
 public interface ZoneDataHandler {
 
   void destroy(Zone zone);

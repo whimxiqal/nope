@@ -27,9 +27,22 @@ package me.pietelite.nope.common.storage;
 import me.pietelite.nope.common.host.Domain;
 import org.jetbrains.annotations.NotNull;
 
+/**
+ * A data handler specifically for {@link Domain}s.
+ */
 public interface DomainDataHandler {
 
+  /**
+   * Save the contents of a {@link Domain} to persistent storage.
+   *
+   * @param domain the domain to save
+   */
   void save(@NotNull Domain domain);
 
+  /**
+   * Load the contents of a {@link Domain} from persistent storage into the given object.
+   *
+   * @param domain the domain to populate with stored info
+   */
   void load(@NotNull Domain domain);
 }

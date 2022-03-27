@@ -55,7 +55,6 @@ import org.spongepowered.api.command.CommandCompletion;
 import org.spongepowered.api.command.exception.ArgumentParseException;
 import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.command.parameter.Parameter;
-import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.util.Nameable;
@@ -127,7 +126,8 @@ public class Parameters {
             String name = reader.parseString();
             if (Validate.invalidSettingCollectionName(name)) {
               throw new ArgumentParseException(
-                  Formatter.error("Zones can only have names with numbers, letters, and some special characters"),
+                  Formatter.error("Zones can only have names with numbers, "
+                      + "letters, and some special characters"),
                   name,
                   0);
             }
@@ -168,12 +168,17 @@ public class Parameters {
             .collect(Collectors.toList());
       })
       .build();
-  public static final Parameter.Value<String> PERMISSION = Parameter.string().key(ParameterKeys.PERMISSION).build();
-  public static final Parameter.Value<Boolean> PERMISSION_VALUE = Parameter.bool().key(ParameterKeys.PERMISSION_VALUE).build();
-  public static final Parameter.Value<ServerPlayer> PLAYER = Parameter.player().key(ParameterKeys.PLAYER).build();
-  public static final Parameter.Value<Set<CompletableFuture<GameProfile>>> PLAYER_LIST = set(name -> Sponge.server()
-          .gameProfileManager()
-          .profile(name),
+  public static final Parameter.Value<String> PERMISSION = Parameter.string()
+      .key(ParameterKeys.PERMISSION)
+      .build();
+  public static final Parameter.Value<Boolean> PERMISSION_VALUE = Parameter.bool()
+      .key(ParameterKeys.PERMISSION_VALUE)
+      .build();
+  public static final Parameter.Value<ServerPlayer> PLAYER = Parameter.player()
+      .key(ParameterKeys.PLAYER)
+      .build();
+  public static final Parameter.Value<Set<CompletableFuture<GameProfile>>> PLAYER_LIST = set(name ->
+          Sponge.server().gameProfileManager().profile(name),
       () -> Sponge.server().onlinePlayers().stream().map(Nameable::name).collect(Collectors.toSet()),
       ParameterKeys.PLAYER_LIST,
       "players")
@@ -192,39 +197,48 @@ public class Parameters {
             .collect(Collectors.toList());
       })
       .build();
-  public static final Parameter.Value<Integer> POS_X = Parameter.rangedInteger(-Nope.WORLD_RADIUS, Nope.WORLD_RADIUS)
+  public static final Parameter.Value<Integer> POS_X = Parameter.rangedInteger(-Nope.WORLD_RADIUS,
+          Nope.WORLD_RADIUS)
       .key(ParameterKeys.POS_X)
       .usage(key -> "X")
       .build();
-  public static final Parameter.Value<Integer> POS_X_1 = Parameter.rangedInteger(-Nope.WORLD_RADIUS, Nope.WORLD_RADIUS)
+  public static final Parameter.Value<Integer> POS_X_1 = Parameter.rangedInteger(-Nope.WORLD_RADIUS,
+          Nope.WORLD_RADIUS)
       .key(ParameterKeys.POS_X_1)
       .usage(key -> "first X")
       .build();
-  public static final Parameter.Value<Integer> POS_X_2 = Parameter.rangedInteger(-Nope.WORLD_RADIUS, Nope.WORLD_RADIUS)
+  public static final Parameter.Value<Integer> POS_X_2 = Parameter.rangedInteger(-Nope.WORLD_RADIUS,
+          Nope.WORLD_RADIUS)
       .key(ParameterKeys.POS_X_2)
       .usage(key -> "second X")
       .build();
-  public static final Parameter.Value<Integer> POS_Y = Parameter.rangedInteger(-Nope.WORLD_RADIUS, Nope.WORLD_RADIUS)
+  public static final Parameter.Value<Integer> POS_Y = Parameter.rangedInteger(-Nope.WORLD_RADIUS,
+          Nope.WORLD_RADIUS)
       .key(ParameterKeys.POS_Y)
       .usage(key -> "Y")
       .build();
-  public static final Parameter.Value<Integer> POS_Y_1 = Parameter.rangedInteger(-Nope.WORLD_DEPTH, Nope.WORLD_DEPTH)
+  public static final Parameter.Value<Integer> POS_Y_1 = Parameter.rangedInteger(-Nope.WORLD_DEPTH,
+          Nope.WORLD_DEPTH)
       .key(ParameterKeys.POS_Y_1)
       .usage(key -> "first Y")
       .build();
-  public static final Parameter.Value<Integer> POS_Y_2 = Parameter.rangedInteger(-Nope.WORLD_DEPTH, Nope.WORLD_DEPTH)
+  public static final Parameter.Value<Integer> POS_Y_2 = Parameter.rangedInteger(-Nope.WORLD_DEPTH,
+          Nope.WORLD_DEPTH)
       .key(ParameterKeys.POS_Y_2)
       .usage(key -> "second Y")
       .build();
-  public static final Parameter.Value<Integer> POS_Z = Parameter.rangedInteger(-Nope.WORLD_RADIUS, Nope.WORLD_RADIUS)
+  public static final Parameter.Value<Integer> POS_Z = Parameter.rangedInteger(-Nope.WORLD_RADIUS,
+          Nope.WORLD_RADIUS)
       .key(ParameterKeys.POS_Z)
       .usage(key -> "Z")
       .build();
-  public static final Parameter.Value<Integer> POS_Z_1 = Parameter.rangedInteger(-Nope.WORLD_RADIUS, Nope.WORLD_RADIUS)
+  public static final Parameter.Value<Integer> POS_Z_1 = Parameter.rangedInteger(-Nope.WORLD_RADIUS,
+          Nope.WORLD_RADIUS)
       .key(ParameterKeys.POS_Z_1)
       .usage(key -> "first Z")
       .build();
-  public static final Parameter.Value<Integer> POS_Z_2 = Parameter.rangedInteger(-Nope.WORLD_RADIUS, Nope.WORLD_RADIUS)
+  public static final Parameter.Value<Integer> POS_Z_2 = Parameter.rangedInteger(-Nope.WORLD_RADIUS,
+          Nope.WORLD_RADIUS)
       .key(ParameterKeys.POS_Z_2)
       .usage(key -> "second Z")
       .build();
@@ -240,32 +254,33 @@ public class Parameters {
       .key(ParameterKeys.SETTING_CATEGORY)
       .optional()
       .build();
-  public static final Parameter.Value<SettingKey<?, ?, ?>> SETTING_KEY = Parameter.builder(ParameterKeys.SETTING_KEY)
-      .addParser((parameterKey, reader, context) -> {
-        String id = reader.parseString();
-        SettingKey<?, ?, ?> key = SpongeNope.instance().settingKeys().get(id);
-        if (key == null) {
-          throw new ArgumentParseException(Formatter.error(
-              "___ is not a setting key", id
-          ), id, 0);
-        }
-        return Optional.of(key);
-      })
-      .completer((context, currentInput) -> {
-        Optional<Host> host = context.one(HOST);
-        boolean showGlobal = host.isPresent()
-            && host.get().equals(SpongeNope.instance().hostSystem().universe());
-        final Predicate<String> inOrder = new ContainsInOrderPredicate(currentInput);
-        return SpongeNope.instance().settingKeys()
-            .keys()
-            .entrySet()
-            .stream()
-            .filter(entry -> inOrder.test(entry.getKey()))
-            .filter(entry -> showGlobal || !entry.getValue().global())
-            .map(entry -> CommandCompletion.of(entry.getKey(),
-                Formatter.accent(entry.getValue().description())))
-            .collect(Collectors.toList());
-      }).build();
+  public static final Parameter.Value<SettingKey<?, ?, ?>> SETTING_KEY =
+      Parameter.builder(ParameterKeys.SETTING_KEY)
+          .addParser((parameterKey, reader, context) -> {
+            String id = reader.parseString();
+            SettingKey<?, ?, ?> key = SpongeNope.instance().settingKeys().get(id);
+            if (key == null) {
+              throw new ArgumentParseException(Formatter.error(
+                  "___ is not a setting key", id
+              ), id, 0);
+            }
+            return Optional.of(key);
+          })
+          .completer((context, currentInput) -> {
+            Optional<Host> host = context.one(HOST);
+            boolean showGlobal = host.isPresent()
+                && host.get().equals(SpongeNope.instance().hostSystem().universe());
+            final Predicate<String> inOrder = new ContainsInOrderPredicate(currentInput);
+            return SpongeNope.instance().settingKeys()
+                .keys()
+                .entrySet()
+                .stream()
+                .filter(entry -> inOrder.test(entry.getKey()))
+                .filter(entry -> showGlobal || !entry.getValue().global())
+                .map(entry -> CommandCompletion.of(entry.getKey(),
+                    Formatter.accent(entry.getValue().description())))
+                .collect(Collectors.toList());
+          }).build();
   public static final Parameter.Value<String> SETTING_VALUE = Parameter.remainingJoinedStrings()
       .key(ParameterKeys.SETTING_VALUE)
       .optional()
@@ -377,7 +392,10 @@ public class Parameters {
         }
       })
       .build();
-  public static final Parameter.Value<Integer> VOLUME_INDEX_OPTIONAL = Parameter.integerNumber().key(ParameterKeys.VOLUME_INDEX).optional().build();
+  public static final Parameter.Value<Integer> VOLUME_INDEX_OPTIONAL = Parameter.integerNumber()
+      .key(ParameterKeys.VOLUME_INDEX)
+      .optional()
+      .build();
   public static final Parameter.Value<ServerWorld> WORLD = Parameter.world().key(ParameterKeys.WORLD).build();
   public static final Parameter.Multi CUBOID = Parameter.seqBuilder(Parameters.WORLD)
       .then(Parameters.POS_X_1)
@@ -405,6 +423,17 @@ public class Parameters {
       .then(Parameters.POS_Y_2)
       .optional().build();
 
+  /**
+   * A static generator for a {@link Parameter.Value.Builder} in charge of handling a set of values,
+   * given functionality to parse each value.
+   *
+   * @param parser      the parser for individual items
+   * @param options     all possible options for the values in the set, used for completion
+   * @param key         the parameter key
+   * @param pluralTypes the plural form of the type being parsed here
+   * @param <T>         the type of values parsed
+   * @return the builder of a value parameter
+   */
   public static <T> Parameter.Value.Builder<Set<T>> set(Function<String, T> parser,
                                                         Supplier<Set<String>> options,
                                                         Parameter.Key<Set<T>> key,
@@ -453,10 +482,10 @@ public class Parameters {
    * @return the host
    */
   public static Optional<Host> inferHost(CommandContext context) {
-    if (!(context.cause().root() instanceof Player)) {
+    if (!(context.cause().root() instanceof ServerPlayer)) {
       return Optional.empty();
     }
-    Player player = (Player) context.cause().root();
+    ServerPlayer player = (ServerPlayer) context.cause().root();
     Collection<Host> containing = SpongeNope.instance()
         .hostSystem()
         .collectSuperiorHosts(SpongeUtil.reduceLocation(player.serverLocation()));

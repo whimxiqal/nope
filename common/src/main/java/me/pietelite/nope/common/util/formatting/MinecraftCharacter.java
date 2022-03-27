@@ -2,8 +2,6 @@
  * MIT License
  *
  * Copyright (c) Pieter Svenson
- * Copyright (c) MinecraftOnline
- * Copyright (c) contributors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,7 +20,6 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
- *
  */
 
 package me.pietelite.nope.common.util.formatting;
@@ -31,6 +28,9 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * A utility enumeration of characters with their lengths in the standard Minecraft font.
+ */
 public enum MinecraftCharacter {
 
   A('A', 5),
@@ -130,10 +130,10 @@ public enum MinecraftCharacter {
   SPACE(' ', 3),
   DEFAULT('a', 4);
 
-  private static final Map<Character, MinecraftCharacter> map = new HashMap();
+  private static final Map<Character, MinecraftCharacter> map = new HashMap<>();
 
   static {
-    Arrays.stream(values()).forEach(mChar -> map.put(mChar.character, mChar));
+    Arrays.stream(values()).forEach(c -> map.put(c.character, c));
   }
 
   private final char character;
@@ -144,6 +144,12 @@ public enum MinecraftCharacter {
     this.length = length;
   }
 
+  /**
+   * Get the Minecraft-specific object storing information for this character.
+   *
+   * @param c the character
+   * @return the Minecraft character
+   */
   public static MinecraftCharacter characterOf(char c) {
     if (map.containsKey(c)) {
       return map.get(c);
@@ -151,6 +157,14 @@ public enum MinecraftCharacter {
     return MinecraftCharacter.DEFAULT;
   }
 
+  /**
+   * Gives a string of spaces that are required to extend the given
+   * string to a certain pixel length.
+   *
+   * @param string the original string
+   * @param length the length in pixels
+   * @return the string of spaces
+   */
   public static String spacesRequiredToExtend(String string, int length) {
     int currentLength = pixelLengthOf(string);
     int spaces = (length - currentLength) / (SPACE.length + 1);
@@ -161,6 +175,12 @@ public enum MinecraftCharacter {
     return builder.toString();
   }
 
+  /**
+   * Get the longest length among the lengths of the given series of strings.
+   *
+   * @param strings the strings of which to check lengths
+   * @return the length
+   */
   public static int longestPixelLength(Iterable<String> strings) {
     int maxLength = 0;
     int cur;

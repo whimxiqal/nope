@@ -55,6 +55,10 @@ import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.world.server.ServerLocation;
 
+/**
+ * A manager for all users' in-game {@link me.pietelite.nope.common.math.Volume}
+ * {@link Selection}s.
+ */
 public class SelectionHandler {
 
   private final Map<UUID, CuboidSelection> boxDrafts = new HashMap<>();
@@ -78,20 +82,24 @@ public class SelectionHandler {
     return slabDrafts.get(playerUuid);
   }
 
+  /**
+   * Check if this item stack is a selection tool or not.
+   *
+   * @param stack the stack
+   * @return true if it is a tool
+   */
   public boolean isTool(ValueContainer stack) {
     return toolType(stack) != null;
   }
 
-  @Nullable
-  public Selection.Type toolType(ValueContainer stack) {
-    for (Selection.Type type : Selection.Type.values()) {
-      if (isTool(stack, type)) {
-        return type;
-      }
-    }
-    return null;
-  }
 
+  /**
+   * Check if this stack is a specific type of tool.
+   *
+   * @param stack the stack
+   * @param type  the type of selection
+   * @return true if the stack is the requested type of tool
+   */
   public boolean isTool(ValueContainer stack, Selection.Type type) {
     switch (type) {
       case CUBOID:
@@ -107,6 +115,28 @@ public class SelectionHandler {
     }
   }
 
+  /**
+   * Get the type of tool this container is.
+   *
+   * @param stack the item stack
+   * @return the type, or null if none
+   */
+  @Nullable
+  public Selection.Type toolType(ValueContainer stack) {
+    for (Selection.Type type : Selection.Type.values()) {
+      if (isTool(stack, type)) {
+        return type;
+      }
+    }
+    return null;
+  }
+
+  /**
+   * Create a new tool of the requested type.
+   *
+   * @param type the type
+   * @return the item stack that may be used in-game as a tool
+   */
   public ItemStack createTool(Selection.Type type) {
     ItemStack itemStack;
     switch (type) {
@@ -177,11 +207,23 @@ public class SelectionHandler {
     }
   }
 
+  /**
+   * Event handler for selecting the first position in {@link Selection}s
+   * or rotating between tools in-hand.
+   *
+   * @param event the event
+   */
   @Listener(order = Order.FIRST)
   public void onSelect(InteractBlockEvent.Primary.Start event) {
     onSelect(event, true);
   }
 
+  /**
+   * Event handler for selecting the second position in {@link Selection}s
+   * or rotating between tools in-hand.
+   *
+   * @param event the event
+   */
   @Listener(order = Order.FIRST)
   public void onSelect(InteractBlockEvent.Secondary event) {
     Optional<HandType> handType = event.context().get(EventContextKeys.USED_HAND);
@@ -328,6 +370,11 @@ public class SelectionHandler {
     }
   }
 
+  /**
+   * Event handler to ensure that tools are not misplaced by removing them if dropped.
+   *
+   * @param event the event
+   */
   @Listener(order = Order.FIRST)
   public void onDrop(SpawnEntityEvent event) {
     for (Entity entity : event.entities()) {

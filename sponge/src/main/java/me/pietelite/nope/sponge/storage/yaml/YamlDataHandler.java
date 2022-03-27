@@ -40,6 +40,9 @@ import org.spongepowered.configurate.ConfigurationOptions;
 import org.spongepowered.configurate.yaml.NodeStyle;
 import org.spongepowered.configurate.yaml.YamlConfigurationLoader;
 
+/**
+ * The YAML implementation of the {@link ConfigurateDataHandler}.
+ */
 public class YamlDataHandler extends ConfigurateDataHandler {
 
   public YamlDataHandler(Path path, SettingValueConfigSerializerRegistrar serializerRegistrar) {
@@ -75,6 +78,12 @@ public class YamlDataHandler extends ConfigurateDataHandler {
             serializerRegistrar));
   }
 
+  /**
+   * Get a {@link YamlConfigurationLoader} at the given {@link Path}.
+   *
+   * @param path the path
+   * @return the loader
+   */
   public static YamlConfigurationLoader yamlLoader(Path path) {
     return YamlConfigurationLoader.builder()
         .defaultOptions(ConfigurationOptions.defaults()

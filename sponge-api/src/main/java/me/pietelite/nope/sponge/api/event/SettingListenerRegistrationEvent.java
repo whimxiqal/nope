@@ -29,6 +29,10 @@ import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.EventContext;
 import org.spongepowered.api.event.lifecycle.LifecycleEvent;
 
+/**
+ * A lifecycle event with which to register {@link SettingEventListener}s by wrapping them
+ * in {@link SettingListenerRegistration}s.
+ */
 public class SettingListenerRegistrationEvent implements LifecycleEvent {
 
   private final SettingListenerRegistrar registrar;
@@ -37,6 +41,15 @@ public class SettingListenerRegistrationEvent implements LifecycleEvent {
   private final Object source;
   private final EventContext context;
 
+  /**
+   * Generic constructor.
+   *
+   * @param registrar the registrar with which to actually register the listeners
+   * @param game      the game, for the {@link LifecycleEvent}
+   * @param cause     the cause, for the {@link LifecycleEvent}
+   * @param source    the source, for the {@link LifecycleEvent}
+   * @param context   the context, for the {@link LifecycleEvent}
+   */
   public SettingListenerRegistrationEvent(SettingListenerRegistrar registrar,
                                           Game game, Cause cause,
                                           Object source, EventContext context) {

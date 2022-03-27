@@ -2,8 +2,6 @@
  * MIT License
  *
  * Copyright (c) Pieter Svenson
- * Copyright (c) MinecraftOnline
- * Copyright (c) contributors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,7 +20,6 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
- *
  */
 
 package me.pietelite.nope.sponge.listener.dynamic;
@@ -36,12 +33,16 @@ import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.data.ChangeDataHolderEvent;
 
+/**
+ * Implements {@link me.pietelite.nope.common.setting.SettingKeys#HUNGER_DRAIN}.
+ */
 public class HungerDrainListener implements SettingEventListener<Boolean, ChangeDataHolderEvent.ValueChange> {
   @Override
   public void handle(SettingEventContext<Boolean, ChangeDataHolderEvent.ValueChange> context) {
     if (context.event().targetHolder() instanceof ServerPlayer) {
       ServerPlayer player = (ServerPlayer) context.event().targetHolder();
-      Optional<Value.Immutable<Integer>> changedFoodLevel = context.event().endResult().successfulValue(Keys.FOOD_LEVEL);
+      Optional<Value.Immutable<Integer>> changedFoodLevel = context.event().endResult()
+          .successfulValue(Keys.FOOD_LEVEL);
       if (changedFoodLevel.isPresent()
           && (changedFoodLevel.get().get() < player.get(Keys.FOOD_LEVEL).get())
           && !context.lookup(player, player.serverLocation())) {

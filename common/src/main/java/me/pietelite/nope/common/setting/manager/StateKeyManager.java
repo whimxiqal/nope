@@ -28,6 +28,10 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import org.jetbrains.annotations.NotNull;
 
+/**
+ * A {@link me.pietelite.nope.common.setting.SettingKey.Manager} for managing
+ * permissive state values: "allow" vs "deny".
+ */
 public class StateKeyManager extends BooleanKeyManager {
 
   private final Map<String, Object> suggestions;

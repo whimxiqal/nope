@@ -29,18 +29,30 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import org.jetbrains.annotations.NotNull;
 
+/**
+ * In-memory storage for all the server's {@link SettingKey}s.
+ */
 public class SettingKeyStore {
 
   private final HashMap<String, SettingKey<?, ?, ?>> settingMap = new HashMap<>();
   private boolean locked;
 
-  public void register(@NotNull SettingKey<?, ?, ?> settingKey) throws IllegalArgumentException {
+  /**
+   * Register a new {@link SettingKey}.
+   *
+   * @param settingKey the key
+   * @throws IllegalStateException    if registration of {@link SettingKey}s are no longer allowed.
+   * @throws IllegalArgumentException if the key is invalid, like if it's id is already used by another one
+   */
+  public void register(@NotNull SettingKey<?, ?, ?> settingKey)
+      throws IllegalStateException, IllegalArgumentException {
     if (locked) {
       throw new IllegalStateException("The setting key store is locked. "
           + "You may only register keys during the allocated event.");
     }
     if (settingMap.containsKey(settingKey.id())) {
-      throw new IllegalArgumentException(String.format("A setting key with id %s already exists", settingKey.id()));
+      throw new IllegalArgumentException(String.format("A setting key with id %s already exists",
+          settingKey.id()));
     }
     settingMap.put(settingKey.id(), settingKey);
   }

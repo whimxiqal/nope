@@ -31,20 +31,24 @@ import me.pietelite.nope.sponge.api.event.SettingEventReport;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.action.FishingEvent;
 
-public class HookableEntitiesListener implements SettingEventListener<AltSet<String>, FishingEvent.HookEntity> {
+/**
+ * Implements {@link me.pietelite.nope.common.setting.SettingKeys#HOOKABLE_ENTITIES}.
+ */
+public class HookableEntitiesListener implements
+    SettingEventListener<AltSet<String>, FishingEvent.HookEntity> {
   @Override
   public void handle(SettingEventContext<AltSet<String>, FishingEvent.HookEntity> context) {
-    final Player player;
-    if (context.event().source() instanceof Player) {
-      player = (Player) context.event().source();
+    final ServerPlayer player;
+    if (context.event().source() instanceof ServerPlayer) {
+      player = (ServerPlayer) context.event().source();
     } else {
       player = null;
     }
     ResourceKey entityKey = EntityTypes.registry().valueKey(context.event().entity().type());
-    if (!context.lookup(context.event().source(), context.event().entity().serverLocation()).contains(entityKey.value())
-        || (player != null && !context.lookup(player, player.serverLocation()).contains(entityKey.value()))) {
+    if (!context.lookup(context.event().entity().serverLocation()).contains(entityKey.value())) {
       context.event().setCancelled(true);
       context.report(SettingEventReport.restricted()
           .target(entityKey.formatted())

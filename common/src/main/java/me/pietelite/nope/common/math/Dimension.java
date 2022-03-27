@@ -24,6 +24,9 @@
 
 package me.pietelite.nope.common.math;
 
+/**
+ * An axis in a 3D vector space.
+ */
 public enum Dimension {
   X,
   Y,

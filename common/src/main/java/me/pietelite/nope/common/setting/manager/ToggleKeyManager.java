@@ -28,6 +28,10 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import org.jetbrains.annotations.NotNull;
 
+/**
+ * A toggling version of the {@link BooleanKeyManager}.
+ * The values are either "on" or "off".
+ */
 public class ToggleKeyManager extends BooleanKeyManager {
 
   private final Map<String, Object> suggestions;

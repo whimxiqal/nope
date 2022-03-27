@@ -27,8 +27,12 @@ package me.pietelite.nope.common.math;
 import lombok.Value;
 import lombok.experimental.Accessors;
 
+/**
+ * A simple 3-dimension vector stored on integer axes.
+ */
 @Value
 @Accessors(fluent = true)
+@SuppressWarnings("checkstyle:MemberName")
 public class Vector3i {
   int x;
   int y;

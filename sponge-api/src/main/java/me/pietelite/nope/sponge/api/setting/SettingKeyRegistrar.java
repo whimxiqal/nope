@@ -26,8 +26,16 @@ package me.pietelite.nope.sponge.api.setting;
 
 import me.pietelite.nope.common.setting.SettingKey;
 
+/**
+ * A registrar of {@link SettingKey}s.
+ */
 public interface SettingKeyRegistrar {
 
+  /**
+   * Register a {@link SettingKey} to the plugin.
+   *
+   * @param settingKey the setting key
+   */
   void register(SettingKey<?, ?, ?> settingKey);
 
 }

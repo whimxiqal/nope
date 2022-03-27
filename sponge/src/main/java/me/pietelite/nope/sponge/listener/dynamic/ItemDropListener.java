@@ -29,51 +29,50 @@ import me.pietelite.nope.sponge.api.event.SettingEventContext;
 import me.pietelite.nope.sponge.api.event.SettingEventListener;
 import me.pietelite.nope.sponge.util.Formatter;
 import net.kyori.adventure.audience.Audience;
-import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.item.inventory.DropItemEvent;
 import org.spongepowered.api.item.inventory.Carrier;
 import org.spongepowered.api.item.inventory.transaction.InventoryTransactionResult;
 import org.spongepowered.api.world.Locatable;
 
-public abstract class ItemDropListener<E extends Event>
-    implements SettingEventListener<Boolean, E> {
-
-  public static class DropItemPre extends ItemDropListener<DropItemEvent.Pre> {
-    @Override
-    public void handle(SettingEventContext<Boolean, DropItemEvent.Pre> context) {
-      if (!(context.event().source() instanceof Locatable)) {
-        return;
-      }
-      Locatable locatable = (Locatable) context.event().source();
-      Optional<Carrier> carrier = context.event().cause().first(Carrier.class);
-      if (!context.lookup(locatable, locatable.serverLocation())) {
-        context.event().droppedItems().clear();
-        carrier.ifPresent(c -> context.event().originalDroppedItems().forEach(snapshot -> {
-          InventoryTransactionResult result = c.inventory().offer(snapshot.createStack());
-          if (result.type() != InventoryTransactionResult.Type.SUCCESS && c instanceof Audience) {
-            ((Audience) c).sendMessage(Formatter.error("You cannot drop items here and "
-                + "there was a problem trying to return your item(s) to you"));
-          }
-        }));
-        // TODO schedule this for later because someone else may have re-added the items
-        //  that we removed here, so we shouldn't be giving them back.
-//        carrier.ifPresent(c -> Sponge.server().scheduler().submit(Task.builder()
-//            .plugin(SpongeNope.instance().pluginContainer())
-//            .delay(Ticks.of(1))
-//            .execute(task -> {
-//              List<ItemStackSnapshot> snapshots = new LinkedList<>(event.originalDroppedItems());
-//              snapshots.removeAll(event.droppedItems());
-//              snapshots.forEach(snapshot -> {
-//                InventoryTransactionResult result = c.inventory().offer(snapshot.createStack());
-//                if (result.type() != InventoryTransactionResult.Type.SUCCESS && c instanceof Audience) {
-//                  ((Audience) c).sendMessage(Formatter.error("You cannot drop items here and "
-//                      + "there was a problem trying to return your item(s) to you"));
-//                }
-//              });
-//            })
-//            .build()));
-      }
+/**
+ * Implements {@link me.pietelite.nope.common.setting.SettingKeys#ITEM_DROP}.
+ */
+public class ItemDropListener implements SettingEventListener<Boolean, DropItemEvent.Pre> {
+  @Override
+  public void handle(SettingEventContext<Boolean, DropItemEvent.Pre> context) {
+    if (!(context.event().source() instanceof Locatable)) {
+      return;
+    }
+    Locatable locatable = (Locatable) context.event().source();
+    Optional<Carrier> carrier = context.event().cause().first(Carrier.class);
+    if (!context.lookup(locatable, locatable.serverLocation())) {
+      context.event().droppedItems().clear();
+      carrier.ifPresent(c -> context.event().originalDroppedItems().forEach(snapshot -> {
+        InventoryTransactionResult result = c.inventory().offer(snapshot.createStack());
+        if (result.type() != InventoryTransactionResult.Type.SUCCESS && c instanceof Audience) {
+          ((Audience) c).sendMessage(Formatter.error("You cannot drop items here and "
+              + "there was a problem trying to return your item(s) to you"));
+        }
+      }));
+      // TODO schedule this for later because someone else may have re-added the items
+      //  that we removed here, so we shouldn't be giving them back.
+      /*
+        carrier.ifPresent(c -> Sponge.server().scheduler().submit(Task.builder()
+            .plugin(SpongeNope.instance().pluginContainer())
+            .delay(Ticks.of(1))
+            .execute(task -> {
+              List<ItemStackSnapshot> snapshots = new LinkedList<>(event.originalDroppedItems());
+              snapshots.removeAll(event.droppedItems());
+              snapshots.forEach(snapshot -> {
+                InventoryTransactionResult result = c.inventory().offer(snapshot.createStack());
+                if (result.type() != InventoryTransactionResult.Type.SUCCESS && c instanceof Audience) {
+                  ((Audience) c).sendMessage(Formatter.error("You cannot drop items here and "
+                      + "there was a problem trying to return your item(s) to you"));
+                }
+              });
+            })
+            .build()));
+*/
     }
   }
-
 }

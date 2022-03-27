@@ -24,8 +24,16 @@
 
 package me.pietelite.nope.common.struct;
 
+/**
+ * Something that has a description.
+ */
 public interface Described {
 
+  /**
+   * A description of what this object is.
+   *
+   * @return the description
+   */
   String description();
 
 }

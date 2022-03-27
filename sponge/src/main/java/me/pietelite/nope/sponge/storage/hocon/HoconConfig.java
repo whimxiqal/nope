@@ -28,8 +28,18 @@ import java.nio.file.Path;
 import me.pietelite.nope.sponge.api.config.SettingValueConfigSerializerRegistrar;
 import me.pietelite.nope.sponge.storage.configurate.UniverseConfigurateDataHandler;
 
+/**
+ * A config handler for the {@link me.pietelite.nope.common.host.Universe} host
+ * using hocon as the storage type.
+ */
 public class HoconConfig extends UniverseConfigurateDataHandler {
 
+  /**
+   * Generic constructor.
+   *
+   * @param path                the path to where the data file will be stored
+   * @param serializerRegistrar the registrar of setting value serializers
+   */
   public HoconConfig(Path path, SettingValueConfigSerializerRegistrar serializerRegistrar) {
     super(HoconDataHandler.hoconLoader(path.resolve("server.conf")),
         serializerRegistrar);

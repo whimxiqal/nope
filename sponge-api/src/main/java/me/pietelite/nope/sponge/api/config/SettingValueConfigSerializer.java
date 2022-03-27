@@ -30,6 +30,13 @@ import org.spongepowered.configurate.CommentedConfigurationNode;
 import org.spongepowered.configurate.ConfigurationNode;
 import org.spongepowered.configurate.serialize.SerializationException;
 
+/**
+ * A serializer for serializing values stored in {@link me.pietelite.nope.common.setting.Setting}s
+ * for the purpose of persisting data in configuration files.
+ *
+ * @param <M> the manager type
+ */
+@SuppressWarnings("checkstyle:LineLength")
 public interface SettingValueConfigSerializer<M extends SettingKey.Manager<?, ?>> {
 
   Class<M> managerClass();

@@ -83,6 +83,7 @@ public class SpongeNope extends Nope {
   @Accessors(fluent = true)
   private static SpongeNope instance;
   private final SelectionHandler selectionHandler = new SelectionHandler();
+  @Inject
   private final PluginContainer pluginContainer;
   // B stats
   private final Metrics metrics;
@@ -93,6 +94,7 @@ public class SpongeNope extends Nope {
   @ConfigDir(sharedRoot = false)
   private Path configDir;
 
+  @SuppressWarnings("checkstyle:MissingJavadocMethod")
   @Inject
   public SpongeNope(final PluginContainer pluginContainer, final Metrics.Factory metricsFactory) {
     super(new SpongeLogger());
@@ -119,6 +121,11 @@ public class SpongeNope extends Nope {
 
   }
 
+  /**
+   * Listener for registering data with Sponge.
+   *
+   * @param event the event
+   */
   @Listener
   public void onRegisterDataEvent(RegisterDataEvent event) {
     NopeKeys.SELECTION_TOOL_CUBOID = Key.from(pluginContainer(), "cuboid_tool", Boolean.class);
@@ -187,8 +194,6 @@ public class SpongeNope extends Nope {
 
     // Register selection handlers
     Sponge.eventManager().registerListeners(pluginContainer(), selectionHandler);
-//    collisionHandler = new CollisionHandler();
-//    playerMovementHandler = new PlayerMovementHandler();
     logger().info("Registering listeners!");
     settingListeners.registerAll();
     Sponge.eventManager().registerListeners(pluginContainer(), new MovementListener());
@@ -201,6 +206,11 @@ public class SpongeNope extends Nope {
     Extra.printSplashscreen();
   }
 
+  /**
+   * Handler for registering commands.
+   *
+   * @param event the command
+   */
   @Listener
   public void onCommandRegistering(RegisterCommandEvent<Command.Parameterized> event) {
     // Register entire Nope command tree
@@ -218,6 +228,9 @@ public class SpongeNope extends Nope {
     loadState();
   }
 
+  /**
+   * Load plugin state from persistent storage.
+   */
   public void loadState() {
     hostSystem(data().loadSystem());
     hostSystem().addAllZones(data().zones().load());

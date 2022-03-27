@@ -59,14 +59,30 @@ public final class Target {
   private Target() {
   }
 
+  /**
+   * A static factory for a target that targets all players.
+   *
+   * @return the target
+   */
   public static Target all() {
     return Target.blacklisted(Collections.emptyList());
   }
 
+  /**
+   * A static factory for a target that targets no one.
+   *
+   * @return the target
+   */
   public static Target none() {
     return Target.whitelisted(Collections.emptyList());
   }
 
+  /**
+   * A static factory for a target that targets only those identified in the given collection.
+   *
+   * @param collection the collection
+   * @return the target
+   */
   public static Target whitelisted(Collection<UUID> collection) {
     Target target = new Target();
     target.users.addAll(collection);
@@ -74,6 +90,12 @@ public final class Target {
     return target;
   }
 
+  /**
+   * A static factory for a target that targets only those <i>not</i> identified in the given collection.
+   *
+   * @param collection the collection
+   * @return the target
+   */
   public static Target blacklisted(Collection<UUID> collection) {
     Target target = new Target();
     target.users.addAll(collection);
@@ -81,6 +103,9 @@ public final class Target {
     return target;
   }
 
+  /**
+   * Turn the targeted set of players into a whitelist.
+   */
   public void whitelist() {
     if (!whitelist) {
       this.whitelist = true;
@@ -88,6 +113,9 @@ public final class Target {
     }
   }
 
+  /**
+   * Turn the targeted set of players into a blacklist.
+   */
   public void blacklist() {
     if (whitelist) {
       this.whitelist = false;

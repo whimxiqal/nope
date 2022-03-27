@@ -26,5 +26,8 @@ package me.pietelite.nope.common.setting.sets;
 
 import me.pietelite.nope.common.struct.HashAltSet;
 
+/**
+ * A {@link HashAltSet} for storing an unbounded quantity of {@link String}s.
+ */
 public class StringSet extends HashAltSet.UnboundedAlternate<String> {
 }

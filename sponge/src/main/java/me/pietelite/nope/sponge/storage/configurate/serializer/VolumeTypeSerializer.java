@@ -36,6 +36,9 @@ import org.spongepowered.configurate.ConfigurationNode;
 import org.spongepowered.configurate.serialize.SerializationException;
 import org.spongepowered.configurate.serialize.TypeSerializer;
 
+/**
+ * The {@link TypeSerializer} for {@link Volume}s.
+ */
 public class VolumeTypeSerializer implements TypeSerializer<Volume> {
   @Override
   public Volume deserialize(Type type, ConfigurationNode node) throws SerializationException {
@@ -56,7 +59,8 @@ public class VolumeTypeSerializer implements TypeSerializer<Volume> {
   }
 
   @Override
-  public void serialize(Type type, @Nullable Volume obj, ConfigurationNode node) throws SerializationException {
+  public void serialize(Type type, @Nullable Volume obj, ConfigurationNode node)
+      throws SerializationException {
     if (obj == null) {
       return;
     }
@@ -135,7 +139,8 @@ public class VolumeTypeSerializer implements TypeSerializer<Volume> {
     node.node("dimensions", "max-z").set(obj.maxZ());
   }
 
-  private void serializeCylinder(@Nullable Cylinder obj, ConfigurationNode node) throws SerializationException {
+  private void serializeCylinder(@Nullable Cylinder obj, ConfigurationNode node)
+      throws SerializationException {
     if (obj == null) {
       return;
     }

@@ -132,7 +132,7 @@ public class HostInfoCommand extends CommandNode {
                     : host.settings().stream()
                     .flatMap(setting -> {
                       try {
-                        return Formatter.setting(setting, context.cause().subject(), host)
+                        return Formatter.setting(setting, host)
                             .get()
                             .stream();
                       } catch (InterruptedException | ExecutionException e) {

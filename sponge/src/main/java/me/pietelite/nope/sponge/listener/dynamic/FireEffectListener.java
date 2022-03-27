@@ -29,12 +29,18 @@ import java.util.Random;
 import me.pietelite.nope.sponge.api.event.SettingEventContext;
 import me.pietelite.nope.sponge.api.event.SettingEventListener;
 import me.pietelite.nope.sponge.api.event.SettingEventReport;
+import org.spongepowered.api.block.BlockSnapshot;
+import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.block.transaction.BlockTransaction;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
+import org.spongepowered.api.state.IntegerStateProperties;
 import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.api.world.server.ServerLocation;
 
+/**
+ * Implementing {@link me.pietelite.nope.common.setting.SettingKeys#FIRE_EFFECT}.
+ */
 public class FireEffectListener implements SettingEventListener<Boolean, ChangeBlockEvent.All> {
 
   private final Random random = new Random();
@@ -54,20 +60,18 @@ public class FireEffectListener implements SettingEventListener<Boolean, ChangeB
               // The fire isn't moving, it's just getting older
               fireAging = true;
 
-              // TODO uncomment this once IntegerStateProperties are registered appropariately in Sponge.
-              //  This stuff makes it so that fire dies out in due time if Fire Effect is off
-//              // See if we should just manually extinguish
-//              //  (it shouldn't be going above age 3 if 'fire effect' is off because
-//              //  0 fire effect means not living long enough to try to burn it)
-//              Optional<Integer> age = transaction.finalReplacement().state().stateProperty(IntegerStateProperties.FIRE_AGE);
-//              if (age.isPresent() && age.get() >= 3 /*&& random.nextDouble() > .5*/) {
-//                transaction.setCustom(BlockSnapshot.builder()
-//                    .blockState(BlockState.builder()
-//                        .blockType(BlockTypes.AIR)
-//                        .build())
-//                    .build());
-//                continue;
-//              }
+              // See if we should just manually extinguish
+              //  (it shouldn't be going above age 3 if 'fire effect' is off because
+              //  0 fire effect means not living long enough to try to burn it)
+              Optional<Integer> age = transaction.finalReplacement().state()
+                  .stateProperty(IntegerStateProperties.FIRE_AGE);
+              if (age.isPresent() && age.get() >= 3 && random.nextDouble() > .5) {
+                transaction.setCustom(BlockSnapshot.builder()
+                    .from(transaction.finalReplacement())
+                    .blockState(BlockState.builder().blockType(BlockTypes.AIR).build())
+                    .build());
+                continue;
+              }
             } else if (transaction.finalReplacement().state().type().equals(BlockTypes.AIR.get())) {
               // Fire just extinguished itself, go ahead
               continue;

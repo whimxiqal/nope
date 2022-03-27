@@ -32,6 +32,11 @@ import java.util.Objects;
 import java.util.Set;
 import org.jetbrains.annotations.NotNull;
 
+/**
+ * A special type of {@link Set} that only stores one value.
+ *
+ * @param <T> the type of data stored here
+ */
 public class SingleValueSet<T> implements Set<T> {
 
   private final T value;
@@ -93,12 +98,12 @@ public class SingleValueSet<T> implements Set<T> {
 
   @Override
   public boolean add(T t) {
-    return false;
+    throw new UnsupportedOperationException();
   }
 
   @Override
   public boolean remove(Object o) {
-    return false;
+    throw new UnsupportedOperationException();
   }
 
   @Override
@@ -115,21 +120,21 @@ public class SingleValueSet<T> implements Set<T> {
 
   @Override
   public boolean addAll(@NotNull Collection<? extends T> c) {
-    return false;
+    throw new UnsupportedOperationException();
   }
 
   @Override
   public boolean retainAll(@NotNull Collection<?> c) {
-    return false;
+    throw new UnsupportedOperationException();
   }
 
   @Override
   public boolean removeAll(@NotNull Collection<?> c) {
-    return false;
+    throw new UnsupportedOperationException();
   }
 
   @Override
   public void clear() {
-
+    throw new UnsupportedOperationException();
   }
 }

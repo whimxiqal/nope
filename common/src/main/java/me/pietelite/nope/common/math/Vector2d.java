@@ -28,6 +28,9 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.experimental.Accessors;
 
+/**
+ * A simple 2-dimensional vector.
+ */
 @Data
 public class Vector2d {
   @Getter
@@ -46,18 +49,29 @@ public class Vector2d {
     return new Vector2d(posX, posZ);
   }
 
+  /**
+   * Calculate the distance to another vector squared.
+   *
+   * @param other the other vector
+   * @return the distance squared
+   */
   public double distanceSquared(Vector2d other) {
     double lengthX = this.posX - other.posX;
     double lengthZ = this.posZ - other.posZ;
     return lengthX * lengthX + lengthZ * lengthZ;
   }
 
-  public double length() {
+  public double magnitude() {
     return Math.sqrt(posX * posX + posZ * posZ);
   }
 
+  /**
+   * Copy this vector to a new vector with a magnitude of 1.
+   *
+   * @return the new vector
+   */
   public Vector2d normalize() {
-    double length = length();
+    double length = magnitude();
     return new Vector2d(posX / length, posZ / length);
   }
 

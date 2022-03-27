@@ -29,7 +29,36 @@ import me.pietelite.nope.common.setting.SettingKeys;
 import me.pietelite.nope.sponge.SpongeNope;
 import me.pietelite.nope.sponge.api.event.SettingEventListener;
 import me.pietelite.nope.sponge.api.event.SettingListenerRegistration;
-import me.pietelite.nope.sponge.listener.dynamic.*;
+import me.pietelite.nope.sponge.listener.dynamic.BlockChangeListener;
+import me.pietelite.nope.sponge.listener.dynamic.BlockChangingMobsListener;
+import me.pietelite.nope.sponge.listener.dynamic.DestructiveExplosivesBlockListener;
+import me.pietelite.nope.sponge.listener.dynamic.DestructiveExplosivesExplosionListener;
+import me.pietelite.nope.sponge.listener.dynamic.DropExpListener;
+import me.pietelite.nope.sponge.listener.dynamic.FireEffectListener;
+import me.pietelite.nope.sponge.listener.dynamic.GrowablesListener;
+import me.pietelite.nope.sponge.listener.dynamic.HarmfulExplosivesDamageListener;
+import me.pietelite.nope.sponge.listener.dynamic.HarmfulExplosivesExplosionListener;
+import me.pietelite.nope.sponge.listener.dynamic.HealthRegenListener;
+import me.pietelite.nope.sponge.listener.dynamic.HookableEntitiesListener;
+import me.pietelite.nope.sponge.listener.dynamic.HungerDrainListener;
+import me.pietelite.nope.sponge.listener.dynamic.InteractiveBlocksListener;
+import me.pietelite.nope.sponge.listener.dynamic.InteractiveEntitiesListener;
+import me.pietelite.nope.sponge.listener.dynamic.InvincibleEntitiesListener;
+import me.pietelite.nope.sponge.listener.dynamic.ItemDropListener;
+import me.pietelite.nope.sponge.listener.dynamic.ItemPickupListener;
+import me.pietelite.nope.sponge.listener.dynamic.LeafDecayListener;
+import me.pietelite.nope.sponge.listener.dynamic.LeashableEntitiesListener;
+import me.pietelite.nope.sponge.listener.dynamic.LightNetherPortalListener;
+import me.pietelite.nope.sponge.listener.dynamic.LightningListener;
+import me.pietelite.nope.sponge.listener.dynamic.PlayerCollisionListener;
+import me.pietelite.nope.sponge.listener.dynamic.RideMountListener;
+import me.pietelite.nope.sponge.listener.dynamic.RideMoveListener;
+import me.pietelite.nope.sponge.listener.dynamic.SleepListener;
+import me.pietelite.nope.sponge.listener.dynamic.SpawnableEntitiesListener;
+import me.pietelite.nope.sponge.listener.dynamic.SpecificBlockChangeListener;
+import me.pietelite.nope.sponge.listener.dynamic.TntIgnitionInteractListener;
+import me.pietelite.nope.sponge.listener.dynamic.TntIgnitionSpawnListener;
+import me.pietelite.nope.sponge.listener.dynamic.UseNameTagListener;
 import me.pietelite.nope.sponge.util.Groups;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.event.Event;
@@ -50,18 +79,25 @@ import org.spongepowered.api.event.item.inventory.ChangeInventoryEvent;
 import org.spongepowered.api.event.item.inventory.DropItemEvent;
 import org.spongepowered.api.event.world.ExplosionEvent;
 
-public class NopeSettingListeners {
+/**
+ * Utility class to store the registration method for registering listeners for settings.
+ */
+public final class NopeSettingListeners {
 
   private NopeSettingListeners() {
   }
 
+  /**
+   * Register all setting listeners, or in other words,
+   * stage them to be registered to Sponge later.
+   */
   public static void register() {
     one(SettingKeys.BLOCK_CHANGE,
         ChangeBlockEvent.All.class,
         new BlockChangeListener());
     one(SettingKeys.BLOCK_CHANGING_MOBS,
         ChangeBlockEvent.All.class,
-        new GriefingMobsListener());
+        new BlockChangingMobsListener());
     one(SettingKeys.CONCRETE_SOLIDIFICATION,
         ChangeBlockEvent.All.class,
         SpecificBlockChangeListener.manyToMany(Groups.CONCRETE_POWDER, Groups.CONCRETE));
@@ -124,9 +160,9 @@ public class NopeSettingListeners {
         new InvincibleEntitiesListener());
     one(SettingKeys.ITEM_DROP,
         DropItemEvent.Pre.class,
-        new ItemDropListener.DropItemPre());
+        new ItemDropListener());
     one(SettingKeys.ITEM_PICKUP,
-        ChangeInventoryEvent.Pickup.class,
+        ChangeInventoryEvent.Pickup.Pre.class,
         new ItemPickupListener());
     one(SettingKeys.LEAF_DECAY,
         ChangeBlockEvent.All.class,
@@ -175,7 +211,7 @@ public class NopeSettingListeners {
         new TntIgnitionSpawnListener());
     one(SettingKeys.TRAMPLE,
         ChangeBlockEvent.All.class,
-        SpecificBlockChangeListener.oneToOne(BlockTypes.DIRT.get(), BlockTypes.FARMLAND.get()));
+        SpecificBlockChangeListener.oneToOne(BlockTypes.FARMLAND.get(), BlockTypes.DIRT.get()));
     one(SettingKeys.USE_NAME_TAG,
         InteractEntityEvent.Secondary.class,
         new UseNameTagListener());
@@ -183,7 +219,7 @@ public class NopeSettingListeners {
         ChangeBlockEvent.All.class,
         SpecificBlockChangeListener.forFinal(BlockTypes.WATER.get()));
 
-    IgniteNetherPortalListener.stage();
+    LightNetherPortalListener.stage();
   }
 
   private static <T, E extends Event> void one(SettingKey<? extends T, ?, ?> settingKey,

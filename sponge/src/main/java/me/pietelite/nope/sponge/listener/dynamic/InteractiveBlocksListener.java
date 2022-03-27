@@ -35,7 +35,11 @@ import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.block.InteractBlockEvent;
 import org.spongepowered.api.world.server.ServerLocation;
 
-public class InteractiveBlocksListener implements SettingEventListener<AltSet<String>, InteractBlockEvent.Secondary> {
+/**
+ * Implements {@link me.pietelite.nope.common.setting.SettingKeys#INTERACTIVE_BLOCKS}.
+ */
+public class InteractiveBlocksListener implements
+    SettingEventListener<AltSet<String>, InteractBlockEvent.Secondary> {
   @Override
   public void handle(SettingEventContext<AltSet<String>, InteractBlockEvent.Secondary> context) {
     final Optional<ServerLocation> location = context.event().block().location();

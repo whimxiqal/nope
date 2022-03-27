@@ -39,11 +39,18 @@ import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.registry.RegistryEntry;
 
-public class SpongeSettingKeyManagerUtil {
+/**
+ * A utility class for manipulating {@link SettingKey.Manager}s.
+ */
+public final class SpongeSettingKeyManagerUtil {
 
   private SpongeSettingKeyManagerUtil() {
   }
 
+  /**
+   * Manipulate the constant {@link SettingKey.Manager}s in {@link SettingKeyManagers}
+   * to make the best use of Sponge's platform.
+   */
   public static void updateSettingKeyManagers() {
     SettingKeyManagers.POLY_ENTITY_KEY_MANAGER.elementOptions(
         () -> EntityTypes.registry().streamEntries()

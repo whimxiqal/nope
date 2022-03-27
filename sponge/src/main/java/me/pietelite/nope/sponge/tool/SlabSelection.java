@@ -28,6 +28,9 @@ import me.pietelite.nope.common.math.Slab;
 import me.pietelite.nope.sponge.util.Formatter;
 import net.kyori.adventure.text.Component;
 
+/**
+ * A {@link Selection} for selecting a {@link Slab}.
+ */
 public class SlabSelection extends Selection<Slab> {
 
   @Override

@@ -28,10 +28,29 @@ import me.pietelite.nope.common.setting.SettingKey;
 import me.pietelite.nope.common.setting.SettingValue;
 import org.jetbrains.annotations.NotNull;
 
+/**
+ * A registrar for {@link SettingValueConfigSerializer}s.
+ */
 public interface SettingValueConfigSerializerRegistrar {
 
+  /**
+   * Register a serializer for purpose of serialization of setting values for i/o.
+   *
+   * @param serializer the serializer
+   */
   void register(SettingValueConfigSerializer<?> serializer);
 
-  @NotNull <T, V extends SettingValue<T>, M extends SettingKey.Manager<T, V>> SettingValueConfigSerializer<M> serializerOf(M manager);
+  /**
+   * Get the serializer for some {@link me.pietelite.nope.common.setting.SettingKey.Manager}.
+   *
+   * @param manager the manager
+   * @param <T>     the data type provided for a setting
+   * @param <V>     the value stored in a setting
+   * @param <M>     the manager of a setting key
+   * @return the serializer for the data stored by the manager on behalf of its settings
+   */
+  @NotNull <T,
+      V extends SettingValue<T>,
+      M extends SettingKey.Manager<T, V>> SettingValueConfigSerializer<M> serializerOf(M manager);
 
 }

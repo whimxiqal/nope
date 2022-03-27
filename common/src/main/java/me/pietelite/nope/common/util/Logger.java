@@ -24,6 +24,9 @@
 
 package me.pietelite.nope.common.util;
 
+/**
+ * A simple logging interface.
+ */
 public interface Logger {
 
   void error(String string);

@@ -39,7 +39,7 @@ import org.spongepowered.api.entity.explosive.Explosive;
 import org.spongepowered.api.entity.explosive.fused.PrimedTNT;
 import org.spongepowered.api.entity.living.monster.Creeper;
 import org.spongepowered.api.entity.living.monster.boss.Wither;
-import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.entity.projectile.explosive.FireworkRocket;
 import org.spongepowered.api.entity.projectile.explosive.WitherSkull;
 import org.spongepowered.api.entity.projectile.explosive.fireball.ExplosiveFireball;
@@ -49,15 +49,30 @@ import org.spongepowered.api.event.cause.entity.MovementTypes;
 import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.server.ServerWorld;
 
+/**
+ * A utility class to manage miscellaneous Sponge-related tasks.
+ */
 public final class SpongeUtil {
 
   private SpongeUtil() {
   }
 
+  /**
+   * Get the Nope id of a world.
+   *
+   * @param world the world
+   * @return the id
+   */
   public static String worldToId(ServerWorld world) {
     return "_" + world.key().namespace() + "_" + world.key().value();
   }
 
+  /**
+   * "Reduce" a Sponge type {@link ServerLocation} to a local type {@link Location}.
+   *
+   * @param location the sponge type location
+   * @return the local type location
+   */
   public static Location reduceLocation(ServerLocation location) {
     return new Location(location.blockX(),
         location.blockY(),
@@ -65,22 +80,46 @@ public final class SpongeUtil {
         Nope.instance().hostSystem().domain(worldToId(location.world())));
   }
 
+  /**
+   * "Reduce" a Sponge type cause to a unique identifier, or null if it can't be.
+   *
+   * @param cause the cause
+   * @return the local type location
+   */
   public static UUID reduceCause(Object cause) {
-    if (cause instanceof Player) {
-      return reducePlayer((Player) cause);
+    if (cause instanceof ServerPlayer) {
+      return reducePlayer((ServerPlayer) cause);
     } else {
       return null;
     }
   }
 
-  public static UUID reducePlayer(Player player) {
+  /**
+   * "Reduce" a Sponge type {@link ServerPlayer} to its unique identifier.
+   *
+   * @param player the player
+   * @return the local type location
+   */
+  public static UUID reducePlayer(ServerPlayer player) {
     return player.uniqueId();
   }
 
+  /**
+   * "Reduce" a Sponge type {@link Entity} to its unique identifier, only if it's a player.
+   *
+   * @param entity the entity
+   * @return the local type location
+   */
   public static UUID reduceEntity(Entity entity) {
     return reduceCause(entity);
   }
 
+  /**
+   * "Reduce" a Sponge type {@link ServerWorld} to a local {@link Domain}.
+   *
+   * @param world the world
+   * @return the domain
+   */
   public static Domain reduceWorld(ServerWorld world) {
     return SpongeNope.instance().hostSystem().domain(worldToId(world));
   }
@@ -89,18 +128,44 @@ public final class SpongeUtil {
     return new org.spongepowered.math.vector.Vector3d(vector.x(), vector.y(), vector.z());
   }
 
+  /**
+   * See {@link #valueFor(SettingKey, Object, Location)}.
+   *
+   * @param key    a key
+   * @param entity an entity, which really is only used if it is a player
+   * @param <T>    the data type
+   * @return the evaluated data
+   */
   public static <T> T valueFor(SettingKey<T, ?, ?> key, Entity entity) {
     return SpongeNope.instance().hostSystem().lookup(key,
         reduceEntity(entity),
         reduceLocation(entity.serverLocation())).result();
   }
 
+  /**
+   * An alias for {@link me.pietelite.nope.common.host.HostSystem#lookup(SettingKey, UUID, Location)}.
+   *
+   * @param key      a key
+   * @param cause    the (root) cause of the event causing this lookup
+   * @param location the location at which to evaluate
+   * @param <T>      the data type
+   * @return the evaluated data
+   */
   public static <T> T valueFor(SettingKey<T, ?, ?> key, Object cause, ServerLocation location) {
     return SpongeNope.instance().hostSystem().lookup(key,
         reduceCause(cause),
         reduceLocation(location)).result();
   }
 
+  /**
+   * See {@link #valueFor(SettingKey, Object, ServerLocation)}, but with a local type {@link Location}.
+   *
+   * @param key      the key
+   * @param cause    the cause
+   * @param location the location
+   * @param <T>      the data type
+   * @return the evaluated data
+   */
   public static <T> T valueFor(SettingKey<T, ?, ?> key, Object cause, Location location) {
     return SpongeNope.instance().hostSystem().lookup(key, reduceCause(cause), location).result();
   }
@@ -109,6 +174,12 @@ public final class SpongeUtil {
     return SpongeNope.instance().hostSystem().lookupAnonymous(key, reduceLocation(location)).result();
   }
 
+  /**
+   * "Reduce" a Sponge {@link MovementType} type to a local {@link MovementSet.Movement} type.
+   *
+   * @param movementType the Sponge movement type
+   * @return the local type
+   */
   public static MovementSet.Movement reduceMovementType(MovementType movementType) {
     if (movementType.equals(MovementTypes.CHORUS_FRUIT.get())) {
       return MovementSet.Movement.CHORUSFRUIT;
@@ -131,6 +202,12 @@ public final class SpongeUtil {
     }
   }
 
+  /**
+   * "Reduce" a Sponge {@link Explosive} type to a local {@link ExplosiveSet.Explosive} type.
+   *
+   * @param explosive the Sponge explosive
+   * @return the local type
+   */
   public static ExplosiveSet.Explosive reduceExplosive(Explosive explosive) {
     if (explosive instanceof Creeper) {
       return ExplosiveSet.Explosive.CREEPER;

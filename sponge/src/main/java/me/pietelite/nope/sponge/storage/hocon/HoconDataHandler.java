@@ -39,8 +39,17 @@ import me.pietelite.nope.sponge.storage.configurate.serializer.VolumeTypeSeriali
 import org.spongepowered.configurate.ConfigurationOptions;
 import org.spongepowered.configurate.hocon.HoconConfigurationLoader;
 
+/**
+ * A configurate data handler specifically stored with HOCON.
+ */
 public class HoconDataHandler extends ConfigurateDataHandler {
 
+  /**
+   * Generic constructor.
+   *
+   * @param path                the path to where the data file will be written.
+   * @param serializerRegistrar the serializers for setting values
+   */
   public HoconDataHandler(Path path, SettingValueConfigSerializerRegistrar serializerRegistrar) {
     super(new HoconConfig(path, serializerRegistrar),
         new DomainConfigurateDataHandler((name) -> hoconLoader(path.resolve(name + ".conf")),
@@ -74,6 +83,12 @@ public class HoconDataHandler extends ConfigurateDataHandler {
             serializerRegistrar));
   }
 
+  /**
+   * Get a configuration loader for HOCON at the given path.
+   *
+   * @param path the file path
+   * @return the loader
+   */
   public static HoconConfigurationLoader hoconLoader(Path path) {
     return HoconConfigurationLoader.builder()
         .defaultOptions(ConfigurationOptions.defaults()

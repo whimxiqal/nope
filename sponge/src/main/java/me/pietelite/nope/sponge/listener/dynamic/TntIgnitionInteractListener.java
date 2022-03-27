@@ -2,8 +2,6 @@
  * MIT License
  *
  * Copyright (c) Pieter Svenson
- * Copyright (c) MinecraftOnline
- * Copyright (c) contributors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,7 +20,6 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
- *
  */
 
 package me.pietelite.nope.sponge.listener.dynamic;
@@ -33,7 +30,12 @@ import me.pietelite.nope.sponge.api.event.SettingEventReport;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.event.block.InteractBlockEvent;
 
-public class TntIgnitionInteractListener implements SettingEventListener<Boolean, InteractBlockEvent.Secondary> {
+/**
+ * Implements {@link me.pietelite.nope.common.setting.SettingKeys#TNT_IGNITION}, by stopping
+ * the user from interacting with the tnt in the first place.
+ */
+public class TntIgnitionInteractListener
+    implements SettingEventListener<Boolean, InteractBlockEvent.Secondary> {
   @Override
   public void handle(SettingEventContext<Boolean, InteractBlockEvent.Secondary> context) {
     if (context.event().block().state().type().equals(BlockTypes.TNT.get())) {

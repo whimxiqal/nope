@@ -32,11 +32,25 @@ import me.pietelite.nope.common.struct.Described;
 import me.pietelite.nope.common.struct.HashAltSet;
 import org.jetbrains.annotations.NotNull;
 
-public class PolyAllCapsEnumKeyManager<E extends Enum<E> & Described, S extends HashAltSet<E>> extends SettingKey.Manager.Poly<E, S> {
+/**
+ * A {@link SettingKey.Manager} for {@link SettingKey.Poly}s to handle
+ * multiple values retrieved from an enum type value.
+ *
+ * @param <E> the enum type
+ * @param <S> the set of values stored
+ */
+public class PolyAllCapsEnumKeyManager<E extends Enum<E> & Described, S extends HashAltSet<E>>
+    extends SettingKey.Manager.Poly<E, S> {
 
   private final Class<E> clazz;
   private final Supplier<S> setConstructor;
 
+  /**
+   * Generic constructor.
+   *
+   * @param clazz          the class of enum
+   * @param setConstructor the constructor for the special set of values
+   */
   public PolyAllCapsEnumKeyManager(Class<E> clazz, Supplier<S> setConstructor) {
     this.clazz = clazz;
     this.setConstructor = setConstructor;

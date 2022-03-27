@@ -35,7 +35,12 @@ import org.spongepowered.api.entity.explosive.Explosive;
 import org.spongepowered.api.event.entity.DamageEntityEvent;
 import org.spongepowered.api.registry.RegistryTypes;
 
-public class HarmfulExplosivesDamageListener implements SettingEventListener<AltSet<ExplosiveSet.Explosive>, DamageEntityEvent> {
+/**
+ * Implements {@link me.pietelite.nope.common.setting.SettingKeys#HARMFUL_EXPLOSIVES},
+ * specifically for cancelling the physical damaging of entities.
+ */
+public class HarmfulExplosivesDamageListener implements
+    SettingEventListener<AltSet<ExplosiveSet.Explosive>, DamageEntityEvent> {
   @Override
   public void handle(SettingEventContext<AltSet<ExplosiveSet.Explosive>, DamageEntityEvent> context) {
     final Optional<Explosive> sourceExplosive = context.event().cause().first(Explosive.class);

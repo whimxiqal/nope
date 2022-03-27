@@ -24,8 +24,14 @@
 
 package me.pietelite.nope.common.storage;
 
+/**
+ * Something that may be destroyed, usually from a data storage location.
+ */
 public interface Destructible {
 
+  /**
+   * Destroy this object from local and persistent storage.
+   */
   void destroy();
 
 }

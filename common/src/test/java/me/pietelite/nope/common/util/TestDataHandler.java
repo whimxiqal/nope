@@ -2,8 +2,6 @@
  * MIT License
  *
  * Copyright (c) Pieter Svenson
- * Copyright (c) MinecraftOnline
- * Copyright (c) contributors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,7 +20,6 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
- *
  */
 
 package me.pietelite.nope.common.util;
@@ -40,6 +37,9 @@ import me.pietelite.nope.common.storage.UniverseDataHandler;
 import me.pietelite.nope.common.storage.ZoneDataHandler;
 import org.jetbrains.annotations.NotNull;
 
+/**
+ * A test {@link DataHandler}.
+ */
 public class TestDataHandler implements DataHandler {
   @Override
   public UniverseDataHandler universe() {

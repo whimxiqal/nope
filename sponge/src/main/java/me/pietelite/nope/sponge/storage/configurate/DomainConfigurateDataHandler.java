@@ -34,11 +34,22 @@ import org.spongepowered.configurate.CommentedConfigurationNode;
 import org.spongepowered.configurate.ConfigurateException;
 import org.spongepowered.configurate.loader.ConfigurationLoader;
 
-public class DomainConfigurateDataHandler extends SettingsConfigurateDataHandler implements DomainDataHandler {
+/**
+ * Data handler for persistent storage of {@link Domain} information using Configurate.
+ */
+public class DomainConfigurateDataHandler
+    extends SettingsConfigurateDataHandler implements DomainDataHandler {
 
   private final Function<String, ConfigurationLoader<CommentedConfigurationNode>> loader;
 
-  public DomainConfigurateDataHandler(Function<String, ConfigurationLoader<CommentedConfigurationNode>> loader,
+  /**
+   * Generic constructor.
+   *
+   * @param loader              the configuration loader
+   * @param serializerRegistrar serialization registrar
+   */
+  public DomainConfigurateDataHandler(Function<String, ConfigurationLoader<CommentedConfigurationNode>>
+                                          loader,
                                       SettingValueConfigSerializerRegistrar serializerRegistrar) {
     super(serializerRegistrar);
     this.loader = loader;

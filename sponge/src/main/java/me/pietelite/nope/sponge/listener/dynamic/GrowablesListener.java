@@ -32,15 +32,21 @@ import me.pietelite.nope.sponge.api.event.SettingEventReport;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.block.transaction.BlockTransaction;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
 
+/**
+ * Implements {@link me.pietelite.nope.common.setting.SettingKeys#GROWABLES}.
+ */
 public class GrowablesListener implements SettingEventListener<AltSet<String>, ChangeBlockEvent.All> {
   @Override
   public void handle(SettingEventContext<AltSet<String>, ChangeBlockEvent.All> context) {
-    final Optional<Player> player = context.event().cause().first(Player.class);
-    final Player playerOrNull = player.orElse(null);
+    final Optional<ServerPlayer> player = context.event().cause().first(ServerPlayer.class);
+    final ServerPlayer playerOrNull = player.orElse(null);
     for (BlockTransaction transaction : context.event().transactions()) {
-      final String crop = BlockTypes.registry().valueKey(transaction.finalReplacement().state().type()).value();
+      final String crop = BlockTypes.registry()
+          .valueKey(transaction.finalReplacement().state().type())
+          .value();
       if (transaction.original()
           .location()
           .map(loc -> !context.lookup(playerOrNull, loc).contains(crop))

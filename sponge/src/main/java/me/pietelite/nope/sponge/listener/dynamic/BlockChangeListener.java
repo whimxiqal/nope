@@ -30,7 +30,6 @@ import me.pietelite.nope.common.setting.sets.BlockChangeSet;
 import me.pietelite.nope.sponge.api.event.SettingEventContext;
 import me.pietelite.nope.sponge.api.event.SettingEventListener;
 import me.pietelite.nope.sponge.api.event.SettingEventReport;
-import me.pietelite.nope.sponge.listener.SpongeEventUtil;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.transaction.BlockTransaction;
 import org.spongepowered.api.block.transaction.Operations;
@@ -62,9 +61,11 @@ public class BlockChangeListener implements SettingEventListener<BlockChangeSet,
       } else {
         return;
       }
-      if (SpongeEventUtil.invalidateTransactionIfNeeded(context.event().source(),
-          transaction,
-          (cause, location) -> !context.lookup(cause, location).contains(blockChangeType))) {
+      if (transaction.finalReplacement()
+          .location()
+          .map(loc -> !context.lookup(loc).contains(blockChangeType))
+          .orElse(false)) {
+        transaction.invalidate();
         context.report(SettingEventReport.restricted()
             .source(context.event().source())
             .target(transaction.original().state().type().key(RegistryTypes.BLOCK_TYPE).formatted())

@@ -39,6 +39,10 @@
         <property name="ignorePattern" value="^package.*|^import.*|a href|href|http://|https://|ftp://"/>
     </module>
 
+    <module name="SuppressionFilter">
+        <property name="file" value="suppressions.xml"/>
+    </module>
+
     <module name="TreeWalker">
         <module name="SuppressWarningsHolder" />
         <module name="OuterTypeFilename"/>
@@ -320,9 +324,9 @@
         </module>
         <module name="MissingJavadocMethod">
             <property name="scope" value="public"/>
+            <property name="minLineCount" value="1"/>
             <property name="allowedAnnotations" value="Override, Test"/>
-            <property name="tokens" value="METHOD_DEF, CTOR_DEF, ANNOTATION_FIELD_DEF,
-                                   COMPACT_CTOR_DEF"/>
+            <property name="tokens" value="METHOD_DEF, ANNOTATION_FIELD_DEF"/>
         </module>
         <module name="MissingJavadocType">
             <property name="scope" value="protected"/>
@@ -344,9 +348,5 @@
             <property name="tokens" value="SINGLE_LINE_COMMENT, BLOCK_COMMENT_BEGIN"/>
         </module>
         <!-- https://checkstyle.org/config_filters.html#SuppressionXpathFilter -->
-        <module name="SuppressionXpathFilter">
-            <property name="file" value="self" />
-            <property name="optional" value="true"/>
-        </module>
     </module>
 </module>

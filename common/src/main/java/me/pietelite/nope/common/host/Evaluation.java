@@ -2,8 +2,6 @@
  * MIT License
  *
  * Copyright (c) Pieter Svenson
- * Copyright (c) MinecraftOnline
- * Copyright (c) contributors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,7 +20,6 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
- *
  */
 
 package me.pietelite.nope.common.host;
@@ -30,6 +27,14 @@ package me.pietelite.nope.common.host;
 import java.util.LinkedList;
 import me.pietelite.nope.common.setting.SettingKey;
 
+/**
+ * The result of an in-game analysis of the value stored on a {@link SettingKey}
+ * at a given location and a given subject.
+ * The purpose of the evaluation is to keep track of how the value mutated as it
+ * passed through various {@link Host}s.
+ *
+ * @param <T> the returned data type
+ */
 public class Evaluation<T> extends LinkedList<Evaluation<T>.EvaluationStage> {
 
   private final SettingKey<T, ?, ?> settingKey;
@@ -38,6 +43,11 @@ public class Evaluation<T> extends LinkedList<Evaluation<T>.EvaluationStage> {
     this.settingKey = settingKey;
   }
 
+  /**
+   * Get the final response to the request for a value.
+   *
+   * @return the result
+   */
   public T result() {
     if (isEmpty()) {
       return settingKey.defaultData();
@@ -45,17 +55,37 @@ public class Evaluation<T> extends LinkedList<Evaluation<T>.EvaluationStage> {
     return getLast().value;
   }
 
+  /**
+   * Add a stage to the end of the stage list, insinuating
+   * that the host cause the overall value to mutate to the given value
+   * after the evaluation passed through the host.
+   * This method is for bookkeeping and does not affect the actual result
+   * when it is queried.
+   *
+   * @param host  the host
+   * @param value the value after the host was applied
+   * @return the stage that was added
+   */
   public EvaluationStage add(Host host, T value) {
     EvaluationStage stage = new EvaluationStage(host, value);
     this.add(stage);
     return stage;
   }
 
+  /**
+   * A single stage in the entire process of evaluating the requested value.
+   */
   public class EvaluationStage {
 
     private final Host host;
     private final T value;
 
+    /**
+     * Generic constructor.
+     *
+     * @param host  the host
+     * @param value the value
+     */
     public EvaluationStage(Host host, T value) {
       this.host = host;
       this.value = value;

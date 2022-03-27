@@ -33,11 +33,14 @@ import me.pietelite.nope.sponge.api.event.SettingEventListener;
 import me.pietelite.nope.sponge.api.event.SettingEventReport;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.transaction.BlockTransaction;
-import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.world.server.ServerLocation;
 
+/**
+ * A generic listener for handling the events and settings related to changing blocks.
+ */
 public class SpecificBlockChangeListener implements SettingEventListener<Boolean, ChangeBlockEvent.All> {
 
   private final Set<BlockType> originalBlocks;
@@ -48,18 +51,36 @@ public class SpecificBlockChangeListener implements SettingEventListener<Boolean
     this(originalBlocks, finalBlocks, false);
   }
 
-  private SpecificBlockChangeListener(Set<BlockType> originalBlocks, Set<BlockType> finalBlocks, boolean environmentCauseOnly) {
+  private SpecificBlockChangeListener(Set<BlockType> originalBlocks,
+                                      Set<BlockType> finalBlocks,
+                                      boolean environmentCauseOnly) {
     this.originalBlocks = originalBlocks;
     this.finalBlocks = finalBlocks;
     this.environmentCauseOnly = environmentCauseOnly;
   }
 
+  /**
+   * Create a listener for handling the changing from one type of block to one other block type.
+   *
+   * @param originalBlock the starting type of block
+   * @param finalBlock    the ending type of block
+   * @return the listener
+   */
   public static SpecificBlockChangeListener oneToOne(BlockType originalBlock,
                                                      BlockType finalBlock) {
     return new SpecificBlockChangeListener(new SingleValueSet<>(originalBlock),
         new SingleValueSet<>(finalBlock));
   }
 
+  /**
+   * Create a listener for handling the changing from one type of block to one other block type.
+   *
+   * @param originalBlock        the starting type of block
+   * @param finalBlock           the ending type of block
+   * @param environmentCauseOnly whether to only handle the event if it was caused naturally,
+   *                             by the environment
+   * @return the listener
+   */
   public static SpecificBlockChangeListener oneToOne(BlockType originalBlock,
                                                      BlockType finalBlock,
                                                      boolean environmentCauseOnly) {
@@ -68,39 +89,48 @@ public class SpecificBlockChangeListener implements SettingEventListener<Boolean
         environmentCauseOnly);
   }
 
+  /**
+   * Create a listener for handling the changing from one of a set of block types
+   * to one of another set of block types.
+   *
+   * @param originalBlocks a set of starting block types
+   * @param finalBlocks    a set of ending block types
+   * @return the listener
+   */
   public static SpecificBlockChangeListener manyToMany(Set<BlockType> originalBlocks,
                                                        Set<BlockType> finalBlocks) {
     return new SpecificBlockChangeListener(originalBlocks, finalBlocks);
   }
 
+  /**
+   * Create a listener for handling the changing from one type of block to any other type ot block.
+   *
+   * @param blockType the starting type of block
+   * @return the listener
+   */
   public static SpecificBlockChangeListener forOriginal(BlockType blockType) {
     return new SpecificBlockChangeListener(new SingleValueSet<>(blockType), Collections.emptySet());
   }
 
+  /**
+   * Create a listener for handling the changing from any type of block to one other type ot block.
+   *
+   * @param blockType the final type of block
+   * @return the listener
+   */
   public static SpecificBlockChangeListener forFinal(BlockType blockType) {
     return new SpecificBlockChangeListener(Collections.emptySet(), new SingleValueSet<>(blockType));
   }
 
   @Override
   public void handle(SettingEventContext<Boolean, ChangeBlockEvent.All> context) {
-    final Object eventCause = context.event().cause().root();
-    final Player player;
-    if (eventCause instanceof Player) {
-      if (environmentCauseOnly) {
-        return;
-      }
-      player = (Player) eventCause;
-    } else {
-      player = null;
-    }
     Optional<ServerLocation> blockLocation;
     for (BlockTransaction transaction : context.event().transactions()) {
       blockLocation = transaction.finalReplacement().location();
       if (blockLocation.isPresent()) {
         if ((originalBlocks.isEmpty() || originalBlocks.contains(transaction.original().state().type()))
             && (finalBlocks.isEmpty() || finalBlocks.contains(transaction.finalReplacement().state().type()))
-            && (!context.lookup(eventCause, blockLocation.get())
-            || (player != null && !context.lookup(player, player.serverLocation())))) {
+            && (!context.lookup(blockLocation.get()))) {
           transaction.invalidate();
           context.report(SettingEventReport.restricted()
               .target(transaction.original().state().type().key(RegistryTypes.BLOCK_TYPE).formatted())

@@ -4,7 +4,7 @@ import org.spongepowered.plugin.metadata.model.PluginDependency
 plugins {
     id 'java-library'
     id 'org.spongepowered.gradle.plugin' version '2.0.0'
-    id 'com.github.johnrengelman.shadow' version '7.0.0'
+    id 'com.github.johnrengelman.shadow' version '7.1.2'
 }
 
 repositories {
@@ -12,11 +12,11 @@ repositories {
 }
 
 sponge {
-    apiVersion("8.0.0-SNAPSHOT")
-    license("LICENSE")
+    apiVersion("8.0.0")
+    license("LICENSE.txt")
     loader {
         name(PluginLoaders.JAVA_PLAIN)
-        version("1.0")
+        version(project.ext.fullVersion)
     }
     plugin("nope") {
         displayName("Nope")
@@ -60,35 +60,27 @@ test {
 dependencies {
     implementation project(':common')
     implementation project(':sponge-api')
-    // Sponge
-    shadow "org.spongepowered:spongeapi:8.0.0-SNAPSHOT"
-    annotationProcessor "org.spongepowered:spongeapi:8.0.0-SNAPSHOT"
 
-    // JUnit
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.2'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.2'
+    implementation 'org.spongepowered:spongeapi:8.0.0'
+    annotationProcessor "org.spongepowered:spongeapi:8.0.0"
 
-    // Lombok
-    shadow 'org.projectlombok:lombok:1.18.22'
     annotationProcessor 'org.projectlombok:lombok:1.18.22'
+    annotationProcessor 'org.jetbrains:annotations:23.0.0'
 
-    testImplementation 'org.projectlombok:lombok:1.18.22'
-    testAnnotationProcessor 'org.projectlombok:lombok:1.18.22'
-
-    // IntelliJ Annotations
-    shadow 'org.jetbrains:annotations:22.0.0'
-
-    // bStats
     implementation 'org.bstats:bstats-sponge:3.0.0'
-
 }
 
 shadowJar {
-    archiveFileName = "Nope-Sponge-${project.version}.jar"
+    archiveFileName = "Nope-Sponge-${project.ext.fullVersion}.jar"
 
     dependencies {
-        exclude(dependency('org.projectlombok:lombok'))
+        include(dependency('me.pietelite.nope:.*'))
+        include(dependency('org.bstats:.*'))
     }
 
-    relocate 'org.bstats', 'com.minecraftonline'
+    relocate 'org.bstats', 'me.pietelite.nope.lib.bstats'
+}
+
+artifacts {
+    archives shadowJar
 }

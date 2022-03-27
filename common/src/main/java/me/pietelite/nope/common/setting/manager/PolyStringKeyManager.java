@@ -33,6 +33,11 @@ import me.pietelite.nope.common.setting.SettingKey;
 import me.pietelite.nope.common.struct.HashAltSet;
 import org.jetbrains.annotations.NotNull;
 
+/**
+ * A manager for keys that store multiple strings.
+ *
+ * @param <S> the special type of set of strings
+ */
 @Accessors(fluent = true)
 public class PolyStringKeyManager<S extends HashAltSet<String>> extends SettingKey.Manager.Poly<String, S> {
 

@@ -37,7 +37,10 @@ import me.pietelite.nope.common.setting.sets.ExplosiveSet;
 import me.pietelite.nope.common.setting.sets.MovementSet;
 import me.pietelite.nope.common.setting.sets.StringSet;
 
-public class SettingKeyManagers {
+/**
+ * A utility class to store constant managers, which are used in defining {@link SettingKey}s.
+ */
+public final class SettingKeyManagers {
 
   public static final BooleanKeyManager BOOLEAN_KEY_MANAGER = new BooleanKeyManager();
   public static final IntegerKeyManager INTEGER_KEY_MANAGER = new IntegerKeyManager();

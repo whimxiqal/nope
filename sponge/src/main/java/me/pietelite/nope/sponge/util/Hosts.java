@@ -27,6 +27,9 @@ package me.pietelite.nope.sponge.util;
 import java.util.Optional;
 import org.spongepowered.api.service.context.Context;
 
+/**
+ * A utility class for manipulation of {@link me.pietelite.nope.common.host.Host}s.
+ */
 public final class Hosts {
 
   private Hosts() {

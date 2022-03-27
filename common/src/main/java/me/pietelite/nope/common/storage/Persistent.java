@@ -24,8 +24,14 @@
 
 package me.pietelite.nope.common.storage;
 
+/**
+ * An interface for persistent data types.
+ */
 public interface Persistent {
 
+  /**
+   * Store this to some persistent data storage.
+   */
   void save();
 
 }

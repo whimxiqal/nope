@@ -41,6 +41,14 @@ public class Location {
   private final double posZ;
   private final Domain domain;
 
+  /**
+   * Generic constructor.
+   *
+   * @param x      the X coordinate
+   * @param y      the Y coordinate
+   * @param z      the Z coordinate
+   * @param domain the domain
+   */
   public Location(int x, int y, int z, Domain domain) {
     this.posX = x;
     this.posY = y;
@@ -48,6 +56,14 @@ public class Location {
     this.domain = domain;
   }
 
+  /**
+   * Generic constructor, with double floating point precision.
+   *
+   * @param x      the X coordinate
+   * @param y      the Y coordinate
+   * @param z      the Z coordinate
+   * @param domain the domain
+   */
   public Location(double x, double y, double z, Domain domain) {
     this.posX = x;
     this.posY = y;

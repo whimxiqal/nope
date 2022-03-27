@@ -32,6 +32,9 @@ import me.pietelite.nope.sponge.api.config.SettingValueConfigSerializer;
 import me.pietelite.nope.sponge.api.config.SettingValueConfigSerializerRegistrar;
 import org.jetbrains.annotations.NotNull;
 
+/**
+ * The implementation of the API's {@link SettingValueConfigSerializerRegistrar}.
+ */
 public class SettingValueConfigSerializerRegistrarImpl implements SettingValueConfigSerializerRegistrar {
 
   private final List<SettingValueConfigSerializer<?>> serializers = new LinkedList<>();
@@ -39,7 +42,8 @@ public class SettingValueConfigSerializerRegistrarImpl implements SettingValueCo
   @Override
   public void register(SettingValueConfigSerializer<?> serializer) {
     if (serializers.stream().anyMatch(ser -> ser.managerClass().equals(serializer.managerClass()))) {
-      throw new IllegalArgumentException("A serializer already exists of type: " + serializer.getClass().getName());
+      throw new IllegalArgumentException("A serializer already exists of type: "
+          + serializer.getClass().getName());
     }
     this.serializers.add(serializer);
   }
@@ -47,14 +51,18 @@ public class SettingValueConfigSerializerRegistrarImpl implements SettingValueCo
   @Override
   @NotNull
   @SuppressWarnings("unchecked")
-  public <T, V extends SettingValue<T>, M extends SettingKey.Manager<T, V>> SettingValueConfigSerializer<M> serializerOf(M manager) {
+  public <T,
+      V extends SettingValue<T>,
+      M extends SettingKey.Manager<T, V>> SettingValueConfigSerializer<M> serializerOf(M manager) {
     try {
       return (SettingValueConfigSerializer<M>) serializers.stream()
           .filter(ser -> ser.managerClass().isInstance(manager))
           .findFirst()
-          .orElseThrow(() -> new IllegalArgumentException("No serializer found stored for class " + manager.getClass().getName()));
+          .orElseThrow(() -> new IllegalArgumentException("No serializer found stored for class "
+              + manager.getClass().getName()));
     } catch (ClassCastException e) {
-      throw new IllegalStateException("Serializer was not stored with the proper type associated with class " + manager.getClass().getName(), e);
+      throw new IllegalStateException("Serializer was not stored with the proper type associated with class "
+          + manager.getClass().getName(), e);
     }
   }
 

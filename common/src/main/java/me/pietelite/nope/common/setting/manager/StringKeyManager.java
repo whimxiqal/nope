@@ -26,6 +26,9 @@ package me.pietelite.nope.common.setting.manager;
 
 import me.pietelite.nope.common.setting.SettingKey;
 
+/**
+ * A {@link SettingKey.Manager} for handling data values made of a single {@link String}.
+ */
 public class StringKeyManager extends SettingKey.Manager.Unary<String> {
   @Override
   public Class<String> dataType() throws SettingKey.ParseSettingException {
@@ -35,5 +38,10 @@ public class StringKeyManager extends SettingKey.Manager.Unary<String> {
   @Override
   public String parseData(String data) throws SettingKey.ParseSettingException {
     return data;
+  }
+
+  @Override
+  public String createAlternate(String data) {
+    return data + " :)";
   }
 }

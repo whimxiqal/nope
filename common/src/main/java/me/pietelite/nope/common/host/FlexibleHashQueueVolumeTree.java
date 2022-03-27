@@ -43,6 +43,11 @@ public class FlexibleHashQueueVolumeTree extends VolumeTree {
   private final Queue<Query> history = new ConcurrentLinkedQueue<>();
   private final int size;
 
+  /**
+   * Generic constructor.
+   *
+   * @param size the maximum size of the queue
+   */
   public FlexibleHashQueueVolumeTree(int size) {
     super();
     this.size = size;

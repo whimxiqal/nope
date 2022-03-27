@@ -62,11 +62,22 @@ public class HostSystem {
 
   protected final HashMap<String, Zone> zones = new HashMap<>();
 
+  /**
+   * Generic constructor.
+   *
+   * @param universe the universe
+   * @param domains  the domains
+   */
   public HostSystem(Universe universe, Iterable<Domain> domains) {
     this.universe = universe;
     domains.forEach(domain -> this.domains.put(domain.name(), domain));
   }
 
+  /**
+   * Returns a map of every host keyed by its name.
+   *
+   * @return all hosts
+   */
   @NotNull
   public Map<String, Host> hosts() {
     Map<String, Host> hosts = new HashMap<>();
@@ -76,6 +87,13 @@ public class HostSystem {
     return hosts;
   }
 
+  /**
+   * Add a zone into the system and replaces any other zone with the same name.
+   *
+   * @param zone the zone to add
+   * @return the zone that was removed, or null if none
+   */
+  @Nullable
   public Zone addZone(Zone zone) {
     Zone replaced = zones.put(zone.name().toLowerCase(), zone);
     Set<VolumeTree> trees = new HashSet<>();
@@ -87,12 +105,24 @@ public class HostSystem {
     return replaced;
   }
 
+  /**
+   * Add a volume into a zone and updates the internal structures
+   * to be aware of the zone's increased ownership of a domain.
+   *
+   * @param volume the volume to add on the zone
+   * @param zone   the zone
+   */
   public void addVolume(Volume volume, Zone zone) {
     zone.volumes.add(volume);
     volume.domain().volumes().put(volume, zone, true);
     zone.save();
   }
 
+  /**
+   * Add a series of zones. This is faster than adding each one individually.
+   *
+   * @param zones the zones
+   */
   public void addAllZones(Iterable<Zone> zones) {
     // Put all zones in the collection of zones for indexing by their name
     zones.forEach(zone -> this.zones.put(zone.name().toLowerCase(), zone));
@@ -108,6 +138,12 @@ public class HostSystem {
     trees.forEach(VolumeTree::construct);
   }
 
+  /**
+   * Remove a {@link Zone} from the system by name.
+   *
+   * @param zoneName the name of the zone
+   * @return the {@link Zone} that was removed
+   */
   @Nullable
   public Zone removeZone(String zoneName) {
     Zone removed = zones.remove(zoneName.toLowerCase());
@@ -123,7 +159,15 @@ public class HostSystem {
     return removed;
   }
 
-  public Volume removeVolume(Zone zone, int index) {
+  /**
+   * Remove a {@link Volume} from a {@link Zone} in the system.
+   *
+   * @param zone  the zone
+   * @param index the index of the volume in the zone
+   * @return the removed {@link Volume}.
+   * @throws IndexOutOfBoundsException if the index is out of bounds in the volume list on the zone
+   */
+  public Volume removeVolume(Zone zone, int index) throws IndexOutOfBoundsException {
     Volume removed = zone.volumes.remove(index);
     removed.domain().volumes().remove(removed, true);
     return removed;
@@ -142,6 +186,13 @@ public class HostSystem {
     return zones.values();
   }
 
+  /**
+   * Get all the hosts "superior" at that location, which include any hosts
+   * that encapsulate that point and those hosts' parents.
+   *
+   * @param location the location for which to find superior hosts
+   * @return the superior hosts
+   */
   @NotNull
   public Set<Host> collectSuperiorHosts(@NotNull Location location) {
     Set<Host> set = new HashSet<>();
@@ -154,6 +205,43 @@ public class HostSystem {
         .containing(location.getBlockX(), location.getBlockY(), location.getBlockZ());
     set.addAll(zones);
     accumulateParents(zones, set);
+    return set;
+  }
+
+  /**
+   * Get all the superior hosts around another {@link Host}.
+   * A host is superior if it completely encapsulates the other or is an ancestor.
+   *
+   * @param host         the host for which to find other superior hosts
+   * @param discriminate currently unused
+   * @return the set of all superior hosts
+   */
+  @NotNull
+  public Set<Host> collectSuperiorHosts(Host host, boolean discriminate) {
+    Set<Host> set = new HashSet<>();
+    if (host instanceof Universe) {
+      return set;  // Not contained by anything
+    }
+    set.add(universe);
+    if (host instanceof Domain) {
+      set.add(universe);  // Only contained by universe
+      return set;
+    }
+    if (!(host instanceof Zone)) {
+      throw new IllegalArgumentException("The host of type "
+          + host.getClass().getName()
+          + " is unrecognized.");
+    }
+    // Add domains
+    Zone zone = (Zone) host;
+    zone.volumes.forEach(volume -> set.add(volume.domain()));
+
+    // Add zones which contain this entire zone (all of its volumes)
+    Set<Zone> containingZones = containingZones(zone, true);
+    set.addAll(containingZones);
+
+    // Grab all the parents of each containing zone
+    accumulateParents(containingZones, set);
     return set;
   }
 
@@ -170,33 +258,6 @@ public class HostSystem {
       }
     }
     return all;
-  }
-
-  @NotNull
-  public Set<Host> collectSuperiorHosts(Host host, boolean discriminate) {
-    Set<Host> set = new HashSet<>();
-    if (host instanceof Universe) {
-      return set;  // Not contained by anything
-    }
-    set.add(universe);
-    if (host instanceof Domain) {
-      set.add(universe);  // Only contained by global
-      return set;
-    }
-    if (!(host instanceof Zone)) {
-      throw new IllegalArgumentException("The host of type " + host.getClass().getName() + " is unrecognized.");
-    }
-    // Add domains
-    Zone zone = (Zone) host;
-    zone.volumes.forEach(volume -> set.add(volume.domain()));
-
-    // Add zones which contain this entire zone (all of its volumes)
-    Set<Zone> containingZones = containingZones(zone, true);
-    set.addAll(containingZones);
-
-    // Grab all the parents of each containing zone
-    accumulateParents(containingZones, set);
-    return set;
   }
 
   private void accumulateParents(Set<Zone> zones, Set<Host> accumulator) {
@@ -219,6 +280,16 @@ public class HostSystem {
     return lookup(key, null, location);
   }
 
+  /**
+   * Evaluate the result of a setting key for a specific user at a given location.
+   * This method is the meat and potatoes of the plugin.
+   *
+   * @param key      the key
+   * @param userUuid the user's uuid
+   * @param location the location
+   * @param <X>      the type of data to return
+   * @return a record of the evaluation process
+   */
   public <X> Evaluation<X> lookup(@NotNull final SettingKey<X, ?, ?> key,
                                   @Nullable final UUID userUuid,
                                   @NotNull final Location location) {
@@ -313,6 +384,13 @@ public class HostSystem {
     return new HashMap<>(domains);
   }
 
+  /**
+   * Lookup a domain by name.
+   *
+   * @param name the name of the domain
+   * @return the domain
+   * @throws IllegalArgumentException if there is no domain by that name
+   */
   @NotNull
   public Domain domain(String name) {
     Domain domain = domains.get(name.toLowerCase());
@@ -330,6 +408,12 @@ public class HostSystem {
     return zones.get(name);
   }
 
+  /**
+   * Lookup a host by name.
+   *
+   * @param name the name of a host
+   * @return the host, or an empty optional if none exists
+   */
   public Optional<Host> host(String name) {
     if (name.equalsIgnoreCase(universe.name())) {
       return Optional.of(universe);

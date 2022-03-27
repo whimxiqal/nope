@@ -26,6 +26,9 @@ package me.pietelite.nope.sponge.command.parameters;
 
 import org.spongepowered.api.command.parameter.managed.Flag;
 
+/**
+ * Stores {@link Flag}s for commands.
+ */
 public class Flags {
 
   public static final Flag ADDITIVE_VALUE_FLAG = Flag.of("additive");

@@ -74,7 +74,8 @@ public class ValueCommand extends CommandNode {
       SettingKey<X, Y, ?> settingKey,
       CommandContext context) {
     Host host = context.requireOne(Parameters.HOST);
-    ParameterValueTypes.SettingValueAlterType alterType = context.requireOne(ParameterKeys.SETTING_VALUE_ALTER_TYPE);
+    ParameterValueTypes.SettingValueAlterType alterType = context.requireOne(
+        ParameterKeys.SETTING_VALUE_ALTER_TYPE);
     Optional<String> settingValue = context.one(ParameterKeys.SETTING_VALUE);
     boolean additive = context.hasFlag(Flags.ADDITIVE_VALUE_FLAG);
     boolean subtractive = context.hasFlag(Flags.SUBTRACTIVE_VALUE_FLAG);
@@ -92,7 +93,8 @@ public class ValueCommand extends CommandNode {
           settingValue.orElse(null),
           additive, subtractive);
     } else if (additive || subtractive) {
-      return CommandResult.error(Formatter.error("You may not alter this value in an additive or subtractive way"));
+      return CommandResult.error(Formatter.error("You may not alter this value in an additive "
+          + "or subtractive way"));
     } else {
       if (!settingValue.isPresent()) {
         return CommandResult.error(Formatter.error("You must provide a value to update this setting"));

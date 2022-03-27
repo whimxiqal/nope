@@ -2,8 +2,6 @@
  * MIT License
  *
  * Copyright (c) Pieter Svenson
- * Copyright (c) MinecraftOnline
- * Copyright (c) contributors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,7 +20,6 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
- *
  */
 
 package me.pietelite.nope.sponge.listener.dynamic;
@@ -40,12 +37,18 @@ import org.spongepowered.api.event.Order;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.world.server.ServerLocation;
 
-public class IgniteNetherPortalListener {
+/**
+ * Implements {@link SettingKeys#LIGHT_NETHER_PORTAL}.
+ */
+public class LightNetherPortalListener {
 
   private final HashMap<ServerLocation, UUID> fireOwnership = new HashMap<>();
 
+  /**
+   * Stage all handlers required to implement this listener.
+   */
   public static void stage() {
-    IgniteNetherPortalListener listener = new IgniteNetherPortalListener();
+    LightNetherPortalListener listener = new LightNetherPortalListener();
     // Listener to populate fire ownership map with the players that own certain fires
     SpongeNope.instance()
         .settingListeners()
@@ -70,9 +73,12 @@ public class IgniteNetherPortalListener {
             context ->
                 context.event().transactions().forEach(transaction -> {
                   if (transaction.original().state().type().equals(BlockTypes.FIRE.get())
-                      && transaction.finalReplacement().state().type().equals(BlockTypes.NETHER_PORTAL.get())) {
+                      && transaction.finalReplacement().state()
+                      .type().equals(BlockTypes.NETHER_PORTAL.get())) {
                     transaction.finalReplacement().location().ifPresent(location -> {
-                      if (!context.lookup(Sponge.server().player(listener.fireOwnership.get(location)).orElse(null), location)) {
+                      if (!context.lookup(Sponge.server()
+                          .player(listener.fireOwnership.get(location))
+                          .orElse(null), location)) {
                         transaction.setValid(false);
                         context.report(SettingEventReport.restricted().build());
                       }

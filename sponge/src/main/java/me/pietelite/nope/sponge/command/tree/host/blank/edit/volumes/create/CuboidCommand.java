@@ -45,6 +45,7 @@ import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.world.server.ServerWorld;
 
 /**
@@ -147,8 +148,8 @@ public class CuboidCommand extends CommandNode {
     context.cause().audience().sendMessage(Formatter.success(
         "A box was created on zone ___", zone.name()
     ));
-    if (context.cause().root() instanceof Player) {
-      EffectsUtil.show(cuboid, (Player) context.cause().root());
+    if (context.cause().root() instanceof ServerPlayer) {
+      EffectsUtil.show(cuboid, (ServerPlayer) context.cause().root());
     }
     return CommandResult.success();
 

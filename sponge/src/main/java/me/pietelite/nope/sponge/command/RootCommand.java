@@ -37,8 +37,14 @@ import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.parameter.CommandContext;
 
+/**
+ * The root command of the plugin. Every other command is a descendant of this node.
+ */
 public class RootCommand extends CommandNode {
 
+  /**
+   * Generic constructor.
+   */
   public RootCommand() {
     super(null, null,
         "Root for all Nope commands", "nope");

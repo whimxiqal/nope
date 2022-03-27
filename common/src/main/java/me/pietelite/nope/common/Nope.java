@@ -38,6 +38,9 @@ import me.pietelite.nope.common.setting.SettingKeyStore;
 import me.pietelite.nope.common.storage.DataHandler;
 import me.pietelite.nope.common.util.Logger;
 
+/**
+ * Generic plugin file to manage global plugin state.
+ */
 @RequiredArgsConstructor
 public abstract class Nope {
 

@@ -28,8 +28,12 @@ import java.util.Objects;
 import lombok.Value;
 import lombok.experimental.Accessors;
 
+/**
+ * A simple 3-dimensional vector.
+ */
 @Value
 @Accessors(fluent = true)
+@SuppressWarnings("checkstyle:MemberName")
 public class Vector3d {
   double x;
   double y;
@@ -45,6 +49,12 @@ public class Vector3d {
     return new Vector3d(x, y, z);
   }
 
+  /**
+   * Get the distance squared from this vector to another vector.
+   *
+   * @param other the other vector
+   * @return the distance squared
+   */
   public double distanceSquared(Vector3d other) {
     double lengthX = this.x - other.x;
     double lengthY = this.y - other.y;
@@ -60,13 +70,48 @@ public class Vector3d {
     return new Vector3d(x + vector2d.posX(), y, z + vector2d.posZ());
   }
 
+  public Vector3d plus(Vector3d vector3d) {
+    return new Vector3d(this.x + vector3d.x, this.y + vector3d.y, this.z + vector3d.z);
+  }
+
+  public Vector3d negative() {
+    return new Vector3d(-this.x, -this.y, -this.z);
+  }
+
   public double magnitude() {
     return Math.sqrt(x * x + y * y + z * z);
   }
 
+  /**
+   * Copy this vector to a new vector with a magnitude of 1.
+   *
+   * @return the new vector
+   */
   public Vector3d normalize() {
     double magnitude = magnitude();
     return new Vector3d(x / magnitude, y / magnitude, z / magnitude);
+  }
+
+  /**
+   * Calculate the cross product between this vector and another vector.
+   *
+   * @param other the other vector
+   * @return the cross product
+   */
+  public Vector3d cross(Vector3d other) {
+    return new Vector3d(this.y * other.z - this.z * other.y,
+        this.z * other.x - this.x * other.z,
+        this.x * other.y - this.y * other.x);
+  }
+
+  /**
+   * Calculate the dot product between this vector and another vector.
+   *
+   * @param other the other vector
+   * @return the dot product
+   */
+  public double dot(Vector3d other) {
+    return this.x * other.x + this.y * other.y + this.z * other.z;
   }
 
   @Override

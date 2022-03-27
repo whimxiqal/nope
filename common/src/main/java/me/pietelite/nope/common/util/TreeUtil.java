@@ -29,11 +29,24 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Function;
 
+/**
+ * A utility class to provide methods to deal with tree structures.
+ */
 public final class TreeUtil {
 
   private TreeUtil() {
   }
 
+  /**
+   * Given the root of the tree, get the list of all nodes and retrieve their values.
+   *
+   * @param root             the root
+   * @param valueFunction    the function to retrieve the value from a node
+   * @param childrenFunction the function retrieve a node's children
+   * @param <N>              the node type
+   * @param <T>              the value type
+   * @return the list of values
+   */
   public static <N, T> List<T> getAllInTree(N root,
                                             Function<N, T> valueFunction,
                                             Function<N, Collection<N>> childrenFunction) {

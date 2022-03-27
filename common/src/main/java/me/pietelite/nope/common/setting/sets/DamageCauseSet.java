@@ -27,6 +27,9 @@ package me.pietelite.nope.common.setting.sets;
 import me.pietelite.nope.common.struct.Described;
 import me.pietelite.nope.common.struct.HashAltSet;
 
+/**
+ * A set of causes of damage on a player in Minecraft.
+ */
 public class DamageCauseSet extends HashAltSet.FewEnum<DamageCauseSet.DamageCause> {
 
   public DamageCauseSet() {

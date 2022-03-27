@@ -31,7 +31,11 @@ import org.spongepowered.configurate.CommentedConfigurationNode;
 import org.spongepowered.configurate.ConfigurationNode;
 import org.spongepowered.configurate.serialize.SerializationException;
 
-public class UnarySettingValueConfigSerializer implements SettingValueConfigSerializer<SettingKey.Manager.Unary<?>> {
+/**
+ * The serializer for values stored in {@link SettingKey.Unary}s.
+ */
+public class UnarySettingValueConfigSerializer
+    implements SettingValueConfigSerializer<SettingKey.Manager.Unary<?>> {
 
   @Override
   @SuppressWarnings("unchecked")

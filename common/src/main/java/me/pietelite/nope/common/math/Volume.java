@@ -33,6 +33,9 @@ import me.pietelite.nope.common.struct.Location;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+/**
+ * A <a href="https://en.wikipedia.org/wiki/Volume">Volume</a>.
+ */
 @Accessors(fluent = true)
 public abstract class Volume implements Domained {
 
@@ -61,6 +64,12 @@ public abstract class Volume implements Domained {
   @NotNull
   public abstract Cuboid inscribed();
 
+  /**
+   * Whether this volume contains a point within it.
+   *
+   * @param location the location
+   * @return true if the volume contains it
+   */
   public final boolean containsPoint(Location location) {
     return domain.equals(location.domain()) && this.containsPoint(
         location.getBlockX(),
@@ -68,16 +77,54 @@ public abstract class Volume implements Domained {
         location.getBlockZ());
   }
 
+  /**
+   * Whether this volume contains a point within it.
+   *
+   * @param x the x coordinate
+   * @param y the y coordinate
+   * @param z the z coordinate
+   * @return true if the volume contains it
+   */
   public abstract boolean containsPoint(double x, double y, double z);
 
+  /**
+   * Whether this volume contains a point within it,
+   * assuming that the domain is the same.
+   *
+   * @param vector3d the point
+   * @return true if the volume contains it
+   */
   public final boolean containsPoint(@NotNull Vector3d vector3d) {
     return containsPoint(vector3d.x(), vector3d.y(), vector3d.z());
   }
 
+  /**
+   * Whether this volume contains an entire 1-unit-cubed block within it.
+   *
+   * @param x the (starting) x coordinate
+   * @param y the (starting) y coordinate
+   * @param z the (starting) z coordinate
+   * @return true if it contains the block
+   */
   public abstract boolean containsBlock(int x, int y, int z);
 
+  /**
+   * Whether this volume is internally configured correctly to represent
+   * the mathematical construct it's supposed to.
+   *
+   * @return true if valid
+   */
   public abstract boolean valid();
 
+  /**
+   * Get points on the surface of the volume, but only ones within a given proximity to the given point.
+   * This is for the purpose of visualizing the volume in-game.
+   *
+   * @param point     the point to which the returned points must be near
+   * @param proximity the maximum proximity of the returned points to the input point
+   * @param density   the line-density of points
+   * @return the list of points
+   */
   public abstract List<Vector3d> surfacePointsNear(Vector3d point, double proximity, double density);
 
 }

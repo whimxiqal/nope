@@ -40,6 +40,12 @@ public class Domain extends Host implements Domained {
   @Accessors(fluent = true)
   private final VolumeTree volumes;
 
+  /**
+   * Generic constructor.
+   *
+   * @param name      the name of the domain
+   * @param cacheSize the amount of grid cells for which to cache data
+   */
   public Domain(String name, int cacheSize) {
     super(name, -1);
     if (cacheSize < 0) {

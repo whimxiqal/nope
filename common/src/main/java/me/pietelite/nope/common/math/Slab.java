@@ -31,6 +31,9 @@ import java.util.stream.Collectors;
 import me.pietelite.nope.common.host.Domain;
 import org.jetbrains.annotations.NotNull;
 
+/**
+ * A volume that represents a cuboid but with infinite X and Z dimensions.
+ */
 public class Slab extends Volume {
 
   private final Integer minY;
@@ -39,6 +42,13 @@ public class Slab extends Volume {
   private final Cuboid circumscribed;
   private final Cuboid inscribed;
 
+  /**
+   * Generic constructor.
+   *
+   * @param domain the domain in which this slab resides
+   * @param y1     the first y dimension, inclusive
+   * @param y2     the second y dimension, inclusive
+   */
   public Slab(Domain domain,
               Integer y1,
               Integer y2) {

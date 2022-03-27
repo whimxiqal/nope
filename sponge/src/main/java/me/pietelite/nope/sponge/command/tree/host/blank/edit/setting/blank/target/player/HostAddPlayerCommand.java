@@ -58,7 +58,8 @@ public class HostAddPlayerCommand extends CommandNode {
 
     Target target = host.computeTarget(key, Target::none);
     String listType = target.isWhitelist() ? "whitelist" : "blacklist";
-    Sponge.asyncScheduler().submit(Task.builder().execute(() -> {
+    Sponge.asyncScheduler().submit(Task.builder()
+        .execute(() -> {
           GameProfile profile;
           for (CompletableFuture<GameProfile> player : players) {
             try {

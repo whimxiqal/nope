@@ -24,6 +24,9 @@
 
 package me.pietelite.nope.sponge.command.parameters;
 
+/**
+ * A target type specified by the user in a command.
+ */
 public enum TargetOption {
   ALL("Targets all users"),
   NONE("Targets no users"),

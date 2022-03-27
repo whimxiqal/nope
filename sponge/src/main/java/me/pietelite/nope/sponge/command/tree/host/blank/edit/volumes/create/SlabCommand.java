@@ -45,6 +45,7 @@ import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.world.server.ServerWorld;
 
 public class SlabCommand extends CommandNode {
@@ -128,8 +129,8 @@ public class SlabCommand extends CommandNode {
         "A ___ was created on zone ___",
         "slab", zone.name()
     ));
-    if (context.cause().root() instanceof Player) {
-      EffectsUtil.show(slab, (Player) context.cause().root());
+    if (context.cause().root() instanceof ServerPlayer) {
+      EffectsUtil.show(slab, (ServerPlayer) context.cause().root());
     }
     return CommandResult.success();
   }

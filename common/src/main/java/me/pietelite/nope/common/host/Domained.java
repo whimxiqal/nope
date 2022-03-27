@@ -24,8 +24,16 @@
 
 package me.pietelite.nope.common.host;
 
+/**
+ * An object that is part of or inside a single {@link Domain}.
+ */
 public interface Domained {
 
+  /**
+   * The domain of which this object is a part.
+   *
+   * @return the domain
+   */
   Domain domain();
 
 }

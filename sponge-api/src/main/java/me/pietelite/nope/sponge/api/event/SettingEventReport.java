@@ -2,8 +2,6 @@
  * MIT License
  *
  * Copyright (c) Pieter Svenson
- * Copyright (c) MinecraftOnline
- * Copyright (c) contributors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,13 +20,16 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
- *
  */
 
 package me.pietelite.nope.sponge.api.event;
 
 import org.spongepowered.api.util.Nameable;
 
+/**
+ * A user-friendly report format to inform administrators when events
+ * related to settings occur.
+ */
 public class SettingEventReport {
 
   private final Action action;
@@ -61,11 +62,17 @@ public class SettingEventReport {
     return target;
   }
 
+  /**
+   * A type of action associated with what caused this report to be generated.
+   */
   public enum Action {
     RESTRICTED,
     PREVENTED
   }
 
+  /**
+   * A builder for a report.
+   */
   public static class Builder {
     private final Action action;
     private String source;
@@ -75,17 +82,32 @@ public class SettingEventReport {
       this.action = action;
     }
 
-    public Builder source(Object subject) {
-      if (subject instanceof String) {
-        this.source = (String) subject;
-      } else if (subject instanceof Nameable) {
-        this.source = ((Nameable) subject).name();
+    /**
+     * Set the source of the event generating this report.
+     *
+     * @param source the source (root cause)
+     * @return the builder, for chaining
+     */
+    public Builder source(Object source) {
+      if (source instanceof String) {
+        this.source = (String) source;
+      } else if (source instanceof Nameable) {
+        this.source = ((Nameable) source).name();
       } else {
-        this.source = subject.getClass().getSimpleName();
+        this.source = source.getClass().getSimpleName();
       }
       return this;
     }
 
+    /**
+     * Set the target of the event, which is usually the thing the source of the event
+     * was interacting with in the event.
+     *
+     * <p>For example, if a player broke a block, the block would be the target.
+     *
+     * @param target the target of the event
+     * @return this builder, for chaining
+     */
     public Builder target(String target) {
       this.target = target;
       return this;

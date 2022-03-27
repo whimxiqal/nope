@@ -60,12 +60,20 @@ import org.spongepowered.api.util.Ticks;
 import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.server.ServerWorld;
 
+/**
+ * The listener containing all handlers for managing movement events.
+ */
 public class MovementListener {
 
   Set<EntityType<?>> loggable = Sets.newHashSet(EntityTypes.PLAYER.get(),
       EntityTypes.BOAT.get(),
       EntityTypes.HORSE.get());
 
+  /**
+   * Handler for entities moving.
+   *
+   * @param event the event
+   */
   @Listener(order = Order.FIRST)
   public void onMove(MoveEntityEvent event) {
     final ServerWorld world = event.entity().serverLocation().world();
@@ -85,13 +93,18 @@ public class MovementListener {
         entity -> entity.passengers().all());
 
     for (Entity entity : entities) {
-//      if (entity.type().equals(EntityTypes.HORSE.get())) {
-//        if (!entity.passengers().all().isEmpty()) {
-//          Nope.instance().logger().info("Added passengers to " + entity.type() + ": " + entity.passengers().all().stream().map(Object::toString).collect(Collectors.joining(", ")));
-//        } else {
-//          Nope.instance().logger().info("Entity " + entity.type() + " has no passengers");
-//        }
-//      }
+      /*
+      if (entity.type().equals(EntityTypes.HORSE.get())) {
+        if (!entity.passengers().all().isEmpty()) {
+          Nope.instance().logger().info("Added passengers to " + entity.type() + ": " + entity.passengers()
+          .all().stream()
+          .map(Object::toString)
+          .collect(Collectors.joining(", ")));
+        } else {
+          Nope.instance().logger().info("Entity " + entity.type() + " has no passengers");
+        }
+      }
+       */
 
       final MovementSet.Movement movementType = SpongeUtil.reduceMovementType(event.context()
           .get(EventContextKeys.MOVEMENT_TYPE)
@@ -126,9 +139,15 @@ public class MovementListener {
           && !SpongeUtil.valueFor(SettingKeys.EXIT, entity, firstLocation).contains(movementType)) {
         cancelMovement(event, movementType, firstWorld, entity, SettingKeys.EXIT);
         if (entity instanceof Audience) {
-          trySendMessage((Audience) entity, SpongeUtil.valueFor(SettingKeys.EXIT_DENY_MESSAGE, entity, lastLocation));
-          trySendTitle((Audience) entity, SpongeUtil.valueFor(SettingKeys.EXIT_DENY_TITLE, entity, lastLocation));
-          trySendSubtitle((Audience) entity, SpongeUtil.valueFor(SettingKeys.EXIT_DENY_SUBTITLE, entity, lastLocation));
+          trySendMessage((Audience) entity, SpongeUtil.valueFor(SettingKeys.EXIT_DENY_MESSAGE,
+              entity,
+              lastLocation));
+          trySendTitle((Audience) entity, SpongeUtil.valueFor(SettingKeys.EXIT_DENY_TITLE,
+              entity,
+              lastLocation));
+          trySendSubtitle((Audience) entity, SpongeUtil.valueFor(SettingKeys.EXIT_DENY_SUBTITLE,
+              entity,
+              lastLocation));
         }
         return;
       }
@@ -138,9 +157,15 @@ public class MovementListener {
           && !SpongeUtil.valueFor(SettingKeys.ENTRY, entity, lastLocation).contains(movementType)) {
         cancelMovement(event, movementType, firstWorld, entity, SettingKeys.ENTRY);
         if (entity instanceof Audience) {
-          trySendMessage((Audience) entity, SpongeUtil.valueFor(SettingKeys.ENTRY_DENY_MESSAGE, entity, lastLocation));
-          trySendTitle((Audience) entity, SpongeUtil.valueFor(SettingKeys.ENTRY_DENY_TITLE, entity, lastLocation));
-          trySendSubtitle((Audience) entity, SpongeUtil.valueFor(SettingKeys.ENTRY_DENY_SUBTITLE, entity, lastLocation));
+          trySendMessage((Audience) entity, SpongeUtil.valueFor(SettingKeys.ENTRY_DENY_MESSAGE,
+              entity,
+              lastLocation));
+          trySendTitle((Audience) entity, SpongeUtil.valueFor(SettingKeys.ENTRY_DENY_TITLE,
+              entity,
+              lastLocation));
+          trySendSubtitle((Audience) entity, SpongeUtil.valueFor(SettingKeys.ENTRY_DENY_SUBTITLE,
+              entity,
+              lastLocation));
         }
         return;
       }
@@ -149,14 +174,20 @@ public class MovementListener {
       if (entity instanceof Audience) {
         final Audience audience = (Audience) entity;
         for (Host host : lastHosts) {
-          host.getValue(SettingKeys.GREETING).ifPresent(stringUnary -> trySendMessage(audience, stringUnary.get()));
-          host.getValue(SettingKeys.GREETING_TITLE).ifPresent(stringUnary -> trySendTitle(audience, stringUnary.get()));
-          host.getValue(SettingKeys.GREETING_SUBTITLE).ifPresent(stringUnary -> trySendSubtitle(audience, stringUnary.get()));
+          host.getValue(SettingKeys.GREETING).ifPresent(stringUnary ->
+              trySendMessage(audience, stringUnary.get()));
+          host.getValue(SettingKeys.GREETING_TITLE).ifPresent(stringUnary ->
+              trySendTitle(audience, stringUnary.get()));
+          host.getValue(SettingKeys.GREETING_SUBTITLE).ifPresent(stringUnary ->
+              trySendSubtitle(audience, stringUnary.get()));
         }
         for (Host host : firstHosts) {
-          host.getValue(SettingKeys.FAREWELL).ifPresent(stringUnary -> trySendMessage(audience, stringUnary.get()));
-          host.getValue(SettingKeys.FAREWELL_TITLE).ifPresent(stringUnary -> trySendTitle(audience, stringUnary.get()));
-          host.getValue(SettingKeys.FAREWELL_SUBTITLE).ifPresent(stringUnary -> trySendSubtitle(audience, stringUnary.get()));
+          host.getValue(SettingKeys.FAREWELL).ifPresent(stringUnary ->
+              trySendMessage(audience, stringUnary.get()));
+          host.getValue(SettingKeys.FAREWELL_TITLE).ifPresent(stringUnary ->
+              trySendTitle(audience, stringUnary.get()));
+          host.getValue(SettingKeys.FAREWELL_SUBTITLE).ifPresent(stringUnary ->
+              trySendSubtitle(audience, stringUnary.get()));
         }
       }
     }

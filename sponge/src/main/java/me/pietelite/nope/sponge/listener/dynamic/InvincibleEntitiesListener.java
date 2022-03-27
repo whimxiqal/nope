@@ -34,6 +34,9 @@ import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.entity.DamageEntityEvent;
 
+/**
+ * Implements {@link me.pietelite.nope.common.setting.SettingKeys#INVINCIBLE_ENTITIES}.
+ */
 public class InvincibleEntitiesListener implements SettingEventListener<AltSet<String>, DamageEntityEvent> {
   @Override
   public void handle(SettingEventContext<AltSet<String>, DamageEntityEvent> context) {
@@ -45,7 +48,8 @@ public class InvincibleEntitiesListener implements SettingEventListener<AltSet<S
       }
     }
     final ResourceKey entityKey = EntityTypes.registry().valueKey(context.event().entity().type());
-    if (context.lookup(context.event().entity(), context.event().entity().serverLocation()).contains(entityKey.value())) {
+    if (context.lookup(context.event().entity(), context.event().entity().serverLocation())
+        .contains(entityKey.value())) {
       context.event().setCancelled(true);
       context.report(SettingEventReport.restricted().target(entityKey.formatted()).build());
     }

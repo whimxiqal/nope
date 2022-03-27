@@ -28,6 +28,9 @@ import me.pietelite.nope.common.math.Cylinder;
 import me.pietelite.nope.sponge.util.Formatter;
 import net.kyori.adventure.text.Component;
 
+/**
+ * A {@link Selection} of a {@link Cylinder}.
+ */
 public class CylinderSelection extends Selection<Cylinder> {
 
   private double radius() {

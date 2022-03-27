@@ -30,26 +30,28 @@ import me.pietelite.nope.common.struct.AltSet;
 import me.pietelite.nope.sponge.api.event.SettingEventContext;
 import me.pietelite.nope.sponge.api.event.SettingEventListener;
 import me.pietelite.nope.sponge.api.event.SettingEventReport;
-import me.pietelite.nope.sponge.listener.SpongeEventUtil;
 import me.pietelite.nope.sponge.util.SpongeUtil;
 import org.spongepowered.api.block.transaction.BlockTransaction;
 import org.spongepowered.api.entity.explosive.Explosive;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
 
 /**
- *
+ * Implementation of {@link me.pietelite.nope.common.setting.SettingKeys#DESTRUCTIVE_EXPLOSIVES},
+ * specifically for handling the physical destruction of blocks due to explosions.
  */
-public class DestructiveExplosivesBlockListener implements SettingEventListener<AltSet<ExplosiveSet.Explosive>, ChangeBlockEvent.All> {
+public class DestructiveExplosivesBlockListener
+    implements SettingEventListener<AltSet<ExplosiveSet.Explosive>, ChangeBlockEvent.All> {
   @Override
   public void handle(SettingEventContext<AltSet<ExplosiveSet.Explosive>, ChangeBlockEvent.All> context) {
     final Optional<Explosive> sourceExplosive = context.event().cause().first(Explosive.class);
     if (sourceExplosive.isPresent()) {
       final ExplosiveSet.Explosive explosive = SpongeUtil.reduceExplosive(sourceExplosive.get());
       for (BlockTransaction transaction : context.event().transactions()) {
-        if (SpongeEventUtil.invalidateTransactionIfNeeded(context.event().cause(),
-            transaction,
-            (cause, location) ->
-                !context.lookup(cause, location).contains(explosive))) {
+        if (transaction.finalReplacement()
+            .location()
+            .map(loc -> !context.lookup(loc).contains(explosive))
+            .orElse(false)) {
+          transaction.invalidate();
           context.report(SettingEventReport.restricted()
               .source(context.event().source())
               .target(explosive.name())

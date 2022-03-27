@@ -29,6 +29,11 @@ import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.EventContext;
 import org.spongepowered.api.event.lifecycle.LifecycleEvent;
 
+/**
+ * A new event to be thrown during the server startup portion of the lifecycle.
+ * Through this event, developers must register any of their
+ * {@link me.pietelite.nope.common.setting.SettingKey}s.
+ */
 public class SettingKeyRegistrationEvent implements LifecycleEvent {
 
   private final SettingKeyRegistrar registrar;
@@ -37,6 +42,15 @@ public class SettingKeyRegistrationEvent implements LifecycleEvent {
   private final Object source;
   private final EventContext context;
 
+  /**
+   * Generic constructor.
+   *
+   * @param registrar the registrar that will accept {@link me.pietelite.nope.common.setting.SettingKey}s.
+   * @param game      the game, for the {@link LifecycleEvent}
+   * @param cause     the cause, for the {@link LifecycleEvent}
+   * @param source    the source, for the {@link LifecycleEvent}
+   * @param context   the context, for the {@link LifecycleEvent}
+   */
   public SettingKeyRegistrationEvent(SettingKeyRegistrar registrar,
                                      Game game, Cause cause,
                                      Object source, EventContext context) {
@@ -47,6 +61,11 @@ public class SettingKeyRegistrationEvent implements LifecycleEvent {
     this.context = context;
   }
 
+  /**
+   * Get the {@link SettingKeyRegistrar}.
+   *
+   * @return the registrar
+   */
   public SettingKeyRegistrar registrar() {
     return registrar;
   }

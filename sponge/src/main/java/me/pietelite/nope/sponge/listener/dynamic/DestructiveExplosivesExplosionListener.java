@@ -35,7 +35,12 @@ import org.spongepowered.api.entity.explosive.Explosive;
 import org.spongepowered.api.event.world.ExplosionEvent;
 import org.spongepowered.api.world.explosion.Explosion;
 
-public class DestructiveExplosivesExplosionListener implements SettingEventListener<AltSet<ExplosiveSet.Explosive>, ExplosionEvent.Pre> {
+/**
+ * Implementation of {@link me.pietelite.nope.common.setting.SettingKeys#DESTRUCTIVE_EXPLOSIVES},
+ * specifically for updating explosions to be non-destructive if applicable.
+ */
+public class DestructiveExplosivesExplosionListener
+    implements SettingEventListener<AltSet<ExplosiveSet.Explosive>, ExplosionEvent.Pre> {
   @Override
   public void handle(SettingEventContext<AltSet<ExplosiveSet.Explosive>, ExplosionEvent.Pre> context) {
     final Object rootCause = context.event().cause().root();

@@ -24,10 +24,19 @@
 
 package me.pietelite.nope.common.math;
 
+/**
+ * A utility class for geometric methods.
+ */
 public final class Geometry {
   private Geometry() {
   }
 
+  /**
+   * Get the user-friendly name of the type of volume.
+   *
+   * @param volume the volume
+   * @return the name of the type
+   */
   public static String typeOf(Volume volume) {
     if (volume instanceof Cuboid) {
       return "box";
@@ -42,6 +51,13 @@ public final class Geometry {
     }
   }
 
+  /**
+   * Whether these two volumes intersect with each other.
+   *
+   * @param v1 the first volume
+   * @param v2 the second volume
+   * @return true if intersects
+   */
   public static boolean intersects(Volume v1, Volume v2) {
     if (v1 instanceof Cuboid) {
       if (v2 instanceof Cuboid) {
@@ -204,19 +220,22 @@ public final class Geometry {
 
   private static boolean touches(Cylinder cylinder1, Cylinder cylinder2) {
     return cylinder1.maxY() > cylinder2.minY() && cylinder1.minY() < cylinder2.maxY()
-        && cylinder1.midPoint2d().distanceSquared(cylinder2.midPoint2d()) < (cylinder1.radius() + cylinder2.radius()) * (cylinder1.radius() + cylinder2.radius());
+        && cylinder1.midPoint2d().distanceSquared(cylinder2.midPoint2d())
+        < (cylinder1.radius() + cylinder2.radius()) * (cylinder1.radius() + cylinder2.radius());
   }
 
   private static boolean touches(Cylinder cylinder, Sphere sphere) {
-    // Three cases: cylinder's side touches equator of sphere (compare radii),
+    // Three cases: cylinder's side touches the equator of sphere (compare radii),
     //  cylinder's top or bottom coincide with sphere's 2d location (compare y dimensions),
     //  or the hardest one, which is when the edge of the top or bottom touch an arbitrary latitude
-    if ((cylinder.radius() + sphere.radius()) * (cylinder.radius() + sphere.radius()) < cylinder.midPoint2d().distanceSquared(sphere.midPoint2d())) {
+    if ((cylinder.radius() + sphere.radius()) * (cylinder.radius() + sphere.radius())
+        < cylinder.midPoint2d().distanceSquared(sphere.midPoint2d())) {
       // could intersect
       if (cylinder.minY() < sphere.posY() && cylinder.maxY() > sphere.posY()) {
         return true;
       } else {
-        if (cylinder.minY() < sphere.posY() + sphere.radius() && cylinder.maxY() > sphere.posY() - sphere.radius()) {
+        if (cylinder.minY() < sphere.posY() + sphere.radius()
+            && cylinder.maxY() > sphere.posY() - sphere.radius()) {
           if (cylinder.midPoint2d().distanceSquared(sphere.midPoint2d()) < cylinder.radiusSquared()) {
             // Cylinder's top or bottom coincide with one of the sphere's poles
             return true;
@@ -251,7 +270,8 @@ public final class Geometry {
   }
 
   private static boolean touches(Sphere sphere1, Sphere sphere2) {
-    return sphere1.midPoint3d().distanceSquared(sphere2.midPoint3d()) < (sphere1.radius() + sphere2.radius()) * (sphere1.radius() + sphere2.radius());
+    return sphere1.midPoint3d().distanceSquared(sphere2.midPoint3d())
+        < (sphere1.radius() + sphere2.radius()) * (sphere1.radius() + sphere2.radius());
   }
 
   private static boolean touches(Sphere sphere, Slab slab) {

@@ -2,8 +2,6 @@
  * MIT License
  *
  * Copyright (c) Pieter Svenson
- * Copyright (c) MinecraftOnline
- * Copyright (c) contributors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,26 +20,28 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
- *
  */
 
 package me.pietelite.nope.sponge;
 
+import me.pietelite.nope.common.host.Domain;
 import me.pietelite.nope.sponge.api.event.SettingListenerRegistration;
 import me.pietelite.nope.sponge.api.service.NopeService;
 import me.pietelite.nope.sponge.listener.SettingEventContextImpl;
+import me.pietelite.nope.sponge.util.SpongeUtil;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.EventListenerRegistration;
+import org.spongepowered.api.world.server.ServerWorld;
 
+/**
+ * The Sponge plugin implementation of the {@link NopeService}.
+ */
 public class NopeServiceImpl implements NopeService {
+
   @Override
-  public <T, E extends Event> void registerSettingListener(SettingListenerRegistration<T, E> registration) {
-    Sponge.eventManager().registerListener(EventListenerRegistration.builder(registration.eventClass())
-        .listener(event -> registration.settingEventListener()
-            .handle(new SettingEventContextImpl<T, E>(event, registration.settingKey())))
-        .plugin(registration.plugin())
-        .order(registration.order())
-        .build());
+  public Domain reduce(ServerWorld world) {
+    return SpongeUtil.reduceWorld(world);
   }
+
 }

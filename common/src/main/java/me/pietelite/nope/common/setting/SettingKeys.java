@@ -33,7 +33,10 @@ import me.pietelite.nope.common.setting.sets.MovementSet;
 import me.pietelite.nope.common.setting.sets.StringSet;
 import me.pietelite.nope.common.struct.AltSet;
 
-public class SettingKeys {
+/**
+ * A utility class to store all constant default Nope {@link SettingKey}s.
+ */
+public final class SettingKeys {
 
   public static final SettingKey.Poly<BlockChangeSet.BlockChange, BlockChangeSet> BLOCK_CHANGE =
       SettingKey.Poly.builder("block-change",
@@ -45,7 +48,9 @@ public class SettingKeys {
           .playerRestrictive()
           .build();
   public static final SettingKey.Poly<String, StringSet> BLOCK_CHANGING_MOBS =
-      SettingKey.Poly.builder("mob-grief", AltSet.full(new StringSet()), SettingKeyManagers.POLY_ENTITY_KEY_MANAGER)
+      SettingKey.Poly.builder("mob-grief",
+              AltSet.full(new StringSet()),
+              SettingKeyManagers.POLY_ENTITY_KEY_MANAGER)
           .blurb("Mobs that can change blocks")
           .description("A list of all mobs that can change blocks")
           .category(SettingKey.Category.ENTITIES)
@@ -353,7 +358,9 @@ public class SettingKeys {
           .playerRestrictive()
           .build();
   public static final SettingKey.Poly<MovementSet.Movement, MovementSet> MOVE =
-      SettingKey.Poly.builder("move", AltSet.full(new MovementSet()), SettingKeyManagers.POLY_MOVEMENT_KEY_MANAGER)
+      SettingKey.Poly.builder("move",
+              AltSet.full(new MovementSet()),
+              SettingKeyManagers.POLY_MOVEMENT_KEY_MANAGER)
           .blurb("Movement within a host")
           .description("Specify which type of movement is allowed.")
           .category(SettingKey.Category.MOVEMENT)
@@ -436,6 +443,7 @@ public class SettingKeys {
   /**
    * Prepare the SettingLibrary for easy accessing of SettingKeys.
    *
+   * @param keyStore a {@link SettingKeyStore} into which to store all the {@link SettingKey}s in this class.
    * @throws IllegalStateException if there are multiple SettingKeys with the same ID.
    */
   public static void registerTo(SettingKeyStore keyStore) throws IllegalStateException {

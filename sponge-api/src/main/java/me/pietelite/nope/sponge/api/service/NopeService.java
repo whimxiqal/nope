@@ -24,11 +24,21 @@
 
 package me.pietelite.nope.sponge.api.service;
 
+import me.pietelite.nope.common.host.Domain;
 import me.pietelite.nope.sponge.api.event.SettingListenerRegistration;
 import org.spongepowered.api.event.Event;
+import org.spongepowered.api.world.server.ServerWorld;
 
+/**
+ * A service for the usage of other plugins and for the main plugin to implement.
+ */
 public interface NopeService {
 
-  <T, E extends Event> void registerSettingListener(SettingListenerRegistration<T, E> registration);
+  /**
+   * Convert a sponge-type world into its Nope-type domain counterpart.
+   * @param world the world
+   * @return the domain
+   */
+  Domain reduce(ServerWorld world);
 
 }

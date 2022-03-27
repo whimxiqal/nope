@@ -27,6 +27,10 @@ package me.pietelite.nope.common.math;
 import lombok.Getter;
 import lombok.experimental.Accessors;
 
+/**
+ * A {@link Plane} that is in unit-normal form,
+ * meaning its normal vector is simply represented by one of the three coordinate axes.
+ */
 public class UnitNormalPlane extends Plane {
 
   @Getter

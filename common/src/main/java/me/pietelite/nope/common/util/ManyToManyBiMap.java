@@ -2,8 +2,6 @@
  * MIT License
  *
  * Copyright (c) Pieter Svenson
- * Copyright (c) MinecraftOnline
- * Copyright (c) contributors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,7 +20,6 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
- *
  */
 
 package me.pietelite.nope.common.util;
@@ -60,6 +57,12 @@ public class ManyToManyBiMap<A, B> {
     return backwardsMap.containsKey(value);
   }
 
+  /**
+   * Get all the values mapped to this key.
+   *
+   * @param key the key
+   * @return the set of all values
+   */
   @NotNull
   public Set<B> getValues(A key) {
     if (key == null) {
@@ -69,6 +72,12 @@ public class ManyToManyBiMap<A, B> {
     }
   }
 
+  /**
+   * Get all the keys that map to the given value.
+   *
+   * @param value the value
+   * @return the set of keys
+   */
   @NotNull
   public Set<A> getKeys(B value) {
     if (value == null) {
@@ -78,6 +87,12 @@ public class ManyToManyBiMap<A, B> {
     }
   }
 
+  /**
+   * Map a key to a value.
+   *
+   * @param key   the key
+   * @param value the value
+   */
   @Nullable
   public void put(A key, B value) {
     forwardsMap.computeIfAbsent(key, k -> new HashSet<>()).add(value);
@@ -107,6 +122,9 @@ public class ManyToManyBiMap<A, B> {
     }
   }
 
+  /**
+   * Clear all contents.
+   */
   public void clear() {
     forwardsMap.clear();
     backwardsMap.clear();

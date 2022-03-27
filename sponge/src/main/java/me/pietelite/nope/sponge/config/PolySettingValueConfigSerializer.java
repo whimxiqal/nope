@@ -35,7 +35,11 @@ import org.spongepowered.configurate.CommentedConfigurationNode;
 import org.spongepowered.configurate.ConfigurationNode;
 import org.spongepowered.configurate.serialize.SerializationException;
 
-public class PolySettingValueConfigSerializer implements SettingValueConfigSerializer<SettingKey.Manager.Poly<?, ?>> {
+/**
+ * A serializer of setting values for values stored with {@link SettingKey.Poly}s.
+ */
+public class PolySettingValueConfigSerializer
+    implements SettingValueConfigSerializer<SettingKey.Manager.Poly<?, ?>> {
 
   @Override
   @SuppressWarnings("unchecked")
@@ -46,7 +50,8 @@ public class PolySettingValueConfigSerializer implements SettingValueConfigSeria
   @Override
   public <X,
       Y extends SettingValue<X>,
-      Z extends SettingKey.Manager<X, Y>> CommentedConfigurationNode serialize(Z managerGeneral, Y valueGeneral)
+      Z extends SettingKey.Manager<X, Y>> CommentedConfigurationNode serialize(Z managerGeneral,
+                                                                               Y valueGeneral)
       throws SerializationException {
     return serializePoly(managerGeneral, valueGeneral);
   }

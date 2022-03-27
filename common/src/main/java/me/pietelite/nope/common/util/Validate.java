@@ -38,6 +38,7 @@ public final class Validate {
    * Ensures that the input is in the kebab case format.
    *
    * @param name the input string
+   * @return true if the input is an invalid setting collection name
    * @throws IllegalArgumentException the exception to throw if fails
    */
   public static boolean invalidSettingCollectionName(String name) throws IllegalArgumentException {

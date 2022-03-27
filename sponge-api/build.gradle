@@ -1,6 +1,6 @@
 plugins {
     id 'java-library'
-    id 'com.github.johnrengelman.shadow' version '7.0.0'
+    id 'com.github.johnrengelman.shadow' version '7.1.2'
 }
 
 repositories {
@@ -32,15 +32,21 @@ test {
 
 dependencies {
     implementation project(':common')
-    // Sponge
-    shadow "org.spongepowered:spongeapi:8.0.0-SNAPSHOT"
-    annotationProcessor "org.spongepowered:spongeapi:8.0.0-SNAPSHOT"
 
-    // IntelliJ Annotations
-    shadow 'org.jetbrains:annotations:22.0.0'
+    implementation "org.spongepowered:spongeapi:8.0.0"
+    annotationProcessor "org.spongepowered:spongeapi:8.0.0"
 
+    implementation 'org.jetbrains:annotations:23.0.0'
 }
 
 shadowJar {
-    archiveFileName = "Nope-SpongeApi-${project.version}.jar"
+    archiveFileName = "Nope-SpongeApi-${project.ext.fullVersion}.jar"
+
+    dependencies {
+        include(dependency('me.pietelite.nope:.*'))
+    }
+}
+
+artifacts {
+    archives shadowJar
 }

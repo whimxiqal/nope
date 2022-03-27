@@ -24,6 +24,8 @@
 
 package me.pietelite.nope.common.host;
 
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 import me.pietelite.nope.common.Nope;
 import me.pietelite.nope.common.math.Cuboid;
 import me.pietelite.nope.common.math.Cylinder;
@@ -32,9 +34,6 @@ import me.pietelite.nope.common.math.Slab;
 import me.pietelite.nope.common.math.Sphere;
 import me.pietelite.nope.common.math.Volume;
 import me.pietelite.nope.common.util.Logger;
-
-import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

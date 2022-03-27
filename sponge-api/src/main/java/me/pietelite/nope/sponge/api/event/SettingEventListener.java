@@ -26,9 +26,22 @@ package me.pietelite.nope.sponge.api.event;
 
 import org.spongepowered.api.event.Event;
 
+/**
+ * An event listener specifically for handling events correlated to a user-specified
+ * {@link me.pietelite.nope.common.setting.Setting}.
+ *
+ * @param <T> the data type
+ * @param <E> the event type
+ */
 @FunctionalInterface
 public interface SettingEventListener<T, E extends Event> {
 
+  /**
+   * Handle the event. This is supposed to be called at some point after when the mod
+   * platform fires an event.
+   *
+   * @param context the context of the event
+   */
   void handle(SettingEventContext<T, E> context);
 
 }

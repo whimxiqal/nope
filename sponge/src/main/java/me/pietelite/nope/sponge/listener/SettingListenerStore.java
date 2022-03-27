@@ -33,8 +33,13 @@ import me.pietelite.nope.common.setting.SettingKeyStore;
 import me.pietelite.nope.sponge.SpongeNope;
 import me.pietelite.nope.sponge.api.event.SettingListenerRegistration;
 import org.jetbrains.annotations.NotNull;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.Event;
+import org.spongepowered.api.event.EventListenerRegistration;
 
+/**
+ * The in-memory storage for all registered {@link me.pietelite.nope.sponge.api.event.SettingEventListener}s.
+ */
 public class SettingListenerStore {
 
   private final SettingKeyStore settingKeys;
@@ -45,6 +50,16 @@ public class SettingListenerStore {
     this.settingKeys = settingKeys;
   }
 
+  /**
+   * Stage ("register") a new {@link me.pietelite.nope.sponge.api.event.SettingEventListener}
+   * wrapped in a {@link SettingListenerRegistration}.
+   * This only prepares the wrapped listeners for registration with the mod platform.
+   *
+   * @param registration the registration to stage
+   * @param <T>          the data type
+   * @param <E>          the event type
+   * @see #registerAll()
+   */
   public <T, E extends Event> void stage(SettingListenerRegistration<T, E> registration) {
     if (!settingKeys.containsId(registration.settingKey().id())) {
       throw new IllegalStateException(String.format("Cannot register setting listener because "
@@ -57,6 +72,12 @@ public class SettingListenerStore {
     this.unregisteredKeys.add(registration.settingKey());
   }
 
+  /**
+   * Register to the mod platform all staged listeners that must be registered to perform their
+   * required functionality.
+   * This should be called any time the {@link me.pietelite.nope.common.setting.Setting}s change
+   * anywhere because some listeners may have only just become required.
+   */
   public void registerAll() {
     List<SettingKey<?, ?, ?>> stillUnregistered = new LinkedList<>();
     int registerCount = 0;
@@ -64,7 +85,7 @@ public class SettingListenerStore {
       if (SpongeNope.instance().hostSystem().isAssigned(key)) {
         for (SettingListenerRegistration<?, ?> registration : settingListeners.get(key.id())) {
           registerCount++;
-          registration.registerToSponge();
+          registerToSponge(registration);
         }
       } else {
         stillUnregistered.add(key);
@@ -74,6 +95,15 @@ public class SettingListenerStore {
       SpongeNope.instance().logger().info("Registered " + registerCount + " dynamic listener(s)");
     }
     unregisteredKeys = stillUnregistered;
+  }
+
+  private <T, E extends Event> void registerToSponge(SettingListenerRegistration<T, E> registration) {
+    Sponge.eventManager().registerListener(EventListenerRegistration.builder(registration.eventClass())
+        .listener(event -> registration.settingEventListener()
+            .handle(new SettingEventContextImpl<>(event, registration.settingKey())))
+        .plugin(registration.plugin())
+        .order(registration.order())
+        .build());
   }
 
 }

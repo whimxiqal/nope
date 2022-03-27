@@ -30,6 +30,9 @@ import me.pietelite.nope.sponge.api.event.SettingEventReport;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.entity.CollideEntityEvent;
 
+/**
+ * Implements {@link me.pietelite.nope.common.setting.SettingKeys#PLAYER_COLLISION}.
+ */
 public class PlayerCollisionListener implements SettingEventListener<Boolean, CollideEntityEvent> {
   @Override
   public void handle(SettingEventContext<Boolean, CollideEntityEvent> context) {

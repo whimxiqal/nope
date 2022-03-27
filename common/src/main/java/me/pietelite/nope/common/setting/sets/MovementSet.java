@@ -27,6 +27,9 @@ package me.pietelite.nope.common.setting.sets;
 import me.pietelite.nope.common.struct.Described;
 import me.pietelite.nope.common.struct.HashAltSet;
 
+/**
+ * A set of modes of movements.
+ */
 public class MovementSet extends HashAltSet.FewEnum<MovementSet.Movement> {
 
   public MovementSet() {

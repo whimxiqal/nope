@@ -29,7 +29,7 @@ import me.pietelite.nope.common.setting.SettingKey;
 import me.pietelite.nope.common.struct.Location;
 
 /**
- * Class for managing the single GlobalHost in this HostTree.
+ * Class for managing the single "global" server-wide {@link Host} in the {@link HostSystem}.
  */
 public class Universe extends Host {
 

@@ -32,7 +32,11 @@ import org.spongepowered.configurate.CommentedConfigurationNode;
 import org.spongepowered.configurate.ConfigurateException;
 import org.spongepowered.configurate.loader.ConfigurationLoader;
 
-public class UniverseConfigurateDataHandler extends SettingsConfigurateDataHandler implements UniverseDataHandler {
+/**
+ * The data handler for the {@link Universe} using Configurate.
+ */
+public class UniverseConfigurateDataHandler
+    extends SettingsConfigurateDataHandler implements UniverseDataHandler {
 
   private final ConfigurationLoader<CommentedConfigurationNode> loader;
 

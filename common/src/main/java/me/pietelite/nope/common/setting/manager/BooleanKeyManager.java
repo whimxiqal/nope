@@ -94,6 +94,11 @@ public class BooleanKeyManager extends SettingKey.Manager.Unary<Boolean> {
   }
 
   @Override
+  public Boolean createAlternate(Boolean data) {
+    return !data;
+  }
+
+  @Override
   public @NotNull String printData(@NotNull Boolean data) {
     return String.valueOf(data);
   }

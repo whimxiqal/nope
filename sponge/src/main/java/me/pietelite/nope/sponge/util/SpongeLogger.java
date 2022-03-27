@@ -27,6 +27,9 @@ package me.pietelite.nope.sponge.util;
 import me.pietelite.nope.sponge.SpongeNope;
 import org.apache.logging.log4j.Logger;
 
+/**
+ * A simple logger for the Sponge plugin.
+ */
 public class SpongeLogger implements me.pietelite.nope.common.util.Logger {
 
   private Logger logger() {

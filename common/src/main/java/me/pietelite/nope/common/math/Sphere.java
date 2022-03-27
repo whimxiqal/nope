@@ -32,6 +32,9 @@ import lombok.experimental.Accessors;
 import me.pietelite.nope.common.host.Domain;
 import org.jetbrains.annotations.NotNull;
 
+/**
+ * A volume representing a mathematical sphere.
+ */
 public class Sphere extends Volume {
 
   private final Integer posX;
@@ -54,10 +57,17 @@ public class Sphere extends Volume {
   private final Cuboid circumscribed;
   private final Cuboid inscribed;
 
+  /**
+   * Generic constructor.
+   *
+   * @param domain the domain in which this volume resides
+   * @param x      the x coordinate of the center of the sphere
+   * @param y      the y coordinate of the center of the sphere
+   * @param z      the z coordinate of the center of the sphere
+   * @param radius the sphere's radius
+   */
   public Sphere(@NotNull Domain domain,
-                Integer x,
-                Integer y,
-                Integer z,
+                Integer x, Integer y, Integer z,
                 Double radius) {
     super(domain);
     this.posX = x;
@@ -88,7 +98,8 @@ public class Sphere extends Volume {
 
   }
 
-  private static Vector3d sphericalToCartesian(double x, double y, double z, double rho, double theta, double phi) {
+  private static Vector3d sphericalToCartesian(double x, double y, double z,
+                                               double rho, double theta, double phi) {
     return Vector3d.of(x + rho * Math.sin(theta) * Math.sin(phi),
         y + rho * Math.cos(phi),
         z + rho * Math.cos(theta) * Math.sin(phi));
@@ -186,7 +197,9 @@ public class Sphere extends Volume {
         final double halfPhiRange = Math.min(4 * proximity * Math.PI / radius, Math.PI) / 2;
         final double minPhi = Math.max(0, phiStart - halfPhiRange);
         final double maxPhi = Math.min(Math.PI - angleInc, phiStart + halfPhiRange);
-        for (double theta = thetaStart - halfThetaRange; theta < thetaStart + halfThetaRange; theta += angleInc) {
+        for (double theta = thetaStart - halfThetaRange;
+             theta < thetaStart + halfThetaRange;
+             theta += angleInc) {
           for (double phi = minPhi; phi < maxPhi; phi += angleInc) {
             points.add(sphericalToCartesian(posX, posY, posZ, radius, theta, phi));
             for (double p = separation; p < 1; p += separation) {

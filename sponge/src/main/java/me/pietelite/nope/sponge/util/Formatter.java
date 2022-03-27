@@ -59,7 +59,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.service.pagination.PaginationList;
-import org.spongepowered.api.service.permission.Subject;
 
 /**
  * A utility class to store static fields and methods pertaining to
@@ -130,6 +129,12 @@ public final class Formatter {
 
   public static final TextColor WHITE = TextColor.color(255, 255, 255);
 
+  /**
+   * Return the plugin's standard prefix text, to prepend to some general text
+   * sent on behalf of the plugin.
+   *
+   * @return the text component
+   */
   public static Component prefix() {
     return Component.text()
         .append(Component.text("Nope ").color(THEME))
@@ -137,7 +142,8 @@ public final class Formatter {
         .build();
   }
 
-  private static Component formattedMessage(TextColor color, String message, boolean prefix, Object... accented) {
+  private static Component formattedMessage(TextColor color, String message,
+                                            boolean prefix, Object... accented) {
     LinkedList<String> tokenList = new LinkedList<>(Arrays.asList(message.split(FORMAT_ACCENT_REGEX, -1)));
 
     TextComponent.Builder builder = Component.text();
@@ -224,6 +230,14 @@ public final class Formatter {
     return keyValue(keyColor, key, Component.text(value));
   }
 
+  /**
+   * Format a key-value pair.
+   *
+   * @param keyColor the color of the key
+   * @param key      the key
+   * @param value    the value
+   * @return the text component
+   */
   public static Component keyValue(TextColor keyColor, String key, Component value) {
     return Component.text()
         .append(Component.text(key).color(keyColor))
@@ -232,6 +246,13 @@ public final class Formatter {
         .build();
   }
 
+  /**
+   * Format some text to display text when the user hovers over it.
+   *
+   * @param label   the text to show in chat
+   * @param onHover the text to display on hover
+   * @return the text component
+   */
   public static Component hover(String label, String onHover) {
     return hover(Component.text(label).decorate(TextDecoration.ITALIC),
         Component.text(onHover));
@@ -241,6 +262,13 @@ public final class Formatter {
     return label.hoverEvent(HoverEvent.showText(onHover));
   }
 
+  /**
+   * Format some text to link to a given url.
+   *
+   * @param label the text to show in the chat
+   * @param url   the url to link to on click
+   * @return the component text
+   */
   public static Component url(@NotNull String label, @NotNull String url) {
     TextComponent.Builder textBuilder = Component.text();
     textBuilder.append(Component.text(label).color(URL));
@@ -268,6 +296,16 @@ public final class Formatter {
     return command(label, command, hoverMessage, true, false);
   }
 
+  /**
+   * Format text to run a command when clicked.
+   *
+   * @param label        the text to show in the chat
+   * @param command      the command to run when the text is clicked
+   * @param hoverMessage the text to show when hovered
+   * @param accentuate   whether to make the text stand out in the chat window
+   * @param suggest      whether to suggest the command instead of running it immediately
+   * @return the text component
+   */
   public static Component command(@NotNull String label,
                                   @NotNull String command,
                                   @Nullable Component hoverMessage,
@@ -296,6 +334,12 @@ public final class Formatter {
     return builder.build();
   }
 
+  /**
+   * Format a {@link Host} for showing in chat.
+   *
+   * @param host the host
+   * @return the text component
+   */
   public static Component host(@NotNull Host host) {
     String name = host.name();
     return command(
@@ -307,7 +351,17 @@ public final class Formatter {
     );
   }
 
-  public static <T, V extends SettingValue<T>> Component settingKey(SettingKey<T, V, ?> key, boolean verbose) {
+  /**
+   * Format a {@link SettingKey} to display in chat.
+   *
+   * @param key     the key
+   * @param verbose will show more information about the setting key
+   * @param <T>     the data type
+   * @param <V>     the value type
+   * @return the text component
+   */
+  public static <T, V extends SettingValue<T>> Component settingKey(SettingKey<T, V, ?> key,
+                                                                    boolean verbose) {
     TextComponent.Builder idText = Component.text().append(Component.text(key.id()).color(ACCENT));
 
     TextComponent.Builder hoverText = Component.text()
@@ -355,9 +409,18 @@ public final class Formatter {
     return builder.build();
   }
 
-  public static <T, V extends SettingValue<T>> CompletableFuture<List<Component>> setting(Setting<T, V> setting,
-                                                                                          Subject subject,
-                                                                                          @NotNull SettingCollection collection) {
+  /**
+   * Format a {@link Setting} to show in chat.
+   *
+   * @param setting    the setting to show
+   * @param collection the setting collection that stores the setting
+   * @param <T>        the data type
+   * @param <V>        the value type
+   * @return a list of components return when the contents are available
+   */
+  public static <T, V extends SettingValue<T>> CompletableFuture<List<Component>> setting(
+      Setting<T, V> setting,
+      @NotNull SettingCollection collection) {
     return CompletableFuture.supplyAsync(() -> {
       TextComponent.Builder main = Component.text();
 
@@ -419,6 +482,18 @@ public final class Formatter {
     });
   }
 
+  /**
+   * Format a {@link SettingValue} for chat.
+   *
+   * @param value                a text component of a printed version of the setting value
+   * @param redundantOnDefault   true if this setting value is the same as the default value,
+   *                             and therefore redundant
+   * @param redundancyController the host that is in a configuration such that it has a
+   *                             value that makes this given value redundant.
+   *                             If it is redundant by the default value, this host should just
+   *                             be the host with the given value
+   * @return the text component
+   */
   public static Component settingValue(Component value,
                                        boolean redundantOnDefault,
                                        Host redundancyController) {
@@ -442,10 +517,22 @@ public final class Formatter {
     return builder.build();
   }
 
+  /**
+   * Get a paginator specific to this plugin, using a specific title string.
+   *
+   * @param title the title of the pages
+   * @return the paginator builder
+   */
   public static PaginationList.Builder paginator(String title) {
     return paginator(Component.text(title).color(Formatter.GOLD));
   }
 
+  /**
+   * Get a paginator specific to this plugin, using a specific title component.
+   *
+   * @param title the title of the pages
+   * @return the paginator builder
+   */
   public static PaginationList.Builder paginator(Component title) {
     return Sponge.serviceProvider().paginationService()
         .builder()
@@ -457,6 +544,13 @@ public final class Formatter {
     return formattedMessage(DULL, s, false);
   }
 
+  /**
+   * Send a {@link Setting} editor panel to an {@link Audience} member.
+   *
+   * @param audience the audience to receive the text panel
+   * @param host     the host on which to set settings
+   * @param page     the page to send of the paginator
+   */
   public static void sendSettingEditor(Audience audience, Host host, int page) {
     List<Component> contents = new LinkedList<>();
     Map<String, SettingKey<?, ?, ?>> map = SpongeNope.instance().settingKeys().keys();
@@ -480,6 +574,16 @@ public final class Formatter {
         .sendTo(audience, page);
   }
 
+  /**
+   * Get a list of chat components that allow graphical interfacing with
+   * a {@link SettingKey.Unary} type {@link Setting}.
+   *
+   * @param host                  the host to edit
+   * @param key                   the key of the setting to edit
+   * @param firstColumnPixelWidth the pixel width of the first column
+   * @param <T>                   the data type
+   * @return the list of chat components
+   */
   public static <T> List<Component> editableSettingUnary(Host host, SettingKey.Unary<T> key,
                                                          int firstColumnPixelWidth) {
     TextComponent.Builder line = Component.text()
@@ -497,7 +601,9 @@ public final class Formatter {
       line.append(Component.text(" unset").color(DARK));
     }
 
-    List<Map.Entry<String, Object>> suggestions = new LinkedList<>(key.manager().elementSuggestions().entrySet());
+    List<Map.Entry<String, Object>> suggestions = new LinkedList<>(key.manager()
+        .elementSuggestions()
+        .entrySet());
     if (suggestions.isEmpty()) {
       // No suggestions, so have to allow user to type it in themselves
       if (setting.isPresent() && setting.get().value() != null) {
@@ -524,7 +630,9 @@ public final class Formatter {
         suggestions.sort(Map.Entry.comparingByKey());
       }
       for (Map.Entry<String, Object> entry : suggestions) {
-        if (setting.isPresent() && key.manager().printData(setting.get().value().get()).equalsIgnoreCase(entry.getKey())) {
+        if (setting.isPresent() && key.manager()
+            .printData(setting.get().value().get())
+            .equalsIgnoreCase(entry.getKey())) {
           // the value is set to this
           T value = setting.get().value().get();
           line.append(TWO_SPACES.append(Component.text(entry.getKey())
@@ -542,11 +650,23 @@ public final class Formatter {
       }
     }
 
-
     return Collections.singletonList(line.build());
   }
 
-  public static <T, S extends AltSet<T>> List<Component> editableSettingPoly(Host host, SettingKey.Poly<T, S> key, int firstColumnPixelWidth) {
+  /**
+   * Get a list of chat components that allow graphical interfacing with
+   * a {@link SettingKey.Poly} type {@link Setting}.
+   *
+   * @param host                  the host to edit
+   * @param key                   the key of the setting to edit
+   * @param firstColumnPixelWidth the pixel width of the first column
+   * @param <T>                   the data type, which is a set
+   * @param <S>                   the element in the set
+   * @return the list of chat components
+   */
+  public static <T, S extends AltSet<T>> List<Component> editableSettingPoly(Host host,
+                                                                             SettingKey.Poly<T, S> key,
+                                                                             int firstColumnPixelWidth) {
     TextComponent.Builder line = Component.text()
         .append(settingKey(key, false))
         .append(Component.text(MinecraftCharacter.spacesRequiredToExtend(key.id(), firstColumnPixelWidth)));
@@ -568,7 +688,8 @@ public final class Formatter {
               .color(INFO)
               .decorate(TextDecoration.UNDERLINED)
               .hoverEvent(HoverEvent.showText(accent("Set ___ on ___", key.id(), host.name())))
-              .clickEvent(ClickEvent.runCommand(String.format("/nope host %s edit setting %s value -e setnone",
+              .clickEvent(ClickEvent.runCommand(String.format("/nope host %s edit setting "
+                      + "%s value -e setnone",
                   host.name(), key.id())))));
         }
         if (value.additive().isFull()) {
@@ -592,21 +713,30 @@ public final class Formatter {
             .append(Component.text("D").color(GOLD).decorate(TextDecoration.BOLD))
             .append(Component.text("/").color(DULL))
             .append(Component.text("M").color(INFO).decorate(TextDecoration.UNDERLINED)
-                .hoverEvent(HoverEvent.showText(accent("Change value type of ___ to ___", key.id(), "Manipulative")))
-                .clickEvent(ClickEvent.suggestCommand(String.format("/nope host %s edit setting %s value -e --additive set ",
+                .hoverEvent(HoverEvent.showText(accent("Change value type of ___ to ___",
+                    key.id(),
+                    "Manipulative")))
+                .clickEvent(ClickEvent.suggestCommand(String.format("/nope host %s edit setting "
+                        + "%s value -e --additive set ",
                     host.name(), key.id()))))
             .append(Component.text("]").color(DARK))
             .append(TWO_SPACES)
             .append(Component.text("[").color(DARK))
             .append(Component.text("+").color(SUCCESS)
-                .hoverEvent(HoverEvent.showText(accent("Add values to ___ on ___", key.id(), host.name())))
-                .clickEvent(ClickEvent.suggestCommand(String.format("/nope host %s edit setting %s value -e add ",
+                .hoverEvent(HoverEvent.showText(accent("Add values to ___ on ___",
+                    key.id(),
+                    host.name())))
+                .clickEvent(ClickEvent.suggestCommand(String.format("/nope host "
+                        + "%s edit setting %s value -e add ",
                     host.name(), key.id()))))
             .append(Component.text("]").color(DARK))
             .append(Component.text("[").color(DARK))
             .append(Component.text("-").color(ERROR)
-                .hoverEvent(HoverEvent.showText(accent("Remove values from ___ on ___", key.id(), host.name())))
-                .clickEvent(ClickEvent.suggestCommand(String.format("/nope host %s edit setting %s value -e remove ",
+                .hoverEvent(HoverEvent.showText(accent("Remove values from ___ on ___",
+                    key.id(),
+                    host.name())))
+                .clickEvent(ClickEvent.suggestCommand(String.format("/nope host %s edit setting "
+                        + "%s value -e remove ",
                     host.name(), key.id()))))
             .append(Component.text("]").color(DARK));
       } else {
@@ -617,7 +747,8 @@ public final class Formatter {
               .color(INFO)
               .decorate(TextDecoration.UNDERLINED)
               .hoverEvent(HoverEvent.showText(accent("Set ___ on ___", key.id(), host.name())))
-              .clickEvent(ClickEvent.runCommand(String.format("/nope host %s edit setting %s value -e setnone",
+              .clickEvent(ClickEvent.runCommand(String.format("/nope host %s edit setting "
+                      + "%s value -e setnone",
                   host.name(), key.id())))));
         }
         if (value.additive().isFull()) {
@@ -627,7 +758,8 @@ public final class Formatter {
               .color(INFO)
               .decorate(TextDecoration.UNDERLINED)
               .hoverEvent(HoverEvent.showText(accent("Set ___ on ___", key.id(), host.name())))
-              .clickEvent(ClickEvent.runCommand(String.format("/nope host %s edit setting %s value -e setall",
+              .clickEvent(ClickEvent.runCommand(String.format("/nope host %s edit setting "
+                      + "%s value -e setall",
                   host.name(), key.id())))));
         }
         if (!value.subtractive().isFull() && !value.additive().isFull()) {
@@ -640,8 +772,11 @@ public final class Formatter {
         secondLine = TWO_SPACES
             .append(Component.text("[").color(DARK))
             .append(Component.text("D").color(INFO).decorate(TextDecoration.UNDERLINED)
-                .hoverEvent(HoverEvent.showText(accent("Change value type of ___ to ___", key.id(), "Declarative")))
-                .clickEvent(ClickEvent.runCommand(String.format("/nope host %s edit setting %s value -e setdefault",
+                .hoverEvent(HoverEvent.showText(accent("Change value type of ___ to ___",
+                    key.id(),
+                    "Declarative")))
+                .clickEvent(ClickEvent.runCommand(String.format("/nope host %s edit setting "
+                        + "%s value -e setdefault",
                     host.name(), key.id()))))
             .append(Component.text("/").color(DULL))
             .append(Component.text("M").color(GOLD).decorate(TextDecoration.BOLD))
@@ -651,26 +786,41 @@ public final class Formatter {
             .append(SPACE)
             .append(Component.text("[").color(DARK))
             .append(Component.text("+").color(SUCCESS)
-                .hoverEvent(HoverEvent.showText(accent("Add values to ___ set of ___ on ___", "additive", key.id(), host.name())))
-                .clickEvent(ClickEvent.suggestCommand(String.format("/nope host %s edit setting %s value -e --additive add ",
+                .hoverEvent(HoverEvent.showText(accent("Add values to ___ set of ___ on ___",
+                    "additive", key.id(),
+                    host.name())))
+                .clickEvent(ClickEvent.suggestCommand(String.format("/nope host %s edit setting "
+                        + "%s value -e --additive add ",
                     host.name(), key.id()))))
             .append(Component.text("]").color(DARK))
             .append(Component.text("[").color(DARK))
             .append(Component.text("-").color(ERROR)
-                .hoverEvent(HoverEvent.showText(accent("Remove values from ___ set of ___ on ___", "additive", key.id(), host.name())))
-                .clickEvent(ClickEvent.suggestCommand(String.format("/nope host %s edit setting %s value -e --additive remove ",
+                .hoverEvent(HoverEvent.showText(accent("Remove values from ___ set of ___ on ___",
+                    "additive",
+                    key.id(),
+                    host.name())))
+                .clickEvent(ClickEvent.suggestCommand(String.format("/nope host %s edit setting "
+                        + "%s value -e --additive remove ",
                     host.name(), key.id()))))
             .append(Component.text("]").color(DARK))
             .append(Component.text("[").color(DARK))
             .append(Component.text("x").color(WARN)
-                .hoverEvent(HoverEvent.showText(accent("Clear all from ___ set of ___ on ___", "additive", key.id(), host.name())))
-                .clickEvent(ClickEvent.runCommand(String.format("/nope host %s edit setting %s value -e --additive setnone ",
+                .hoverEvent(HoverEvent.showText(accent("Clear all from ___ set of ___ on ___",
+                    "additive",
+                    key.id(),
+                    host.name())))
+                .clickEvent(ClickEvent.runCommand(String.format("/nope host %s edit setting "
+                        + "%s value -e --additive setnone ",
                     host.name(), key.id()))))
             .append(Component.text("]").color(DARK))
             .append(Component.text("[").color(DARK))
             .append(Component.text("o").color(WHITE)
-                .hoverEvent(HoverEvent.showText(accent("Set all possible values in ___ set of ___ on ___", "additive", key.id(), host.name())))
-                .clickEvent(ClickEvent.runCommand(String.format("/nope host %s edit setting %s value -e --additive setall ",
+                .hoverEvent(HoverEvent.showText(accent("Set all possible values in ___ set of ___ on ___",
+                    "additive",
+                    key.id(),
+                    host.name())))
+                .clickEvent(ClickEvent.runCommand(String.format("/nope host %s edit setting "
+                        + "%s value -e --additive setall ",
                     host.name(), key.id()))))
             .append(Component.text("]").color(DARK))
             .append(SPACE)
@@ -678,26 +828,42 @@ public final class Formatter {
             .append(SPACE)
             .append(Component.text("[").color(DARK))
             .append(Component.text("+").color(SUCCESS)
-                .hoverEvent(HoverEvent.showText(accent("Add values to ___ set of ___ on ___", "subtractive", key.id(), host.name())))
-                .clickEvent(ClickEvent.suggestCommand(String.format("/nope host %s edit setting %s value -e --subtractive add ",
+                .hoverEvent(HoverEvent.showText(accent("Add values to ___ set of ___ on ___",
+                    "subtractive",
+                    key.id(),
+                    host.name())))
+                .clickEvent(ClickEvent.suggestCommand(String.format("/nope host %s edit setting "
+                        + "%s value -e --subtractive add ",
                     host.name(), key.id()))))
             .append(Component.text("]").color(DARK))
             .append(Component.text("[").color(DARK))
             .append(Component.text("-").color(ERROR)
-                .hoverEvent(HoverEvent.showText(accent("Remove values from ___ set of ___ on ___", "subtractive", key.id(), host.name())))
-                .clickEvent(ClickEvent.suggestCommand(String.format("/nope host %s edit setting %s value -e --subtractive remove ",
+                .hoverEvent(HoverEvent.showText(accent("Remove values from ___ set of ___ on ___",
+                    "subtractive",
+                    key.id(),
+                    host.name())))
+                .clickEvent(ClickEvent.suggestCommand(String.format("/nope host %s edit setting "
+                        + "%s value -e --subtractive remove ",
                     host.name(), key.id()))))
             .append(Component.text("]").color(DARK))
             .append(Component.text("[").color(DARK))
             .append(Component.text("x").color(WARN)
-                .hoverEvent(HoverEvent.showText(accent("Clear all from ___ set of ___ on ___", "subtractive", key.id(), host.name())))
-                .clickEvent(ClickEvent.runCommand(String.format("/nope host %s edit setting %s value -e --subtractive setnone",
+                .hoverEvent(HoverEvent.showText(accent("Clear all from ___ set of ___ on ___",
+                    "subtractive",
+                    key.id(),
+                    host.name())))
+                .clickEvent(ClickEvent.runCommand(String.format("/nope host %s edit setting "
+                        + "%s value -e --subtractive setnone",
                     host.name(), key.id()))))
             .append(Component.text("]").color(DARK))
             .append(Component.text("[").color(DARK))
             .append(Component.text("o").color(WHITE)
-                .hoverEvent(HoverEvent.showText(accent("Set all possible values in ___ set of ___ on ___", "subtractive", key.id(), host.name())))
-                .clickEvent(ClickEvent.runCommand(String.format("/nope host %s edit setting %s value -e --subtractive setall",
+                .hoverEvent(HoverEvent.showText(accent("Set all possible values in ___ set of ___ on ___",
+                    "subtractive",
+                    key.id(),
+                    host.name())))
+                .clickEvent(ClickEvent.runCommand(String.format("/nope host %s edit setting "
+                        + "%s value -e --subtractive setall",
                     host.name(), key.id()))))
             .append(Component.text("]").color(DARK));
       }
@@ -720,6 +886,13 @@ public final class Formatter {
     }
   }
 
+  /**
+   * Cast an object to a component. It can either be a {@link Component}
+   * or a {@link String}.
+   *
+   * @param o the object to cast
+   * @return the text component
+   */
   public static Component castToComponent(Object o) {
     if (o instanceof Component) {
       return (Component) o;

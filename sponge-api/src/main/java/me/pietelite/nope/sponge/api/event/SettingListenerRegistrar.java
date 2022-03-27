@@ -24,8 +24,17 @@
 
 package me.pietelite.nope.sponge.api.event;
 
+/**
+ * A registrar for registering {@link SettingEventListener}s using
+ * {@link SettingListenerRegistration}s.
+ */
 public interface SettingListenerRegistrar {
 
+  /**
+   * Register a {@link SettingEventListener}.
+   *
+   * @param registration the registration wrapper
+   */
   void register(SettingListenerRegistration<?, ?> registration);
 
 }

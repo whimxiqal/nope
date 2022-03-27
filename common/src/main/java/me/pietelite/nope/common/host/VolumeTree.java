@@ -104,6 +104,22 @@ public class VolumeTree {
     return all;
   }
 
+  /**
+   * Get all {@link Zone}s that wholly contain the given {@link Volume}.
+   * The math for this is pretty complex, so to simplify this, we check how this volume is contained
+   * by checking the volumes that contain the corners of a cuboid that's merely an approximation of
+   * the given volume.
+   *
+   * <p>The <code>discriminate</code> parameter decides how strict to be with the approximation, depending
+   * on whether it is better to accidentally end up with some added incorrect {@link Zone}s or to accidentally
+   * end up with some missing correct {@link Zone}s.
+   *
+   * @param volume       the volume to contain
+   * @param discriminate true to ensure that every correct {@link Zone} is included in the returned list,
+   *                     but extras are possible. False to ensure that there are no extra {@link Zone}s
+   *                     included, but it may be missing some correct ones
+   * @return the set of {@link Zone}s containing this {@link Volume}
+   */
   public Set<Zone> containing(Volume volume, boolean discriminate) {
     Set<Zone> all = new HashSet<>();
     Cuboid approximation = discriminate ? volume.circumscribed() : volume.inscribed();
@@ -126,6 +142,14 @@ public class VolumeTree {
     return all;
   }
 
+  /**
+   * Get the set of {@link Volume}s that contain this given point.
+   *
+   * @param x the x coordinate
+   * @param y the y coordinate
+   * @param z the z coordinate
+   * @return the set of zones
+   */
   @NotNull
   public Set<Zone> containing(int x, int y, int z) {
     if (this.root == null) {
@@ -138,6 +162,9 @@ public class VolumeTree {
     return size;
   }
 
+  /**
+   * Construct the internal data structure for querying containing {@link Volume}s.
+   */
   public void construct() {
     root = construct(Dimension.X, Comparison.MIN, new ArrayList<>(this.volumes.keySet()), 0);
     height = calculateHeight(root);
@@ -269,6 +296,15 @@ public class VolumeTree {
     return 0;
   }
 
+  /**
+   * Add a new volume into the volume tree.
+   *
+   * @param volume    the volume
+   * @param zone      the zone of which the volume is a part
+   * @param construct whether to construct the entire tree again. If this is called multiple
+   *                  times consecutively, this should be false and then this stucture should
+   *                  be rebuilt again manually with {@link #construct()}
+   */
   public void put(Volume volume, Zone zone, boolean construct) {
     this.volumes.put(volume, zone);
     if (construct) {
@@ -280,6 +316,15 @@ public class VolumeTree {
     return volumes.keySet();
   }
 
+  /**
+   * Remove a volume from the tree.
+   *
+   * @param volume    the volume
+   * @param construct whether to construct the entire tree again. If this is called multiple
+   *                  times consecutively, this should be false and then this stucture should
+   *                  be rebuilt again manually with {@link #construct()}
+   * @return the removed volume (the input) or null if nothing was removed
+   */
   public Volume remove(Volume volume, boolean construct) {
     Volume toRemove = volumes.containsKey(volume) ? volume : null;
     this.volumes.remove(volume);

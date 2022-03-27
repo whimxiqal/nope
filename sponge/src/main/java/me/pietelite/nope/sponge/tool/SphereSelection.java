@@ -28,6 +28,9 @@ import me.pietelite.nope.common.math.Sphere;
 import me.pietelite.nope.sponge.util.Formatter;
 import net.kyori.adventure.text.Component;
 
+/**
+ * A {@link Selection} for a {@link Sphere}.
+ */
 public class SphereSelection extends Selection<Sphere> {
 
   private double radius() {

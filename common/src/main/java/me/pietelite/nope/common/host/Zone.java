@@ -35,6 +35,10 @@ import me.pietelite.nope.common.storage.Destructible;
 import me.pietelite.nope.common.struct.Location;
 import org.jetbrains.annotations.Nullable;
 
+/**
+ * A {@link Host} that contains all points inside a group of {@link Volume}s.
+ * There can be arbitrarily many of them and can be user-created.
+ */
 public class Zone extends Host implements Child<Zone>, Destructible {
 
   protected final List<Volume> volumes = new LinkedList<>();
@@ -55,17 +59,30 @@ public class Zone extends Host implements Child<Zone>, Destructible {
     this.volumes.addAll(volumes);
   }
 
+  /**
+   * Set the priority and update the whole system to ensure that priorities
+   * do not conflict with each other.
+   *
+   * @param priority the priority
+   * @throws IllegalArgumentException if an invalid priority is given
+   */
   public void setPriority(int priority) throws IllegalArgumentException {
     if (priority < 0) {
       throw new IllegalArgumentException("Cannot set a negative priority");
+    }
+    if (priority >= Integer.MAX_VALUE) {
+      this.destroy();
+      return;
     }
     this.priority = priority;
     this.save();
     ensurePriority();
   }
 
+  /**
+   * Set the priority of each intersecting zone up by one that has the same priority.
+   */
   public void ensurePriority() {
-    // Push the priority of all intersecting zones up by one (perhaps more, recursively)
     volumes().forEach(volume -> volume.domain().volumes()
         .intersecting(this)
         .stream()
@@ -78,6 +95,12 @@ public class Zone extends Host implements Child<Zone>, Destructible {
     return new LinkedList<>(volumes);
   }
 
+  /**
+   * Remove a {@link Volume}.
+   *
+   * @param index the index at which to remove the zone
+   * @return the removed volume
+   */
   public Volume remove(int index) {
     Volume volume = volumes.remove(index);
     save();
@@ -85,6 +108,12 @@ public class Zone extends Host implements Child<Zone>, Destructible {
     return volume;
   }
 
+  /**
+   * Remove a {@link Volume}.
+   *
+   * @param volume the specific volume to move
+   * @return true if it was removed
+   */
   public boolean remove(Volume volume) {
     boolean removed = volumes.remove(volume);
     save();

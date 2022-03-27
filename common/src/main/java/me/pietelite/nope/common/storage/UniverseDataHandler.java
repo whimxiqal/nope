@@ -26,6 +26,9 @@ package me.pietelite.nope.common.storage;
 
 import me.pietelite.nope.common.host.Universe;
 
+/**
+ * The data handler for the {@link Universe}.
+ */
 public interface UniverseDataHandler {
 
   void save(Universe universe);

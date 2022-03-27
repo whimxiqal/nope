@@ -2,8 +2,6 @@
  * MIT License
  *
  * Copyright (c) Pieter Svenson
- * Copyright (c) MinecraftOnline
- * Copyright (c) contributors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,7 +20,6 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
- *
  */
 
 package me.pietelite.nope.sponge.listener.dynamic;
@@ -35,6 +32,10 @@ import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.entity.MoveEntityEvent;
 
+/**
+ * Implements {@link me.pietelite.nope.common.setting.SettingKeys#RIDE}, specifically for stopping the ride
+ * during motion into a region that does not allow it.
+ */
 public class RideMoveListener implements SettingEventListener<Boolean, MoveEntityEvent> {
   @Override
   public void handle(SettingEventContext<Boolean, MoveEntityEvent> context) {

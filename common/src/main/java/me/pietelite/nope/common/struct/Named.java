@@ -24,6 +24,9 @@
 
 package me.pietelite.nope.common.struct;
 
+/**
+ * A named object.
+ */
 public interface Named {
 
   String name();

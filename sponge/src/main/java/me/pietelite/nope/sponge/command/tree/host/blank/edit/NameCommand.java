@@ -59,7 +59,9 @@ public class NameCommand extends CommandNode {
     SpongeNope.instance().hostSystem().removeZone(zone.name());
     SpongeNope.instance().hostSystem().addZone(newZone);
     newZone.save();
-    context.sendMessage(Identity.nil(), Formatter.success("Zone name ___ changed to ___", zone.name(), newZone.name()));
+    context.sendMessage(Identity.nil(), Formatter.success("Zone name ___ changed to ___",
+        zone.name(),
+        newZone.name()));
     return CommandResult.success();
   }
 }

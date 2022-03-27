@@ -45,9 +45,8 @@ public class VolumeDestroyCommand extends CommandNode {
 
   @Override
   public CommandResult execute(CommandContext context) throws CommandException {
-    int index = context.one(ParameterKeys.VOLUME_INDEX).orElseThrow(() -> new CommandException(Formatter.error(
-        "You must supply a volume index"
-    )));
+    int index = context.one(ParameterKeys.VOLUME_INDEX).orElseThrow(() ->
+        new CommandException(Formatter.error("You must supply a volume index")));
     Host host = context.requireOne(ParameterKeys.HOST);
     if (!(host instanceof Zone)) {
       return CommandResult.error(Formatter.error(

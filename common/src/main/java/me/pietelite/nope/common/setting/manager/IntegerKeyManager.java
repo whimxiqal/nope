@@ -26,6 +26,10 @@ package me.pietelite.nope.common.setting.manager;
 
 import me.pietelite.nope.common.setting.SettingKey;
 
+/**
+ * A {@link SettingKey.Manager} for {@link SettingKey.Unary} type setting keys
+ * storing {@link Integer}s.
+ */
 public class IntegerKeyManager extends SettingKey.Manager.Unary<Integer> {
 
   @Override
@@ -38,4 +42,8 @@ public class IntegerKeyManager extends SettingKey.Manager.Unary<Integer> {
     return Integer.parseInt(data);
   }
 
+  @Override
+  public Integer createAlternate(Integer data) {
+    return data + 1;
+  }
 }

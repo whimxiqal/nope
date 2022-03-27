@@ -29,6 +29,11 @@ import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.EventContext;
 import org.spongepowered.api.event.lifecycle.LifecycleEvent;
 
+/**
+ * An event in the lifecycle to register {@link SettingValueConfigSerializer}s.
+ * This ensures that any values stored under custom {@link me.pietelite.nope.common.setting.SettingKey}s
+ * are properly managed when serialized to/deserialized from persistent storage.
+ */
 public class SettingValueConfigSerializerRegistrationEvent implements LifecycleEvent {
 
   private final SettingValueConfigSerializerRegistrar registrar;
@@ -37,6 +42,15 @@ public class SettingValueConfigSerializerRegistrationEvent implements LifecycleE
   private final Object source;
   private final EventContext context;
 
+  /**
+   * Generic constructor.
+   *
+   * @param registrar the registrar for registering these serializers
+   * @param game      the game, for the {@link LifecycleEvent}
+   * @param cause     the cause, for the {@link LifecycleEvent}
+   * @param source    the source, for the {@link LifecycleEvent}
+   * @param context   the context, for the {@link LifecycleEvent}
+   */
   public SettingValueConfigSerializerRegistrationEvent(SettingValueConfigSerializerRegistrar registrar,
                                                        Game game, Cause cause,
                                                        Object source, EventContext context) {

@@ -30,15 +30,15 @@ import me.pietelite.nope.sponge.api.event.SettingEventReport;
 import org.spongepowered.api.event.item.inventory.ChangeInventoryEvent;
 import org.spongepowered.api.world.Locatable;
 
-public class ItemPickupListener implements SettingEventListener<Boolean, ChangeInventoryEvent.Pickup> {
+/**
+ * Implements {@link me.pietelite.nope.common.setting.SettingKeys#ITEM_PICKUP}.
+ */
+public class ItemPickupListener implements SettingEventListener<Boolean, ChangeInventoryEvent.Pickup.Pre> {
   @Override
-  public void handle(SettingEventContext<Boolean, ChangeInventoryEvent.Pickup> context) {
-    if (context.event().source() instanceof Locatable) {
-      final Locatable locatable = (Locatable) context.event().source();
-      if (!context.lookup(context.event().source(), locatable.serverLocation())) {
-        context.event().setCancelled(true);
-        context.report(SettingEventReport.restricted().build());
-      }
+  public void handle(SettingEventContext<Boolean, ChangeInventoryEvent.Pickup.Pre> context) {
+    if (!context.lookup(context.event().item().serverLocation())) {
+      context.event().setCancelled(true);
+      context.report(SettingEventReport.restricted().build());
     }
   }
 }

@@ -34,6 +34,11 @@ import me.pietelite.nope.common.math.Vector3i;
 import me.pietelite.nope.common.math.Volume;
 import net.kyori.adventure.text.Component;
 
+/**
+ * An abstract user-created selection that represents a some type of {@link Volume}.
+ *
+ * @param <T> the type of volume
+ */
 @Data
 @Accessors(fluent = true)
 public abstract class Selection<T extends Volume> {
@@ -42,6 +47,13 @@ public abstract class Selection<T extends Volume> {
   Vector3i position1;
   Vector3i position2;
 
+  /**
+   * Get the chat-ready description of the selection for a volume.
+   * The selection must first be valid, which can be checked with
+   * {@link #validate()}.
+   *
+   * @return the chat text
+   */
   public final Component description() {
     if (!validate()) {
       throw new IllegalStateException("This selection is invalid, so props should not be called");
@@ -49,10 +61,40 @@ public abstract class Selection<T extends Volume> {
     return propsWhenValid();
   }
 
+  /**
+   * Get the chat-ready information ("properties") about the selection,
+   * assuming that validate has already been called.
+   *
+   * @return the chat text
+   */
   protected abstract Component propsWhenValid();
 
+  /**
+   * Unsafely construct a volume from the information stored in this selection.
+   * The selection should be previously validated and the resulting {@link Volume} {@link T}
+   * should be validated too.
+   *
+   * @return the volume
+   */
   protected abstract T construct();
 
+  /**
+   * Validate this selection to ensure that it properly represents a {@link Volume}
+   * of type {@link T}. Any error messages are quelled.
+   *
+   * @return true if this selection is valid
+   */
+  public final boolean validate() {
+    return validate(new LinkedList<>());
+  }
+
+  /**
+   * Validate this selection to ensure that it properly represents a {@link Volume}
+   * of type {@link T}.
+   *
+   * @param errors a list too store any errors that arise during validation
+   * @return true if this selection is valid
+   */
   public final boolean validate(List<String> errors) {
     if (position1 == null) {
       errors.add("You must select position 1");
@@ -92,6 +134,11 @@ public abstract class Selection<T extends Volume> {
     return errors.isEmpty();
   }
 
+  /**
+   * Safely build the {@link Volume} of type {@link T}.
+   *
+   * @return the volume
+   */
   public final T build() {
     if (validate()) {
       T volume = construct();
@@ -102,10 +149,11 @@ public abstract class Selection<T extends Volume> {
     return null;
   }
 
-  public final boolean validate() {
-    return validate(new LinkedList<>());
-  }
-
+  /**
+   * Get all validation errors of this selection.
+   *
+   * @return the errors
+   */
   public final List<String> errors() {
     List<String> errors = new LinkedList<>();
     validate(errors);
@@ -116,6 +164,9 @@ public abstract class Selection<T extends Volume> {
     return domain != null && position1 != null && position2 != null;
   }
 
+  /**
+   * The type of selection, which corresponds to a type of {@link Volume}.
+   */
   public enum Type {
     CUBOID,
     CYLINDER,

@@ -2,8 +2,6 @@
  * MIT License
  *
  * Copyright (c) Pieter Svenson
- * Copyright (c) MinecraftOnline
- * Copyright (c) contributors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,7 +20,6 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
- *
  */
 
 package me.pietelite.nope.sponge.listener.dynamic;
@@ -31,6 +28,10 @@ import me.pietelite.nope.sponge.api.event.SettingEventContext;
 import me.pietelite.nope.sponge.api.event.SettingEventListener;
 import org.spongepowered.api.event.entity.RideEntityEvent;
 
+/**
+ * Implements {@link me.pietelite.nope.common.setting.SettingKeys#RIDE},
+ * specifically for mounting the vehicle.
+ */
 public class RideMountListener implements SettingEventListener<Boolean, RideEntityEvent.Mount> {
   @Override
   public void handle(SettingEventContext<Boolean, RideEntityEvent.Mount> context) {

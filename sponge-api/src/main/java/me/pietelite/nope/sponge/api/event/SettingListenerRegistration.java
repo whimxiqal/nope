@@ -30,6 +30,12 @@ import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.Order;
 import org.spongepowered.plugin.PluginContainer;
 
+/**
+ * A registration wrapper around a {@link SettingEventListener}.
+ *
+ * @param <T> the data type
+ * @param <E> the event type
+ */
 public class SettingListenerRegistration<T, E extends Event> {
 
   private final SettingKey<? extends T, ?, ?> settingKey;
@@ -38,6 +44,14 @@ public class SettingListenerRegistration<T, E extends Event> {
   private final PluginContainer plugin;
   private final SettingEventListener<T, E> settingEventListener;
 
+  /**
+   * Generic constructor.
+   *
+   * @param settingKey           the setting key associated with this listener
+   * @param eventClass           the type of event
+   * @param plugin               the plugin responsible for this listener
+   * @param settingEventListener the actual listener to handle the event
+   */
   public SettingListenerRegistration(SettingKey<? extends T, ?, ?> settingKey,
                                      Class<E> eventClass,
                                      PluginContainer plugin,
@@ -49,6 +63,15 @@ public class SettingListenerRegistration<T, E extends Event> {
     this.order = Order.EARLY;
   }
 
+  /**
+   * More specific constructor.
+   *
+   * @param settingKey           the setting key associated with this listener
+   * @param eventClass           the type of event
+   * @param plugin               the plugin responsible for this listener
+   * @param settingEventListener the actual listener to handle the event
+   * @param order                the event ordering with which to register this event to the mod platform
+   */
   public SettingListenerRegistration(SettingKey<? extends T, ?, ?> settingKey,
                                      Class<E> eventClass,
                                      PluginContainer plugin,
@@ -59,10 +82,6 @@ public class SettingListenerRegistration<T, E extends Event> {
     this.plugin = plugin;
     this.settingEventListener = settingEventListener;
     this.order = order;
-  }
-
-  public void registerToSponge() {
-    SpongeNopeApi.service().registerSettingListener(this);
   }
 
   public SettingKey<? extends T, ?, ?> settingKey() {

@@ -60,30 +60,30 @@ public class HostRemovePlayerCommand extends CommandNode {
 
     Target target = host.computeTarget(key, Target::none);
     String listType = target.isWhitelist() ? "whitelist" : "blacklist";
-    Sponge.asyncScheduler()
-        .submit(Task.builder().execute(() -> {
-              GameProfile profile;
-              for (CompletableFuture<GameProfile> player : players) {
-                try {
-                  profile = player.get();
-                } catch (InterruptedException | ExecutionException e) {
-                  e.printStackTrace();
-                  continue;
-                }
-                if (target.users().remove(profile.uuid())) {
-                  context.cause().audience().sendMessage(Formatter.success(
-                      "Removed user ___ to the ___ on ___ ",
-                      profile.name().orElse(profile.uuid().toString()), listType, key.id()
-                  ));
-                } else {
-                  context.cause().audience().sendMessage(Formatter.warn(
-                      "Could not remove user ___ to the ___ on ___ ",
-                      profile.name().orElse(profile.uuid().toString()), listType, key.id()
-                  ));
-                }
-              }
-            }).plugin(SpongeNope.instance().pluginContainer())
-            .build());
+    Sponge.asyncScheduler().submit(Task.builder()
+        .execute(() -> {
+          GameProfile profile;
+          for (CompletableFuture<GameProfile> player : players) {
+            try {
+              profile = player.get();
+            } catch (InterruptedException | ExecutionException e) {
+              e.printStackTrace();
+              continue;
+            }
+            if (target.users().remove(profile.uuid())) {
+              context.cause().audience().sendMessage(Formatter.success(
+                  "Removed user ___ to the ___ on ___ ",
+                  profile.name().orElse(profile.uuid().toString()), listType, key.id()
+              ));
+            } else {
+              context.cause().audience().sendMessage(Formatter.warn(
+                  "Could not remove user ___ to the ___ on ___ ",
+                  profile.name().orElse(profile.uuid().toString()), listType, key.id()
+              ));
+            }
+          }
+        }).plugin(SpongeNope.instance().pluginContainer())
+        .build());
     return CommandResult.success();
   }
 }

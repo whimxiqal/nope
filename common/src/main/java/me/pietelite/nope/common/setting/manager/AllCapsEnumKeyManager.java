@@ -67,6 +67,20 @@ public class AllCapsEnumKeyManager<E extends Enum<E> & Described> extends Settin
   }
 
   @Override
+  public E createAlternate(E data) {
+    // Return the first value that is not the input
+    for (E value : clazz.getEnumConstants()) {
+      if (!value.equals(data)) {
+        return value;
+      }
+    }
+    throw new IllegalStateException("An alternate enum type could not be found for type "
+        + clazz.getSimpleName()
+        + " and input "
+        + data.name());
+  }
+
+  @Override
   public @NotNull String printData(@NotNull E value) {
     return value.name().toLowerCase();
   }

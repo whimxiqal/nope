@@ -30,11 +30,28 @@ import lombok.experimental.Accessors;
 import me.pietelite.nope.common.struct.AltSet;
 import org.jetbrains.annotations.NotNull;
 
+/**
+ * A value to be stored under a {@link SettingKey} in a {@link Setting}s.
+ *
+ * @param <T> the data type
+ */
 public abstract class SettingValue<T> implements Serializable {
 
+  /**
+   * A {@link SettingValue} that, when evaluated through the system, returns a single {@link T}.
+   *
+   * @param <T> the data type
+   */
   public static class Unary<T> extends SettingValue<T> implements Serializable {
     private T data;
 
+    /**
+     * A static factory method.
+     *
+     * @param data the data to store in the value
+     * @param <X>  the data type
+     * @return a new {@link SettingValue.Unary}
+     */
     public static <X> Unary<X> of(X data) {
       Unary<X> value = new Unary<>();
       value.data = data;
@@ -51,30 +68,76 @@ public abstract class SettingValue<T> implements Serializable {
 
   }
 
+  /**
+   * A {@link SettingValue} that, when evaluated through the system, returns multiple {@link T}.
+   *
+   * @param <T> the data type
+   */
   public abstract static class Poly<T, S extends AltSet<T>>
       extends SettingValue<S> implements Serializable {
 
     private Poly() {
     }
 
+    /**
+     * A static factory method for a "manipulative" setting value.
+     * This means that this type will manipulate a value being evaluated by the system
+     * and simply add or subtract values from the mutable set, as opposed to the "declarative" type.
+     *
+     * @param additive    a set of data that will be additive during an evaluation
+     * @param subtractive a set of data that will be subtractive during an evaluation
+     * @param <X>         the data type
+     * @param <Y>         the set of data type
+     * @return a new {@link SettingValue.Unary}
+     */
     public static <X, Y extends AltSet<X>> Poly<X, Y> manipulative(@NotNull Y additive,
                                                                    @NotNull Y subtractive) {
       return new Manipulative<>(additive, subtractive);
     }
 
+    /**
+     * A static factory method for a "declarative" setting value.
+     * This means that this type will completely update a value being evaluated by the system,
+     * as opposed to the "manipulative" type.
+     *
+     * @param set a set of data that will replace any current mutable evaluation
+     * @param <X> the data type
+     * @param <Y> the set of data type
+     * @return a new {@link SettingValue.Unary}
+     */
     public static <X, Y extends AltSet<X>> Poly<X, Y> declarative(@NotNull Y set) {
       return new Declarative<>(set);
     }
 
+    /**
+     * Get whether this a "manipulative" type, versus a "declarative" type.
+     *
+     * @return true if manipulative
+     * @see #manipulative(AltSet, AltSet)
+     */
+    @SuppressWarnings("checkstyle:OverloadMethodsDeclarationOrder")
+    public abstract boolean manipulative();
+
+    /**
+     * Get whether this is a "declarative" type, versus "manipulative" type.
+     *
+     * @return true if declarative
+     * @see #declarative(AltSet)
+     */
+    @SuppressWarnings("checkstyle:OverloadMethodsDeclarationOrder")
+    public abstract boolean declarative();
+
+    /**
+     * Apply this value to a mutable set.
+     *
+     * @param set the incoming set
+     * @return the resultant set, after passing through this value
+     */
     public abstract S applyTo(S set);
 
     public abstract S additive();
 
     public abstract S subtractive();
-
-    public abstract boolean declarative();
-
-    public abstract boolean manipulative();
 
     private static class Declarative<T, S extends AltSet<T>> extends Poly<T, S> {
       private final S set;

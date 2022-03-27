@@ -27,6 +27,9 @@ package me.pietelite.nope.common.setting.sets;
 import me.pietelite.nope.common.struct.Described;
 import me.pietelite.nope.common.struct.HashAltSet;
 
+/**
+ * A {@link HashAltSet} for storing Minecraft explosives.
+ */
 public class ExplosiveSet extends HashAltSet.FewEnum<ExplosiveSet.Explosive> {
 
   public ExplosiveSet() {

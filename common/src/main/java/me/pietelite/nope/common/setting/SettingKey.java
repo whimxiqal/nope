@@ -108,6 +108,13 @@ public abstract class SettingKey<T,
     return this.id().compareTo(o.id());
   }
 
+  public final V defaultValue() {
+    return manager.wrapData(defaultData);
+  }
+
+  /**
+   * A category of key, for sorting purposes.
+   */
   public enum Category {
     BLOCKS,
     DAMAGE,
@@ -116,6 +123,98 @@ public abstract class SettingKey<T,
     MOVEMENT,
   }
 
+  @SuppressWarnings("unchecked")
+  private abstract static class Builder<T,
+      K extends SettingKey<T, V, M>,
+      V extends SettingValue<T>,
+      M extends SettingKey.Manager<T, V>,
+      B extends Builder<T, K, V, M, B>> {
+    protected final String id;
+    protected final M manager;
+    protected final T defaultValue;
+    protected T naturalValue;
+    protected String description = "";
+    protected String blurb = "";
+    protected Category category = Category.MISC;
+    protected boolean functional = false;
+    protected boolean global = false;
+    protected boolean playerRestrictive = false;
+
+    protected Builder(String id, T defaultValue, M manager) {
+      this.id = id;
+      this.manager = manager;
+      this.defaultValue = defaultValue;
+      this.naturalValue = defaultValue;
+    }
+
+    public B naturalValue(T naturalValue) {
+      this.naturalValue = naturalValue;
+      return (B) this;
+    }
+
+    public B description(String description) {
+      this.description = description;
+      return (B) this;
+    }
+
+    public B blurb(String blurb) {
+      this.blurb = blurb;
+      return (B) this;
+    }
+
+    public B category(Category category) {
+      this.category = category;
+      return (B) this;
+    }
+
+    /**
+     * Specify that this key is implemented.
+     *
+     * @return this builder, for chaining
+     */
+    public B functional() {
+      this.functional = true;
+      return (B) this;
+    }
+
+    /**
+     * Specify that this key can only be set for the entire server, globally.
+     *
+     * @return this builder, for chaining
+     */
+    public B global() {
+      this.global = true;
+      return (B) this;
+    }
+
+    /**
+     * Specify that when a non-default value of this setting is set, it is restrictive for players.
+     * This feature is intended to determine when unrestricted-type players should be able to ingore
+     * restrictive types of changes to behavior.
+     * For example, this plugin should generally not prevent administrators from breaking blocks where
+     * breaking blocks is disallowed.
+     *
+     * @return this builder, for chaining
+     */
+    public B playerRestrictive() {
+      this.playerRestrictive = true;
+      return (B) this;
+    }
+
+    /**
+     * Construct this setting key.
+     *
+     * @return the setting key
+     */
+    public abstract K build();
+  }
+
+  /**
+   * A {@link SettingKey} that stores values such that a single {@link T} datum is returned
+   * when evaluating the key on the whole system.
+   *
+   * @param <T> the data type
+   */
   public static class Unary<T> extends SettingKey<T, SettingValue.Unary<T>, Manager.Unary<T>> {
 
     Unary(String id, Manager.Unary<T> manager,
@@ -199,49 +298,27 @@ public abstract class SettingKey<T,
       return host.getValue(this).map(SettingValue.Unary::get).orElse(this.defaultData());
     }
 
-    public static class Builder<T> {
-      private final String id;
-      private final Manager.Unary<T> manager;
-      private final T defaultValue;
-      @Setter
-      @Accessors(fluent = true)
-      private T naturalValue;
-      @Setter
-      @Accessors(fluent = true)
-      private String description = "";
-      @Setter
-      @Accessors(fluent = true)
-      private String blurb = "";
-      @Setter
-      @Accessors(fluent = true)
-      private Category category = Category.MISC;
-
-      private boolean functional = false;
-      private boolean global = false;
-      private boolean playerRestrictive = false;
+    /**
+     * A builder for a {@link SettingKey.Unary}.
+     *
+     * @param <T> the data type
+     */
+    public static class Builder<T> extends SettingKey.Builder<T,
+        SettingKey.Unary<T>,
+        SettingValue.Unary<T>,
+        SettingKey.Manager.Unary<T>,
+        Builder<T>> {
 
       private Builder(String id, T defaultValue, Manager.Unary<T> manager) {
-        this.id = id;
-        this.manager = manager;
-        this.defaultValue = defaultValue;
-        this.naturalValue = defaultValue;
+        super(id, defaultValue, manager);
       }
 
-      public Builder<T> functional() {
-        this.functional = true;
-        return this;
-      }
-
-      public Builder<T> global() {
-        this.global = true;
-        return this;
-      }
-
-      public Builder<T> playerRestrictive() {
-        this.playerRestrictive = true;
-        return this;
-      }
-
+      /**
+       * Construct this setting key.
+       *
+       * @return the setting key
+       */
+      @Override
       public SettingKey.Unary<T> build() {
         return new SettingKey.Unary<>(
             id, manager,
@@ -255,6 +332,12 @@ public abstract class SettingKey<T,
     }
   }
 
+  /**
+   * A {@link SettingKey} that stores values such that <i>multiple</i> {@link T} data is returned
+   * when evaluating the key on the whole system.
+   *
+   * @param <T> the data type
+   */
   public static class Poly<T, S extends AltSet<T>> extends SettingKey<S,
       SettingValue.Poly<T, S>,
       Manager.Poly<T, S>> {
@@ -343,53 +426,26 @@ public abstract class SettingKey<T,
       return "Multiple Value";
     }
 
-    public static class Builder<T, S extends HashAltSet<T>> {
-      private final String id;
-      private final Manager.Poly<T, S> manager;
-      private final S defaultData;
-      @Setter
-      @Accessors(fluent = true)
-      private S naturalData;
-      @Setter
-      @Accessors(fluent = true)
-      private String description = "";
-      @Setter
-      @Accessors(fluent = true)
-      private String blurb = "";
-      @Setter
-      @Accessors(fluent = true)
-      private Category category = Category.MISC;
+    /**
+     * A builder for a {@link SettingKey.Poly}.
+     *
+     * @param <T> the data type
+     */
+    public static class Builder<T, S extends HashAltSet<T>> extends SettingKey.Builder<S,
+        SettingKey.Poly<T, S>,
+        SettingValue.Poly<T, S>,
+        SettingKey.Manager.Poly<T, S>,
+        Builder<T, S>> {
 
-      private boolean functional = false;
-      private boolean global = false;
-      private boolean playerRestrictive = false;
-
-      private Builder(String id, S defaultData, Manager.Poly<T, S> manager) {
-        this.id = id;
-        this.manager = manager;
-        this.defaultData = defaultData;
-        this.naturalData = defaultData;
+      private Builder(String id, S defaultValue, Manager.Poly<T, S> manager) {
+        super(id, defaultValue, manager);
       }
 
-      public Builder<T, S> functional() {
-        this.functional = true;
-        return this;
-      }
-
-      public Builder<T, S> global() {
-        this.global = true;
-        return this;
-      }
-
-      public Builder<T, S> playerRestrictive() {
-        this.playerRestrictive = true;
-        return this;
-      }
-
+      @Override
       public SettingKey.Poly<T, S> build() {
         return new SettingKey.Poly<>(
             id, manager,
-            defaultData, naturalData,
+            defaultValue, naturalValue,
             description, blurb,
             category,
             functional,
@@ -399,19 +455,14 @@ public abstract class SettingKey<T,
     }
   }
 
+  /**
+   * A manager of data stored under {@link SettingKey} in {@link Setting}s.
+   *
+   * @param <T> the data type
+   * @param <V> the setting value type
+   */
   public abstract static class Manager<T, V extends SettingValue<T>> {
 
-    //    public final Object serializeValue(Object value) {
-//      return serializeValueGenerified(castValue(value));
-//    }
-//
-//    public abstract Object serializeValueGenerified(V value);
-//
-//    public final Object deserializeValue(Object serialized) throws ParseSettingException {
-//      return deserializeValueGenerified(serialized);
-//    }
-//
-//    public abstract V deserializeValueGenerified(Object serialized) throws ParseSettingException;
     @NotNull
     public abstract String printData(@NotNull T value);
 
@@ -428,8 +479,30 @@ public abstract class SettingKey<T,
 
     public abstract V parseDeclarativeValue(String settingValue);
 
+    /**
+     * Wrap data into a value that, if applied to an evaluation of setting value,
+     * would yield the data.
+     *
+     * @param data the data
+     * @return the wrapped value
+     */
     public abstract V wrapData(T data);
 
+    /**
+     * Get a piece of data different from the input. The new piece of data should be opposite
+     * to the input, if possible.
+     * This method should only be used for non-critical functionality.
+     *
+     * @param data the data
+     * @return the opposite
+     */
+    public abstract T createAlternate(T data);
+
+    /**
+     * A manager for {@link SettingKey.Unary}s.
+     *
+     * @param <T> the data type
+     */
     public abstract static class Unary<T> extends Manager<T, SettingValue.Unary<T>> {
 
       public abstract Class<T> dataType() throws ParseSettingException;
@@ -462,6 +535,12 @@ public abstract class SettingKey<T,
       }
     }
 
+    /**
+     * A manager for {@link SettingKey.Poly}s.
+     *
+     * @param <T> the data type
+     * @param <S> the set of data type
+     */
     public abstract static class Poly<T, S extends AltSet<T>> extends Manager<S, SettingValue.Poly<T, S>> {
       public static final String SET_SPLIT_REGEX = "(?<![ ,])(( )+|( *, *))(?![ ,])";
       private final Map<String, Set<T>> groups = new HashMap<>();
@@ -478,6 +557,21 @@ public abstract class SettingKey<T,
         return SettingValue.Poly.declarative(data);
       }
 
+      @Override
+      public final S createAlternate(S data) {
+        S opposite = createSet();
+        opposite.addAll(data);
+        opposite.invert();
+        return opposite;
+      }
+
+      /**
+       * Parse a set of data from a string.
+       *
+       * @param data the data in string form
+       * @return the set of data
+       * @throws ParseSettingException if it could not be parsed
+       */
       public final Set<T> parseSet(String data) throws ParseSettingException {
         Set<T> set = new HashSet<>();
         for (String token : data.split(SET_SPLIT_REGEX)) {
@@ -532,6 +626,16 @@ public abstract class SettingKey<T,
         return printSetGrouped(value);
       }
 
+      /**
+       * Add a group of values. When returning the contents of the set of values,
+       * the list of groups will be considered to see how to shorten the returned
+       * set by combining those in a group into just the group's name.
+       * This improves the user experience.
+       *
+       * @param id          the id/name of the group
+       * @param description the description of the group
+       * @param group       the actual set of values to combine as a single group
+       */
       public final void addGroup(String id, String description, Set<T> group) {
         this.groups.put(id, group);
         this.groupDescriptions.put(id, description);
@@ -581,13 +685,36 @@ public abstract class SettingKey<T,
         return map;
       }
 
+      /**
+       * Same as {@link #elementOptions()}, but do not combine elements into groups.
+       *
+       * @return a map of value to description
+       */
       @NotNull
       public abstract Map<String, Object> elementOptionsWithoutGroups();
 
+      /**
+       * Parse a single element.
+       *
+       * @param element the element in string form
+       * @return the data
+       * @throws ParseSettingException if it cannot be parsed
+       */
       public abstract T parseElement(String element) throws ParseSettingException;
 
+      /**
+       * Generate a new empty set.
+       *
+       * @return the set
+       */
       public abstract S createSet();
 
+      /**
+       * Shallow copy the set into another set.
+       *
+       * @param set the set
+       * @return a new set
+       */
       public final S copySet(S set) {
         S newSet = createSet();
         newSet.addAll(set);

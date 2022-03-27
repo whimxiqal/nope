@@ -38,7 +38,11 @@ import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.world.server.ServerWorld;
 
-public class ParameterKeys {
+/**
+ * Utility class to store various {@link Parameter.Key}s for commands.
+ */
+@SuppressWarnings("checkstyle:LineLength")
+public final class ParameterKeys {
 
   public static final Parameter.Key<Cuboid> CUBOID = Parameter.key("cuboid", Cuboid.class);
   public static final Parameter.Key<Cylinder> CYLINDER = Parameter.key("cylinder", Cylinder.class);
@@ -75,4 +79,7 @@ public class ParameterKeys {
   public static final Parameter.Key<Integer> VOLUME_INDEX = Parameter.key("index", Integer.class);
   public static final Parameter.Key<ServerWorld> WORLD = Parameter.key("world", ServerWorld.class);
   public static final Parameter.Key<Zone> ZONE = Parameter.key("zone", Zone.class);
+
+  private ParameterKeys() {
+  }
 }

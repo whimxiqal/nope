@@ -48,6 +48,9 @@ import org.spongepowered.configurate.ConfigurationNode;
 import org.spongepowered.configurate.ConfigurationOptions;
 import org.spongepowered.configurate.serialize.SerializationException;
 
+/**
+ * A data handler for storing {@link Setting}s using Configurate.
+ */
 public abstract class SettingsConfigurateDataHandler {
 
   private final SettingValueConfigSerializerRegistrar serializerRegistrar;
@@ -56,7 +59,8 @@ public abstract class SettingsConfigurateDataHandler {
     this.serializerRegistrar = serializerRegistrar;
   }
 
-  protected final CommentedConfigurationNode settingCollectionRoot(SettingCollection settings) throws SerializationException {
+  protected final CommentedConfigurationNode settingCollectionRoot(SettingCollection settings)
+      throws SerializationException {
     CommentedConfigurationNode root = CommentedConfigurationNode.root(ConfigurationOptions.defaults()
         .serializers(builder ->
             builder.register(Volume.class, new VolumeTypeSerializer())));
@@ -64,7 +68,8 @@ public abstract class SettingsConfigurateDataHandler {
     return root;
   }
 
-  protected final CommentedConfigurationNode serializeSettings(SettingCollection settings) throws SerializationException {
+  protected final CommentedConfigurationNode serializeSettings(SettingCollection settings)
+      throws SerializationException {
     CommentedConfigurationNode node = CommentedConfigurationNode.root();
     for (Setting<?, ?> setting : settings.settings()) {
       CommentedConfigurationNode settingNode = node.node(setting.key().id());
@@ -85,7 +90,8 @@ public abstract class SettingsConfigurateDataHandler {
             usersNode = targetNode.node("blacklist");
           }
           usersNode.set(setting.requireTarget().users());
-          usersNode.comment("whitelist - affects only users listed; blacklist - affects everyone other than users listed");
+          usersNode.comment("whitelist - affects only users listed; "
+              + "blacklist - affects everyone other than users listed");
         }
       }
     }
@@ -100,7 +106,8 @@ public abstract class SettingsConfigurateDataHandler {
             .serialize(setting.key().manager(), setting.value()));
   }
 
-  protected final Collection<Setting<?, ?>> deserializeSettings(Map<Object, ? extends ConfigurationNode> settingNodes) throws SerializationException {
+  protected final Collection<Setting<?, ?>> deserializeSettings(
+      Map<Object, ? extends ConfigurationNode> settingNodes) throws SerializationException {
     List<Setting<?, ?>> settings = new LinkedList<>();
     for (Map.Entry<Object, ? extends ConfigurationNode> entry : settingNodes.entrySet()) {
       String keyId = Objects.requireNonNull((String) entry.getKey());
@@ -121,7 +128,8 @@ public abstract class SettingsConfigurateDataHandler {
                                                                  List<Setting<?, ?>> settings,
                                                                  SettingKey<X, Y, ?> key)
       throws SerializationException {
-    Y value = serializerRegistrar.serializerOf(key.manager()).deserialize(key.manager(), settingNode.node("value"));
+    Y value = serializerRegistrar.serializerOf(key.manager()).deserialize(key.manager(),
+        settingNode.node("value"));
     Target target = null;
     if (!settingNode.node("target").virtual()) {
       ConfigurationNode targetNode = settingNode.node("target");
@@ -130,7 +138,8 @@ public abstract class SettingsConfigurateDataHandler {
         target.permissions().putAll(targetNode.node("permissions").childrenMap()
             .entrySet()
             .stream()
-            .collect(Collectors.toMap(entry -> (String) entry.getKey(), entry -> entry.getValue().getBoolean())));
+            .collect(Collectors.toMap(entry -> (String) entry.getKey(),
+                entry -> entry.getValue().getBoolean())));
       }
       if (!targetNode.node("whitelist").virtual()) {
         target.whitelist();

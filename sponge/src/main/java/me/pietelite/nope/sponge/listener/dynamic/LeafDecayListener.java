@@ -2,8 +2,6 @@
  * MIT License
  *
  * Copyright (c) Pieter Svenson
- * Copyright (c) MinecraftOnline
- * Copyright (c) contributors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,7 +20,6 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
- *
  */
 
 package me.pietelite.nope.sponge.listener.dynamic;
@@ -35,6 +32,9 @@ import org.spongepowered.api.block.transaction.BlockTransaction;
 import org.spongepowered.api.block.transaction.Operations;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
 
+/**
+ * Implements {@link me.pietelite.nope.common.setting.SettingKeys#LEAF_DECAY}.
+ */
 public class LeafDecayListener implements SettingEventListener<Boolean, ChangeBlockEvent.All> {
   @Override
   public void handle(SettingEventContext<Boolean, ChangeBlockEvent.All> context) {

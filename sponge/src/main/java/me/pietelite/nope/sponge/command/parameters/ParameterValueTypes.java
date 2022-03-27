@@ -27,11 +27,17 @@ package me.pietelite.nope.sponge.command.parameters;
 import lombok.Getter;
 import lombok.experimental.Accessors;
 
+/**
+ * Utility class for storing types used in parameters of commands.
+ */
 public final class ParameterValueTypes {
 
   private ParameterValueTypes() {
   }
 
+  /**
+   * A setting parameter type of altering setting values.
+   */
   public enum SettingValueAlterType {
     CONCATENATE("add", "Adds elements onto the targeted list of values"),
     REMOVE("remove", "Removes elements from the targeted list of values"),

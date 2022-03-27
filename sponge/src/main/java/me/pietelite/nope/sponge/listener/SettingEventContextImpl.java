@@ -2,8 +2,6 @@
  * MIT License
  *
  * Copyright (c) Pieter Svenson
- * Copyright (c) MinecraftOnline
- * Copyright (c) contributors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,7 +20,6 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
- *
  */
 
 package me.pietelite.nope.sponge.listener;
@@ -45,11 +42,23 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.Event;
 import org.spongepowered.api.world.server.ServerLocation;
 
+/**
+ * The implementation of the interface for the context of events correlating to settings.
+ *
+ * @param <T> the data type
+ * @param <E> the event type
+ */
 public class SettingEventContextImpl<T, E extends Event> implements SettingEventContext<T, E> {
 
   final E event;
   final SettingKey<? extends T, ?, ?> settingKey;
 
+  /**
+   * Generic constructor.
+   *
+   * @param event      the event being handled
+   * @param settingKey the setting key related to the handler
+   */
   public SettingEventContextImpl(E event, SettingKey<? extends T, ?, ?> settingKey) {
     this.event = event;
     this.settingKey = settingKey;
@@ -94,7 +103,8 @@ public class SettingEventContextImpl<T, E extends Event> implements SettingEvent
                         .append(Formatter.accent("Event Class: ___",
                             event.getClass().getSimpleName()))
                         .append(Optional.ofNullable(report.target())
-                            .map(target -> Component.newline().append(Formatter.accent("Target: ___", target)))
+                            .map(target -> Component.newline().append(Formatter.accent("Target: ___",
+                                target)))
                             .orElse(Component.empty()))
                 )));
             break;
@@ -108,7 +118,8 @@ public class SettingEventContextImpl<T, E extends Event> implements SettingEvent
                         .append(Formatter.accent("Event Class: ___",
                             event.getClass().getSimpleName()))
                         .append(Optional.ofNullable(report.target())
-                            .map(target -> Component.newline().append(Formatter.accent("Target: ___", target)))
+                            .map(target -> Component.newline().append(Formatter.accent("Target: ___",
+                                target)))
                             .orElse(Component.empty()))
                 )));
             break;

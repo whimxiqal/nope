@@ -47,6 +47,9 @@ import org.spongepowered.configurate.ConfigurationNode;
 import org.spongepowered.configurate.loader.ConfigurationLoader;
 import org.spongepowered.configurate.serialize.SerializationException;
 
+/**
+ * The {@link ZoneDataHandler} implemented with Configurate.
+ */
 public class ZoneConfigurateDataHandler extends SettingsConfigurateDataHandler implements ZoneDataHandler {
 
   private final Function<String, ConfigurationLoader<CommentedConfigurationNode>> loader;
@@ -55,7 +58,8 @@ public class ZoneConfigurateDataHandler extends SettingsConfigurateDataHandler i
 
   public ZoneConfigurateDataHandler(Function<String, ConfigurationLoader<CommentedConfigurationNode>> loader,
                                     Function<String, Path> filePath,
-                                    Supplier<Collection<ConfigurationLoader<CommentedConfigurationNode>>> allLoader,
+                                    Supplier<Collection<ConfigurationLoader<CommentedConfigurationNode>>>
+                                        allLoader,
                                     SettingValueConfigSerializerRegistrar serializerRegistrar) {
     super(serializerRegistrar);
     this.loader = loader;

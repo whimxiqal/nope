@@ -33,6 +33,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
@@ -46,7 +47,7 @@ import me.pietelite.nope.sponge.SpongeNope;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.effect.particle.ParticleEffect;
 import org.spongepowered.api.effect.particle.ParticleTypes;
-import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.scheduler.ScheduledTaskFuture;
 import org.spongepowered.api.scheduler.TaskExecutorService;
 
@@ -55,14 +56,16 @@ import org.spongepowered.api.scheduler.TaskExecutorService;
  */
 public final class EffectsUtil {
 
-  public static final ParticleEffect BOUNDARY_PARTICLE = ParticleEffect.builder().type(ParticleTypes.COMPOSTER.get())
+  public static final ParticleEffect BOUNDARY_PARTICLE = ParticleEffect.builder()
+      .type(ParticleTypes.COMPOSTER.get())
       .quantity(1)
       .build();
   /**
    * Number of interior boundary particles per period of allowing particles to go through.
    */
   public static final int INTERIOR_BOUNDARY_LIKELIHOOD = 8;
-  public static final ParticleEffect INTERIOR_BOUNDARY_PARTICLE = ParticleEffect.builder().type(ParticleTypes.SMOKE.get())
+  public static final ParticleEffect INTERIOR_BOUNDARY_PARTICLE = ParticleEffect.builder()
+      .type(ParticleTypes.SMOKE.get())
       .quantity(1)
       .build();
   /**
@@ -93,7 +96,7 @@ public final class EffectsUtil {
    * Multiplier on particle spawn time delay.
    */
   public static final int PARTICLE_SPREAD_DELAY = 120;
-  private static final Table<Volume, Player, TaskGroup> taskGroups = HashBasedTable.create();
+  private static final Table<Volume, UUID, TaskGroup> taskGroups = HashBasedTable.create();
   private static TaskExecutorService VOLUME_PARTICLE_TASK_EXECUTOR;
 
   private static void ensureTaskExecutor() {
@@ -103,7 +106,15 @@ public final class EffectsUtil {
     }
   }
 
-  public static boolean show(Zone zone, Player player) {
+  /**
+   * Display the boundaries of all {@link Volume}s within a {@link Zone} for
+   * a specific {@link ServerPlayer}.
+   *
+   * @param zone   the zone to show
+   * @param player the player to
+   * @return true if any particles are shown, false if none
+   */
+  public static boolean show(Zone zone, ServerPlayer player) {
     ensureTaskExecutor();
 
     Location location = SpongeUtil.reduceLocation(player.serverLocation());
@@ -128,11 +139,11 @@ public final class EffectsUtil {
     if (points.size() > MAX_VOLUME_INTERSECTION_COMPARISON_COUNT) {
       for (Volume volume : points.keySet()) {
         // Ensure only one animation is happening per user per volume
-        if (taskGroups.contains(volume, player)) {
-          taskGroups.get(volume, player).cancel();
+        if (taskGroups.contains(volume, player.uniqueId())) {
+          taskGroups.get(volume, player.uniqueId()).cancel();
         }
         TaskGroup taskGroup = new TaskGroup();
-        taskGroups.put(volume, player, taskGroup);
+        taskGroups.put(volume, player.uniqueId(), taskGroup);
         return show(points.get(volume).stream()
             .map(point ->
                 new BoundaryParticle(point, false))
@@ -143,11 +154,11 @@ public final class EffectsUtil {
       //  to see if they are contained, so we can mark that
       for (Volume volume : points.keySet()) {
         // Ensure only one animation is happening per user per volume
-        if (taskGroups.contains(volume, player)) {
-          taskGroups.get(volume, player).cancel();
+        if (taskGroups.contains(volume, player.uniqueId())) {
+          taskGroups.get(volume, player.uniqueId()).cancel();
         }
         TaskGroup taskGroup = new TaskGroup();
-        taskGroups.put(volume, player, taskGroup);
+        taskGroups.put(volume, player.uniqueId(), taskGroup);
         return show(points.get(volume).stream()
             .map(point -> {
               for (Volume other : points.keySet()) {
@@ -165,7 +176,14 @@ public final class EffectsUtil {
 
   }
 
-  public static boolean show(Volume volume, Player player) {
+  /**
+   * Show the boundaries of a volume for a player.
+   *
+   * @param volume the volume to show
+   * @param player the player for which to show the boundaries
+   * @return true if any particles were shown, false if none
+   */
+  public static boolean show(Volume volume, ServerPlayer player) {
     ensureTaskExecutor();
 
     Location location = SpongeUtil.reduceLocation(player.serverLocation());
@@ -174,11 +192,11 @@ public final class EffectsUtil {
     }
 
     // Ensure only one animation is happening per user per volume
-    if (taskGroups.contains(volume, player)) {
-      taskGroups.get(volume, player).cancel();
+    if (taskGroups.contains(volume, player.uniqueId())) {
+      taskGroups.get(volume, player.uniqueId()).cancel();
     }
     TaskGroup taskGroup = new TaskGroup();
-    taskGroups.put(volume, player, taskGroup);
+    taskGroups.put(volume, player.uniqueId(), taskGroup);
 
     final List<BoundaryParticle> points = volume.surfacePointsNear(
             Vector3d.of(location.posX(), location.posY(), location.posZ()),
@@ -190,8 +208,16 @@ public final class EffectsUtil {
     return show(points, player, taskGroup);
   }
 
+  /**
+   * Show a list of particles to a player using a {@link TaskGroup}.
+   *
+   * @param points    the points to show
+   * @param player    the player for which to show the points
+   * @param taskGroup the task group to use for scheduling the showing of particles
+   * @return true if any particles were shown, false if none
+   */
   public static boolean show(final List<BoundaryParticle> points,
-                             final Player player,
+                             final ServerPlayer player,
                              final TaskGroup taskGroup) {
     if (points.isEmpty()) {
       return false;
@@ -202,7 +228,8 @@ public final class EffectsUtil {
     final double bundleRangeSize = ((double) PARTICLE_PROXIMITY) / PARTICLE_SCHEDULE_BUNDLES;
     points.sort(Comparator.comparing(point -> point.position.distanceSquared(playerLocation)));
     final double shortestDistance = points.get(0).position.distance(playerLocation);
-    double flooredDistance = shortestDistance - shortestDistance % bundleRangeSize;  // "floored" distance of points in batch, relative to batch range
+    // "floored" distance of points in batch, relative to batch range
+    double flooredDistance = shortestDistance - shortestDistance % bundleRangeSize;
     final List<BoundaryParticle> batch = new LinkedList<>();
     AtomicInteger interiorCount = new AtomicInteger();
     for (BoundaryParticle point : points) {

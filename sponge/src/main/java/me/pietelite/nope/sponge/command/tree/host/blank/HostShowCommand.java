@@ -56,7 +56,7 @@ public class HostShowCommand extends CommandNode {
           "Only players may execute this command."
       ));
     }
-    Player player = (Player) context.cause().root();
+    ServerPlayer player = (ServerPlayer) context.cause().root();
 
     Host host = context.requireOne(Parameters.HOST);
     if (!(host instanceof Zone)) {

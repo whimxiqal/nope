@@ -31,6 +31,9 @@ import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 
+/**
+ * Implements {@link me.pietelite.nope.common.setting.SettingKeys#DROP_EXP}.
+ */
 public class DropExpListener implements SettingEventListener<Boolean, SpawnEntityEvent.Pre> {
   @Override
   public void handle(SettingEventContext<Boolean, SpawnEntityEvent.Pre> context) {
