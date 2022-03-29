@@ -3,7 +3,7 @@ name: Upload
 on:
   push:
     branches:
-    - 'master'
+    - '*'
 
 jobs:
 
@@ -23,8 +23,13 @@ jobs:
         run: chmod +x gradlew
       - name: Build with Gradle
         run: ./gradlew build
-      - name: Upload
+      - name: Upload Sponge Plugin
         uses: actions/upload-artifact@v2
         with:
-          path: build/libs/**
+          path: sponge/build/lib/**
+          if-no-files-found: error
+      - name: Upload Sponge API
+        uses: actions/upload-artifact@v2
+        with:
+          path: sponge-api/build/lib/**
           if-no-files-found: error
