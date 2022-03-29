@@ -46,7 +46,3 @@ shadowJar {
         include(dependency('me.pietelite.nope:.*'))
     }
 }
-
-artifacts {
-    archives shadowJar
-}

@@ -59,7 +59,7 @@ test {
 
 dependencies {
     implementation project(':common')
-    implementation project(':sponge-api')
+    implementation project(path: ':sponge-api', configuration: 'shadow')
 
     implementation 'org.spongepowered:spongeapi:8.0.0'
     annotationProcessor "org.spongepowered:spongeapi:8.0.0"
@@ -79,8 +79,4 @@ shadowJar {
     }
 
     relocate 'org.bstats', 'me.pietelite.nope.lib.bstats'
-}
-
-artifacts {
-    archives shadowJar
 }
