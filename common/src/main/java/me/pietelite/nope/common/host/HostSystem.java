@@ -1,0 +1,426 @@
+/*
+ * MIT License
+ *
+ * Copyright (c) Pieter Svenson
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
+package me.pietelite.nope.common.host;
+
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
+import lombok.Getter;
+import lombok.experimental.Accessors;
+import me.pietelite.nope.common.math.Volume;
+import me.pietelite.nope.common.setting.Setting;
+import me.pietelite.nope.common.setting.SettingKey;
+import me.pietelite.nope.common.struct.Location;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
+/**
+ * Implementation of HostTree making distinctions between
+ * a GlobalHost, a WorldHost, and a Zone (VolumeHost).
+ *
+ * @see Host
+ */
+public class HostSystem {
+
+  @Getter
+  @Accessors(fluent = true)
+  protected final Universe universe;
+
+  /**
+   * Domain id mapped to itself.
+   */
+  protected final HashMap<String, Domain> domains = new HashMap<>();
+
+  protected final HashMap<String, Zone> zones = new HashMap<>();
+
+  /**
+   * Generic constructor.
+   *
+   * @param universe the universe
+   * @param domains  the domains
+   */
+  public HostSystem(Universe universe, Iterable<Domain> domains) {
+    this.universe = universe;
+    domains.forEach(domain -> this.domains.put(domain.name(), domain));
+  }
+
+  /**
+   * Returns a map of every host keyed by its name.
+   *
+   * @return all hosts
+   */
+  @NotNull
+  public Map<String, Host> hosts() {
+    Map<String, Host> hosts = new HashMap<>();
+    hosts.put(this.universe.name(), this.universe);
+    hosts.putAll(this.domains);
+    hosts.putAll(this.zones);
+    return hosts;
+  }
+
+  /**
+   * Add a zone into the system and replaces any other zone with the same name.
+   *
+   * @param zone the zone to add
+   * @return the zone that was removed, or null if none
+   */
+  @Nullable
+  public Zone addZone(Zone zone) {
+    Zone replaced = zones.put(zone.name().toLowerCase(), zone);
+    Set<VolumeTree> trees = new HashSet<>();
+    zone.volumes.forEach(volume -> {
+      volume.domain().volumes().put(volume, zone, false);
+      trees.add(volume.domain().volumes());
+    });
+    trees.forEach(VolumeTree::construct);
+    return replaced;
+  }
+
+  /**
+   * Add a volume into a zone and updates the internal structures
+   * to be aware of the zone's increased ownership of a domain.
+   *
+   * @param volume the volume to add on the zone
+   * @param zone   the zone
+   */
+  public void addVolume(Volume volume, Zone zone) {
+    zone.volumes.add(volume);
+    volume.domain().volumes().put(volume, zone, true);
+    zone.save();
+  }
+
+  /**
+   * Add a series of zones. This is faster than adding each one individually.
+   *
+   * @param zones the zones
+   */
+  public void addAllZones(Iterable<Zone> zones) {
+    // Put all zones in the collection of zones for indexing by their name
+    zones.forEach(zone -> this.zones.put(zone.name().toLowerCase(), zone));
+
+    Set<VolumeTree> trees = new HashSet<>();
+    // Add all volumes into volume tree
+    zones.forEach(zone ->
+        zone.volumes.forEach(volume -> {
+          volume.domain().volumes().put(volume, zone, false);
+          trees.add(volume.domain().volumes());
+        }));
+    // Construct all volume trees that were affected
+    trees.forEach(VolumeTree::construct);
+  }
+
+  /**
+   * Remove a {@link Zone} from the system by name.
+   *
+   * @param zoneName the name of the zone
+   * @return the {@link Zone} that was removed
+   */
+  @Nullable
+  public Zone removeZone(String zoneName) {
+    Zone removed = zones.remove(zoneName.toLowerCase());
+    if (removed != null) {
+      Set<Domain> domains = new HashSet<>();
+      removed.volumes.forEach(volume -> {
+        volume.domain().volumes().remove(volume, false);
+        domains.add(volume.domain());
+      });
+      removed.destroy();
+      domains.forEach(domain -> domain.volumes().construct());
+    }
+    return removed;
+  }
+
+  /**
+   * Remove a {@link Volume} from a {@link Zone} in the system.
+   *
+   * @param zone  the zone
+   * @param index the index of the volume in the zone
+   * @return the removed {@link Volume}.
+   * @throws IndexOutOfBoundsException if the index is out of bounds in the volume list on the zone
+   */
+  public Volume removeVolume(Zone zone, int index) throws IndexOutOfBoundsException {
+    Volume removed = zone.volumes.remove(index);
+    removed.domain().volumes().remove(removed, true);
+    return removed;
+  }
+
+  @Nullable
+  public Zone get(String zoneName) {
+    return zones.get(zoneName);
+  }
+
+  public boolean hasName(String hostName) {
+    return host(hostName).isPresent();
+  }
+
+  public Collection<Zone> getAll() {
+    return zones.values();
+  }
+
+  /**
+   * Get all the hosts "superior" at that location, which include any hosts
+   * that encapsulate that point and those hosts' parents.
+   *
+   * @param location the location for which to find superior hosts
+   * @return the superior hosts
+   */
+  @NotNull
+  public Set<Host> collectSuperiorHosts(@NotNull Location location) {
+    Set<Host> set = new HashSet<>();
+    set.add(universe);
+    set.add(location.domain());
+
+    // Add all the containing zones and their parents
+    Set<Zone> zones = location.domain()
+        .volumes()
+        .containing(location.getBlockX(), location.getBlockY(), location.getBlockZ());
+    set.addAll(zones);
+    accumulateParents(zones, set);
+    return set;
+  }
+
+  /**
+   * Get all the superior hosts around another {@link Host}.
+   * A host is superior if it completely encapsulates the other or is an ancestor.
+   *
+   * @param host         the host for which to find other superior hosts
+   * @param discriminate currently unused
+   * @return the set of all superior hosts
+   */
+  @NotNull
+  public Set<Host> collectSuperiorHosts(Host host, boolean discriminate) {
+    Set<Host> set = new HashSet<>();
+    if (host instanceof Universe) {
+      return set;  // Not contained by anything
+    }
+    set.add(universe);
+    if (host instanceof Domain) {
+      set.add(universe);  // Only contained by universe
+      return set;
+    }
+    if (!(host instanceof Zone)) {
+      throw new IllegalArgumentException("The host of type "
+          + host.getClass().getName()
+          + " is unrecognized.");
+    }
+    // Add domains
+    Zone zone = (Zone) host;
+    zone.volumes.forEach(volume -> set.add(volume.domain()));
+
+    // Add zones which contain this entire zone (all of its volumes)
+    Set<Zone> containingZones = containingZones(zone, true);
+    set.addAll(containingZones);
+
+    // Grab all the parents of each containing zone
+    accumulateParents(containingZones, set);
+    return set;
+  }
+
+  private Set<Zone> containingZones(Zone zone, boolean discriminate) {
+    Set<Zone> all = new HashSet<>();
+    boolean first = true;
+    // Only keep the zones which contain every single volume of the given zone
+    for (Volume volume : zone.volumes) {
+      if (first) {
+        all.addAll(volume.domain().volumes().containing(volume, discriminate));
+        first = false;
+      } else {
+        all.retainAll(volume.domain().volumes().containing(volume, discriminate));
+      }
+    }
+    return all;
+  }
+
+  private void accumulateParents(Set<Zone> zones, Set<Host> accumulator) {
+    Zone current;
+    for (Zone zone : zones) {
+      current = zone;
+      while (current.parent().isPresent() && !accumulator.contains(current.parent().get())) {
+        current = current.parent().get();
+        accumulator.add(current);
+      }
+    }
+  }
+
+  public boolean isAssigned(SettingKey<?, ?, ?> key) {
+    return hosts().values().stream().anyMatch(host -> host.get(key).isPresent());
+  }
+
+  public <X> Evaluation<X> lookupAnonymous(@NotNull SettingKey<X, ?, ?> key,
+                                           @NotNull Location location) {
+    return lookup(key, null, location);
+  }
+
+  /**
+   * Evaluate the result of a setting key for a specific user at a given location.
+   * This method is the meat and potatoes of the plugin.
+   *
+   * @param key      the key
+   * @param userUuid the user's uuid
+   * @param location the location
+   * @param <X>      the type of data to return
+   * @return a record of the evaluation process
+   */
+  public <X> Evaluation<X> lookup(@NotNull final SettingKey<X, ?, ?> key,
+                                  @Nullable final UUID userUuid,
+                                  @NotNull final Location location) {
+    LinkedList<Host> hosts = new LinkedList<>();
+
+    // add universe
+    if (universe.isSet(key)) {
+      hosts.addFirst(universe);
+    }
+
+    // add domain
+    if (location.domain().isSet(key)) {
+      hosts.addFirst(location.domain());
+    }
+
+    // add zones
+    location.domain()
+        .volumes()
+        .containing(location.getBlockX(),
+            location.getBlockY(),
+            location.getBlockZ())
+        .stream()
+        .filter(zone -> zone.isSet(key))
+        .forEach(hosts::addFirst);
+
+    // add parents
+    LinkedList<Host> unadded = hosts;
+    hosts = new LinkedList<>();
+    Host current;
+    while (!unadded.isEmpty()) {
+      current = unadded.pop();
+      hosts.add(current);
+      if (current instanceof Zone) {
+        if (((Zone) current).parent().isPresent()) {
+          unadded.add(((Zone) current).parent().get());
+        }
+      }
+    }
+    return key.extractValue(hosts, userUuid, location);
+  }
+
+  /**
+   * Finds an immediate superior host which has the exact same data and target
+   * applied with the given key. Returns empty if there is no superior host
+   * with the given setting applied or if the most immediate superior (highest
+   * in priority) has either a different data or target on the setting.
+   * A superior host is one which is either a parent of the given host or
+   * one which completely encapsulates the given host.
+   *
+   * @param host the host
+   * @param key  the key
+   * @return a superior with an identical setting
+   */
+  public Optional<Host> findIdenticalSuperior(Host host, SettingKey<?, ?, ?> key) {
+    // Check if this host even has a setting
+    Optional<? extends Setting<?, ?>> setting = host.get(key);
+    if (!setting.isPresent()) {
+      return Optional.empty();
+    }
+    List<Host> superiors = new LinkedList<>(collectSuperiorHosts(host, true));
+    superiors.sort(Comparator.comparingInt(h -> -h.priority()));  // Sort maximum first
+    for (Host superior : superiors) {
+      // Continue if this superior doesn't have priority over the desired host
+      if (superior.priority() > host.priority()) {
+        continue;
+      }
+
+      Optional<? extends Setting<?, ?>> superiorSetting = superior.get(key);
+      // Continue if the value is not found on this host
+      if (!superiorSetting.isPresent()) {
+        continue;
+      }
+
+      // If the value is the same, then its redundant. Otherwise, not redundant
+      if (setting.get().equals(superiorSetting.get())) {
+        return Optional.of(superior);
+      } else {
+        return Optional.empty();
+      }
+    }
+
+    // We're out of superiors, so check if the default value is this one
+    if (key.defaultData().equals(setting.get().value())) {
+      // Return the original host to signify that the default value makes this redundant
+      return Optional.of(host);
+    } else {
+      return Optional.empty();
+    }
+  }
+
+  public Map<String, Domain> domains() {
+    return new HashMap<>(domains);
+  }
+
+  /**
+   * Lookup a domain by name.
+   *
+   * @param name the name of the domain
+   * @return the domain
+   * @throws IllegalArgumentException if there is no domain by that name
+   */
+  @NotNull
+  public Domain domain(String name) {
+    Domain domain = domains.get(name.toLowerCase());
+    if (domain == null) {
+      throw new IllegalArgumentException("There is no domain called: " + name.toLowerCase());
+    }
+    return domain;
+  }
+
+  public Map<String, Zone> zones() {
+    return new HashMap<>(zones);
+  }
+
+  public Zone zone(String name) {
+    return zones.get(name);
+  }
+
+  /**
+   * Lookup a host by name.
+   *
+   * @param name the name of a host
+   * @return the host, or an empty optional if none exists
+   */
+  public Optional<Host> host(String name) {
+    if (name.equalsIgnoreCase(universe.name())) {
+      return Optional.of(universe);
+    } else if (domains.containsKey(name.toLowerCase())) {
+      return Optional.of(domains.get(name.toLowerCase()));
+    } else {
+      return Optional.ofNullable(zones.get(name.toLowerCase()));
+    }
+  }
+}
