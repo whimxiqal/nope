@@ -41,6 +41,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import me.pietelite.nope.common.Nope;
+import me.pietelite.nope.common.api.setting.SettingCategory;
 import me.pietelite.nope.common.host.Host;
 import me.pietelite.nope.common.host.Zone;
 import me.pietelite.nope.common.setting.SettingKey;
@@ -250,7 +251,7 @@ public class Parameters {
       .usage(key -> "radius")
       .build();
   public static final Parameter.Value<String> REGEX = Parameter.string().key(ParameterKeys.REGEX).build();
-  public static final Parameter.Value<?> SETTING_CATEGORY = Parameter.enumValue(SettingKey.Category.class)
+  public static final Parameter.Value<?> SETTING_CATEGORY = Parameter.enumValue(SettingCategory.class)
       .key(ParameterKeys.SETTING_CATEGORY)
       .optional()
       .build();

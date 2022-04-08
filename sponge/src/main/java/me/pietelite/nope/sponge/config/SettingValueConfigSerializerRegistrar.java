@@ -28,18 +28,12 @@ import java.util.LinkedList;
 import java.util.List;
 import me.pietelite.nope.common.setting.SettingKey;
 import me.pietelite.nope.common.setting.SettingValue;
-import me.pietelite.nope.sponge.api.config.SettingValueConfigSerializer;
-import me.pietelite.nope.sponge.api.config.SettingValueConfigSerializerRegistrar;
 import org.jetbrains.annotations.NotNull;
 
-/**
- * The implementation of the API's {@link SettingValueConfigSerializerRegistrar}.
- */
-public class SettingValueConfigSerializerRegistrarImpl implements SettingValueConfigSerializerRegistrar {
+public class SettingValueConfigSerializerRegistrar {
 
   private final List<SettingValueConfigSerializer<?>> serializers = new LinkedList<>();
 
-  @Override
   public void register(SettingValueConfigSerializer<?> serializer) {
     if (serializers.stream().anyMatch(ser -> ser.managerClass().equals(serializer.managerClass()))) {
       throw new IllegalArgumentException("A serializer already exists of type: "
@@ -48,7 +42,6 @@ public class SettingValueConfigSerializerRegistrarImpl implements SettingValueCo
     this.serializers.add(serializer);
   }
 
-  @Override
   @NotNull
   @SuppressWarnings("unchecked")
   public <T,

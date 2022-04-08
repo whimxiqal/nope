@@ -46,11 +46,8 @@ public abstract class Nope {
 
   /* CONSTANTS */
   public static final String GLOBAL_HOST_NAME = "_global";
-  public static final String REPO_URL = "https://github.com/pietelite/nope/";
   public static final int WORLD_DEPTH = 512;
   public static final int WORLD_RADIUS = 100000;
-  public static final String ZONE_CONFIG_BACKUP_FILENAME = "zones-backup.conf";
-  public static final String ZONE_CONFIG_FILENAME = "zones.conf";
   @Setter
   @Getter
   @Accessors(fluent = true)

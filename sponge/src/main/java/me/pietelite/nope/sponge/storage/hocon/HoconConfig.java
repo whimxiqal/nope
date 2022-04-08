@@ -25,7 +25,7 @@
 package me.pietelite.nope.sponge.storage.hocon;
 
 import java.nio.file.Path;
-import me.pietelite.nope.sponge.api.config.SettingValueConfigSerializerRegistrar;
+import me.pietelite.nope.sponge.config.SettingValueConfigSerializerRegistrar;
 import me.pietelite.nope.sponge.storage.configurate.UniverseConfigurateDataHandler;
 
 /**
@@ -41,8 +41,7 @@ public class HoconConfig extends UniverseConfigurateDataHandler {
    * @param serializerRegistrar the registrar of setting value serializers
    */
   public HoconConfig(Path path, SettingValueConfigSerializerRegistrar serializerRegistrar) {
-    super(HoconDataHandler.hoconLoader(path.resolve("server.conf")),
-        serializerRegistrar);
+    super(HoconDataHandler.hoconLoader(path.resolve("server.conf")), serializerRegistrar);
   }
 
 }

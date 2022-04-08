@@ -31,7 +31,7 @@ import java.util.Collections;
 import java.util.stream.Collectors;
 import me.pietelite.nope.common.Nope;
 import me.pietelite.nope.common.math.Volume;
-import me.pietelite.nope.sponge.api.config.SettingValueConfigSerializerRegistrar;
+import me.pietelite.nope.sponge.config.SettingValueConfigSerializerRegistrar;
 import me.pietelite.nope.sponge.storage.configurate.ConfigurateDataHandler;
 import me.pietelite.nope.sponge.storage.configurate.DomainConfigurateDataHandler;
 import me.pietelite.nope.sponge.storage.configurate.ZoneConfigurateDataHandler;

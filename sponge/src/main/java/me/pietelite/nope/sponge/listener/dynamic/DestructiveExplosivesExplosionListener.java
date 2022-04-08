@@ -26,7 +26,7 @@ package me.pietelite.nope.sponge.listener.dynamic;
 
 import java.util.Optional;
 import me.pietelite.nope.common.setting.sets.ExplosiveSet;
-import me.pietelite.nope.common.struct.AltSet;
+import me.pietelite.nope.common.api.struct.AltSet;
 import me.pietelite.nope.sponge.api.event.SettingEventContext;
 import me.pietelite.nope.sponge.api.event.SettingEventListener;
 import me.pietelite.nope.sponge.api.event.SettingEventReport;
@@ -40,13 +40,13 @@ import org.spongepowered.api.world.explosion.Explosion;
  * specifically for updating explosions to be non-destructive if applicable.
  */
 public class DestructiveExplosivesExplosionListener
-    implements SettingEventListener<AltSet<ExplosiveSet.Explosive>, ExplosionEvent.Pre> {
+    implements SettingEventListener<AltSet<me.pietelite.nope.common.api.setting.data.Explosive>, ExplosionEvent.Pre> {
   @Override
-  public void handle(SettingEventContext<AltSet<ExplosiveSet.Explosive>, ExplosionEvent.Pre> context) {
+  public void handle(SettingEventContext<AltSet<me.pietelite.nope.common.api.setting.data.Explosive>, ExplosionEvent.Pre> context) {
     final Object rootCause = context.event().cause().root();
     final Optional<Explosive> sourceExplosive = context.event().explosion().sourceExplosive();
     if (sourceExplosive.isPresent()) {
-      final ExplosiveSet.Explosive explosive = SpongeUtil.reduceExplosive(sourceExplosive.get());
+      final me.pietelite.nope.common.api.setting.data.Explosive explosive = SpongeUtil.reduceExplosive(sourceExplosive.get());
       if (!context.lookup(rootCause, sourceExplosive.get().serverLocation()).contains(explosive)) {
         context.event().setExplosion(Explosion.builder()
             .from(context.event().explosion())

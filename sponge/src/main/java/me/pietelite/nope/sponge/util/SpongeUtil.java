@@ -26,6 +26,7 @@ package me.pietelite.nope.sponge.util;
 
 import java.util.UUID;
 import me.pietelite.nope.common.Nope;
+import me.pietelite.nope.common.api.setting.data.Movement;
 import me.pietelite.nope.common.host.Domain;
 import me.pietelite.nope.common.math.Vector3d;
 import me.pietelite.nope.common.setting.SettingKey;
@@ -175,56 +176,56 @@ public final class SpongeUtil {
   }
 
   /**
-   * "Reduce" a Sponge {@link MovementType} type to a local {@link MovementSet.Movement} type.
+   * "Reduce" a Sponge {@link MovementType} type to a local {@link Movement} type.
    *
    * @param movementType the Sponge movement type
    * @return the local type
    */
-  public static MovementSet.Movement reduceMovementType(MovementType movementType) {
+  public static Movement reduceMovementType(MovementType movementType) {
     if (movementType.equals(MovementTypes.CHORUS_FRUIT.get())) {
-      return MovementSet.Movement.CHORUSFRUIT;
+      return Movement.CHORUSFRUIT;
     } else if (movementType.equals(MovementTypes.COMMAND.get())) {
-      return MovementSet.Movement.COMMAND;
+      return Movement.COMMAND;
     } else if (movementType.equals(MovementTypes.END_GATEWAY.get())) {
-      return MovementSet.Movement.ENDGATEWAY;
+      return Movement.ENDGATEWAY;
     } else if (movementType.equals(MovementTypes.ENDER_PEARL.get())) {
-      return MovementSet.Movement.ENDERPEARL;
+      return Movement.ENDERPEARL;
     } else if (movementType.equals(MovementTypes.ENTITY_TELEPORT.get())) {
-      return MovementSet.Movement.ENTITYTELEPORT;
+      return Movement.ENTITYTELEPORT;
     } else if (movementType.equals(MovementTypes.NATURAL.get())) {
-      return MovementSet.Movement.NATURAL;
+      return Movement.NATURAL;
     } else if (movementType.equals(MovementTypes.PLUGIN.get())) {
-      return MovementSet.Movement.PLUGIN;
+      return Movement.PLUGIN;
     } else if (movementType.equals(MovementTypes.PORTAL.get())) {
-      return MovementSet.Movement.PORTAL;
+      return Movement.PORTAL;
     } else {
       throw new IllegalArgumentException("Unknown movement type: " + movementType);
     }
   }
 
   /**
-   * "Reduce" a Sponge {@link Explosive} type to a local {@link ExplosiveSet.Explosive} type.
+   * "Reduce" a Sponge {@link Explosive} type to a local {@link me.pietelite.nope.common.api.setting.data.Explosive} type.
    *
    * @param explosive the Sponge explosive
    * @return the local type
    */
-  public static ExplosiveSet.Explosive reduceExplosive(Explosive explosive) {
+  public static me.pietelite.nope.common.api.setting.data.Explosive reduceExplosive(Explosive explosive) {
     if (explosive instanceof Creeper) {
-      return ExplosiveSet.Explosive.CREEPER;
+      return me.pietelite.nope.common.api.setting.data.Explosive.CREEPER;
     } else if (explosive instanceof EndCrystal) {
-      return ExplosiveSet.Explosive.ENDCRYSTAL;
+      return me.pietelite.nope.common.api.setting.data.Explosive.ENDCRYSTAL;
     } else if (explosive instanceof ExplosiveFireball) {
-      return ExplosiveSet.Explosive.EXPLOSIVEFIREBALL;
+      return me.pietelite.nope.common.api.setting.data.Explosive.EXPLOSIVEFIREBALL;
     } else if (explosive instanceof FireworkRocket) {
-      return ExplosiveSet.Explosive.FIREWORK;
+      return me.pietelite.nope.common.api.setting.data.Explosive.FIREWORK;
     } else if (explosive instanceof PrimedTNT) {
-      return ExplosiveSet.Explosive.PRIMEDTNT;
+      return me.pietelite.nope.common.api.setting.data.Explosive.PRIMEDTNT;
     } else if (explosive instanceof TNTMinecart) {
-      return ExplosiveSet.Explosive.TNTMINECART;
+      return me.pietelite.nope.common.api.setting.data.Explosive.TNTMINECART;
     } else if (explosive instanceof Wither) {
-      return ExplosiveSet.Explosive.WITHER;
+      return me.pietelite.nope.common.api.setting.data.Explosive.WITHER;
     } else if (explosive instanceof WitherSkull) {
-      return ExplosiveSet.Explosive.WITHERSKULL;
+      return me.pietelite.nope.common.api.setting.data.Explosive.WITHERSKULL;
     } else {
       throw new IllegalArgumentException("Unknown explosive type: " + explosive);
     }

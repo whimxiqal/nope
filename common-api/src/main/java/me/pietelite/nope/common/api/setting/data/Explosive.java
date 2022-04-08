@@ -22,35 +22,33 @@
  * SOFTWARE.
  */
 
-package me.pietelite.nope.sponge.api.config;
+package me.pietelite.nope.common.api.setting.data;
 
-import me.pietelite.nope.common.setting.SettingKey;
-import me.pietelite.nope.common.setting.SettingValue;
-import org.jetbrains.annotations.NotNull;
+import me.pietelite.nope.common.api.struct.Described;
 
-/**
- * A registrar for {@link SettingValueConfigSerializer}s.
- */
-public interface SettingValueConfigSerializerRegistrar {
+public enum Explosive implements Described {
+    CREEPER("Explosion caused by creeper"),
+    ENDCRYSTAL("Explosion caused by endercrystal"),
+    FIREWORK("Explosion caused by firework"),
+    EXPLOSIVEFIREBALL("Explosion caused by large fireball"),
+    PRIMEDTNT("Explosion caused by primed TNT"),
+    TNTMINECART("Explosion caused by TNT minecart"),
+    WITHER("Explosion caused by Wither"),
+    WITHERSKULL("Explosion caused by Wither skull");
 
-  /**
-   * Register a serializer for purpose of serialization of setting values for i/o.
-   *
-   * @param serializer the serializer
-   */
-  void register(SettingValueConfigSerializer<?> serializer);
+    private final String description;
 
-  /**
-   * Get the serializer for some {@link me.pietelite.nope.common.setting.SettingKey.Manager}.
-   *
-   * @param manager the manager
-   * @param <T>     the data type provided for a setting
-   * @param <V>     the value stored in a setting
-   * @param <M>     the manager of a setting key
-   * @return the serializer for the data stored by the manager on behalf of its settings
-   */
-  @NotNull <T,
-      V extends SettingValue<T>,
-      M extends SettingKey.Manager<T, V>> SettingValueConfigSerializer<M> serializerOf(M manager);
+    Explosive(String description) {
+        this.description = description;
+    }
 
+    @Override
+    public String description() {
+        return description;
+    }
+
+    @Override
+    public String toString() {
+        return name().toLowerCase();
+    }
 }

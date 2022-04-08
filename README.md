@@ -21,15 +21,15 @@ The primary goals of the plugin is to:
 - `Host` context compatibility to enable context-dependent permissions with your permissions plugin
 
 ## Terminology
-| Term | Definition 
-| :----: | :------: 
-| `Setting` | A combination of a `Setting Key` and a `Setting Value` that presumably changes game behavior in some way 
-| `Host`  | Something on which settings may be applied 
-| `Global`/Server | The `Host` that applies its settings everywhere 
-| `Domain`/World | The `Host` that applies its settings everywhere inside a specific Minecraft world 
-| `Zone` | A `Host` that applies its settings to a set of `Volume`s 
-| `Volume` | A 3-dimensional region to partially manifest the location of a `Zone` 
-| `Target` | The criteria to identify the intended group of users affected by a `Setting` 
+| Term | Definition |
+| :----: | :------: |
+| `Setting` | A combination of a `Setting Key` and a `Setting Value` that presumably changes game behavior in some way |
+| `Host`  | Something on which settings may be applied |
+| `Global`/Server | The `Host` that applies its settings everywhere | 
+| `Domain`/World | The `Host` that applies its settings everywhere inside a specific Minecraft world |
+| `Zone` | A `Host` that applies its settings to a set of `Volume`s |
+| `Volume` | A 3-dimensional region to partially manifest the location of a `Zone` |
+| `Target` | The criteria to identify the intended group of users affected by a `Setting` |
 
 ## Why Beta?
 

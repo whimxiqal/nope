@@ -24,45 +24,16 @@
 
 package me.pietelite.nope.common.setting.sets;
 
-import me.pietelite.nope.common.struct.Described;
+import me.pietelite.nope.common.api.setting.data.Explosive;
 import me.pietelite.nope.common.struct.HashAltSet;
 
 /**
  * A {@link HashAltSet} for storing Minecraft explosives.
  */
-public class ExplosiveSet extends HashAltSet.FewEnum<ExplosiveSet.Explosive> {
+public class ExplosiveSet extends HashAltSet.FewEnum<Explosive> {
 
   public ExplosiveSet() {
     super(Explosive.class);
   }
 
-  /**
-   * Enumeration for all explosive types considered by Nope.
-   */
-  public enum Explosive implements Described {
-    CREEPER("Explosion caused by creeper"),
-    ENDCRYSTAL("Explosion caused by endercrystal"),
-    FIREWORK("Explosion caused by firework"),
-    EXPLOSIVEFIREBALL("Explosion caused by large fireball"),
-    PRIMEDTNT("Explosion caused by primed TNT"),
-    TNTMINECART("Explosion caused by TNT minecart"),
-    WITHER("Explosion caused by Wither"),
-    WITHERSKULL("Explosion caused by Wither skull");
-
-    private final String description;
-
-    Explosive(String description) {
-      this.description = description;
-    }
-
-    @Override
-    public String description() {
-      return description;
-    }
-
-    @Override
-    public String toString() {
-      return name().toLowerCase();
-    }
-  }
 }

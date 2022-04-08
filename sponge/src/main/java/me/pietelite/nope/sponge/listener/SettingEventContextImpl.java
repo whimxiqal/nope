@@ -80,11 +80,6 @@ public class SettingEventContextImpl<T, E extends Event> implements SettingEvent
   }
 
   @Override
-  public T lookup(UUID userUuid, Location location) {
-    return SpongeNope.instance().hostSystem().lookup(settingKey, userUuid, location).result();
-  }
-
-  @Override
   public void report(SettingEventReport report) {
     Set<UUID> recipients = Nope.instance().debugManager().watchersOf(report.source(),
         settingKey,

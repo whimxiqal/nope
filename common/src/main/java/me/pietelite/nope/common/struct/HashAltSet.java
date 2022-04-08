@@ -30,6 +30,8 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+
+import me.pietelite.nope.common.api.struct.AltSet;
 import org.jetbrains.annotations.NotNull;
 
 /**

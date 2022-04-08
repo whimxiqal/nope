@@ -27,7 +27,7 @@ package me.pietelite.nope.sponge.api.event;
 import org.spongepowered.api.event.Event;
 
 /**
- * The context for an event handler involving a {@link me.pietelite.nope.common.setting.Setting}.
+ * The context for an event handler involving a setting key.
  *
  * @param <T> the data type
  * @param <E> the event type

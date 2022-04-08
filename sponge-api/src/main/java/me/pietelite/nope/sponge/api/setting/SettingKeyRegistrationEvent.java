@@ -31,8 +31,8 @@ import org.spongepowered.api.event.lifecycle.LifecycleEvent;
 
 /**
  * A new event to be thrown during the server startup portion of the lifecycle.
- * Through this event, developers must register any of their
- * {@link me.pietelite.nope.common.setting.SettingKey}s.
+ * Through this event, developers must register any of their setting keys using
+ * {@link me.pietelite.nope.common.api.setting.SettingKeyBuilder}s.
  */
 public class SettingKeyRegistrationEvent implements LifecycleEvent {
 
@@ -45,7 +45,7 @@ public class SettingKeyRegistrationEvent implements LifecycleEvent {
   /**
    * Generic constructor.
    *
-   * @param registrar the registrar that will accept {@link me.pietelite.nope.common.setting.SettingKey}s.
+   * @param registrar the registrar that will accept setting keys.
    * @param game      the game, for the {@link LifecycleEvent}
    * @param cause     the cause, for the {@link LifecycleEvent}
    * @param source    the source, for the {@link LifecycleEvent}

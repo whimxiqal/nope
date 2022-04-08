@@ -26,7 +26,6 @@ package me.pietelite.nope.sponge.config;
 
 import me.pietelite.nope.common.setting.SettingKey;
 import me.pietelite.nope.common.setting.SettingValue;
-import me.pietelite.nope.sponge.api.config.SettingValueConfigSerializer;
 import org.spongepowered.configurate.CommentedConfigurationNode;
 import org.spongepowered.configurate.ConfigurationNode;
 import org.spongepowered.configurate.serialize.SerializationException;

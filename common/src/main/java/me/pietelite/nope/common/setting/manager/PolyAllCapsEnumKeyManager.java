@@ -27,8 +27,9 @@ package me.pietelite.nope.common.setting.manager;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
+
+import me.pietelite.nope.common.api.struct.Described;
 import me.pietelite.nope.common.setting.SettingKey;
-import me.pietelite.nope.common.struct.Described;
 import me.pietelite.nope.common.struct.HashAltSet;
 import org.jetbrains.annotations.NotNull;
 
@@ -43,6 +44,7 @@ public class PolyAllCapsEnumKeyManager<E extends Enum<E> & Described, S extends 
     extends SettingKey.Manager.Poly<E, S> {
 
   private final Class<E> clazz;
+  private final Class<S> setClazz;
   private final Supplier<S> setConstructor;
 
   /**
@@ -51,8 +53,9 @@ public class PolyAllCapsEnumKeyManager<E extends Enum<E> & Described, S extends 
    * @param clazz          the class of enum
    * @param setConstructor the constructor for the special set of values
    */
-  public PolyAllCapsEnumKeyManager(Class<E> clazz, Supplier<S> setConstructor) {
+  public PolyAllCapsEnumKeyManager(Class<E> clazz, Class<S> setClazz, Supplier<S> setConstructor) {
     this.clazz = clazz;
+    this.setClazz = setClazz;
     this.setConstructor = setConstructor;
   }
 
@@ -84,5 +87,10 @@ public class PolyAllCapsEnumKeyManager<E extends Enum<E> & Described, S extends 
       return map;
     }
     return map;
+  }
+
+  @Override
+  public Class<S> dataType() throws SettingKey.ParseSettingException {
+    return setClazz;
   }
 }

@@ -40,12 +40,13 @@ import java.util.stream.Collectors;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
+import me.pietelite.nope.common.api.setting.SettingCategory;
+import me.pietelite.nope.common.api.setting.SettingKeyBuilder;
+import me.pietelite.nope.common.api.struct.AltSet;
+import me.pietelite.nope.common.struct.Named;
 import me.pietelite.nope.common.host.Evaluation;
 import me.pietelite.nope.common.host.Host;
-import me.pietelite.nope.common.struct.AltSet;
-import me.pietelite.nope.common.struct.HashAltSet;
 import me.pietelite.nope.common.struct.Location;
-import me.pietelite.nope.common.struct.Named;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -67,7 +68,7 @@ public abstract class SettingKey<T,
   private final T naturalData;
   private final String description;
   private final String blurb;
-  private final Category category;
+  private final SettingCategory category;
   private final boolean global;
   private final boolean playerRestrictive;
   @Setter
@@ -76,7 +77,7 @@ public abstract class SettingKey<T,
   SettingKey(String id, @NotNull M manager,
              T defaultData, T naturalData,
              String description, String blurb,
-             Category category,
+             SettingCategory category,
              boolean functional,
              boolean global,
              boolean playerRestrictive) {
@@ -112,39 +113,37 @@ public abstract class SettingKey<T,
     return manager.wrapData(defaultData);
   }
 
-  /**
-   * A category of key, for sorting purposes.
-   */
-  public enum Category {
-    BLOCKS,
-    DAMAGE,
-    ENTITIES,
-    MISC,
-    MOVEMENT,
-  }
-
   @SuppressWarnings("unchecked")
-  private abstract static class Builder<T,
+  public abstract static class Builder<T,
       K extends SettingKey<T, V, M>,
       V extends SettingValue<T>,
       M extends SettingKey.Manager<T, V>,
       B extends Builder<T, K, V, M, B>> {
     protected final String id;
     protected final M manager;
-    protected final T defaultValue;
+    protected T defaultValue;
     protected T naturalValue;
-    protected String description = "";
-    protected String blurb = "";
-    protected Category category = Category.MISC;
+    protected String description;
+    protected String blurb;
+    protected SettingCategory category = SettingCategory.MISC;
     protected boolean functional = false;
     protected boolean global = false;
     protected boolean playerRestrictive = false;
 
-    protected Builder(String id, T defaultValue, M manager) {
+    private boolean updatedDefaultValue = false;
+
+    protected Builder(String id, M manager) {
       this.id = id;
       this.manager = manager;
+    }
+
+    public B defaultValue(T defaultValue) {
       this.defaultValue = defaultValue;
-      this.naturalValue = defaultValue;
+      updatedDefaultValue = true;
+      if (naturalValue == null) {
+        this.naturalValue = defaultValue;
+      }
+      return (B) this;
     }
 
     public B naturalValue(T naturalValue) {
@@ -158,11 +157,14 @@ public abstract class SettingKey<T,
     }
 
     public B blurb(String blurb) {
+      if (blurb.length() > 36) {
+        throw new IllegalStateException("A 'blurb' may not be longer than 36 characters");
+      }
       this.blurb = blurb;
       return (B) this;
     }
 
-    public B category(Category category) {
+    public B category(SettingCategory category) {
       this.category = category;
       return (B) this;
     }
@@ -201,6 +203,26 @@ public abstract class SettingKey<T,
       return (B) this;
     }
 
+    protected final void validate() {
+      if (id == null) {
+        throw new IllegalStateException("A SettingKey's id may not be null");
+      } else if (manager == null) {
+        throw new IllegalStateException("A SettingKey's manager may not be null");
+      } else if (defaultValue == null) {
+        throw new IllegalStateException("A SettingKey's default value may not be null");
+      } else if (!updatedDefaultValue) {
+        throw new IllegalStateException("A SettingKey's default value must be set");
+      } else if (naturalValue == null) {
+        throw new IllegalStateException("A SettingKey's natural value may not be null");
+      } else if (blurb == null) {
+        throw new IllegalStateException("A SettingKey's blurb may not be null");
+      } else if (description == null) {
+        throw new IllegalStateException("A SettingKey's description may not be null");
+      } else if (category == null) {
+        throw new IllegalStateException("A SettingKey's category may not be null");
+      }
+    }
+
     /**
      * Construct this setting key.
      *
@@ -220,7 +242,7 @@ public abstract class SettingKey<T,
     Unary(String id, Manager.Unary<T> manager,
           T defaultData, T naturalValue,
           String description, String blurb,
-          Category category,
+          SettingCategory category,
           boolean functional,
           boolean global, boolean playerRestrictive) {
       super(id, manager,
@@ -231,10 +253,8 @@ public abstract class SettingKey<T,
           global, playerRestrictive);
     }
 
-    public static <X> Builder<X> builder(String id,
-                                         X defaultValue,
-                                         Manager.Unary<X> manager) {
-      return new Builder<>(id, defaultValue, manager);
+    public static <X> Builder<X> builder(String id, Manager.Unary<X> manager) {
+      return new Builder<>(id, manager);
     }
 
     @Override
@@ -307,10 +327,10 @@ public abstract class SettingKey<T,
         SettingKey.Unary<T>,
         SettingValue.Unary<T>,
         SettingKey.Manager.Unary<T>,
-        Builder<T>> {
+        Builder<T>> implements SettingKeyBuilder.Unary<T, Builder<T>> {
 
-      private Builder(String id, T defaultValue, Manager.Unary<T> manager) {
-        super(id, defaultValue, manager);
+      private Builder(String id, Manager.Unary<T> manager) {
+        super(id, manager);
       }
 
       /**
@@ -320,6 +340,7 @@ public abstract class SettingKey<T,
        */
       @Override
       public SettingKey.Unary<T> build() {
+        validate();
         return new SettingKey.Unary<>(
             id, manager,
             defaultValue, naturalValue,
@@ -345,7 +366,7 @@ public abstract class SettingKey<T,
     Poly(String id, Manager.Poly<T, S> manager,
          S defaultData, S naturalValue,
          String description, String blurb,
-         Category category,
+         SettingCategory category,
          boolean functional,
          boolean global, boolean playerRestrictive) {
       super(id, manager,
@@ -357,10 +378,8 @@ public abstract class SettingKey<T,
           global, playerRestrictive);
     }
 
-    public static <X, Y extends HashAltSet<X>> Builder<X, Y> builder(String id,
-                                                                     Y defaultData,
-                                                                     Manager.Poly<X, Y> manager) {
-      return new Builder<>(id, defaultData, manager);
+    public static <X, Y extends AltSet<X>> Builder<X, Y> builder(String id, Manager.Poly<X, Y> manager) {
+      return new Builder<>(id, manager);
     }
 
     @Override
@@ -431,18 +450,19 @@ public abstract class SettingKey<T,
      *
      * @param <T> the data type
      */
-    public static class Builder<T, S extends HashAltSet<T>> extends SettingKey.Builder<S,
+    public static class Builder<T, S extends AltSet<T>> extends SettingKey.Builder<S,
         SettingKey.Poly<T, S>,
         SettingValue.Poly<T, S>,
         SettingKey.Manager.Poly<T, S>,
-        Builder<T, S>> {
+        Builder<T, S>> implements SettingKeyBuilder.Poly<T, S, Builder<T, S>> {
 
-      private Builder(String id, S defaultValue, Manager.Poly<T, S> manager) {
-        super(id, defaultValue, manager);
+      private Builder(String id, Manager.Poly<T, S> manager) {
+        super(id, manager);
       }
 
       @Override
       public SettingKey.Poly<T, S> build() {
+        validate();
         return new SettingKey.Poly<>(
             id, manager,
             defaultValue, naturalValue,
@@ -451,6 +471,26 @@ public abstract class SettingKey<T,
             functional,
             global, playerRestrictive
         );
+      }
+
+      @Override
+      public Builder<T, S> fillDefaultData() {
+        return defaultValue(AltSet.full(this.manager.createSet()));
+      }
+
+      @Override
+      public Builder<T, S> emptyDefaultData() {
+        return defaultValue(this.manager.createSet());
+      }
+
+      @Override
+      public Builder<T, S> fillNaturalData() {
+        return naturalValue(AltSet.full(this.manager.createSet()));
+      }
+
+      @Override
+      public Builder<T, S> emptyNaturalData() {
+        return naturalValue(this.manager.createSet());
       }
     }
   }
@@ -462,6 +502,8 @@ public abstract class SettingKey<T,
    * @param <V> the setting value type
    */
   public abstract static class Manager<T, V extends SettingValue<T>> {
+
+    public abstract Class<T> dataType() throws ParseSettingException;
 
     @NotNull
     public abstract String printData(@NotNull T value);
@@ -505,8 +547,6 @@ public abstract class SettingKey<T,
      */
     public abstract static class Unary<T> extends Manager<T, SettingValue.Unary<T>> {
 
-      public abstract Class<T> dataType() throws ParseSettingException;
-
       public final SettingValue.Unary<T> parseValue(String data) throws ParseSettingException {
         return SettingValue.Unary.of(parseData(data));
       }
@@ -532,6 +572,10 @@ public abstract class SettingKey<T,
       @Override
       public @NotNull String printData(@NotNull T value) {
         return value.toString();
+      }
+
+      public SettingKeyBuilder.Unary<T, SettingKey.Unary.Builder<T>> keyBuilder(String id) {
+        return new SettingKey.Unary.Builder<T>(id, this);
       }
     }
 
@@ -721,7 +765,9 @@ public abstract class SettingKey<T,
         return newSet;
       }
 
-
+      public SettingKeyBuilder.Poly<T, S, SettingKey.Poly.Builder<T, S>> keyBuilder(String id) {
+        return new SettingKey.Poly.Builder<>(id, this);
+      }
     }
 
   }

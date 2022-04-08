@@ -29,7 +29,7 @@ import me.pietelite.nope.common.host.Host;
 import me.pietelite.nope.common.permission.Permissions;
 import me.pietelite.nope.common.setting.SettingKey;
 import me.pietelite.nope.common.setting.SettingValue;
-import me.pietelite.nope.common.struct.AltSet;
+import me.pietelite.nope.common.api.struct.AltSet;
 import me.pietelite.nope.sponge.SpongeNope;
 import me.pietelite.nope.sponge.command.CommandNode;
 import me.pietelite.nope.sponge.command.parameters.Flags;

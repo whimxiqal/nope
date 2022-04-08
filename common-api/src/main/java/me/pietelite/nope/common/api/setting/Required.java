@@ -22,41 +22,11 @@
  * SOFTWARE.
  */
 
-package me.pietelite.nope.sponge.api;
-
-import java.util.Objects;
-import me.pietelite.nope.sponge.api.service.NopeService;
+package me.pietelite.nope.common.api.setting;
 
 /**
- * Static class to hold information for Nope's Sponge API.
+ * Represents that a field in a {@link SettingKeyBuilder} is required
+ * to build a valid setting key.
  */
-public final class SpongeNopeApi {
-
-  private static NopeService service;
-
-  private SpongeNopeApi() {
-    // unused
-  }
-
-  /**
-   * Retrieve the {@link NopeService}.
-   *
-   * @return the nope service
-   */
-  public static NopeService service() {
-    if (service == null) {
-      throw new IllegalStateException("There is no Nope Service. Has it been registered yet?");
-    }
-    return service;
-  }
-
-  /**
-   * Initialize the {@link NopeService}. This is for internal use only.
-   *
-   * @param service the nope service
-   */
-  public static void init(NopeService service) {
-    SpongeNopeApi.service = Objects.requireNonNull(service);
-  }
-
+public @interface Required {
 }

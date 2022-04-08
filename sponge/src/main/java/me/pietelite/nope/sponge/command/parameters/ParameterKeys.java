@@ -27,6 +27,8 @@ package me.pietelite.nope.sponge.command.parameters;
 import io.leangen.geantyref.TypeToken;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+
+import me.pietelite.nope.common.api.setting.SettingCategory;
 import me.pietelite.nope.common.host.Host;
 import me.pietelite.nope.common.host.Zone;
 import me.pietelite.nope.common.math.Cuboid;
@@ -68,7 +70,7 @@ public final class ParameterKeys {
   public static final Parameter.Key<Integer> PRIORITY = Parameter.key("priority", Integer.class);
   public static final Parameter.Key<Double> RADIUS = Parameter.key("radius", Double.class);
   public static final Parameter.Key<String> REGEX = Parameter.key("regex", String.class);
-  public static final Parameter.Key<SettingKey.Category> SETTING_CATEGORY = Parameter.key("setting-category", SettingKey.Category.class);
+  public static final Parameter.Key<SettingCategory> SETTING_CATEGORY = Parameter.key("setting-category", SettingCategory.class);
   public static final Parameter.Key<SettingKey<?, ?, ?>> SETTING_KEY = Parameter.key("setting-key", new TypeToken<SettingKey<?, ?, ?>>() {
   });
   public static final Parameter.Key<String> SETTING_VALUE = Parameter.key("setting-value", String.class);

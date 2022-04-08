@@ -26,43 +26,48 @@ package me.pietelite.nope.common.setting;
 
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
+
+import me.pietelite.nope.common.api.setting.SettingCategory;
+import me.pietelite.nope.common.api.setting.data.BlockChange;
+import me.pietelite.nope.common.api.setting.data.DamageCause;
+import me.pietelite.nope.common.api.setting.data.Explosive;
+import me.pietelite.nope.common.api.setting.data.Movement;
 import me.pietelite.nope.common.setting.sets.BlockChangeSet;
 import me.pietelite.nope.common.setting.sets.DamageCauseSet;
 import me.pietelite.nope.common.setting.sets.ExplosiveSet;
 import me.pietelite.nope.common.setting.sets.MovementSet;
 import me.pietelite.nope.common.setting.sets.StringSet;
-import me.pietelite.nope.common.struct.AltSet;
 
 /**
  * A utility class to store all constant default Nope {@link SettingKey}s.
  */
 public final class SettingKeys {
 
-  public static final SettingKey.Poly<BlockChangeSet.BlockChange, BlockChangeSet> BLOCK_CHANGE =
-      SettingKey.Poly.builder("block-change",
-              AltSet.full(new BlockChangeSet()),
-              SettingKeyManagers.POLY_BLOCK_CHANGE_KEY_MANAGER)
+  public static final SettingKey.Poly<BlockChange, BlockChangeSet> BLOCK_CHANGE =
+      SettingKeyManagers.POLY_BLOCK_CHANGE_KEY_MANAGER.keyBuilder("block-change")
+          .fillDefaultData()
           .blurb("How blocks may be changed")
           .description("A list of ways that blocks may be changed.")
-          .category(SettingKey.Category.BLOCKS)
+          .category(SettingCategory.BLOCKS)
           .playerRestrictive()
           .build();
   public static final SettingKey.Poly<String, StringSet> BLOCK_CHANGING_MOBS =
-      SettingKey.Poly.builder("mob-grief",
-              AltSet.full(new StringSet()),
-              SettingKeyManagers.POLY_ENTITY_KEY_MANAGER)
+      SettingKeyManagers.POLY_ENTITY_KEY_MANAGER.keyBuilder("mob-grief")
+          .fillDefaultData()
           .blurb("Mobs that can change blocks")
           .description("A list of all mobs that can change blocks")
-          .category(SettingKey.Category.ENTITIES)
+          .category(SettingCategory.ENTITIES)
           .build();
   public static final SettingKey.Unary<Boolean> BLOCK_PROPAGATE =
-      SettingKey.Unary.builder("block-propagate", true, SettingKeyManagers.TOGGLE_KEY_MANAGER)
+      SettingKeyManagers.TOGGLE_KEY_MANAGER.keyBuilder("block-propagate")
+          .defaultValue(true)
           .blurb("Block updates to neighbors")
           .description("When disabled, blocks will not update each other.")
-          .category(SettingKey.Category.BLOCKS)
+          .category(SettingCategory.BLOCKS)
           .build();
   public static final SettingKey.Unary<Integer> CACHE_SIZE =
-      SettingKey.Unary.builder("cache-size", 75000, SettingKeyManagers.INTEGER_KEY_MANAGER)
+      SettingKeyManagers.INTEGER_KEY_MANAGER.keyBuilder("cache-size")
+          .defaultValue(75000)
           .blurb("Size of world block caches")
           .description("This is the quantity of block locations to cache for each world. "
               + "Total memory is roughly this multiplied by 56 bytes, "
@@ -72,366 +77,390 @@ public final class SettingKeys {
           .functional()
           .build();
   public static final SettingKey.Unary<Boolean> CONCRETE_SOLIDIFICATION =
-      SettingKey.Unary.builder("concrete-solidification", true, SettingKeyManagers.TOGGLE_KEY_MANAGER)
+      SettingKeyManagers.TOGGLE_KEY_MANAGER.keyBuilder("concrete-solidification")
+          .defaultValue(true)
           .blurb("Concrete powder solidification")
           .description("When disabled, concrete powder does not solidify into concrete.")
-          .category(SettingKey.Category.BLOCKS)
+          .category(SettingCategory.BLOCKS)
           .playerRestrictive()
           .build();
-  public static final SettingKey.Poly<ExplosiveSet.Explosive, ExplosiveSet> DESTRUCTIVE_EXPLOSIVES =
-      SettingKey.Poly.builder("destructive-explosives",
-              AltSet.full(new ExplosiveSet()),
-              SettingKeyManagers.POLY_EXPLOSIVE_KEY_MANAGER)
+  public static final SettingKey.Poly<Explosive, ExplosiveSet> DESTRUCTIVE_EXPLOSIVES =
+      SettingKeyManagers.POLY_EXPLOSIVE_KEY_MANAGER.keyBuilder("destructive-explosives")
+          .fillDefaultData()
           .blurb("Explosives causing no world damage")
           .description("A list of explosives whose explosions to not cause damage to the world.")
-          .category(SettingKey.Category.BLOCKS)
+          .category(SettingCategory.BLOCKS)
           .build();
   public static final SettingKey.Unary<Boolean> DROP_EXP =
-      SettingKey.Unary.builder("drop-exp", true, SettingKeyManagers.TOGGLE_KEY_MANAGER)
+      SettingKeyManagers.TOGGLE_KEY_MANAGER.keyBuilder("drop-exp")
+          .defaultValue(true)
           .blurb("Experience drop")
           .description("When disabled, experience points are never dropped.")
-          .category(SettingKey.Category.MISC)
+          .category(SettingCategory.MISC)
           .build();
-  public static final SettingKey.Poly<MovementSet.Movement, MovementSet> ENTRY =
-      SettingKey.Poly.builder("entry",
-              AltSet.full(new MovementSet()),
-              SettingKeyManagers.POLY_MOVEMENT_KEY_MANAGER)
+  public static final SettingKey.Poly<Movement, MovementSet> ENTRY =
+      SettingKeyManagers.POLY_MOVEMENT_KEY_MANAGER.keyBuilder("entry")
+          .fillDefaultData()
           .blurb("Host entrance restriction")
           .description("Specify which type of movement is allowed by players to enter.")
-          .category(SettingKey.Category.MOVEMENT)
+          .category(SettingCategory.MOVEMENT)
           .functional()
           .playerRestrictive()
           .build();
   public static final SettingKey.Unary<String> ENTRY_DENY_MESSAGE =
-      SettingKey.Unary.builder("entry-deny-message",
-              "You are not allowed to go there",
-              SettingKeyManagers.STRING_KEY_MANAGER)
+      SettingKeyManagers.STRING_KEY_MANAGER.keyBuilder("entry-deny-message")
+          .defaultValue("You are not allowed to go there")
+          .naturalValue("")
           .blurb("Message when entry is denied")
           .description("The message that is sent to a player if they are barred from entry.")
-          .category(SettingKey.Category.MOVEMENT)
+          .category(SettingCategory.MOVEMENT)
           .functional()
           .build();
   public static final SettingKey.Unary<String> ENTRY_DENY_SUBTITLE =
-      SettingKey.Unary.builder("entry-deny-subtitle", "", SettingKeyManagers.STRING_KEY_MANAGER)
+      SettingKeyManagers.STRING_KEY_MANAGER.keyBuilder("entry-deny-subtitle")
+          .defaultValue("")
           .blurb("Subtitle when entry is denied")
           .description("The subtitle that is sent to a player if they are barred from entry.")
-          .category(SettingKey.Category.MOVEMENT)
+          .category(SettingCategory.MOVEMENT)
           .functional()
           .build();
   public static final SettingKey.Unary<String> ENTRY_DENY_TITLE =
-      SettingKey.Unary.builder("entry-deny-title", "", SettingKeyManagers.STRING_KEY_MANAGER)
+      SettingKeyManagers.STRING_KEY_MANAGER.keyBuilder("entry-deny-title")
+          .defaultValue("")
           .blurb("Title when entry is denied")
           .description("The title that is sent to a player if they are barred from entry.")
-          .category(SettingKey.Category.MOVEMENT)
+          .category(SettingCategory.MOVEMENT)
           .functional()
           .build();
-  public static final SettingKey.Poly<MovementSet.Movement, MovementSet> EXIT =
-      SettingKey.Poly.builder("exit",
-              AltSet.full(new MovementSet()),
-              SettingKeyManagers.POLY_MOVEMENT_KEY_MANAGER)
+  public static final SettingKey.Poly<Movement, MovementSet> EXIT =
+      SettingKeyManagers.POLY_MOVEMENT_KEY_MANAGER.keyBuilder("exit")
+          .fillDefaultData()
           .blurb("Host exit restriction")
           .description("Specify which type of movement is allowed by players to exit.")
-          .category(SettingKey.Category.MOVEMENT)
+          .category(SettingCategory.MOVEMENT)
           .playerRestrictive()
           .functional()
           .build();
   public static final SettingKey.Unary<String> EXIT_DENY_MESSAGE =
-      SettingKey.Unary.builder("exit-deny-message",
-              "You are not allowed to leave here",
-              SettingKeyManagers.STRING_KEY_MANAGER)
+      SettingKeyManagers.STRING_KEY_MANAGER.keyBuilder("exit-deny-message")
+          .defaultValue("You are not allowed to leave here")
+          .naturalValue("")
           .blurb("Message when exit is denied")
           .description("The message that is sent to the player if they are barred from exiting.")
-          .category(SettingKey.Category.MOVEMENT)
+          .category(SettingCategory.MOVEMENT)
           .functional()
           .build();
   public static final SettingKey.Unary<String> EXIT_DENY_SUBTITLE =
-      SettingKey.Unary.builder("exit-deny-subtitle", "", SettingKeyManagers.STRING_KEY_MANAGER)
+      SettingKeyManagers.STRING_KEY_MANAGER.keyBuilder("exit-deny-subtitle")
+          .defaultValue("")
           .blurb("Subtitle when exit is denied")
           .description("The subtitle that is sent to a player if they are barred from exiting")
-          .category(SettingKey.Category.MOVEMENT)
+          .category(SettingCategory.MOVEMENT)
           .functional()
           .build();
   public static final SettingKey.Unary<String> EXIT_DENY_TITLE =
-      SettingKey.Unary.builder("exit-deny-title", "", SettingKeyManagers.STRING_KEY_MANAGER)
+      SettingKeyManagers.STRING_KEY_MANAGER.keyBuilder("exit-deny-title")
+          .defaultValue("")
           .blurb("Title when exit is denied")
           .description("The title that is sent to a player if they are barred from exiting")
-          .category(SettingKey.Category.MOVEMENT)
+          .category(SettingCategory.MOVEMENT)
           .functional()
           .build();
   public static final SettingKey.Unary<String> FAREWELL =
-      SettingKey.Unary.builder("farewell", "", SettingKeyManagers.STRING_KEY_MANAGER)
+      SettingKeyManagers.STRING_KEY_MANAGER.keyBuilder("farewell")
+          .defaultValue("")
           .blurb("Message upon exit")
           .description("The message to a player when they leave the host.")
-          .category(SettingKey.Category.MOVEMENT)
+          .category(SettingCategory.MOVEMENT)
           .functional()
           .build();
   public static final SettingKey.Unary<String> FAREWELL_SUBTITLE =
-      SettingKey.Unary.builder("farewell-subtitle", "", SettingKeyManagers.STRING_KEY_MANAGER)
+      SettingKeyManagers.STRING_KEY_MANAGER.keyBuilder("farwell-subtitle")
+          .defaultValue("")
           .blurb("Subtitle upon exit")
           .description("The subtitle that appears to a player when they leave the host.")
-          .category(SettingKey.Category.MOVEMENT)
+          .category(SettingCategory.MOVEMENT)
           .functional()
           .build();
   public static final SettingKey.Unary<String> FAREWELL_TITLE =
-      SettingKey.Unary.builder("farewell-title", "", SettingKeyManagers.STRING_KEY_MANAGER)
+      SettingKeyManagers.STRING_KEY_MANAGER.keyBuilder("farewell-title")
+          .defaultValue("")
           .blurb("Title upon exit")
           .description("The title that appears to a player when they leave the host.")
-          .category(SettingKey.Category.MOVEMENT)
+          .category(SettingCategory.MOVEMENT)
           .functional()
           .build();
   public static final SettingKey.Unary<Boolean> FIRE_EFFECT =
-      SettingKey.Unary.builder("fire-effect", true, SettingKeyManagers.TOGGLE_KEY_MANAGER)
+      SettingKeyManagers.TOGGLE_KEY_MANAGER.keyBuilder("fire-effect")
+          .defaultValue(true)
           .blurb("Fire spread/damage")
           .description("When disabled, fire does not spread or cause block damage")
-          .category(SettingKey.Category.MISC)
+          .category(SettingCategory.MISC)
           .build();
   public static final SettingKey.Unary<Boolean> FIRE_IGNITION =
-      SettingKey.Unary.builder("fire-ignition", true, SettingKeyManagers.STATE_KEY_MANAGER)
+      SettingKeyManagers.STATE_KEY_MANAGER.keyBuilder("fire-ignition")
+          .defaultValue(true)
           .blurb("Fire ignition restriction")
           .description("When disabled, fire may not be lit")
-          .category(SettingKey.Category.MISC)
+          .category(SettingCategory.MISC)
           .playerRestrictive()
           .build();
   public static final SettingKey.Unary<Boolean> FROSTED_ICE_FORM =
-      SettingKey.Unary.builder("frosted-ice-form", true, SettingKeyManagers.TOGGLE_KEY_MANAGER)
+      SettingKeyManagers.TOGGLE_KEY_MANAGER.keyBuilder("frosted-ice-form")
+          .defaultValue(true)
           .blurb("Frosted ice formation")
           .description("When disabled, frost ice does not form.")
-          .category(SettingKey.Category.BLOCKS)
+          .category(SettingCategory.BLOCKS)
           .build();
   public static final SettingKey.Unary<Boolean> FROSTED_ICE_MELT =
-      SettingKey.Unary.builder("frosted-ice-melt", true, SettingKeyManagers.TOGGLE_KEY_MANAGER)
+      SettingKeyManagers.TOGGLE_KEY_MANAGER.keyBuilder("frosted-ice-melt")
+          .defaultValue(true)
           .blurb("Frosted ice melt")
           .description("When disabled, frosted ice does not melt")
-          .category(SettingKey.Category.BLOCKS)
+          .category(SettingCategory.BLOCKS)
           .build();
   public static final SettingKey.Unary<Boolean> GRASS_GROWTH =
-      SettingKey.Unary.builder("grass-growth", true, SettingKeyManagers.TOGGLE_KEY_MANAGER)
+      SettingKeyManagers.TOGGLE_KEY_MANAGER.keyBuilder("grass-growth")
+          .defaultValue(true)
           .blurb("Grass growth")
           .description("When disabled, grass cannot grow naturally")
-          .category(SettingKey.Category.BLOCKS)
+          .category(SettingCategory.BLOCKS)
           .build();
   public static final SettingKey.Unary<String> GREETING =
-      SettingKey.Unary.builder("greeting", "", SettingKeyManagers.STRING_KEY_MANAGER)
+      SettingKeyManagers.STRING_KEY_MANAGER.keyBuilder("greeting")
+          .defaultValue("")
           .blurb("Message upon entry")
           .description("The message to a player when they enter")
-          .category(SettingKey.Category.MOVEMENT)
+          .category(SettingCategory.MOVEMENT)
           .functional()
           .build();
   public static final SettingKey.Unary<String> GREETING_SUBTITLE =
-      SettingKey.Unary.builder("greeting-subtitle", "", SettingKeyManagers.STRING_KEY_MANAGER)
+      SettingKeyManagers.STRING_KEY_MANAGER.keyBuilder("greeting-subtitle")
+          .defaultValue("")
           .blurb("Subtitle upon entry")
           .description("The subtitle that appears to a player when they enter")
-          .category(SettingKey.Category.MOVEMENT)
+          .category(SettingCategory.MOVEMENT)
           .functional()
           .build();
   public static final SettingKey.Unary<String> GREETING_TITLE =
-      SettingKey.Unary.builder("greeting-title", "", SettingKeyManagers.STRING_KEY_MANAGER)
+      SettingKeyManagers.STRING_KEY_MANAGER.keyBuilder("greeting-title")
+          .defaultValue("")
           .blurb("Title upon entry")
           .description("The title that appears to a player when they enter")
-          .category(SettingKey.Category.MOVEMENT)
+          .category(SettingCategory.MOVEMENT)
           .functional()
           .build();
   public static final SettingKey.Poly<String, StringSet> GROWABLES =
-      SettingKey.Poly.builder("growables",
-              AltSet.full(new StringSet()),
-              SettingKeyManagers.POLY_GROWABLE_KEY_MANAGER)
+      SettingKeyManagers.POLY_GROWABLE_KEY_MANAGER.keyBuilder("growables")
+          .fillDefaultData()
           .blurb("Growable blocks")
           .description("A list of blocks that can grow")
-          .category(SettingKey.Category.BLOCKS)
+          .category(SettingCategory.BLOCKS)
           .playerRestrictive()
           .build();
-  public static final SettingKey.Poly<ExplosiveSet.Explosive, ExplosiveSet> HARMFUL_EXPLOSIVES =
-      SettingKey.Poly.builder("harmful-explosives",
-              AltSet.full(new ExplosiveSet()),
-              SettingKeyManagers.POLY_EXPLOSIVE_KEY_MANAGER)
+  public static final SettingKey.Poly<Explosive, ExplosiveSet> HARMFUL_EXPLOSIVES =
+      SettingKeyManagers.POLY_EXPLOSIVE_KEY_MANAGER.keyBuilder("harmful-explosives")
+          .fillDefaultData()
           .blurb("Explosives causing no entity damage")
           .description("A list of explosives whose explosions do not cause damage to entities.")
-          .category(SettingKey.Category.DAMAGE)
+          .category(SettingCategory.DAMAGE)
           .build();
   public static final SettingKey.Unary<Boolean> HEALTH_REGEN =
-      SettingKey.Unary.builder("health-regen", true, SettingKeyManagers.TOGGLE_KEY_MANAGER)
+      SettingKeyManagers.TOGGLE_KEY_MANAGER.keyBuilder("health-regen")
+          .defaultValue(true)
           .blurb("Health regen")
           .description("When disabled, players do not regenerate health")
-          .category(SettingKey.Category.DAMAGE)
+          .category(SettingCategory.DAMAGE)
           .playerRestrictive()
           .build();
+
   public static final SettingKey.Poly<String, StringSet> HOOKABLE_ENTITIES =
-      SettingKey.Poly.builder("hookable-entities",
-              AltSet.full(new StringSet()),
-              SettingKeyManagers.POLY_ENTITY_KEY_MANAGER)
+      SettingKeyManagers.POLY_ENTITY_KEY_MANAGER.keyBuilder("hookable-entities")
+          .fillDefaultData()
           .blurb("Entities that can be hooked")
           .description("A list of entities that can be hooked with a fishing rod")
-          .category(SettingKey.Category.ENTITIES)
+          .category(SettingCategory.ENTITIES)
           .playerRestrictive()
           .build();
   public static final SettingKey.Unary<Boolean> HUNGER_DRAIN =
-      SettingKey.Unary.builder("hunger-drain", true, SettingKeyManagers.TOGGLE_KEY_MANAGER)
+      SettingKeyManagers.TOGGLE_KEY_MANAGER.keyBuilder("hunger-drain")
+          .defaultValue(true)
           .blurb("Player hunger drain")
           .description("When disabled, player hunger does not drain naturally.")
           .playerRestrictive()
           .build();
   public static final SettingKey.Unary<Boolean> ICE_FORM =
-      SettingKey.Unary.builder("ice-form", true, SettingKeyManagers.TOGGLE_KEY_MANAGER)
+      SettingKeyManagers.TOGGLE_KEY_MANAGER.keyBuilder("ice-form")
+          .defaultValue(true)
           .blurb("Ice formation")
           .description("When disabled, ice does not form.")
-          .category(SettingKey.Category.BLOCKS)
+          .category(SettingCategory.BLOCKS)
           .build();
   public static final SettingKey.Unary<Boolean> ICE_MELT =
-      SettingKey.Unary.builder("ice-melt", true, SettingKeyManagers.TOGGLE_KEY_MANAGER)
+      SettingKeyManagers.TOGGLE_KEY_MANAGER.keyBuilder("ice-melt")
+          .defaultValue(true)
           .blurb("Ice melt")
           .description("When disabled, ice does not melt.")
-          .category(SettingKey.Category.BLOCKS)
+          .category(SettingCategory.BLOCKS)
           .build();
   public static final SettingKey.Poly<String, StringSet> IGNORED_PLUGINS =
-      SettingKey.Poly.builder("ignored-plugins", new StringSet(), SettingKeyManagers.POLY_PLUGIN_MANAGER)
+      SettingKeyManagers.POLY_PLUGIN_MANAGER.keyBuilder("ignored-plugins")
+          .emptyDefaultData()
           .blurb("Plugins unaffected by Nope")
           .description("A list of all plugins that Nope does not affect")
           .build();
   public static final SettingKey.Poly<String, StringSet> INTERACTIVE_BLOCKS =
-      SettingKey.Poly.builder("interactive-blocks",
-              AltSet.full(new StringSet()),
-              SettingKeyManagers.POLY_BLOCK_KEY_MANAGER)
+      SettingKeyManagers.POLY_BLOCK_KEY_MANAGER.keyBuilder("interactive-blocks")
+          .fillDefaultData()
           .blurb("Interactive blocks")
           .description("A list of blocks with which that can be interacted.")
-          .category(SettingKey.Category.BLOCKS)
+          .category(SettingCategory.BLOCKS)
           .playerRestrictive()
           .build();
   public static final SettingKey.Poly<String, StringSet> INTERACTIVE_ENTITIES =
-      SettingKey.Poly.builder("interactive-entities",
-              AltSet.full(new StringSet()),
-              SettingKeyManagers.POLY_ENTITY_KEY_MANAGER)
+      SettingKeyManagers.POLY_ENTITY_KEY_MANAGER.keyBuilder("interactive-entities")
+          .fillDefaultData()
           .blurb("Entity interactivity")
           .description("List of entities that can be interacted with.")
-          .category(SettingKey.Category.DAMAGE)
+          .category(SettingCategory.DAMAGE)
           .build();
   public static final SettingKey.Poly<String, StringSet> INVINCIBLE_ENTITIES =
-      SettingKey.Poly.builder("invincible-entities",
-              new StringSet(),
-              SettingKeyManagers.POLY_ENTITY_KEY_MANAGER)
+      SettingKeyManagers.POLY_ENTITY_KEY_MANAGER.keyBuilder("invincible-entities")
+          .emptyDefaultData()
           .blurb("Entity invincibility")
           .description("List of entities which cannot be damaged or destroyed.")
-          .category(SettingKey.Category.DAMAGE)
+          .category(SettingCategory.DAMAGE)
           .build();
   public static final SettingKey.Unary<Boolean> ITEM_DROP =
-      SettingKey.Unary.builder("item-drop", true, SettingKeyManagers.TOGGLE_KEY_MANAGER)
+      SettingKeyManagers.TOGGLE_KEY_MANAGER.keyBuilder("item-drop")
+          .defaultValue(true)
           .blurb("Item drop restriction")
           .description("When disabled, items cannot drop.")
           .playerRestrictive()
           .build();
   public static final SettingKey.Unary<Boolean> ITEM_PICKUP =
-      SettingKey.Unary.builder("item-pickup", true, SettingKeyManagers.TOGGLE_KEY_MANAGER)
+      SettingKeyManagers.TOGGLE_KEY_MANAGER.keyBuilder("item-pickup")
+          .defaultValue(true)
           .blurb("Item pickup restriction")
           .description("When disabled, items may not be picked up.")
           .playerRestrictive()
           .build();
   public static final SettingKey.Unary<Boolean> LAVA_FLOW =
-      SettingKey.Unary.builder("lava-flow", true, SettingKeyManagers.TOGGLE_KEY_MANAGER)
+      SettingKeyManagers.TOGGLE_KEY_MANAGER.keyBuilder("lava-flow")
+          .defaultValue(true)
           .blurb("Lava flow")
           .description("When disabled, lava does not spread")
-          .category(SettingKey.Category.BLOCKS)
+          .category(SettingCategory.BLOCKS)
           .build();
   public static final SettingKey.Unary<Boolean> LEAF_DECAY =
-      SettingKey.Unary.builder("leaf-decay", true, SettingKeyManagers.TOGGLE_KEY_MANAGER)
+      SettingKeyManagers.TOGGLE_KEY_MANAGER.keyBuilder("leaf-decay")
+          .defaultValue(true)
           .blurb("Leaf decay")
           .description("When disabled, leaves will not decay naturally.")
-          .category(SettingKey.Category.BLOCKS)
+          .category(SettingCategory.BLOCKS)
           .build();
   public static final SettingKey.Poly<String, StringSet> LEASHABLE_ENTITIES =
-      SettingKey.Poly.builder("leashable-entities",
-              AltSet.full(new StringSet()),
-              SettingKeyManagers.POLY_ENTITY_KEY_MANAGER)
+      SettingKeyManagers.POLY_ENTITY_KEY_MANAGER.keyBuilder("leashable-entities")
+          .fillDefaultData()
           .blurb("Entities that can have leads")
           .description("A list of entities which can have leads attached to them")
-          .category(SettingKey.Category.BLOCKS)
+          .category(SettingCategory.BLOCKS)
           .playerRestrictive()
           .build();
   public static final SettingKey.Unary<Boolean> LIGHTNING =
-      SettingKey.Unary.builder("lightning", true, SettingKeyManagers.TOGGLE_KEY_MANAGER)
+      SettingKeyManagers.TOGGLE_KEY_MANAGER.keyBuilder("lightning")
+          .defaultValue(true)
           .blurb("Lightning strikes")
           .description("When disabled, lightning cannot strike.")
           .build();
   public static final SettingKey.Unary<Boolean> LIGHT_NETHER_PORTAL =
-      SettingKey.Unary.builder("light-nether-portal", true, SettingKeyManagers.STATE_KEY_MANAGER)
+      SettingKeyManagers.STATE_KEY_MANAGER.keyBuilder("light-nether-portal")
+          .defaultValue(true)
           .blurb("Lighting nether portals")
           .description("When disabled, players cannot light nether portals")
-          .category(SettingKey.Category.MISC)
+          .category(SettingCategory.MISC)
           .playerRestrictive()
           .build();
-  public static final SettingKey.Poly<MovementSet.Movement, MovementSet> MOVE =
-      SettingKey.Poly.builder("move",
-              AltSet.full(new MovementSet()),
-              SettingKeyManagers.POLY_MOVEMENT_KEY_MANAGER)
+  public static final SettingKey.Poly<Movement, MovementSet> MOVE =
+      SettingKeyManagers.POLY_MOVEMENT_KEY_MANAGER.keyBuilder("move")
+          .fillDefaultData()
           .blurb("Movement within a host")
           .description("Specify which type of movement is allowed.")
-          .category(SettingKey.Category.MOVEMENT)
+          .category(SettingCategory.MOVEMENT)
           .playerRestrictive()
           .build();
   public static final SettingKey.Unary<Boolean> MYCELIUM_SPREAD =
-      SettingKey.Unary.builder("mycelium-spread", true, SettingKeyManagers.TOGGLE_KEY_MANAGER)
+      SettingKeyManagers.TOGGLE_KEY_MANAGER.keyBuilder("mycelium-spread")
+          .defaultValue(true)
           .blurb("Mycelium spread")
           .description("When disabled, mycelium does not spread")
-          .category(SettingKey.Category.BLOCKS)
+          .category(SettingCategory.BLOCKS)
           .build();
   public static final SettingKey.Unary<Boolean> PLAYER_COLLISION =
-      SettingKey.Unary.builder("player-collision", true, SettingKeyManagers.TOGGLE_KEY_MANAGER)
+      SettingKeyManagers.TOGGLE_KEY_MANAGER.keyBuilder("player-collision")
+          .defaultValue(true)
           .blurb("Collision between players")
           .description("When disabled, players do not collide")
-          .category(SettingKey.Category.MOVEMENT)
+          .category(SettingCategory.MOVEMENT)
           .build();
-  public static final SettingKey.Poly<DamageCauseSet.DamageCause, DamageCauseSet> PLAYER_DAMAGE_SOURCE =
-      SettingKey.Poly.builder("player-damage-source",
-              AltSet.full(new DamageCauseSet()),
-              SettingKeyManagers.POLY_DAMAGE_SOURCE_KEY_MANAGER)
+  public static final SettingKey.Poly<DamageCause, DamageCauseSet> PLAYER_DAMAGE_SOURCE =
+      SettingKeyManagers.POLY_DAMAGE_SOURCE_KEY_MANAGER.keyBuilder("player-damage-source")
+          .fillDefaultData()
           .blurb("Damage sources to players")
           .description("A list of damage sources that may inflict damage to players")
-          .category(SettingKey.Category.DAMAGE)
+          .category(SettingCategory.DAMAGE)
           .build();
   public static final SettingKey.Unary<Boolean> RIDE =
-      SettingKey.Unary.builder("ride", true, SettingKeyManagers.STATE_KEY_MANAGER)
+      SettingKeyManagers.STATE_KEY_MANAGER.keyBuilder("ride")
+          .defaultValue(true)
           .blurb("Ability to ride entities")
           .description("When disabled, players may not ride entities")
-          .category(SettingKey.Category.ENTITIES)
+          .category(SettingCategory.ENTITIES)
           .playerRestrictive()
           .build();
   public static final SettingKey.Unary<Boolean> SLEEP =
-      SettingKey.Unary.builder("sleep", true, SettingKeyManagers.STATE_KEY_MANAGER)
+      SettingKeyManagers.STATE_KEY_MANAGER.keyBuilder("sleep")
+          .defaultValue(true)
           .blurb("Ability to sleep")
           .description("When disabled, players may not sleep.")
           .playerRestrictive()
           .build();
   public static final SettingKey.Poly<String, StringSet> SPAWNABLE_ENTITIES =
-      SettingKey.Poly.builder("spawnable-entities",
-              AltSet.full(new StringSet()),
-              SettingKeyManagers.POLY_ENTITY_KEY_MANAGER)
+      SettingKeyManagers.POLY_ENTITY_KEY_MANAGER.keyBuilder("spawnable-entities")
+          .fillDefaultData()
           .blurb("Spawnable entities")
           .description("List of entities which can be spawned")
-          .category(SettingKey.Category.ENTITIES)
+          .category(SettingCategory.ENTITIES)
           .playerRestrictive()
           .build();
   public static final SettingKey.Unary<Boolean> TNT_IGNITION =
-      SettingKey.Unary.builder("tnt-ignition", true, SettingKeyManagers.STATE_KEY_MANAGER)
+      SettingKeyManagers.STATE_KEY_MANAGER.keyBuilder("tnt-ignition")
+          .defaultValue(true)
           .blurb("TNT ignition")
           .description("When disabled, TNT may not be primed.")
-          .category(SettingKey.Category.BLOCKS)
+          .category(SettingCategory.BLOCKS)
           .build();
   public static final SettingKey.Unary<Boolean> TRAMPLE =
-      SettingKey.Unary.builder("trample", true, SettingKeyManagers.STATE_KEY_MANAGER)
+      SettingKeyManagers.STATE_KEY_MANAGER.keyBuilder("trample")
+          .defaultValue(true)
           .blurb("Farmland trample restriction")
           .description("When disabled, blocks like farmland may not be trampled.")
-          .category(SettingKey.Category.BLOCKS)
+          .category(SettingCategory.BLOCKS)
           .playerRestrictive()
           .build();
   public static final SettingKey.Unary<Boolean> USE_NAME_TAG =
-      SettingKey.Unary.builder("use-name-tag", true, SettingKeyManagers.STATE_KEY_MANAGER)
+      SettingKeyManagers.STATE_KEY_MANAGER.keyBuilder("use-name-tag")
+          .defaultValue(true)
           .blurb("use-name-tag")
           .description("When disabled, players may not use name tags")
           .playerRestrictive()
           .build();
   public static final SettingKey.Unary<Boolean> WATER_FLOW =
-      SettingKey.Unary.builder("water-flow", true, SettingKeyManagers.TOGGLE_KEY_MANAGER)
+      SettingKeyManagers.TOGGLE_KEY_MANAGER.keyBuilder("water-flow")
+          .defaultValue(true)
           .blurb("Lava flow")
           .description("When disabled, lava does not spread")
-          .category(SettingKey.Category.BLOCKS)
+          .category(SettingCategory.BLOCKS)
           .build();
 
   /**

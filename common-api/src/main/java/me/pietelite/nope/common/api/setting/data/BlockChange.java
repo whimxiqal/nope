@@ -22,27 +22,30 @@
  * SOFTWARE.
  */
 
-package me.pietelite.nope.sponge.api.config;
+package me.pietelite.nope.common.api.setting.data;
 
-import me.pietelite.nope.common.setting.SettingKey;
-import me.pietelite.nope.common.setting.SettingValue;
-import org.spongepowered.configurate.CommentedConfigurationNode;
-import org.spongepowered.configurate.ConfigurationNode;
-import org.spongepowered.configurate.serialize.SerializationException;
+import me.pietelite.nope.common.api.struct.Described;
 
-/**
- * A serializer for serializing values stored in {@link me.pietelite.nope.common.setting.Setting}s
- * for the purpose of persisting data in configuration files.
- *
- * @param <M> the manager type
- */
-@SuppressWarnings("checkstyle:LineLength")
-public interface SettingValueConfigSerializer<M extends SettingKey.Manager<?, ?>> {
+public enum BlockChange implements Described {
+    BREAK("Whether blocks can be replaced with air"),
+    PLACE("Whether blocks can replace air"),
+    MODIFY("Whether blocks can changed to other blocks or change internally"),
+    GROW("Whether blocks may be grown"),
+    DECAY("Whether blocks may decay");
 
-  Class<M> managerClass();
+    private final String description;
 
-  <X, Y extends SettingValue<X>, Z extends SettingKey.Manager<X, Y>> CommentedConfigurationNode serialize(Z manager, Y value) throws SerializationException;
+    BlockChange(String description) {
+        this.description = description;
+    }
 
-  <X, Y extends SettingValue<X>, Z extends SettingKey.Manager<X, Y>> Y deserialize(Z manager, ConfigurationNode configNode) throws SerializationException;
+    @Override
+    public String description() {
+        return description;
+    }
 
+    @Override
+    public String toString() {
+        return name().toLowerCase();
+    }
 }

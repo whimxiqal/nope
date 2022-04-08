@@ -1,6 +1,5 @@
 plugins {
     id 'java-library'
-    id 'com.github.johnrengelman.shadow' version '7.1.2'
 }
 
 repositories {
@@ -19,19 +18,8 @@ tasks.withType(JavaCompile.class).configureEach {
     options.encoding = "utf-8"
 }
 
-// Make sure all tasks which produce archives (jar, sources jar, javadoc jar, etc) produce more consistent output
-tasks.withType(AbstractArchiveTask.class).configureEach {
-    reproducibleFileOrder = true
-    preserveFileTimestamps = false
-}
-//////////////////////////
-
-test {
-    useJUnitPlatform()
-}
-
 dependencies {
-    implementation project(':common')
+    implementation project(':common-api')
 
     implementation "org.spongepowered:spongeapi:8.0.0"
     annotationProcessor "org.spongepowered:spongeapi:8.0.0"
@@ -39,10 +27,3 @@ dependencies {
     implementation 'org.jetbrains:annotations:23.0.0'
 }
 
-shadowJar {
-    archiveFileName = "Nope-SpongeApi-${project.ext.fullVersion}.jar"
-
-    dependencies {
-        include(dependency('me.pietelite.nope:.*'))
-    }
-}

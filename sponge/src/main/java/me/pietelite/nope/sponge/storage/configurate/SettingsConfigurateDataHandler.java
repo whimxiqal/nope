@@ -41,7 +41,7 @@ import me.pietelite.nope.common.setting.SettingKey;
 import me.pietelite.nope.common.setting.SettingValue;
 import me.pietelite.nope.common.setting.Target;
 import me.pietelite.nope.sponge.SpongeNope;
-import me.pietelite.nope.sponge.api.config.SettingValueConfigSerializerRegistrar;
+import me.pietelite.nope.sponge.config.SettingValueConfigSerializerRegistrar;
 import me.pietelite.nope.sponge.storage.configurate.serializer.VolumeTypeSerializer;
 import org.spongepowered.configurate.CommentedConfigurationNode;
 import org.spongepowered.configurate.ConfigurationNode;

@@ -25,7 +25,7 @@
 package me.pietelite.nope.sponge.storage.yaml;
 
 import java.nio.file.Path;
-import me.pietelite.nope.sponge.api.config.SettingValueConfigSerializerRegistrar;
+import me.pietelite.nope.sponge.config.SettingValueConfigSerializerRegistrar;
 import me.pietelite.nope.sponge.storage.configurate.UniverseConfigurateDataHandler;
 
 /**

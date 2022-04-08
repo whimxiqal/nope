@@ -24,13 +24,13 @@
 
 package me.pietelite.nope.common.setting.sets;
 
-import me.pietelite.nope.common.struct.Described;
+import me.pietelite.nope.common.api.setting.data.BlockChange;
 import me.pietelite.nope.common.struct.HashAltSet;
 
 /**
  * A set of all possible block changes acknowledged by Nope.
  */
-public class BlockChangeSet extends HashAltSet.FewEnum<BlockChangeSet.BlockChange> {
+public class BlockChangeSet extends HashAltSet.FewEnum<BlockChange> {
 
   /**
    * Default constructor.
@@ -39,30 +39,4 @@ public class BlockChangeSet extends HashAltSet.FewEnum<BlockChangeSet.BlockChang
     super(BlockChange.class);
   }
 
-  /**
-   * Enumeration for all explosive types considered by Nope.
-   */
-  public enum BlockChange implements Described {
-    BREAK("Whether blocks can be replaced with air"),
-    PLACE("Whether blocks can replace air"),
-    MODIFY("Whether blocks can changed to other blocks or change internally"),
-    GROW("Whether blocks may be grown"),
-    DECAY("Whether blocks may decay");
-
-    private final String description;
-
-    BlockChange(String description) {
-      this.description = description;
-    }
-
-    @Override
-    public String description() {
-      return description;
-    }
-
-    @Override
-    public String toString() {
-      return name().toLowerCase();
-    }
-  }
 }

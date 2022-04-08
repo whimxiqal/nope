@@ -28,6 +28,8 @@ import java.util.AbstractCollection;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.stream.IntStream;
+
+import me.pietelite.nope.common.api.struct.AltSet;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 

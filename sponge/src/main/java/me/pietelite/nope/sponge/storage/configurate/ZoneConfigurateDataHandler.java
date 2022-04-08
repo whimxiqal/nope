@@ -40,7 +40,7 @@ import me.pietelite.nope.common.math.Sphere;
 import me.pietelite.nope.common.math.Volume;
 import me.pietelite.nope.common.storage.ZoneDataHandler;
 import me.pietelite.nope.sponge.SpongeNope;
-import me.pietelite.nope.sponge.api.config.SettingValueConfigSerializerRegistrar;
+import me.pietelite.nope.sponge.config.SettingValueConfigSerializerRegistrar;
 import org.spongepowered.configurate.CommentedConfigurationNode;
 import org.spongepowered.configurate.ConfigurateException;
 import org.spongepowered.configurate.ConfigurationNode;

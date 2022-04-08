@@ -1,0 +1,16 @@
+plugins {
+    id 'java-library'
+}
+
+tasks.withType(JavaCompile.class).configureEach {
+    options.encoding = "utf-8"
+}
+
+java {
+    sourceCompatibility = JavaVersion.toVersion(8)
+    targetCompatibility = JavaVersion.toVersion(8)
+}
+
+dependencies {
+    implementation 'org.jetbrains:annotations:23.0.0'
+}

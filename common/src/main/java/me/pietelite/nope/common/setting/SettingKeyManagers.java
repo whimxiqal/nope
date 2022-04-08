@@ -24,6 +24,10 @@
 
 package me.pietelite.nope.common.setting;
 
+import me.pietelite.nope.common.api.setting.data.BlockChange;
+import me.pietelite.nope.common.api.setting.data.DamageCause;
+import me.pietelite.nope.common.api.setting.data.Explosive;
+import me.pietelite.nope.common.api.setting.data.Movement;
 import me.pietelite.nope.common.setting.manager.BooleanKeyManager;
 import me.pietelite.nope.common.setting.manager.IntegerKeyManager;
 import me.pietelite.nope.common.setting.manager.PolyAllCapsEnumKeyManager;
@@ -44,25 +48,25 @@ public final class SettingKeyManagers {
 
   public static final BooleanKeyManager BOOLEAN_KEY_MANAGER = new BooleanKeyManager();
   public static final IntegerKeyManager INTEGER_KEY_MANAGER = new IntegerKeyManager();
-  public static final PolyAllCapsEnumKeyManager<BlockChangeSet.BlockChange, BlockChangeSet>
+  public static final PolyAllCapsEnumKeyManager<BlockChange, BlockChangeSet>
       POLY_BLOCK_CHANGE_KEY_MANAGER =
-      new PolyAllCapsEnumKeyManager<>(BlockChangeSet.BlockChange.class, BlockChangeSet::new);
-  public static final PolyStringKeyManager<StringSet> POLY_BLOCK_KEY_MANAGER =
-      new PolyStringKeyManager<>(StringSet::new);
-  public static final PolyAllCapsEnumKeyManager<DamageCauseSet.DamageCause, DamageCauseSet>
+      new PolyAllCapsEnumKeyManager<>(BlockChange.class, BlockChangeSet.class, BlockChangeSet::new);
+  public static final PolyStringKeyManager POLY_BLOCK_KEY_MANAGER =
+      new PolyStringKeyManager();
+  public static final PolyAllCapsEnumKeyManager<DamageCause, DamageCauseSet>
       POLY_DAMAGE_SOURCE_KEY_MANAGER =
-      new PolyAllCapsEnumKeyManager<>(DamageCauseSet.DamageCause.class, DamageCauseSet::new);
-  public static final PolyStringKeyManager<StringSet> POLY_ENTITY_KEY_MANAGER =
-      new PolyStringKeyManager<>(StringSet::new);
-  public static final PolyAllCapsEnumKeyManager<ExplosiveSet.Explosive, ExplosiveSet>
+      new PolyAllCapsEnumKeyManager<>(DamageCause.class, DamageCauseSet.class, DamageCauseSet::new);
+  public static final PolyStringKeyManager POLY_ENTITY_KEY_MANAGER =
+      new PolyStringKeyManager();
+  public static final PolyAllCapsEnumKeyManager<Explosive, ExplosiveSet>
       POLY_EXPLOSIVE_KEY_MANAGER =
-      new PolyAllCapsEnumKeyManager<>(ExplosiveSet.Explosive.class, ExplosiveSet::new);
-  public static final PolyStringKeyManager<StringSet> POLY_GROWABLE_KEY_MANAGER =
-      new PolyStringKeyManager<>(StringSet::new);
-  public static final PolyAllCapsEnumKeyManager<MovementSet.Movement, MovementSet> POLY_MOVEMENT_KEY_MANAGER =
-      new PolyAllCapsEnumKeyManager<>(MovementSet.Movement.class, MovementSet::new);
-  public static final PolyStringKeyManager<StringSet> POLY_PLUGIN_MANAGER =
-      new PolyStringKeyManager<>(StringSet::new);
+      new PolyAllCapsEnumKeyManager<>(Explosive.class, ExplosiveSet.class, ExplosiveSet::new);
+  public static final PolyStringKeyManager POLY_GROWABLE_KEY_MANAGER =
+      new PolyStringKeyManager();
+  public static final PolyAllCapsEnumKeyManager<Movement, MovementSet> POLY_MOVEMENT_KEY_MANAGER =
+      new PolyAllCapsEnumKeyManager<>(Movement.class, MovementSet.class, MovementSet::new);
+  public static final PolyStringKeyManager POLY_PLUGIN_MANAGER =
+      new PolyStringKeyManager();
   public static final StateKeyManager STATE_KEY_MANAGER = new StateKeyManager();
   public static final StringKeyManager STRING_KEY_MANAGER = new StringKeyManager();
   public static final ToggleKeyManager TOGGLE_KEY_MANAGER = new ToggleKeyManager();

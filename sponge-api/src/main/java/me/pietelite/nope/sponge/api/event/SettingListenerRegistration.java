@@ -24,8 +24,6 @@
 
 package me.pietelite.nope.sponge.api.event;
 
-import me.pietelite.nope.common.setting.SettingKey;
-import me.pietelite.nope.sponge.api.SpongeNopeApi;
 import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.Order;
 import org.spongepowered.plugin.PluginContainer;
@@ -38,7 +36,8 @@ import org.spongepowered.plugin.PluginContainer;
  */
 public class SettingListenerRegistration<T, E extends Event> {
 
-  private final SettingKey<? extends T, ?, ?> settingKey;
+  private final String settingKey;
+  private final Class<? extends T> dataClass;
   private final Class<E> eventClass;
   private final Order order;
   private final PluginContainer plugin;
@@ -52,11 +51,13 @@ public class SettingListenerRegistration<T, E extends Event> {
    * @param plugin               the plugin responsible for this listener
    * @param settingEventListener the actual listener to handle the event
    */
-  public SettingListenerRegistration(SettingKey<? extends T, ?, ?> settingKey,
+  public SettingListenerRegistration(String settingKey,
+                                     Class<? extends T> dataClass,
                                      Class<E> eventClass,
                                      PluginContainer plugin,
                                      SettingEventListener<T, E> settingEventListener) {
     this.settingKey = settingKey;
+    this.dataClass = dataClass;
     this.eventClass = eventClass;
     this.plugin = plugin;
     this.settingEventListener = settingEventListener;
@@ -72,20 +73,26 @@ public class SettingListenerRegistration<T, E extends Event> {
    * @param settingEventListener the actual listener to handle the event
    * @param order                the event ordering with which to register this event to the mod platform
    */
-  public SettingListenerRegistration(SettingKey<? extends T, ?, ?> settingKey,
+  public SettingListenerRegistration(String settingKey,
+                                     Class<? extends T> dataClass,
                                      Class<E> eventClass,
                                      PluginContainer plugin,
                                      SettingEventListener<T, E> settingEventListener,
                                      Order order) {
     this.settingKey = settingKey;
+    this.dataClass = dataClass;
     this.eventClass = eventClass;
     this.plugin = plugin;
     this.settingEventListener = settingEventListener;
     this.order = order;
   }
 
-  public SettingKey<? extends T, ?, ?> settingKey() {
+  public String settingKey() {
     return settingKey;
+  }
+
+  public Class<? extends T> dataClass() {
+    return dataClass;
   }
 
   public Class<E> eventClass() {

@@ -31,16 +31,12 @@ import java.util.concurrent.TimeUnit;
 import lombok.Getter;
 import lombok.experimental.Accessors;
 import me.pietelite.nope.common.Nope;
+import me.pietelite.nope.common.setting.SettingKey;
 import me.pietelite.nope.common.setting.SettingKeys;
-import me.pietelite.nope.sponge.api.SpongeNopeApi;
-import me.pietelite.nope.sponge.api.config.SettingValueConfigSerializerRegistrar;
-import me.pietelite.nope.sponge.api.config.SettingValueConfigSerializerRegistrationEvent;
 import me.pietelite.nope.sponge.api.event.SettingListenerRegistrationEvent;
 import me.pietelite.nope.sponge.api.setting.SettingKeyRegistrationEvent;
 import me.pietelite.nope.sponge.command.RootCommand;
-import me.pietelite.nope.sponge.config.PolySettingValueConfigSerializer;
-import me.pietelite.nope.sponge.config.SettingValueConfigSerializerRegistrarImpl;
-import me.pietelite.nope.sponge.config.UnarySettingValueConfigSerializer;
+import me.pietelite.nope.sponge.config.SettingValueConfigSerializerRegistrar;
 import me.pietelite.nope.sponge.context.ZoneContextCalculator;
 import me.pietelite.nope.sponge.key.NopeKeys;
 import me.pietelite.nope.sponge.listener.NopeSettingListeners;
@@ -111,7 +107,6 @@ public class SpongeNope extends Nope {
   public void onConstruct(ConstructPluginEvent event) {
     // Set general static variables
     Nope.instance(this);
-    SpongeNopeApi.init(new NopeServiceImpl());
     instance = this;
     path(configDir);
 
@@ -150,22 +145,15 @@ public class SpongeNope extends Nope {
   public void onLoadedGame(LoadedGameEvent event) {
     SpongeSettingKeyManagerUtil.updateSettingKeyManagers();
 
-    // Collect serializers for setting values
-    SettingValueConfigSerializerRegistrar configRegistrar = new SettingValueConfigSerializerRegistrarImpl();
-    configRegistrar.register(new UnarySettingValueConfigSerializer());
-    configRegistrar.register(new PolySettingValueConfigSerializer());
-    Sponge.eventManager().post(new SettingValueConfigSerializerRegistrationEvent(
-        configRegistrar,
-        event.game(),
-        event.cause(),
-        event.source(),
-        event.context()
-    ));
-
     // Create setting keys
     SettingKeys.registerTo(instance().settingKeys());
     Sponge.eventManager().post(new SettingKeyRegistrationEvent(
-        (settingKey) -> instance().settingKeys().register(settingKey),
+        (settingKey) -> {
+          if (!(settingKey instanceof SettingKey.Builder)) {
+            throw new IllegalArgumentException("You may not use your own setting key builder.");
+          }
+          instance().settingKeys().register(((SettingKey.Builder<?, ?, ?, ?, ?>) settingKey).build());
+        },
         event.game(),
         event.cause(),
         event.source(),
@@ -174,7 +162,7 @@ public class SpongeNope extends Nope {
     instance().settingKeys().lock();
 
     // Load data
-    data(new HoconDataHandler(configDir, configRegistrar));
+    data(new HoconDataHandler(configDir, new SettingValueConfigSerializerRegistrar()));
     hostSystem(data().loadSystem());
     hostSystem().addAllZones(data().zones().load());
 
@@ -183,8 +171,10 @@ public class SpongeNope extends Nope {
     NopeSettingListeners.register();
     Sponge.eventManager().post(new SettingListenerRegistrationEvent(
         registration -> {
+          SettingKey<?, ?, ?> key = settingKeys().get(registration.settingKey());
+          key.manager().dataType().isAssignableFrom(registration.dataClass());
           settingListeners().stage(registration);
-          registration.settingKey().functional(true);
+          settingKeys().get(registration.settingKey()).functional(true);
         },
         event.game(),
         event.cause(),

@@ -22,22 +22,29 @@
  * SOFTWARE.
  */
 
-package me.pietelite.nope.sponge.api.service;
+package me.pietelite.nope.common.api.setting.data;
 
-import me.pietelite.nope.common.host.Domain;
-import org.spongepowered.api.world.server.ServerWorld;
+import me.pietelite.nope.common.api.struct.Described;
 
-/**
- * A service for the usage of other plugins and for the main plugin to implement.
- */
-public interface NopeService {
+public enum DamageCause implements Described {
+    PLAYERS("Damage caused by other players"),
+    FALL("Damage caused from falling down"),
+    ENTITY("Damage caused by some entity"),
+    MISC("Miscellaneous damage");
 
-  /**
-   * Convert a sponge-type world into its Nope-type domain counterpart.
-   *
-   * @param world the world
-   * @return the domain
-   */
-  Domain reduce(ServerWorld world);
+    private final String description;
 
+    DamageCause(String description) {
+        this.description = description;
+    }
+
+    @Override
+    public String description() {
+        return description;
+    }
+
+    @Override
+    public String toString() {
+        return name().toLowerCase();
+    }
 }

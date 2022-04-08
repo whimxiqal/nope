@@ -27,7 +27,7 @@ package me.pietelite.nope.common.setting;
 import java.io.Serializable;
 import lombok.Getter;
 import lombok.experimental.Accessors;
-import me.pietelite.nope.common.struct.AltSet;
+import me.pietelite.nope.common.api.struct.AltSet;
 import org.jetbrains.annotations.NotNull;
 
 /**
