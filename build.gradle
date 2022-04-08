@@ -20,7 +20,6 @@ def determinePatchVersion() {
 
 subprojects {
     apply plugin: 'java'
-    apply plugin: 'maven-publish'
     apply plugin: 'org.cadixdev.licenser'
 
     group = 'me.pietelite.nope'

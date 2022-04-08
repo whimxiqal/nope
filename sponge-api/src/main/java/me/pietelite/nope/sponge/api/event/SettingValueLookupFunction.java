@@ -38,7 +38,7 @@ public interface SettingValueLookupFunction<T> {
 
   /**
    * Look up the requested value using the cause of an event and a specific location.
-   * If the cause is found to be a {@link org.spongepowered.api.entity.living.player.Player},
+   * If the cause is found to be a Sponge ServerPlayer,
    * the setting system will use this player's permission as part of the evaluation process
    * for the resulting value. The location is just the location where you want the setting evaluated.
    *
