@@ -26,12 +26,12 @@ package me.pietelite.nope.common.host;
 
 import java.util.UUID;
 import me.pietelite.nope.common.TestNope;
+import me.pietelite.nope.common.api.struct.AltSet;
 import me.pietelite.nope.common.permission.Permissions;
 import me.pietelite.nope.common.setting.Setting;
 import me.pietelite.nope.common.setting.SettingKeys;
 import me.pietelite.nope.common.setting.SettingValue;
 import me.pietelite.nope.common.setting.sets.BlockChangeSet;
-import me.pietelite.nope.common.struct.AltSet;
 import me.pietelite.nope.common.struct.Location;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;

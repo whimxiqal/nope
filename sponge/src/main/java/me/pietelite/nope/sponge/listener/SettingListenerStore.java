@@ -44,7 +44,7 @@ public class SettingListenerStore {
 
   private final SettingKeyStore settingKeys;
   private final HashMap<String, List<SettingListenerRegistration<?, ?>>> settingListeners = new HashMap<>();
-  private List<SettingKey<?, ?, ?>> unregisteredKeys = new LinkedList<>();
+  private List<String> unregisteredKeys = new LinkedList<>();
 
   public SettingListenerStore(@NotNull SettingKeyStore settingKeys) {
     this.settingKeys = settingKeys;
@@ -61,12 +61,12 @@ public class SettingListenerStore {
    * @see #registerAll()
    */
   public <T, E extends Event> void stage(SettingListenerRegistration<T, E> registration) {
-    if (!settingKeys.containsId(registration.settingKey().id())) {
+    if (!settingKeys.containsId(registration.settingKey())) {
       throw new IllegalStateException(String.format("Cannot register setting listener because "
-          + "setting key %s is not registered.", registration.settingKey().id()));
+          + "setting key %s is not registered.", registration.settingKey()));
     }
 
-    this.settingListeners.computeIfAbsent(registration.settingKey().id(),
+    this.settingListeners.computeIfAbsent(registration.settingKey(),
             (k) -> new ArrayList<>(1))
         .add(registration);
     this.unregisteredKeys.add(registration.settingKey());
@@ -77,18 +77,21 @@ public class SettingListenerStore {
    * required functionality.
    * This should be called any time the {@link me.pietelite.nope.common.setting.Setting}s change
    * anywhere because some listeners may have only just become required.
+   * It must be called on the main thread.
    */
   public void registerAll() {
-    List<SettingKey<?, ?, ?>> stillUnregistered = new LinkedList<>();
+    List<String> stillUnregistered = new LinkedList<>();
     int registerCount = 0;
-    for (SettingKey<?, ?, ?> key : unregisteredKeys) {
+    SettingKey<?, ?, ?> key;
+    for (String keyId : unregisteredKeys) {
+      key = settingKeys.get(keyId);
       if (SpongeNope.instance().hostSystem().isAssigned(key)) {
         for (SettingListenerRegistration<?, ?> registration : settingListeners.get(key.id())) {
           registerCount++;
           registerToSponge(registration);
         }
       } else {
-        stillUnregistered.add(key);
+        stillUnregistered.add(keyId);
       }
     }
     if (registerCount > 0) {
@@ -97,10 +100,16 @@ public class SettingListenerStore {
     unregisteredKeys = stillUnregistered;
   }
 
+  @SuppressWarnings("unchecked")
   private <T, E extends Event> void registerToSponge(SettingListenerRegistration<T, E> registration) {
+    SettingKey<?, ?, ?> key = settingKeys.get(registration.settingKey());
+    if (!registration.dataClass().isAssignableFrom(key.manager().dataType())) {
+      throw new IllegalStateException("The setting key's data type in the registration "
+          + "must match the registration's data type");
+    }
     Sponge.eventManager().registerListener(EventListenerRegistration.builder(registration.eventClass())
-        .listener(event -> registration.settingEventListener()
-            .handle(new SettingEventContextImpl<>(event, registration.settingKey())))
+        .listener(event -> registration.settingEventListener().handle(new SettingEventContextImpl<>(event,
+            (SettingKey<T, ?, ?>) settingKeys.get(registration.settingKey()))))
         .plugin(registration.plugin())
         .order(registration.order())
         .build());

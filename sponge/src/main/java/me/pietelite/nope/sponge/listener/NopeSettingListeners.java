@@ -227,7 +227,8 @@ public final class NopeSettingListeners {
                                                SettingEventListener<T, E> settingEventListener) {
     SpongeNope.instance()
         .settingListeners()
-        .stage(new SettingListenerRegistration<>(settingKey,
+        .stage(new SettingListenerRegistration<>(settingKey.id(),
+            settingKey.manager().dataType(),
             eventClass,
             SpongeNope.instance().pluginContainer(),
             settingEventListener));

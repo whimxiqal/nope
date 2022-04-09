@@ -20,23 +20,22 @@ def determinePatchVersion() {
 
 subprojects {
     apply plugin: 'java'
-    apply plugin: 'maven-publish'
     apply plugin: 'org.cadixdev.licenser'
 
     group = 'me.pietelite.nope'
 
     project.ext.majorVersion = '1'
-    project.ext.minorVersion = '0'
+    project.ext.minorVersion = '1'
     project.ext.patchVersion = determinePatchVersion()
     project.ext.versionPrefix = 'BETA-'
-    project.ext.apiVersion = versionPrefix + project.ext.majorVersion + '.' + project.ext.minorVersion
+    project.ext.apiVersion = project.ext.versionPrefix + project.ext.majorVersion + '.' + project.ext.minorVersion
     project.ext.fullVersion = project.ext.apiVersion + '.' + project.ext.patchVersion
     version = project.ext.fullVersion
 
-    sourceCompatibility = 1.8
-    targetCompatibility = 1.8
+    sourceCompatibility = JavaVersion.toVersion(8)
+    targetCompatibility = JavaVersion.toVersion(8)
 
-    tasks.withType(JavaCompile) {
+    tasks.withType(JavaCompile).configureEach {
         options.encoding = 'UTF-8'
     }
 
@@ -53,4 +52,5 @@ subprojects {
     repositories {
         mavenCentral()
     }
+
 }

@@ -52,7 +52,8 @@ public class LightNetherPortalListener {
     // Listener to populate fire ownership map with the players that own certain fires
     SpongeNope.instance()
         .settingListeners()
-        .stage(new SettingListenerRegistration<>(SettingKeys.LIGHT_NETHER_PORTAL,
+        .stage(new SettingListenerRegistration<>(SettingKeys.LIGHT_NETHER_PORTAL.id(),
+            Boolean.class,
             ChangeBlockEvent.All.class,
             SpongeNope.instance().pluginContainer(),
             context ->
@@ -67,7 +68,8 @@ public class LightNetherPortalListener {
     // Listener to stop lighting nether portals
     SpongeNope.instance()
         .settingListeners()
-        .stage(new SettingListenerRegistration<>(SettingKeys.LIGHT_NETHER_PORTAL,
+        .stage(new SettingListenerRegistration<>(SettingKeys.LIGHT_NETHER_PORTAL.id(),
+            Boolean.class,
             ChangeBlockEvent.All.class,
             SpongeNope.instance().pluginContainer(),
             context ->

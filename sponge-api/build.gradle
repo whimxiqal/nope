@@ -1,6 +1,5 @@
 plugins {
     id 'java-library'
-    id 'com.github.johnrengelman.shadow' version '7.1.2'
 }
 
 repositories {
@@ -10,28 +9,8 @@ repositories {
     }
 }
 
-java {
-    sourceCompatibility = JavaVersion.toVersion(8)
-    targetCompatibility = JavaVersion.toVersion(8)
-}
-
-tasks.withType(JavaCompile.class).configureEach {
-    options.encoding = "utf-8"
-}
-
-// Make sure all tasks which produce archives (jar, sources jar, javadoc jar, etc) produce more consistent output
-tasks.withType(AbstractArchiveTask.class).configureEach {
-    reproducibleFileOrder = true
-    preserveFileTimestamps = false
-}
-//////////////////////////
-
-test {
-    useJUnitPlatform()
-}
-
 dependencies {
-    implementation project(':common')
+    implementation project(':common-api')
 
     implementation "org.spongepowered:spongeapi:8.0.0"
     annotationProcessor "org.spongepowered:spongeapi:8.0.0"
@@ -39,10 +18,93 @@ dependencies {
     implementation 'org.jetbrains:annotations:23.0.0'
 }
 
-shadowJar {
-    archiveFileName = "Nope-SpongeApi-${project.ext.fullVersion}.jar"
+jar {
+    archiveFileName = "Nope-SpongeAPI-${project.ext.apiVersion}.jar"
+}
 
-    dependencies {
-        include(dependency('me.pietelite.nope:.*'))
+// Used for deployment of the Sponge API
+/*
+if (project.hasProperty('sonatypeUsername') && project.hasProperty('sonatypePassword')) {
+    apply plugin: 'maven-publish'
+    apply plugin: 'signing'
+
+    javadoc {
+        title = 'Nope Sponge API (v' + project.ext.apiVersion + ')'
+        options.encoding = 'UTF-8'
+        options.charSet = 'UTF-8'
+        options.links(
+                'https://javadoc.io/doc/org.jetbrains/annotations/23.0.0'
+        )
+        options.addStringOption('Xdoclint:none', '-quiet')
+    }
+    task javadocJar(type: Jar, dependsOn: javadoc) {
+        classifier 'javadoc'
+        from javadoc.destinationDir
+    }
+    task sourcesJar(type: Jar) {
+        classifier 'sources'
+        from sourceSets.main.allSource
+    }
+    artifacts {
+        archives javadocJar
+        archives sourcesJar
+    }
+    publishing {
+        repositories {
+            maven {
+                name = "OSSRH"
+                url = "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/"
+                credentials {
+                    username sonatypeUsername
+                    password sonatypePassword
+                }
+            }
+        }
+        publications {
+            mavenJava(MavenPublication) {
+                groupId = 'me.pietelite.nope'
+                artifactId = 'sponge-api'
+                version = project.ext.apiVersion
+                from components.java
+                artifact sourcesJar
+                artifact javadocJar
+                pom {
+                    name = 'Nope Sponge API'
+                    description = 'A protections plugin for Minecraft servers.'
+                    url = 'https://github.com/pietelite/nope'
+                    licenses {
+                        license {
+                            name = 'MIT'
+                            url = 'https://opensource.org/licenses/MIT'
+                        }
+                    }
+                    developers {
+                        developer {
+                            id = 'pietelite'
+                            name = 'PietElite'
+                            url = 'https://pietelite.me'
+                            email = 'pietelite@gmail.com'
+                        }
+                    }
+                    scm {
+                        connection = 'scm:git:https://github.com/pietelite/nope.git'
+                        developerConnection = 'scm:git:git@github.com:pietelite/nope.git'
+                        url = 'https://github.com/pietelite/nope'
+                    }
+                    issueManagement {
+                        system = 'GitHub'
+                        url = 'https://github.com/pietelite/nope/issues'
+                    }
+                }
+            }
+        }
+
+        signing {
+            useGpgCmd()
+            sign configurations.archives
+            sign publishing.publications.mavenJava
+            required = true
+        }
     }
 }
+*/

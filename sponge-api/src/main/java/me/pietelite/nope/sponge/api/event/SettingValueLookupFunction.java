@@ -24,14 +24,11 @@
 
 package me.pietelite.nope.sponge.api.event;
 
-import java.util.UUID;
-import me.pietelite.nope.common.setting.Setting;
-import me.pietelite.nope.common.struct.Location;
 import org.spongepowered.api.world.server.ServerLocation;
 
 /**
- * A group of functions to assist in evaluating what value a certain
- * pre-specified {@link Setting} has.
+ * A group of functions to assist in evaluating what value is under a certain
+ * pre-specified setting key has.
  *
  * @param <T> the type of value to request
  */
@@ -41,7 +38,7 @@ public interface SettingValueLookupFunction<T> {
 
   /**
    * Look up the requested value using the cause of an event and a specific location.
-   * If the cause is found to be a {@link org.spongepowered.api.entity.living.player.Player},
+   * If the cause is found to be a Sponge ServerPlayer,
    * the setting system will use this player's permission as part of the evaluation process
    * for the resulting value. The location is just the location where you want the setting evaluated.
    *
@@ -50,15 +47,5 @@ public interface SettingValueLookupFunction<T> {
    * @return the requested value
    */
   T lookup(Object cause, ServerLocation location);
-
-  /**
-   * Look up the requested value using a player's UUID and the location of interest.
-   * The player's UUID is used to evaluate the permission level of the corresponding player.
-   *
-   * @param userUuid the user's UUID
-   * @param location the (Nope) location
-   * @return the requested value
-   */
-  T lookup(UUID userUuid, Location location);
 
 }

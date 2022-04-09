@@ -22,22 +22,15 @@
  * SOFTWARE.
  */
 
-package me.pietelite.nope.sponge.api.service;
-
-import me.pietelite.nope.common.host.Domain;
-import org.spongepowered.api.world.server.ServerWorld;
+package me.pietelite.nope.common.api.setting;
 
 /**
- * A service for the usage of other plugins and for the main plugin to implement.
+ * A category of setting key, for organizational and sorting purposes.
  */
-public interface NopeService {
-
-  /**
-   * Convert a sponge-type world into its Nope-type domain counterpart.
-   *
-   * @param world the world
-   * @return the domain
-   */
-  Domain reduce(ServerWorld world);
-
+public enum SettingCategory {
+    BLOCKS,
+    DAMAGE,
+    ENTITIES,
+    MISC,
+    MOVEMENT,
 }

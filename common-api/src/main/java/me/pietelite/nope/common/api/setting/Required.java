@@ -22,27 +22,11 @@
  * SOFTWARE.
  */
 
-package me.pietelite.nope.sponge.api.config;
-
-import me.pietelite.nope.common.setting.SettingKey;
-import me.pietelite.nope.common.setting.SettingValue;
-import org.spongepowered.configurate.CommentedConfigurationNode;
-import org.spongepowered.configurate.ConfigurationNode;
-import org.spongepowered.configurate.serialize.SerializationException;
+package me.pietelite.nope.common.api.setting;
 
 /**
- * A serializer for serializing values stored in {@link me.pietelite.nope.common.setting.Setting}s
- * for the purpose of persisting data in configuration files.
- *
- * @param <M> the manager type
+ * Represents that a field in a {@link SettingKeyBuilder} is required
+ * to build a valid setting key.
  */
-@SuppressWarnings("checkstyle:LineLength")
-public interface SettingValueConfigSerializer<M extends SettingKey.Manager<?, ?>> {
-
-  Class<M> managerClass();
-
-  <X, Y extends SettingValue<X>, Z extends SettingKey.Manager<X, Y>> CommentedConfigurationNode serialize(Z manager, Y value) throws SerializationException;
-
-  <X, Y extends SettingValue<X>, Z extends SettingKey.Manager<X, Y>> Y deserialize(Z manager, ConfigurationNode configNode) throws SerializationException;
-
+public @interface Required {
 }

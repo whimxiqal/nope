@@ -27,8 +27,7 @@ package me.pietelite.nope.sponge.api.event;
 import org.spongepowered.api.event.Event;
 
 /**
- * An event listener specifically for handling events correlated to a user-specified
- * {@link me.pietelite.nope.common.setting.Setting}.
+ * An event listener specifically for handling events correlated to a user-specified setting key.
  *
  * @param <T> the data type
  * @param <E> the event type

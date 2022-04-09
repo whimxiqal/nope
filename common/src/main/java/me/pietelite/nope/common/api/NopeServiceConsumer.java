@@ -22,26 +22,21 @@
  * SOFTWARE.
  */
 
-package me.pietelite.nope.sponge;
-
-import me.pietelite.nope.common.host.Domain;
-import me.pietelite.nope.sponge.api.event.SettingListenerRegistration;
-import me.pietelite.nope.sponge.api.service.NopeService;
-import me.pietelite.nope.sponge.listener.SettingEventContextImpl;
-import me.pietelite.nope.sponge.util.SpongeUtil;
-import org.spongepowered.api.Sponge;
-import org.spongepowered.api.event.Event;
-import org.spongepowered.api.event.EventListenerRegistration;
-import org.spongepowered.api.world.server.ServerWorld;
+package me.pietelite.nope.common.api;
 
 /**
- * The Sponge plugin implementation of the {@link NopeService}.
+ * An object that consumes a {@link NopeService} and puts it into the
+ * {@link NopeServiceProvider}.
  */
-public class NopeServiceImpl implements NopeService {
+public class NopeServiceConsumer {
 
-  @Override
-  public Domain reduce(ServerWorld world) {
-    return SpongeUtil.reduceWorld(world);
+  /**
+   * Take a service and save it so that it may be provided.
+   *
+   * @param service the service
+   */
+  public void consume(NopeService service) {
+    NopeServiceProvider.service(service);
   }
 
 }

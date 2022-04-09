@@ -27,7 +27,7 @@ package me.pietelite.nope.sponge.storage.configurate;
 import me.pietelite.nope.common.Nope;
 import me.pietelite.nope.common.host.Universe;
 import me.pietelite.nope.common.storage.UniverseDataHandler;
-import me.pietelite.nope.sponge.api.config.SettingValueConfigSerializerRegistrar;
+import me.pietelite.nope.sponge.config.SettingValueConfigSerializerRegistrar;
 import org.spongepowered.configurate.CommentedConfigurationNode;
 import org.spongepowered.configurate.ConfigurateException;
 import org.spongepowered.configurate.loader.ConfigurationLoader;

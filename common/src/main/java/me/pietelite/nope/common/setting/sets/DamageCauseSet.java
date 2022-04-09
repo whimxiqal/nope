@@ -24,41 +24,16 @@
 
 package me.pietelite.nope.common.setting.sets;
 
-import me.pietelite.nope.common.struct.Described;
+import me.pietelite.nope.common.api.setting.data.DamageCause;
 import me.pietelite.nope.common.struct.HashAltSet;
 
 /**
  * A set of causes of damage on a player in Minecraft.
  */
-public class DamageCauseSet extends HashAltSet.FewEnum<DamageCauseSet.DamageCause> {
+public class DamageCauseSet extends HashAltSet.FewEnum<DamageCause> {
 
   public DamageCauseSet() {
     super(DamageCause.class);
   }
 
-  /**
-   * Enumeration for all explosive types considered by Nope.
-   */
-  public enum DamageCause implements Described {
-    PLAYERS("Damage caused by other players"),
-    FALL("Damage caused from falling down"),
-    ENTITY("Damage caused by some entity"),
-    MISC("Miscellaneous damage");
-
-    private final String description;
-
-    DamageCause(String description) {
-      this.description = description;
-    }
-
-    @Override
-    public String description() {
-      return description;
-    }
-
-    @Override
-    public String toString() {
-      return name().toLowerCase();
-    }
-  }
 }

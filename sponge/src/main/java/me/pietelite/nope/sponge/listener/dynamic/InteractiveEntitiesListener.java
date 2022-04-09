@@ -24,7 +24,7 @@
 
 package me.pietelite.nope.sponge.listener.dynamic;
 
-import me.pietelite.nope.common.struct.AltSet;
+import me.pietelite.nope.common.api.struct.AltSet;
 import me.pietelite.nope.sponge.api.event.SettingEventContext;
 import me.pietelite.nope.sponge.api.event.SettingEventListener;
 import org.spongepowered.api.entity.EntityTypes;

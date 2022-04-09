@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-package me.pietelite.nope.common.struct;
+package me.pietelite.nope.common.api.struct;
 
 import java.util.Collection;
 import java.util.Set;

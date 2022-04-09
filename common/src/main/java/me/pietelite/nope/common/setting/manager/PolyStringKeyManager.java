@@ -30,26 +30,20 @@ import java.util.function.Supplier;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import me.pietelite.nope.common.setting.SettingKey;
+import me.pietelite.nope.common.setting.sets.StringSet;
 import me.pietelite.nope.common.struct.HashAltSet;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * A manager for keys that store multiple strings.
- *
- * @param <S> the special type of set of strings
+ * A manager for keys that store an unlimited number of multiple strings.
  */
 @Accessors(fluent = true)
-public class PolyStringKeyManager<S extends HashAltSet<String>> extends SettingKey.Manager.Poly<String, S> {
+public class PolyStringKeyManager extends SettingKey.Manager.Poly<String, StringSet> {
 
-  private final Supplier<? extends S> setConstructor;
   @Setter
   private Supplier<Map<String, Object>> elementOptions = null;
   @Setter
   private Function<String, String> parser = null;
-
-  public PolyStringKeyManager(Supplier<? extends S> setConstructor) {
-    this.setConstructor = setConstructor;
-  }
 
   @Override
   @NotNull
@@ -67,8 +61,8 @@ public class PolyStringKeyManager<S extends HashAltSet<String>> extends SettingK
   }
 
   @Override
-  public S createSet() {
-    return this.setConstructor.get();
+  public StringSet createSet() {
+    return new StringSet();
   }
 
   @Override
@@ -80,4 +74,8 @@ public class PolyStringKeyManager<S extends HashAltSet<String>> extends SettingK
     }
   }
 
+  @Override
+  public Class<StringSet> dataType() throws SettingKey.ParseSettingException {
+    return StringSet.class;
+  }
 }

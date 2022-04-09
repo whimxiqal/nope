@@ -22,41 +22,32 @@
  * SOFTWARE.
  */
 
-package me.pietelite.nope.sponge.api;
+package me.pietelite.nope.common.api.setting.data;
 
-import java.util.Objects;
-import me.pietelite.nope.sponge.api.service.NopeService;
+import me.pietelite.nope.common.api.struct.Described;
 
 /**
- * Static class to hold information for Nope's Sponge API.
+ * Possible causes of damage in Minecraft.
  */
-public final class SpongeNopeApi {
+public enum DamageCause implements Described {
+  PLAYERS("Damage caused by other players"),
+  FALL("Damage caused from falling down"),
+  ENTITY("Damage caused by some entity"),
+  MISC("Miscellaneous damage");
 
-  private static NopeService service;
+  private final String description;
 
-  private SpongeNopeApi() {
-    // unused
+  DamageCause(String description) {
+    this.description = description;
   }
 
-  /**
-   * Retrieve the {@link NopeService}.
-   *
-   * @return the nope service
-   */
-  public static NopeService service() {
-    if (service == null) {
-      throw new IllegalStateException("There is no Nope Service. Has it been registered yet?");
-    }
-    return service;
+  @Override
+  public String description() {
+    return description;
   }
 
-  /**
-   * Initialize the {@link NopeService}. This is for internal use only.
-   *
-   * @param service the nope service
-   */
-  public static void init(NopeService service) {
-    SpongeNopeApi.service = Objects.requireNonNull(service);
+  @Override
+  public String toString() {
+    return name().toLowerCase();
   }
-
 }

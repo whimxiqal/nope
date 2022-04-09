@@ -22,35 +22,33 @@
  * SOFTWARE.
  */
 
-package me.pietelite.nope.sponge.api.config;
+package me.pietelite.nope.common.api.setting.data;
 
-import me.pietelite.nope.common.setting.SettingKey;
-import me.pietelite.nope.common.setting.SettingValue;
-import org.jetbrains.annotations.NotNull;
+import me.pietelite.nope.common.api.struct.Described;
 
 /**
- * A registrar for {@link SettingValueConfigSerializer}s.
+ * Methods of changing blocks.
  */
-public interface SettingValueConfigSerializerRegistrar {
+public enum BlockChange implements Described {
+  BREAK("Whether blocks can be replaced with air"),
+  PLACE("Whether blocks can replace air"),
+  MODIFY("Whether blocks can changed to other blocks or change internally"),
+  GROW("Whether blocks may be grown"),
+  DECAY("Whether blocks may decay");
 
-  /**
-   * Register a serializer for purpose of serialization of setting values for i/o.
-   *
-   * @param serializer the serializer
-   */
-  void register(SettingValueConfigSerializer<?> serializer);
+  private final String description;
 
-  /**
-   * Get the serializer for some {@link me.pietelite.nope.common.setting.SettingKey.Manager}.
-   *
-   * @param manager the manager
-   * @param <T>     the data type provided for a setting
-   * @param <V>     the value stored in a setting
-   * @param <M>     the manager of a setting key
-   * @return the serializer for the data stored by the manager on behalf of its settings
-   */
-  @NotNull <T,
-      V extends SettingValue<T>,
-      M extends SettingKey.Manager<T, V>> SettingValueConfigSerializer<M> serializerOf(M manager);
+  BlockChange(String description) {
+    this.description = description;
+  }
 
+  @Override
+  public String description() {
+    return description;
+  }
+
+  @Override
+  public String toString() {
+    return name().toLowerCase();
+  }
 }

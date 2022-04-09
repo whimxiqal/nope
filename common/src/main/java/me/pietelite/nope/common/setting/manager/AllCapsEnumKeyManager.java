@@ -27,8 +27,8 @@ package me.pietelite.nope.common.setting.manager;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.stream.Collectors;
+import me.pietelite.nope.common.api.struct.Described;
 import me.pietelite.nope.common.setting.SettingKey;
-import me.pietelite.nope.common.struct.Described;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -62,8 +62,8 @@ public class AllCapsEnumKeyManager<E extends Enum<E> & Described> extends Settin
 
   @Override
   public @NotNull Map<String, Object> elementOptions() {
-    return Arrays.stream(clazz.getEnumConstants())
-        .collect(Collectors.toMap(e -> e.name().toLowerCase(), Described::description));
+    return Arrays.stream(clazz.getEnumConstants()).collect(Collectors.toMap(e -> e.name().toLowerCase(),
+        Described::description));
   }
 
   @Override

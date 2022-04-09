@@ -28,11 +28,11 @@ import com.google.common.collect.Sets;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import me.pietelite.nope.common.api.setting.data.Movement;
+import me.pietelite.nope.common.api.struct.AltSet;
 import me.pietelite.nope.common.host.Host;
 import me.pietelite.nope.common.setting.SettingKey;
 import me.pietelite.nope.common.setting.SettingKeys;
-import me.pietelite.nope.common.setting.sets.MovementSet;
-import me.pietelite.nope.common.struct.AltSet;
 import me.pietelite.nope.common.struct.Location;
 import me.pietelite.nope.common.util.TreeUtil;
 import me.pietelite.nope.sponge.SpongeNope;
@@ -106,7 +106,7 @@ public class MovementListener {
       }
        */
 
-      final MovementSet.Movement movementType = SpongeUtil.reduceMovementType(event.context()
+      final Movement movementType = SpongeUtil.reduceMovementType(event.context()
           .get(EventContextKeys.MOVEMENT_TYPE)
           .orElse(MovementTypes.NATURAL.get()));
       final Location firstLocation = new Location(event.originalPosition().x(),
@@ -220,10 +220,10 @@ public class MovementListener {
   }
 
   private void cancelMovement(MoveEntityEvent event,
-                              MovementSet.Movement movementType,
+                              Movement movementType,
                               ServerWorld returnWorld,
                               Entity entity,
-                              SettingKey<? extends AltSet<MovementSet.Movement>, ?, ?> settingKey) {
+                              SettingKey<? extends AltSet<Movement>, ?, ?> settingKey) {
     event.setCancelled(true);
     event.setDestinationPosition(event.originalPosition());
     entity.remove(Keys.VEHICLE);
@@ -234,7 +234,7 @@ public class MovementListener {
           event.originalPosition().y(),
           event.originalPosition().z()));
     }
-    SettingEventContext<AltSet<MovementSet.Movement>, MoveEntityEvent> context =
+    SettingEventContext<AltSet<Movement>, MoveEntityEvent> context =
         new SettingEventContextImpl<>(event, settingKey);
     context.report(SettingEventReport.restricted().build());
   }

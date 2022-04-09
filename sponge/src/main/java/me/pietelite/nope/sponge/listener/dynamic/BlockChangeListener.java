@@ -25,6 +25,7 @@
 package me.pietelite.nope.sponge.listener.dynamic;
 
 import java.util.Optional;
+import me.pietelite.nope.common.api.setting.data.BlockChange;
 import me.pietelite.nope.common.setting.SettingKeys;
 import me.pietelite.nope.common.setting.sets.BlockChangeSet;
 import me.pietelite.nope.sponge.api.event.SettingEventContext;
@@ -47,17 +48,17 @@ public class BlockChangeListener implements SettingEventListener<BlockChangeSet,
   @Override
   public void handle(SettingEventContext<BlockChangeSet, ChangeBlockEvent.All> context) {
     for (BlockTransaction transaction : context.event().transactions()) {
-      final BlockChangeSet.BlockChange blockChangeType;
+      final BlockChange blockChangeType;
       if (transaction.operation().equals(Operations.BREAK.get())) {
-        blockChangeType = BlockChangeSet.BlockChange.BREAK;
+        blockChangeType = BlockChange.BREAK;
       } else if (transaction.operation().equals(Operations.PLACE.get())) {
-        blockChangeType = BlockChangeSet.BlockChange.PLACE;
+        blockChangeType = BlockChange.PLACE;
       } else if (transaction.operation().equals(Operations.MODIFY.get())) {
-        blockChangeType = BlockChangeSet.BlockChange.MODIFY;
+        blockChangeType = BlockChange.MODIFY;
       } else if (transaction.operation().equals(Operations.GROWTH.get())) {
-        blockChangeType = BlockChangeSet.BlockChange.GROW;
+        blockChangeType = BlockChange.GROW;
       } else if (transaction.operation().equals(Operations.DECAY.get())) {
-        blockChangeType = BlockChangeSet.BlockChange.DECAY;
+        blockChangeType = BlockChange.DECAY;
       } else {
         return;
       }
@@ -70,7 +71,7 @@ public class BlockChangeListener implements SettingEventListener<BlockChangeSet,
             .source(context.event().source())
             .target(transaction.original().state().type().key(RegistryTypes.BLOCK_TYPE).formatted())
             .build());
-      } else if (blockChangeType == BlockChangeSet.BlockChange.GROW) {
+      } else if (blockChangeType == BlockChange.GROW) {
         // If the origin of some growth is banned from growing anything, then we still must invalidate
         Optional<BlockSnapshot> growthOrigin = context.event().context().get(EventContextKeys.GROWTH_ORIGIN);
         if (growthOrigin.isPresent()) {

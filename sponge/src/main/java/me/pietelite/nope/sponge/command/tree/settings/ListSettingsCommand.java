@@ -27,8 +27,8 @@ package me.pietelite.nope.sponge.command.tree.settings;
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import me.pietelite.nope.common.api.setting.SettingCategory;
 import me.pietelite.nope.common.permission.Permissions;
-import me.pietelite.nope.common.setting.SettingKey;
 import me.pietelite.nope.sponge.SpongeNope;
 import me.pietelite.nope.sponge.command.CommandNode;
 import me.pietelite.nope.sponge.command.parameters.ParameterKeys;
@@ -50,14 +50,14 @@ public class ListSettingsCommand extends CommandNode {
 
   @Override
   public CommandResult execute(CommandContext context) throws CommandException {
-    Optional<SettingKey.Category> category = context.one(ParameterKeys.SETTING_CATEGORY);
+    Optional<SettingCategory> category = context.one(ParameterKeys.SETTING_CATEGORY);
     if (category.isPresent()) {
       sendSettings(context, category.get());
     } else {
       if (context.cause().root() instanceof ServerPlayer) {
         Formatter.paginator("Setting Categories")
             .header(Formatter.accent("Choose a category"))
-            .contents(Arrays.stream(SettingKey.Category.values())
+            .contents(Arrays.stream(SettingCategory.values())
                 .map(c -> c.name().toLowerCase())
                 .map(c -> Formatter.command(c,
                     this.fullCommand(context) + " " + c,
@@ -71,7 +71,7 @@ public class ListSettingsCommand extends CommandNode {
     return CommandResult.success();
   }
 
-  private void sendSettings(CommandContext context, SettingKey.Category category) {
+  private void sendSettings(CommandContext context, SettingCategory category) {
     Formatter.paginator(category.name().toUpperCase() + " Settings")
         .contents(SpongeNope.instance().settingKeys()
             .keys()

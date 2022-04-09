@@ -28,18 +28,20 @@ import java.util.LinkedList;
 import java.util.List;
 import me.pietelite.nope.common.setting.SettingKey;
 import me.pietelite.nope.common.setting.SettingValue;
-import me.pietelite.nope.sponge.api.config.SettingValueConfigSerializer;
-import me.pietelite.nope.sponge.api.config.SettingValueConfigSerializerRegistrar;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * The implementation of the API's {@link SettingValueConfigSerializerRegistrar}.
+ * A place to register serializers for setting values.
  */
-public class SettingValueConfigSerializerRegistrarImpl implements SettingValueConfigSerializerRegistrar {
+public class SettingValueConfigSerializerRegistrar {
 
   private final List<SettingValueConfigSerializer<?>> serializers = new LinkedList<>();
 
-  @Override
+  /**
+   * Register a serializer to serialize a setting value type.
+   *
+   * @param serializer the serializer
+   */
   public void register(SettingValueConfigSerializer<?> serializer) {
     if (serializers.stream().anyMatch(ser -> ser.managerClass().equals(serializer.managerClass()))) {
       throw new IllegalArgumentException("A serializer already exists of type: "
@@ -48,7 +50,15 @@ public class SettingValueConfigSerializerRegistrarImpl implements SettingValueCo
     this.serializers.add(serializer);
   }
 
-  @Override
+  /**
+   * Get the serializer for a specific manager.
+   *
+   * @param manager the manager
+   * @param <T>     the data type
+   * @param <V>     the value type
+   * @param <M>     the manager type
+   * @return the serializer
+   */
   @NotNull
   @SuppressWarnings("unchecked")
   public <T,

@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-package me.pietelite.nope.common.struct;
+package me.pietelite.nope.common.api.struct;
 
 /**
  * Something that has a description.

@@ -52,7 +52,7 @@ import org.jetbrains.annotations.NotNull;
  * dimensions between the maximum and minimum values.
  *
  * <p>Search in the following order:
- * Min X -> Min Z -> Max X -> Max Z -> ...
+ * Min X, Min Z, Max X, Max Z, ...
  * Then check Y values at the end
  */
 public class VolumeTree {

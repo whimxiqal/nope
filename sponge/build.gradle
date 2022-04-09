@@ -59,7 +59,8 @@ test {
 
 dependencies {
     implementation project(':common')
-    implementation project(path: ':sponge-api', configuration: 'shadow')
+    implementation project(':common-api')
+    implementation project(':sponge-api')
 
     implementation 'org.spongepowered:spongeapi:8.0.0'
     annotationProcessor "org.spongepowered:spongeapi:8.0.0"
