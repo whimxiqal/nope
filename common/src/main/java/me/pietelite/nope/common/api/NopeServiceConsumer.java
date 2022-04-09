@@ -24,10 +24,19 @@
 
 package me.pietelite.nope.common.api;
 
+/**
+ * An object that consumes a {@link NopeService} and puts it into the
+ * {@link NopeServiceProvider}.
+ */
 public class NopeServiceConsumer {
 
-    public void consume(NopeService service) {
-        NopeServiceProvider.service(service);
-    }
+  /**
+   * Take a service and save it so that it may be provided.
+   *
+   * @param service the service
+   */
+  public void consume(NopeService service) {
+    NopeServiceProvider.service(service);
+  }
 
 }

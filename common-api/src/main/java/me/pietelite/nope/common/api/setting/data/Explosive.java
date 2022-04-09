@@ -26,29 +26,32 @@ package me.pietelite.nope.common.api.setting.data;
 
 import me.pietelite.nope.common.api.struct.Described;
 
+/**
+ * Something that explodes in Minecraft.
+ */
 public enum Explosive implements Described {
-    CREEPER("Explosion caused by creeper"),
-    ENDCRYSTAL("Explosion caused by endercrystal"),
-    FIREWORK("Explosion caused by firework"),
-    EXPLOSIVEFIREBALL("Explosion caused by large fireball"),
-    PRIMEDTNT("Explosion caused by primed TNT"),
-    TNTMINECART("Explosion caused by TNT minecart"),
-    WITHER("Explosion caused by Wither"),
-    WITHERSKULL("Explosion caused by Wither skull");
+  CREEPER("Explosion caused by creeper"),
+  ENDCRYSTAL("Explosion caused by endercrystal"),
+  FIREWORK("Explosion caused by firework"),
+  EXPLOSIVEFIREBALL("Explosion caused by large fireball"),
+  PRIMEDTNT("Explosion caused by primed TNT"),
+  TNTMINECART("Explosion caused by TNT minecart"),
+  WITHER("Explosion caused by Wither"),
+  WITHERSKULL("Explosion caused by Wither skull");
 
-    private final String description;
+  private final String description;
 
-    Explosive(String description) {
-        this.description = description;
-    }
+  Explosive(String description) {
+    this.description = description;
+  }
 
-    @Override
-    public String description() {
-        return description;
-    }
+  @Override
+  public String description() {
+    return description;
+  }
 
-    @Override
-    public String toString() {
-        return name().toLowerCase();
-    }
+  @Override
+  public String toString() {
+    return name().toLowerCase();
+  }
 }

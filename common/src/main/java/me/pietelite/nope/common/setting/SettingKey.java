@@ -43,10 +43,10 @@ import lombok.experimental.Accessors;
 import me.pietelite.nope.common.api.setting.SettingCategory;
 import me.pietelite.nope.common.api.setting.SettingKeyBuilder;
 import me.pietelite.nope.common.api.struct.AltSet;
-import me.pietelite.nope.common.struct.Named;
 import me.pietelite.nope.common.host.Evaluation;
 import me.pietelite.nope.common.host.Host;
 import me.pietelite.nope.common.struct.Location;
+import me.pietelite.nope.common.struct.Named;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -113,12 +113,21 @@ public abstract class SettingKey<T,
     return manager.wrapData(defaultData);
   }
 
+  /**
+   * An implementation of a setting key builder.
+   *
+   * @param <T> the data type
+   * @param <K> the setting key type
+   * @param <V> the value type
+   * @param <M> the manager type
+   * @param <B> the builder type, for chaining
+   */
   @SuppressWarnings("unchecked")
   public abstract static class Builder<T,
       K extends SettingKey<T, V, M>,
       V extends SettingValue<T>,
       M extends SettingKey.Manager<T, V>,
-      B extends Builder<T, K, V, M, B>> {
+      B extends Builder<T, K, V, M, B>> implements SettingKeyBuilder<T, B> {
     protected final String id;
     protected final M manager;
     protected T defaultValue;
@@ -137,6 +146,7 @@ public abstract class SettingKey<T,
       this.manager = manager;
     }
 
+    @Override
     public B defaultValue(T defaultValue) {
       this.defaultValue = defaultValue;
       updatedDefaultValue = true;
@@ -146,16 +156,19 @@ public abstract class SettingKey<T,
       return (B) this;
     }
 
+    @Override
     public B naturalValue(T naturalValue) {
       this.naturalValue = naturalValue;
       return (B) this;
     }
 
+    @Override
     public B description(String description) {
       this.description = description;
       return (B) this;
     }
 
+    @Override
     public B blurb(String blurb) {
       if (blurb.length() > 36) {
         throw new IllegalStateException("A 'blurb' may not be longer than 36 characters");
@@ -164,6 +177,7 @@ public abstract class SettingKey<T,
       return (B) this;
     }
 
+    @Override
     public B category(SettingCategory category) {
       this.category = category;
       return (B) this;
@@ -174,6 +188,7 @@ public abstract class SettingKey<T,
      *
      * @return this builder, for chaining
      */
+    @Override
     public B functional() {
       this.functional = true;
       return (B) this;
@@ -184,6 +199,7 @@ public abstract class SettingKey<T,
      *
      * @return this builder, for chaining
      */
+    @Override
     public B global() {
       this.global = true;
       return (B) this;
@@ -198,6 +214,7 @@ public abstract class SettingKey<T,
      *
      * @return this builder, for chaining
      */
+    @Override
     public B playerRestrictive() {
       this.playerRestrictive = true;
       return (B) this;

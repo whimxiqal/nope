@@ -26,7 +26,6 @@ package me.pietelite.nope.common.setting;
 
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
-
 import me.pietelite.nope.common.api.setting.SettingCategory;
 import me.pietelite.nope.common.api.setting.data.BlockChange;
 import me.pietelite.nope.common.api.setting.data.DamageCause;

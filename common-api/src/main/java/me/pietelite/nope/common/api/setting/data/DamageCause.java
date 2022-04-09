@@ -26,25 +26,28 @@ package me.pietelite.nope.common.api.setting.data;
 
 import me.pietelite.nope.common.api.struct.Described;
 
+/**
+ * Possible causes of damage in Minecraft.
+ */
 public enum DamageCause implements Described {
-    PLAYERS("Damage caused by other players"),
-    FALL("Damage caused from falling down"),
-    ENTITY("Damage caused by some entity"),
-    MISC("Miscellaneous damage");
+  PLAYERS("Damage caused by other players"),
+  FALL("Damage caused from falling down"),
+  ENTITY("Damage caused by some entity"),
+  MISC("Miscellaneous damage");
 
-    private final String description;
+  private final String description;
 
-    DamageCause(String description) {
-        this.description = description;
-    }
+  DamageCause(String description) {
+    this.description = description;
+  }
 
-    @Override
-    public String description() {
-        return description;
-    }
+  @Override
+  public String description() {
+    return description;
+  }
 
-    @Override
-    public String toString() {
-        return name().toLowerCase();
-    }
+  @Override
+  public String toString() {
+    return name().toLowerCase();
+  }
 }

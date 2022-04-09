@@ -24,10 +24,9 @@
 
 package me.pietelite.nope.common.api.struct;
 
-import org.jetbrains.annotations.NotNull;
-
 import java.util.Collection;
 import java.util.Set;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * An alternative to a {@link Set} that allow for an "inverted" state, in which

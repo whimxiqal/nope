@@ -31,6 +31,7 @@ import me.pietelite.nope.common.api.struct.AltSet;
  * a certain administrative configuration on the server,
  * and special event listeners may be registered to evaluate a final value under the specified setting key
  * and determine special game behavior dependent on location and permission.
+ *
  * @param <T> the data type evaluated at any given location under the setting key
  * @param <B> the builder, for chaining
  */

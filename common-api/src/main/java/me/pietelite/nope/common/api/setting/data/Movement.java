@@ -26,35 +26,38 @@ package me.pietelite.nope.common.api.setting.data;
 
 import me.pietelite.nope.common.api.struct.Described;
 
+/**
+ * A method of movement in Minecraft.
+ */
 public enum Movement implements Described {
-    CHORUSFRUIT("Teleportation with chorus fruit", true),
-    COMMAND("Movement caused by a command", true),
-    ENDGATEWAY("Teleportation through an end gateway", true),
-    ENDERPEARL("Teleportation with an ender pearl", true),
-    ENTITYTELEPORT("Teleportation of an entity", true),
-    NATURAL("Any natural movement", false),
-    PLUGIN("Movement caused by a plugin", true),
-    PORTAL("Teleportation with a nether portal", true);
+  CHORUSFRUIT("Teleportation with chorus fruit", true),
+  COMMAND("Movement caused by a command", true),
+  ENDGATEWAY("Teleportation through an end gateway", true),
+  ENDERPEARL("Teleportation with an ender pearl", true),
+  ENTITYTELEPORT("Teleportation of an entity", true),
+  NATURAL("Any natural movement", false),
+  PLUGIN("Movement caused by a plugin", true),
+  PORTAL("Teleportation with a nether portal", true);
 
-    private final String description;
-    private final boolean teleportation;
+  private final String description;
+  private final boolean teleportation;
 
-    Movement(String description, boolean teleportation) {
-        this.description = description;
-        this.teleportation = teleportation;
-    }
+  Movement(String description, boolean teleportation) {
+    this.description = description;
+    this.teleportation = teleportation;
+  }
 
-    @Override
-    public String description() {
-        return description;
-    }
+  @Override
+  public String description() {
+    return description;
+  }
 
-    @Override
-    public String toString() {
-        return name().toLowerCase();
-    }
+  @Override
+  public String toString() {
+    return name().toLowerCase();
+  }
 
-    public boolean teleportation() {
-        return this.teleportation;
-    }
+  public boolean teleportation() {
+    return this.teleportation;
+  }
 }

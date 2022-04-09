@@ -27,7 +27,6 @@ package me.pietelite.nope.common.setting.manager;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
-
 import me.pietelite.nope.common.api.struct.Described;
 import me.pietelite.nope.common.setting.SettingKey;
 import me.pietelite.nope.common.struct.HashAltSet;
@@ -51,6 +50,7 @@ public class PolyAllCapsEnumKeyManager<E extends Enum<E> & Described, S extends 
    * Generic constructor.
    *
    * @param clazz          the class of enum
+   * @param setClazz       the class of the set
    * @param setConstructor the constructor for the special set of values
    */
   public PolyAllCapsEnumKeyManager(Class<E> clazz, Class<S> setClazz, Supplier<S> setConstructor) {

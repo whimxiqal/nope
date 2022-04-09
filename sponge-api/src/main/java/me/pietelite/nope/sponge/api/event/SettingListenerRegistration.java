@@ -47,6 +47,7 @@ public class SettingListenerRegistration<T, E extends Event> {
    * Generic constructor.
    *
    * @param settingKey           the setting key associated with this listener
+   * @param dataClass            the type of data
    * @param eventClass           the type of event
    * @param plugin               the plugin responsible for this listener
    * @param settingEventListener the actual listener to handle the event
@@ -68,6 +69,7 @@ public class SettingListenerRegistration<T, E extends Event> {
    * More specific constructor.
    *
    * @param settingKey           the setting key associated with this listener
+   * @param dataClass            the type of data
    * @param eventClass           the type of event
    * @param plugin               the plugin responsible for this listener
    * @param settingEventListener the actual listener to handle the event

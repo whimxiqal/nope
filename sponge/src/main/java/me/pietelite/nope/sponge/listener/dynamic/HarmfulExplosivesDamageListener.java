@@ -25,7 +25,6 @@
 package me.pietelite.nope.sponge.listener.dynamic;
 
 import java.util.Optional;
-import me.pietelite.nope.common.setting.sets.ExplosiveSet;
 import me.pietelite.nope.common.api.struct.AltSet;
 import me.pietelite.nope.sponge.api.event.SettingEventContext;
 import me.pietelite.nope.sponge.api.event.SettingEventListener;
@@ -42,10 +41,12 @@ import org.spongepowered.api.registry.RegistryTypes;
 public class HarmfulExplosivesDamageListener implements
     SettingEventListener<AltSet<me.pietelite.nope.common.api.setting.data.Explosive>, DamageEntityEvent> {
   @Override
-  public void handle(SettingEventContext<AltSet<me.pietelite.nope.common.api.setting.data.Explosive>, DamageEntityEvent> context) {
+  public void handle(SettingEventContext<AltSet<me.pietelite.nope.common.api.setting.data.Explosive>,
+      DamageEntityEvent> context) {
     final Optional<Explosive> sourceExplosive = context.event().cause().first(Explosive.class);
     if (sourceExplosive.isPresent()) {
-      final me.pietelite.nope.common.api.setting.data.Explosive explosive = SpongeUtil.reduceExplosive(sourceExplosive.get());
+      final me.pietelite.nope.common.api.setting.data.Explosive explosive =
+          SpongeUtil.reduceExplosive(sourceExplosive.get());
       if (!context.lookup(null, sourceExplosive.get().serverLocation()).contains(explosive)
           || !context.lookup(null, context.event().entity().serverLocation()).contains(explosive)) {
         context.event().setCancelled(true);

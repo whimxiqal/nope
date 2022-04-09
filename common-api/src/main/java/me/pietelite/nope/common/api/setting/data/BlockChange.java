@@ -26,26 +26,29 @@ package me.pietelite.nope.common.api.setting.data;
 
 import me.pietelite.nope.common.api.struct.Described;
 
+/**
+ * Methods of changing blocks.
+ */
 public enum BlockChange implements Described {
-    BREAK("Whether blocks can be replaced with air"),
-    PLACE("Whether blocks can replace air"),
-    MODIFY("Whether blocks can changed to other blocks or change internally"),
-    GROW("Whether blocks may be grown"),
-    DECAY("Whether blocks may decay");
+  BREAK("Whether blocks can be replaced with air"),
+  PLACE("Whether blocks can replace air"),
+  MODIFY("Whether blocks can changed to other blocks or change internally"),
+  GROW("Whether blocks may be grown"),
+  DECAY("Whether blocks may decay");
 
-    private final String description;
+  private final String description;
 
-    BlockChange(String description) {
-        this.description = description;
-    }
+  BlockChange(String description) {
+    this.description = description;
+  }
 
-    @Override
-    public String description() {
-        return description;
-    }
+  @Override
+  public String description() {
+    return description;
+  }
 
-    @Override
-    public String toString() {
-        return name().toLowerCase();
-    }
+  @Override
+  public String toString() {
+    return name().toLowerCase();
+  }
 }

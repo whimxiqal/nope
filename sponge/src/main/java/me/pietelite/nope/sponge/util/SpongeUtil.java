@@ -30,8 +30,6 @@ import me.pietelite.nope.common.api.setting.data.Movement;
 import me.pietelite.nope.common.host.Domain;
 import me.pietelite.nope.common.math.Vector3d;
 import me.pietelite.nope.common.setting.SettingKey;
-import me.pietelite.nope.common.setting.sets.ExplosiveSet;
-import me.pietelite.nope.common.setting.sets.MovementSet;
 import me.pietelite.nope.common.struct.Location;
 import me.pietelite.nope.sponge.SpongeNope;
 import org.spongepowered.api.entity.Entity;
@@ -204,7 +202,8 @@ public final class SpongeUtil {
   }
 
   /**
-   * "Reduce" a Sponge {@link Explosive} type to a local {@link me.pietelite.nope.common.api.setting.data.Explosive} type.
+   * "Reduce" a Sponge {@link Explosive} type to a local
+   * {@link me.pietelite.nope.common.api.setting.data.Explosive} type.
    *
    * @param explosive the Sponge explosive
    * @return the local type

@@ -28,9 +28,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
-
 import me.pietelite.nope.common.setting.SettingKey;
 import me.pietelite.nope.common.setting.SettingKeyStore;
 import me.pietelite.nope.sponge.SpongeNope;
@@ -103,14 +100,16 @@ public class SettingListenerStore {
     unregisteredKeys = stillUnregistered;
   }
 
+  @SuppressWarnings("unchecked")
   private <T, E extends Event> void registerToSponge(SettingListenerRegistration<T, E> registration) {
     SettingKey<?, ?, ?> key = settingKeys.get(registration.settingKey());
     if (!registration.dataClass().isAssignableFrom(key.manager().dataType())) {
-      throw new IllegalStateException("The setting key's data type in the registration must match the registration's data type");
+      throw new IllegalStateException("The setting key's data type in the registration "
+          + "must match the registration's data type");
     }
     Sponge.eventManager().registerListener(EventListenerRegistration.builder(registration.eventClass())
-        .listener(event -> registration.settingEventListener()
-            .handle(new SettingEventContextImpl<>(event, (SettingKey<T, ?, ?>) settingKeys.get(registration.settingKey()))))
+        .listener(event -> registration.settingEventListener().handle(new SettingEventContextImpl<>(event,
+            (SettingKey<T, ?, ?>) settingKeys.get(registration.settingKey()))))
         .plugin(registration.plugin())
         .order(registration.order())
         .build());
