@@ -9,15 +9,6 @@ repositories {
     }
 }
 
-java {
-    sourceCompatibility = JavaVersion.toVersion(8)
-    targetCompatibility = JavaVersion.toVersion(8)
-}
-
-tasks.withType(JavaCompile.class).configureEach {
-    options.encoding = "utf-8"
-}
-
 dependencies {
     implementation project(':common-api')
 
@@ -27,7 +18,11 @@ dependencies {
     implementation 'org.jetbrains:annotations:23.0.0'
 }
 
+jar {
+    archiveFileName = "Nope-SpongeAPI-${project.ext.apiVersion}.jar"
+}
 
+// Used for deployment of the Sponge API
 /*
 if (project.hasProperty('sonatypeUsername') && project.hasProperty('sonatypePassword')) {
     apply plugin: 'maven-publish'
@@ -68,7 +63,7 @@ if (project.hasProperty('sonatypeUsername') && project.hasProperty('sonatypePass
         publications {
             mavenJava(MavenPublication) {
                 groupId = 'me.pietelite.nope'
-                artifactId = 'spongeapi'
+                artifactId = 'sponge-api'
                 version = project.ext.apiVersion
                 from components.java
                 artifact sourcesJar
@@ -112,4 +107,4 @@ if (project.hasProperty('sonatypeUsername') && project.hasProperty('sonatypePass
         }
     }
 }
- */
+*/

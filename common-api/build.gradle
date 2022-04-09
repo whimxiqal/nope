@@ -2,15 +2,97 @@ plugins {
     id 'java-library'
 }
 
-tasks.withType(JavaCompile.class).configureEach {
-    options.encoding = "utf-8"
-}
-
-java {
-    sourceCompatibility = JavaVersion.toVersion(8)
-    targetCompatibility = JavaVersion.toVersion(8)
-}
-
 dependencies {
     implementation 'org.jetbrains:annotations:23.0.0'
 }
+
+jar {
+    archiveFileName = "Nope-API-${project.ext.apiVersion}.jar"
+}
+
+// Used for deployment of the Common API
+/*
+if (project.hasProperty('sonatypeUsername') && project.hasProperty('sonatypePassword')) {
+    apply plugin: 'maven-publish'
+    apply plugin: 'signing'
+
+    javadoc {
+        title = 'Nope Sponge API (v' + project.ext.apiVersion + ')'
+        options.encoding = 'UTF-8'
+        options.charSet = 'UTF-8'
+        options.links(
+                'https://javadoc.io/doc/org.jetbrains/annotations/23.0.0'
+        )
+        options.addStringOption('Xdoclint:none', '-quiet')
+    }
+    task javadocJar(type: Jar, dependsOn: javadoc) {
+        classifier 'javadoc'
+        from javadoc.destinationDir
+    }
+    task sourcesJar(type: Jar) {
+        classifier 'sources'
+        from sourceSets.main.allSource
+    }
+    artifacts {
+        archives javadocJar
+        archives sourcesJar
+    }
+    publishing {
+        repositories {
+            maven {
+                name = "OSSRH"
+                url = "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/"
+                credentials {
+                    username sonatypeUsername
+                    password sonatypePassword
+                }
+            }
+        }
+        publications {
+            mavenJava(MavenPublication) {
+                groupId = 'me.pietelite.nope'
+                artifactId = 'common-api'
+                version = project.ext.apiVersion
+                from components.java
+                artifact sourcesJar
+                artifact javadocJar
+                pom {
+                    name = 'Nope Common API'
+                    description = 'A protections plugin for Minecraft servers.'
+                    url = 'https://github.com/pietelite/nope'
+                    licenses {
+                        license {
+                            name = 'MIT'
+                            url = 'https://opensource.org/licenses/MIT'
+                        }
+                    }
+                    developers {
+                        developer {
+                            id = 'pietelite'
+                            name = 'PietElite'
+                            url = 'https://pietelite.me'
+                            email = 'pietelite@gmail.com'
+                        }
+                    }
+                    scm {
+                        connection = 'scm:git:https://github.com/pietelite/nope.git'
+                        developerConnection = 'scm:git:git@github.com:pietelite/nope.git'
+                        url = 'https://github.com/pietelite/nope'
+                    }
+                    issueManagement {
+                        system = 'GitHub'
+                        url = 'https://github.com/pietelite/nope/issues'
+                    }
+                }
+            }
+        }
+
+        signing {
+            useGpgCmd()
+            sign configurations.archives
+            sign publishing.publications.mavenJava
+            required = true
+        }
+    }
+}
+*/

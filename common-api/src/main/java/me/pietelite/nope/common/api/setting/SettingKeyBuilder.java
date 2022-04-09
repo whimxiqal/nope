@@ -87,6 +87,9 @@ public interface SettingKeyBuilder<T, B extends SettingKeyBuilder<T, B>> {
 
   /**
    * Specify that this key is implemented.
+   * When a setting listener using this key through Nope, "functional" will automatically be set to true.
+   * This should only be specified manually here if the setting listener(s) involving this setting key
+   * are registered to the mod platform manually also.
    *
    * @return this builder, for chaining
    */
