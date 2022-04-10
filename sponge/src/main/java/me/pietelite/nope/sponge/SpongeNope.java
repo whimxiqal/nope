@@ -31,6 +31,8 @@ import java.util.concurrent.TimeUnit;
 import lombok.Getter;
 import lombok.experimental.Accessors;
 import me.pietelite.nope.common.Nope;
+import me.pietelite.nope.common.NopeServiceImpl;
+import me.pietelite.nope.common.api.NopeServiceConsumer;
 import me.pietelite.nope.common.setting.SettingKey;
 import me.pietelite.nope.common.setting.SettingKeys;
 import me.pietelite.nope.sponge.api.event.SettingListenerRegistrationEvent;
@@ -105,6 +107,9 @@ public class SpongeNope extends Nope {
    */
   @Listener
   public void onConstruct(ConstructPluginEvent event) {
+    // Setup the Nope Service
+    NopeServiceConsumer.consume(new NopeServiceImpl());
+
     // Set general static variables
     Nope.instance(this);
     instance = this;
