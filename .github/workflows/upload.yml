@@ -21,17 +21,27 @@ jobs:
           distribution: 'adopt'
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
-      - name: Build with Gradle
-        run: ./gradlew shadowJar
-      - name: Upload Sponge Plugin
+      - name: Build Common API
+        run: ./gradlew common-api:build
+      - name: Upload Common API
         uses: actions/upload-artifact@v2
         with:
-          name: Nope Plugin - Sponge
-          path: sponge/build/libs/**
+          name: Nope Common API
+          path: common-api/build/libs/**
           if-no-files-found: error
+      - name: Build Sponge API
+        run: ./gradlew sponge-api:build
       - name: Upload Sponge API
         uses: actions/upload-artifact@v2
         with:
-          name: Nope API - Sponge
+          name: Nope Sponge API
           path: sponge-api/build/libs/**
+          if-no-files-found: error
+      - name: Build Sponge Plugin
+        run: ./gradlew sponge:shadowJar
+      - name: Upload Sponge Plugin
+        uses: actions/upload-artifact@v2
+        with:
+          name: Nope Sponge Plugin
+          path: sponge/build/libs/**
           if-no-files-found: error

@@ -35,7 +35,7 @@ public class NopeServiceConsumer {
    *
    * @param service the service
    */
-  public void consume(NopeService service) {
+  public static void consume(NopeService service) {
     NopeServiceProvider.service(service);
   }
 

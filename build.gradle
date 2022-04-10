@@ -54,3 +54,9 @@ subprojects {
     }
 
 }
+
+tasks.register("nopeBuild") {
+    dependsOn "common-api:build"
+    dependsOn "sponge-api:build"
+    dependsOn "sponge:shadowJar"
+}

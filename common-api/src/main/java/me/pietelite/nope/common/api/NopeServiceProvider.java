@@ -37,6 +37,9 @@ public class NopeServiceProvider {
    * @return the service
    */
   public static NopeService service() {
+    if (service == null) {
+      throw new IllegalStateException("The Nope Service is not yet set.");
+    }
     return service;
   }
 
