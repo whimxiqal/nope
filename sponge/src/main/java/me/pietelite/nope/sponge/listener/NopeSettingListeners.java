@@ -131,6 +131,12 @@ public final class NopeSettingListeners {
     one(SettingKeys.GROWABLES,
         ChangeBlockEvent.All.class,
         new GrowablesListener());
+    one(SettingKeys.HARMFUL_EXPLOSIVES,
+        DamageEntityEvent.class,
+        new HarmfulExplosivesDamageListener());
+    one(SettingKeys.HARMFUL_EXPLOSIVES,
+        ExplosionEvent.Pre.class,
+        new HarmfulExplosivesExplosionListener());
     one(SettingKeys.HEALTH_REGEN,
         ChangeDataHolderEvent.ValueChange.class,
         new HealthRegenListener());
@@ -164,39 +170,30 @@ public final class NopeSettingListeners {
     one(SettingKeys.ITEM_PICKUP,
         ChangeInventoryEvent.Pickup.Pre.class,
         new ItemPickupListener());
+    one(SettingKeys.LAVA_FLOW,
+        ChangeBlockEvent.All.class,
+        SpecificBlockChangeListener.forFinal(BlockTypes.LAVA.get()));
     one(SettingKeys.LEAF_DECAY,
         ChangeBlockEvent.All.class,
         new LeafDecayListener());
     one(SettingKeys.LEASHABLE_ENTITIES,
         LeashEntityEvent.class,
         new LeashableEntitiesListener());
-    one(SettingKeys.HARMFUL_EXPLOSIVES,
-        DamageEntityEvent.class,
-        new HarmfulExplosivesDamageListener());
-    one(SettingKeys.HARMFUL_EXPLOSIVES,
-        ExplosionEvent.Pre.class,
-        new HarmfulExplosivesExplosionListener());
     one(SettingKeys.LIGHTNING,
         LightningEvent.Pre.class,
         new LightningListener());
-    one(SettingKeys.LEAF_DECAY,
-        ChangeBlockEvent.All.class,
-        new LeafDecayListener());
-    one(SettingKeys.LAVA_FLOW,
-        ChangeBlockEvent.All.class,
-        SpecificBlockChangeListener.forFinal(BlockTypes.LAVA.get()));
     one(SettingKeys.MYCELIUM_SPREAD,
         ChangeBlockEvent.All.class,
         SpecificBlockChangeListener.oneToOne(BlockTypes.DIRT.get(), BlockTypes.MYCELIUM.get()));
+    one(SettingKeys.PLAYER_COLLISION,
+        CollideEntityEvent.class,
+        new PlayerCollisionListener());
     one(SettingKeys.RIDE,
         RideEntityEvent.Mount.class,
         new RideMountListener());
     one(SettingKeys.RIDE,
         MoveEntityEvent.class,
         new RideMoveListener());
-    one(SettingKeys.PLAYER_COLLISION,
-        CollideEntityEvent.class,
-        new PlayerCollisionListener());
     one(SettingKeys.SLEEP,
         SleepingEvent.Pre.class,
         new SleepListener());

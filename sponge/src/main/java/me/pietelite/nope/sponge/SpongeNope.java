@@ -38,7 +38,9 @@ import me.pietelite.nope.common.setting.SettingKeys;
 import me.pietelite.nope.sponge.api.event.SettingListenerRegistrationEvent;
 import me.pietelite.nope.sponge.api.setting.SettingKeyRegistrationEvent;
 import me.pietelite.nope.sponge.command.RootCommand;
+import me.pietelite.nope.sponge.config.PolySettingValueConfigSerializer;
 import me.pietelite.nope.sponge.config.SettingValueConfigSerializerRegistrar;
+import me.pietelite.nope.sponge.config.UnarySettingValueConfigSerializer;
 import me.pietelite.nope.sponge.context.ZoneContextCalculator;
 import me.pietelite.nope.sponge.key.NopeKeys;
 import me.pietelite.nope.sponge.listener.NopeSettingListeners;
@@ -166,8 +168,12 @@ public class SpongeNope extends Nope {
     ));
     instance().settingKeys().lock();
 
+    SettingValueConfigSerializerRegistrar configRegistrar = new SettingValueConfigSerializerRegistrar();
+    configRegistrar.register(new UnarySettingValueConfigSerializer());
+    configRegistrar.register(new PolySettingValueConfigSerializer());
+
     // Load data
-    data(new HoconDataHandler(configDir, new SettingValueConfigSerializerRegistrar()));
+    data(new HoconDataHandler(configDir, configRegistrar));
     hostSystem(data().loadSystem());
     hostSystem().addAllZones(data().zones().load());
 
