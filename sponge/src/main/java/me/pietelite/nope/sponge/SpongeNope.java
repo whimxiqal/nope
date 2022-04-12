@@ -52,6 +52,7 @@ import me.pietelite.nope.sponge.tool.SelectionHandler;
 import me.pietelite.nope.sponge.util.Extra;
 import me.pietelite.nope.sponge.util.SpongeLogger;
 import org.bstats.sponge.Metrics;
+import org.spongepowered.api.Server;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.Command;
 import org.spongepowered.api.config.ConfigDir;
@@ -59,10 +60,11 @@ import org.spongepowered.api.data.DataRegistration;
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.lifecycle.ConstructPluginEvent;
-import org.spongepowered.api.event.lifecycle.LoadedGameEvent;
 import org.spongepowered.api.event.lifecycle.RefreshGameEvent;
 import org.spongepowered.api.event.lifecycle.RegisterCommandEvent;
 import org.spongepowered.api.event.lifecycle.RegisterDataEvent;
+import org.spongepowered.api.event.lifecycle.RegisterRegistryValueEvent;
+import org.spongepowered.api.event.lifecycle.StartedEngineEvent;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.service.context.ContextService;
@@ -144,12 +146,12 @@ public class SpongeNope extends Nope {
   }
 
   /**
-   * Nope's server start event hook method.
+   * Nope's registry value event hook.
    *
    * @param event the event
    */
   @Listener
-  public void onLoadedGame(LoadedGameEvent event) {
+  public void onRegisterRegistryValue(RegisterRegistryValueEvent.EngineScoped<Server> event) {
     SpongeSettingKeyManagerUtil.updateSettingKeyManagers();
 
     // Create setting keys
@@ -167,7 +169,15 @@ public class SpongeNope extends Nope {
         event.context()
     ));
     instance().settingKeys().lock();
+  }
 
+  /**
+   * Nope's server start event hook method.
+   *
+   * @param event the event
+   */
+  @Listener
+  public void onStartedServer(StartedEngineEvent<Server> event) {
     SettingValueConfigSerializerRegistrar configRegistrar = new SettingValueConfigSerializerRegistrar();
     configRegistrar.register(new UnarySettingValueConfigSerializer());
     configRegistrar.register(new PolySettingValueConfigSerializer());
