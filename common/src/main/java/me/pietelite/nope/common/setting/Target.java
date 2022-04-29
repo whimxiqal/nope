@@ -29,12 +29,13 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.UUID;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.experimental.Accessors;
 import me.pietelite.nope.common.Nope;
+import me.pietelite.nope.common.api.edit.Alteration;
+import me.pietelite.nope.common.api.edit.AlterationImpl;
+import me.pietelite.nope.common.api.edit.TargetEditor;
 import me.pietelite.nope.common.permission.Permissions;
 
 /**
@@ -42,21 +43,13 @@ import me.pietelite.nope.common.permission.Permissions;
  */
 public final class Target {
 
-  @Getter
-  @Accessors(fluent = true)
   private final Set<UUID> users = new HashSet<>();
-
-  @Getter
-  @Accessors(fluent = true)
   private final Map<String, Boolean> permissions = new HashMap<>();
-
-  @Getter
-  @Setter
   private boolean indiscriminate = false;
-
   private boolean whitelist;
 
-  private Target() {
+  private Target(boolean whitelist) {
+    this.whitelist = whitelist;
   }
 
   /**
@@ -65,7 +58,7 @@ public final class Target {
    * @return the target
    */
   public static Target all() {
-    return Target.blacklisted(Collections.emptyList());
+    return new Target(false);  // use blacklist, and no one is blacklisted
   }
 
   /**
@@ -74,7 +67,7 @@ public final class Target {
    * @return the target
    */
   public static Target none() {
-    return Target.whitelisted(Collections.emptyList());
+    return new Target(true);  // use whitelist, and no one is whitelisted
   }
 
   /**
@@ -83,10 +76,9 @@ public final class Target {
    * @param collection the collection
    * @return the target
    */
-  public static Target whitelisted(Collection<UUID> collection) {
-    Target target = new Target();
+  public static Target intend(Collection<UUID> collection) {
+    Target target = new Target(false);
     target.users.addAll(collection);
-    target.whitelist = true;
     return target;
   }
 
@@ -96,39 +88,46 @@ public final class Target {
    * @param collection the collection
    * @return the target
    */
-  public static Target blacklisted(Collection<UUID> collection) {
-    Target target = new Target();
-    target.users.addAll(collection);
-    target.whitelist = false;
+  public static Target miss(Collection<UUID> collection) {
+    Target target = new Target(true);
+    target.users.removeAll(collection);
     return target;
+  }
+
+  public Set<UUID> users() {
+    return users;
+  }
+
+  public Map<String, Boolean> permissions() {
+    return permissions;
+  }
+
+  public boolean indiscriminate() {
+    return indiscriminate;
+  }
+
+  public void indiscriminate(boolean indiscriminate) {
+    this.indiscriminate = indiscriminate;
+  }
+
+  public boolean hasWhitelist() {
+    return whitelist;
   }
 
   /**
    * Turn the targeted set of players into a whitelist.
    */
-  public void whitelist() {
-    if (!whitelist) {
-      this.whitelist = true;
-      this.users.clear();
-    }
+  public void targetAll() {
+    this.users.clear();
+    this.whitelist = false;
   }
 
   /**
    * Turn the targeted set of players into a blacklist.
    */
-  public void blacklist() {
-    if (whitelist) {
-      this.whitelist = false;
-      this.users.clear();
-    }
-  }
-
-  public boolean isWhitelist() {
-    return whitelist;
-  }
-
-  public boolean isBlacklist() {
-    return !whitelist;
+  public void targetNone() {
+    this.users.clear();
+    this.whitelist = true;
   }
 
   /**
@@ -144,14 +143,125 @@ public final class Target {
         return false;
       }
     }
-    if (whitelist && !users.contains(userUuid)) {
-      return false;
+    if (!users.isEmpty()) {
+      boolean mentioned = users.contains(userUuid);
+      return mentioned == whitelist;
     }
-    if (!whitelist && users.contains(userUuid)) {
-      return false;
-    }
+    // otherwise, revert to permissions
     return this.permissions.entrySet().stream().allMatch(entry ->
         Nope.instance().hasPermission(userUuid, entry.getKey()) == entry.getValue());
+  }
+
+  public static class Editor implements TargetEditor {
+
+    private final Targetable targetable;
+    private final Runnable saveFunction;
+
+    public Editor(Targetable targetable, Runnable saveFunction) {
+      this.targetable = targetable;
+      this.saveFunction = saveFunction;
+    }
+
+    @Override
+    public Alteration targetAll() {
+      targetable.target(Target.all());
+      saveFunction.run();
+      return AlterationImpl.success();
+    }
+
+    @Override
+    public Alteration targetNone() {
+      targetable.target(Target.none());
+      saveFunction.run();
+      return AlterationImpl.success();
+    }
+
+    @Override
+    public Alteration targetPermission(String permission, boolean value) {
+      Target target = targetable.target();
+      if (target == null) {
+        target = Target.all();
+        targetable.target(target);
+      }
+      target.permissions().put(permission, value);
+      saveFunction.run();
+      return AlterationImpl.success();
+    }
+
+    @Override
+    public Alteration untargetPermission(String permission) {
+      Target target = targetable.target();
+      if (target == null) {
+        return AlterationImpl.fail("The permission " + permission + " is not targeted");
+      }
+      Boolean value = target.permissions().remove(permission);
+      if (value == null) {
+        return AlterationImpl.fail("The permission " + permission + " is not target");
+      }
+      saveFunction.run();
+      return AlterationImpl.success();
+    }
+
+    @Override
+    public Alteration targetPlayer(UUID player) {
+      Target target = targetable.target();
+      if (target == null) {
+        target = Target.none();
+        targetable.target(target);
+      }
+      if (!target.users().add(player)) {
+        return AlterationImpl.fail("That player is already targeted");
+      }
+      saveFunction.run();
+      return AlterationImpl.success();
+    }
+
+    @Override
+    public Alteration untargetPlayer(UUID player) {
+      Target target = targetable.target();
+      if (target == null) {
+        return AlterationImpl.fail("That player wasn't targeted");
+      }
+      if (!target.users().remove(player)) {
+        return AlterationImpl.fail("That player wasn't targeted");
+      }
+      saveFunction.run();
+      return AlterationImpl.success();
+    }
+
+    @Override
+    public Alteration remove() {
+      targetable.target(null);
+      saveFunction.run();
+      return AlterationImpl.success();
+    }
+
+    @Override
+    public Type playerTargetType() {
+      Target target = targetable.target();
+      if (target == null) {
+        throw new NoSuchElementException();
+      }
+      return target.whitelist ? Type.WHITELIST : Type.BLACKLIST;
+    }
+
+    @Override
+    public Set<UUID> playerSet() {
+      Target target = targetable.target();
+      if (target == null) {
+        return Collections.emptySet();
+      }
+      return Collections.unmodifiableSet(target.users);
+    }
+
+    @Override
+    public Map<String, Boolean> permissions() {
+      Target target = targetable.target();
+      if (target == null) {
+        return Collections.emptyMap();
+      }
+      return Collections.unmodifiableMap(target.permissions);
+    }
   }
 
 }

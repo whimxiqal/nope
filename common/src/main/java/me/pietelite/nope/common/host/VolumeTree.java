@@ -32,6 +32,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.Data;
@@ -57,7 +58,7 @@ import org.jetbrains.annotations.NotNull;
  */
 public class VolumeTree {
 
-  private final Map<Volume, Zone> volumes = new HashMap<>();
+  private final Map<Volume, Scene> volumes = new HashMap<>();
   protected Node root = null;
   @Getter
   protected int height = 0;
@@ -76,12 +77,12 @@ public class VolumeTree {
    * Calculate all zones which have any intersecting volumes
    * with this one.
    *
-   * @param zone the zone to check for intersection
+   * @param scene the scene to check for intersection
    * @return all intersecting zones
    */
-  public Set<Zone> intersecting(Zone zone) {
-    Set<Zone> all = new HashSet<>();
-    for (Volume volume : zone.volumes) {
+  public Set<Scene> intersecting(Scene scene) {
+    Set<Scene> all = new HashSet<>();
+    for (Volume volume : scene.volumes) {
       all.addAll(intersecting(volume));
     }
     return all;
@@ -94,8 +95,8 @@ public class VolumeTree {
    * @param volume the volume to check for intersection
    * @return all intersecting zones
    */
-  public Set<Zone> intersecting(Volume volume) {
-    Set<Zone> all = new HashSet<>();
+  public Set<Scene> intersecting(Volume volume) {
+    Set<Scene> all = new HashSet<>();
     volumes.forEach((v, z) -> {
       if (Geometry.intersects(v, volume) && v != volume) {
         all.add(z);
@@ -105,27 +106,27 @@ public class VolumeTree {
   }
 
   /**
-   * Get all {@link Zone}s that wholly contain the given {@link Volume}.
+   * Get all {@link Scene}s that wholly contain the given {@link Volume}.
    * The math for this is pretty complex, so to simplify this, we check how this volume is contained
    * by checking the volumes that contain the corners of a cuboid that's merely an approximation of
    * the given volume.
    *
    * <p>The <code>discriminate</code> parameter decides how strict to be with the approximation, depending
-   * on whether it is better to accidentally end up with some added incorrect {@link Zone}s or to accidentally
-   * end up with some missing correct {@link Zone}s.
+   * on whether it is better to accidentally end up with some added incorrect {@link Scene}s or to accidentally
+   * end up with some missing correct {@link Scene}s.
    *
    * @param volume       the volume to contain
-   * @param discriminate true to ensure that every correct {@link Zone} is included in the returned list,
-   *                     but extras are possible. False to ensure that there are no extra {@link Zone}s
+   * @param discriminate true to ensure that every correct {@link Scene} is included in the returned list,
+   *                     but extras are possible. False to ensure that there are no extra {@link Scene}s
    *                     included, but it may be missing some correct ones
-   * @return the set of {@link Zone}s containing this {@link Volume}
+   * @return the set of {@link Scene}s containing this {@link Volume}
    */
-  public Set<Zone> containing(Volume volume, boolean discriminate) {
-    Set<Zone> all = new HashSet<>();
+  public Set<Scene> containing(Volume volume, boolean discriminate) {
+    Set<Scene> all = new HashSet<>();
     Cuboid approximation = discriminate ? volume.circumscribed() : volume.inscribed();
-    int[] listX = new int[]{approximation.minX(), approximation.maxX()};
-    int[] listY = new int[]{approximation.minY(), approximation.maxY()};
-    int[] listZ = new int[]{approximation.minZ(), approximation.maxZ()};
+    float[] listX = new float[]{approximation.minX(), approximation.maxX()};
+    float[] listY = new float[]{approximation.minY(), approximation.maxY()};
+    float[] listZ = new float[]{approximation.minZ(), approximation.maxZ()};
     boolean first = true;
     for (int x = 0; x < 2; x++) {
       for (int y = 0; y < 2; y++) {
@@ -151,11 +152,42 @@ public class VolumeTree {
    * @return the set of zones
    */
   @NotNull
-  public Set<Zone> containing(int x, int y, int z) {
+  public Set<Scene> containing(float x, float y, float z) {
+    return containingCuboid(x, y, z, x, y, z, false);
+  }
+
+  /**
+   * Get the set of {@link Volume}s that contain this given point.
+   *
+   * @param x the x coordinate
+   * @param y the y coordinate
+   * @param z the z coordinate
+   * @return the set of zones
+   */
+  @NotNull
+  public Set<Scene> containingBlock(int x, int y, int z) {
+    return containingCuboid(x, y, z, x + 1, y + 1, z + 1, true);
+
+  }
+
+  /**
+   * Get the set of {@link Volume}s that contain this given cuboid.
+   *
+   * @param minX the minimum X value
+   * @param minY the minimum Y value
+   * @param minZ the minimum Z value
+   * @param maxX the maximum X value
+   * @param maxY the maximum Y value
+   * @param maxZ the maximum Z value
+   * @param maxInclusive whether we will say it is contained with inclusive max boundaries
+   * @return the set of zones
+   */
+  @NotNull
+  public Set<Scene> containingCuboid(float minX, float minY, float minZ, float maxX, float maxY, float maxZ, boolean maxInclusive) {
     if (this.root == null) {
       throw new IllegalStateException("Root of VolumeTree is not initialized. Did you forget to construct?");
     }
-    return root.findVolumes(x, y, z).stream().map(volumes::get).collect(Collectors.toSet());
+    return root.findVolumes(minX, minY, minZ, maxX, maxY, maxZ, maxInclusive).stream().map(volumes::get).collect(Collectors.toSet());
   }
 
   public int size() {
@@ -186,7 +218,7 @@ public class VolumeTree {
     }
 
     int divIndex = count / 2;
-    int divider;
+    float divider;
 
     List<Volume> leftKeys;
     List<Volume> rightKeys;
@@ -300,13 +332,13 @@ public class VolumeTree {
    * Add a new volume into the volume tree.
    *
    * @param volume    the volume
-   * @param zone      the zone of which the volume is a part
+   * @param scene      the scene of which the volume is a part
    * @param construct whether to construct the entire tree again. If this is called multiple
    *                  times consecutively, this should be false and then this stucture should
    *                  be rebuilt again manually with {@link #construct()}
    */
-  public void put(Volume volume, Zone zone, boolean construct) {
-    this.volumes.put(volume, zone);
+  public void put(Volume volume, Scene scene, boolean construct) {
+    this.volumes.put(volume, scene);
     if (construct) {
       construct();
     }
@@ -343,7 +375,7 @@ public class VolumeTree {
    * coordinates.
    */
   protected abstract static class Node {
-    abstract Set<Volume> findVolumes(int x, int y, int z);
+    abstract Set<Volume> findVolumes(float minX, float minY, float minZ, float maxX, float maxY, float maxZ, boolean maxInclusive);
   }
 
   /**
@@ -351,7 +383,7 @@ public class VolumeTree {
    */
   protected static class EmptyNode extends Node {
     @Override
-    Set<Volume> findVolumes(int x, int y, int z) {
+    Set<Volume> findVolumes(float minX, float minY, float minZ, float maxX, float maxY, float maxZ, boolean maxInclusive) {
       return new HashSet<>();
     }
   }
@@ -363,7 +395,7 @@ public class VolumeTree {
   @EqualsAndHashCode(callSuper = true)
   @Data
   protected abstract static class DimensionDivider extends Node {
-    protected final int divider;
+    protected final float divider;
     protected final Node left;
     protected final Node right;
   }
@@ -373,16 +405,16 @@ public class VolumeTree {
    * the minimum x value of {@link Cuboid}s.
    */
   protected static class DimensionDividerMinX extends DimensionDivider {
-    public DimensionDividerMinX(int divider, Node left, Node right) {
+    public DimensionDividerMinX(float divider, Node left, Node right) {
       super(divider, left, right);
     }
 
     @Override
-    Set<Volume> findVolumes(int x, int y, int z) {
-      if (x < divider) {
-        return left.findVolumes(x, y, z);
+    Set<Volume> findVolumes(float minX, float minY, float minZ, float maxX, float maxY, float maxZ, boolean maxInclusive) {
+      if (maxX < divider || (maxInclusive && maxX == divider)) {
+        return left.findVolumes(minX, minY, minZ, maxX, maxY, maxZ, maxInclusive);
       } else {
-        return right.findVolumes(x, y, z);
+        return right.findVolumes(minX, minY, minZ, maxX, maxY, maxZ, maxInclusive);
       }
     }
   }
@@ -392,16 +424,16 @@ public class VolumeTree {
    * the maximum x value of {@link Cuboid}s.
    */
   protected static class DimensionDividerMaxX extends DimensionDivider {
-    public DimensionDividerMaxX(int divider, Node left, Node right) {
+    public DimensionDividerMaxX(float divider, Node left, Node right) {
       super(divider, left, right);
     }
 
     @Override
-    Set<Volume> findVolumes(int x, int y, int z) {
-      if (x <= divider) {
-        return left.findVolumes(x, y, z);
+    Set<Volume> findVolumes(float minX, float minY, float minZ, float maxX, float maxY, float maxZ, boolean maxInclusive) {
+      if (minX <= divider) {
+        return left.findVolumes(minX, minY, minZ, maxX, maxY, maxZ, maxInclusive);
       } else {
-        return right.findVolumes(x, y, z);
+        return right.findVolumes(minX, minY, minZ, maxX, maxY, maxZ, maxInclusive);
       }
     }
   }
@@ -411,16 +443,16 @@ public class VolumeTree {
    * the minimum z value of {@link Cuboid}s.
    */
   protected static class DimensionDividerMinZ extends DimensionDivider {
-    public DimensionDividerMinZ(int divider, Node left, Node right) {
+    public DimensionDividerMinZ(float divider, Node left, Node right) {
       super(divider, left, right);
     }
 
     @Override
-    Set<Volume> findVolumes(int x, int y, int z) {
-      if (z < divider) {
-        return left.findVolumes(x, y, z);
+    Set<Volume> findVolumes(float minX, float minY, float minZ, float maxX, float maxY, float maxZ, boolean maxInclusive) {
+      if (maxZ < divider || (maxInclusive && maxZ == divider)) {
+        return left.findVolumes(minX, minY, minZ, maxX, maxY, maxZ, maxInclusive);
       } else {
-        return right.findVolumes(x, y, z);
+        return right.findVolumes(minX, minY, minZ, maxX, maxY, maxZ, maxInclusive);
       }
     }
   }
@@ -430,16 +462,16 @@ public class VolumeTree {
    * the maximum z value of {@link Cuboid}s.
    */
   protected static class DimensionDividerMaxZ extends DimensionDivider {
-    public DimensionDividerMaxZ(int divider, Node left, Node right) {
+    public DimensionDividerMaxZ(float divider, Node left, Node right) {
       super(divider, left, right);
     }
 
     @Override
-    Set<Volume> findVolumes(int x, int y, int z) {
-      if (z <= divider) {
-        return left.findVolumes(x, y, z);
+    Set<Volume> findVolumes(float minX, float minY, float minZ, float maxX, float maxY, float maxZ, boolean maxInclusive) {
+      if (minZ <= divider) {
+        return left.findVolumes(minX, minY, minZ, maxX, maxY, maxZ, maxInclusive);
       } else {
-        return right.findVolumes(x, y, z);
+        return right.findVolumes(minX, minY, minZ, maxX, maxY, maxZ, maxInclusive);
       }
     }
   }
@@ -459,8 +491,14 @@ public class VolumeTree {
     }
 
     @Override
-    Set<Volume> findVolumes(int x, int y, int z) {
-      return viable.stream().filter(volume -> volume.containsPoint(x, y, z)).collect(Collectors.toSet());
+    Set<Volume> findVolumes(float minX, float minY, float minZ, float maxX, float maxY, float maxZ, boolean maxInclusive) {
+      return viable.stream().filter(volume -> {
+        if (minX == maxX && minY == maxY && minZ == maxZ) {
+          return volume.containsPoint(minX, minY, minZ);
+        } else {
+          return volume.containsCuboid(minX, minY, minZ, maxX, maxY, maxZ, maxInclusive);
+        }
+      }).collect(Collectors.toSet());
     }
   }
 

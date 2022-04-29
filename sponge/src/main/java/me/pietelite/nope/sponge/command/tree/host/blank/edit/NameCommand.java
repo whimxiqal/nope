@@ -24,10 +24,10 @@
 
 package me.pietelite.nope.sponge.command.tree.host.blank.edit;
 
+import me.pietelite.nope.common.api.NopeServiceProvider;
 import me.pietelite.nope.common.host.Host;
-import me.pietelite.nope.common.host.Zone;
+import me.pietelite.nope.common.host.Scene;
 import me.pietelite.nope.common.permission.Permissions;
-import me.pietelite.nope.sponge.SpongeNope;
 import me.pietelite.nope.sponge.command.CommandNode;
 import me.pietelite.nope.sponge.command.parameters.ParameterKeys;
 import me.pietelite.nope.sponge.command.parameters.Parameters;
@@ -43,25 +43,28 @@ public class NameCommand extends CommandNode {
     super(parent, Permissions.EDIT,
         "Edit the name of a host",
         "name");
-    addParameter(Parameters.HOST_NAME);
+    addParameter(Parameters.ID);
   }
 
   @Override
   public CommandResult execute(CommandContext context) throws CommandException {
     Host host = context.requireOne(ParameterKeys.HOST);
-    if (!(host instanceof Zone)) {
-      return CommandResult.error(Formatter.error("You may only rename zones"));
+    if (!(host instanceof Scene)) {
+      return CommandResult.error(Formatter.error("You may only rename scenes"));
     }
-    Zone zone = (Zone) host;
-
-    String name = context.requireOne(ParameterKeys.HOST_NAME);
-    Zone newZone = zone.shallowCopy(name);
-    SpongeNope.instance().hostSystem().removeZone(zone.name());
-    SpongeNope.instance().hostSystem().addZone(newZone);
-    newZone.save();
-    context.sendMessage(Identity.nil(), Formatter.success("Zone name ___ changed to ___",
-        zone.name(),
-        newZone.name()));
+    String newName = context.requireOne(ParameterKeys.ID);
+    if (NopeServiceProvider.service().editSystem()
+        .editScene(host.name())
+        .name(newName)
+        .result().succeed()) {
+      context.sendMessage(Identity.nil(), Formatter.success("Scene name ___ changed to ___",
+          host.name(),
+          newName));
+    } else {
+      context.sendMessage(Identity.nil(), Formatter.error("Could not change scene name from ___ to ___",
+          host.name(),
+          newName));
+    }
     return CommandResult.success();
   }
 }

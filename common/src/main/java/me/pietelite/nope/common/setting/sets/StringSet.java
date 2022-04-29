@@ -30,4 +30,7 @@ import me.pietelite.nope.common.struct.HashAltSet;
  * A {@link HashAltSet} for storing an unbounded quantity of {@link String}s.
  */
 public class StringSet extends HashAltSet.UnboundedAlternate<String> {
+  public StringSet(boolean full) {
+    super(full);
+  }
 }

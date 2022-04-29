@@ -27,7 +27,11 @@ package me.pietelite.nope.common.setting;
 import java.io.Serializable;
 import lombok.Getter;
 import lombok.experimental.Accessors;
+import me.pietelite.nope.common.api.edit.Alteration;
+import me.pietelite.nope.common.api.edit.SingleValueSettingEditor;
+import me.pietelite.nope.common.api.edit.TargetEditor;
 import me.pietelite.nope.common.api.struct.AltSet;
+import me.pietelite.nope.common.host.Profile;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -206,4 +210,5 @@ public abstract class SettingValue<T> implements Serializable {
     }
 
   }
+
 }

@@ -41,7 +41,7 @@ import me.pietelite.nope.sponge.command.RootCommand;
 import me.pietelite.nope.sponge.config.PolySettingValueConfigSerializer;
 import me.pietelite.nope.sponge.config.SettingValueConfigSerializerRegistrar;
 import me.pietelite.nope.sponge.config.UnarySettingValueConfigSerializer;
-import me.pietelite.nope.sponge.context.ZoneContextCalculator;
+import me.pietelite.nope.sponge.context.NopeContextCalculator;
 import me.pietelite.nope.sponge.key.NopeKeys;
 import me.pietelite.nope.sponge.listener.NopeSettingListeners;
 import me.pietelite.nope.sponge.listener.SettingListenerStore;
@@ -184,8 +184,7 @@ public class SpongeNope extends Nope {
 
     // Load data
     data(new HoconDataHandler(configDir, configRegistrar));
-    hostSystem(data().loadSystem());
-    hostSystem().addAllZones(data().zones().load());
+    system(data().loadSystem());
 
     // Create setting listeners
     this.settingListeners = new SettingListenerStore(settingKeys());
@@ -211,7 +210,7 @@ public class SpongeNope extends Nope {
 
     Sponge.serviceProvider()
         .provide(ContextService.class)
-        .ifPresent(service -> service.registerContextCalculator(new ZoneContextCalculator()));
+        .ifPresent(service -> service.registerContextCalculator(new NopeContextCalculator()));
 
     // Finally, we announce that Nope is live!
     Extra.printSplashscreen();
@@ -243,8 +242,7 @@ public class SpongeNope extends Nope {
    * Load plugin state from persistent storage.
    */
   public void loadState() {
-    hostSystem(data().loadSystem());
-    hostSystem().addAllZones(data().zones().load());
+    system(data().loadSystem());
   }
 
   @Override

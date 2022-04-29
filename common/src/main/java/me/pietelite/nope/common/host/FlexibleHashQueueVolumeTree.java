@@ -25,10 +25,12 @@
 package me.pietelite.nope.common.host;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.locks.ReentrantLock;
 import lombok.Data;
 import me.pietelite.nope.common.math.Volume;
 import org.jetbrains.annotations.NotNull;
@@ -39,9 +41,10 @@ import org.jetbrains.annotations.NotNull;
  */
 public class FlexibleHashQueueVolumeTree extends VolumeTree {
 
-  private final Map<Query, Set<Zone>> cache = new ConcurrentHashMap<>();
+  private final Map<Query, Set<Scene>> cache = new ConcurrentHashMap<>();
   private final Queue<Query> history = new ConcurrentLinkedQueue<>();
   private final int size;
+  private final ReentrantLock lock = new ReentrantLock();
 
   /**
    * Generic constructor.
@@ -55,33 +58,41 @@ public class FlexibleHashQueueVolumeTree extends VolumeTree {
 
   @NotNull
   @Override
-  public Set<Zone> containing(int x, int y, int z) {
+  public Set<Scene> containing(float x, float y, float z) {
     Query query = Query.of(x, y, z);
-    if (cache.containsKey(query)) {
-      return cache.get(query);
+    synchronized (lock) {
+      if (cache.containsKey(query)) {
+        return cache.get(query);
+      }
+      Set<Scene> scenes = super.containing(x, y, z);
+      cache.put(query, scenes);
+      history.add(query);
+      return scenes;
     }
-    Set<Zone> zones = super.containing(x, y, z);
-    cache.put(query, zones);
-    history.add(query);
-    return zones;
   }
 
   public int getCacheSize() {
-    return history.size();
+    synchronized (lock) {
+      return history.size();
+    }
   }
 
   @Override
-  public void put(Volume volume, Zone zone, boolean construct) {
-    cache.clear();
-    history.clear();
-    super.put(volume, zone, construct);
+  public void put(Volume volume, Scene scene, boolean construct) {
+    synchronized (lock) {
+      cache.clear();
+      history.clear();
+      super.put(volume, scene, construct);
+    }
   }
 
   @Override
   public Volume remove(Volume volume, boolean construct) {
-    cache.clear();
-    history.clear();
-    return super.remove(volume, construct);
+    synchronized (lock) {
+      cache.clear();
+      history.clear();
+      return super.remove(volume, construct);
+    }
   }
 
   /**
@@ -89,20 +100,22 @@ public class FlexibleHashQueueVolumeTree extends VolumeTree {
    * the size is at its soft maximum.
    */
   public void trim() {
-    Queue<Query> deletionStage = new ConcurrentLinkedQueue<>();
-    while (history.size() > size) {
-      deletionStage.add(history.remove());
-    }
-    while (!deletionStage.isEmpty()) {
-      cache.remove(deletionStage.remove());
+    synchronized (lock) {
+      Queue<Query> deletionStage = new ConcurrentLinkedQueue<>();
+      while (history.size() > size) {
+        deletionStage.add(history.remove());
+      }
+      while (!deletionStage.isEmpty()) {
+        cache.remove(deletionStage.remove());
+      }
     }
   }
 
   @Data(staticConstructor = "of")
   private static class Query {
-    private final int posX;
-    private final int posY;
-    private final int posZ;
+    private final float posX;
+    private final float posY;
+    private final float posZ;
 
     @Override
     public boolean equals(Object other) {
@@ -117,10 +130,7 @@ public class FlexibleHashQueueVolumeTree extends VolumeTree {
 
     @Override
     public int hashCode() {
-      int result = posX ^ (posX >>> 16);
-      result = 31 * result + (posY ^ (posY >>> 16));
-      result = 31 * result + (posZ ^ (posZ >>> 16));
-      return result;
+      return Objects.hash(posX, posY, posZ);
     }
 
   }

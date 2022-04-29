@@ -26,27 +26,43 @@ package me.pietelite.nope.sponge.storage.configurate;
 
 import java.util.List;
 import java.util.stream.Collectors;
-import lombok.AllArgsConstructor;
+import me.pietelite.nope.common.api.NopeServiceProvider;
 import me.pietelite.nope.common.host.Domain;
 import me.pietelite.nope.common.host.HostSystem;
-import me.pietelite.nope.common.host.Universe;
+import me.pietelite.nope.common.host.Global;
 import me.pietelite.nope.common.setting.SettingKeys;
 import me.pietelite.nope.common.storage.DataHandler;
 import me.pietelite.nope.common.storage.DomainDataHandler;
+import me.pietelite.nope.common.storage.ProfileDataHandler;
 import me.pietelite.nope.common.storage.UniverseDataHandler;
-import me.pietelite.nope.common.storage.ZoneDataHandler;
+import me.pietelite.nope.common.storage.SceneDataHandler;
 import org.spongepowered.api.Sponge;
 
 /**
  * A {@link DataHandler} for managing the plugin with Configurate
  * (org.spongepowered.configurate.).
  */
-@AllArgsConstructor
 public abstract class ConfigurateDataHandler implements DataHandler {
 
-  private final UniverseConfigurateDataHandler universeDataHandler;
+  private final ProfileConfigurateDataHandler profileConfigurateDataHandler;
+  private final GlobalConfigurateDataHandler universeDataHandler;
   private final DomainConfigurateDataHandler domainDataHandler;
-  private final ZoneConfigurateDataHandler zoneDataHandler;
+  private final SceneConfigurateDataHandler sceneConfigurateDataHandler;
+
+  protected ConfigurateDataHandler(ProfileConfigurateDataHandler profileConfigurateDataHandler,
+                                   GlobalConfigurateDataHandler universeDataHandler,
+                                   DomainConfigurateDataHandler domainDataHandler,
+                                   SceneConfigurateDataHandler sceneConfigurateDataHandler) {
+    this.profileConfigurateDataHandler = profileConfigurateDataHandler;
+    this.universeDataHandler = universeDataHandler;
+    this.domainDataHandler = domainDataHandler;
+    this.sceneConfigurateDataHandler = sceneConfigurateDataHandler;
+  }
+
+  @Override
+  public ProfileDataHandler profiles() {
+    return profileConfigurateDataHandler;
+  }
 
   @Override
   public UniverseDataHandler universe() {
@@ -59,13 +75,15 @@ public abstract class ConfigurateDataHandler implements DataHandler {
   }
 
   @Override
-  public ZoneDataHandler zones() {
-    return zoneDataHandler;
+  public SceneDataHandler scenes() {
+    return sceneConfigurateDataHandler;
   }
 
   @Override
   public HostSystem loadSystem() {
-    Universe universe = universeDataHandler.load();
+    HostSystem hostSystem = new HostSystem();
+    profileConfigurateDataHandler.load().forEach(profile -> hostSystem.profiles().put(profile.name(), profile));
+    hostSystem.global(universeDataHandler.load());
     List<Domain> domains = Sponge.server()
         .worldManager()
         .worlds()
@@ -73,10 +91,14 @@ public abstract class ConfigurateDataHandler implements DataHandler {
         .map(world -> new Domain("_" + world.key()
             .formatted()
             .replace(":", "_"),
-            SettingKeys.CACHE_SIZE.getDataOrDefault(universe)))
+            NopeServiceProvider.service().evaluator().unarySettingGlobal(SettingKeys.CACHE_SIZE.name(), Integer.class)))
         .collect(Collectors.toList());
-    domains.forEach(domainDataHandler::load);
-    return new HostSystem(universe, domains);
+    domains.forEach(domain -> {
+      domainDataHandler.load(domain);
+      hostSystem.domains().put(domain.name(), domain);
+    });
+    hostSystem.addAllScenes(sceneConfigurateDataHandler.load());
+    return hostSystem;
   }
 
 }

@@ -27,7 +27,7 @@ package me.pietelite.nope.sponge.command.tree.host.blank.info;
 import java.util.LinkedList;
 import java.util.List;
 import me.pietelite.nope.common.host.Host;
-import me.pietelite.nope.common.host.Zone;
+import me.pietelite.nope.common.host.Scene;
 import me.pietelite.nope.common.math.Geometry;
 import me.pietelite.nope.common.math.Volume;
 import me.pietelite.nope.common.permission.Permissions;
@@ -52,13 +52,13 @@ public class HostInfoVolumesCommand extends CommandNode {
   @Override
   public CommandResult execute(CommandContext context) throws CommandException {
     Host host = context.requireOne(ParameterKeys.HOST);
-    if (!(host instanceof Zone)) {
+    if (!(host instanceof Scene)) {
       return CommandResult.error(Formatter.error(
-          "The host must be a zone"
+          "The host must be a scene"
       ));
     }
-    Zone zone = (Zone) host;
-    List<Volume> volumes = zone.volumes();
+    Scene scene = (Scene) host;
+    List<Volume> volumes = scene.volumes();
     List<Component> contents = new LinkedList<>();
     for (int i = 0; i < volumes.size(); i++) {
       contents.add(Component.text(i + ". ").color(Formatter.DULL)
@@ -69,7 +69,7 @@ public class HostInfoVolumesCommand extends CommandNode {
             .plugin(SpongeNope.instance().pluginContainer())
             .execute(() -> Sponge.serviceProvider().paginationService().builder()
                 .title(Component.text("Volumes of ").color(Formatter.GOLD)
-                    .append(Component.text(zone.name()).color(Formatter.ACCENT)))
+                    .append(Component.text(scene.name()).color(Formatter.ACCENT)))
                 .padding(Component.text("=").color(Formatter.THEME))
                 .contents(contents)
                 .sendTo(context.cause().audience()))

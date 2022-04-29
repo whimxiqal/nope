@@ -27,7 +27,7 @@ package me.pietelite.nope.sponge.command.tree.hosts;
 import java.util.Optional;
 import me.pietelite.nope.common.Nope;
 import me.pietelite.nope.common.host.Host;
-import me.pietelite.nope.common.host.Zone;
+import me.pietelite.nope.common.host.Scene;
 import me.pietelite.nope.common.permission.Permissions;
 import me.pietelite.nope.sponge.command.CommandNode;
 import me.pietelite.nope.sponge.command.parameters.Flags;
@@ -40,7 +40,7 @@ import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.parameter.CommandContext;
 
 /**
- * Command for creating a {@link Host}, which can only ever be a {@link Zone}.
+ * Command for creating a {@link Host}, which can only ever be a {@link Scene}.
  */
 public class CreateHostCommand extends CommandNode {
 
@@ -54,29 +54,27 @@ public class CreateHostCommand extends CommandNode {
         Permissions.CREATE,
         "Create a zone",
         "create");
-    addParameter(Parameters.HOST_NAME);
-    addFlag(Flags.PARENT);
+    addParameter(Parameters.ID);
     addFlag(Flags.PRIORITY);
   }
 
   @Override
   public CommandResult execute(CommandContext context) throws CommandException {
-    String name = context.requireOne(ParameterKeys.HOST_NAME);
+    String name = context.requireOne(ParameterKeys.ID);
 
-    Optional<Host> existingHost = Nope.instance().hostSystem().host(name);
+    Optional<Host> existingHost = Nope.instance().system().host(name);
     if (existingHost.isPresent()) {
       return CommandResult.error(Formatter.error(
           "A host already exists with the name ___", existingHost.get().name()));
     }
-    Zone parent = context.one(ParameterKeys.PARENT).orElse(null);
     int priority = context.one(ParameterKeys.PRIORITY).orElse(0);
-    Zone zone = new Zone(name, parent, priority);
-    Nope.instance().hostSystem().addZone(zone);
-    zone.save();
+    Scene scene = new Scene(name, priority);
+    Nope.instance().system().addScene(scene);
+    scene.save();
     context.cause()
         .audience()
-        .sendMessage(Formatter.success("Created zone ___",
-            Component.text(zone.name())));
+        .sendMessage(Formatter.success("Created scene ___",
+            Component.text(scene.name())));
     return CommandResult.success();
   }
 

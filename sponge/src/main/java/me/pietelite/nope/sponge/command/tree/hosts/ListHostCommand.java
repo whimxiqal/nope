@@ -64,15 +64,15 @@ public class ListHostCommand extends CommandNode {
     List<Host> hosts;
     if (all) {
       hosts = new ArrayList<>(SpongeNope.instance()
-          .hostSystem()
+          .system()
           .hosts()
           .values());
     } else {
       // Cause must be player
       Player player = (Player) context.cause().root();
       hosts = new ArrayList<>(SpongeNope.instance()
-          .hostSystem()
-          .collectSuperiorHosts(SpongeUtil.reduceLocation(player.serverLocation())));
+          .system()
+          .containingHosts(SpongeUtil.reduceLocation(player.serverLocation())));
     }
     hosts.sort(Comparator.comparing(Host::priority));
     Sponge.serviceProvider().paginationService().builder()

@@ -28,6 +28,7 @@ import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
+import me.pietelite.nope.common.api.edit.ZoneType;
 import me.pietelite.nope.common.host.Domain;
 import org.jetbrains.annotations.NotNull;
 
@@ -36,8 +37,8 @@ import org.jetbrains.annotations.NotNull;
  */
 public class Slab extends Volume {
 
-  private final Integer minY;
-  private final Integer maxY;
+  private final Float minY;
+  private final Float maxY;
 
   private final Cuboid circumscribed;
   private final Cuboid inscribed;
@@ -50,28 +51,28 @@ public class Slab extends Volume {
    * @param y2     the second y dimension, inclusive
    */
   public Slab(Domain domain,
-              Integer y1,
-              Integer y2) {
+              Float y1,
+              Float y2) {
     super(domain);
     this.minY = Math.min(y1, y2);
     this.maxY = Math.max(y1, y2);
 
     circumscribed = new Cuboid(domain,
-        Integer.MIN_VALUE,
+        Float.MIN_VALUE,
         minY,
-        Integer.MIN_VALUE,
-        Integer.MAX_VALUE,
+        Float.MIN_VALUE,
+        Float.MAX_VALUE,
         maxY,
-        Integer.MAX_VALUE);
+        Float.MAX_VALUE);
 
     inscribed = circumscribed;
   }
 
-  public int minY() {
+  public float minY() {
     return this.minY;
   }
 
-  public int maxY() {
+  public float maxY() {
     return this.maxY;
   }
 
@@ -88,15 +89,19 @@ public class Slab extends Volume {
   }
 
   @Override
-  public boolean containsPoint(double x, double y, double z) {
+  public ZoneType zoneType() {
+    return ZoneType.SLAB;
+  }
+
+  @Override
+  public boolean containsPoint(float x, float y, float z) {
     return y >= minY
         && y < maxY;
   }
 
   @Override
-  public boolean containsBlock(int x, int y, int z) {
-    return y >= minY
-        && y < maxY;
+  public boolean containsCuboid(float minX, float minY, float minZ, float maxX, float maxY, float maxZ, boolean maxInclusive) {
+    return minY >= this.minY && (maxInclusive ? (maxY <= this.maxY) : (maxY < this.maxY));
   }
 
   @Override

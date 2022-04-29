@@ -24,13 +24,16 @@
 
 package me.pietelite.nope.sponge.command.tree.host.blank.edit;
 
+import me.pietelite.nope.common.api.NopeServiceProvider;
+import me.pietelite.nope.common.api.edit.Alteration;
 import me.pietelite.nope.common.host.Host;
-import me.pietelite.nope.common.host.Zone;
+import me.pietelite.nope.common.host.Scene;
 import me.pietelite.nope.common.permission.Permissions;
 import me.pietelite.nope.sponge.command.CommandNode;
 import me.pietelite.nope.sponge.command.parameters.ParameterKeys;
 import me.pietelite.nope.sponge.command.parameters.Parameters;
 import me.pietelite.nope.sponge.util.Formatter;
+import net.kyori.adventure.identity.Identity;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.parameter.CommandContext;
@@ -48,13 +51,16 @@ public class PriorityCommand extends CommandNode {
     Host host = context.requireOne(ParameterKeys.HOST);
     int priority = context.requireOne(ParameterKeys.PRIORITY);
 
-    if (!(host instanceof Zone)) {
+    if (!(host instanceof Scene)) {
       throw new CommandException(Formatter.error(
           "You may not change the priority on host ___", host.name()
       ));
     }
 
-    ((Zone) host).setPriority(priority);
+    Alteration alteration = NopeServiceProvider.service().editSystem()
+        .editScene(host.name())
+        .priority(priority);
+    context.sendMessage(Identity.nil(), Formatter.alteration(alteration));
     return CommandResult.success();
   }
 }

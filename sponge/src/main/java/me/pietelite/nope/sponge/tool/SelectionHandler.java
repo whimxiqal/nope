@@ -288,28 +288,28 @@ public class SelectionHandler {
         case CUBOID:
           updateSelection(player,
               boxDrafts.computeIfAbsent(player.uniqueId(), uuid -> new CuboidSelection()),
-              SpongeNope.instance().hostSystem().domain(SpongeUtil.worldToId(location.world())),
+              SpongeNope.instance().system().domain(SpongeUtil.worldToId(location.world())),
               Vector3i.of(location.blockX(), location.blockY(), location.blockZ()),
               first);
           break;
         case CYLINDER:
           updateSelection(player,
               cylinderDrafts.computeIfAbsent(player.uniqueId(), uuid -> new CylinderSelection()),
-              SpongeNope.instance().hostSystem().domain(SpongeUtil.worldToId(location.world())),
+              SpongeNope.instance().system().domain(SpongeUtil.worldToId(location.world())),
               Vector3i.of(location.blockX(), location.blockY(), location.blockZ()),
               first);
           break;
         case SPHERE:
           updateSelection(player,
               sphereDrafts.computeIfAbsent(player.uniqueId(), uuid -> new SphereSelection()),
-              SpongeNope.instance().hostSystem().domain(SpongeUtil.worldToId(location.world())),
+              SpongeNope.instance().system().domain(SpongeUtil.worldToId(location.world())),
               Vector3i.of(location.blockX(), location.blockY(), location.blockZ()),
               first);
           break;
         case SLAB:
           updateSelection(player,
               slabDrafts.computeIfAbsent(player.uniqueId(), uuid -> new SlabSelection()),
-              SpongeNope.instance().hostSystem().domain(SpongeUtil.worldToId(location.world())),
+              SpongeNope.instance().system().domain(SpongeUtil.worldToId(location.world())),
               Vector3i.of(location.blockX(), location.blockY(), location.blockZ()),
               first);
           break;

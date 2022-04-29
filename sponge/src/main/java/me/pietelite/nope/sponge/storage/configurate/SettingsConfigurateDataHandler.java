@@ -24,17 +24,12 @@
 
 package me.pietelite.nope.sponge.storage.configurate;
 
-import io.leangen.geantyref.TypeToken;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
-import java.util.UUID;
-import java.util.stream.Collectors;
 import me.pietelite.nope.common.Nope;
-import me.pietelite.nope.common.math.Volume;
 import me.pietelite.nope.common.setting.Setting;
 import me.pietelite.nope.common.setting.SettingCollection;
 import me.pietelite.nope.common.setting.SettingKey;
@@ -42,7 +37,6 @@ import me.pietelite.nope.common.setting.SettingValue;
 import me.pietelite.nope.common.setting.Target;
 import me.pietelite.nope.sponge.SpongeNope;
 import me.pietelite.nope.sponge.config.SettingValueConfigSerializerRegistrar;
-import me.pietelite.nope.sponge.storage.configurate.serializer.VolumeTypeSerializer;
 import org.spongepowered.configurate.CommentedConfigurationNode;
 import org.spongepowered.configurate.ConfigurationNode;
 import org.spongepowered.configurate.ConfigurationOptions;
@@ -61,9 +55,7 @@ public abstract class SettingsConfigurateDataHandler {
 
   protected final CommentedConfigurationNode settingCollectionRoot(SettingCollection settings)
       throws SerializationException {
-    CommentedConfigurationNode root = CommentedConfigurationNode.root(ConfigurationOptions.defaults()
-        .serializers(builder ->
-            builder.register(Volume.class, new VolumeTypeSerializer())));
+    CommentedConfigurationNode root = CommentedConfigurationNode.root(ConfigurationOptions.defaults());
     root.node("settings").set(serializeSettings(settings));
     return root;
   }
@@ -79,21 +71,7 @@ public abstract class SettingsConfigurateDataHandler {
         serializeSetting(settingNode, setting);
       }
 
-      if (setting.target() != null) {
-        CommentedConfigurationNode targetNode = settingNode.node("target");
-        targetNode.node("permissions").set(setting.requireTarget().permissions());
-        if (!setting.requireTarget().users().isEmpty()) {
-          CommentedConfigurationNode usersNode;
-          if (setting.requireTarget().isWhitelist()) {
-            usersNode = targetNode.node("whitelist");
-          } else {
-            usersNode = targetNode.node("blacklist");
-          }
-          usersNode.set(setting.requireTarget().users());
-          usersNode.comment("whitelist - affects only users listed; "
-              + "blacklist - affects everyone other than users listed");
-        }
-      }
+      CommentedConfigurationNode targetNode = settingNode.node("target").set(Target.class, setting.target());
     }
     return node;
   }
@@ -130,27 +108,7 @@ public abstract class SettingsConfigurateDataHandler {
       throws SerializationException {
     Y value = serializerRegistrar.serializerOf(key.manager()).deserialize(key.manager(),
         settingNode.node("value"));
-    Target target = null;
-    if (!settingNode.node("target").virtual()) {
-      ConfigurationNode targetNode = settingNode.node("target");
-      target = Target.all();
-      if (!targetNode.node("permissions").virtual()) {
-        target.permissions().putAll(targetNode.node("permissions").childrenMap()
-            .entrySet()
-            .stream()
-            .collect(Collectors.toMap(entry -> (String) entry.getKey(),
-                entry -> entry.getValue().getBoolean())));
-      }
-      if (!targetNode.node("whitelist").virtual()) {
-        target.whitelist();
-        target.users().addAll(targetNode.node("whitelist").require(new TypeToken<Set<UUID>>() {
-        }));
-      } else if (!targetNode.node("blacklist").virtual()) {
-        target.blacklist();
-        target.users().addAll(targetNode.node("blacklist").require(new TypeToken<Set<UUID>>() {
-        }));
-      }
-    }
+    Target target = settingNode.node("target").get(Target.class);
     settings.add(Setting.ofUnchecked(key, value, target));
   }
 

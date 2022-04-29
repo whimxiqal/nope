@@ -28,11 +28,8 @@ import me.pietelite.nope.common.permission.Permissions;
 import me.pietelite.nope.sponge.command.CommandNode;
 import me.pietelite.nope.sponge.command.FunctionlessCommandNode;
 import me.pietelite.nope.sponge.command.parameters.Parameters;
-import me.pietelite.nope.sponge.command.tree.host.blank.edit.ClearCommand;
 import me.pietelite.nope.sponge.command.tree.host.blank.edit.NameCommand;
 import me.pietelite.nope.sponge.command.tree.host.blank.edit.PriorityCommand;
-import me.pietelite.nope.sponge.command.tree.host.blank.edit.SettingCommand;
-import me.pietelite.nope.sponge.command.tree.host.blank.edit.SettingsCommand;
 import me.pietelite.nope.sponge.command.tree.host.blank.edit.VolumesCommand;
 
 public class HostEditCommand extends FunctionlessCommandNode {
@@ -42,11 +39,8 @@ public class HostEditCommand extends FunctionlessCommandNode {
         "Edit settings and properties of a host",
         "edit");
     prefix(Parameters.HOST);
-    addChild(new ClearCommand(this));
     addChild(new NameCommand(this));
     addChild(new PriorityCommand(this));
-    addChild(new SettingCommand(this));
-    addChild(new SettingsCommand(this));
     addChild(new VolumesCommand(this));
   }
 

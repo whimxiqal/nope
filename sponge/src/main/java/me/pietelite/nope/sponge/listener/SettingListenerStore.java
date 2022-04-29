@@ -85,7 +85,7 @@ public class SettingListenerStore {
     SettingKey<?, ?, ?> key;
     for (String keyId : unregisteredKeys) {
       key = settingKeys.get(keyId);
-      if (SpongeNope.instance().hostSystem().isAssigned(key)) {
+      if (SpongeNope.instance().system().isAssigned(key)) {
         for (SettingListenerRegistration<?, ?> registration : settingListeners.get(key.id())) {
           registerCount++;
           registerToSponge(registration);

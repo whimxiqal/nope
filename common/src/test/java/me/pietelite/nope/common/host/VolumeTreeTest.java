@@ -43,7 +43,7 @@ class VolumeTreeTest {
   Domain domain;
   Volume volume1;
   Volume volume2;
-  Zone zone1;
+  Scene scene1;
   Volume volume3;
   Volume volume4;
 
@@ -52,27 +52,27 @@ class VolumeTreeTest {
     Nope.instance(new TestNope());
     volumeTree = new VolumeTree();
     domain = new Domain("domain", 100);
-    volume1 = new Cuboid(domain, 0, 0, 0, 10, 10, 10);
-    volume2 = new Sphere(domain, 20, 20, 20, 5d);
-    zone1 = new Zone("zone1", null, 0, volume1, volume2);
-    volume3 = new Slab(domain, -1, 1);
-    volume4 = new Cylinder(domain, 0, 30, 40, 0, 5d);
-    volumeTree.put(volume1, zone1, false);
-    volumeTree.put(volume2, zone1, false);
+    volume1 = new Cuboid(domain, 0f, 0f, 0f, 10f, 10f, 10f);
+    volume2 = new Sphere(domain, 20f, 20f, 20f, 5f);
+    scene1 = new Scene("scene1", 0);
+    volume3 = new Slab(domain, -1f, 1f);
+    volume4 = new Cylinder(domain, 0f, 30f, 40f, 0f, 5f);
+    volumeTree.put(volume1, scene1, false);
+    volumeTree.put(volume2, scene1, false);
     volumeTree.construct();
   }
 
   @Test
   void intersecting() {
     assert Geometry.intersects(volume1, volume3);
-    assert volumeTree.intersecting(volume3).contains(zone1);
-    assert !volumeTree.intersecting(volume4).contains(zone1);
+    assert volumeTree.intersecting(volume3).contains(scene1);
+    assert !volumeTree.intersecting(volume4).contains(scene1);
   }
 
   @Test
   void containing() {
-    assert volumeTree.containing(1, 1, 1).contains(zone1);
-    assert !volumeTree.containing(-1, 1, 1).contains(zone1);
+    assert volumeTree.containing(1, 1, 1).contains(scene1);
+    assert !volumeTree.containing(-1, 1, 1).contains(scene1);
   }
 
   private static class TestNope extends Nope {

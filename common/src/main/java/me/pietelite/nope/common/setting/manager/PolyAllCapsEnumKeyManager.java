@@ -71,7 +71,12 @@ public class PolyAllCapsEnumKeyManager<E extends Enum<E> & Described, S extends 
   }
 
   @Override
-  public S createSet() {
+  public Class<E> elementType() {
+    return clazz;
+  }
+
+  @Override
+  public S emptySet() {
     return this.setConstructor.get();
   }
 

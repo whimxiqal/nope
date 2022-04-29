@@ -26,11 +26,11 @@ package me.pietelite.nope.common.setting;
 
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
-import me.pietelite.nope.common.api.setting.SettingCategory;
-import me.pietelite.nope.common.api.setting.data.BlockChange;
-import me.pietelite.nope.common.api.setting.data.DamageCause;
-import me.pietelite.nope.common.api.setting.data.Explosive;
-import me.pietelite.nope.common.api.setting.data.Movement;
+import me.pietelite.nope.common.api.register.SettingCategory;
+import me.pietelite.nope.common.api.register.data.BlockChange;
+import me.pietelite.nope.common.api.register.data.DamageCause;
+import me.pietelite.nope.common.api.register.data.Explosive;
+import me.pietelite.nope.common.api.register.data.Movement;
 import me.pietelite.nope.common.setting.sets.BlockChangeSet;
 import me.pietelite.nope.common.setting.sets.DamageCauseSet;
 import me.pietelite.nope.common.setting.sets.ExplosiveSet;

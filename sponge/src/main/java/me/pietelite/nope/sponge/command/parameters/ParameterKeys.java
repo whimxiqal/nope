@@ -27,9 +27,10 @@ package me.pietelite.nope.sponge.command.parameters;
 import io.leangen.geantyref.TypeToken;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
-import me.pietelite.nope.common.api.setting.SettingCategory;
+import me.pietelite.nope.common.api.register.SettingCategory;
 import me.pietelite.nope.common.host.Host;
-import me.pietelite.nope.common.host.Zone;
+import me.pietelite.nope.common.host.Profile;
+import me.pietelite.nope.common.host.Scene;
 import me.pietelite.nope.common.math.Cuboid;
 import me.pietelite.nope.common.math.Cylinder;
 import me.pietelite.nope.common.math.Sphere;
@@ -49,8 +50,8 @@ public final class ParameterKeys {
   public static final Parameter.Key<Cylinder> CYLINDER = Parameter.key("cylinder", Cylinder.class);
   public static final Parameter.Key<String> DESCRIPTION = Parameter.key("parameter", String.class);
   public static final Parameter.Key<Host> HOST = Parameter.key("host", Host.class);
-  public static final Parameter.Key<String> HOST_NAME = Parameter.key("name", String.class);
-  public static final Parameter.Key<Zone> PARENT = Parameter.key("parent", Zone.class);
+  public static final Parameter.Key<String> ID = Parameter.key("name", String.class);
+  public static final Parameter.Key<Profile> PROFILE = Parameter.key("profile", Profile.class);
   public static final Parameter.Key<String> PERMISSION = Parameter.key("permission", String.class);
   public static final Parameter.Key<Boolean> PERMISSION_VALUE = Parameter.key("permission-value", Boolean.class);
   public static final Parameter.Key<ServerPlayer> PLAYER = Parameter.key("player", ServerPlayer.class);
@@ -79,7 +80,7 @@ public final class ParameterKeys {
   public static final Parameter.Key<String> VALUE = Parameter.key("value", String.class);
   public static final Parameter.Key<Integer> VOLUME_INDEX = Parameter.key("index", Integer.class);
   public static final Parameter.Key<ServerWorld> WORLD = Parameter.key("world", ServerWorld.class);
-  public static final Parameter.Key<Zone> ZONE = Parameter.key("zone", Zone.class);
+  public static final Parameter.Key<Scene> ZONE = Parameter.key("zone", Scene.class);
 
   private ParameterKeys() {
   }

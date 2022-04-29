@@ -38,8 +38,10 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 import me.pietelite.nope.common.Nope;
+import me.pietelite.nope.common.api.edit.Alteration;
 import me.pietelite.nope.common.api.struct.AltSet;
 import me.pietelite.nope.common.host.Host;
+import me.pietelite.nope.common.host.Profile;
 import me.pietelite.nope.common.permission.Permissions;
 import me.pietelite.nope.common.setting.Setting;
 import me.pietelite.nope.common.setting.SettingCollection;
@@ -341,11 +343,26 @@ public final class Formatter {
    * @return the text component
    */
   public static Component host(@NotNull Host host) {
-    String name = host.name();
     return command(
-        name,
-        String.format("/nope host %s info", host.name()),
-        Component.text("Click for more details about this zone"),
+        host.name(),
+        String.format("/nope host %s info ", host.name()),
+        Component.text("Click for more details about this host"),
+        false,
+        false
+    );
+  }
+
+  /**
+   * Format a {@link Host} for showing in chat.
+   *
+   * @param profile the profile
+   * @return the text component
+   */
+  public static Component profile(@NotNull Profile profile) {
+    return command(
+        profile.name(),
+        String.format("/nope host %s info ", profile.name()),
+        Component.text("Click for more details about this profile"),
         false,
         false
     );
@@ -427,19 +444,8 @@ public final class Formatter {
       String dataString = setting.value() == null
           ? "(Empty)"
           : setting.key().manager().printValue(setting.value());
-      if (collection instanceof Host) {
-        Host host = (Host) collection;
-        Host redundancy = Nope.instance().hostSystem().findIdenticalSuperior(host, setting.key())
-            .orElse(null);
-        main.append(settingKey(setting.key(), false),
-            Component.text(" = ").append(settingValue(
-                Component.text(dataString),
-                collection.equals(redundancy),
-                redundancy)));
-      } else {
-        main.append(settingKey(setting.key(), false),
-            Component.text(" = ").append(Component.text(dataString)));
-      }
+      main.append(settingKey(setting.key(), false),
+          Component.text(" = ").append(Component.text(dataString)));
 
       List<Component> list = Lists.newLinkedList();
 
@@ -449,7 +455,7 @@ public final class Formatter {
         Target target = setting.requireTarget();
         if (!target.users().isEmpty()) {
           list.add(Component.text(" > ").color(SUCCESS)
-              .append(keyValue(target.isWhitelist() ? "Whitelist:" : "Blacklist:",
+              .append(keyValue(target.hasWhitelist() ? "Whitelist:" : "Blacklist:",
                   target.users()
                       .stream()
                       .map(uuid -> {
@@ -470,7 +476,7 @@ public final class Formatter {
         target.permissions().forEach((permission, value) ->
             list.add(Component.text(" > ").color(SUCCESS)
                 .append(keyValue(permission + ":", String.valueOf(value)))));
-        if (target.isIndiscriminate()) {
+        if (target.indiscriminate()) {
           list.add(Component.text(" > ").color(SUCCESS)
               .append(hover("FORCE AFFECT",
                   "When affect is forced, players with the "
@@ -548,25 +554,25 @@ public final class Formatter {
    * Send a {@link Setting} editor panel to an {@link Audience} member.
    *
    * @param audience the audience to receive the text panel
-   * @param host     the host on which to set settings
+   * @param profile  the profile on which to set settings
    * @param page     the page to send of the paginator
    */
-  public static void sendSettingEditor(Audience audience, Host host, int page) {
+  public static void sendSettingEditor(Audience audience, Profile profile, int page) {
     List<Component> contents = new LinkedList<>();
     Map<String, SettingKey<?, ?, ?>> map = SpongeNope.instance().settingKeys().keys();
     int maxIdPixelSize = MinecraftCharacter.longestPixelLength(map.keySet());
     map.values()
         .stream()
         .sorted()
-        .filter(host::canHave)
+        .filter(profile::canHave)
         .forEach(key -> {
           if (key instanceof SettingKey.Poly) {
-            contents.addAll(editableSettingPoly(host, (SettingKey.Poly<?, ?>) key, maxIdPixelSize));
+            contents.addAll(editableSettingPoly(profile, (SettingKey.Poly<?, ?>) key, maxIdPixelSize));
           } else if (key instanceof SettingKey.Unary) {
-            contents.addAll(editableSettingUnary(host, (SettingKey.Unary<?>) key, maxIdPixelSize));
+            contents.addAll(editableSettingUnary(profile, (SettingKey.Unary<?>) key, maxIdPixelSize));
           }
         });
-    paginator(formattedMessage(GOLD, "___ Settings", false, host(host)))
+    paginator(formattedMessage(GOLD, "___ Settings", false, profile(profile)))
         .contents(contents)
         .header(Component.text("Click on values to apply them. ").color(DULL)
             .append(Component.text("View ")))
@@ -578,25 +584,25 @@ public final class Formatter {
    * Get a list of chat components that allow graphical interfacing with
    * a {@link SettingKey.Unary} type {@link Setting}.
    *
-   * @param host                  the host to edit
+   * @param profile               the profile to edit
    * @param key                   the key of the setting to edit
    * @param firstColumnPixelWidth the pixel width of the first column
    * @param <T>                   the data type
    * @return the list of chat components
    */
-  public static <T> List<Component> editableSettingUnary(Host host, SettingKey.Unary<T> key,
+  public static <T> List<Component> editableSettingUnary(Profile profile, SettingKey.Unary<T> key,
                                                          int firstColumnPixelWidth) {
     TextComponent.Builder line = Component.text()
         .append(settingKey(key, false))
         .append(Component.text(MinecraftCharacter.spacesRequiredToExtend(key.id(), firstColumnPixelWidth)));
-    Optional<Setting<T, SettingValue.Unary<T>>> setting = host.get(key);
+    Optional<Setting<T, SettingValue.Unary<T>>> setting = profile.get(key);
     if (setting.isPresent()) {
       line.append(SPACE.append(Component.text("unset")
           .color(INFO)
           .decorate(TextDecoration.UNDERLINED)
-          .hoverEvent(HoverEvent.showText(accent("Unset ___ from ___", key.id(), host.name())))
+          .hoverEvent(HoverEvent.showText(accent("Unset ___ from ___", key.id(), profile.name())))
           .clickEvent(ClickEvent.runCommand(String.format("/nope host %s edit setting %s value -e unset",
-              host.name(), key.id())))));
+              profile.name(), key.id())))));
     } else {
       line.append(Component.text(" unset").color(DARK));
     }
@@ -611,16 +617,16 @@ public final class Formatter {
             .color(DULL)
             .append(Component.text(key.manager().printData(setting.get().value().get())))
             .append(Component.text("]").color(DULL))
-            .hoverEvent(HoverEvent.showText(accent("Update ___ on ___", key.id(), host.name())))
+            .hoverEvent(HoverEvent.showText(accent("Update ___ on ___", key.id(), profile.name())))
             .clickEvent(ClickEvent.suggestCommand(String.format("/nope host %s edit setting %s value -e set ",
-                host.name(), key.id())))));
+                profile.name(), key.id())))));
       } else {
         line.append(TWO_SPACES.append(Component.text("set")
             .color(INFO)
             .decorate(TextDecoration.UNDERLINED)
-            .hoverEvent(HoverEvent.showText(accent("Set ___ on ___", key.id(), host.name())))
+            .hoverEvent(HoverEvent.showText(accent("Set ___ on ___", key.id(), profile.name())))
             .clickEvent(ClickEvent.suggestCommand(String.format("/nope host %s edit setting %s value -e set ",
-                host.name(), key.id())))));
+                profile.name(), key.id())))));
       }
     } else {
       if (Comparable.class.isAssignableFrom(key.manager().dataType())) {
@@ -645,7 +651,7 @@ public final class Formatter {
               .decorate(TextDecoration.UNDERLINED)
               .hoverEvent(HoverEvent.showText(castToComponent(entry.getValue())))
               .clickEvent(ClickEvent.runCommand(String.format("/nope host %s edit setting %s value -e set %s",
-                  host.name(), key.id(), entry.getKey())))));
+                  profile.name(), key.id(), entry.getKey())))));
         }
       }
     }
@@ -657,28 +663,28 @@ public final class Formatter {
    * Get a list of chat components that allow graphical interfacing with
    * a {@link SettingKey.Poly} type {@link Setting}.
    *
-   * @param host                  the host to edit
+   * @param profile               the profile to edit
    * @param key                   the key of the setting to edit
    * @param firstColumnPixelWidth the pixel width of the first column
    * @param <T>                   the data type, which is a set
    * @param <S>                   the element in the set
    * @return the list of chat components
    */
-  public static <T, S extends AltSet<T>> List<Component> editableSettingPoly(Host host,
+  public static <T, S extends AltSet<T>> List<Component> editableSettingPoly(Profile profile,
                                                                              SettingKey.Poly<T, S> key,
                                                                              int firstColumnPixelWidth) {
     TextComponent.Builder line = Component.text()
         .append(settingKey(key, false))
         .append(Component.text(MinecraftCharacter.spacesRequiredToExtend(key.id(), firstColumnPixelWidth)));
     TextComponent secondLine = null;
-    Optional<Setting<S, SettingValue.Poly<T, S>>> setting = host.get(key);
+    Optional<Setting<S, SettingValue.Poly<T, S>>> setting = profile.get(key);
     if (setting.isPresent() && setting.get().value() != null) {
       line.append(SPACE.append(Component.text("unset")
           .color(INFO)
           .decorate(TextDecoration.UNDERLINED)
-          .hoverEvent(HoverEvent.showText(accent("Unset ___ from ___", key.id(), host.name())))
+          .hoverEvent(HoverEvent.showText(accent("Unset ___ from ___", key.id(), profile.name())))
           .clickEvent(ClickEvent.runCommand(String.format("/nope host %s edit setting %s value -e unset",
-              host.name(), key.id())))));
+              profile.name(), key.id())))));
       SettingValue.Poly<T, S> value = setting.get().value();
       if (value.declarative()) {
         if (value.additive().isEmpty()) {
@@ -687,10 +693,10 @@ public final class Formatter {
           line.append(TWO_SPACES.append(Component.text("none")
               .color(INFO)
               .decorate(TextDecoration.UNDERLINED)
-              .hoverEvent(HoverEvent.showText(accent("Set ___ on ___", key.id(), host.name())))
+              .hoverEvent(HoverEvent.showText(accent("Set ___ on ___", key.id(), profile.name())))
               .clickEvent(ClickEvent.runCommand(String.format("/nope host %s edit setting "
                       + "%s value -e setnone",
-                  host.name(), key.id())))));
+                  profile.name(), key.id())))));
         }
         if (value.additive().isFull()) {
           line.append(TWO_SPACES.append(Component.text("all").color(GOLD)));
@@ -698,9 +704,9 @@ public final class Formatter {
           line.append(TWO_SPACES.append(Component.text("all")
               .color(INFO)
               .decorate(TextDecoration.UNDERLINED)
-              .hoverEvent(HoverEvent.showText(accent("Set ___ on ___", key.id(), host.name())))
+              .hoverEvent(HoverEvent.showText(accent("Set ___ on ___", key.id(), profile.name())))
               .clickEvent(ClickEvent.runCommand(String.format("/nope host %s edit setting %s value -e setall",
-                  host.name(), key.id())))));
+                  profile.name(), key.id())))));
         }
         if (!value.additive().isEmpty() && !value.additive().isFull()) {
           line.append(TWO_SPACES.append(Component.text("some").color(GOLD)));
@@ -718,26 +724,26 @@ public final class Formatter {
                     "Manipulative")))
                 .clickEvent(ClickEvent.suggestCommand(String.format("/nope host %s edit setting "
                         + "%s value -e --additive set ",
-                    host.name(), key.id()))))
+                    profile.name(), key.id()))))
             .append(Component.text("]").color(DARK))
             .append(TWO_SPACES)
             .append(Component.text("[").color(DARK))
             .append(Component.text("+").color(SUCCESS)
                 .hoverEvent(HoverEvent.showText(accent("Add values to ___ on ___",
                     key.id(),
-                    host.name())))
+                    profile.name())))
                 .clickEvent(ClickEvent.suggestCommand(String.format("/nope host "
                         + "%s edit setting %s value -e add ",
-                    host.name(), key.id()))))
+                    profile.name(), key.id()))))
             .append(Component.text("]").color(DARK))
             .append(Component.text("[").color(DARK))
             .append(Component.text("-").color(ERROR)
                 .hoverEvent(HoverEvent.showText(accent("Remove values from ___ on ___",
                     key.id(),
-                    host.name())))
+                    profile.name())))
                 .clickEvent(ClickEvent.suggestCommand(String.format("/nope host %s edit setting "
                         + "%s value -e remove ",
-                    host.name(), key.id()))))
+                    profile.name(), key.id()))))
             .append(Component.text("]").color(DARK));
       } else {
         if (value.subtractive().isFull()) {
@@ -746,10 +752,10 @@ public final class Formatter {
           line.append(TWO_SPACES.append(Component.text("none")
               .color(INFO)
               .decorate(TextDecoration.UNDERLINED)
-              .hoverEvent(HoverEvent.showText(accent("Set ___ on ___", key.id(), host.name())))
+              .hoverEvent(HoverEvent.showText(accent("Set ___ on ___", key.id(), profile.name())))
               .clickEvent(ClickEvent.runCommand(String.format("/nope host %s edit setting "
                       + "%s value -e setnone",
-                  host.name(), key.id())))));
+                  profile.name(), key.id())))));
         }
         if (value.additive().isFull()) {
           line.append(TWO_SPACES.append(Component.text("all").color(GOLD)));
@@ -757,10 +763,10 @@ public final class Formatter {
           line.append(TWO_SPACES.append(Component.text("all")
               .color(INFO)
               .decorate(TextDecoration.UNDERLINED)
-              .hoverEvent(HoverEvent.showText(accent("Set ___ on ___", key.id(), host.name())))
+              .hoverEvent(HoverEvent.showText(accent("Set ___ on ___", key.id(), profile.name())))
               .clickEvent(ClickEvent.runCommand(String.format("/nope host %s edit setting "
                       + "%s value -e setall",
-                  host.name(), key.id())))));
+                  profile.name(), key.id())))));
         }
         if (!value.subtractive().isFull() && !value.additive().isFull()) {
           line.append(TWO_SPACES.append(Component.text("some").color(GOLD)));
@@ -777,7 +783,7 @@ public final class Formatter {
                     "Declarative")))
                 .clickEvent(ClickEvent.runCommand(String.format("/nope host %s edit setting "
                         + "%s value -e setdefault",
-                    host.name(), key.id()))))
+                    profile.name(), key.id()))))
             .append(Component.text("/").color(DULL))
             .append(Component.text("M").color(GOLD).decorate(TextDecoration.BOLD))
             .append(Component.text("]").color(DARK))
@@ -788,40 +794,40 @@ public final class Formatter {
             .append(Component.text("+").color(SUCCESS)
                 .hoverEvent(HoverEvent.showText(accent("Add values to ___ set of ___ on ___",
                     "additive", key.id(),
-                    host.name())))
+                    profile.name())))
                 .clickEvent(ClickEvent.suggestCommand(String.format("/nope host %s edit setting "
                         + "%s value -e --additive add ",
-                    host.name(), key.id()))))
+                    profile.name(), key.id()))))
             .append(Component.text("]").color(DARK))
             .append(Component.text("[").color(DARK))
             .append(Component.text("-").color(ERROR)
                 .hoverEvent(HoverEvent.showText(accent("Remove values from ___ set of ___ on ___",
                     "additive",
                     key.id(),
-                    host.name())))
+                    profile.name())))
                 .clickEvent(ClickEvent.suggestCommand(String.format("/nope host %s edit setting "
                         + "%s value -e --additive remove ",
-                    host.name(), key.id()))))
+                    profile.name(), key.id()))))
             .append(Component.text("]").color(DARK))
             .append(Component.text("[").color(DARK))
             .append(Component.text("x").color(WARN)
                 .hoverEvent(HoverEvent.showText(accent("Clear all from ___ set of ___ on ___",
                     "additive",
                     key.id(),
-                    host.name())))
+                    profile.name())))
                 .clickEvent(ClickEvent.runCommand(String.format("/nope host %s edit setting "
                         + "%s value -e --additive setnone ",
-                    host.name(), key.id()))))
+                    profile.name(), key.id()))))
             .append(Component.text("]").color(DARK))
             .append(Component.text("[").color(DARK))
             .append(Component.text("o").color(WHITE)
                 .hoverEvent(HoverEvent.showText(accent("Set all possible values in ___ set of ___ on ___",
                     "additive",
                     key.id(),
-                    host.name())))
+                    profile.name())))
                 .clickEvent(ClickEvent.runCommand(String.format("/nope host %s edit setting "
                         + "%s value -e --additive setall ",
-                    host.name(), key.id()))))
+                    profile.name(), key.id()))))
             .append(Component.text("]").color(DARK))
             .append(SPACE)
             .append(Component.text("sub"))
@@ -831,40 +837,40 @@ public final class Formatter {
                 .hoverEvent(HoverEvent.showText(accent("Add values to ___ set of ___ on ___",
                     "subtractive",
                     key.id(),
-                    host.name())))
+                    profile.name())))
                 .clickEvent(ClickEvent.suggestCommand(String.format("/nope host %s edit setting "
                         + "%s value -e --subtractive add ",
-                    host.name(), key.id()))))
+                    profile.name(), key.id()))))
             .append(Component.text("]").color(DARK))
             .append(Component.text("[").color(DARK))
             .append(Component.text("-").color(ERROR)
                 .hoverEvent(HoverEvent.showText(accent("Remove values from ___ set of ___ on ___",
                     "subtractive",
                     key.id(),
-                    host.name())))
+                    profile.name())))
                 .clickEvent(ClickEvent.suggestCommand(String.format("/nope host %s edit setting "
                         + "%s value -e --subtractive remove ",
-                    host.name(), key.id()))))
+                    profile.name(), key.id()))))
             .append(Component.text("]").color(DARK))
             .append(Component.text("[").color(DARK))
             .append(Component.text("x").color(WARN)
                 .hoverEvent(HoverEvent.showText(accent("Clear all from ___ set of ___ on ___",
                     "subtractive",
                     key.id(),
-                    host.name())))
+                    profile.name())))
                 .clickEvent(ClickEvent.runCommand(String.format("/nope host %s edit setting "
                         + "%s value -e --subtractive setnone",
-                    host.name(), key.id()))))
+                    profile.name(), key.id()))))
             .append(Component.text("]").color(DARK))
             .append(Component.text("[").color(DARK))
             .append(Component.text("o").color(WHITE)
                 .hoverEvent(HoverEvent.showText(accent("Set all possible values in ___ set of ___ on ___",
                     "subtractive",
                     key.id(),
-                    host.name())))
+                    profile.name())))
                 .clickEvent(ClickEvent.runCommand(String.format("/nope host %s edit setting "
                         + "%s value -e --subtractive setall",
-                    host.name(), key.id()))))
+                    profile.name(), key.id()))))
             .append(Component.text("]").color(DARK));
       }
     } else {
@@ -872,9 +878,9 @@ public final class Formatter {
       line.append(TWO_SPACES.append(Component.text("set")
           .color(INFO)
           .decorate(TextDecoration.UNDERLINED)
-          .hoverEvent(HoverEvent.showText(accent("Set ___ on ___", key.id(), host.name())))
+          .hoverEvent(HoverEvent.showText(accent("Set ___ on ___", key.id(), profile.name())))
           .clickEvent(ClickEvent.runCommand(String.format("/nope host %s edit setting %s value -e setdefault",
-              host.name(), key.id())))));
+              profile.name(), key.id())))));
     }
     if (secondLine == null) {
       return Collections.singletonList(line.build());
@@ -901,6 +907,25 @@ public final class Formatter {
     } else {
       throw new IllegalArgumentException("Unknown type tried to cast to Component: "
           + o.getClass().getSimpleName());
+    }
+  }
+
+  /**
+   * Convert an {@link Alteration} into a readable message.
+   *
+   * @param alteration the alteration
+   * @return the message
+   */
+  public static Component alteration(Alteration alteration) {
+    switch (alteration.result()) {
+      case SUCCESS:
+        return success(alteration.message().orElse("Success!"));
+      case WARNING:
+        return warn(alteration.message().orElse("Operation only partially succeeded"));
+      case FAILURE:
+        return error(alteration.message().orElse("Operation failed"));
+      default:
+        throw new RuntimeException();
     }
   }
 }

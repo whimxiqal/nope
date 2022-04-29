@@ -25,10 +25,13 @@
 package me.pietelite.nope.common.math;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 import lombok.Getter;
 import lombok.experimental.Accessors;
+import me.pietelite.nope.common.api.edit.ZoneType;
 import me.pietelite.nope.common.host.Domain;
 import me.pietelite.nope.common.host.Domained;
+import me.pietelite.nope.common.storage.Destructible;
 import me.pietelite.nope.common.struct.Location;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -37,13 +40,14 @@ import org.jetbrains.annotations.Nullable;
  * A <a href="https://en.wikipedia.org/wiki/Volume">Volume</a>.
  */
 @Accessors(fluent = true)
-public abstract class Volume implements Domained {
+public abstract class Volume implements Domained, Destructible {
 
   @Getter
   protected final Domain domain;
   @Getter
   @Nullable
   private String name;
+  private boolean destroyed;
 
   public Volume(Domain domain) {
     this(null, domain);
@@ -64,6 +68,8 @@ public abstract class Volume implements Domained {
   @NotNull
   public abstract Cuboid inscribed();
 
+  public abstract ZoneType zoneType();
+
   /**
    * Whether this volume contains a point within it.
    *
@@ -72,9 +78,9 @@ public abstract class Volume implements Domained {
    */
   public final boolean containsPoint(Location location) {
     return domain.equals(location.domain()) && this.containsPoint(
-        location.getBlockX(),
-        location.getBlockY(),
-        location.getBlockZ());
+        location.posX(),
+        location.posY(),
+        location.posZ());
   }
 
   /**
@@ -85,28 +91,30 @@ public abstract class Volume implements Domained {
    * @param z the z coordinate
    * @return true if the volume contains it
    */
-  public abstract boolean containsPoint(double x, double y, double z);
-
-  /**
-   * Whether this volume contains a point within it,
-   * assuming that the domain is the same.
-   *
-   * @param vector3d the point
-   * @return true if the volume contains it
-   */
-  public final boolean containsPoint(@NotNull Vector3d vector3d) {
-    return containsPoint(vector3d.x(), vector3d.y(), vector3d.z());
-  }
+  public abstract boolean containsPoint(float x, float y, float z);
 
   /**
    * Whether this volume contains an entire 1-unit-cubed block within it.
    *
-   * @param x the (starting) x coordinate
-   * @param y the (starting) y coordinate
-   * @param z the (starting) z coordinate
+   * @param minX the minimum X value
+   * @param minY the minimum Y value
+   * @param minZ the minimum Z value
+   * @param maxX the maximum X value
+   * @param maxY the maximum Y value
+   * @param maxZ the maximum Z value
+   * @param maxInclusive true if we want to include the maximum values as "inside" the volume
    * @return true if it contains the block
    */
-  public abstract boolean containsBlock(int x, int y, int z);
+  public boolean containsCuboid(float minX, float minY, float minZ, float maxX, float maxY, float maxZ, boolean maxInclusive) {
+    return containsPoint(minX, minY, minZ)
+            && containsPoint(maxX, maxY, maxZ)
+            && containsPoint(minX, minY, maxZ)
+            && containsPoint(minX, maxY, minZ)
+            && containsPoint(maxX, minY, maxZ)
+            && containsPoint(maxX, maxY, minZ)
+            && containsPoint(minX, maxY, maxZ)
+            && containsPoint(maxX, minY, minZ);
+  }
 
   /**
    * Whether this volume is internally configured correctly to represent
@@ -127,4 +135,20 @@ public abstract class Volume implements Domained {
    */
   public abstract List<Vector3d> surfacePointsNear(Vector3d point, double proximity, double density);
 
+  @Override
+  public void markDestroyed() {
+    this.destroyed = true;
+  }
+
+  @Override
+  public boolean destroyed() {
+    return destroyed;
+  }
+
+  @Override
+  public void verifyExistence() throws NoSuchElementException {
+    if (destroyed()) {
+      throw new IllegalStateException("Volume (" + zoneType().name() + ") is destroyed");
+    }
+  }
 }

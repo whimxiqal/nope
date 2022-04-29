@@ -27,6 +27,7 @@ package me.pietelite.nope.sponge.storage.configurate;
 import java.util.Objects;
 import java.util.function.Function;
 import me.pietelite.nope.common.host.Domain;
+import me.pietelite.nope.common.host.HostedProfile;
 import me.pietelite.nope.common.storage.DomainDataHandler;
 import me.pietelite.nope.sponge.config.SettingValueConfigSerializerRegistrar;
 import org.jetbrains.annotations.NotNull;
@@ -37,8 +38,7 @@ import org.spongepowered.configurate.loader.ConfigurationLoader;
 /**
  * Data handler for persistent storage of {@link Domain} information using Configurate.
  */
-public class DomainConfigurateDataHandler
-    extends SettingsConfigurateDataHandler implements DomainDataHandler {
+public class DomainConfigurateDataHandler implements DomainDataHandler {
 
   private final Function<String, ConfigurationLoader<CommentedConfigurationNode>> loader;
 
@@ -46,12 +46,8 @@ public class DomainConfigurateDataHandler
    * Generic constructor.
    *
    * @param loader              the configuration loader
-   * @param serializerRegistrar serialization registrar
    */
-  public DomainConfigurateDataHandler(Function<String, ConfigurationLoader<CommentedConfigurationNode>>
-                                          loader,
-                                      SettingValueConfigSerializerRegistrar serializerRegistrar) {
-    super(serializerRegistrar);
+  public DomainConfigurateDataHandler(Function<String, ConfigurationLoader<CommentedConfigurationNode>> loader) {
     this.loader = loader;
   }
 
@@ -59,8 +55,8 @@ public class DomainConfigurateDataHandler
   public void save(@NotNull Domain domain) {
     Objects.requireNonNull(domain);
     try {
-      CommentedConfigurationNode root = settingCollectionRoot(domain);
-      root.comment("Settings for world " + domain.name());
+      CommentedConfigurationNode root = loader.apply(domain.name()).load();
+      root.node("profiles").setList(HostedProfile.class, domain.hostedProfiles());
       loader.apply(domain.name()).save(root);
     } catch (ConfigurateException e) {
       e.printStackTrace();
@@ -71,12 +67,7 @@ public class DomainConfigurateDataHandler
   public void load(@NotNull Domain domain) {
     try {
       CommentedConfigurationNode root = loader.apply(domain.name()).load();
-      if (root.node("settings").virtual()) {
-        // No settings, so this file was likely not created yet.
-        root.node("settings").set(null);
-      } else {
-        domain.setAll(deserializeSettings(root.node("settings").childrenMap()));
-      }
+      domain.hostedProfiles().addAll(root.node("profiles").getList(HostedProfile.class));
     } catch (ConfigurateException e) {
       e.printStackTrace();
     }

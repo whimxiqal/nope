@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import lombok.Getter;
 import lombok.experimental.Accessors;
+import me.pietelite.nope.common.api.edit.ZoneType;
 import me.pietelite.nope.common.host.Domain;
 import org.jetbrains.annotations.NotNull;
 
@@ -39,21 +40,21 @@ import org.jetbrains.annotations.NotNull;
 @SuppressWarnings("AbbreviationAsWordInName")
 public class Cuboid extends Volume {
 
-  private final Integer minX;
-  private final Integer minY;
-  private final Integer minZ;
-  private final Integer maxX;
-  private final Integer maxY;
-  private final Integer maxZ;
+  private final Float minX;
+  private final Float minY;
+  private final Float minZ;
+  private final Float maxX;
+  private final Float maxY;
+  private final Float maxZ;
   @Getter
   @Accessors(fluent = true)
-  private final int lengthX;
+  private final float lengthX;
   @Getter
   @Accessors(fluent = true)
-  private final int lengthY;
+  private final float lengthY;
   @Getter
   @Accessors(fluent = true)
-  private final int lengthZ;
+  private final float lengthZ;
   @Getter
   @Accessors(fluent = true)
   private final Vector2d midPointYZPlane;
@@ -93,12 +94,12 @@ public class Cuboid extends Volume {
    * @param z2     second z value
    */
   public Cuboid(Domain domain,
-                Integer x1,
-                Integer y1,
-                Integer z1,
-                Integer x2,
-                Integer y2,
-                Integer z2) {
+                Float x1,
+                Float y1,
+                Float z1,
+                Float x2,
+                Float y2,
+                Float z2) {
     super(domain);
     this.minX = Math.min(x1, x2);
     this.minY = Math.min(y1, y2);
@@ -133,7 +134,7 @@ public class Cuboid extends Volume {
    *
    * @return min x
    */
-  public int minX() {
+  public float minX() {
     return minX;
   }
 
@@ -142,7 +143,7 @@ public class Cuboid extends Volume {
    *
    * @return min y
    */
-  public int minY() {
+  public float minY() {
     return minY;
   }
 
@@ -151,7 +152,7 @@ public class Cuboid extends Volume {
    *
    * @return min z
    */
-  public int minZ() {
+  public float minZ() {
     return minZ;
   }
 
@@ -160,7 +161,7 @@ public class Cuboid extends Volume {
    *
    * @return max x
    */
-  public int maxX() {
+  public float maxX() {
     return maxX;
   }
 
@@ -169,7 +170,7 @@ public class Cuboid extends Volume {
    *
    * @return max y
    */
-  public int maxY() {
+  public float maxY() {
     return maxY;
   }
 
@@ -178,7 +179,7 @@ public class Cuboid extends Volume {
    *
    * @return max z
    */
-  public int maxZ() {
+  public float maxZ() {
     return maxZ;
   }
 
@@ -195,7 +196,12 @@ public class Cuboid extends Volume {
   }
 
   @Override
-  public boolean containsPoint(double x, double y, double z) {
+  public ZoneType zoneType() {
+    return ZoneType.CUBOID;
+  }
+
+  @Override
+  public boolean containsPoint(float x, float y, float z) {
     return x >= this.minX
         && x < this.maxX
         && y >= this.minY
@@ -205,13 +211,13 @@ public class Cuboid extends Volume {
   }
 
   @Override
-  public boolean containsBlock(int x, int y, int z) {
-    return x >= this.minX
-        && x < this.maxX
-        && y >= this.minY
-        && y < this.maxY
-        && z >= this.minZ
-        && z < this.maxZ;
+  public boolean containsCuboid(float minX, float minY, float minZ, float maxX, float maxY, float maxZ, boolean maxInclusive) {
+    return minX >= this.minX
+        && minY >= this.minY
+        && minZ >= this.minZ
+        && (maxInclusive
+        ? (maxX <= this.maxX && maxY <= this.maxY && maxZ <= this.maxZ)
+        : (maxX < this.maxX && maxY < this.maxY && maxZ < this.maxZ));
   }
 
   @Override

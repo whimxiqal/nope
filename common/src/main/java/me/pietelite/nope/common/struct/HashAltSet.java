@@ -27,6 +27,7 @@ package me.pietelite.nope.common.struct;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -61,65 +62,69 @@ public abstract class HashAltSet<T> implements AltSet<T> {
    * Create a set that can hold an infinite amount of elements,
    * like all {@link Integer}s or {@link String}s.
    *
-   * @param <X> the type stored in the set
+   * @param full true if this set should be initialized as a full alt set
+   * @param <X>  the type stored in the set
    * @return a new set
    */
-  public static <X> HashAltSet<X> infinite() {
-    return new UnboundedAlternate<>();
+  public static <X> HashAltSet<X> infinite(boolean full) {
+    return new UnboundedAlternate<>(full);
   }
 
   /**
    * Create a set that can only hold a finite number of elements.
    * This value may not be less than or equal to this class's
-   * <code>STANDARD_MAX_SIZE</code> unless you use {@link #finite(int, Supplier)}.
+   * <code>STANDARD_MAX_SIZE</code> unless you use {@link #finite(boolean, int, Supplier)}.
    *
+   * @param full    true if this set should be initialized as a full alt set
    * @param maxSize set the maximum number of elements that can be held in this set
    * @param <X>     the type stored in the set
    * @return a new set
    */
-  public static <X> HashAltSet<X> finite(int maxSize) {
+  public static <X> HashAltSet<X> finite(boolean full, int maxSize) {
     if (maxSize <= STANDARD_MAX_SIZE) {
       throw new IllegalArgumentException("If the max size is below "
           + STANDARD_MAX_SIZE
           + ", you must specify a supplier for all possible elements");
     }
-    return finiteLarge(maxSize);
+    return finiteLarge(full, maxSize);
   }
 
   /**
    * Create a set that can only hold a finite number of elements.
    *
+   * @param full     true if this set should be initialized as a full alt set
    * @param maxSize  set the maximum number of elements that can be held in this set
    * @param elements a getter for all possible elements in this set
    * @param <X>      the type stored in the set
    * @return a new set
    */
-  public static <X> HashAltSet<X> finite(int maxSize, Supplier<Collection<X>> elements) {
+  public static <X> HashAltSet<X> finite(boolean full, int maxSize, Supplier<Collection<X>> elements) {
     if (maxSize <= STANDARD_MAX_SIZE) {
-      return finiteSmall(elements.get());
+      return finiteSmall(full, elements.get());
     } else {
-      return finiteLarge(maxSize);
+      return finiteLarge(full, maxSize);
     }
   }
 
-  private static <X> HashAltSet<X> finiteSmall(Collection<X> elements) {
-    return new Standard<>(elements.size(), elements);
+  private static <X> HashAltSet<X> finiteSmall(boolean full, Collection<X> elements) {
+    return new Standard<>(full, elements.size(), elements);
   }
 
-  private static <X> HashAltSet<X> finiteLarge(int maxSize) {
-    return new Alternate<>(maxSize);
+  private static <X> HashAltSet<X> finiteLarge(boolean full, int maxSize) {
+    return new Alternate<>(full, maxSize);
   }
 
   /**
    * Create a set that stores enums.
    *
+   * @param full  true if this set should be initialized as a full alt set
    * @param clazz the enum class
    * @param <E>   the type of enum
    * @return a new set
    */
-  public static <E extends Enum<E>> HashAltSet<E> ofEnum(Class<E> clazz) {
+  public static <E extends Enum<E>> HashAltSet<E> ofEnum(boolean full, Class<E> clazz) {
     E[] enums = clazz.getEnumConstants();
-    return finite(enums.length, () -> Arrays.asList(enums));
+    return finite(full, enums.length, () -> Arrays.asList(enums));
   }
 
   @Override
@@ -329,6 +334,23 @@ public abstract class HashAltSet<T> implements AltSet<T> {
     return this.printAll();
   }
 
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+    HashAltSet<?> that = (HashAltSet<?>) o;
+    return maxSize == that.maxSize && inverted == that.inverted && set.equals(that.set);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(maxSize, set, inverted);
+  }
+
   /**
    * An {@link AltSet} that works effectively just like a {@link HashSet}.
    * In other words, it cannot be inverted.
@@ -339,9 +361,12 @@ public abstract class HashAltSet<T> implements AltSet<T> {
 
     private final Collection<T> options;
 
-    private Standard(int maxSize, Collection<T> options) {
+    private Standard(boolean full, int maxSize, Collection<T> options) {
       super(maxSize);
       this.options = options;
+      if (full) {
+        this.fill();
+      }
     }
 
     @Override
@@ -361,8 +386,11 @@ public abstract class HashAltSet<T> implements AltSet<T> {
    */
   private static class Alternate<T> extends HashAltSet<T> {
 
-    private Alternate(int maxSize) {
+    private Alternate(boolean full, int maxSize) {
       super(maxSize);
+      if (full) {
+        this.fill();
+      }
     }
 
     @Override
@@ -382,9 +410,11 @@ public abstract class HashAltSet<T> implements AltSet<T> {
 
     /**
      * General constructor that sets the "max size" to infinity.
+     *
+     * @param full true if this set should be initialized as a full alt set
      */
-    public UnboundedAlternate() {
-      super(Integer.MAX_VALUE);
+    public UnboundedAlternate(boolean full) {
+      super(full, Integer.MAX_VALUE);
     }
   }
 
@@ -399,10 +429,11 @@ public abstract class HashAltSet<T> implements AltSet<T> {
     /**
      * General constructor that ensures there are only a few possible values to put in the set.
      *
+     * @param full    true if this set should be initialized as a full alt set
      * @param options the possible values to store in this set
      */
-    public FewStandard(Collection<T> options) {
-      super(options.size(), options);
+    public FewStandard(boolean full, Collection<T> options) {
+      super(full, options.size(), options);
       if (maxSize > STANDARD_MAX_SIZE) {
         throw new IllegalArgumentException("You may not make a Small Limited Alt Set with more than "
             + STANDARD_MAX_SIZE + " possible options.");
@@ -420,10 +451,11 @@ public abstract class HashAltSet<T> implements AltSet<T> {
     /**
      * General constructor.
      *
+     * @param full  true if this set should be initialized as a full alt set
      * @param clazz the enum class
      */
-    public FewEnum(Class<E> clazz) {
-      super(Arrays.asList(clazz.getEnumConstants()));
+    public FewEnum(boolean full, Class<E> clazz) {
+      super(full, Arrays.asList(clazz.getEnumConstants()));
     }
   }
 

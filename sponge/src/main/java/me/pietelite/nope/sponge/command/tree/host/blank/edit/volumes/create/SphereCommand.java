@@ -29,7 +29,7 @@ import java.util.List;
 import java.util.Optional;
 import me.pietelite.nope.common.Nope;
 import me.pietelite.nope.common.host.Host;
-import me.pietelite.nope.common.host.Zone;
+import me.pietelite.nope.common.host.Scene;
 import me.pietelite.nope.common.math.Geometry;
 import me.pietelite.nope.common.math.Sphere;
 import me.pietelite.nope.common.permission.Permissions;
@@ -60,12 +60,12 @@ public class SphereCommand extends CommandNode {
   @Override
   public CommandResult execute(CommandContext context) throws CommandException {
     Host host = context.requireOne(ParameterKeys.HOST);
-    if (!(host instanceof Zone)) {
+    if (!(host instanceof Scene)) {
       return CommandResult.error(Formatter.error(
           "You may not create volumes for host ___", host.name()
       ));
     }
-    Zone zone = (Zone) host;
+    Scene scene = (Scene) host;
 
     Sphere sphere;
 
@@ -79,7 +79,7 @@ public class SphereCommand extends CommandNode {
         && posY.isPresent()
         && posZ.isPresent()
         && radius.isPresent()) {
-      sphere = new Sphere(Nope.instance().hostSystem().domain(SpongeUtil.worldToId(world.get())),
+      sphere = new Sphere(Nope.instance().system().domain(SpongeUtil.worldToId(world.get())),
           posX.get(),
           posY.get(),
           posZ.get(),
@@ -121,19 +121,19 @@ public class SphereCommand extends CommandNode {
       }
     }
 
-    for (int i = 0; i < zone.volumes().size(); i++) {
-      if (Geometry.intersects(zone.volumes().get(i), sphere)) {
+    for (int i = 0; i < scene.volumes().size(); i++) {
+      if (Geometry.intersects(scene.volumes().get(i), sphere)) {
         context.cause().audience().sendMessage(Formatter.warn(
-            "Your new ___ intersects with zone ___'s volume number ___ ",
-            "sphere", zone.name(), i
+            "Your new ___ intersects with scene ___'s volume number ___ ",
+            "sphere", scene.name(), i
         ));
       }
     }
-    Nope.instance().hostSystem().addVolume(sphere, zone);
-    zone.ensurePriority();
+    Nope.instance().system().addVolume(sphere, scene);
+    scene.ensurePriority();
     context.cause().audience().sendMessage(Formatter.success(
-        "A ___ was created on zone ___",
-        "sphere", zone.name()
+        "A ___ was created on scene ___",
+        "sphere", scene.name()
     ));
     if (context.cause().root() instanceof ServerPlayer) {
       EffectsUtil.show(sphere, (ServerPlayer) context.cause().root());

@@ -24,9 +24,9 @@
 
 package me.pietelite.nope.sponge.command.tree.host.blank;
 
-import me.pietelite.nope.common.Nope;
+import me.pietelite.nope.common.api.NopeServiceProvider;
 import me.pietelite.nope.common.host.Host;
-import me.pietelite.nope.common.host.Zone;
+import me.pietelite.nope.common.host.Scene;
 import me.pietelite.nope.common.permission.Permissions;
 import me.pietelite.nope.sponge.command.CommandNode;
 import me.pietelite.nope.sponge.command.parameters.ParameterKeys;
@@ -48,15 +48,20 @@ public class HostDestroyCommand extends CommandNode {
   @Override
   public CommandResult execute(CommandContext context) throws CommandException {
     Host host = context.requireOne(ParameterKeys.HOST);
-    if (!(host instanceof Zone)) {
+    if (!(host instanceof Scene)) {
       return CommandResult.error(Formatter.error(
           "You may only delete hosts of type ___", "zone"
       ));
     }
-    Nope.instance().hostSystem().removeZone(host.name());
-    context.cause().audience().sendMessage(Formatter.success(
-        "Zone ___ was destroyed", host.name()
-    ));
+    if (NopeServiceProvider.service().editSystem().editProfile(host.name()).destroy().result().succeed()) {
+      context.cause().audience().sendMessage(Formatter.success(
+          "Scene ___ was destroyed", host.name()
+      ));
+    } else {
+      context.cause().audience().sendMessage(Formatter.error(
+          "Scene ___ could not be destroyed", host.name()
+      ));
+    }
     return CommandResult.success();
   }
 }

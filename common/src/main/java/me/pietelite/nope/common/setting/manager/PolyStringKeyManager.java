@@ -61,8 +61,13 @@ public class PolyStringKeyManager extends SettingKey.Manager.Poly<String, String
   }
 
   @Override
-  public StringSet createSet() {
-    return new StringSet();
+  public Class<String> elementType() {
+    return String.class;
+  }
+
+  @Override
+  public StringSet emptySet() {
+    return new StringSet(false);
   }
 
   @Override

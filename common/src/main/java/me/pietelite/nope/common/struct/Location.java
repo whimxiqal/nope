@@ -32,13 +32,11 @@ import me.pietelite.nope.common.math.Vector3d;
 /**
  * A generic Minecraft location.
  */
-@Getter
-@Accessors(fluent = true)
 public class Location {
 
-  private final double posX;
-  private final double posY;
-  private final double posZ;
+  private final float posX;
+  private final float posY;
+  private final float posZ;
   private final Domain domain;
 
   /**
@@ -49,41 +47,38 @@ public class Location {
    * @param z      the Z coordinate
    * @param domain the domain
    */
-  public Location(int x, int y, int z, Domain domain) {
+  public Location(float x, float y, float z, Domain domain) {
     this.posX = x;
     this.posY = y;
     this.posZ = z;
     this.domain = domain;
   }
 
-  /**
-   * Generic constructor, with double floating point precision.
-   *
-   * @param x      the X coordinate
-   * @param y      the Y coordinate
-   * @param z      the Z coordinate
-   * @param domain the domain
-   */
-  public Location(double x, double y, double z, Domain domain) {
-    this.posX = x;
-    this.posY = y;
-    this.posZ = z;
-    this.domain = domain;
+  public float posX() {
+    return posX;
   }
 
-  public int getBlockX() {
+  public float posY() {
+    return posY;
+  }
+
+  public float posZ() {
+    return posZ;
+  }
+
+  public int blockX() {
     return (int) Math.floor(posX);
   }
 
-  public int getBlockY() {
+  public int blockY() {
     return (int) Math.floor(posY);
   }
 
-  public int getBlockZ() {
+  public int blockZ() {
     return (int) Math.floor(posZ);
   }
 
-  public Vector3d vector3d() {
-    return Vector3d.of(posX, posY, posZ);
+  public Domain domain() {
+    return domain;
   }
 }

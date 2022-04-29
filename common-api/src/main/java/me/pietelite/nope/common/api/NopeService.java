@@ -24,12 +24,12 @@
 
 package me.pietelite.nope.common.api;
 
-import me.pietelite.nope.common.api.setting.SettingKeyBuilder;
-import me.pietelite.nope.common.api.setting.data.BlockChange;
-import me.pietelite.nope.common.api.setting.data.DamageCause;
-import me.pietelite.nope.common.api.setting.data.Explosive;
-import me.pietelite.nope.common.api.setting.data.Movement;
+import java.util.UUID;
+import me.pietelite.nope.common.api.edit.SystemEditor;
+import me.pietelite.nope.common.api.evaluate.Evaluator;
+import me.pietelite.nope.common.api.register.SettingManagers;
 import me.pietelite.nope.common.api.struct.AltSet;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * A developer API for all platform implementations of Nope.
@@ -37,114 +37,15 @@ import me.pietelite.nope.common.api.struct.AltSet;
 public interface NopeService {
 
   /**
-   * Returns a {@link SettingKeyBuilder} to build a key for settings with {@link Boolean} values.
-   * The values are set with the terms "true" and "false". Due to these bland-sounding terms,
-   * the {@link #toggleKeyBuilder(String)} is generally preferred over this builder.
+   * A tool for retrieving Nope's managers that handle the data for setting keys
+   * and provide their builders.
    *
-   * @param id the identifier of the setting
-   * @return the builder
+   * @return the managers
    */
-  SettingKeyBuilder.Unary<Boolean, ?> booleanKeyBuilder(String id);
+  SettingManagers settingManagers();
 
-  /**
-   * Returns a {@link SettingKeyBuilder} to build a key for settings with {@link Boolean} values.
-   * The values are set with the terms "allow" and "deny", so it is best used for settings that
-   * represent the ability for a player or entity to do something.
-   *
-   * <p>For example, "ride" is a setting with this type because a player either is allowed to
-   * ride an entity or not ride an entity.
-   *
-   * @param id the identifier of the setting
-   * @return the builder
-   */
-  SettingKeyBuilder.Unary<Boolean, ?> stateKeyBuilder(String id);
+  SystemEditor editSystem();
 
-  /**
-   * Returns a {@link SettingKeyBuilder} to build a key for settings with {@link Boolean} values.
-   * The values are set with the terms "on" and "off", so it is best used for settings that
-   * represent a simple stand-alone processes of the server that can either happen or simply not happen.
-   *
-   * <p>For example, "leaf-decay" is a setting with this type because it is something the server does,
-   * irrespective of player intervention.
-   *
-   * @param id the identifier of the setting
-   * @return the builder
-   */
-  SettingKeyBuilder.Unary<Boolean, ?> toggleKeyBuilder(String id);
-
-  /**
-   * Returns a {@link SettingKeyBuilder} to build a key for settings with {@link Integer} values.
-   *
-   * @param id the identifier of the setting
-   * @return the builder
-   */
-  SettingKeyBuilder.Unary<Integer, ?> integerKeyBuilder(String id);
-
-  /**
-   * Returns a {@link SettingKeyBuilder} to build a key for settings with {@link String} values.
-   *
-   * @param id the identifier of the setting
-   * @return the builder
-   */
-  SettingKeyBuilder.Unary<String, ?> stringKeyBuilder(String id);
-
-  /**
-   * Returns a {@link SettingKeyBuilder} to build a key for settings with {@link String} values
-   * that represent types of Minecraft entities.
-   *
-   * @param id the identifier of the setting
-   * @return the builder
-   */
-  SettingKeyBuilder.Poly<String, ?, ?> entitiesManager(String id);
-
-  /**
-   * Returns a {@link SettingKeyBuilder} to build a key for settings with {@link String} values
-   * that represent types of Minecraft blocks that are able to grow.
-   *
-   * @param id the identifier of the setting
-   * @return the builder
-   */
-  SettingKeyBuilder.Poly<String, ? extends AltSet<String>, ?> growablesManager(String id);
-
-  /**
-   * Returns a {@link SettingKeyBuilder} to build a key for settings with {@link String} values,
-   * which are each the name of a plugin.
-   *
-   * @param id the identifier of the setting
-   * @return the builder
-   */
-  SettingKeyBuilder.Poly<String, ? extends AltSet<String>, ?> pluginsManager(String id);
-
-  /**
-   * Returns a {@link SettingKeyBuilder} to build a key for settings with {@link BlockChange} values.
-   *
-   * @param id the identifier of the setting
-   * @return the builder
-   */
-  SettingKeyBuilder.Poly<BlockChange, ?, ?> blockChangesManager(String id);
-
-  /**
-   * Returns a {@link SettingKeyBuilder} to build a key for settings with {@link DamageCause} values.
-   *
-   * @param id the identifier of the setting
-   * @return the builder
-   */
-  SettingKeyBuilder.Poly<DamageCause, ?, ?> damageCausesManager(String id);
-
-  /**
-   * Returns a {@link SettingKeyBuilder} to build a key for settings with {@link Explosive} values.
-   *
-   * @param id the identifier of the setting
-   * @return the builder
-   */
-  SettingKeyBuilder.Poly<Explosive, ?, ?> explosivesManager(String id);
-
-  /**
-   * Returns a {@link SettingKeyBuilder} to build a key for settings with {@link Movement} values.
-   *
-   * @param id the identifier of the setting
-   * @return the builder
-   */
-  SettingKeyBuilder.Poly<Movement, ?, ?> movementsManager(String id);
+  Evaluator evaluator();
 
 }

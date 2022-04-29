@@ -79,45 +79,45 @@ public class VolumeTypeSerializer implements TypeSerializer<Volume> {
 
   private Cuboid deserializeCuboid(ConfigurationNode node) throws SerializationException {
     Cuboid obj = new Cuboid(
-        Nope.instance().hostSystem().domain(node.node("world").getString()),
-        node.node("dimensions").node("min-x").require(Integer.class),
-        node.node("dimensions").node("min-y").require(Integer.class),
-        node.node("dimensions").node("min-z").require(Integer.class),
-        node.node("dimensions").node("max-x").require(Integer.class),
-        node.node("dimensions").node("max-y").require(Integer.class),
-        node.node("dimensions").node("max-z").require(Integer.class));
+        Nope.instance().system().domains().get(node.node("world").getString()),
+        node.node("dimensions").node("min-x").require(Float.class),
+        node.node("dimensions").node("min-y").require(Float.class),
+        node.node("dimensions").node("min-z").require(Float.class),
+        node.node("dimensions").node("max-x").require(Float.class),
+        node.node("dimensions").node("max-y").require(Float.class),
+        node.node("dimensions").node("max-z").require(Float.class));
     obj.name(node.node("name").getString());
     return obj;
   }
 
   private Cylinder deserializeCylinder(ConfigurationNode node) throws SerializationException {
     Cylinder obj = new Cylinder(
-        Nope.instance().hostSystem().domain(node.node("world").getString()),
-        node.node("dimensions").node("pos-x").require(Integer.class),
-        node.node("dimensions").node("min-y").require(Integer.class),
-        node.node("dimensions").node("max-y").require(Integer.class),
-        node.node("dimensions").node("pos-z").require(Integer.class),
-        node.node("dimensions").node("radius").require(Double.class));
+        Nope.instance().system().domains().get(node.node("world").getString()),
+        node.node("dimensions").node("pos-x").require(Float.class),
+        node.node("dimensions").node("min-y").require(Float.class),
+        node.node("dimensions").node("max-y").require(Float.class),
+        node.node("dimensions").node("pos-z").require(Float.class),
+        node.node("dimensions").node("radius").require(Float.class));
     obj.name(node.node("name").getString());
     return obj;
   }
 
   private Sphere deserializeSphere(ConfigurationNode node) throws SerializationException {
     Sphere obj = new Sphere(
-        Nope.instance().hostSystem().domain(node.node("world").getString()),
-        node.node("dimensions").node("pos-x").require(Integer.class),
-        node.node("dimensions").node("pos-y").require(Integer.class),
-        node.node("dimensions").node("pos-z").require(Integer.class),
-        node.node("dimensions").node("radius").require(Double.class));
+        Nope.instance().system().domains().get(node.node("world").getString()),
+        node.node("dimensions").node("pos-x").require(Float.class),
+        node.node("dimensions").node("pos-y").require(Float.class),
+        node.node("dimensions").node("pos-z").require(Float.class),
+        node.node("dimensions").node("radius").require(Float.class));
     obj.name(node.node("name").getString());
     return obj;
   }
 
   private Slab deserializeSlab(ConfigurationNode node) throws SerializationException {
     Slab obj = new Slab(
-        Nope.instance().hostSystem().domain(node.node("world").getString()),
-        node.node("dimensions").node("min-y").require(Integer.class),
-        node.node("dimensions").node("max-y").require(Integer.class));
+        Nope.instance().system().domains().get(node.node("world").getString()),
+        node.node("dimensions").node("min-y").require(Float.class),
+        node.node("dimensions").node("max-y").require(Float.class));
     obj.name(node.node("name").getString());
     return obj;
   }

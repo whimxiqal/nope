@@ -73,7 +73,7 @@ public abstract class Nope {
   @Getter
   @Setter
   @Accessors(fluent = true)
-  private HostSystem hostSystem;
+  private HostSystem system;
 
   public final boolean hasPermission(UUID playerUuid, Permission permission) {
     return hasPermission(playerUuid, permission.get());
