@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import lombok.Getter;
 import lombok.experimental.Accessors;
+import me.pietelite.nope.common.api.edit.ZoneType;
 import me.pietelite.nope.common.host.Domain;
 import org.jetbrains.annotations.NotNull;
 
@@ -39,18 +40,18 @@ import org.jetbrains.annotations.NotNull;
  */
 public class Cylinder extends Volume {
 
-  private final Integer posX;
-  private final Integer minY;
-  private final Integer maxY;
-  private final Integer posZ;
-  private final Double radius;
+  private final Float posX;
+  private final Float minY;
+  private final Float maxY;
+  private final Float posZ;
+  private final Float radius;
 
   @Getter
   @Accessors(fluent = true)
-  private final double radiusSquared;
+  private final float radiusSquared;
   @Getter
   @Accessors(fluent = true)
-  private final int lengthY;
+  private final float lengthY;
   @Getter
   @Accessors(fluent = true)
   private final Vector2d midPoint2d;
@@ -78,11 +79,11 @@ public class Cylinder extends Volume {
    * @param radius the radius in the x-z plane
    */
   public Cylinder(Domain domain,
-                  Integer x,
-                  Integer y1,
-                  Integer y2,
-                  Integer z,
-                  Double radius) {
+                  Float x,
+                  Float y1,
+                  Float y2,
+                  Float z,
+                  Float radius) {
     super(domain);
     this.posX = x;
     this.minY = Math.min(y1, y2);
@@ -98,21 +99,21 @@ public class Cylinder extends Volume {
     this.midPoint3dBottom = Vector3d.of((double) posX, minY, (double) posZ);
 
     circumscribed = new Cuboid(domain,
-        (int) Math.floor(posX - radius),
+        posX - radius,
         minY,
-        (int) Math.floor(posZ - radius),
-        (int) Math.ceil(posX + radius),
+        posZ - radius,
+        posX + radius,
         maxY,
-        (int) Math.ceil(posZ + radius));
+        posZ + radius);
 
-    double radiusSqrt2Over2 = radius * Math.sqrt(2) / 2;
+    float radiusSqrt2Over2 = radius * ((float) Math.sqrt(2)) / 2;
     inscribed = new Cuboid(domain,
-        (int) Math.ceil(posX - radiusSqrt2Over2),
+        posX - radiusSqrt2Over2,
         minY,
-        (int) Math.ceil(posZ - radiusSqrt2Over2),
-        (int) Math.floor(posX + radiusSqrt2Over2),
+        posZ - radiusSqrt2Over2,
+        posX + radiusSqrt2Over2,
         maxY,
-        (int) Math.floor(posZ + radiusSqrt2Over2));
+        posZ + radiusSqrt2Over2);
   }
 
   /**
@@ -120,7 +121,7 @@ public class Cylinder extends Volume {
    *
    * @return x position
    */
-  public int posX() {
+  public float posX() {
     return this.posX;
   }
 
@@ -129,7 +130,7 @@ public class Cylinder extends Volume {
    *
    * @return y value
    */
-  public int minY() {
+  public float minY() {
     return this.minY;
   }
 
@@ -138,7 +139,7 @@ public class Cylinder extends Volume {
    *
    * @return y value
    */
-  public int maxY() {
+  public float maxY() {
     return this.maxY;
   }
 
@@ -147,7 +148,7 @@ public class Cylinder extends Volume {
    *
    * @return z position
    */
-  public int posZ() {
+  public float posZ() {
     return this.posZ;
   }
 
@@ -156,7 +157,7 @@ public class Cylinder extends Volume {
    *
    * @return the radius
    */
-  public double radius() {
+  public float radius() {
     return this.radius;
   }
 
@@ -173,6 +174,11 @@ public class Cylinder extends Volume {
   }
 
   @Override
+  public ZoneType zoneType() {
+    return ZoneType.CYLINDER;
+  }
+
+  @Override
   public boolean containsPoint(double x, double y, double z) {
     return y >= minY
         && y < maxY
@@ -181,10 +187,10 @@ public class Cylinder extends Volume {
 
   @Override
   public boolean containsBlock(int x, int y, int z) {
-    int posXsquared = (posX - x) * (posX - x);
-    int posXplus1Squared = (posX + 1 - x) * (posX + 1 - x);
-    int posZsquared = (posZ - z) * (posZ - z);
-    int posZplus1Squared = (posZ + 1 - z) * (posZ + 1 - z);
+    float posXsquared = (posX - x) * (posX - x);
+    float posXplus1Squared = (posX + 1 - x) * (posX + 1 - x);
+    float posZsquared = (posZ - z) * (posZ - z);
+    float posZplus1Squared = (posZ + 1 - z) * (posZ + 1 - z);
     return y >= minY
         && y < maxY
         && (

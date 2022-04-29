@@ -28,30 +28,32 @@ import java.util.Collection;
 import java.util.Collections;
 import me.pietelite.nope.common.Nope;
 import me.pietelite.nope.common.host.Domain;
+import me.pietelite.nope.common.host.Global;
 import me.pietelite.nope.common.host.HostSystem;
-import me.pietelite.nope.common.host.Universe;
-import me.pietelite.nope.common.host.Zone;
+import me.pietelite.nope.common.host.Profile;
+import me.pietelite.nope.common.host.Scene;
 import me.pietelite.nope.common.storage.DataHandler;
 import me.pietelite.nope.common.storage.DomainDataHandler;
+import me.pietelite.nope.common.storage.ProfileDataHandler;
 import me.pietelite.nope.common.storage.UniverseDataHandler;
-import me.pietelite.nope.common.storage.ZoneDataHandler;
+import me.pietelite.nope.common.storage.SceneDataHandler;
 import org.jetbrains.annotations.NotNull;
 
 /**
  * A test {@link DataHandler}.
  */
-public class TestDataHandler implements DataHandler {
+public class MockDataHandler implements DataHandler {
   @Override
   public UniverseDataHandler universe() {
     return new UniverseDataHandler() {
       @Override
-      public void save(Universe universe) {
+      public void save(Global global) {
         // ignore
       }
 
       @Override
-      public Universe load() {
-        return new Universe("universe");
+      public Global load() {
+        return new Global("_global", new Profile("_global"));
       }
     };
   }
@@ -72,20 +74,40 @@ public class TestDataHandler implements DataHandler {
   }
 
   @Override
-  public ZoneDataHandler zones() {
-    return new ZoneDataHandler() {
+  public SceneDataHandler scenes() {
+    return new SceneDataHandler() {
       @Override
-      public void destroy(Zone zone) {
+      public void destroy(Scene scene) {
         // ignore
       }
 
       @Override
-      public void save(Zone zone) {
+      public void save(Scene scene) {
         // ignore
       }
 
       @Override
-      public Collection<Zone> load() {
+      public Collection<Scene> load() {
+        return Collections.emptyList();
+      }
+    };
+  }
+
+  @Override
+  public ProfileDataHandler profiles() {
+    return new ProfileDataHandler() {
+      @Override
+      public void destroy(Profile profile) {
+        // ignore
+      }
+
+      @Override
+      public void save(Profile profile) {
+        // ignore
+      }
+
+      @Override
+      public Collection<Profile> load() {
         return Collections.emptyList();
       }
     };
@@ -93,6 +115,6 @@ public class TestDataHandler implements DataHandler {
 
   @Override
   public HostSystem loadSystem() {
-    return Nope.instance().hostSystem();
+    return Nope.instance().system();
   }
 }

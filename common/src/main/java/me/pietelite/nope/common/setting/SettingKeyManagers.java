@@ -24,10 +24,10 @@
 
 package me.pietelite.nope.common.setting;
 
-import me.pietelite.nope.common.api.setting.data.BlockChange;
-import me.pietelite.nope.common.api.setting.data.DamageCause;
-import me.pietelite.nope.common.api.setting.data.Explosive;
-import me.pietelite.nope.common.api.setting.data.Movement;
+import me.pietelite.nope.common.api.register.data.BlockChange;
+import me.pietelite.nope.common.api.register.data.DamageCause;
+import me.pietelite.nope.common.api.register.data.Explosive;
+import me.pietelite.nope.common.api.register.data.Movement;
 import me.pietelite.nope.common.setting.manager.BooleanKeyManager;
 import me.pietelite.nope.common.setting.manager.IntegerKeyManager;
 import me.pietelite.nope.common.setting.manager.PolyAllCapsEnumKeyManager;
@@ -39,7 +39,6 @@ import me.pietelite.nope.common.setting.sets.BlockChangeSet;
 import me.pietelite.nope.common.setting.sets.DamageCauseSet;
 import me.pietelite.nope.common.setting.sets.ExplosiveSet;
 import me.pietelite.nope.common.setting.sets.MovementSet;
-import me.pietelite.nope.common.setting.sets.StringSet;
 
 /**
  * A utility class to store constant managers, which are used in defining {@link SettingKey}s.

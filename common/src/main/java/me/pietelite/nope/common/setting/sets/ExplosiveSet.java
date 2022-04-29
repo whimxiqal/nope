@@ -24,7 +24,7 @@
 
 package me.pietelite.nope.common.setting.sets;
 
-import me.pietelite.nope.common.api.setting.data.Explosive;
+import me.pietelite.nope.common.api.register.data.Explosive;
 import me.pietelite.nope.common.struct.HashAltSet;
 
 /**
@@ -33,7 +33,11 @@ import me.pietelite.nope.common.struct.HashAltSet;
 public class ExplosiveSet extends HashAltSet.FewEnum<Explosive> {
 
   public ExplosiveSet() {
-    super(Explosive.class);
+    this(false);
+  }
+
+  public ExplosiveSet(boolean full) {
+    super(full, Explosive.class);
   }
 
 }

@@ -25,10 +25,14 @@
 package me.pietelite.nope.common.math;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 import lombok.Getter;
 import lombok.experimental.Accessors;
+import me.pietelite.nope.common.api.edit.ZoneType;
 import me.pietelite.nope.common.host.Domain;
 import me.pietelite.nope.common.host.Domained;
+import me.pietelite.nope.common.host.Scene;
+import me.pietelite.nope.common.storage.Destructible;
 import me.pietelite.nope.common.struct.Location;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -37,13 +41,14 @@ import org.jetbrains.annotations.Nullable;
  * A <a href="https://en.wikipedia.org/wiki/Volume">Volume</a>.
  */
 @Accessors(fluent = true)
-public abstract class Volume implements Domained {
+public abstract class Volume implements Domained, Destructible {
 
   @Getter
   protected final Domain domain;
   @Getter
   @Nullable
   private String name;
+  private boolean destroyed;
 
   public Volume(Domain domain) {
     this(null, domain);
@@ -63,6 +68,8 @@ public abstract class Volume implements Domained {
 
   @NotNull
   public abstract Cuboid inscribed();
+
+  public abstract ZoneType zoneType();
 
   /**
    * Whether this volume contains a point within it.
@@ -127,4 +134,20 @@ public abstract class Volume implements Domained {
    */
   public abstract List<Vector3d> surfacePointsNear(Vector3d point, double proximity, double density);
 
+  @Override
+  public void markDestroyed() {
+    this.destroyed = true;
+  }
+
+  @Override
+  public boolean destroyed() {
+    return destroyed;
+  }
+
+  @Override
+  public void verifyExistence() throws NoSuchElementException {
+    if (destroyed()) {
+      throw new IllegalStateException("Volume (" + zoneType().name() + ") is destroyed");
+    }
+  }
 }

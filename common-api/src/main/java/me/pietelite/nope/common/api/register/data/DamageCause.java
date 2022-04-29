@@ -22,26 +22,22 @@
  * SOFTWARE.
  */
 
-package me.pietelite.nope.common.api.setting.data;
+package me.pietelite.nope.common.api.register.data;
 
 import me.pietelite.nope.common.api.struct.Described;
 
 /**
- * Something that explodes in Minecraft.
+ * Possible causes of damage in Minecraft.
  */
-public enum Explosive implements Described {
-  CREEPER("Explosion caused by creeper"),
-  ENDCRYSTAL("Explosion caused by endercrystal"),
-  FIREWORK("Explosion caused by firework"),
-  EXPLOSIVEFIREBALL("Explosion caused by large fireball"),
-  PRIMEDTNT("Explosion caused by primed TNT"),
-  TNTMINECART("Explosion caused by TNT minecart"),
-  WITHER("Explosion caused by Wither"),
-  WITHERSKULL("Explosion caused by Wither skull");
+public enum DamageCause implements Described {
+  PLAYERS("Damage caused by other players"),
+  FALL("Damage caused from falling down"),
+  ENTITY("Damage caused by some entity"),
+  MISC("Miscellaneous damage");
 
   private final String description;
 
-  Explosive(String description) {
+  DamageCause(String description) {
     this.description = description;
   }
 

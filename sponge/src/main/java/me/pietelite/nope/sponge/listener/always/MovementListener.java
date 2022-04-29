@@ -28,7 +28,7 @@ import com.google.common.collect.Sets;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import me.pietelite.nope.common.api.setting.data.Movement;
+import me.pietelite.nope.common.api.register.data.Movement;
 import me.pietelite.nope.common.api.struct.AltSet;
 import me.pietelite.nope.common.host.Host;
 import me.pietelite.nope.common.setting.SettingKey;
@@ -125,8 +125,8 @@ public class MovementListener {
       }
 
       // Check for EXIT and ENTRY
-      Set<Host> firstHosts = SpongeNope.instance().hostSystem().collectSuperiorHosts(firstLocation);
-      Set<Host> lastHosts = SpongeNope.instance().hostSystem().collectSuperiorHosts(lastLocation);
+      Set<Host> firstHosts = SpongeNope.instance().system().collectSuperiorHosts(firstLocation);
+      Set<Host> lastHosts = SpongeNope.instance().system().collectSuperiorHosts(lastLocation);
 
       // Remove shared hosts
       Set<Host> shared = new HashSet<>(firstHosts);

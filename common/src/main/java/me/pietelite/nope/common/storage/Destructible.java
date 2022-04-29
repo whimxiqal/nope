@@ -24,6 +24,8 @@
 
 package me.pietelite.nope.common.storage;
 
+import java.util.NoSuchElementException;
+
 /**
  * Something that may be destroyed, usually from a data storage location.
  */
@@ -32,6 +34,10 @@ public interface Destructible {
   /**
    * Destroy this object from local and persistent storage.
    */
-  void destroy();
+  void markDestroyed();
+
+  boolean destroyed();
+
+  void verifyExistence() throws NoSuchElementException;
 
 }

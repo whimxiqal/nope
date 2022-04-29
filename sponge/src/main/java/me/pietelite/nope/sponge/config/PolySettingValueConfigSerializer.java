@@ -127,7 +127,7 @@ public class PolySettingValueConfigSerializer
       Z extends SettingKey.Manager.Poly<X, S>,
       S extends AltSet<X>> S deserializeSet(Z manager,
                                             ConfigurationNode node) throws SerializationException {
-    S set = manager.createSet();
+    S set = manager.emptySet();
     Objects.requireNonNull(node.node("values").getList(String.class)).forEach(s ->
         set.add(manager.parseElement(s)));
     String type = Objects.requireNonNull(node.node("type").getString());

@@ -29,7 +29,7 @@ import java.util.List;
 import java.util.Optional;
 import me.pietelite.nope.common.Nope;
 import me.pietelite.nope.common.host.Host;
-import me.pietelite.nope.common.host.Zone;
+import me.pietelite.nope.common.host.Scene;
 import me.pietelite.nope.common.math.Geometry;
 import me.pietelite.nope.common.math.Slab;
 import me.pietelite.nope.common.permission.Permissions;
@@ -60,12 +60,12 @@ public class SlabCommand extends CommandNode {
   @Override
   public CommandResult execute(CommandContext context) throws CommandException {
     Host host = context.requireOne(ParameterKeys.HOST);
-    if (!(host instanceof Zone)) {
+    if (!(host instanceof Scene)) {
       return CommandResult.error(Formatter.error(
           "You may not create volumes for host ___", host.name()
       ));
     }
-    Zone zone = (Zone) host;
+    Scene scene = (Scene) host;
 
     Slab slab;
 
@@ -75,7 +75,7 @@ public class SlabCommand extends CommandNode {
     if (world.isPresent()
         && posY1.isPresent()
         && posY2.isPresent()) {
-      slab = new Slab(Nope.instance().hostSystem().domain(SpongeUtil.worldToId(world.get())),
+      slab = new Slab(Nope.instance().system().domain(SpongeUtil.worldToId(world.get())),
           Math.min(posY1.get(), posY2.get()),
           Math.max(posY1.get(), posY2.get()));
       if (!slab.valid()) {
@@ -115,19 +115,19 @@ public class SlabCommand extends CommandNode {
       }
     }
 
-    for (int i = 0; i < zone.volumes().size(); i++) {
-      if (Geometry.intersects(zone.volumes().get(i), slab)) {
+    for (int i = 0; i < scene.volumes().size(); i++) {
+      if (Geometry.intersects(scene.volumes().get(i), slab)) {
         context.cause().audience().sendMessage(Formatter.warn(
-            "Your new ___ intersects with zone ___'s volume number ___ ",
-            "slab", zone.name(), i
+            "Your new ___ intersects with scene ___'s volume number ___ ",
+            "slab", scene.name(), i
         ));
       }
     }
-    Nope.instance().hostSystem().addVolume(slab, zone);
-    zone.ensurePriority();
+    Nope.instance().system().addVolume(slab, scene);
+    scene.ensurePriority();
     context.cause().audience().sendMessage(Formatter.success(
-        "A ___ was created on zone ___",
-        "slab", zone.name()
+        "A ___ was created on scene ___",
+        "slab", scene.name()
     ));
     if (context.cause().root() instanceof ServerPlayer) {
       EffectsUtil.show(slab, (ServerPlayer) context.cause().root());

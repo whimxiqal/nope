@@ -25,6 +25,7 @@
 package me.pietelite.nope.common.host;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -39,7 +40,7 @@ import org.jetbrains.annotations.NotNull;
  */
 public class FlexibleHashQueueVolumeTree extends VolumeTree {
 
-  private final Map<Query, Set<Zone>> cache = new ConcurrentHashMap<>();
+  private final Map<Query, Set<Scene>> cache = new ConcurrentHashMap<>();
   private final Queue<Query> history = new ConcurrentLinkedQueue<>();
   private final int size;
 
@@ -55,15 +56,15 @@ public class FlexibleHashQueueVolumeTree extends VolumeTree {
 
   @NotNull
   @Override
-  public Set<Zone> containing(int x, int y, int z) {
+  public Set<Scene> containing(float x, float y, float z) {
     Query query = Query.of(x, y, z);
     if (cache.containsKey(query)) {
       return cache.get(query);
     }
-    Set<Zone> zones = super.containing(x, y, z);
-    cache.put(query, zones);
+    Set<Scene> scenes = super.containing(x, y, z);
+    cache.put(query, scenes);
     history.add(query);
-    return zones;
+    return scenes;
   }
 
   public int getCacheSize() {
@@ -71,10 +72,10 @@ public class FlexibleHashQueueVolumeTree extends VolumeTree {
   }
 
   @Override
-  public void put(Volume volume, Zone zone, boolean construct) {
+  public void put(Volume volume, Scene scene, boolean construct) {
     cache.clear();
     history.clear();
-    super.put(volume, zone, construct);
+    super.put(volume, scene, construct);
   }
 
   @Override
@@ -100,9 +101,9 @@ public class FlexibleHashQueueVolumeTree extends VolumeTree {
 
   @Data(staticConstructor = "of")
   private static class Query {
-    private final int posX;
-    private final int posY;
-    private final int posZ;
+    private final float posX;
+    private final float posY;
+    private final float posZ;
 
     @Override
     public boolean equals(Object other) {
@@ -117,10 +118,7 @@ public class FlexibleHashQueueVolumeTree extends VolumeTree {
 
     @Override
     public int hashCode() {
-      int result = posX ^ (posX >>> 16);
-      result = 31 * result + (posY ^ (posY >>> 16));
-      result = 31 * result + (posZ ^ (posZ >>> 16));
-      return result;
+      return Objects.hash(posX, posY, posZ);
     }
 
   }

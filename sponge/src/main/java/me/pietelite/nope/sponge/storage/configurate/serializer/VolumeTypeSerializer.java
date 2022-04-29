@@ -79,7 +79,7 @@ public class VolumeTypeSerializer implements TypeSerializer<Volume> {
 
   private Cuboid deserializeCuboid(ConfigurationNode node) throws SerializationException {
     Cuboid obj = new Cuboid(
-        Nope.instance().hostSystem().domain(node.node("world").getString()),
+        Nope.instance().system().domain(node.node("world").getString()),
         node.node("dimensions").node("min-x").require(Integer.class),
         node.node("dimensions").node("min-y").require(Integer.class),
         node.node("dimensions").node("min-z").require(Integer.class),
@@ -92,7 +92,7 @@ public class VolumeTypeSerializer implements TypeSerializer<Volume> {
 
   private Cylinder deserializeCylinder(ConfigurationNode node) throws SerializationException {
     Cylinder obj = new Cylinder(
-        Nope.instance().hostSystem().domain(node.node("world").getString()),
+        Nope.instance().system().domain(node.node("world").getString()),
         node.node("dimensions").node("pos-x").require(Integer.class),
         node.node("dimensions").node("min-y").require(Integer.class),
         node.node("dimensions").node("max-y").require(Integer.class),
@@ -104,7 +104,7 @@ public class VolumeTypeSerializer implements TypeSerializer<Volume> {
 
   private Sphere deserializeSphere(ConfigurationNode node) throws SerializationException {
     Sphere obj = new Sphere(
-        Nope.instance().hostSystem().domain(node.node("world").getString()),
+        Nope.instance().system().domain(node.node("world").getString()),
         node.node("dimensions").node("pos-x").require(Integer.class),
         node.node("dimensions").node("pos-y").require(Integer.class),
         node.node("dimensions").node("pos-z").require(Integer.class),
@@ -115,7 +115,7 @@ public class VolumeTypeSerializer implements TypeSerializer<Volume> {
 
   private Slab deserializeSlab(ConfigurationNode node) throws SerializationException {
     Slab obj = new Slab(
-        Nope.instance().hostSystem().domain(node.node("world").getString()),
+        Nope.instance().system().domain(node.node("world").getString()),
         node.node("dimensions").node("min-y").require(Integer.class),
         node.node("dimensions").node("max-y").require(Integer.class));
     obj.name(node.node("name").getString());

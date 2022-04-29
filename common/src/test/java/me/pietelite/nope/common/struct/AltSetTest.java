@@ -36,7 +36,7 @@ class AltSetTest {
 
   @Test
   void isEmpty() {
-    AltSet<Integer> set = HashAltSet.infinite();
+    AltSet<Integer> set = HashAltSet.infinite(false);
     Assertions.assertTrue(set.isEmpty());
     set.add(1);
     Assertions.assertFalse(set.isEmpty());
@@ -48,7 +48,7 @@ class AltSetTest {
 
   @Test
   void contains() {
-    AltSet<Integer> set = HashAltSet.infinite();
+    AltSet<Integer> set = HashAltSet.infinite(false);
     Assertions.assertFalse(set.contains(0));
     set.add(0);
     Assertions.assertTrue(set.contains(0));
@@ -60,7 +60,7 @@ class AltSetTest {
 
   @Test
   void add() {
-    AltSet<Integer> set = HashAltSet.infinite();
+    AltSet<Integer> set = HashAltSet.infinite(false);
     Assertions.assertTrue(set.add(0));
     Assertions.assertFalse(set.add(0));
     Assertions.assertTrue(set.add(5));
@@ -70,7 +70,7 @@ class AltSetTest {
 
   @Test
   void remove() {
-    AltSet<Integer> set = HashAltSet.infinite();
+    AltSet<Integer> set = HashAltSet.infinite(false);
     Assertions.assertFalse(set.remove(0));
     set.fill();
     Assertions.assertTrue(set.remove(1));
@@ -79,8 +79,8 @@ class AltSetTest {
 
   @Test
   void containsAll() {
-    HashAltSet<Integer> set1 = HashAltSet.infinite();
-    HashAltSet<Integer> set2 = HashAltSet.infinite();
+    HashAltSet<Integer> set1 = HashAltSet.infinite(false);
+    HashAltSet<Integer> set2 = HashAltSet.infinite(false);
     set1.addAll(Arrays.asList(1, 2, 3, 4, 5));
     set2.addAll(Arrays.asList(4, 5));
     Assertions.assertTrue(set1.containsAll(set2));
@@ -102,8 +102,8 @@ class AltSetTest {
     set1.add(4);
     Assertions.assertTrue(set2.containsAll(set1));
 
-    AltSet<Integer> setA = HashAltSet.finite(100);
-    HashAltSet<Integer> setB = HashAltSet.finite(100);
+    AltSet<Integer> setA = HashAltSet.finite(false, 100);
+    HashAltSet<Integer> setB = HashAltSet.finite(false, 100);
     // Fill set B with "all the numbers" (it has no idea what they actually are)
     setB.fill();
     Assertions.assertFalse(setA.containsAll(setB));
@@ -117,8 +117,8 @@ class AltSetTest {
     setA.remove(3);
     Assertions.assertFalse(setA.containsAll(setB));
 
-    AltSet<Animal> setC = HashAltSet.ofEnum(Animal.class);
-    HashAltSet<Animal> setD = HashAltSet.ofEnum(Animal.class);
+    AltSet<Animal> setC = HashAltSet.ofEnum(false, Animal.class);
+    HashAltSet<Animal> setD = HashAltSet.ofEnum(false, Animal.class);
     setD.fill();
     Assertions.assertFalse(setC.containsAll(setD));
     setC.addAll(Arrays.asList(Animal.CAT, Animal.DOG, Animal.MOUSE, Animal.BIRD));
@@ -131,8 +131,8 @@ class AltSetTest {
 
   @Test
   void addAll() {
-    AltSet<Integer> set1 = HashAltSet.infinite();
-    HashAltSet<Integer> set2 = HashAltSet.infinite();
+    AltSet<Integer> set1 = HashAltSet.infinite(false);
+    HashAltSet<Integer> set2 = HashAltSet.infinite(false);
 
     set2.fill();
     set1.addAll(set2);
@@ -151,8 +151,8 @@ class AltSetTest {
 
   @Test
   void retainAll() {
-    AltSet<Integer> set1 = HashAltSet.infinite();
-    HashAltSet<Integer> set2 = HashAltSet.infinite();
+    AltSet<Integer> set1 = HashAltSet.infinite(false);
+    HashAltSet<Integer> set2 = HashAltSet.infinite(false);
     set1.add(0);
     set2.add(1);
     set1.retainAll(set2);
@@ -181,8 +181,8 @@ class AltSetTest {
 
   @Test
   void removeAll() {
-    AltSet<Integer> set1 = HashAltSet.infinite();
-    HashAltSet<Integer> set2 = HashAltSet.infinite();
+    AltSet<Integer> set1 = HashAltSet.infinite(false);
+    HashAltSet<Integer> set2 = HashAltSet.infinite(false);
     set1.add(0);
     set1.add(1);
     set2.add(1);

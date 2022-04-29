@@ -41,9 +41,9 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import me.pietelite.nope.common.Nope;
-import me.pietelite.nope.common.api.setting.SettingCategory;
+import me.pietelite.nope.common.api.register.SettingCategory;
 import me.pietelite.nope.common.host.Host;
-import me.pietelite.nope.common.host.Zone;
+import me.pietelite.nope.common.host.Scene;
 import me.pietelite.nope.common.setting.SettingKey;
 import me.pietelite.nope.common.util.ContainsInOrderPredicate;
 import me.pietelite.nope.common.util.Validate;
@@ -79,7 +79,7 @@ public class Parameters {
   public static final Parameter.Value<Host> HOST = Parameter.builder(ParameterKeys.HOST)
       .addParser((parameterKey, reader, context) -> {
         String hostName = reader.parseString().toLowerCase();
-        Host host = SpongeNope.instance().hostSystem().hosts().get(hostName);
+        Host host = SpongeNope.instance().system().hosts().get(hostName);
         if (host == null) {
           throw new ArgumentParseException(Formatter.error("No hosts exist named ___", hostName),
               hostName, 0);
@@ -88,7 +88,7 @@ public class Parameters {
       })
       .completer((context, currentInput) -> {
         final Predicate<String> inOrder = new ContainsInOrderPredicate(currentInput);
-        return SpongeNope.instance().hostSystem()
+        return SpongeNope.instance().system()
             .hosts()
             .entrySet()
             .stream()
@@ -102,7 +102,7 @@ public class Parameters {
       .optional()
       .addParser((parameterKey, reader, context) -> {
         String hostName = reader.parseString().toLowerCase();
-        Host host = SpongeNope.instance().hostSystem().hosts().get(hostName);
+        Host host = SpongeNope.instance().system().hosts().get(hostName);
         if (host == null) {
           return inferHost(context);
         } else {
@@ -111,7 +111,7 @@ public class Parameters {
       })
       .completer((context, currentInput) -> {
         final Predicate<String> startsWith = new StartsWithPredicate(currentInput);
-        return SpongeNope.instance().hostSystem()
+        return SpongeNope.instance().system()
             .hosts()
             .entrySet()
             .stream()
@@ -142,15 +142,15 @@ public class Parameters {
 
       )
       .build();
-  public static final Parameter.Value<Zone> PARENT = Parameter.builder(ParameterKeys.PARENT)
+  public static final Parameter.Value<Scene> PARENT = Parameter.builder(ParameterKeys.PARENT)
       .addParser((parameterKey, reader, context) -> {
         String hostName = reader.parseString().toLowerCase();
-        Host host = SpongeNope.instance().hostSystem().hosts().get(hostName);
+        Host host = SpongeNope.instance().system().hosts().get(hostName);
         if (host == null) {
           return Optional.empty();
         }
-        if (host instanceof Zone) {
-          return Optional.of((Zone) host);
+        if (host instanceof Scene) {
+          return Optional.of((Scene) host);
         } else {
           throw new ArgumentParseException(Formatter.error("Host ___ may not be a parent"),
               hostName, 0);
@@ -158,11 +158,11 @@ public class Parameters {
       })
       .completer((context, currentInput) -> {
         final Predicate<String> startsWith = new StartsWithPredicate(currentInput);
-        return SpongeNope.instance().hostSystem()
+        return SpongeNope.instance().system()
             .hosts()
             .entrySet()
             .stream()
-            .filter(entry -> entry.getValue() instanceof Zone)
+            .filter(entry -> entry.getValue() instanceof Scene)
             .filter(entry -> startsWith.test(entry.getKey()))
             .map(entry -> CommandCompletion.of(entry.getKey(),
                 Formatter.host(entry.getValue())))
@@ -270,7 +270,7 @@ public class Parameters {
           .completer((context, currentInput) -> {
             Optional<Host> host = context.one(HOST);
             boolean showGlobal = host.isPresent()
-                && host.get().equals(SpongeNope.instance().hostSystem().universe());
+                && host.get().equals(SpongeNope.instance().system().global());
             final Predicate<String> inOrder = new ContainsInOrderPredicate(currentInput);
             return SpongeNope.instance().settingKeys()
                 .keys()
@@ -380,13 +380,13 @@ public class Parameters {
       .completer((context, currentInput) -> {
         final Predicate<String> startsWith = new StartsWithPredicate(currentInput);
         Host host = context.requireOne(HOST);
-        if (host instanceof Zone) {
-          Zone zone = (Zone) host;
-          return IntStream.range(0, zone.volumes().size()).boxed()
+        if (host instanceof Scene) {
+          Scene scene = (Scene) host;
+          return IntStream.range(0, scene.volumes().size()).boxed()
               .filter(integer -> startsWith.test(String.valueOf(integer)))
               .map(integer -> CommandCompletion.of(String.valueOf(integer)
                   // TODO add an info method to volumes to give insight as to what they are
-                  /*, zone.volumes().get(integer).info */))
+                  /*, scene.volumes().get(integer).info */))
               .collect(Collectors.toList());
         } else {
           return Collections.emptyList();
@@ -488,7 +488,7 @@ public class Parameters {
     }
     ServerPlayer player = (ServerPlayer) context.cause().root();
     Collection<Host> containing = SpongeNope.instance()
-        .hostSystem()
+        .system()
         .collectSuperiorHosts(SpongeUtil.reduceLocation(player.serverLocation()));
     if (containing.isEmpty()) {
       return Optional.empty();

@@ -29,7 +29,7 @@ import java.util.List;
 import java.util.Optional;
 import me.pietelite.nope.common.Nope;
 import me.pietelite.nope.common.host.Host;
-import me.pietelite.nope.common.host.Zone;
+import me.pietelite.nope.common.host.Scene;
 import me.pietelite.nope.common.math.Cylinder;
 import me.pietelite.nope.common.math.Geometry;
 import me.pietelite.nope.common.permission.Permissions;
@@ -68,12 +68,12 @@ public class CylinderCommand extends CommandNode {
   @Override
   public CommandResult execute(CommandContext context) throws CommandException {
     Host host = context.requireOne(ParameterKeys.HOST);
-    if (!(host instanceof Zone)) {
+    if (!(host instanceof Scene)) {
       return CommandResult.error(Formatter.error(
           "You may not create volumes for host ___", host.name()
       ));
     }
-    Zone zone = (Zone) host;
+    Scene scene = (Scene) host;
 
     Cylinder cylinder;
 
@@ -89,7 +89,7 @@ public class CylinderCommand extends CommandNode {
         && maxY.isPresent()
         && posZ.isPresent()
         && radius.isPresent()) {
-      cylinder = new Cylinder(Nope.instance().hostSystem().domain(SpongeUtil.worldToId(world.get())),
+      cylinder = new Cylinder(Nope.instance().system().domain(SpongeUtil.worldToId(world.get())),
           posX.get(),
           minY.get(),
           maxY.get(),
@@ -132,18 +132,18 @@ public class CylinderCommand extends CommandNode {
       }
     }
 
-    for (int i = 0; i < zone.volumes().size(); i++) {
-      if (Geometry.intersects(zone.volumes().get(i), cylinder)) {
+    for (int i = 0; i < scene.volumes().size(); i++) {
+      if (Geometry.intersects(scene.volumes().get(i), cylinder)) {
         context.cause().audience().sendMessage(Formatter.warn(
-            "Your new ___ intersects with zone ___'s volume number ___ ",
-            "cylinder", zone.name(), i
+            "Your new ___ intersects with scene ___'s volume number ___ ",
+            "cylinder", scene.name(), i
         ));
       }
     }
-    Nope.instance().hostSystem().addVolume(cylinder, zone);
-    zone.ensurePriority();
+    Nope.instance().system().addVolume(cylinder, scene);
+    scene.ensurePriority();
     context.cause().audience().sendMessage(Formatter.success(
-        "A ___ was created on zone ___", "cylinder", zone.name()
+        "A ___ was created on scene ___", "cylinder", scene.name()
     ));
     if (context.cause().root() instanceof ServerPlayer) {
       EffectsUtil.show(cylinder, (ServerPlayer) context.cause().root());

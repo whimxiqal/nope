@@ -24,7 +24,9 @@
 
 package me.pietelite.nope.common.storage;
 
+import me.pietelite.nope.common.host.Global;
 import me.pietelite.nope.common.host.HostSystem;
+import me.pietelite.nope.common.host.Scene;
 
 /**
  * A handler for all persistent storage I/O.
@@ -32,7 +34,7 @@ import me.pietelite.nope.common.host.HostSystem;
 public interface DataHandler {
 
   /**
-   * Persistent data storage for the {@link me.pietelite.nope.common.host.Universe}.
+   * Persistent data storage for the {@link Global}.
    *
    * @return the handler
    */
@@ -46,11 +48,18 @@ public interface DataHandler {
   DomainDataHandler domains();
 
   /**
-   * Persistent data storage for the {@link me.pietelite.nope.common.host.Zone}s.
+   * Persistent data storage for the {@link Scene}s.
    *
    * @return the handler
    */
-  ZoneDataHandler zones();
+  SceneDataHandler scenes();
+
+  /**
+   * Persistent data storage for the {@link me.pietelite.nope.common.host.Profile}s.
+   *
+   * @return the handler
+   */
+  ProfileDataHandler profiles();
 
   /**
    * Persistent data storage for the {@link HostSystem}.

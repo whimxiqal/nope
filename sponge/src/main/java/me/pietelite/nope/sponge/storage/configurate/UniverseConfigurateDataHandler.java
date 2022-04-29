@@ -25,7 +25,7 @@
 package me.pietelite.nope.sponge.storage.configurate;
 
 import me.pietelite.nope.common.Nope;
-import me.pietelite.nope.common.host.Universe;
+import me.pietelite.nope.common.host.Global;
 import me.pietelite.nope.common.storage.UniverseDataHandler;
 import me.pietelite.nope.sponge.config.SettingValueConfigSerializerRegistrar;
 import org.spongepowered.configurate.CommentedConfigurationNode;
@@ -33,7 +33,7 @@ import org.spongepowered.configurate.ConfigurateException;
 import org.spongepowered.configurate.loader.ConfigurationLoader;
 
 /**
- * The data handler for the {@link Universe} using Configurate.
+ * The data handler for the {@link Global} using Configurate.
  */
 public class UniverseConfigurateDataHandler
     extends SettingsConfigurateDataHandler implements UniverseDataHandler {
@@ -47,9 +47,9 @@ public class UniverseConfigurateDataHandler
   }
 
   @Override
-  public void save(Universe universe) {
+  public void save(Global global) {
     try {
-      CommentedConfigurationNode root = settingCollectionRoot(universe);
+      CommentedConfigurationNode root = settingCollectionRoot(global);
       loader.save(root);
     } catch (ConfigurateException e) {
       e.printStackTrace();
@@ -57,14 +57,14 @@ public class UniverseConfigurateDataHandler
   }
 
   @Override
-  public Universe load() {
-    Universe universe = new Universe(Nope.GLOBAL_HOST_NAME);
+  public Global load() {
+    Global global = new Global(Nope.GLOBAL_HOST_NAME);
     try {
       CommentedConfigurationNode node = loader.load();
       if (!node.virtual()) {
-        universe.setAll(deserializeSettings(node.node("settings").childrenMap()));
+        global.setAll(deserializeSettings(node.node("settings").childrenMap()));
       }
-      return universe;
+      return global;
     } catch (ConfigurateException e) {
       e.printStackTrace();
       return null;

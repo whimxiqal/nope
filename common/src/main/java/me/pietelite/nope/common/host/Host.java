@@ -24,7 +24,19 @@
 
 package me.pietelite.nope.common.host;
 
-import me.pietelite.nope.common.setting.SettingCollection;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.stream.Collectors;
+import me.pietelite.nope.common.Nope;
+import me.pietelite.nope.common.api.edit.Alteration;
+import me.pietelite.nope.common.api.edit.AlterationImpl;
+import me.pietelite.nope.common.api.edit.HostEditor;
+import me.pietelite.nope.common.api.edit.TargetEditor;
+import me.pietelite.nope.common.setting.SettingKey;
+import me.pietelite.nope.common.setting.Target;
+import me.pietelite.nope.common.storage.Destructible;
+import me.pietelite.nope.common.storage.Persistent;
 import me.pietelite.nope.common.struct.Container;
 import me.pietelite.nope.common.struct.Location;
 import me.pietelite.nope.common.struct.Named;
@@ -33,9 +45,10 @@ import me.pietelite.nope.common.util.Validate;
 /**
  * A class to store Settings based on graphical locations.
  */
-public abstract class Host extends SettingCollection implements Container, Named {
+public abstract class Host implements Container, Named, Persistent, Destructible {
 
-  private final String name;
+  private final ArrayList<HostedProfile> profiles = new ArrayList<>();
+  protected String name;
   protected int priority;
 
   /**
@@ -62,12 +75,36 @@ public abstract class Host extends SettingCollection implements Container, Named
 
   @Override
   public int hashCode() {
-    return name.hashCode();
+    return name().hashCode();
+  }
+
+  public int priority() {
+    return priority;
+  }
+
+  public ArrayList<HostedProfile> profiles() {
+    return profiles;
+  }
+
+  public boolean isSet(SettingKey<?, ?, ?> key) {
+    return profiles.stream().anyMatch(profileItem -> profileItem.profile().isSet(key));
   }
 
   @Override
-  public boolean equals(Object obj) {
-    return obj instanceof Host && ((Host) obj).name.equals(this.name);
+  public void markDestroyed() {
+    // do nothing
+  }
+
+  @Override
+  public boolean destroyed() {
+    return false;
+  }
+
+  @Override
+  public void verifyExistence() throws NoSuchElementException {
+    if (destroyed()) {
+      throw new IllegalStateException("Host is destroyed: " + name);
+    }
   }
 
   @Override
@@ -75,8 +112,104 @@ public abstract class Host extends SettingCollection implements Container, Named
     return name;
   }
 
-  public int priority() {
-    return priority;
-  }
+  /**
+   * Public editor for a {@link Host}.
+   */
+  public abstract static class Editor<H extends Host> implements HostEditor {
 
+    protected final H host;
+
+    public Editor(H host) {
+      this.host = host;
+    }
+
+    @Override
+    public String name() {
+      host.verifyExistence();
+      return host.name;
+    }
+
+    @Override
+    public List<String> profiles() {
+      host.verifyExistence();
+      return host.profiles()
+          .stream()
+          .map(hostedProfile -> hostedProfile.profile().name())
+          .collect(Collectors.toList());
+    }
+
+    @Override
+    public Alteration addProfile(String name, int index) {
+      Profile profile = Nope.instance().system().profiles().get(name);
+      if (profile == null) {
+        throw new NoSuchElementException("No profile exists with name " + name);
+      }
+      host.verifyExistence();
+      if (index < 0 || index > host.profiles().size()) {
+        throw new IndexOutOfBoundsException("There is no profile at index " + index);
+      }
+      if (host.profiles().stream().anyMatch(hostedProfile -> hostedProfile.profile().equals(profile))) {
+        throw new IllegalArgumentException("There is already a profile added with the name " + name);
+      }
+      host.profiles().add(index, new HostedProfile(profile));
+      host.save();
+      return AlterationImpl.success("Added profile " + profile.name() + " to host " + name);
+    }
+
+    @Override
+    public Alteration removeProfile(String name) {
+      host.verifyExistence();
+      if (!host.profiles().removeIf(hostedProfile -> hostedProfile.profile().name().equalsIgnoreCase(name))) {
+        return AlterationImpl.fail("No profile exists named " + name);
+      }
+      host.save();
+      return AlterationImpl.success("Removed profile with name " + name + " from host " + name);
+    }
+
+    @Override
+    public Alteration removeProfile(int index) {
+      host.verifyExistence();
+      if (index < 0 || index > host.profiles().size()) {
+        throw new IndexOutOfBoundsException("There is no profile at index " + index);
+      }
+      HostedProfile hostedProfile = host.profiles().remove(index);
+      host.save();
+      return AlterationImpl.success("Removed profile " + hostedProfile.profile().name()
+          + " from host " + host.name);
+    }
+
+    @Override
+    public boolean hasTarget(int index) throws IndexOutOfBoundsException {
+      host.verifyExistence();
+      return host.profiles().get(index).target() != null;
+    }
+
+    @Override
+    public TargetEditor editTarget(String name) throws NoSuchElementException {
+      host.verifyExistence();
+      HostedProfile hostedProfile = null;
+      for (int i = 0; i < host.profiles().size(); i++) {
+        HostedProfile p = host.profiles().get(i);
+        if (p.profile().name().equalsIgnoreCase(name)) {
+          hostedProfile = p;
+          break;
+        }
+      }
+      if (hostedProfile == null) {
+        throw new NoSuchElementException("There is no profile with name " + name);
+      }
+      return new Target.Editor(hostedProfile, host::save);
+    }
+
+    @Override
+    public TargetEditor editTarget(int index) throws IndexOutOfBoundsException {
+      host.verifyExistence();
+      if (index < 0 || index > host.profiles().size()) {
+        throw new IndexOutOfBoundsException("There is no profile at index " + index);
+      }
+      HostedProfile hostedProfile = host.profiles().get(index);
+      return new Target.Editor(hostedProfile, host::save);
+    }
+
+  }
 }

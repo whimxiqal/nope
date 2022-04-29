@@ -22,23 +22,36 @@
  * SOFTWARE.
  */
 
-package me.pietelite.nope.common.host;
+package me.pietelite.nope.common.api.register.data;
 
-import java.util.Optional;
+import me.pietelite.nope.common.api.struct.Described;
 
 /**
- * An object representing a child of a {@link Host}.
- *
- * @param <P> the type of host
+ * Something that explodes in Minecraft.
  */
-public interface Child<P extends Host> {
+public enum Explosive implements Described {
+  CREEPER("Explosion caused by creeper"),
+  ENDCRYSTAL("Explosion caused by endercrystal"),
+  FIREWORK("Explosion caused by firework"),
+  EXPLOSIVEFIREBALL("Explosion caused by large fireball"),
+  PRIMEDTNT("Explosion caused by primed TNT"),
+  TNTMINECART("Explosion caused by TNT minecart"),
+  WITHER("Explosion caused by Wither"),
+  WITHERSKULL("Explosion caused by Wither skull");
 
-  /**
-   * Return an optional of the parent, implying that this child
-   * need not actually have a parent.
-   *
-   * @return the parent
-   */
-  Optional<P> parent();
+  private final String description;
 
+  Explosive(String description) {
+    this.description = description;
+  }
+
+  @Override
+  public String description() {
+    return description;
+  }
+
+  @Override
+  public String toString() {
+    return name().toLowerCase();
+  }
 }

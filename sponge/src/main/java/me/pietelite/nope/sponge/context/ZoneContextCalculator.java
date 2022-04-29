@@ -28,7 +28,7 @@ import java.util.Optional;
 import java.util.function.Consumer;
 import me.pietelite.nope.common.host.Domain;
 import me.pietelite.nope.common.host.Host;
-import me.pietelite.nope.common.host.Zone;
+import me.pietelite.nope.common.host.Scene;
 import me.pietelite.nope.sponge.SpongeNope;
 import me.pietelite.nope.sponge.util.SpongeUtil;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
@@ -48,7 +48,7 @@ public class ZoneContextCalculator implements ContextCalculator {
     if (!player.isPresent()) {
       return;
     }
-    SpongeNope.instance().hostSystem()
+    SpongeNope.instance().system()
         .collectSuperiorHosts(SpongeUtil.reduceLocation(player.get().serverLocation()))
         .forEach(host -> accumulator.accept(calculateContext(host)));
   }
@@ -56,7 +56,7 @@ public class ZoneContextCalculator implements ContextCalculator {
   private Context calculateContext(Host host) {
     if (host instanceof Domain) {
       return new Context("nope.w." + host.name(), "true");
-    } else if (host instanceof Zone) {
+    } else if (host instanceof Scene) {
       return new Context("nope.z." + host.name(), "true");
     }
     return null;

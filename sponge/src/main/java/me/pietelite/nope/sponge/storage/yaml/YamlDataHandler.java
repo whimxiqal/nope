@@ -34,7 +34,7 @@ import me.pietelite.nope.common.math.Volume;
 import me.pietelite.nope.sponge.config.SettingValueConfigSerializerRegistrar;
 import me.pietelite.nope.sponge.storage.configurate.ConfigurateDataHandler;
 import me.pietelite.nope.sponge.storage.configurate.DomainConfigurateDataHandler;
-import me.pietelite.nope.sponge.storage.configurate.ZoneConfigurateDataHandler;
+import me.pietelite.nope.sponge.storage.configurate.SceneConfigurateDataHandler;
 import me.pietelite.nope.sponge.storage.configurate.serializer.VolumeTypeSerializer;
 import org.spongepowered.configurate.ConfigurationOptions;
 import org.spongepowered.configurate.yaml.NodeStyle;
@@ -49,7 +49,7 @@ public class YamlDataHandler extends ConfigurateDataHandler {
     super(new YamlConfig(path, serializerRegistrar),
         new DomainConfigurateDataHandler((name) -> yamlLoader(path.resolve(name + ".yml")),
             serializerRegistrar),
-        new ZoneConfigurateDataHandler((name) -> yamlLoader(path.resolve("zones")
+        new SceneConfigurateDataHandler((name) -> yamlLoader(path.resolve("zones")
             .resolve(name + ".yml")),
             (name) -> path.resolve("zones")
                 .resolve(name + ".yml"),

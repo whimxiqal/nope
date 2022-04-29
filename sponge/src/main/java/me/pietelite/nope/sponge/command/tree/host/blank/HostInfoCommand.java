@@ -33,7 +33,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import me.pietelite.nope.common.host.Child;
 import me.pietelite.nope.common.host.Host;
-import me.pietelite.nope.common.host.Zone;
+import me.pietelite.nope.common.host.Scene;
 import me.pietelite.nope.common.math.Cuboid;
 import me.pietelite.nope.common.math.Cylinder;
 import me.pietelite.nope.common.math.Slab;
@@ -79,8 +79,8 @@ public class HostInfoCommand extends CommandNode {
                 + "A higher priority means a higher precedence for conflicting targets and data."))
         .append(Formatter.accent(String.valueOf(host.priority())))
         .build());
-    if (host instanceof Zone) {
-      Collection<Volume> volumes = ((Zone) host).volumes();
+    if (host instanceof Scene) {
+      Collection<Volume> volumes = ((Scene) host).volumes();
       List<String> volumeDescription = new LinkedList<>();
       long cuboids = volumes.stream().filter(volume -> volume instanceof Cuboid).count();
       if (cuboids != 0) {

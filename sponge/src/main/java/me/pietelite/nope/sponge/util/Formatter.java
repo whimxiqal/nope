@@ -427,19 +427,8 @@ public final class Formatter {
       String dataString = setting.value() == null
           ? "(Empty)"
           : setting.key().manager().printValue(setting.value());
-      if (collection instanceof Host) {
-        Host host = (Host) collection;
-        Host redundancy = Nope.instance().hostSystem().findIdenticalSuperior(host, setting.key())
-            .orElse(null);
-        main.append(settingKey(setting.key(), false),
-            Component.text(" = ").append(settingValue(
-                Component.text(dataString),
-                collection.equals(redundancy),
-                redundancy)));
-      } else {
         main.append(settingKey(setting.key(), false),
             Component.text(" = ").append(Component.text(dataString)));
-      }
 
       List<Component> list = Lists.newLinkedList();
 

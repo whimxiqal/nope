@@ -34,11 +34,11 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import me.pietelite.nope.common.Nope;
-import me.pietelite.nope.common.host.Zone;
+import me.pietelite.nope.common.host.Scene;
 import me.pietelite.nope.common.math.Cylinder;
 import me.pietelite.nope.common.math.Sphere;
 import me.pietelite.nope.common.math.Volume;
-import me.pietelite.nope.common.storage.ZoneDataHandler;
+import me.pietelite.nope.common.storage.SceneDataHandler;
 import me.pietelite.nope.sponge.SpongeNope;
 import me.pietelite.nope.sponge.config.SettingValueConfigSerializerRegistrar;
 import org.spongepowered.configurate.CommentedConfigurationNode;
@@ -48,19 +48,19 @@ import org.spongepowered.configurate.loader.ConfigurationLoader;
 import org.spongepowered.configurate.serialize.SerializationException;
 
 /**
- * The {@link ZoneDataHandler} implemented with Configurate.
+ * The {@link SceneDataHandler} implemented with Configurate.
  */
-public class ZoneConfigurateDataHandler extends SettingsConfigurateDataHandler implements ZoneDataHandler {
+public class SceneConfigurateDataHandler extends SettingsConfigurateDataHandler implements SceneDataHandler {
 
   private final Function<String, ConfigurationLoader<CommentedConfigurationNode>> loader;
   private final Function<String, Path> filePath;
   private final Supplier<Collection<ConfigurationLoader<CommentedConfigurationNode>>> allLoader;
 
-  public ZoneConfigurateDataHandler(Function<String, ConfigurationLoader<CommentedConfigurationNode>> loader,
-                                    Function<String, Path> filePath,
-                                    Supplier<Collection<ConfigurationLoader<CommentedConfigurationNode>>>
+  public SceneConfigurateDataHandler(Function<String, ConfigurationLoader<CommentedConfigurationNode>> loader,
+                                     Function<String, Path> filePath,
+                                     Supplier<Collection<ConfigurationLoader<CommentedConfigurationNode>>>
                                         allLoader,
-                                    SettingValueConfigSerializerRegistrar serializerRegistrar) {
+                                     SettingValueConfigSerializerRegistrar serializerRegistrar) {
     super(serializerRegistrar);
     this.loader = loader;
     this.filePath = filePath;
@@ -68,35 +68,35 @@ public class ZoneConfigurateDataHandler extends SettingsConfigurateDataHandler i
   }
 
   @Override
-  public void destroy(Zone zone) {
-    File file = filePath.apply(zone.name()).toFile();
+  public void destroy(Scene scene) {
+    File file = filePath.apply(scene.name()).toFile();
     if (file.exists()) {
       if (!file.delete()) {
-        SpongeNope.instance().logger().error("Error when trying to destroy zone "
-            + zone.name()
+        SpongeNope.instance().logger().error("Error when trying to destroy scene "
+            + scene.name()
             + " by deleting its configuration file");
       }
     }
   }
 
   @Override
-  public void save(Zone zone) {
+  public void save(Scene scene) {
     try {
-      CommentedConfigurationNode root = settingCollectionRoot(zone);
-      root.node("name").set(zone.name());
-      root.node("settings").comment("Settings for Zone " + zone.name());
-      root.node("priority").set(zone.priority());
-      root.node("parent").set(zone.parent().map(Zone::name).orElse(null));
-      root.node("volumes").setList(Volume.class, zone.volumes());
-      loader.apply(zone.name()).save(root);
+      CommentedConfigurationNode root = settingCollectionRoot(scene);
+      root.node("name").set(scene.name());
+      root.node("settings").comment("Settings for Scene " + scene.name());
+      root.node("priority").set(scene.priority());
+      root.node("parent").set(scene.parent().map(Scene::name).orElse(null));
+      root.node("volumes").setList(Volume.class, scene.volumes());
+      loader.apply(scene.name()).save(root);
     } catch (ConfigurateException e) {
       e.printStackTrace();
     }
   }
 
   @Override
-  public Collection<Zone> load() {
-    Map<String, Zone> zones = new HashMap<>();
+  public Collection<Scene> load() {
+    Map<String, Scene> zones = new HashMap<>();
     // Need to queue other loaders if the one given does not have their parent loaded yet
     Map<String, List<ConfigurationLoader<CommentedConfigurationNode>>> queue = new HashMap<>();
     for (ConfigurationLoader<CommentedConfigurationNode> loader : allLoader.get()) {
@@ -105,7 +105,7 @@ public class ZoneConfigurateDataHandler extends SettingsConfigurateDataHandler i
     return zones.values();
   }
 
-  private void load(Map<String, Zone> zones,
+  private void load(Map<String, Scene> zones,
                     Map<String, List<ConfigurationLoader<CommentedConfigurationNode>>> queue,
                     ConfigurationLoader<CommentedConfigurationNode> loader) {
     ConfigurationNode root;
@@ -117,7 +117,7 @@ public class ZoneConfigurateDataHandler extends SettingsConfigurateDataHandler i
       root = loader.load();
       name = root.node("name").get(String.class);
     } catch (ConfigurateException e) {
-      Nope.instance().logger().error("Error loading Zone: " + e.getMessage());
+      Nope.instance().logger().error("Error loading Scene: " + e.getMessage());
       e.printStackTrace();
       return;
     }
@@ -127,7 +127,7 @@ public class ZoneConfigurateDataHandler extends SettingsConfigurateDataHandler i
 
     try {
       String parentName = root.node("parent").get(String.class);
-      Zone parent;
+      Scene parent;
       if (parentName == null) {
         parent = null;
       } else if (zones.containsKey(parentName)) {
@@ -141,17 +141,17 @@ public class ZoneConfigurateDataHandler extends SettingsConfigurateDataHandler i
       try {
         volumes = root.node("volumes").getList(Volume.class);
       } catch (Exception e) {
-        Nope.instance().logger().error("Failed parsing volumes for zone: " + name);
+        Nope.instance().logger().error("Failed parsing volumes for scene: " + name);
         throw e;
       }
-      Zone zone = new Zone(name, parent, priority, volumes);
-      zone.setAll(deserializeSettings(root.node("settings").childrenMap()));
-      zones.put(name, zone);
+      Scene scene = new Scene(name, parent, priority, volumes);
+      scene.setAll(deserializeSettings(root.node("settings").childrenMap()));
+      zones.put(name, scene);
       if (queue.containsKey(name)) {
         queue.get(name).forEach(queuedLoader -> load(zones, queue, queuedLoader));
       }
     } catch (ConfigurateException e) {
-      Nope.instance().logger().error(String.format("Error loading Zone %s: " + e.getMessage()
+      Nope.instance().logger().error(String.format("Error loading Scene %s: " + e.getMessage()
           + ". Is it in the right format?", name));
       e.printStackTrace();
     }

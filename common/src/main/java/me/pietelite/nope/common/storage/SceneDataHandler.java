@@ -22,33 +22,20 @@
  * SOFTWARE.
  */
 
-package me.pietelite.nope.common.api.setting.data;
+package me.pietelite.nope.common.storage;
 
-import me.pietelite.nope.common.api.struct.Described;
+import java.util.Collection;
+import me.pietelite.nope.common.host.Scene;
 
 /**
- * Methods of changing blocks.
+ * A general interface for handling {@link Scene} persistent data.
  */
-public enum BlockChange implements Described {
-  BREAK("Whether blocks can be replaced with air"),
-  PLACE("Whether blocks can replace air"),
-  MODIFY("Whether blocks can changed to other blocks or change internally"),
-  GROW("Whether blocks may be grown"),
-  DECAY("Whether blocks may decay");
+public interface SceneDataHandler {
 
-  private final String description;
+  void destroy(Scene scene);
 
-  BlockChange(String description) {
-    this.description = description;
-  }
+  void save(Scene scene);
 
-  @Override
-  public String description() {
-    return description;
-  }
+  Collection<Scene> load();
 
-  @Override
-  public String toString() {
-    return name().toLowerCase();
-  }
 }

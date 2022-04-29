@@ -26,8 +26,9 @@ package me.pietelite.nope.sponge.util;
 
 import java.util.UUID;
 import me.pietelite.nope.common.Nope;
-import me.pietelite.nope.common.api.setting.data.Movement;
+import me.pietelite.nope.common.api.register.data.Movement;
 import me.pietelite.nope.common.host.Domain;
+import me.pietelite.nope.common.host.HostSystem;
 import me.pietelite.nope.common.math.Vector3d;
 import me.pietelite.nope.common.setting.SettingKey;
 import me.pietelite.nope.common.struct.Location;
@@ -76,7 +77,7 @@ public final class SpongeUtil {
     return new Location(location.blockX(),
         location.blockY(),
         location.blockZ(),
-        Nope.instance().hostSystem().domain(worldToId(location.world())));
+        Nope.instance().system().domain(worldToId(location.world())));
   }
 
   /**
@@ -120,7 +121,7 @@ public final class SpongeUtil {
    * @return the domain
    */
   public static Domain reduceWorld(ServerWorld world) {
-    return SpongeNope.instance().hostSystem().domain(worldToId(world));
+    return SpongeNope.instance().system().domain(worldToId(world));
   }
 
   public static org.spongepowered.math.vector.Vector3d raiseVector(Vector3d vector) {
@@ -136,13 +137,13 @@ public final class SpongeUtil {
    * @return the evaluated data
    */
   public static <T> T valueFor(SettingKey<T, ?, ?> key, Entity entity) {
-    return SpongeNope.instance().hostSystem().lookup(key,
+    return SpongeNope.instance().system().lookup(key,
         reduceEntity(entity),
         reduceLocation(entity.serverLocation())).result();
   }
 
   /**
-   * An alias for {@link me.pietelite.nope.common.host.HostSystem#lookup(SettingKey, UUID, Location)}.
+   * An alias for {@link HostSystem#lookup(SettingKey, UUID, Location)}.
    *
    * @param key      a key
    * @param cause    the (root) cause of the event causing this lookup
@@ -151,7 +152,7 @@ public final class SpongeUtil {
    * @return the evaluated data
    */
   public static <T> T valueFor(SettingKey<T, ?, ?> key, Object cause, ServerLocation location) {
-    return SpongeNope.instance().hostSystem().lookup(key,
+    return SpongeNope.instance().system().lookup(key,
         reduceCause(cause),
         reduceLocation(location)).result();
   }
@@ -166,11 +167,11 @@ public final class SpongeUtil {
    * @return the evaluated data
    */
   public static <T> T valueFor(SettingKey<T, ?, ?> key, Object cause, Location location) {
-    return SpongeNope.instance().hostSystem().lookup(key, reduceCause(cause), location).result();
+    return SpongeNope.instance().system().lookup(key, reduceCause(cause), location).result();
   }
 
   public static <T> T valueFor(SettingKey<T, ?, ?> key, ServerLocation location) {
-    return SpongeNope.instance().hostSystem().lookupAnonymous(key, reduceLocation(location)).result();
+    return SpongeNope.instance().system().lookupAnonymous(key, reduceLocation(location)).result();
   }
 
   /**
@@ -203,28 +204,28 @@ public final class SpongeUtil {
 
   /**
    * "Reduce" a Sponge {@link Explosive} type to a local
-   * {@link me.pietelite.nope.common.api.setting.data.Explosive} type.
+   * {@link me.pietelite.nope.common.api.register.data.Explosive} type.
    *
    * @param explosive the Sponge explosive
    * @return the local type
    */
-  public static me.pietelite.nope.common.api.setting.data.Explosive reduceExplosive(Explosive explosive) {
+  public static me.pietelite.nope.common.api.register.data.Explosive reduceExplosive(Explosive explosive) {
     if (explosive instanceof Creeper) {
-      return me.pietelite.nope.common.api.setting.data.Explosive.CREEPER;
+      return me.pietelite.nope.common.api.register.data.Explosive.CREEPER;
     } else if (explosive instanceof EndCrystal) {
-      return me.pietelite.nope.common.api.setting.data.Explosive.ENDCRYSTAL;
+      return me.pietelite.nope.common.api.register.data.Explosive.ENDCRYSTAL;
     } else if (explosive instanceof ExplosiveFireball) {
-      return me.pietelite.nope.common.api.setting.data.Explosive.EXPLOSIVEFIREBALL;
+      return me.pietelite.nope.common.api.register.data.Explosive.EXPLOSIVEFIREBALL;
     } else if (explosive instanceof FireworkRocket) {
-      return me.pietelite.nope.common.api.setting.data.Explosive.FIREWORK;
+      return me.pietelite.nope.common.api.register.data.Explosive.FIREWORK;
     } else if (explosive instanceof PrimedTNT) {
-      return me.pietelite.nope.common.api.setting.data.Explosive.PRIMEDTNT;
+      return me.pietelite.nope.common.api.register.data.Explosive.PRIMEDTNT;
     } else if (explosive instanceof TNTMinecart) {
-      return me.pietelite.nope.common.api.setting.data.Explosive.TNTMINECART;
+      return me.pietelite.nope.common.api.register.data.Explosive.TNTMINECART;
     } else if (explosive instanceof Wither) {
-      return me.pietelite.nope.common.api.setting.data.Explosive.WITHER;
+      return me.pietelite.nope.common.api.register.data.Explosive.WITHER;
     } else if (explosive instanceof WitherSkull) {
-      return me.pietelite.nope.common.api.setting.data.Explosive.WITHERSKULL;
+      return me.pietelite.nope.common.api.register.data.Explosive.WITHERSKULL;
     } else {
       throw new IllegalArgumentException("Unknown explosive type: " + explosive);
     }

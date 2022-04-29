@@ -34,7 +34,7 @@ import me.pietelite.nope.common.math.Volume;
 import me.pietelite.nope.sponge.config.SettingValueConfigSerializerRegistrar;
 import me.pietelite.nope.sponge.storage.configurate.ConfigurateDataHandler;
 import me.pietelite.nope.sponge.storage.configurate.DomainConfigurateDataHandler;
-import me.pietelite.nope.sponge.storage.configurate.ZoneConfigurateDataHandler;
+import me.pietelite.nope.sponge.storage.configurate.SceneConfigurateDataHandler;
 import me.pietelite.nope.sponge.storage.configurate.serializer.VolumeTypeSerializer;
 import org.spongepowered.configurate.ConfigurationOptions;
 import org.spongepowered.configurate.hocon.HoconConfigurationLoader;
@@ -54,7 +54,7 @@ public class HoconDataHandler extends ConfigurateDataHandler {
     super(new HoconConfig(path, serializerRegistrar),
         new DomainConfigurateDataHandler((name) -> hoconLoader(path.resolve(name + ".conf")),
             serializerRegistrar),
-        new ZoneConfigurateDataHandler((name) -> hoconLoader(path.resolve("zones")
+        new SceneConfigurateDataHandler((name) -> hoconLoader(path.resolve("zones")
             .resolve(name + ".conf")),
             (name) -> path.resolve("zones")
                 .resolve(name + ".conf"),

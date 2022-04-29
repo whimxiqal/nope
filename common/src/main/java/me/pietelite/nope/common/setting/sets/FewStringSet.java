@@ -31,7 +31,7 @@ import me.pietelite.nope.common.struct.HashAltSet;
  * A {@link HashAltSet} for storing a small number of strings.
  */
 public class FewStringSet extends HashAltSet.FewStandard<String> {
-  public FewStringSet(Collection<String> options) {
-    super(options);
+  public FewStringSet(boolean full, Collection<String> options) {
+    super(full, options);
   }
 }

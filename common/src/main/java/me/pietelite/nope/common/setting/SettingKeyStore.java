@@ -27,6 +27,7 @@ package me.pietelite.nope.common.setting;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import me.pietelite.nope.common.Nope;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -88,6 +89,30 @@ public class SettingKeyStore {
 
   public boolean isEmpty() {
     return settingMap.isEmpty();
+  }
+
+  public <T> SettingKey.Poly<T, ?> getPolySetting(String setting, Class<T> type) {
+    SettingKey<?, ?, ?> key = get(setting);
+    if (!(key instanceof SettingKey.Poly)) {
+      throw new NoSuchElementException("There is no poly setting with name " + setting);
+    }
+    SettingKey.Poly<?, ?> polyKey = (SettingKey.Poly<?, ?>) key;
+    if (!polyKey.manager().elementType().isAssignableFrom(type)) {
+      throw new IllegalArgumentException("The setting " + setting + " does not use the given element type");
+    }
+    return (SettingKey.Poly<T, ?>) polyKey;
+  }
+
+  public <T> SettingKey.Unary<T> getUnarySetting(String setting, Class<T> type) {
+    SettingKey<?, ?, ?> key = get(setting);
+    if (!(key instanceof SettingKey.Unary)) {
+      throw new NoSuchElementException("There is no unary setting with name " + setting);
+    }
+    SettingKey.Unary<?> unaryKey = (SettingKey.Unary<?>) key;
+    if (!unaryKey.manager().dataType().isAssignableFrom(type)) {
+      throw new IllegalArgumentException("The setting " + setting + " does not use the given element type");
+    }
+    return (SettingKey.Unary<T>) unaryKey;
   }
 
 }

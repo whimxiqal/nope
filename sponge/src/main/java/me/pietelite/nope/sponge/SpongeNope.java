@@ -184,8 +184,8 @@ public class SpongeNope extends Nope {
 
     // Load data
     data(new HoconDataHandler(configDir, configRegistrar));
-    hostSystem(data().loadSystem());
-    hostSystem().addAllZones(data().zones().load());
+    system(data().loadSystem());
+    system().addAllScenes(data().scenes().load());
 
     // Create setting listeners
     this.settingListeners = new SettingListenerStore(settingKeys());
@@ -243,8 +243,8 @@ public class SpongeNope extends Nope {
    * Load plugin state from persistent storage.
    */
   public void loadState() {
-    hostSystem(data().loadSystem());
-    hostSystem().addAllZones(data().zones().load());
+    system(data().loadSystem());
+    system().addAllScenes(data().scenes().load());
   }
 
   @Override

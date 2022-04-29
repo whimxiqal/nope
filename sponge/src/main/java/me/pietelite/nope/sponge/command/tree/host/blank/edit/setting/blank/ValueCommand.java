@@ -80,10 +80,10 @@ public class ValueCommand extends CommandNode {
     boolean additive = context.hasFlag(Flags.ADDITIVE_VALUE_FLAG);
     boolean subtractive = context.hasFlag(Flags.SUBTRACTIVE_VALUE_FLAG);
 
-    if (settingKey.global() && !host.equals(SpongeNope.instance().hostSystem().universe())) {
+    if (settingKey.global() && !host.equals(SpongeNope.instance().system().global())) {
       context.sendMessage(Identity.nil(),
           Formatter.error("This setting may only be set on the host ___",
-              SpongeNope.instance().hostSystem().universe().name()));
+              SpongeNope.instance().system().global().name()));
       return CommandResult.success();
     }
 
@@ -117,7 +117,7 @@ public class ValueCommand extends CommandNode {
         return CommandResult.error(Formatter.error("You may not set both additive "
             + "and subtractive values at the same time"));
       }
-      Y inputSet = polyKey.manager().createSet();
+      Y inputSet = polyKey.manager().emptySet();
       if (alterType == ParameterValueTypes.SettingValueAlterType.SET_ALL) {
         inputSet.fill();
         alterType = ParameterValueTypes.SettingValueAlterType.SET;
@@ -138,7 +138,7 @@ public class ValueCommand extends CommandNode {
         switch (alterType) {
           case SET:
           case SET_NOT:
-            subtractiveSet = polyKey.manager().createSet();
+            subtractiveSet = polyKey.manager().emptySet();
             if (currentValue.isPresent()) {
               if (currentValue.get().declarative()) {
                 context.sendMessage(Identity.nil(),
@@ -151,8 +151,8 @@ public class ValueCommand extends CommandNode {
             newValue = SettingValue.Poly.manipulative(inputSet, subtractiveSet);
             break;
           case CONCATENATE:
-            additiveSet = polyKey.manager().createSet();
-            subtractiveSet = polyKey.manager().createSet();
+            additiveSet = polyKey.manager().emptySet();
+            subtractiveSet = polyKey.manager().emptySet();
             if (currentValue.isPresent()) {
               if (currentValue.get().declarative()) {
                 context.sendMessage(Identity.nil(),
@@ -179,7 +179,7 @@ public class ValueCommand extends CommandNode {
             newValue = SettingValue.Poly.manipulative(additiveSet,
                 currentValue.filter(SettingValue.Poly::manipulative)
                     .map(SettingValue.Poly::subtractive)
-                    .orElse(polyKey.manager().createSet()));
+                    .orElse(polyKey.manager().emptySet()));
             break;
           default:
             throw new CommandException(Formatter.error("Unknown setting value alter type: " + alterType));
@@ -188,7 +188,7 @@ public class ValueCommand extends CommandNode {
         switch (alterType) {
           case SET:
           case SET_NOT:
-            additiveSet = polyKey.manager().createSet();
+            additiveSet = polyKey.manager().emptySet();
             if (currentValue.isPresent()) {
               if (currentValue.get().declarative()) {
                 context.sendMessage(Identity.nil(),
@@ -201,8 +201,8 @@ public class ValueCommand extends CommandNode {
             newValue = SettingValue.Poly.manipulative(additiveSet, inputSet);
             break;
           case CONCATENATE:
-            additiveSet = polyKey.manager().createSet();
-            subtractiveSet = polyKey.manager().createSet();
+            additiveSet = polyKey.manager().emptySet();
+            subtractiveSet = polyKey.manager().emptySet();
             if (currentValue.isPresent()) {
               if (currentValue.get().declarative()) {
                 context.sendMessage(Identity.nil(),
@@ -243,7 +243,7 @@ public class ValueCommand extends CommandNode {
             newValue = SettingValue.Poly.declarative(inputSet);
             break;
           case CONCATENATE:
-            additiveSet = polyKey.manager().createSet();
+            additiveSet = polyKey.manager().emptySet();
             if (currentValue.isPresent()) {
               if (currentValue.get().manipulative()) {
                 context.sendMessage(Identity.nil(),

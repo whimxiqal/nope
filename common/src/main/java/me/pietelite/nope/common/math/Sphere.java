@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import lombok.Getter;
 import lombok.experimental.Accessors;
+import me.pietelite.nope.common.api.edit.ZoneType;
 import me.pietelite.nope.common.host.Domain;
 import org.jetbrains.annotations.NotNull;
 
@@ -37,14 +38,14 @@ import org.jetbrains.annotations.NotNull;
  */
 public class Sphere extends Volume {
 
-  private final Integer posX;
-  private final Integer posY;
-  private final Integer posZ;
-  private final Double radius;
+  private final Float posX;
+  private final Float posY;
+  private final Float posZ;
+  private final Float radius;
 
   @Getter
   @Accessors(fluent = true)
-  private final Double radiusSquared;
+  private final float radiusSquared;
 
   @Getter
   @Accessors(fluent = true)
@@ -67,8 +68,8 @@ public class Sphere extends Volume {
    * @param radius the sphere's radius
    */
   public Sphere(@NotNull Domain domain,
-                Integer x, Integer y, Integer z,
-                Double radius) {
+                Float x, Float y, Float z,
+                Float radius) {
     super(domain);
     this.posX = x;
     this.posY = y;
@@ -80,21 +81,21 @@ public class Sphere extends Volume {
     this.midPoint3d = Vector3d.of(posX, posY, posZ);
 
     circumscribed = new Cuboid(domain,
-        (int) Math.floor(posX - radius),
-        (int) Math.floor(posY - radius),
-        (int) Math.floor(posZ - radius),
-        (int) Math.ceil(posX + radius),
-        (int) Math.ceil(posY + radius),
-        (int) Math.ceil(posZ + radius));
+        posX - radius,
+        posY - radius,
+        posZ - radius,
+        posX + radius,
+        posY + radius,
+        posZ + radius);
 
-    double radiusSqrt3Over3 = radius * Math.sqrt(3) / 3;
+    float radiusSqrt3Over3 = radius * ((float) Math.sqrt(3)) / 3;
     inscribed = new Cuboid(domain,
-        (int) Math.ceil(posX - radiusSqrt3Over3),
-        (int) Math.ceil(posY - radiusSqrt3Over3),
-        (int) Math.ceil(posZ - radiusSqrt3Over3),
-        (int) Math.floor(posX + radiusSqrt3Over3),
-        (int) Math.floor(posY + radiusSqrt3Over3),
-        (int) Math.floor(posZ + radiusSqrt3Over3));
+        posX - radiusSqrt3Over3,
+        posY - radiusSqrt3Over3,
+        posZ - radiusSqrt3Over3,
+        posX + radiusSqrt3Over3,
+        posY + radiusSqrt3Over3,
+        posZ + radiusSqrt3Over3);
 
   }
 
@@ -105,19 +106,19 @@ public class Sphere extends Volume {
         z + rho * Math.cos(theta) * Math.sin(phi));
   }
 
-  public int posX() {
+  public float posX() {
     return this.posX;
   }
 
-  public int posY() {
+  public float posY() {
     return this.posY;
   }
 
-  public int posZ() {
+  public float posZ() {
     return this.posZ;
   }
 
-  public double radius() {
+  public float radius() {
     return this.radius;
   }
 
@@ -134,18 +135,23 @@ public class Sphere extends Volume {
   }
 
   @Override
+  public ZoneType zoneType() {
+    return ZoneType.SPHERE;
+  }
+
+  @Override
   public boolean containsPoint(double x, double y, double z) {
     return (posX - x) * (posX - x) + (posY - y) * (posY - y) + (posZ - z) * (posZ - z) <= radiusSquared;
   }
 
   @Override
   public boolean containsBlock(int x, int y, int z) {
-    final int distSquaredX = (posX - x) * (posX - x);
-    final int distSquaredY = (posX - y) * (posX - y);
-    final int distSquaredZ = (posX - z) * (posX - z);
-    final int distPlus1SquaredX = (posX + 1 - x) * (posX + 1 - x);
-    final int distPlus1SquaredY = (posY + 1 - y) * (posY + 1 - y);
-    final int distPlus1SquaredZ = (posZ + 1 - z) * (posZ + 1 - z);
+    final float distSquaredX = (posX - x) * (posX - x);
+    final float distSquaredY = (posX - y) * (posX - y);
+    final float distSquaredZ = (posX - z) * (posX - z);
+    final float distPlus1SquaredX = (posX + 1 - x) * (posX + 1 - x);
+    final float distPlus1SquaredY = (posY + 1 - y) * (posY + 1 - y);
+    final float distPlus1SquaredZ = (posZ + 1 - z) * (posZ + 1 - z);
     return distSquaredX + distSquaredY + distSquaredZ <= radiusSquared
         || distPlus1SquaredX + distSquaredY + distSquaredZ <= radiusSquared
         || distSquaredX + distPlus1SquaredY + distSquaredZ <= radiusSquared

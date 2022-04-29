@@ -33,20 +33,23 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+import me.pietelite.nope.common.api.NopeServiceConsumer;
 import me.pietelite.nope.common.host.Domain;
+import me.pietelite.nope.common.host.Global;
 import me.pietelite.nope.common.host.HostSystem;
-import me.pietelite.nope.common.host.Universe;
-import me.pietelite.nope.common.util.TestDataHandler;
+import me.pietelite.nope.common.host.Profile;
+import me.pietelite.nope.common.setting.SettingKeys;
+import me.pietelite.nope.common.util.MockDataHandler;
 import me.pietelite.nope.common.util.TestLogger;
 
 /**
  * A test plugin class.
  */
-public class TestNope extends Nope {
+public class MockNope extends Nope {
 
   public Map<UUID, Set<String>> permissions = new HashMap<>();
 
-  public TestNope() {
+  public MockNope() {
     super(new TestLogger());
   }
 
@@ -56,14 +59,16 @@ public class TestNope extends Nope {
    * @param domainNames the domains in the test system
    * @return the plugin instance
    */
-  public static TestNope init(String... domainNames) {
-    TestNope nope = new TestNope();
+  public static MockNope init(String... domainNames) {
+    MockNope nope = new MockNope();
     Nope.instance(nope);
-    nope.hostSystem(new HostSystem(new Universe("universe"),
+    NopeServiceConsumer.consume(new NopeServiceImpl());
+    SettingKeys.registerTo(instance().settingKeys());
+    nope.system(new HostSystem(new Global(Nope.GLOBAL_HOST_NAME, new Profile(Nope.GLOBAL_HOST_NAME)),
         Arrays.stream(domainNames)
             .map(name -> new Domain(name, 10000))
             .collect(Collectors.toList())));
-    nope.data(new TestDataHandler());
+    nope.data(new MockDataHandler());
     return nope;
   }
 

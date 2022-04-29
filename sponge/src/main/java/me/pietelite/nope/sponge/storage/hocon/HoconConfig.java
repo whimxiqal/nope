@@ -25,11 +25,12 @@
 package me.pietelite.nope.sponge.storage.hocon;
 
 import java.nio.file.Path;
+import me.pietelite.nope.common.host.Global;
 import me.pietelite.nope.sponge.config.SettingValueConfigSerializerRegistrar;
 import me.pietelite.nope.sponge.storage.configurate.UniverseConfigurateDataHandler;
 
 /**
- * A config handler for the {@link me.pietelite.nope.common.host.Universe} host
+ * A config handler for the {@link Global} host
  * using hocon as the storage type.
  */
 public class HoconConfig extends UniverseConfigurateDataHandler {

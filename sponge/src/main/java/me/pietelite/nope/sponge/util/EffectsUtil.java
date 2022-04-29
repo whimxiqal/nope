@@ -39,7 +39,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import lombok.Data;
 import lombok.experimental.Accessors;
-import me.pietelite.nope.common.host.Zone;
+import me.pietelite.nope.common.host.Scene;
 import me.pietelite.nope.common.math.Vector3d;
 import me.pietelite.nope.common.math.Volume;
 import me.pietelite.nope.common.struct.Location;
@@ -107,19 +107,19 @@ public final class EffectsUtil {
   }
 
   /**
-   * Display the boundaries of all {@link Volume}s within a {@link Zone} for
+   * Display the boundaries of all {@link Volume}s within a {@link Scene} for
    * a specific {@link ServerPlayer}.
    *
-   * @param zone   the zone to show
+   * @param scene   the scene to show
    * @param player the player to
    * @return true if any particles are shown, false if none
    */
-  public static boolean show(Zone zone, ServerPlayer player) {
+  public static boolean show(Scene scene, ServerPlayer player) {
     ensureTaskExecutor();
 
     Location location = SpongeUtil.reduceLocation(player.serverLocation());
     Vector3d locationVector = location.vector3d();
-    List<Volume> volumes = zone.volumes();
+    List<Volume> volumes = scene.volumes();
 
     final Map<Volume, List<Vector3d>> points = new HashMap<>();
     for (Volume volume : volumes) {

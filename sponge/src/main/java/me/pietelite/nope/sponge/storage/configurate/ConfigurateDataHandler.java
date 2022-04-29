@@ -27,14 +27,15 @@ package me.pietelite.nope.sponge.storage.configurate;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
+import me.pietelite.nope.common.api.NopeServiceProvider;
 import me.pietelite.nope.common.host.Domain;
 import me.pietelite.nope.common.host.HostSystem;
-import me.pietelite.nope.common.host.Universe;
+import me.pietelite.nope.common.host.Global;
 import me.pietelite.nope.common.setting.SettingKeys;
 import me.pietelite.nope.common.storage.DataHandler;
 import me.pietelite.nope.common.storage.DomainDataHandler;
 import me.pietelite.nope.common.storage.UniverseDataHandler;
-import me.pietelite.nope.common.storage.ZoneDataHandler;
+import me.pietelite.nope.common.storage.SceneDataHandler;
 import org.spongepowered.api.Sponge;
 
 /**
@@ -46,7 +47,7 @@ public abstract class ConfigurateDataHandler implements DataHandler {
 
   private final UniverseConfigurateDataHandler universeDataHandler;
   private final DomainConfigurateDataHandler domainDataHandler;
-  private final ZoneConfigurateDataHandler zoneDataHandler;
+  private final SceneConfigurateDataHandler zoneDataHandler;
 
   @Override
   public UniverseDataHandler universe() {
@@ -59,13 +60,13 @@ public abstract class ConfigurateDataHandler implements DataHandler {
   }
 
   @Override
-  public ZoneDataHandler zones() {
+  public SceneDataHandler scenes() {
     return zoneDataHandler;
   }
 
   @Override
   public HostSystem loadSystem() {
-    Universe universe = universeDataHandler.load();
+    Global global = universeDataHandler.load();
     List<Domain> domains = Sponge.server()
         .worldManager()
         .worlds()
@@ -73,10 +74,10 @@ public abstract class ConfigurateDataHandler implements DataHandler {
         .map(world -> new Domain("_" + world.key()
             .formatted()
             .replace(":", "_"),
-            SettingKeys.CACHE_SIZE.getDataOrDefault(universe)))
+            NopeServiceProvider.service().evaluator().unarySettingGlobal(SettingKeys.CACHE_SIZE.name(), Integer.class)))
         .collect(Collectors.toList());
     domains.forEach(domainDataHandler::load);
-    return new HostSystem(universe, domains);
+    return new HostSystem(global, domains);
   }
 
 }

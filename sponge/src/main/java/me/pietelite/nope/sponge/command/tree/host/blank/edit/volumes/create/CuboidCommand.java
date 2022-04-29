@@ -29,7 +29,7 @@ import java.util.List;
 import java.util.Optional;
 import me.pietelite.nope.common.Nope;
 import me.pietelite.nope.common.host.Host;
-import me.pietelite.nope.common.host.Zone;
+import me.pietelite.nope.common.host.Scene;
 import me.pietelite.nope.common.math.Cuboid;
 import me.pietelite.nope.common.math.Geometry;
 import me.pietelite.nope.common.permission.Permissions;
@@ -68,12 +68,12 @@ public class CuboidCommand extends CommandNode {
   @Override
   public CommandResult execute(CommandContext context) throws CommandException {
     Host host = context.requireOne(ParameterKeys.HOST);
-    if (!(host instanceof Zone)) {
+    if (!(host instanceof Scene)) {
       return CommandResult.error(Formatter.error(
           "You may not create volumes for host ___", host.name()
       ));
     }
-    Zone zone = (Zone) host;
+    Scene scene = (Scene) host;
 
     Cuboid cuboid;
 
@@ -91,7 +91,7 @@ public class CuboidCommand extends CommandNode {
         && posX2.isPresent()
         && posY2.isPresent()
         && posZ2.isPresent()) {
-      cuboid = new Cuboid(Nope.instance().hostSystem().domain(SpongeUtil.worldToId(world.get())),
+      cuboid = new Cuboid(Nope.instance().system().domain(SpongeUtil.worldToId(world.get())),
           Math.min(posX1.get(), posX2.get()),
           Math.min(posY1.get(), posY2.get()),
           Math.min(posZ1.get(), posZ2.get()),
@@ -135,18 +135,18 @@ public class CuboidCommand extends CommandNode {
       }
     }
 
-    for (int i = 0; i < zone.volumes().size(); i++) {
-      if (Geometry.intersects(zone.volumes().get(i), cuboid)) {
+    for (int i = 0; i < scene.volumes().size(); i++) {
+      if (Geometry.intersects(scene.volumes().get(i), cuboid)) {
         context.cause().audience().sendMessage(Formatter.warn(
-            "Your new box intersects with zone ___'s volume number ___ ",
-            zone.name(), i
+            "Your new box intersects with scene ___'s volume number ___ ",
+            scene.name(), i
         ));
       }
     }
-    Nope.instance().hostSystem().addVolume(cuboid, zone);
-    zone.ensurePriority();
+    Nope.instance().system().addVolume(cuboid, scene);
+    scene.ensurePriority();
     context.cause().audience().sendMessage(Formatter.success(
-        "A box was created on zone ___", zone.name()
+        "A box was created on scene ___", scene.name()
     ));
     if (context.cause().root() instanceof ServerPlayer) {
       EffectsUtil.show(cuboid, (ServerPlayer) context.cause().root());

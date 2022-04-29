@@ -86,4 +86,5 @@ public class Location {
   public Vector3d vector3d() {
     return Vector3d.of(posX, posY, posZ);
   }
+
 }

@@ -24,7 +24,7 @@
 
 package me.pietelite.nope.common.setting.sets;
 
-import me.pietelite.nope.common.api.setting.data.DamageCause;
+import me.pietelite.nope.common.api.register.data.DamageCause;
 import me.pietelite.nope.common.struct.HashAltSet;
 
 /**
@@ -33,7 +33,11 @@ import me.pietelite.nope.common.struct.HashAltSet;
 public class DamageCauseSet extends HashAltSet.FewEnum<DamageCause> {
 
   public DamageCauseSet() {
-    super(DamageCause.class);
+    this(false);
+  }
+
+  public DamageCauseSet(boolean full) {
+    super(full, DamageCause.class);
   }
 
 }

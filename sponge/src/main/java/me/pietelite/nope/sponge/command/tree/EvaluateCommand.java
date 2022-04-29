@@ -70,7 +70,7 @@ public class EvaluateCommand extends CommandNode {
         return CommandResult.error(Formatter.error("You must specify a player"));
       }
     }
-    Evaluation<X> evaluation = SpongeNope.instance().hostSystem().lookup(key,
+    Evaluation<X> evaluation = SpongeNope.instance().system().lookup(key,
         player.uniqueId(),
         SpongeUtil.reduceLocation(player.serverLocation()));
 
@@ -79,7 +79,7 @@ public class EvaluateCommand extends CommandNode {
         .append(Formatter.dull(" "))
         .append(Component.text(key.manager().printData(key.defaultData())).color(Formatter.WHITE)));
     evaluation.stream()
-        .map(stage -> Formatter.host(stage.host())
+        .map(stage -> Formatter.host(stage.profile())
             .append(Formatter.dull(" -> "))
             .append(Component.text(key.manager().printData(stage.value()))))
         .forEach(contents::add);

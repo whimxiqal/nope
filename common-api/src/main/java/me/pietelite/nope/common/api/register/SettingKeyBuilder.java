@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-package me.pietelite.nope.common.api.setting;
+package me.pietelite.nope.common.api.register;
 
 import me.pietelite.nope.common.api.struct.AltSet;
 

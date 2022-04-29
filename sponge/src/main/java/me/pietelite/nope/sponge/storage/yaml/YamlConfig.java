@@ -25,11 +25,12 @@
 package me.pietelite.nope.sponge.storage.yaml;
 
 import java.nio.file.Path;
+import me.pietelite.nope.common.host.Global;
 import me.pietelite.nope.sponge.config.SettingValueConfigSerializerRegistrar;
 import me.pietelite.nope.sponge.storage.configurate.UniverseConfigurateDataHandler;
 
 /**
- * The data handler for the {@link me.pietelite.nope.common.host.Universe} in Configurate,
+ * The data handler for the {@link Global} in Configurate,
  * specifically implemented in YAML.
  */
 public class YamlConfig extends UniverseConfigurateDataHandler {
