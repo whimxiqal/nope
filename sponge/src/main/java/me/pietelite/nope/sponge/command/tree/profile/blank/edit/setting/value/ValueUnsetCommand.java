@@ -40,7 +40,7 @@ import org.spongepowered.api.command.parameter.CommandContext;
 public class ValueUnsetCommand extends CommandNode {
 
   public ValueUnsetCommand(CommandNode parent) {
-    super(parent, Permissions.EDIT,
+    super(parent, null,
         "Unset the value of a setting on a host",
         "unset");
   }

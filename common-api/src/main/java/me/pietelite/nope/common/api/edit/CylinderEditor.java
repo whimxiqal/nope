@@ -24,19 +24,56 @@
 
 package me.pietelite.nope.common.api.edit;
 
+/**
+ * An editor for a cylinder Zone.
+ */
 @SuppressWarnings("checkstyle:MethodName")
 public interface CylinderEditor extends ZoneEditor {
 
-  Alteration setDimensions(float x, float y, float z, float radius, float height);
+  /**
+   * Sets the dimensions for this cylinder.
+   *
+   * @param x      the x coordinate of the center of the cylinder
+   * @param y      the y coordinate of the center, bottom side of the cylinder
+   * @param z      the z coordinate of the center of the cylinder
+   * @param radius the radius of the cylinder
+   * @param height the height of the cylinder
+   */
+  void setDimensions(float x, float y, float z, float radius, float height);
 
+  /**
+   * The x coordinate of the center of the cylinder.
+   *
+   * @return the x coordinate
+   */
   float x();
 
+  /**
+   * The y coordinate of the center of the cylinder.
+   *
+   * @return the y coordinate
+   */
   float y();
 
+  /**
+   * The z coordinate of the center of the cylinder.
+   *
+   * @return the z coordinate
+   */
   float z();
 
+  /**
+   * The radius of the cylinder.
+   *
+   * @return the radius
+   */
   float radius();
 
+  /**
+   * The height of the cylinder.
+   *
+   * @return the height
+   */
   float height();
 
 }

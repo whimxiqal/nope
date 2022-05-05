@@ -29,14 +29,16 @@ import me.pietelite.nope.sponge.command.CommandNode;
 import me.pietelite.nope.sponge.command.FunctionlessCommandNode;
 import me.pietelite.nope.sponge.command.tree.host.blank.edit.volumes.VolumeCreateCommand;
 import me.pietelite.nope.sponge.command.tree.host.blank.edit.volumes.VolumeDestroyCommand;
+import me.pietelite.nope.sponge.command.tree.host.blank.edit.volumes.VolumeEditCommand;
 
 public class VolumesCommand extends FunctionlessCommandNode {
   public VolumesCommand(CommandNode parent) {
-    super(parent, Permissions.EDIT,
-        "Alter the volumes, which give dimensions to zones",
-        "volumes");
+    super(parent, null,
+        "Alter the zones, which define the location of scenes",
+        "zones");
     addChild(new VolumeCreateCommand(this));
     addChild(new VolumeDestroyCommand(this));
+    addChild(new VolumeEditCommand(this));
   }
 
 }

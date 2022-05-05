@@ -91,6 +91,7 @@ public class SettingKeyStore {
     return settingMap.isEmpty();
   }
 
+  @SuppressWarnings("unchecked")
   public <T> SettingKey.Poly<T, ?> getPolySetting(String setting, Class<T> type) {
     SettingKey<?, ?, ?> key = get(setting);
     if (!(key instanceof SettingKey.Poly)) {
@@ -103,6 +104,7 @@ public class SettingKeyStore {
     return (SettingKey.Poly<T, ?>) polyKey;
   }
 
+  @SuppressWarnings("unchecked")
   public <T> SettingKey.Unary<T> getUnarySetting(String setting, Class<T> type) {
     SettingKey<?, ?, ?> key = get(setting);
     if (!(key instanceof SettingKey.Unary)) {

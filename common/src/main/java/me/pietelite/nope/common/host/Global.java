@@ -28,7 +28,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import me.pietelite.nope.common.Nope;
-import me.pietelite.nope.common.api.edit.Alteration;
 import me.pietelite.nope.common.api.edit.TargetEditor;
 import me.pietelite.nope.common.struct.Location;
 
@@ -37,11 +36,10 @@ import me.pietelite.nope.common.struct.Location;
  */
 public class Global extends Host {
 
-  final Profile globalProfile;
+  Profile globalProfile;
 
-  public Global(String name, Profile globalProfile) {
+  public Global(String name) {
     super(name, -2);
-    this.globalProfile = globalProfile;
   }
 
   @Override
@@ -51,6 +49,10 @@ public class Global extends Host {
 
   public void save() {
     Nope.instance().data().universe().save(this);
+  }
+
+  public void globalProfile(Profile globalProfile) {
+    this.globalProfile = globalProfile;
   }
 
   public Profile globalProfile() {
@@ -81,27 +83,27 @@ public class Global extends Host {
     }
 
     @Override
-    public Alteration addProfile(String name, int index) {
+    public void addProfile(String name, int index) {
       if (index == 0) {
         throw new IllegalArgumentException();
       }
-      return super.addProfile(name, index - 1);
+      super.addProfile(name, index - 1);
     }
 
     @Override
-    public Alteration removeProfile(String name) {
-      if (name.equalsIgnoreCase(Nope.GLOBAL_HOST_NAME)) {
+    public void removeProfile(String name) {
+      if (name.equalsIgnoreCase(Nope.GLOBAL_ID)) {
         throw new IllegalArgumentException();
       }
-      return super.removeProfile(name);
+      super.removeProfile(name);
     }
 
     @Override
-    public Alteration removeProfile(int index) {
+    public void removeProfile(int index) {
       if (index == 0) {
         throw new IllegalArgumentException();
       }
-      return super.removeProfile(index - 1);
+      super.removeProfile(index - 1);
     }
 
     @Override

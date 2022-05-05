@@ -26,8 +26,8 @@ package me.pietelite.nope.sponge.listener.dynamic;
 
 import java.util.Optional;
 import me.pietelite.nope.common.setting.SettingKeys;
-import me.pietelite.nope.sponge.api.event.SettingEventContext;
-import me.pietelite.nope.sponge.api.event.SettingEventListener;
+import me.pietelite.nope.sponge.api.setting.SettingEventContext;
+import me.pietelite.nope.sponge.api.setting.SettingEventListener;
 import org.spongepowered.api.block.transaction.NotificationTicket;
 import org.spongepowered.api.event.block.NotifyNeighborBlockEvent;
 import org.spongepowered.api.world.server.ServerLocation;

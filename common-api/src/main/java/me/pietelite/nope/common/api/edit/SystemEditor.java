@@ -26,27 +26,95 @@ package me.pietelite.nope.common.api.edit;
 
 import java.util.NoSuchElementException;
 import java.util.Set;
-import java.util.UUID;
-import me.pietelite.nope.common.api.struct.AltSet;
 
+/**
+ * The central access point for editing anything about the Nope "Host System".
+ * The <i>Host System</i> is the entire structure of <code>Host</code>s and <code>Profile</code>s
+ * which collectively dictate the value of settings at arbitrary positions throughout a server's many
+ * Minecraft worlds.
+ */
 public interface SystemEditor {
 
+  /**
+   * Gets an editor for an existing generic host.
+   *
+   * @param name the name of the host
+   * @return the editor
+   * @throws NoSuchElementException if no host exists with that name
+   */
+  HostEditor editHost(String name) throws NoSuchElementException;
+
+  /**
+   * Gets an editor specifically for the "global host".
+   * The global host encapsulates all locations on the server.
+   *
+   * @return the editor
+   */
   HostEditor editGlobal();
 
+  /**
+   * Gets all domain names.
+   *
+   * @return the domain set
+   */
   Set<String> domains();
 
+  /**
+   * Gets an editor for a domain host.
+   * Equivalent to {@link #editHost(String)} if called with the name of a domain.
+   *
+   * @param name the name of the domain
+   * @return the editor
+   * @throws NoSuchElementException if no domain exists with that name
+   */
   HostEditor editDomain(String name) throws NoSuchElementException;
 
+  /**
+   * Gets all scene names.
+   *
+   * @return the scene set
+   */
   Set<String> scenes();
 
+  /**
+   * Gets an editor for a specific scene.
+   *
+   * @param name the name of the scene
+   * @return the editor
+   * @throws NoSuchElementException if no scene exists with that name
+   */
   SceneEditor editScene(String name) throws NoSuchElementException;
 
-  Alteration createScene(String name, int priority) throws IllegalArgumentException;
+  /**
+   * Creates a scene with the given name and priority.
+   *
+   * @param name     the name of the scene to create
+   * @param priority the priority of the scene
+   * @throws IllegalArgumentException if there already exists a host with the given name
+   */
+  void createScene(String name, int priority) throws IllegalArgumentException;
 
+  /**
+   * Gets all profile names.
+   *
+   * @return the profile set
+   */
   Set<String> profiles();
 
+  /**
+   * Gets an editor for a specific profile.
+   *
+   * @param name the name of the profile
+   * @return the editor
+   * @throws NoSuchElementException if no profile exists with that name
+   */
   ProfileEditor editProfile(String name) throws NoSuchElementException;
 
-  Alteration createProfile(String name);
+  /**
+   * Creates a profile with the given name.
+   *
+   * @param name the name of the profile
+   */
+  void createProfile(String name);
 
 }

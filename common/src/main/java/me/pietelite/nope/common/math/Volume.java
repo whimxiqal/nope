@@ -26,12 +26,11 @@ package me.pietelite.nope.common.math;
 
 import java.util.List;
 import java.util.NoSuchElementException;
-import lombok.Getter;
-import lombok.experimental.Accessors;
+import java.util.UUID;
 import me.pietelite.nope.common.api.edit.ZoneType;
 import me.pietelite.nope.common.host.Domain;
 import me.pietelite.nope.common.host.Domained;
-import me.pietelite.nope.common.storage.Destructible;
+import me.pietelite.nope.common.storage.Expirable;
 import me.pietelite.nope.common.struct.Location;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -39,27 +38,39 @@ import org.jetbrains.annotations.Nullable;
 /**
  * A <a href="https://en.wikipedia.org/wiki/Volume">Volume</a>.
  */
-@Accessors(fluent = true)
-public abstract class Volume implements Domained, Destructible {
+public abstract class Volume implements Domained, Expirable {
 
-  @Getter
-  protected final Domain domain;
-  @Getter
-  @Nullable
-  private String name;
-  private boolean destroyed;
+  protected Domain domain;
+  private UUID uuid;
+  private boolean expired;
 
   public Volume(Domain domain) {
-    this(null, domain);
+    this(UUID.randomUUID(), domain);
   }
 
-  public Volume(@Nullable String name, Domain domain) {
-    this.name = name;
+  public Volume(@Nullable UUID uuid, Domain domain) {
+    this.uuid = uuid;
     this.domain = domain;
   }
 
-  public void name(String name) {
-    this.name = name;
+  public final Domain domain() {
+    return domain;
+  }
+
+  public final void domain(Domain domain) {
+    this.domain = domain;
+  }
+
+  public final void uuid(UUID uuid) {
+    this.uuid = uuid;
+  }
+
+  public final UUID uuid() {
+    return uuid;
+  }
+
+  public final void copyUuidTo(Volume other) {
+    other.uuid(this.uuid);
   }
 
   @NotNull
@@ -105,7 +116,8 @@ public abstract class Volume implements Domained, Destructible {
    * @param maxInclusive true if we want to include the maximum values as "inside" the volume
    * @return true if it contains the block
    */
-  public boolean containsCuboid(float minX, float minY, float minZ, float maxX, float maxY, float maxZ, boolean maxInclusive) {
+  public boolean containsCuboid(float minX, float minY, float minZ, float maxX, float maxY, float maxZ,
+                                boolean maxInclusive) {
     return containsPoint(minX, minY, minZ)
             && containsPoint(maxX, maxY, maxZ)
             && containsPoint(minX, minY, maxZ)
@@ -135,20 +147,23 @@ public abstract class Volume implements Domained, Destructible {
    */
   public abstract List<Vector3d> surfacePointsNear(Vector3d point, double proximity, double density);
 
+  public abstract Volume copy();
+
   @Override
-  public void markDestroyed() {
-    this.destroyed = true;
+  public void expire() {
+    this.expired = true;
   }
 
   @Override
-  public boolean destroyed() {
-    return destroyed;
+  public boolean expired() {
+    return expired;
   }
 
   @Override
   public void verifyExistence() throws NoSuchElementException {
-    if (destroyed()) {
-      throw new IllegalStateException("Volume (" + zoneType().name() + ") is destroyed");
+    if (expired()) {
+      throw new IllegalStateException("Volume (" + zoneType().name() + ") has expired");
     }
   }
+
 }

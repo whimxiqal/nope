@@ -24,24 +24,39 @@
 
 package me.pietelite.nope.sponge.command.tree.host.blank;
 
+import me.pietelite.nope.common.api.NopeServiceProvider;
+import me.pietelite.nope.common.host.Host;
+import me.pietelite.nope.common.host.Profile;
 import me.pietelite.nope.common.permission.Permissions;
+import me.pietelite.nope.common.setting.SettingKey;
 import me.pietelite.nope.sponge.command.CommandNode;
 import me.pietelite.nope.sponge.command.FunctionlessCommandNode;
+import me.pietelite.nope.sponge.command.parameters.ParameterKeys;
 import me.pietelite.nope.sponge.command.parameters.Parameters;
+import me.pietelite.nope.sponge.command.target.TargetCommand;
 import me.pietelite.nope.sponge.command.tree.host.blank.edit.NameCommand;
 import me.pietelite.nope.sponge.command.tree.host.blank.edit.PriorityCommand;
+import me.pietelite.nope.sponge.command.tree.host.blank.edit.ProfilesCommand;
 import me.pietelite.nope.sponge.command.tree.host.blank.edit.VolumesCommand;
 
 public class HostEditCommand extends FunctionlessCommandNode {
   public HostEditCommand(CommandNode parent) {
     super(parent,
-        Permissions.EDIT,
+        Permissions.HOST_EDIT,
         "Edit settings and properties of a host",
         "edit");
     prefix(Parameters.HOST);
     addChild(new NameCommand(this));
     addChild(new PriorityCommand(this));
+    addChild(new ProfilesCommand(this));
     addChild(new VolumesCommand(this));
+    addChild(new TargetCommand(this, context -> {
+      Host host = context.requireOne(Parameters.HOST);
+      Profile profile = context.requireOne(Parameters.PROFILE);
+      return NopeServiceProvider.service().editSystem()
+          .editHost(host.name())
+          .editTarget(profile.name());
+    }, Parameters.PROFILE, "all settings on a profile for this host"));
   }
 
 }

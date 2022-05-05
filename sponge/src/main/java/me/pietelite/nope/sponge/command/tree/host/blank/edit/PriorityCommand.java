@@ -25,7 +25,6 @@
 package me.pietelite.nope.sponge.command.tree.host.blank.edit;
 
 import me.pietelite.nope.common.api.NopeServiceProvider;
-import me.pietelite.nope.common.api.edit.Alteration;
 import me.pietelite.nope.common.host.Host;
 import me.pietelite.nope.common.host.Scene;
 import me.pietelite.nope.common.permission.Permissions;
@@ -40,7 +39,7 @@ import org.spongepowered.api.command.parameter.CommandContext;
 
 public class PriorityCommand extends CommandNode {
   public PriorityCommand(CommandNode parent) {
-    super(parent, Permissions.EDIT,
+    super(parent, null,
         "Edit the priority of a zone",
         "priority");
     addParameter(Parameters.PRIORITY);
@@ -57,10 +56,14 @@ public class PriorityCommand extends CommandNode {
       ));
     }
 
-    Alteration alteration = NopeServiceProvider.service().editSystem()
+    int numChanged = NopeServiceProvider.service().editSystem()
         .editScene(host.name())
         .priority(priority);
-    context.sendMessage(Identity.nil(), Formatter.alteration(alteration));
+    context.sendMessage(Identity.nil(), Formatter.success("Changed priority of ___ to ___", host.name(), priority));
+    if (numChanged > 1) {
+      context.sendMessage(Identity.nil(), Formatter.warn("Also changed priority of ___ other hosts to accommodate",
+          numChanged - 1));
+    }
     return CommandResult.success();
   }
 }

@@ -24,10 +24,12 @@
 
 package me.pietelite.nope.common.host;
 
+import java.util.Objects;
 import java.util.Optional;
 import me.pietelite.nope.common.setting.SettingKey;
 import me.pietelite.nope.common.setting.Target;
 import me.pietelite.nope.common.setting.Targetable;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class HostedProfile implements Targetable {
@@ -35,12 +37,12 @@ public class HostedProfile implements Targetable {
   private final Profile profile;
   private Target target;
 
-  public HostedProfile(Profile profile) {
+  public HostedProfile(@NotNull Profile profile) {
     this(profile, null);
   }
 
-  public HostedProfile(Profile profile, Target target) {
-    this.profile = profile;
+  public HostedProfile(@NotNull Profile profile, Target target) {
+    this.profile = Objects.requireNonNull(profile);
     this.target = target;
   }
 

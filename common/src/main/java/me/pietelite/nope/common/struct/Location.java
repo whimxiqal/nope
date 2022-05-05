@@ -54,6 +54,10 @@ public class Location {
     this.domain = domain;
   }
 
+  public Location(Double x, Double y, Double z, Domain domain) {
+    this(x.floatValue(), y.floatValue(), z.floatValue(), domain);
+  }
+
   public float posX() {
     return posX;
   }

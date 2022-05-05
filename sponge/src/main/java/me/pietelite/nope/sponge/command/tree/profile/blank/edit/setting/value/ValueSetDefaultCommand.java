@@ -38,7 +38,7 @@ import org.spongepowered.api.command.parameter.CommandContext;
 
 public class ValueSetDefaultCommand extends CommandNode {
   public ValueSetDefaultCommand(CommandNode parent) {
-    super(parent, Permissions.EDIT,
+    super(parent, null,
         "Set the universal default value of a setting on a host",
         "setdefault");
   }

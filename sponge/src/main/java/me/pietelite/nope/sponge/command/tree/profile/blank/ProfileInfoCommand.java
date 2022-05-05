@@ -24,31 +24,19 @@
 
 package me.pietelite.nope.sponge.command.tree.profile.blank;
 
-import java.util.Collection;
 import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import me.pietelite.nope.common.host.Host;
-import me.pietelite.nope.common.host.HostedProfile;
 import me.pietelite.nope.common.host.Profile;
-import me.pietelite.nope.common.host.Scene;
-import me.pietelite.nope.common.math.Cuboid;
-import me.pietelite.nope.common.math.Cylinder;
-import me.pietelite.nope.common.math.Slab;
-import me.pietelite.nope.common.math.Sphere;
-import me.pietelite.nope.common.math.Volume;
 import me.pietelite.nope.common.permission.Permissions;
 import me.pietelite.nope.sponge.SpongeNope;
 import me.pietelite.nope.sponge.command.CommandNode;
 import me.pietelite.nope.sponge.command.parameters.Parameters;
-import me.pietelite.nope.sponge.command.tree.host.blank.info.HostInfoVolumesCommand;
+import me.pietelite.nope.sponge.command.tree.host.blank.info.VolumesInfoCommand;
 import me.pietelite.nope.sponge.command.tree.host.blank.info.SettingInfoCommand;
 import me.pietelite.nope.sponge.util.Formatter;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.JoinConfiguration;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandResult;
@@ -58,9 +46,9 @@ import org.spongepowered.api.scheduler.Task;
 
 public class ProfileInfoCommand extends CommandNode {
   public ProfileInfoCommand(CommandNode parent) {
-    super(parent, Permissions.INFO, "Get info about a profile", "info");
+    super(parent, Permissions.PROFILE_INFO, "Get info about a profile", "info");
     prefix(Parameters.PROFILE);
-    addChild(new HostInfoVolumesCommand(this));
+    addChild(new VolumesInfoCommand(this));
     addChild(new SettingInfoCommand(this));
   }
 

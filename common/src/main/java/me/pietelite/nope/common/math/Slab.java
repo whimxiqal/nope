@@ -160,6 +160,13 @@ public class Slab extends Volume {
         .collect(Collectors.toList());
   }
 
+  @Override
+  public Slab copy() {
+    Slab out = new Slab(domain, minY, maxY);
+    this.copyUuidTo(out);
+    return out;
+  }
+
   private void tryAddSurfacePoint(Collection<Vector3d> points,
                                   double x, double y, double z) {
     if ((y == this.minY || y == this.maxY)) {

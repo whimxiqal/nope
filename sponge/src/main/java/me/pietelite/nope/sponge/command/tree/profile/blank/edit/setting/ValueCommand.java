@@ -49,7 +49,7 @@ import org.spongepowered.api.command.parameter.Parameter;
 public class ValueCommand extends CommandNode {
 
   public ValueCommand(CommandNode parent) {
-    super(parent, Permissions.EDIT,
+    super(parent, null,
         "Edit the value of a setting on a host",
         "value");
     prefix(Parameters.SETTING_KEY);

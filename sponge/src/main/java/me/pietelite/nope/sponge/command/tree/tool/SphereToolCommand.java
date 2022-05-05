@@ -36,7 +36,7 @@ import org.spongepowered.api.entity.living.player.Player;
 
 public class SphereToolCommand extends CommandNode {
   public SphereToolCommand(CommandNode parent) {
-    super(parent, Permissions.CREATE,
+    super(parent, Permissions.HOST_EDIT,
         "Select the boundaries of a sphere",
         "sphere");
   }

@@ -40,7 +40,7 @@ import org.spongepowered.api.command.parameter.CommandContext;
 public class NameCommand extends CommandNode {
 
   public NameCommand(CommandNode parent) {
-    super(parent, Permissions.EDIT,
+    super(parent, null,
         "Edit the name of a host",
         "name");
     addParameter(Parameters.ID);
@@ -53,17 +53,12 @@ public class NameCommand extends CommandNode {
       return CommandResult.error(Formatter.error("You may only rename scenes"));
     }
     String newName = context.requireOne(ParameterKeys.ID);
-    if (NopeServiceProvider.service().editSystem()
-        .editScene(host.name())
-        .name(newName)
-        .result().succeed()) {
-      context.sendMessage(Identity.nil(), Formatter.success("Scene name ___ changed to ___",
+    if (NopeServiceProvider.service().editSystem().editScene(host.name()).name(newName)) {
+      context.sendMessage(Identity.nil(), Formatter.success("Name of scene ___ changed to ___",
           host.name(),
           newName));
     } else {
-      context.sendMessage(Identity.nil(), Formatter.error("Could not change scene name from ___ to ___",
-          host.name(),
-          newName));
+      context.sendMessage(Identity.nil(), Formatter.error("The scene is already called ___"));
     }
     return CommandResult.success();
   }

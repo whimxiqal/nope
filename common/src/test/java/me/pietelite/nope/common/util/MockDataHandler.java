@@ -26,7 +26,7 @@ package me.pietelite.nope.common.util;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Map;
+import me.pietelite.nope.common.MockNope;
 import me.pietelite.nope.common.Nope;
 import me.pietelite.nope.common.host.Domain;
 import me.pietelite.nope.common.host.Global;
@@ -54,7 +54,7 @@ public class MockDataHandler implements DataHandler {
 
       @Override
       public Global load() {
-        return new Global("_global", new Profile("_global"));
+        return new Global(Nope.GLOBAL_ID);
       }
     };
   }
@@ -115,7 +115,15 @@ public class MockDataHandler implements DataHandler {
   }
 
   @Override
-  public HostSystem loadSystem() {
-    return Nope.instance().system();
+  public void loadSystem(HostSystem system) {
+    Global global = new Global(Nope.GLOBAL_ID);
+    Profile globalProfile = new Profile(Nope.GLOBAL_ID);
+    global.globalProfile(globalProfile);
+    system.global(global);
+    system.profiles().put(globalProfile.name(), globalProfile);
+    Domain domain1 = new Domain(MockNope.DOMAIN_1, 10000);
+    Domain domain2 = new Domain(MockNope.DOMAIN_2, 10000);
+    system.domains().put(domain1.name(), domain1);
+    system.domains().put(domain2.name(), domain2);
   }
 }

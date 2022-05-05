@@ -24,7 +24,6 @@
 
 package me.pietelite.nope.common.api.edit;
 
-import me.pietelite.nope.common.host.Domain;
 import me.pietelite.nope.common.host.Scene;
 import me.pietelite.nope.common.math.Slab;
 
@@ -34,26 +33,18 @@ public class SlabEditorImpl extends ZoneEditorImpl<Slab> implements SlabEditor {
   }
 
   @Override
-  public Alteration setDimensions(float y, float height) {
+  public void setDimensions(float y, float height) {
     update(new Slab(volume.domain(), y, y + height));
-    return AlterationImpl.success("Updated the dimensions of the slab at index "
-        + index + " for host " + scene.name());
   }
 
   @Override
   public float y() {
-    return 0;
+    return volume().minY();
   }
 
   @Override
   public float height() {
-    return 0;
+    return volume().maxY() - volume().minY();
   }
 
-  @Override
-  protected Alteration setDomainObject(Domain domain) {
-    update(new Slab(domain, volume.minY(), volume.maxY()));
-    return AlterationImpl.success("Updated the domain of the slab at index "
-        + index + " for host " + scene.name());
-  }
 }

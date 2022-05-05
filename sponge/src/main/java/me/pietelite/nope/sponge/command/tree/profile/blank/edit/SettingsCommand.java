@@ -24,9 +24,7 @@
 
 package me.pietelite.nope.sponge.command.tree.profile.blank.edit;
 
-import me.pietelite.nope.common.host.Host;
 import me.pietelite.nope.common.host.Profile;
-import me.pietelite.nope.common.permission.Permissions;
 import me.pietelite.nope.sponge.command.CommandNode;
 import me.pietelite.nope.sponge.command.parameters.ParameterKeys;
 import me.pietelite.nope.sponge.util.Formatter;
@@ -38,7 +36,7 @@ import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 
 public class SettingsCommand extends CommandNode {
   public SettingsCommand(CommandNode parent) {
-    super(parent, Permissions.EDIT,
+    super(parent, null,
         "Edit all settings on this host",
         "settings");
   }

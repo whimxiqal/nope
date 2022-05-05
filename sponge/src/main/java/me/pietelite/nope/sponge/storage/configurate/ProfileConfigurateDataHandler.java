@@ -28,17 +28,11 @@ import java.io.File;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import me.pietelite.nope.common.Nope;
 import me.pietelite.nope.common.host.Profile;
-import me.pietelite.nope.common.host.Scene;
-import me.pietelite.nope.common.math.Cylinder;
-import me.pietelite.nope.common.math.Sphere;
-import me.pietelite.nope.common.math.Volume;
 import me.pietelite.nope.common.storage.ProfileDataHandler;
 import me.pietelite.nope.sponge.SpongeNope;
 import me.pietelite.nope.sponge.config.SettingValueConfigSerializerRegistrar;
@@ -46,7 +40,6 @@ import org.spongepowered.configurate.CommentedConfigurationNode;
 import org.spongepowered.configurate.ConfigurateException;
 import org.spongepowered.configurate.ConfigurationNode;
 import org.spongepowered.configurate.loader.ConfigurationLoader;
-import org.spongepowered.configurate.serialize.SerializationException;
 
 public class ProfileConfigurateDataHandler extends SettingsConfigurateDataHandler implements ProfileDataHandler {
 
@@ -92,46 +85,37 @@ public class ProfileConfigurateDataHandler extends SettingsConfigurateDataHandle
   @Override
   public Collection<Profile> load() {
     Map<String, Profile> profiles = new HashMap<>();
-    // Need to queue other loaders if the one given does not have their parent loaded yet
-    Map<String, List<ConfigurationLoader<CommentedConfigurationNode>>> queue = new HashMap<>();
     for (ConfigurationLoader<CommentedConfigurationNode> loader : allLoader.get()) {
-      load(profiles, queue, loader);
+      ConfigurationNode root;
+      String name;
+      try {
+        root = loader.load();
+        name = root.node("name").get(String.class);
+      } catch (ConfigurateException e) {
+        Nope.instance().logger().error("Error loading Profile: " + e.getMessage());
+        e.printStackTrace();
+        continue;
+      }
+      if (name == null) {
+        continue;
+      }
+
+      try {
+        Profile profile = new Profile(name);
+        profile.setAll(deserializeSettings(root.node("settings").childrenMap()));
+        profiles.put(name, profile);
+      } catch (ConfigurateException e) {
+        Nope.instance().logger().error(String.format("Error loading Profile %s: " + e.getMessage()
+            + ". Is it in the right format?", name));
+        e.printStackTrace();
+      }
+    }
+    if (!profiles.containsKey(Nope.GLOBAL_ID)) {
+      Profile globalProfile = new Profile(Nope.GLOBAL_ID);
+      profiles.put(Nope.GLOBAL_ID, globalProfile);
+      save(globalProfile);
     }
     return profiles.values();
-  }
-
-  private void load(Map<String, Profile> zones,
-                    Map<String, List<ConfigurationLoader<CommentedConfigurationNode>>> queue,
-                    ConfigurationLoader<CommentedConfigurationNode> loader) {
-    ConfigurationNode root;
-    String name;
-    // TODO do this for other configurate data handlers...
-    //  i.e. put root and name before its own try/catch clause and add an error log message
-    //  instead of a print stack trace
-    try {
-      root = loader.load();
-      name = root.node("name").get(String.class);
-    } catch (ConfigurateException e) {
-      Nope.instance().logger().error("Error loading Profile: " + e.getMessage());
-      e.printStackTrace();
-      return;
-    }
-    if (name == null) {
-      return;
-    }
-
-    try {
-      Profile profile = new Profile(name);
-      profile.setAll(deserializeSettings(root.node("settings").childrenMap()));
-      zones.put(name, profile);
-      if (queue.containsKey(name)) {
-        queue.get(name).forEach(queuedLoader -> load(zones, queue, queuedLoader));
-      }
-    } catch (ConfigurateException e) {
-      Nope.instance().logger().error(String.format("Error loading Profile %s: " + e.getMessage()
-          + ". Is it in the right format?", name));
-      e.printStackTrace();
-    }
   }
 
 }

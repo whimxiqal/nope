@@ -30,6 +30,7 @@ import me.pietelite.nope.common.api.register.data.Explosive;
 import me.pietelite.nope.common.api.register.data.Movement;
 import me.pietelite.nope.common.setting.manager.BooleanKeyManager;
 import me.pietelite.nope.common.setting.manager.IntegerKeyManager;
+import me.pietelite.nope.common.setting.manager.OptionalStringKeyManager;
 import me.pietelite.nope.common.setting.manager.PolyAllCapsEnumKeyManager;
 import me.pietelite.nope.common.setting.manager.PolyStringKeyManager;
 import me.pietelite.nope.common.setting.manager.StateKeyManager;
@@ -68,6 +69,7 @@ public final class SettingKeyManagers {
       new PolyStringKeyManager();
   public static final StateKeyManager STATE_KEY_MANAGER = new StateKeyManager();
   public static final StringKeyManager STRING_KEY_MANAGER = new StringKeyManager();
+  public static final OptionalStringKeyManager OPTIONAL_STRING_KEY_MANAGER = new OptionalStringKeyManager();
   public static final ToggleKeyManager TOGGLE_KEY_MANAGER = new ToggleKeyManager();
 
   private SettingKeyManagers() {

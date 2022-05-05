@@ -93,7 +93,7 @@ public abstract class SettingKey<T,
     this.playerRestrictive = playerRestrictive;
   }
 
-  public abstract Evaluation<T> extractValue(@NotNull ArrayList<Host> hosts,
+  public abstract Evaluation<T> extractValue(@NotNull List<Host> hosts,
                                              @Nullable final UUID userUuid);
 
   public abstract String type();
@@ -274,7 +274,7 @@ public abstract class SettingKey<T,
     }
 
     @Override
-    public Evaluation<T> extractValue(@NotNull ArrayList<Host> hosts,
+    public Evaluation<T> extractValue(@NotNull List<Host> hosts,
                                       @Nullable final UUID userUuid) {
 
       /* Choose a data structure that will optimize searching for highest priority matching */
@@ -398,7 +398,7 @@ public abstract class SettingKey<T,
     }
 
     @Override
-    public Evaluation<S> extractValue(@NotNull ArrayList<Host> hosts,
+    public Evaluation<S> extractValue(@NotNull List<Host> hosts,
                                       @Nullable UUID userUuid) {
       /* Choose a data structure that will optimize searching for highest priority matching */
       Evaluation<S> evaluation = new Evaluation<>(this);

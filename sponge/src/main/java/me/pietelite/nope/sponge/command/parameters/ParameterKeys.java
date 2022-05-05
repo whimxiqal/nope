@@ -50,6 +50,7 @@ public final class ParameterKeys {
   public static final Parameter.Key<Cylinder> CYLINDER = Parameter.key("cylinder", Cylinder.class);
   public static final Parameter.Key<String> DESCRIPTION = Parameter.key("parameter", String.class);
   public static final Parameter.Key<Host> HOST = Parameter.key("host", Host.class);
+  public static final Parameter.Key<Scene> SCENE = Parameter.key("zone", Scene.class);
   public static final Parameter.Key<String> ID = Parameter.key("name", String.class);
   public static final Parameter.Key<Profile> PROFILE = Parameter.key("profile", Profile.class);
   public static final Parameter.Key<String> PERMISSION = Parameter.key("permission", String.class);
@@ -58,15 +59,15 @@ public final class ParameterKeys {
   public static final Parameter.Key<Set<CompletableFuture<GameProfile>>> PLAYER_LIST = Parameter.key("player-list", new TypeToken<Set<CompletableFuture<GameProfile>>>() {
   });
   public static final Parameter.Key<ServerPlayer> PLAYER_OPTIONAL = Parameter.key("player", ServerPlayer.class);
-  public static final Parameter.Key<Integer> POS_X = Parameter.key("position-x", Integer.class);
-  public static final Parameter.Key<Integer> POS_X_1 = Parameter.key("position-x-1", Integer.class);
-  public static final Parameter.Key<Integer> POS_X_2 = Parameter.key("position-x-2", Integer.class);
-  public static final Parameter.Key<Integer> POS_Y = Parameter.key("position-y", Integer.class);
-  public static final Parameter.Key<Integer> POS_Y_1 = Parameter.key("position-y-1", Integer.class);
-  public static final Parameter.Key<Integer> POS_Y_2 = Parameter.key("position-y-2", Integer.class);
-  public static final Parameter.Key<Integer> POS_Z = Parameter.key("position-z", Integer.class);
-  public static final Parameter.Key<Integer> POS_Z_1 = Parameter.key("position-z-1", Integer.class);
-  public static final Parameter.Key<Integer> POS_Z_2 = Parameter.key("position-z-2", Integer.class);
+  public static final Parameter.Key<Double> POS_X = Parameter.key("position-x", Double.class);
+  public static final Parameter.Key<Double> POS_X_1 = Parameter.key("position-x-1", Double.class);
+  public static final Parameter.Key<Double> POS_X_2 = Parameter.key("position-x-2", Double.class);
+  public static final Parameter.Key<Double> POS_Y = Parameter.key("position-y", Double.class);
+  public static final Parameter.Key<Double> POS_Y_1 = Parameter.key("position-y-1", Double.class);
+  public static final Parameter.Key<Double> POS_Y_2 = Parameter.key("position-y-2", Double.class);
+  public static final Parameter.Key<Double> POS_Z = Parameter.key("position-z", Double.class);
+  public static final Parameter.Key<Double> POS_Z_1 = Parameter.key("position-z-1", Double.class);
+  public static final Parameter.Key<Double> POS_Z_2 = Parameter.key("position-z-2", Double.class);
   public static final Parameter.Key<Integer> PRIORITY = Parameter.key("priority", Integer.class);
   public static final Parameter.Key<Double> RADIUS = Parameter.key("radius", Double.class);
   public static final Parameter.Key<String> REGEX = Parameter.key("regex", String.class);
@@ -80,8 +81,7 @@ public final class ParameterKeys {
   public static final Parameter.Key<String> VALUE = Parameter.key("value", String.class);
   public static final Parameter.Key<Integer> VOLUME_INDEX = Parameter.key("index", Integer.class);
   public static final Parameter.Key<ServerWorld> WORLD = Parameter.key("world", ServerWorld.class);
-  public static final Parameter.Key<Scene> ZONE = Parameter.key("zone", Scene.class);
 
-  private ParameterKeys() {
+    private ParameterKeys() {
   }
 }

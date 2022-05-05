@@ -30,13 +30,25 @@ import me.pietelite.nope.common.host.Domain;
 import me.pietelite.nope.common.host.Scene;
 import me.pietelite.nope.common.math.Volume;
 
-public abstract class ZoneEditorImpl<V extends Volume> implements ZoneEditor {
+/**
+ * An implementation of the {@link ZoneEditor}.
+ *
+ * @param <V> the volume type
+ */
+public class ZoneEditorImpl<V extends Volume> implements ZoneEditor {
 
   protected final Scene scene;
   protected final int index;
-  protected final V volume;
+  protected final Volume volume;
 
-  ZoneEditorImpl(Scene scene, int index, Class<V> volumeClass) {
+  public ZoneEditorImpl(Scene scene, int index) {
+    scene.verifyExistence();
+    this.scene = scene;
+    this.index = index;
+    this.volume = scene.volumes().get(index);
+  }
+
+  public ZoneEditorImpl(Scene scene, int index, Class<V> volumeClass) {
     scene.verifyExistence();
     this.scene = scene;
     this.index = index;
@@ -54,25 +66,44 @@ public abstract class ZoneEditorImpl<V extends Volume> implements ZoneEditor {
   }
 
   @Override
-  public final Alteration domain(String domainName) {
+  public final void domain(String domainName) {
     volume.verifyExistence();
     Domain domain = Nope.instance().system().domains().get(domainName);
     if (domain == null) {
       throw new NoSuchElementException("There is no domain with name " + domainName);
     }
-    return setDomainObject(domain);
+    setDomainObject(domain);
   }
 
-  protected abstract Alteration setDomainObject(Domain domain);
+  @Override
+  public void destroy() {
+    volume.verifyExistence();
+    scene.volumes().remove(volume);
+    volume.domain().volumes().remove(volume, true);
+    volume.expire();
+    scene.save();
+  }
+
+  protected final void setDomainObject(Domain domain) {
+    Volume newVolume = volume.copy();
+    newVolume.domain(domain);
+    update(newVolume);
+  }
 
   protected final void update(Volume newVolume) {
     scene.verifyExistence();
     volume.verifyExistence();
     volume.domain().volumes().remove(volume, false);
+    volume.copyUuidTo(newVolume);
     volume.domain().volumes().put(newVolume, scene, true);
-    volume.markDestroyed();
+    volume.expire();
     scene.volumes().set(index, newVolume);
     scene.save();
+  }
+
+  @SuppressWarnings("unchecked")
+  protected final V volume() {
+    return (V) volume;
   }
 
 }

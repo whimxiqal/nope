@@ -28,27 +28,57 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
+/**
+ * An editor for a target. A target is used to determine whether the value of a setting
+ * is applied to any given individual.
+ */
 public interface TargetEditor {
 
-  Alteration targetAll();
+  /**
+   * Target all individuals, so a setting with this target will always be used during evaluation.
+   * Unrestricted individuals remain unrestricted by restrictive settings, however.
+   * This must be bypassed manually with {@link #forceAffect(boolean)}.
+   */
+  void targetAll();
 
-  Alteration targetNone();
+  /**
+   * Target no individuals, so setting with this target will never be used during evaluation.
+   */
+  void targetNone();
 
-  Alteration targetPermission(String permission, boolean value);
+  /**
+   * Add a permission requirement to this target.
+   * If an individual is not whitelisted or blacklisted and there are permissions,
+   * the individual must satisfy at least one of the permission requirements
+   * @param permission
+   * @param value
+   * @return
+   */
+  boolean addPermission(String permission, boolean value);
 
-  Alteration untargetPermission(String permission);
+  boolean removePermission(String permission);
 
-  Alteration targetPlayer(UUID player);
+  boolean clearPermissions();
 
-  Alteration untargetPlayer(UUID player);
+  Map<String, Boolean> permissions();
 
-  Alteration remove();
+  boolean addPlayer(UUID player);
 
-  Type playerTargetType();
+  boolean removePlayer(UUID player);
+
+  boolean clearPlayers();
 
   Set<UUID> playerSet();
 
-  Map<String, Boolean> permissions();
+  boolean playerTargetType(Type type);
+
+  Type playerTargetType();
+
+  boolean remove();
+
+  boolean forceAffect(boolean force);
+
+  boolean forceAffect();
 
   enum Type {
     WHITELIST,

@@ -90,7 +90,7 @@ public class SceneConfigurateDataHandler implements SceneDataHandler {
       root.node("name").set(scene.name());
       root.node("priority").set(scene.priority());
       root.node("profiles").setList(HostedProfile.class, scene.hostedProfiles());
-      root.node("volumes").setList(Volume.class, scene.volumes());
+      root.node("zones").setList(Volume.class, scene.volumes());
       loader.apply(scene.name()).save(root);
     } catch (ConfigurateException e) {
       e.printStackTrace();
@@ -101,7 +101,6 @@ public class SceneConfigurateDataHandler implements SceneDataHandler {
   public Collection<Scene> load() {
     LinkedList<Scene> scenes = new LinkedList<>();
     // Need to queue other loaders if the one given does not have their parent loaded yet
-    Map<String, List<ConfigurationLoader<CommentedConfigurationNode>>> queue = new HashMap<>();
     for (ConfigurationLoader<CommentedConfigurationNode> loader : allLoader.get()) {
       ConfigurationNode root;
       String name;
@@ -121,20 +120,26 @@ public class SceneConfigurateDataHandler implements SceneDataHandler {
         int priority = root.node("priority").getInt();
         Scene scene = new Scene(name, priority);
         try {
-          scene.hostedProfiles().addAll(root.node("profiles").getList(HostedProfile.class));
+          if (!root.node("profiles").virtual()) {
+            List<HostedProfile> profiles = root.node("profiles").getList(HostedProfile.class);
+            if (profiles != null) {
+              scene.hostedProfiles().addAll(profiles);
+            }
+          }
         } catch (Exception e) {
           Nope.instance().logger().error("Failed parsing profiles for scene: " + name);
           throw e;
         }
-        List<Volume> volumes;
         try {
-          volumes = root.node("volumes").getList(Volume.class);
+          if (!root.node("zones").virtual()) {
+            List<Volume> volumes = root.node("zones").getList(Volume.class);
+            if (volumes != null) {
+              scene.volumes().addAll(volumes);
+            }
+          }
         } catch (Exception e) {
-          Nope.instance().logger().error("Failed parsing volumes for scene: " + name);
+          Nope.instance().logger().error("Failed parsing zones for scene: " + name);
           throw e;
-        }
-        if (volumes != null) {
-          scene.volumes().addAll(volumes);
         }
         scenes.add(scene);
       } catch (ConfigurateException e) {
@@ -144,14 +149,6 @@ public class SceneConfigurateDataHandler implements SceneDataHandler {
       }
     }
     return scenes;
-  }
-
-  private ConfigurationNode volumeRoot(Volume volume) throws SerializationException {
-    ConfigurationNode node = CommentedConfigurationNode.root();
-    if (volume.name() != null) {
-      node.node("name").set(volume.name());
-    }
-    return node;
   }
 
 }

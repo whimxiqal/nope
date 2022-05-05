@@ -47,10 +47,9 @@ public class MultipleValueSettingEditorImpl<T> extends SettingEditorImpl impleme
   }
 
   @Override
-  public Alteration setAll() {
+  public void setAll() {
     setAllGeneric(key());
     profile.save();
-    return AlterationImpl.success("Updated value of " + setting + " on profile " + profile.name());
   }
 
   private <X, Y extends AltSet<X>> void setAllGeneric(SettingKey.Poly<X, Y> key) {
@@ -58,10 +57,9 @@ public class MultipleValueSettingEditorImpl<T> extends SettingEditorImpl impleme
   }
 
   @Override
-  public Alteration setNone() {
+  public void setNone() {
     setNoneGeneric(key());
     profile.save();
-    return AlterationImpl.success("Updated value of " + setting + " on profile " + profile.name());
   }
 
   private <X, Y extends AltSet<X>> void setNoneGeneric(SettingKey.Poly<X, Y> key) {
@@ -74,10 +72,9 @@ public class MultipleValueSettingEditorImpl<T> extends SettingEditorImpl impleme
   }
 
   @Override
-  public Alteration setDeclarative(AltSet<T> values) {
+  public void setDeclarative(AltSet<T> values) {
     setDeclarativeGeneric(key(), values);
     profile.save();
-    return AlterationImpl.success("Updated value of " + setting + " on profile " + profile.name());
   }
 
   private <X, Y extends AltSet<X>> void setDeclarativeGeneric(SettingKey.Poly<X, Y> key, AltSet<X> values) {
@@ -104,10 +101,9 @@ public class MultipleValueSettingEditorImpl<T> extends SettingEditorImpl impleme
   }
 
   @Override
-  public Alteration setManipulative(AltSet<T> set, ManipulativeType manipulativeType) {
+  public void setManipulative(AltSet<T> set, ManipulativeType manipulativeType) {
     setManipulativeGeneric(key(), set, manipulativeType);
     profile.save();
-    return AlterationImpl.success("Updated value of " + setting + " on profile " + profile.name());
   }
 
   private <X, Y extends AltSet<X>> void setManipulativeGeneric(SettingKey.Poly<X, Y> key,

@@ -28,6 +28,7 @@ import java.util.Optional;
 import me.pietelite.nope.common.host.Host;
 import me.pietelite.nope.common.host.Scene;
 import me.pietelite.nope.common.permission.Permissions;
+import me.pietelite.nope.sponge.SpongeNope;
 import me.pietelite.nope.sponge.command.CommandNode;
 import me.pietelite.nope.sponge.command.parameters.ParameterKeys;
 import me.pietelite.nope.sponge.command.parameters.Parameters;
@@ -41,7 +42,7 @@ import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 public class HostShowCommand extends CommandNode {
 
   public HostShowCommand(CommandNode parent) {
-    super(parent, Permissions.INFO,
+    super(parent, Permissions.HOST_INFO,
         "Show the boundaries of volumes",
         "show");
     prefix(Parameters.HOST);
@@ -68,26 +69,18 @@ public class HostShowCommand extends CommandNode {
     Optional<Integer> index = context.one(ParameterKeys.VOLUME_INDEX);
     if (index.isPresent()) {
       try {
-        if (EffectsUtil.show(scene.volumes().get(index.get()), player)) {
-          player.sendMessage(Formatter.success("Showing boundaries of scene ___, volume ___",
-              scene.name(),
-              index.get()));
-        } else {
-          player.sendMessage(Formatter.error("The boundaries of volume ___ of scene ___ is too far away",
-              index.get(),
-              scene.name()));
-        }
+        SpongeNope.instance().particleEffectHandler().show(scene.volumes().get(index.get()), player);
+        player.sendMessage(Formatter.success("Showing boundaries of scene ___, volume ___",
+            scene.name(),
+            index.get()));
       } catch (IndexOutOfBoundsException e) {
         return CommandResult.error(Formatter.error(
             "Index ___ is out of bounds", index.get()
         ));
       }
     } else {
-      if (EffectsUtil.show(scene, player)) {
-        player.sendMessage(Formatter.success("Showing boundaries of scene ___", scene.name()));
-      } else {
-        player.sendMessage(Formatter.success("The boundaries of scene ___ are too far away", scene.name()));
-      }
+      SpongeNope.instance().particleEffectHandler().show(scene, player);
+      player.sendMessage(Formatter.success("Showing boundaries of scene ___", scene.name()));
     }
     return CommandResult.success();
   }

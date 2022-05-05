@@ -50,8 +50,8 @@ public class ListHostCommand extends CommandNode {
       .build();
 
   public ListHostCommand(CommandNode parent) {
-    super(parent, Permissions.INFO,
-        "List all hosts that you are currently occupy",
+    super(parent, Permissions.HOST_INFO,
+        "List all hosts or hosts that you currently occupy",
         "list");
     addParameter(ALL);
   }

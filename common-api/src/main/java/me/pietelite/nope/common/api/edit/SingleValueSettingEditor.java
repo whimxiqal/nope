@@ -24,10 +24,26 @@
 
 package me.pietelite.nope.common.api.edit;
 
+/**
+ * An editor specifically for settings which store and evaluate to a single value,
+ * which are most basic settings.
+ *
+ * @param <T> the data type evaluated
+ */
 public interface SingleValueSettingEditor<T> extends SettingEditor {
 
-  Alteration set(T value);
+  /**
+   * Set the value.
+   *
+   * @param value the value
+   */
+  void set(T value);
 
+  /**
+   * Get the value.
+   *
+   * @return the value
+   */
   T get();
 
 }

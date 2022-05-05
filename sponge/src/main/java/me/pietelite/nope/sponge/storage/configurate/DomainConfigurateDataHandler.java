@@ -67,7 +67,9 @@ public class DomainConfigurateDataHandler implements DomainDataHandler {
   public void load(@NotNull Domain domain) {
     try {
       CommentedConfigurationNode root = loader.apply(domain.name()).load();
-      domain.hostedProfiles().addAll(root.node("profiles").getList(HostedProfile.class));
+      if (!root.node("profiles").virtual()) {
+        domain.allProfiles().addAll(root.node("profiles").getList(HostedProfile.class));
+      }
     } catch (ConfigurateException e) {
       e.printStackTrace();
     }

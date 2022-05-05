@@ -25,17 +25,18 @@
 package me.pietelite.nope.sponge.storage.configurate;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
-import me.pietelite.nope.common.api.NopeServiceProvider;
+import me.pietelite.nope.common.Nope;
 import me.pietelite.nope.common.host.Domain;
 import me.pietelite.nope.common.host.HostSystem;
-import me.pietelite.nope.common.host.Global;
 import me.pietelite.nope.common.setting.SettingKeys;
 import me.pietelite.nope.common.storage.DataHandler;
 import me.pietelite.nope.common.storage.DomainDataHandler;
+import me.pietelite.nope.common.storage.Expirable;
 import me.pietelite.nope.common.storage.ProfileDataHandler;
-import me.pietelite.nope.common.storage.UniverseDataHandler;
 import me.pietelite.nope.common.storage.SceneDataHandler;
+import me.pietelite.nope.common.storage.UniverseDataHandler;
 import org.spongepowered.api.Sponge;
 
 /**
@@ -80,10 +81,24 @@ public abstract class ConfigurateDataHandler implements DataHandler {
   }
 
   @Override
-  public HostSystem loadSystem() {
-    HostSystem hostSystem = new HostSystem();
-    profileConfigurateDataHandler.load().forEach(profile -> hostSystem.profiles().put(profile.name(), profile));
-    hostSystem.global(universeDataHandler.load());
+  public void loadSystem(HostSystem system) {
+    // Expire profiles and hosts, so they can't be used by other places holding references
+    system.profiles().values().forEach(Expirable::expire);
+    if (system.global() != null) {
+      system.global().expire();
+    }
+    system.domains().values().forEach(Expirable::expire);
+    system.scenes().values().forEach(Expirable::expire);
+
+    // Clear them from the system
+    system.profiles().clear();
+    system.domains().clear();
+    system.scenes().clear();
+
+    profileConfigurateDataHandler.load().forEach(profile -> system.profiles().put(profile.name(), profile));
+    system.global(universeDataHandler.load());
+    system.global().globalProfile(Objects.requireNonNull(system.profiles().get(Nope.GLOBAL_ID),
+        "Global profile couldn't be found!"));
     List<Domain> domains = Sponge.server()
         .worldManager()
         .worlds()
@@ -91,14 +106,14 @@ public abstract class ConfigurateDataHandler implements DataHandler {
         .map(world -> new Domain("_" + world.key()
             .formatted()
             .replace(":", "_"),
-            NopeServiceProvider.service().evaluator().unarySettingGlobal(SettingKeys.CACHE_SIZE.name(), Integer.class)))
+            system.global().globalProfile().getValue(SettingKeys.CACHE_SIZE)
+                .orElse(SettingKeys.CACHE_SIZE.defaultValue()).get()))
         .collect(Collectors.toList());
     domains.forEach(domain -> {
       domainDataHandler.load(domain);
-      hostSystem.domains().put(domain.name(), domain);
+      system.domains().put(domain.name(), domain);
     });
-    hostSystem.addAllScenes(sceneConfigurateDataHandler.load());
-    return hostSystem;
+    system.loadScenes(sceneConfigurateDataHandler.load());
   }
 
 }

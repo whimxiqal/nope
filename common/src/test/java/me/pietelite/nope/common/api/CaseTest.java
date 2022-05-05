@@ -28,7 +28,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import me.pietelite.nope.common.MockNope;
-import me.pietelite.nope.common.Nope;
 import me.pietelite.nope.common.api.edit.ProfileEditor;
 import me.pietelite.nope.common.api.edit.SystemEditor;
 import me.pietelite.nope.common.api.register.data.BlockChange;
@@ -44,35 +43,35 @@ public class CaseTest extends ApiTest {
 
     // setup marketplace
     String name = "marketplace";
-    assertSuccess(editor.createScene(name, 10));
-    assertSuccess(editor.createProfile(name));
-    assertSuccess(editor.editScene(name).addProfile(name, 0));
-    assertSuccess(editor.editScene(name).addCuboid(D1, 0, 0, 0, 100, 100, 100));
+    editor.createScene(name, 10);
+    editor.createProfile(name);
+    editor.editScene(name).addProfile(name, 0);
+    editor.editScene(name).addCuboid(MockNope.DOMAIN_1, 0, 0, 0, 100, 100, 100);
     ProfileEditor marketplaceProfile = editor.editProfile(name);
-    assertSuccess(marketplaceProfile.editSingleValueSetting(SettingKeys.RIDE.name(), Boolean.class).set(false));
-    assertSuccess(marketplaceProfile.editMultipleValueSetting(SettingKeys.BLOCK_CHANGE.name(), BlockChange.class)
-        .setDeclarative(SettingKeys.BLOCK_CHANGE.manager().emptySet()));
-    assertSuccess(marketplaceProfile.editMultipleValueSetting(SettingKeys.INTERACTIVE_BLOCKS.name(), String.class)
-        .setDeclarative(SettingKeys.INTERACTIVE_BLOCKS.manager().emptySet()));
-    assertSuccess(marketplaceProfile.editMultipleValueSetting(SettingKeys.INTERACTIVE_ENTITIES.name(), String.class)
-        .setDeclarative(SettingKeys.INTERACTIVE_ENTITIES.manager().emptySet()));
+    marketplaceProfile.editSingleValueSetting(SettingKeys.RIDE.name(), Boolean.class).set(false);
+    marketplaceProfile.editMultipleValueSetting(SettingKeys.BLOCK_CHANGE.name(), BlockChange.class)
+        .setDeclarative(SettingKeys.BLOCK_CHANGE.manager().emptySet());
+    marketplaceProfile.editMultipleValueSetting(SettingKeys.INTERACTIVE_BLOCKS.name(), String.class)
+        .setDeclarative(SettingKeys.INTERACTIVE_BLOCKS.manager().emptySet());
+    marketplaceProfile.editMultipleValueSetting(SettingKeys.INTERACTIVE_ENTITIES.name(), String.class)
+        .setDeclarative(SettingKeys.INTERACTIVE_ENTITIES.manager().emptySet());
 
     Assertions.assertEquals( SettingKeys.BLOCK_CHANGE.manager().emptySet(),
-        service().evaluator().polySetting(SettingKeys.BLOCK_CHANGE.name(), 0, 0, 0, D1,
+        service().evaluator().polySetting(SettingKeys.BLOCK_CHANGE.name(), 0, 0, 0, MockNope.DOMAIN_1,
             null, BlockChange.class));
     Assertions.assertEquals( false,
-        service().evaluator().unarySetting(SettingKeys.RIDE.name(), 0, 0, 0, D1,
+        service().evaluator().unarySetting(SettingKeys.RIDE.name(), 0, 0, 0, MockNope.DOMAIN_1,
             null, Boolean.class));
 
     // setup stall profile
-    assertSuccess(editor.createProfile("stall"));
+    editor.createProfile("stall");
     ProfileEditor stallProfile = editor.editProfile("stall");
-    assertSuccess(stallProfile.editMultipleValueSetting(SettingKeys.BLOCK_CHANGE.name(), BlockChange.class)
-        .setDeclarative(SettingKeys.BLOCK_CHANGE.manager().fullSet()));
-    assertSuccess(stallProfile.editMultipleValueSetting(SettingKeys.INTERACTIVE_BLOCKS.name(), String.class)
-        .setDeclarative(SettingKeys.INTERACTIVE_BLOCKS.manager().fullSet()));
-    assertSuccess(stallProfile.editMultipleValueSetting(SettingKeys.INTERACTIVE_ENTITIES.name(), String.class)
-        .setDeclarative(SettingKeys.INTERACTIVE_ENTITIES.manager().fullSet()));
+    stallProfile.editMultipleValueSetting(SettingKeys.BLOCK_CHANGE.name(), BlockChange.class)
+        .setDeclarative(SettingKeys.BLOCK_CHANGE.manager().fullSet());
+    stallProfile.editMultipleValueSetting(SettingKeys.INTERACTIVE_BLOCKS.name(), String.class)
+        .setDeclarative(SettingKeys.INTERACTIVE_BLOCKS.manager().fullSet());
+    stallProfile.editMultipleValueSetting(SettingKeys.INTERACTIVE_ENTITIES.name(), String.class)
+        .setDeclarative(SettingKeys.INTERACTIVE_ENTITIES.manager().fullSet());
 
     int index = 0;
     String stallName;
@@ -80,35 +79,40 @@ public class CaseTest extends ApiTest {
     for (int x = 0; x < 10; x++) {
       for (int z = 0; z < 10; z++) {
         stallName = "stall" + index;
-        assertSuccess(editor.createScene(stallName, 20));
-        assertSuccess(editor.editScene(stallName).addCuboid(D1,
+        editor.createScene(stallName, 20);
+        editor.editScene(stallName).addCuboid(MockNope.DOMAIN_1,
             x * 10, 0, z * 10,
-            (x + 1) * 10, 10, (z + 1) * 10));
-        assertSuccess(editor.editScene(stallName).addProfile("stall", 0));
+            (x + 1) * 10, 10, (z + 1) * 10);
+        editor.editScene(stallName).addProfile("stall", 0);
 
         UUID playerUuid = UUID.randomUUID();
         playerUuids.put(index, playerUuid);
-        assertSuccess(editor.editScene(stallName).editTarget(0).targetPlayer(playerUuid));
-
+        Assertions.assertTrue(editor.editScene(stallName).editTarget(0).addPlayer(playerUuid));
+        Assertions.assertTrue(editor.editScene(stallName).editTarget(0).playerSet().contains(playerUuid));
         index++;
       }
     }
 
     // In his own stall
     Assertions.assertEquals( SettingKeys.BLOCK_CHANGE.manager().fullSet(),
-        service().evaluator().polySetting(SettingKeys.BLOCK_CHANGE.name(), 0, 0, 0, D1,
+        service().evaluator().polySetting(SettingKeys.BLOCK_CHANGE.name(), 5, 5, 5, MockNope.DOMAIN_1,
             playerUuids.get(0), BlockChange.class));
-    // On the outside border of this own stall (non-inclusive)
+    // On the outside border of his own stall (inclusive)
+    Assertions.assertEquals( SettingKeys.BLOCK_CHANGE.manager().fullSet(),
+        service().evaluator().polySetting(SettingKeys.BLOCK_CHANGE.name(), 0, 0, 0, MockNope.DOMAIN_1,
+            playerUuids.get(0), BlockChange.class));
+    // On the outside border of his own stall (non-inclusive)
     Assertions.assertEquals(SettingKeys.BLOCK_CHANGE.manager().emptySet(),
-        service().evaluator().polySetting(SettingKeys.BLOCK_CHANGE.name(), 10, 10, 10, D1,
+        service().evaluator().polySetting(SettingKeys.BLOCK_CHANGE.name(), 10, 10, 10, MockNope.DOMAIN_1,
             playerUuids.get(0), BlockChange.class));
     // Outside the marketplace
     Assertions.assertEquals(SettingKeys.BLOCK_CHANGE.manager().fullSet(),
-        service().evaluator().polySetting(SettingKeys.BLOCK_CHANGE.name(), 1000, 1000, 1000, D1,
+        service().evaluator().polySetting(SettingKeys.BLOCK_CHANGE.name(), 1000, 1000, 1000, MockNope.DOMAIN_1,
             playerUuids.get(0), BlockChange.class));
     // Someone else in the first person's stall
+    System.out.println("About to evaluate target:");
     Assertions.assertEquals(SettingKeys.BLOCK_CHANGE.manager().emptySet(),
-        service().evaluator().polySetting(SettingKeys.BLOCK_CHANGE.name(), 1, 1, 1, D1,
+        service().evaluator().polySetting(SettingKeys.BLOCK_CHANGE.name(), 1, 1, 1, MockNope.DOMAIN_1,
             playerUuids.get(12), BlockChange.class));
 
   }

@@ -295,6 +295,13 @@ public class Cylinder extends Volume {
         .collect(Collectors.toList());
   }
 
+  @Override
+  public Cylinder copy() {
+    Cylinder out = new Cylinder(domain, posX, minY, maxY, posZ, radius);
+    this.copyUuidTo(out);
+    return out;
+  }
+
   private void tryAddFlatSurfacePoint(Collection<Vector3d> points,
                                       double x, double y, double z) {
     if ((y == this.minY || y == this.maxY)

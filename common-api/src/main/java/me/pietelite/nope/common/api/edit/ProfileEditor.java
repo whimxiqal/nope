@@ -24,18 +24,80 @@
 
 package me.pietelite.nope.common.api.edit;
 
+import java.util.NoSuchElementException;
+
+/**
+ * An editor for a profile, which is the object that stores settings and therefore
+ * defines the functionality for hosts.
+ */
 public interface ProfileEditor {
 
+  /**
+   * The name of the profile.
+   *
+   * @return the name
+   */
   String name();
 
-  Alteration name(String name) throws IllegalArgumentException;
+  /**
+   * Changes the name of the profile.
+   *
+   * @param name the new name
+   * @return false if the name was already the input name
+   * @throws IllegalArgumentException if the name is illegal
+   */
+  boolean name(String name) throws IllegalArgumentException;
 
+  /**
+   * Gets an editor for the target on this whole profile.
+   * The target is applied to each of its settings, as long as the setting doesn't already
+   * have a target on it and the host which employs this profile at evaluation time doesn't have
+   * a target overriding this one.
+   *
+   * @return the editor
+   */
   TargetEditor editTarget();
 
-  <T> SingleValueSettingEditor<T> editSingleValueSetting(String setting, Class<T> type);
+  /**
+   * Gets a generic editor for a specific setting on this profile.
+   *
+   * @param setting the setting id
+   * @return the editor
+   * @throws NoSuchElementException if no setting exists with the given id
+   * @see #editSingleValueSetting(String, Class)
+   * @see #editMultipleValueSetting(String, Class)
+   */
+  SettingEditor editSetting(String setting) throws NoSuchElementException;
 
-  <T> MultipleValueSettingEditor<T> editMultipleValueSetting(String setting, Class<T> type);
+  /**
+   * Gets an editor for a single-value type setting.
+   *
+   * @param setting the setting id
+   * @param type    the class type of the element evaluated from this setting
+   * @param <T>     the type of element evaluated from this setting
+   * @return the editor
+   * @throws NoSuchElementException if no setting exists with the given id
+   * @see #editMultipleValueSetting(String, Class)
+   */
+  <T> SingleValueSettingEditor<T> editSingleValueSetting(String setting, Class<T> type) throws NoSuchElementException;
 
-  Alteration destroy();
+  /**
+   * Gets an editor for a multiple-value type setting.
+   *
+   * @param setting the setting id
+   * @param type    the class type of element in the {@link me.pietelite.nope.common.api.struct.AltSet}
+   *                evaluated from this setting
+   * @param <T>     the type of element in the {@link me.pietelite.nope.common.api.struct.AltSet}
+   *                *            evaluated from this setting
+   * @return the editor
+   * @throws NoSuchElementException if no setting exists with the given id
+   * @see #editSingleValueSetting(String, Class)
+   */
+  <T> MultipleValueSettingEditor<T> editMultipleValueSetting(String setting, Class<T> type) throws NoSuchElementException;
+
+  /**
+   * Destroys the profile.
+   */
+  void destroy();
 
 }

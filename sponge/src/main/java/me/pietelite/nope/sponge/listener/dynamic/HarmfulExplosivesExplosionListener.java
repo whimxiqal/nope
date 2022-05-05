@@ -26,9 +26,9 @@ package me.pietelite.nope.sponge.listener.dynamic;
 
 import java.util.Optional;
 import me.pietelite.nope.common.api.struct.AltSet;
-import me.pietelite.nope.sponge.api.event.SettingEventContext;
-import me.pietelite.nope.sponge.api.event.SettingEventListener;
-import me.pietelite.nope.sponge.api.event.SettingEventReport;
+import me.pietelite.nope.sponge.api.setting.SettingEventContext;
+import me.pietelite.nope.sponge.api.setting.SettingEventListener;
+import me.pietelite.nope.sponge.api.setting.SettingEventReport;
 import me.pietelite.nope.sponge.util.SpongeUtil;
 import org.spongepowered.api.entity.explosive.Explosive;
 import org.spongepowered.api.event.world.ExplosionEvent;

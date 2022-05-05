@@ -31,7 +31,7 @@ import me.pietelite.nope.common.setting.Target;
 import me.pietelite.nope.common.setting.Targetable;
 import org.jetbrains.annotations.Nullable;
 
-public abstract class SettingEditorImpl implements SettingEditor {
+public class SettingEditorImpl implements SettingEditor {
 
   protected final Profile profile;
   protected final String setting;
@@ -50,9 +50,10 @@ public abstract class SettingEditorImpl implements SettingEditor {
   }
 
   @Override
-  public Alteration unsetValue() {
+  public boolean unsetValue() {
     profile.verifyExistence();
-    return AlterationImpl.success("Unset value of " + setting + " on profile " + profile.name());
+    SettingKey<?, ?, ?> key = Nope.instance().settingKeys().get(setting);
+    return profile.removeValue(key) != null;
   }
 
   @Override

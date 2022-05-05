@@ -31,6 +31,7 @@ import me.pietelite.nope.common.host.Domain;
 import me.pietelite.nope.common.host.HostSystem;
 import me.pietelite.nope.common.math.Vector3d;
 import me.pietelite.nope.common.setting.SettingKey;
+import me.pietelite.nope.common.struct.Direction;
 import me.pietelite.nope.common.struct.Location;
 import me.pietelite.nope.sponge.SpongeNope;
 import org.spongepowered.api.entity.Entity;
@@ -77,7 +78,7 @@ public final class SpongeUtil {
     return new Location(location.blockX(),
         location.blockY(),
         location.blockZ(),
-        Nope.instance().system().domain(worldToId(location.world())));
+        Nope.instance().system().domains().get(worldToId(location.world())));
   }
 
   /**
@@ -121,7 +122,7 @@ public final class SpongeUtil {
    * @return the domain
    */
   public static Domain reduceWorld(ServerWorld world) {
-    return SpongeNope.instance().system().domain(worldToId(world));
+    return SpongeNope.instance().system().domains().get(worldToId(world));
   }
 
   public static org.spongepowered.math.vector.Vector3d raiseVector(Vector3d vector) {
@@ -228,6 +229,32 @@ public final class SpongeUtil {
       return me.pietelite.nope.common.api.register.data.Explosive.WITHERSKULL;
     } else {
       throw new IllegalArgumentException("Unknown explosive type: " + explosive);
+    }
+  }
+
+  public static Direction toDirection(org.spongepowered.math.vector.Vector3d rotation) {
+    int axis = rotation.abs().maxAxis();
+    switch (axis) {
+      case 0:
+        if (rotation.x() < 0) {
+          return Direction.X_NEG;
+        } else {
+          return Direction.X_POS;
+        }
+      case 1:
+        if (rotation.y() < 0) {
+          return Direction.Y_NEG;
+        } else {
+          return Direction.Y_POS;
+        }
+      case 2:
+        if (rotation.z() < 0) {
+          return Direction.Z_NEG;
+        } else {
+          return Direction.Z_POS;
+        }
+      default:
+        throw new RuntimeException();
     }
   }
 }

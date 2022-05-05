@@ -25,7 +25,6 @@
 package me.pietelite.nope.sponge.storage.configurate.serializer;
 
 import java.lang.reflect.Type;
-import java.util.Map;
 import me.pietelite.nope.common.Nope;
 import me.pietelite.nope.common.host.HostedProfile;
 import me.pietelite.nope.common.host.Profile;
@@ -39,7 +38,14 @@ public class HostedProfileTypeSerializer implements TypeSerializer<HostedProfile
 
   @Override
   public HostedProfile deserialize(Type type, ConfigurationNode node) throws SerializationException {
+    String profileName = node.node("name").get(String.class);
+    if (profileName == null) {
+      throw new SerializationException("Could not get profile name for a HostedProfile");
+    }
     Profile profile = Nope.instance().system().profiles().get(node.node("name").get(String.class));
+    if (profile == null) {
+      throw new SerializationException("Could not find profile with name " + profileName);
+    }
     Target target = node.node("target").get(Target.class);
     return new HostedProfile(profile, target);
   }

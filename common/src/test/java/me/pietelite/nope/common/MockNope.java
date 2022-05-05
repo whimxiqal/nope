@@ -24,7 +24,6 @@
 
 package me.pietelite.nope.common;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -32,12 +31,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 import me.pietelite.nope.common.api.NopeServiceConsumer;
-import me.pietelite.nope.common.host.Domain;
-import me.pietelite.nope.common.host.Global;
-import me.pietelite.nope.common.host.HostSystem;
-import me.pietelite.nope.common.host.Profile;
 import me.pietelite.nope.common.setting.SettingKeys;
 import me.pietelite.nope.common.util.MockDataHandler;
 import me.pietelite.nope.common.util.TestLogger;
@@ -47,6 +41,8 @@ import me.pietelite.nope.common.util.TestLogger;
  */
 public class MockNope extends Nope {
 
+  public static final String DOMAIN_1 = "domain_1";
+  public static final String DOMAIN_2 = "domain_2";
   public Map<UUID, Set<String>> permissions = new HashMap<>();
 
   public MockNope() {
@@ -64,15 +60,8 @@ public class MockNope extends Nope {
     Nope.instance(nope);
     NopeServiceConsumer.consume(new NopeServiceImpl());
     SettingKeys.registerTo(instance().settingKeys());
-    HostSystem system = new HostSystem();
-    Profile globalProfile = new Profile(Nope.GLOBAL_HOST_NAME);
-    system.profiles().put(globalProfile.name(), globalProfile);
-    system.global(new Global(Nope.GLOBAL_HOST_NAME, globalProfile));
-    Arrays.stream(domainNames)
-        .map(name -> new Domain(name, 10000))
-            .forEach(domain -> system.domains().put(domain.name(), domain));
-    nope.system(system);
     nope.data(new MockDataHandler());
+    nope.data().loadSystem(nope.system());
     return nope;
   }
 

@@ -35,16 +35,19 @@ import me.pietelite.nope.common.NopeServiceImpl;
 import me.pietelite.nope.common.api.NopeServiceConsumer;
 import me.pietelite.nope.common.setting.SettingKey;
 import me.pietelite.nope.common.setting.SettingKeys;
-import me.pietelite.nope.sponge.api.event.SettingListenerRegistrationEvent;
+import me.pietelite.nope.sponge.api.NopeSpongeServiceConsumer;
+import me.pietelite.nope.sponge.api.setting.SettingListenerRegistrationEvent;
 import me.pietelite.nope.sponge.api.setting.SettingKeyRegistrationEvent;
 import me.pietelite.nope.sponge.command.RootCommand;
 import me.pietelite.nope.sponge.config.PolySettingValueConfigSerializer;
 import me.pietelite.nope.sponge.config.SettingValueConfigSerializerRegistrar;
 import me.pietelite.nope.sponge.config.UnarySettingValueConfigSerializer;
 import me.pietelite.nope.sponge.context.NopeContextCalculator;
+import me.pietelite.nope.sponge.effect.ParticleEffectHandler;
 import me.pietelite.nope.sponge.key.NopeKeys;
 import me.pietelite.nope.sponge.listener.NopeSettingListeners;
 import me.pietelite.nope.sponge.listener.SettingListenerStore;
+import me.pietelite.nope.sponge.listener.always.InteractiveVolumeListener;
 import me.pietelite.nope.sponge.listener.always.MovementListener;
 import me.pietelite.nope.sponge.setting.manager.SpongeSettingKeyManagerUtil;
 import me.pietelite.nope.sponge.storage.hocon.HoconDataHandler;
@@ -85,6 +88,7 @@ public class SpongeNope extends Nope {
   @Accessors(fluent = true)
   private static SpongeNope instance;
   private final SelectionHandler selectionHandler = new SelectionHandler();
+  private final ParticleEffectHandler particleEffectHandler = new ParticleEffectHandler();
   @Inject
   private final PluginContainer pluginContainer;
   // B stats
@@ -111,12 +115,13 @@ public class SpongeNope extends Nope {
    */
   @Listener
   public void onConstruct(ConstructPluginEvent event) {
-    // Setup the Nope Service
-    NopeServiceConsumer.consume(new NopeServiceImpl());
-
-    // Set general static variables
     Nope.instance(this);
     instance = this;
+
+    // Setup the Nope Service
+    NopeServiceConsumer.consume(new NopeServiceImpl());
+    NopeSpongeServiceConsumer.consume(new NopeSpongeServiceImpl());
+
     path(configDir);
 
     if (configDir.toFile().mkdirs()) {
@@ -184,7 +189,7 @@ public class SpongeNope extends Nope {
 
     // Load data
     data(new HoconDataHandler(configDir, configRegistrar));
-    system(data().loadSystem());
+    data().loadSystem(Nope.instance().system());
 
     // Create setting listeners
     this.settingListeners = new SettingListenerStore(settingKeys());
@@ -206,11 +211,14 @@ public class SpongeNope extends Nope {
     Sponge.eventManager().registerListeners(pluginContainer(), selectionHandler);
     logger().info("Registering listeners!");
     settingListeners.registerAll();
+    Sponge.eventManager().registerListeners(pluginContainer(), new InteractiveVolumeListener());
     Sponge.eventManager().registerListeners(pluginContainer(), new MovementListener());
 
     Sponge.serviceProvider()
         .provide(ContextService.class)
         .ifPresent(service -> service.registerContextCalculator(new NopeContextCalculator()));
+
+    particleEffectHandler.initialize();
 
     // Finally, we announce that Nope is live!
     Extra.printSplashscreen();
@@ -242,7 +250,7 @@ public class SpongeNope extends Nope {
    * Load plugin state from persistent storage.
    */
   public void loadState() {
-    system(data().loadSystem());
+    data().loadSystem(Nope.instance().system());
   }
 
   @Override

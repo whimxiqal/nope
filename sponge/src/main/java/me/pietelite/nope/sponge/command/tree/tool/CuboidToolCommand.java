@@ -45,7 +45,7 @@ public class CuboidToolCommand extends CommandNode {
    * @param parent parent node
    */
   public CuboidToolCommand(CommandNode parent) {
-    super(parent, Permissions.CREATE,
+    super(parent, Permissions.HOST_EDIT,
         "Select the corners of a new box",
         "box");
   }

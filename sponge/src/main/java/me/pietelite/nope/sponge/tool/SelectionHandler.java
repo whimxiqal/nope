@@ -234,6 +234,9 @@ public class SelectionHandler {
 
   private <E extends InteractBlockEvent & Cancellable> void onSelect(E event,
                                                                      boolean first) {
+    if (event.isCancelled()) {
+      return;
+    }
     Optional<ServerPlayer> playerOptional = event.cause().first(ServerPlayer.class);
     if (!playerOptional.isPresent()) {
       return;
@@ -288,28 +291,28 @@ public class SelectionHandler {
         case CUBOID:
           updateSelection(player,
               boxDrafts.computeIfAbsent(player.uniqueId(), uuid -> new CuboidSelection()),
-              SpongeNope.instance().system().domain(SpongeUtil.worldToId(location.world())),
+              SpongeNope.instance().system().domains().get(SpongeUtil.worldToId(location.world())),
               Vector3i.of(location.blockX(), location.blockY(), location.blockZ()),
               first);
           break;
         case CYLINDER:
           updateSelection(player,
               cylinderDrafts.computeIfAbsent(player.uniqueId(), uuid -> new CylinderSelection()),
-              SpongeNope.instance().system().domain(SpongeUtil.worldToId(location.world())),
+              SpongeNope.instance().system().domains().get(SpongeUtil.worldToId(location.world())),
               Vector3i.of(location.blockX(), location.blockY(), location.blockZ()),
               first);
           break;
         case SPHERE:
           updateSelection(player,
               sphereDrafts.computeIfAbsent(player.uniqueId(), uuid -> new SphereSelection()),
-              SpongeNope.instance().system().domain(SpongeUtil.worldToId(location.world())),
+              SpongeNope.instance().system().domains().get(SpongeUtil.worldToId(location.world())),
               Vector3i.of(location.blockX(), location.blockY(), location.blockZ()),
               first);
           break;
         case SLAB:
           updateSelection(player,
               slabDrafts.computeIfAbsent(player.uniqueId(), uuid -> new SlabSelection()),
-              SpongeNope.instance().system().domain(SpongeUtil.worldToId(location.world())),
+              SpongeNope.instance().system().domains().get(SpongeUtil.worldToId(location.world())),
               Vector3i.of(location.blockX(), location.blockY(), location.blockZ()),
               first);
           break;

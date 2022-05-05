@@ -43,14 +43,10 @@ public class SingleValueSettingEditorImpl<T> extends SettingEditorImpl implement
   }
 
   @Override
-  public Alteration set(T value) {
+  public void set(T value) {
     profile.verifyExistence();
     SettingKey.Unary<T> key = Nope.instance().settingKeys().getUnarySetting(setting, type);
     profile.setValue(key, SettingValue.Unary.of(value));
-    return AlterationImpl.success("Set value of "
-        + setting + " on profile "
-        + profile.name() + " to "
-        + key.manager().printData(value));
   }
 
   @Override

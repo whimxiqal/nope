@@ -40,7 +40,7 @@ import me.pietelite.nope.common.permission.Permissions;
 import me.pietelite.nope.sponge.SpongeNope;
 import me.pietelite.nope.sponge.command.CommandNode;
 import me.pietelite.nope.sponge.command.parameters.Parameters;
-import me.pietelite.nope.sponge.command.tree.host.blank.info.HostInfoVolumesCommand;
+import me.pietelite.nope.sponge.command.tree.host.blank.info.VolumesInfoCommand;
 import me.pietelite.nope.sponge.command.tree.host.blank.info.SettingInfoCommand;
 import me.pietelite.nope.sponge.util.Formatter;
 import net.kyori.adventure.text.Component;
@@ -52,9 +52,9 @@ import org.spongepowered.api.scheduler.Task;
 
 public class HostInfoCommand extends CommandNode {
   public HostInfoCommand(CommandNode parent) {
-    super(parent, Permissions.INFO, "Get info about a host", "info");
+    super(parent, Permissions.HOST_INFO, "Get info about a host", "info");
     prefix(Parameters.HOST);
-    addChild(new HostInfoVolumesCommand(this));
+    addChild(new VolumesInfoCommand(this));
     addChild(new SettingInfoCommand(this));
   }
 

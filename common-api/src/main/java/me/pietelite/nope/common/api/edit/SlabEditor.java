@@ -24,12 +24,34 @@
 
 package me.pietelite.nope.common.api.edit;
 
+/**
+ * An editor for a slab Zone.
+ * A slab is a cuboid that extends infinitely in the x and z dimensions,
+ * but is bounded on either end in the y dimension
+ */
 public interface SlabEditor extends ZoneEditor {
 
-  Alteration setDimensions(float y, float height);
+  /**
+   * Sets the dimensions for this slab.
+   *
+   * @param y      the y value of the lower boundary of the slab
+   * @param height the height of the slab
+   */
+  void setDimensions(float y, float height);
 
+  /**
+   * The y value of the lower boundary of the slab.
+   *
+   * @return the y value
+   */
+  @SuppressWarnings("checkstyle:MethodName")
   float y();
 
+  /**
+   * The height of the slab.
+   *
+   * @return the height
+   */
   float height();
 
 }

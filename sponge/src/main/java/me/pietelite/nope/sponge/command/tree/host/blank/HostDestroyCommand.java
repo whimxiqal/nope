@@ -39,8 +39,8 @@ import org.spongepowered.api.command.parameter.CommandContext;
 public class HostDestroyCommand extends CommandNode {
   public HostDestroyCommand(CommandNode parent) {
     super(parent,
-        Permissions.DESTROY,
-        "Destroy a zone",
+        Permissions.HOST_DESTROY,
+        "Destroy a scene",
         "destroy");
     prefix(Parameters.HOST);
   }
@@ -53,15 +53,8 @@ public class HostDestroyCommand extends CommandNode {
           "You may only delete hosts of type ___", "zone"
       ));
     }
-    if (NopeServiceProvider.service().editSystem().editProfile(host.name()).destroy().result().succeed()) {
-      context.cause().audience().sendMessage(Formatter.success(
-          "Scene ___ was destroyed", host.name()
-      ));
-    } else {
-      context.cause().audience().sendMessage(Formatter.error(
-          "Scene ___ could not be destroyed", host.name()
-      ));
-    }
+    NopeServiceProvider.service().editSystem().editScene(host.name()).destroy();
+    context.cause().audience().sendMessage(Formatter.success("Scene ___ was destroyed", host.name()));
     return CommandResult.success();
   }
 }

@@ -223,4 +223,11 @@ public class Sphere extends Volume {
         .collect(Collectors.toList());
   }
 
+  @Override
+  public Sphere copy() {
+    Sphere out = new Sphere(domain, posX, posY, posZ, radius);
+    this.copyUuidTo(out);
+    return out;
+  }
+
 }

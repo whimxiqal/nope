@@ -24,28 +24,26 @@
 
 package me.pietelite.nope.common.host;
 
-import java.util.HashSet;
 import java.util.NoSuchElementException;
 import java.util.Set;
 import me.pietelite.nope.common.Nope;
-import me.pietelite.nope.common.api.edit.Alteration;
-import me.pietelite.nope.common.api.edit.AlterationImpl;
 import me.pietelite.nope.common.api.edit.MultipleValueSettingEditor;
 import me.pietelite.nope.common.api.edit.MultipleValueSettingEditorImpl;
 import me.pietelite.nope.common.api.edit.ProfileEditor;
+import me.pietelite.nope.common.api.edit.SettingEditor;
+import me.pietelite.nope.common.api.edit.SettingEditorImpl;
 import me.pietelite.nope.common.api.edit.SingleValueSettingEditor;
 import me.pietelite.nope.common.api.edit.SingleValueSettingEditorImpl;
 import me.pietelite.nope.common.api.edit.TargetEditor;
 import me.pietelite.nope.common.setting.SettingCollection;
 import me.pietelite.nope.common.setting.Target;
 import me.pietelite.nope.common.setting.Targetable;
-import me.pietelite.nope.common.storage.Destructible;
+import me.pietelite.nope.common.storage.Expirable;
 import me.pietelite.nope.common.storage.Persistent;
 import me.pietelite.nope.common.struct.Named;
 import org.jetbrains.annotations.Nullable;
 
-public class Profile extends SettingCollection implements Named, Persistent, Destructible, Targetable {
-  private final Set<Host> hosts = new HashSet<>();
+public class Profile extends SettingCollection implements Named, Persistent, Expirable, Targetable {
   private String name;
   private Target target;
   private boolean destroyed;
@@ -75,18 +73,18 @@ public class Profile extends SettingCollection implements Named, Persistent, Des
   }
 
   @Override
-  public void markDestroyed() {
+  public void expire() {
     this.destroyed = true;
   }
 
   @Override
-  public boolean destroyed() {
+  public boolean expired() {
     return destroyed;
   }
 
   @Override
   public void verifyExistence() throws NoSuchElementException {
-    if (destroyed()) {
+    if (expired()) {
       throw new IllegalStateException("Profile is destroyed: " + name);
     }
   }
@@ -111,18 +109,33 @@ public class Profile extends SettingCollection implements Named, Persistent, Des
     }
 
     @Override
-    public Alteration name(String name) {
+    public boolean name(String name) {
       profile.verifyExistence();
-
+      if (profile.name().equals(name)) {
+        // No change
+        return false;
+      }
+      // We should allow case-change of characters if it's the same name otherwise as the current host
+      if (!profile.name().equalsIgnoreCase(name) && Nope.instance().system().host(name).isPresent()) {
+        throw new IllegalArgumentException("A host with the name \"" + name + "\" already exists");
+      }
+      if (name.startsWith("_")) {
+        throw new IllegalArgumentException("Scene names cannot start with an underscore");
+      }
       // Remove all references of old name
       Nope.instance().system().profiles().remove(profile.name());
       Nope.instance().data().profiles().destroy(profile);
+
+      // Switch backwards-related references of profiles to hosts
+      Set<Host> relatedHosts = Nope.instance().system().relatedToProfile(profile.name());
+      Nope.instance().system().unrelateProfile(profile.name());
+      relatedHosts.forEach(host -> Nope.instance().system().relateProfile(profile.name(), host));
 
       // Change name and add references back in
       profile.name = name;
       Nope.instance().system().profiles().put(profile.name.toLowerCase(), profile);
       profile.save();
-      return AlterationImpl.success("Renamed profile \"" + profile.name() + "\" to \"" + name + "\"");
+      return true;
     }
 
     @Override
@@ -132,30 +145,45 @@ public class Profile extends SettingCollection implements Named, Persistent, Des
     }
 
     @Override
+    public SettingEditor editSetting(String setting) {
+      profile.verifyExistence();
+      if (!Nope.instance().settingKeys().containsId(setting)) {
+        throw new NoSuchElementException();
+      }
+      return new SettingEditorImpl(profile, setting);
+    }
+
+    @Override
     public <T> SingleValueSettingEditor<T> editSingleValueSetting(String setting, Class<T> type) {
       profile.verifyExistence();
+      if (!Nope.instance().settingKeys().containsId(setting)) {
+        throw new NoSuchElementException();
+      }
       return new SingleValueSettingEditorImpl<>(profile, setting, type);
     }
 
     @Override
     public <T> MultipleValueSettingEditor<T> editMultipleValueSetting(String setting, Class<T> type) {
       profile.verifyExistence();
+      if (!Nope.instance().settingKeys().containsId(setting)) {
+        throw new NoSuchElementException();
+      }
       return new MultipleValueSettingEditorImpl<>(profile, setting, type);
     }
 
     @Override
-    public Alteration destroy() {
+    public void destroy() {
       profile.verifyExistence();
       if (Nope.instance().system().profiles().remove(profile.name) == null) {
         throw new NoSuchElementException("There is not host with name " + profile.name());
       }
-      profile.hosts.forEach(host ->
-          host.hostedProfiles().removeIf(hostedProfile ->
-              hostedProfile.profile().name().equalsIgnoreCase(profile.name())));
+      for (Host host : Nope.instance().system().relatedToProfile(profile.name())) {
+        host.hostedProfiles().removeIf(hostedProfile -> hostedProfile.profile().equals(profile));
+        host.save();
+      }
+      Nope.instance().system().unrelateProfile(profile.name());
       Nope.instance().data().profiles().destroy(profile);
-      profile.hosts.clear();
-      profile.markDestroyed();
-      return AlterationImpl.success("Removed scene " + profile.name);
+      profile.expire();
     }
 
   }

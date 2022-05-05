@@ -49,7 +49,7 @@ import org.jetbrains.annotations.NotNull;
  * contain a specific point in 3D space, where the Y dimension
  * is significantly smaller than X and Z.
  *
- * <p>We assume the zones are distributed evenly between all
+ * <p>We assume the scenes are distributed evenly between all
  * dimensions between the maximum and minimum values.
  *
  * <p>Search in the following order:
@@ -74,26 +74,26 @@ public class VolumeTree {
   }
 
   /**
-   * Calculate all zones which have any intersecting volumes
+   * Calculate all scenes which have any intersecting volumes
    * with this one.
    *
    * @param scene the scene to check for intersection
-   * @return all intersecting zones
+   * @return all intersecting scenes
    */
   public Set<Scene> intersecting(Scene scene) {
     Set<Scene> all = new HashSet<>();
-    for (Volume volume : scene.volumes) {
+    for (Volume volume : scene.volumes()) {
       all.addAll(intersecting(volume));
     }
     return all;
   }
 
   /**
-   * Calculate all zones which have any intersecting volumes
+   * Calculate all scenes which have any intersecting volumes
    * with this volume.
    *
    * @param volume the volume to check for intersection
-   * @return all intersecting zones
+   * @return all intersecting scenes
    */
   public Set<Scene> intersecting(Volume volume) {
     Set<Scene> all = new HashSet<>();
@@ -149,7 +149,7 @@ public class VolumeTree {
    * @param x the x coordinate
    * @param y the y coordinate
    * @param z the z coordinate
-   * @return the set of zones
+   * @return the set of scenes
    */
   @NotNull
   public Set<Scene> containing(float x, float y, float z) {
@@ -162,7 +162,7 @@ public class VolumeTree {
    * @param x the x coordinate
    * @param y the y coordinate
    * @param z the z coordinate
-   * @return the set of zones
+   * @return the set of scenes
    */
   @NotNull
   public Set<Scene> containingBlock(int x, int y, int z) {
@@ -180,7 +180,7 @@ public class VolumeTree {
    * @param maxY the maximum Y value
    * @param maxZ the maximum Z value
    * @param maxInclusive whether we will say it is contained with inclusive max boundaries
-   * @return the set of zones
+   * @return the set of scenes
    */
   @NotNull
   public Set<Scene> containingCuboid(float minX, float minY, float minZ, float maxX, float maxY, float maxZ, boolean maxInclusive) {

@@ -60,10 +60,12 @@ public class GlobalConfigurateDataHandler
 
   @Override
   public Global load() {
-    Global global = new Global(Nope.GLOBAL_HOST_NAME, Nope.instance().system().profiles().get(Nope.GLOBAL_HOST_NAME));
+    Global global = new Global(Nope.GLOBAL_ID);
     try {
       CommentedConfigurationNode node = loader.load();
-      global.allProfiles().addAll(node.getList(HostedProfile.class));
+      if (!node.node("profiles").virtual()) {
+        global.allProfiles().addAll(node.node("profiles").getList(HostedProfile.class));
+      }
       return global;
     } catch (ConfigurateException e) {
       e.printStackTrace();

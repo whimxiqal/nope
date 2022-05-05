@@ -33,8 +33,6 @@ import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.UUID;
 import me.pietelite.nope.common.Nope;
-import me.pietelite.nope.common.api.edit.Alteration;
-import me.pietelite.nope.common.api.edit.AlterationImpl;
 import me.pietelite.nope.common.api.edit.TargetEditor;
 import me.pietelite.nope.common.permission.Permissions;
 
@@ -143,13 +141,22 @@ public final class Target {
         return false;
       }
     }
-    if (!users.isEmpty()) {
-      boolean mentioned = users.contains(userUuid);
-      return mentioned == whitelist;
+    // if whitelisted, then we only *NOT* target if NONE of the criteria are met.
+    // in other words, we target if ANY of the criteria are met
+    // if blacklisted, then we only target if NONE of the criteria are met.
+    // in other words, we do *NOT* target if ANY of the criteria are met
+    System.out.println("whitelist: " + whitelist);
+    if (users.contains(userUuid)) {
+      System.out.println("in user list");
+      return whitelist;
     }
-    // otherwise, revert to permissions
-    return this.permissions.entrySet().stream().allMatch(entry ->
-        Nope.instance().hasPermission(userUuid, entry.getKey()) == entry.getValue());
+    for (Map.Entry<String, Boolean> permission : permissions.entrySet()) {
+      if (Nope.instance().hasPermission(userUuid, permission.getKey()) == permission.getValue()) {
+        return whitelist;
+      }
+    }
+    System.out.println("falling through");
+    return !whitelist;
   }
 
   public static class Editor implements TargetEditor {
@@ -163,86 +170,104 @@ public final class Target {
     }
 
     @Override
-    public Alteration targetAll() {
+    public void targetAll() {
       targetable.target(Target.all());
       saveFunction.run();
-      return AlterationImpl.success();
     }
 
     @Override
-    public Alteration targetNone() {
+    public void targetNone() {
       targetable.target(Target.none());
       saveFunction.run();
-      return AlterationImpl.success();
     }
 
     @Override
-    public Alteration targetPermission(String permission, boolean value) {
+    public boolean addPermission(String permission, boolean value) {
       Target target = targetable.target();
       if (target == null) {
         target = Target.all();
         targetable.target(target);
       }
-      target.permissions().put(permission, value);
+      Boolean replaced = target.permissions().put(permission, value);
       saveFunction.run();
-      return AlterationImpl.success();
+      return replaced == null || replaced != value;
     }
 
     @Override
-    public Alteration untargetPermission(String permission) {
+    public boolean removePermission(String permission) {
       Target target = targetable.target();
       if (target == null) {
-        return AlterationImpl.fail("The permission " + permission + " is not targeted");
+        return false;
       }
-      Boolean value = target.permissions().remove(permission);
-      if (value == null) {
-        return AlterationImpl.fail("The permission " + permission + " is not target");
+      if (target.permissions().remove(permission) == null) {
+        return false;
       }
       saveFunction.run();
-      return AlterationImpl.success();
+      return true;
     }
 
     @Override
-    public Alteration targetPlayer(UUID player) {
+    public boolean clearPermissions() {
+      Target target = targetable.target();
+      if (target == null) {
+        return false;
+      }
+      boolean out = !target.permissions().isEmpty();
+      target.permissions().clear();
+      saveFunction.run();
+      return out;
+    }
+
+    @Override
+    public boolean addPlayer(UUID player) {
       Target target = targetable.target();
       if (target == null) {
         target = Target.none();
+        target.users.add(player);
         targetable.target(target);
+        saveFunction.run();
+        return true;
       }
       if (!target.users().add(player)) {
-        return AlterationImpl.fail("That player is already targeted");
+        return false;
       }
       saveFunction.run();
-      return AlterationImpl.success();
+      return true;
     }
 
     @Override
-    public Alteration untargetPlayer(UUID player) {
+    public boolean removePlayer(UUID player) {
       Target target = targetable.target();
       if (target == null) {
-        return AlterationImpl.fail("That player wasn't targeted");
+        return false;
       }
       if (!target.users().remove(player)) {
-        return AlterationImpl.fail("That player wasn't targeted");
+        return false;
       }
       saveFunction.run();
-      return AlterationImpl.success();
+      return true;
     }
 
     @Override
-    public Alteration remove() {
-      targetable.target(null);
-      saveFunction.run();
-      return AlterationImpl.success();
-    }
-
-    @Override
-    public Type playerTargetType() {
+    public boolean clearPlayers() {
       Target target = targetable.target();
       if (target == null) {
-        throw new NoSuchElementException();
+        return false;
       }
-      return target.whitelist ? Type.WHITELIST : Type.BLACKLIST;
+      boolean out = !target.users.isEmpty();
+      target.users.clear();
+      saveFunction.run();
+      return out;
+    }
+
+    @Override
+    public boolean remove() {
+      if (targetable.target() == null) {
+        return false;
+      }
+      targetable.target(null);
+      saveFunction.run();
+      return true;
     }
 
     @Override
@@ -255,12 +280,69 @@ public final class Target {
     }
 
     @Override
+    public boolean playerTargetType(Type type) {
+      Target target = targetable.target();
+      if (target == null) {
+        switch (type) {
+          case WHITELIST:
+            targetable.target(Target.none());
+            return true;
+          case BLACKLIST:
+            targetable.target(Target.all());
+            return true;
+          default:
+            throw new RuntimeException();
+        }
+      }
+      boolean setToWhitelist = type == Type.WHITELIST;
+      if (target.whitelist == setToWhitelist) {
+        return false;
+      }
+      target.whitelist = !target.whitelist;
+      return true;
+    }
+
+    @Override
+    public Type playerTargetType() {
+      Target target = targetable.target();
+      if (target == null) {
+        throw new NoSuchElementException();
+      }
+      return target.whitelist ? Type.WHITELIST : Type.BLACKLIST;
+    }
+
+    @Override
     public Map<String, Boolean> permissions() {
       Target target = targetable.target();
       if (target == null) {
         return Collections.emptyMap();
       }
       return Collections.unmodifiableMap(target.permissions);
+    }
+
+    @Override
+    public boolean forceAffect(boolean force) {
+      Target target = targetable.target();
+      boolean out = false;
+      if (target == null) {
+        if (force) {
+          target = Target.all();
+          target.indiscriminate(true);
+          targetable.target(target);
+          out = true;
+        }
+      } else {
+        out = target.indiscriminate != force;
+        target.indiscriminate(force);
+      }
+      saveFunction.run();
+      return out;
+    }
+
+    @Override
+    public boolean forceAffect() {
+      Target target = targetable.target();
+      return target != null && target.indiscriminate;
     }
   }
 

@@ -24,6 +24,8 @@
 
 package me.pietelite.nope.sponge.tool;
 
+import com.google.common.collect.Lists;
+import java.util.List;
 import me.pietelite.nope.common.math.Sphere;
 import me.pietelite.nope.sponge.util.Formatter;
 import net.kyori.adventure.text.Component;
@@ -33,10 +35,25 @@ import net.kyori.adventure.text.Component;
  */
 public class SphereSelection extends Selection<Sphere> {
 
-  private double radius() {
-    return Math.sqrt((position1.x() - position2.x()) * (position1.x() - position2.x())
-        + (position1.y() - position2.y()) * (position1.y() - position2.y())
-        + (position1.z() - position2.z()) * (position1.z() - position2.z()));
+  @SuppressWarnings("checkstyle:LocalVariableName")
+  private float radius() {
+    // choose a radius that makes it so the entire position block is encompassed
+    double xDistSquared1 = (position1.x() - position2.x()) * (position1.x() - position2.x());
+    double xDistSquared2 = (position1.x() - position2.x() - 1) * (position1.x() - position2.x() - 1);
+    double yDistSquared1 = (position1.y() - position2.y()) * (position1.y() - position2.y());
+    double yDistSquared2 = (position1.y() - position2.y() - 1) * (position1.y() - position2.y() - 1);
+    double zDistSquared1 = (position1.z() - position2.z()) * (position1.z() - position2.z());
+    double zDistSquared2 = (position1.z() - position2.z() - 1) * (position1.z() - position2.z() - 1);
+    List<Double> radii = Lists.newArrayList(
+        xDistSquared1 + yDistSquared1 + zDistSquared1,
+        xDistSquared2 + yDistSquared1 + zDistSquared1,
+        xDistSquared1 + yDistSquared2 + zDistSquared1,
+        xDistSquared1 + yDistSquared1 + zDistSquared2,
+        xDistSquared2 + yDistSquared2 + zDistSquared1,
+        xDistSquared2 + yDistSquared1 + zDistSquared2,
+        xDistSquared1 + yDistSquared2 + zDistSquared2,
+        xDistSquared2 + yDistSquared2 + zDistSquared2);
+    return (float) Math.sqrt(radii.stream().max(Double::compare).get());
   }
 
   @Override
@@ -51,7 +68,7 @@ public class SphereSelection extends Selection<Sphere> {
   @Override
   public Sphere construct() {
     return new Sphere(domain,
-        position1.x(), position1.y(), position1.z(),
+        (float) position1.x(), (float) position1.y(), (float) position1.z(),
         radius());
   }
 }

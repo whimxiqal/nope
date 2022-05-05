@@ -29,13 +29,11 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 import me.pietelite.nope.common.Nope;
-import me.pietelite.nope.common.api.edit.Alteration;
-import me.pietelite.nope.common.api.edit.AlterationImpl;
 import me.pietelite.nope.common.api.edit.HostEditor;
 import me.pietelite.nope.common.api.edit.TargetEditor;
 import me.pietelite.nope.common.setting.SettingKey;
 import me.pietelite.nope.common.setting.Target;
-import me.pietelite.nope.common.storage.Destructible;
+import me.pietelite.nope.common.storage.Expirable;
 import me.pietelite.nope.common.storage.Persistent;
 import me.pietelite.nope.common.struct.Container;
 import me.pietelite.nope.common.struct.Location;
@@ -45,11 +43,12 @@ import me.pietelite.nope.common.util.Validate;
 /**
  * A class to store Settings based on graphical locations.
  */
-public abstract class Host implements Container, Named, Persistent, Destructible {
+public abstract class Host implements Container, Named, Persistent, Expirable {
 
   private final ArrayList<HostedProfile> profiles = new ArrayList<>();
   protected String name;
   protected int priority;
+  private boolean expired = false;
 
   /**
    * Default constructor.
@@ -58,7 +57,7 @@ public abstract class Host implements Container, Named, Persistent, Destructible
    * @param priority the priority
    */
   public Host(String name, int priority) {
-    if (Validate.invalidSettingCollectionName(name)) {
+    if (Validate.invalidId(name)) {
       throw new IllegalArgumentException("Invalid host name: " + name);
     }
     this.name = name;
@@ -95,19 +94,19 @@ public abstract class Host implements Container, Named, Persistent, Destructible
   }
 
   @Override
-  public void markDestroyed() {
-    // do nothing
+  public final void expire() {
+    this.expired = true;
   }
 
   @Override
-  public boolean destroyed() {
-    return false;
+  public final boolean expired() {
+    return expired;
   }
 
   @Override
-  public void verifyExistence() throws NoSuchElementException {
-    if (destroyed()) {
-      throw new IllegalStateException("Host is destroyed: " + name);
+  public final void verifyExistence() throws NoSuchElementException {
+    if (expired()) {
+      throw new IllegalStateException("Host has expired: " + name);
     }
   }
 
@@ -143,7 +142,7 @@ public abstract class Host implements Container, Named, Persistent, Destructible
     }
 
     @Override
-    public Alteration addProfile(String name, int index) {
+    public void addProfile(String name, int index) {
       Profile profile = Nope.instance().system().profiles().get(name);
       if (profile == null) {
         throw new NoSuchElementException("No profile exists with name " + name);
@@ -156,30 +155,27 @@ public abstract class Host implements Container, Named, Persistent, Destructible
         throw new IllegalArgumentException("There is already a profile added with the name " + name);
       }
       host.hostedProfiles().add(index, new HostedProfile(profile));
+      Nope.instance().system().relateProfile(profile.name(), host);
       host.save();
-      return AlterationImpl.success("Added profile " + profile.name() + " to host " + name);
     }
 
     @Override
-    public Alteration removeProfile(String name) {
+    public void removeProfile(String name) {
       host.verifyExistence();
       if (!host.hostedProfiles().removeIf(hostedProfile -> hostedProfile.profile().name().equalsIgnoreCase(name))) {
-        return AlterationImpl.fail("No profile exists named " + name);
+        throw new NoSuchElementException("No profile exists named " + name);
       }
       host.save();
-      return AlterationImpl.success("Removed profile with name " + name + " from host " + name);
     }
 
     @Override
-    public Alteration removeProfile(int index) {
+    public void removeProfile(int index) {
       host.verifyExistence();
       if (index < 0 || index > host.hostedProfiles().size()) {
         throw new IndexOutOfBoundsException("There is no profile at index " + index);
       }
       HostedProfile hostedProfile = host.hostedProfiles().remove(index);
       host.save();
-      return AlterationImpl.success("Removed profile " + hostedProfile.profile().name()
-          + " from host " + host.name);
     }
 
     @Override
@@ -215,5 +211,10 @@ public abstract class Host implements Container, Named, Persistent, Destructible
       return new Target.Editor(hostedProfile, host::save);
     }
 
+    @Override
+    public int priority() {
+      host.verifyExistence();
+      return host.priority();
+    }
   }
 }

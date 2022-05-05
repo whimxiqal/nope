@@ -110,6 +110,9 @@ public class Cuboid extends Volume {
     this.lengthX = maxX - minX;
     this.lengthY = maxY - minY;
     this.lengthZ = maxZ - minZ;
+    if (lengthX == 0 || lengthY == 0 || lengthZ == 0) {
+      throw new IllegalArgumentException("A cuboid may not have a length of 0 in any dimension");
+    }
     this.midPointXYPlane = Vector2d.of(
         maxX - ((double) lengthX) / 2,
         maxY - ((double) lengthY) / 2);
@@ -211,7 +214,9 @@ public class Cuboid extends Volume {
   }
 
   @Override
-  public boolean containsCuboid(float minX, float minY, float minZ, float maxX, float maxY, float maxZ, boolean maxInclusive) {
+  public boolean containsCuboid(float minX, float minY, float minZ,
+                                float maxX, float maxY, float maxZ,
+                                boolean maxInclusive) {
     return minX >= this.minX
         && minY >= this.minY
         && minZ >= this.minZ
@@ -344,6 +349,13 @@ public class Cuboid extends Volume {
     return points.stream()
         .filter(p -> p.distanceSquared(point) < proximitySquared)
         .collect(Collectors.toList());
+  }
+
+  @Override
+  public Cuboid copy() {
+    Cuboid out = new Cuboid(domain, minX, minY, minZ, maxX, maxY, maxZ);
+    this.copyUuidTo(out);
+    return out;
   }
 
   private void tryAddSurfacePoint(Collection<Vector3d> points,

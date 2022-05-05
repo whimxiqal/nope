@@ -45,7 +45,7 @@ import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 public class EvaluateCommand extends CommandNode {
 
   public EvaluateCommand(CommandNode parent) {
-    super(parent, Permissions.INFO,
+    super(parent, Permissions.DEBUG,
         "Evaluate the value for some setting",
         "evaluate");
     addParameter(Parameters.SETTING_KEY);

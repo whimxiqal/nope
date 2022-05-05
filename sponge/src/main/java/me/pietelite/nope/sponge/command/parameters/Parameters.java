@@ -43,6 +43,7 @@ import java.util.stream.IntStream;
 import me.pietelite.nope.common.Nope;
 import me.pietelite.nope.common.api.register.SettingCategory;
 import me.pietelite.nope.common.host.Host;
+import me.pietelite.nope.common.host.HostedProfile;
 import me.pietelite.nope.common.host.Profile;
 import me.pietelite.nope.common.host.Scene;
 import me.pietelite.nope.common.setting.SettingKey;
@@ -82,7 +83,7 @@ public class Parameters {
         String hostName = reader.parseString().toLowerCase();
         Host host = SpongeNope.instance().system().hosts().get(hostName);
         if (host == null) {
-          throw new ArgumentParseException(Formatter.error("No hosts exist named ___", hostName),
+          throw new ArgumentParseException(Formatter.error("No host exists named ___", hostName),
               hostName, 0);
         }
         return Optional.of(host);
@@ -122,11 +123,33 @@ public class Parameters {
             .collect(Collectors.toList());
       })
       .build();
+  public static final Parameter.Value<Scene> SCENE = Parameter.builder(ParameterKeys.SCENE)
+      .addParser((parameterKey, reader, context) -> {
+        String hostName = reader.parseString().toLowerCase();
+        Scene scene = SpongeNope.instance().system().scenes().get(hostName);
+        if (scene == null) {
+          throw new ArgumentParseException(Formatter.error("No scene exists named ___", hostName),
+              hostName, 0);
+        }
+        return Optional.of(scene);
+      })
+      .completer((context, currentInput) -> {
+        final Predicate<String> inOrder = new ContainsInOrderPredicate(currentInput);
+        return SpongeNope.instance().system()
+            .scenes()
+            .entrySet()
+            .stream()
+            .filter(entry -> inOrder.test(entry.getKey()))
+            .map(entry -> CommandCompletion.of(entry.getKey(),
+                Formatter.host(entry.getValue())))
+            .collect(Collectors.toList());
+      })
+      .build();
   public static final Parameter.Value<String> ID = Parameter.builder(ParameterKeys.ID)
       .addParser(
           (parameterKey, reader, context) -> {
             String name = reader.parseString();
-            if (Validate.invalidSettingCollectionName(name)) {
+            if (Validate.invalidId(name)) {
               throw new ArgumentParseException(
                   Formatter.error("Names can only have numbers, "
                       + "letters, and some special characters"),
@@ -148,7 +171,7 @@ public class Parameters {
         String profileName = reader.parseString().toLowerCase();
         Profile profile = SpongeNope.instance().system().profiles().get(profileName.toLowerCase());
         if (profile == null) {
-          throw new ArgumentParseException(Formatter.error("No hosts exist named ___", profileName),
+          throw new ArgumentParseException(Formatter.error("No profile exists named ___", profileName),
               profileName, 0);
         }
         return Optional.of(profile);
@@ -159,9 +182,31 @@ public class Parameters {
             .profiles()
             .entrySet()
             .stream()
-            .filter(entry -> inOrder.test(entry.getKey()))
-            .map(entry -> CommandCompletion.of(entry.getKey(),
+            .filter(entry -> inOrder.test(entry.getValue().name()))
+            .map(entry -> CommandCompletion.of(entry.getValue().name(),
                 Formatter.profile(entry.getValue())))
+            .collect(Collectors.toList());
+      })
+      .build();
+  public static final Parameter.Value<Profile> PROFILE_ON_HOST = Parameter.builder(ParameterKeys.PROFILE)
+      .addParser((parameterKey, reader, context) -> {
+        String profileName = reader.parseString().toLowerCase();
+        Profile profile = SpongeNope.instance().system().profiles().get(profileName.toLowerCase());
+        if (profile == null) {
+          throw new ArgumentParseException(Formatter.error("No profile exists named ___", profileName),
+              profileName, 0);
+        }
+        return Optional.of(profile);
+      })
+      .completer((context, currentInput) -> {
+        final Predicate<String> inOrder = new ContainsInOrderPredicate(currentInput);
+        Host host = context.requireOne(HOST);
+        return host.allProfiles()
+            .stream()
+            .map(HostedProfile::profile)
+            .filter(profile -> inOrder.test(profile.name()))
+            .map(profile -> CommandCompletion.of(profile.name(),
+                Formatter.profile(profile)))
             .collect(Collectors.toList());
       })
       .build();
@@ -194,47 +239,47 @@ public class Parameters {
             .collect(Collectors.toList());
       })
       .build();
-  public static final Parameter.Value<Integer> POS_X = Parameter.rangedInteger(-Nope.WORLD_RADIUS,
+  public static final Parameter.Value<Double> POS_X = Parameter.rangedDouble(-Nope.WORLD_RADIUS,
           Nope.WORLD_RADIUS)
       .key(ParameterKeys.POS_X)
       .usage(key -> "X")
       .build();
-  public static final Parameter.Value<Integer> POS_X_1 = Parameter.rangedInteger(-Nope.WORLD_RADIUS,
+  public static final Parameter.Value<Double> POS_X_1 = Parameter.rangedDouble(-Nope.WORLD_RADIUS,
           Nope.WORLD_RADIUS)
       .key(ParameterKeys.POS_X_1)
       .usage(key -> "first X")
       .build();
-  public static final Parameter.Value<Integer> POS_X_2 = Parameter.rangedInteger(-Nope.WORLD_RADIUS,
+  public static final Parameter.Value<Double> POS_X_2 = Parameter.rangedDouble(-Nope.WORLD_RADIUS,
           Nope.WORLD_RADIUS)
       .key(ParameterKeys.POS_X_2)
       .usage(key -> "second X")
       .build();
-  public static final Parameter.Value<Integer> POS_Y = Parameter.rangedInteger(-Nope.WORLD_RADIUS,
+  public static final Parameter.Value<Double> POS_Y = Parameter.rangedDouble(-Nope.WORLD_RADIUS,
           Nope.WORLD_RADIUS)
       .key(ParameterKeys.POS_Y)
       .usage(key -> "Y")
       .build();
-  public static final Parameter.Value<Integer> POS_Y_1 = Parameter.rangedInteger(-Nope.WORLD_DEPTH,
+  public static final Parameter.Value<Double> POS_Y_1 = Parameter.rangedDouble(-Nope.WORLD_DEPTH,
           Nope.WORLD_DEPTH)
       .key(ParameterKeys.POS_Y_1)
       .usage(key -> "first Y")
       .build();
-  public static final Parameter.Value<Integer> POS_Y_2 = Parameter.rangedInteger(-Nope.WORLD_DEPTH,
+  public static final Parameter.Value<Double> POS_Y_2 = Parameter.rangedDouble(-Nope.WORLD_DEPTH,
           Nope.WORLD_DEPTH)
       .key(ParameterKeys.POS_Y_2)
       .usage(key -> "second Y")
       .build();
-  public static final Parameter.Value<Integer> POS_Z = Parameter.rangedInteger(-Nope.WORLD_RADIUS,
+  public static final Parameter.Value<Double> POS_Z = Parameter.rangedDouble(-Nope.WORLD_RADIUS,
           Nope.WORLD_RADIUS)
       .key(ParameterKeys.POS_Z)
       .usage(key -> "Z")
       .build();
-  public static final Parameter.Value<Integer> POS_Z_1 = Parameter.rangedInteger(-Nope.WORLD_RADIUS,
+  public static final Parameter.Value<Double> POS_Z_1 = Parameter.rangedDouble(-Nope.WORLD_RADIUS,
           Nope.WORLD_RADIUS)
       .key(ParameterKeys.POS_Z_1)
       .usage(key -> "first Z")
       .build();
-  public static final Parameter.Value<Integer> POS_Z_2 = Parameter.rangedInteger(-Nope.WORLD_RADIUS,
+  public static final Parameter.Value<Double> POS_Z_2 = Parameter.rangedDouble(-Nope.WORLD_RADIUS,
           Nope.WORLD_RADIUS)
       .key(ParameterKeys.POS_Z_2)
       .usage(key -> "second Z")

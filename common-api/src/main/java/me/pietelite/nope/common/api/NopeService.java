@@ -24,12 +24,9 @@
 
 package me.pietelite.nope.common.api;
 
-import java.util.UUID;
 import me.pietelite.nope.common.api.edit.SystemEditor;
 import me.pietelite.nope.common.api.evaluate.Evaluator;
 import me.pietelite.nope.common.api.register.SettingManagers;
-import me.pietelite.nope.common.api.struct.AltSet;
-import org.jetbrains.annotations.Nullable;
 
 /**
  * A developer API for all platform implementations of Nope.

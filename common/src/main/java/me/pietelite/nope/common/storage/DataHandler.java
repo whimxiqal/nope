@@ -66,6 +66,6 @@ public interface DataHandler {
    *
    * @return the handler
    */
-  HostSystem loadSystem();
+  void loadSystem(HostSystem system);
 
 }

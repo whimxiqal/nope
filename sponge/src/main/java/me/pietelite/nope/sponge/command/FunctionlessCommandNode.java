@@ -36,7 +36,7 @@ import org.spongepowered.api.command.parameter.CommandContext;
  * Instead, if no subcommand or subcommand given, it
  * just says that there were insufficient arguments.
  */
-public abstract class FunctionlessCommandNode extends CommandNode {
+public class FunctionlessCommandNode extends CommandNode {
 
   public FunctionlessCommandNode(CommandNode parent,
                                  Permission permission,

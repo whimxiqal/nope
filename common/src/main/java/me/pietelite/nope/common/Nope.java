@@ -32,6 +32,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import me.pietelite.nope.common.debug.DebugManager;
+import me.pietelite.nope.common.gui.volume.InteractiveVolumeHandler;
+import me.pietelite.nope.common.gui.volume.InteractiveVolumeInfo;
 import me.pietelite.nope.common.host.HostSystem;
 import me.pietelite.nope.common.permission.Permission;
 import me.pietelite.nope.common.setting.SettingKeyStore;
@@ -41,39 +43,36 @@ import me.pietelite.nope.common.util.Logger;
 /**
  * Generic plugin file to manage global plugin state.
  */
+@Getter
+@Accessors(fluent = true)
 @RequiredArgsConstructor
 public abstract class Nope {
 
   /* CONSTANTS */
-  public static final String GLOBAL_HOST_NAME = "_global";
+  public static final String GLOBAL_ID = "_global";
   public static final int WORLD_DEPTH = 512;
   public static final int WORLD_RADIUS = 100000;
   @Setter
   @Getter
   @Accessors(fluent = true)
   private static Nope instance;
-
-  @Getter
-  @Accessors(fluent = true)
   private final Logger logger;
-  @Getter
-  @Accessors(fluent = true)
   private final SettingKeyStore settingKeys = new SettingKeyStore();
-  @Getter
-  @Accessors(fluent = true)
   private final DebugManager debugManager = new DebugManager();
-  @Getter
+  private final InteractiveVolumeHandler interactiveVolumeHandler = new InteractiveVolumeHandler(
+      InteractiveVolumeInfo.builder()
+          .baseDelta(1)
+          .maxDelta(1000)
+          .consecutiveDeltaMultiplier(2)
+          .consecutiveCutoff(3)
+          .consecutiveTimeout(500)
+          .build());
+  private final HostSystem system = new HostSystem();
+
   @Setter
-  @Accessors(fluent = true)
   private DataHandler data;
-  @Getter
   @Setter
-  @Accessors(fluent = true)
   private Path path;
-  @Getter
-  @Setter
-  @Accessors(fluent = true)
-  private HostSystem system;
 
   public final boolean hasPermission(UUID playerUuid, Permission permission) {
     return hasPermission(playerUuid, permission.get());

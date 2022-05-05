@@ -24,14 +24,39 @@
 
 package me.pietelite.nope.common.api.edit;
 
+/**
+ * Editor for a setting on a profile.
+ */
 public interface SettingEditor {
 
+  /**
+   * Whether there is a value set for this setting.
+   *
+   * @return true if set
+   */
   boolean hasValue();
 
-  Alteration unsetValue();
+  /**
+   * Unset the setting value, if one is set.
+   *
+   * @return true if a setting value was removed, or false if there was none
+   */
+  boolean unsetValue();
 
+  /**
+   * Whether there is a target on this setting.
+   *
+   * @return true if there is a target
+   */
   boolean hasTarget();
 
+  /**
+   * Gets an editor for the target on this setting.
+   * If there is no target set on this setting, calling this method will not create one;
+   * only operations in the returned {@link TargetEditor} can create a target on this setting.
+   *
+   * @return the editor
+   */
   TargetEditor editTarget();
 
 }

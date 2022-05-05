@@ -24,18 +24,32 @@
 
 package me.pietelite.nope.sponge.command.tree.profile.blank.edit;
 
+import me.pietelite.nope.common.api.NopeServiceProvider;
+import me.pietelite.nope.common.host.Profile;
 import me.pietelite.nope.common.permission.Permissions;
+import me.pietelite.nope.common.setting.SettingKey;
 import me.pietelite.nope.sponge.command.CommandNode;
 import me.pietelite.nope.sponge.command.FunctionlessCommandNode;
-import me.pietelite.nope.sponge.command.tree.profile.blank.edit.setting.TargetCommand;
+import me.pietelite.nope.sponge.command.parameters.ParameterKeys;
+import me.pietelite.nope.sponge.command.parameters.Parameters;
+import me.pietelite.nope.sponge.command.target.TargetCommand;
 import me.pietelite.nope.sponge.command.tree.profile.blank.edit.setting.ValueCommand;
 
 public class SettingCommand extends FunctionlessCommandNode {
   public SettingCommand(CommandNode parent) {
-    super(parent, Permissions.EDIT,
-        "Adjust the settings on a host",
+    super(parent, null,
+        "Adjust the settings on a profile",
         "setting");
-    addChild(new TargetCommand(this));
+    CommandNode targetCommand = new TargetCommand(this, context -> {
+      Profile profile = context.requireOne(Parameters.PROFILE);
+      SettingKey<?, ?, ?> key = context.requireOne(ParameterKeys.SETTING_KEY);
+      return NopeServiceProvider.service().editSystem()
+          .editProfile(profile.name())
+          .editSetting(key.name())
+          .editTarget();
+    }, null, "a setting on a profile");
+    targetCommand.prefix(Parameters.SETTING_KEY);
+    addChild(targetCommand);
     addChild(new ValueCommand(this));
   }
 }

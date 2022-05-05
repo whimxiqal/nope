@@ -24,6 +24,8 @@
 
 package me.pietelite.nope.sponge.tool;
 
+import com.google.common.collect.Lists;
+import java.util.List;
 import me.pietelite.nope.common.math.Cylinder;
 import me.pietelite.nope.sponge.util.Formatter;
 import net.kyori.adventure.text.Component;
@@ -33,16 +35,23 @@ import net.kyori.adventure.text.Component;
  */
 public class CylinderSelection extends Selection<Cylinder> {
 
-  private double radius() {
-    return Math.sqrt((position1.x() - position2.x()) * (position1.x() - position2.x())
-        + (position1.z() - position2.z()) * (position1.z() - position2.z()));
+  private float radius() {
+    // choose a radius that makes it so the entire position block is encompassed
+    double xDistSquared1 = (position1.x() - position2.x()) * (position1.x() - position2.x());
+    double xDistSquared2 = (position1.x() - position2.x() - 1) * (position1.x() - position2.x() - 1);
+    double zDistSquared1 = (position1.z() - position2.z()) * (position1.z() - position2.z());
+    double zDistSquared2 = (position1.z() - position2.z() - 1) * (position1.z() - position2.z() - 1);
+    List<Double> radii = Lists.newArrayList(
+        xDistSquared1 + zDistSquared1, xDistSquared2 + zDistSquared1,
+        xDistSquared1 + zDistSquared2, xDistSquared2 + zDistSquared2);
+    return (float) Math.sqrt(radii.stream().max(Double::compare).get());
   }
 
   @Override
   protected Component propsWhenValid() {
     double height = Math.abs(position1.y() - position2.y()) + 1;
     double radius = radius();
-    return Formatter.info("Volume: ~___, Center: {x ___, z ___}, Height: ___, Radius: ___",
+    return Formatter.info("Volume: ___, Center: {x ___, z ___}, Height: ___, Radius: ___",
         (int) Math.ceil(Math.PI * radius * radius * height),
         position1.x(), position1.z(),
         height,
@@ -52,10 +61,10 @@ public class CylinderSelection extends Selection<Cylinder> {
   @Override
   public Cylinder construct() {
     return new Cylinder(domain,
-        position1.x(),
-        Math.min(position1.y(), position2.y()),
-        Math.max(position1.y(), position2.y()) + 1,
-        position1.z(),
+        position1.x() + 0.5f,
+        (float) Math.min(position1.y(), position2.y()),
+        Math.max(position1.y(), position2.y()) + 1f,
+        position1.z() + 0.5f,
         radius());
   }
 

@@ -24,17 +24,50 @@
 
 package me.pietelite.nope.common.api.edit;
 
-@SuppressWarnings("checkstyle:MethodName")
+/**
+ * An editor for a sphere Zone.
+ */
 public interface SphereEditor extends ZoneEditor {
 
-  Alteration setDimensions(float x, float y, float z, float radius);
+  /**
+   * Sets the dimension for this sphere.
+   *
+   * @param x      the x coordinate of the center of the sphere
+   * @param y      the y coordinate of the center of the sphere
+   * @param z      the z coordinate of the center of the sphere
+   * @param radius the radius of the sphere
+   */
+  void setDimensions(float x, float y, float z, float radius);
 
+  /**
+   * The x coordinate of the center of the sphere.
+   *
+   * @return the x coordinate
+   */
+  @SuppressWarnings("checkstyle:MethodName")
   float x();
 
+  /**
+   * The y coordinate of the center of the sphere.
+   *
+   * @return the y coordinate
+   */
+  @SuppressWarnings("checkstyle:MethodName")
   float y();
 
+  /**
+   * The z coordinate of the center of the sphere.
+   *
+   * @return the z coordinate
+   */
+  @SuppressWarnings("checkstyle:MethodName")
   float z();
 
+  /**
+   * The radius of the sphere.
+   *
+   * @return the radius
+   */
   float radius();
 
 }

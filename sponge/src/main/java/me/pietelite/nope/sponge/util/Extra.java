@@ -80,8 +80,8 @@ public final class Extra {
     builder.append(Component.text("||  \\\\    || ").color(Formatter.ERROR));
     builder.append(Component.text("|     /  ").color(Formatter.WHITE));
     builder.append(Component.text("|____  ").color(Formatter.WHITE));
-    builder.append(Component.text("   for ").color(Formatter.DULL));
-    builder.append(Component.text("MinecraftOnline").color(Formatter.THEME));
+    builder.append(Component.text("   by  ").color(Formatter.DULL));
+    builder.append(Component.text("PietElite").color(Formatter.THEME));
     Sponge.server().sendMessage(builder.build());
 
     // Line 5
@@ -90,8 +90,8 @@ public final class Extra {
     builder.append(Component.text("||   \\\\   || ").color(Formatter.ERROR));
     builder.append(Component.text("|____/   ").color(Formatter.WHITE));
     builder.append(Component.text("|      ").color(Formatter.WHITE));
-    builder.append(Component.text("   by  ").color(Formatter.DULL));
-    builder.append(Component.text("Pieter Svenson").color(Formatter.DULL));
+    builder.append(Component.text("      v" + SpongeNope.instance().pluginContainer().metadata().version())
+        .color(Formatter.GOLD));
     Sponge.server().sendMessage(builder.build());
 
     // Line 6
@@ -100,8 +100,6 @@ public final class Extra {
     builder.append(Component.text("||    \\\\  || ").color(Formatter.ERROR));
     builder.append(Component.text("|        ").color(Formatter.WHITE));
     builder.append(Component.text("|      ").color(Formatter.WHITE));
-    builder.append(Component.text("      v" + SpongeNope.instance().pluginContainer().metadata().version())
-        .color(Formatter.GOLD));
     Sponge.server().sendMessage(builder.build());
 
     // Line 7

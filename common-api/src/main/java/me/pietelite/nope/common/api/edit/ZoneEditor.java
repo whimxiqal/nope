@@ -28,6 +28,8 @@ public interface ZoneEditor {
 
   String domain();
 
-  Alteration domain(String domain);
+  void domain(String domain);
+
+  void destroy();
 
 }

@@ -42,7 +42,7 @@ import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 
 public class ListSettingsCommand extends CommandNode {
   public ListSettingsCommand(CommandNode parent) {
-    super(parent, Permissions.INFO,
+    super(parent, null,
         "List all possible settings",
         "list");
     addParameter(Parameters.SETTING_CATEGORY);

@@ -41,7 +41,7 @@ public final class Validate {
    * @return true if the input is an invalid setting collection name
    * @throws IllegalArgumentException the exception to throw if fails
    */
-  public static boolean invalidSettingCollectionName(String name) throws IllegalArgumentException {
+  public static boolean invalidId(String name) throws IllegalArgumentException {
     return !Pattern.compile("^[a-zA-Z0-9\\-()&_]*$").matcher(name).matches();
   }
 

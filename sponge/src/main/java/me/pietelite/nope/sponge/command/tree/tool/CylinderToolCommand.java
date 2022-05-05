@@ -36,7 +36,7 @@ import org.spongepowered.api.entity.living.player.Player;
 
 public class CylinderToolCommand extends CommandNode {
   public CylinderToolCommand(CommandNode parent) {
-    super(parent, Permissions.CREATE,
+    super(parent, Permissions.HOST_EDIT,
         "Select the boundaries of a cylinder",
         "cylinder");
   }

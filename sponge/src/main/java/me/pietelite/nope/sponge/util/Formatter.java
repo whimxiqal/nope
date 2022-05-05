@@ -38,7 +38,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 import me.pietelite.nope.common.Nope;
-import me.pietelite.nope.common.api.edit.Alteration;
 import me.pietelite.nope.common.api.struct.AltSet;
 import me.pietelite.nope.common.host.Host;
 import me.pietelite.nope.common.host.Profile;
@@ -590,6 +589,7 @@ public final class Formatter {
    * @param <T>                   the data type
    * @return the list of chat components
    */
+  @SuppressWarnings("unchecked")
   public static <T> List<Component> editableSettingUnary(Profile profile, SettingKey.Unary<T> key,
                                                          int firstColumnPixelWidth) {
     TextComponent.Builder line = Component.text()
@@ -910,22 +910,4 @@ public final class Formatter {
     }
   }
 
-  /**
-   * Convert an {@link Alteration} into a readable message.
-   *
-   * @param alteration the alteration
-   * @return the message
-   */
-  public static Component alteration(Alteration alteration) {
-    switch (alteration.result()) {
-      case SUCCESS:
-        return success(alteration.message().orElse("Success!"));
-      case WARNING:
-        return warn(alteration.message().orElse("Operation only partially succeeded"));
-      case FAILURE:
-        return error(alteration.message().orElse("Operation failed"));
-      default:
-        throw new RuntimeException();
-    }
-  }
 }
