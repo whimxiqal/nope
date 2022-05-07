@@ -22,13 +22,12 @@
  * SOFTWARE.
  */
 
-package me.pietelite.nope.common.struct;
+package me.pietelite.nope.sponge.storage.configurate.loader;
 
-/**
- * A named object.
- */
-public interface Named {
+import java.nio.file.Path;
 
-  String name();
+public interface DynamicIndividualFilePath {
+
+  Path path(String scope, String name);
 
 }

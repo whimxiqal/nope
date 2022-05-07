@@ -27,6 +27,7 @@ package me.pietelite.nope.sponge.command.tree.profiles;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+import me.pietelite.nope.common.Nope;
 import me.pietelite.nope.common.host.Profile;
 import me.pietelite.nope.common.permission.Permissions;
 import me.pietelite.nope.sponge.SpongeNope;
@@ -54,8 +55,8 @@ public class ListProfileCommand extends CommandNode {
 
   @Override
   public CommandResult execute(CommandContext context) throws CommandException {
-    List<Profile> profiles = new ArrayList<>(SpongeNope.instance()
-        .system()
+    List<Profile> profiles = new ArrayList<>(SpongeNope.instance().system()
+        .scope(Nope.NOPE_SCOPE)
         .profiles()
         .values());
 

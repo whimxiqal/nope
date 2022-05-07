@@ -31,6 +31,9 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.Accessors;
+import me.pietelite.nope.common.api.NopeServiceProvider;
+import me.pietelite.nope.common.api.edit.HostEditor;
+import me.pietelite.nope.common.api.edit.ScopeEditor;
 import me.pietelite.nope.common.debug.DebugManager;
 import me.pietelite.nope.common.gui.volume.InteractiveVolumeHandler;
 import me.pietelite.nope.common.gui.volume.InteractiveVolumeInfo;
@@ -49,6 +52,7 @@ import me.pietelite.nope.common.util.Logger;
 public abstract class Nope {
 
   /* CONSTANTS */
+  public static final String NOPE_SCOPE = "nope";
   public static final String GLOBAL_ID = "_global";
   public static final int WORLD_DEPTH = 512;
   public static final int WORLD_RADIUS = 100000;

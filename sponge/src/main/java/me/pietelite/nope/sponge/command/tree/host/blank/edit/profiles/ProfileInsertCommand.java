@@ -24,16 +24,15 @@
 
 package me.pietelite.nope.sponge.command.tree.host.blank.edit.profiles;
 
-import me.pietelite.nope.common.api.NopeServiceProvider;
+import me.pietelite.nope.common.Nope;
 import me.pietelite.nope.common.api.edit.HostEditor;
 import me.pietelite.nope.common.host.Host;
 import me.pietelite.nope.common.host.Profile;
-import me.pietelite.nope.common.permission.Permission;
+import me.pietelite.nope.common.util.ApiUtil;
 import me.pietelite.nope.sponge.command.CommandNode;
 import me.pietelite.nope.sponge.command.parameters.Parameters;
 import me.pietelite.nope.sponge.util.Formatter;
 import net.kyori.adventure.identity.Identity;
-import org.jetbrains.annotations.NotNull;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.parameter.CommandContext;
@@ -54,11 +53,11 @@ public class ProfileInsertCommand extends CommandNode {
     Host host = context.requireOne(Parameters.HOST);
     Profile profile = context.requireOne(Parameters.PROFILE);
     int index = context.requireOne(indexParameter);
-    HostEditor editor = NopeServiceProvider.service().editSystem().editHost(host.name());
+    HostEditor editor = ApiUtil.editHost(host.name());
     if (index < 0 || index > editor.profiles().size()) {
       return CommandResult.error(Formatter.error("That index is out of bounds"));
     }
-    editor.addProfile(profile.name(), index);
+    editor.addProfile(Nope.NOPE_SCOPE, profile.name(), index);
     context.sendMessage(Identity.nil(), Formatter.success("Added profile ___ at index ___ on host ___",
         profile.name(), index, host.name()));
     return CommandResult.success();

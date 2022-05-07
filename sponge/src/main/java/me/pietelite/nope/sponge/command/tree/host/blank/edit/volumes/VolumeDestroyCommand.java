@@ -24,10 +24,12 @@
 
 package me.pietelite.nope.sponge.command.tree.host.blank.edit.volumes;
 
+import me.pietelite.nope.common.Nope;
 import me.pietelite.nope.common.api.NopeServiceProvider;
 import me.pietelite.nope.common.host.Host;
 import me.pietelite.nope.common.host.Scene;
 import me.pietelite.nope.common.permission.Permissions;
+import me.pietelite.nope.common.util.ApiUtil;
 import me.pietelite.nope.sponge.command.CommandNode;
 import me.pietelite.nope.sponge.command.parameters.ParameterKeys;
 import me.pietelite.nope.sponge.command.parameters.Parameters;
@@ -59,7 +61,7 @@ public class VolumeDestroyCommand extends CommandNode {
     if (index < 0 || index >= volumes) {
       return CommandResult.error(Formatter.error("Your index ___ is out of bounds", index));
     }
-    NopeServiceProvider.service().editSystem().editScene(scene.name()).editZone(index).destroy();
+    ApiUtil.editNopeScope().editScene(scene.name()).editZone(index).destroy();
     context.cause().audience().sendMessage(Formatter.success(
         "You deleted the zone of ___ at index ___",
         scene.name(), index

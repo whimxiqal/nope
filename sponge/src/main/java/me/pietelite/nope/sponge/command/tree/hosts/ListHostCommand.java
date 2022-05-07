@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
+import me.pietelite.nope.common.Nope;
 import me.pietelite.nope.common.host.Host;
 import me.pietelite.nope.common.permission.Permissions;
 import me.pietelite.nope.sponge.SpongeNope;
@@ -65,7 +66,7 @@ public class ListHostCommand extends CommandNode {
     if (all) {
       hosts = new ArrayList<>(SpongeNope.instance()
           .system()
-          .hosts()
+          .hosts(Nope.NOPE_SCOPE)
           .values());
     } else {
       // Cause must be player

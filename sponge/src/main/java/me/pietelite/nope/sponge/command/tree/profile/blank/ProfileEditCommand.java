@@ -28,6 +28,7 @@ import me.pietelite.nope.common.api.NopeServiceProvider;
 import me.pietelite.nope.common.host.Profile;
 import me.pietelite.nope.common.permission.Permissions;
 import me.pietelite.nope.common.setting.SettingKey;
+import me.pietelite.nope.common.util.ApiUtil;
 import me.pietelite.nope.sponge.command.CommandNode;
 import me.pietelite.nope.sponge.command.FunctionlessCommandNode;
 import me.pietelite.nope.sponge.command.InlineCommandNode;
@@ -66,8 +67,7 @@ public class ProfileEditCommand extends FunctionlessCommandNode {
         "name", context -> {
       Profile profile = context.requireOne(ParameterKeys.PROFILE);
       String newName = context.requireOne(ParameterKeys.ID);
-      if (NopeServiceProvider.service().editSystem()
-          .editProfile(profile.name())
+      if (ApiUtil.editNopeScope().editProfile(profile.name())
           .name(newName)) {
         context.sendMessage(Identity.nil(), Formatter.success("Name of profile ___ changed to ___",
             profile.name(),
@@ -82,8 +82,7 @@ public class ProfileEditCommand extends FunctionlessCommandNode {
 
     addChild(new TargetCommand(this, context -> {
       Profile profile = context.requireOne(Parameters.PROFILE);
-      return NopeServiceProvider.service().editSystem()
-          .editProfile(profile.name())
+      return ApiUtil.editNopeScope().editProfile(profile.name())
           .editTarget();
     }, null, "all settings on a profile"));
     addChild(new SettingCommand(this));

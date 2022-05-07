@@ -75,7 +75,7 @@ public class MockDataHandler implements DataHandler {
   }
 
   @Override
-  public SceneDataHandler scenes() {
+  public SceneDataHandler scenes(String scope) {
     return new SceneDataHandler() {
       @Override
       public void destroy(Scene scene) {
@@ -95,7 +95,7 @@ public class MockDataHandler implements DataHandler {
   }
 
   @Override
-  public ProfileDataHandler profiles() {
+  public ProfileDataHandler profiles(String scope) {
     return new ProfileDataHandler() {
       @Override
       public void destroy(Profile profile) {
@@ -117,10 +117,10 @@ public class MockDataHandler implements DataHandler {
   @Override
   public void loadSystem(HostSystem system) {
     Global global = new Global(Nope.GLOBAL_ID);
-    Profile globalProfile = new Profile(Nope.GLOBAL_ID);
+    Profile globalProfile = new Profile(Nope.NOPE_SCOPE, Nope.GLOBAL_ID);
     global.globalProfile(globalProfile);
     system.global(global);
-    system.profiles().put(globalProfile.name(), globalProfile);
+    system.scope(Nope.NOPE_SCOPE).profiles().put(globalProfile.name(), globalProfile);
     Domain domain1 = new Domain(MockNope.DOMAIN_1, 10000);
     Domain domain2 = new Domain(MockNope.DOMAIN_2, 10000);
     system.domains().put(domain1.name(), domain1);

@@ -25,55 +25,42 @@
 package me.pietelite.nope.sponge.storage.configurate;
 
 import java.io.File;
-import java.nio.file.Path;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
-import java.util.function.Function;
-import java.util.function.Supplier;
-import java.util.stream.Collectors;
 import me.pietelite.nope.common.Nope;
 import me.pietelite.nope.common.host.HostedProfile;
-import me.pietelite.nope.common.host.Profile;
 import me.pietelite.nope.common.host.Scene;
-import me.pietelite.nope.common.math.Cylinder;
-import me.pietelite.nope.common.math.Sphere;
 import me.pietelite.nope.common.math.Volume;
-import me.pietelite.nope.common.setting.Target;
 import me.pietelite.nope.common.storage.SceneDataHandler;
 import me.pietelite.nope.sponge.SpongeNope;
-import me.pietelite.nope.sponge.config.SettingValueConfigSerializerRegistrar;
-import me.pietelite.nope.sponge.storage.configurate.serializer.VolumeTypeSerializer;
+import me.pietelite.nope.sponge.storage.configurate.loader.DynamicIndividualConfigurationLoader;
+import me.pietelite.nope.sponge.storage.configurate.loader.DynamicIndividualFilePath;
 import org.spongepowered.configurate.CommentedConfigurationNode;
 import org.spongepowered.configurate.ConfigurateException;
 import org.spongepowered.configurate.ConfigurationNode;
-import org.spongepowered.configurate.ConfigurationOptions;
 import org.spongepowered.configurate.loader.ConfigurationLoader;
-import org.spongepowered.configurate.serialize.SerializationException;
 
 /**
  * The {@link SceneDataHandler} implemented with Configurate.
  */
 public class SceneConfigurateDataHandler implements SceneDataHandler {
 
-  private final Function<String, ConfigurationLoader<CommentedConfigurationNode>> loader;
-  private final Function<String, Path> filePath;
-  private final Supplier<Collection<ConfigurationLoader<CommentedConfigurationNode>>> allLoader;
+  private final DynamicIndividualConfigurationLoader loader;
+  private final DynamicIndividualFilePath filePath;
+  private final Collection<ConfigurationLoader<CommentedConfigurationNode>> allLoaders;
 
-  public SceneConfigurateDataHandler(Function<String, ConfigurationLoader<CommentedConfigurationNode>> loader,
-                                     Function<String, Path> filePath,
-                                     Supplier<Collection<ConfigurationLoader<CommentedConfigurationNode>>>
-                                        allLoader) {
+  public SceneConfigurateDataHandler(DynamicIndividualConfigurationLoader loader,
+                                     DynamicIndividualFilePath filePath,
+                                     Collection<ConfigurationLoader<CommentedConfigurationNode>> allLoaders) {
     this.loader = loader;
     this.filePath = filePath;
-    this.allLoader = allLoader;
+    this.allLoaders = allLoaders;
   }
 
   @Override
   public void destroy(Scene scene) {
-    File file = filePath.apply(scene.name()).toFile();
+    File file = filePath.path(scene.scope(), scene.name()).toFile();
     if (file.exists()) {
       if (!file.delete()) {
         SpongeNope.instance().logger().error("Error when trying to destroy scene "
@@ -86,12 +73,14 @@ public class SceneConfigurateDataHandler implements SceneDataHandler {
   @Override
   public void save(Scene scene) {
     try {
-      CommentedConfigurationNode root = loader.apply(scene.name()).load();
+      ConfigurationLoader<CommentedConfigurationNode> loader = this.loader.loader(scene.scope(), scene.name());
+      CommentedConfigurationNode root = loader.load();
+      root.node("scope").set(scene.scope());
       root.node("name").set(scene.name());
       root.node("priority").set(scene.priority());
       root.node("profiles").setList(HostedProfile.class, scene.hostedProfiles());
       root.node("zones").setList(Volume.class, scene.volumes());
-      loader.apply(scene.name()).save(root);
+      loader.save(root);
     } catch (ConfigurateException e) {
       e.printStackTrace();
     }
@@ -101,11 +90,13 @@ public class SceneConfigurateDataHandler implements SceneDataHandler {
   public Collection<Scene> load() {
     LinkedList<Scene> scenes = new LinkedList<>();
     // Need to queue other loaders if the one given does not have their parent loaded yet
-    for (ConfigurationLoader<CommentedConfigurationNode> loader : allLoader.get()) {
+    for (ConfigurationLoader<CommentedConfigurationNode> loader : allLoaders) {
       ConfigurationNode root;
+      String scope;
       String name;
       try {
         root = loader.load();
+        scope = root.node("scope").get(String.class);
         name = root.node("name").get(String.class);
       } catch (ConfigurateException e) {
         Nope.instance().logger().error("Error loading Scene: " + e.getMessage());
@@ -118,7 +109,7 @@ public class SceneConfigurateDataHandler implements SceneDataHandler {
 
       try {
         int priority = root.node("priority").getInt();
-        Scene scene = new Scene(name, priority);
+        Scene scene = new Scene(scope, name, priority);
         try {
           if (!root.node("profiles").virtual()) {
             List<HostedProfile> profiles = root.node("profiles").getList(HostedProfile.class);

@@ -24,26 +24,12 @@
 
 package me.pietelite.nope.common.api;
 
-import java.util.NoSuchElementException;
-import me.pietelite.nope.common.api.edit.SystemEditor;
-import me.pietelite.nope.common.api.evaluate.Evaluator;
-import me.pietelite.nope.common.api.register.SettingManagers;
+import java.util.function.Supplier;
+import me.pietelite.nope.common.api.edit.TargetEditor;
 
-/**
- * A developer API for all platform implementations of Nope.
- */
-public interface NopeService {
+public class TargetEditorTest {
 
-  /**
-   * A tool for retrieving Nope's managers that handle the data for setting keys
-   * and provide their builders.
-   *
-   * @return the managers
-   */
-  SettingManagers settingManagers();
-
-  SystemEditor editSystem();
-
-  Evaluator evaluator();
+  static void editTarget(TargetEditor targetEditor, Supplier<Boolean> hasTarget) {
+  }
 
 }

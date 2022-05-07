@@ -243,25 +243,27 @@ public abstract class HashAltSet<T> implements AltSet<T> {
   }
 
   @Override
-  public void removeAll(@NotNull AltSet<T> other) {
+  public boolean removeAll(@NotNull AltSet<T> other) {
     if (this.inverted) {
       if (other.inverted()) {
         HashSet<T> oldSet = new HashSet<>(this.set);
         this.set.clear();
         this.inverted = false;
+        boolean changed = false;
         for (T element : other.set()) {
-          if (!oldSet.contains(element)) {
-            this.set.add(element);
+          if (!oldSet.contains(element) && this.set.add(element)) {
+            changed = true;
           }
         }
+        return changed;
       } else {
-        this.set.addAll(other.set());
+        return this.set.addAll(other.set());
       }
     } else {
       if (other.inverted()) {
-        this.set.removeIf(e -> !other.set().contains(e));
+        return this.set.removeIf(e -> !other.set().contains(e));
       } else {
-        this.set.removeAll(other.set());
+        return this.set.removeAll(other.set());
       }
     }
   }

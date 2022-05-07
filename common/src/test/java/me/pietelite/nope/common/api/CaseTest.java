@@ -28,7 +28,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import me.pietelite.nope.common.MockNope;
+import me.pietelite.nope.common.Nope;
 import me.pietelite.nope.common.api.edit.ProfileEditor;
+import me.pietelite.nope.common.api.edit.ScopeEditor;
 import me.pietelite.nope.common.api.edit.SystemEditor;
 import me.pietelite.nope.common.api.register.data.BlockChange;
 import me.pietelite.nope.common.setting.SettingKeys;
@@ -39,13 +41,13 @@ public class CaseTest extends ApiTest {
 
   @Test
   void testMarketplace() {
-    SystemEditor editor = service().editSystem();
+    ScopeEditor editor = service().editSystem().editScope(Nope.NOPE_SCOPE);
 
     // setup marketplace
     String name = "marketplace";
     editor.createScene(name, 10);
     editor.createProfile(name);
-    editor.editScene(name).addProfile(name, 0);
+    editor.editScene(name).addProfile(Nope.NOPE_SCOPE, name, 0);
     editor.editScene(name).addCuboid(MockNope.DOMAIN_1, 0, 0, 0, 100, 100, 100);
     ProfileEditor marketplaceProfile = editor.editProfile(name);
     marketplaceProfile.editSingleValueSetting(SettingKeys.RIDE.name(), Boolean.class).set(false);
@@ -83,7 +85,7 @@ public class CaseTest extends ApiTest {
         editor.editScene(stallName).addCuboid(MockNope.DOMAIN_1,
             x * 10, 0, z * 10,
             (x + 1) * 10, 10, (z + 1) * 10);
-        editor.editScene(stallName).addProfile("stall", 0);
+        editor.editScene(stallName).addProfile(Nope.NOPE_SCOPE, "stall", 0);
 
         UUID playerUuid = UUID.randomUUID();
         playerUuids.put(index, playerUuid);

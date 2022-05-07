@@ -25,6 +25,8 @@
 package me.pietelite.nope.common.api;
 
 import me.pietelite.nope.common.MockNope;
+import me.pietelite.nope.common.Nope;
+import me.pietelite.nope.common.api.edit.ScopeEditor;
 import org.junit.jupiter.api.BeforeEach;
 
 public abstract class ApiTest {
@@ -36,6 +38,10 @@ public abstract class ApiTest {
 
   NopeService service() {
     return NopeServiceProvider.service();
+  }
+
+  ScopeEditor nopeScopeEditor() {
+    return service().editSystem().editScope(Nope.NOPE_SCOPE);
   }
 
 }

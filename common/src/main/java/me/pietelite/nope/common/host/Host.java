@@ -25,19 +25,23 @@
 package me.pietelite.nope.common.host;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 import me.pietelite.nope.common.Nope;
 import me.pietelite.nope.common.api.edit.HostEditor;
 import me.pietelite.nope.common.api.edit.TargetEditor;
+import me.pietelite.nope.common.api.struct.Named;
 import me.pietelite.nope.common.setting.SettingKey;
 import me.pietelite.nope.common.setting.Target;
 import me.pietelite.nope.common.storage.Expirable;
 import me.pietelite.nope.common.storage.Persistent;
 import me.pietelite.nope.common.struct.Container;
 import me.pietelite.nope.common.struct.Location;
-import me.pietelite.nope.common.struct.Named;
 import me.pietelite.nope.common.util.Validate;
 
 /**
@@ -120,7 +124,7 @@ public abstract class Host implements Container, Named, Persistent, Expirable {
    */
   public abstract static class Editor<H extends Host> implements HostEditor {
 
-    protected final H host;
+    protected H host;
 
     public Editor(H host) {
       this.host = host;
@@ -133,17 +137,18 @@ public abstract class Host implements Container, Named, Persistent, Expirable {
     }
 
     @Override
-    public List<String> profiles() {
+    public Map<String, List<String>> profiles() {
       host.verifyExistence();
-      return host.hostedProfiles()
-          .stream()
-          .map(hostedProfile -> hostedProfile.profile().name())
-          .collect(Collectors.toList());
+      Map<String, List<String>> out = new HashMap<>();
+      for (HostedProfile p : host.allProfiles()) {
+        out.computeIfAbsent(p.profile().scope(), k -> new LinkedList<>()).add(p.profile().name());
+      }
+      return Collections.unmodifiableMap(out);
     }
 
     @Override
-    public void addProfile(String name, int index) {
-      Profile profile = Nope.instance().system().profiles().get(name);
+    public void addProfile(String scope, String name, int index) {
+      Profile profile = Nope.instance().system().scope(scope).profiles().get(name);
       if (profile == null) {
         throw new NoSuchElementException("No profile exists with name " + name);
       }
@@ -155,14 +160,15 @@ public abstract class Host implements Container, Named, Persistent, Expirable {
         throw new IllegalArgumentException("There is already a profile added with the name " + name);
       }
       host.hostedProfiles().add(index, new HostedProfile(profile));
-      Nope.instance().system().relateProfile(profile.name(), host);
+      Nope.instance().system().scope(scope).relateProfile(profile.name(), host);
       host.save();
     }
 
     @Override
-    public void removeProfile(String name) {
+    public void removeProfile(String scope, String name) {
       host.verifyExistence();
-      if (!host.hostedProfiles().removeIf(hostedProfile -> hostedProfile.profile().name().equalsIgnoreCase(name))) {
+      if (!host.hostedProfiles().removeIf(hostedProfile -> hostedProfile.profile().scope().equals(scope)
+          && hostedProfile.profile().name().equalsIgnoreCase(name))) {
         throw new NoSuchElementException("No profile exists named " + name);
       }
       host.save();
@@ -185,12 +191,12 @@ public abstract class Host implements Container, Named, Persistent, Expirable {
     }
 
     @Override
-    public TargetEditor editTarget(String name) throws NoSuchElementException {
+    public TargetEditor editTarget(String scope, String name) throws NoSuchElementException {
       host.verifyExistence();
       HostedProfile hostedProfile = null;
       for (int i = 0; i < host.hostedProfiles().size(); i++) {
         HostedProfile p = host.hostedProfiles().get(i);
-        if (p.profile().name().equalsIgnoreCase(name)) {
+        if (p.profile().scope().equals(scope) && p.profile().name().equalsIgnoreCase(name)) {
           hostedProfile = p;
           break;
         }

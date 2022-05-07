@@ -24,12 +24,8 @@
 
 package me.pietelite.nope.sponge.storage.yaml;
 
-import java.io.File;
 import java.nio.file.Path;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.stream.Collectors;
-import me.pietelite.nope.common.Nope;
 import me.pietelite.nope.common.host.HostedProfile;
 import me.pietelite.nope.common.math.Volume;
 import me.pietelite.nope.common.setting.Target;
@@ -51,60 +47,23 @@ import org.spongepowered.configurate.yaml.YamlConfigurationLoader;
 public class YamlDataHandler extends ConfigurateDataHandler {
 
   public YamlDataHandler(Path path, SettingValueConfigSerializerRegistrar serializerRegistrar) {
-    super(new ProfileConfigurateDataHandler((name) -> yamlLoader(path.resolve("profiles")
-        .resolve(name + ".yml")),
-        (name) -> path.resolve("profiles")
-            .resolve(name + ".yml"),
-        () -> {
-          File[] files = path.resolve("profiles")
-              .toFile()
-              .listFiles();
-          if (files == null) {
-            return Collections.emptyList();
-          } else {
-            return Arrays.stream(files)
-                .filter(file -> {
-                  String[] tokens = file.getName().split("\\.");
-                  String type = tokens[tokens.length - 1].toLowerCase();
-                  if (type.equals("yml") || type.equals("yaml")) {
-                    return true;
-                  } else {
-                    Nope.instance().logger().error("File " + file.getName() + " is unknown");
-                    return false;
-                  }
-                })
-                .map(file -> yamlLoader(file.toPath()))
-                .collect(Collectors.toList());
-          }
-        }, serializerRegistrar),
-        new YamlGlobalConfig(path, serializerRegistrar),
+    super(new YamlGlobalConfig(path, serializerRegistrar),
         new DomainConfigurateDataHandler((name) -> yamlLoader(path.resolve(name + ".yml"))),
-        new SceneConfigurateDataHandler((name) -> yamlLoader(path.resolve("scenes")
-            .resolve(name + ".yml")),
-            (name) -> path.resolve("scenes")
-                .resolve(name + ".yml"),
-            () -> {
-              File[] files = path.resolve("scenes")
-                  .toFile()
-                  .listFiles();
-              if (files == null) {
-                return Collections.emptyList();
-              } else {
-                return Arrays.stream(files)
-                    .filter(file -> {
-                      String[] tokens = file.getName().split("\\.");
-                      String type = tokens[tokens.length - 1].toLowerCase();
-                      if (type.equals("yml") || type.equals("yaml")) {
-                        return true;
-                      } else {
-                        Nope.instance().logger().error("File " + file.getName() + " is unknown");
-                        return false;
-                      }
-                    })
-                    .map(file -> yamlLoader(file.toPath()))
-                    .collect(Collectors.toList());
-              }
-            }));
+        new SceneConfigurateDataHandler(
+            (scope, name) -> yamlLoader(path.resolve("scenes").resolve(name + ".conf")),
+            (scope, name) -> path.resolve("scenes").resolve(name + ".conf"),
+            persistentComponentPaths(path, "scenes", "conf")
+                .stream()
+                .map(YamlDataHandler::yamlLoader)
+                .collect(Collectors.toList())),
+        new ProfileConfigurateDataHandler(
+            (scope, name) -> yamlLoader(path.resolve("profiles").resolve(name + ".conf")),
+            (scope, name) -> path.resolve("profiles").resolve(name + ".conf"),
+            persistentComponentPaths(path, "profiles", "conf")
+                .stream()
+                .map(YamlDataHandler::yamlLoader)
+                .collect(Collectors.toList()),
+            serializerRegistrar));
   }
 
   /**

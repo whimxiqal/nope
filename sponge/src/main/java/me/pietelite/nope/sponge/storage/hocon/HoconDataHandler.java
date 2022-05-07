@@ -24,12 +24,8 @@
 
 package me.pietelite.nope.sponge.storage.hocon;
 
-import java.io.File;
 import java.nio.file.Path;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.stream.Collectors;
-import me.pietelite.nope.common.Nope;
 import me.pietelite.nope.common.host.HostedProfile;
 import me.pietelite.nope.common.math.Volume;
 import me.pietelite.nope.common.setting.Target;
@@ -56,60 +52,23 @@ public class HoconDataHandler extends ConfigurateDataHandler {
    * @param serializerRegistrar the serializers for setting values
    */
   public HoconDataHandler(Path path, SettingValueConfigSerializerRegistrar serializerRegistrar) {
-    super(new ProfileConfigurateDataHandler((name) -> hoconLoader(path.resolve("profiles")
-            .resolve(name + ".conf")),
-            (name) -> path.resolve("profiles")
-                .resolve(name + ".conf"),
-            () -> {
-              File[] files = path.resolve("profiles")
-                  .toFile()
-                  .listFiles();
-              if (files == null) {
-                return Collections.emptyList();
-              } else {
-                return Arrays.stream(files)
-                    .filter(file -> {
-                      String[] tokens = file.getName().split("\\.");
-                      String type = tokens[tokens.length - 1].toLowerCase();
-                      if (type.equals("conf")) {
-                        return true;
-                      } else {
-                        Nope.instance().logger().error("File " + file.getName() + " is unknown");
-                        return false;
-                      }
-                    })
-                    .map(file -> hoconLoader(file.toPath()))
-                    .collect(Collectors.toList());
-              }
-            }, serializerRegistrar),
-        new GlobalHoconConfig(path, serializerRegistrar),
+    super(new GlobalHoconConfig(path, serializerRegistrar),
         new DomainConfigurateDataHandler((name) -> hoconLoader(path.resolve(name + ".conf"))),
-        new SceneConfigurateDataHandler((name) -> hoconLoader(path.resolve("scenes")
-            .resolve(name + ".conf")),
-            (name) -> path.resolve("scenes")
-                .resolve(name + ".conf"),
-            () -> {
-              File[] files = path.resolve("scenes")
-                  .toFile()
-                  .listFiles();
-              if (files == null) {
-                return Collections.emptyList();
-              } else {
-                return Arrays.stream(files)
-                    .filter(file -> {
-                      String[] tokens = file.getName().split("\\.");
-                      String type = tokens[tokens.length - 1].toLowerCase();
-                      if (type.equals("conf")) {
-                        return true;
-                      } else {
-                        Nope.instance().logger().error("File " + file.getName() + " is unknown");
-                        return false;
-                      }
-                    })
-                    .map(file -> hoconLoader(file.toPath()))
-                    .collect(Collectors.toList());
-              }
-            }));
+        new SceneConfigurateDataHandler(
+            (scope, name) -> hoconLoader(path.resolve("scenes").resolve(name + ".conf")),
+            (scope, name) -> path.resolve("scenes").resolve(name + ".conf"),
+            persistentComponentPaths(path, "scenes", "conf")
+                .stream()
+                .map(HoconDataHandler::hoconLoader)
+                .collect(Collectors.toList())),
+        new ProfileConfigurateDataHandler(
+            (scope, name) -> hoconLoader(path.resolve("profiles").resolve(name + ".conf")),
+            (scope, name) -> path.resolve("profiles").resolve(name + ".conf"),
+            persistentComponentPaths(path, "profiles", "conf")
+                .stream()
+                .map(HoconDataHandler::hoconLoader)
+                .collect(Collectors.toList()),
+            serializerRegistrar));
   }
 
   /**

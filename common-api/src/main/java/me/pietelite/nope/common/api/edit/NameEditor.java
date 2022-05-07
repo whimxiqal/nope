@@ -22,28 +22,22 @@
  * SOFTWARE.
  */
 
-package me.pietelite.nope.common.api;
+package me.pietelite.nope.common.api.edit;
 
-import java.util.NoSuchElementException;
-import me.pietelite.nope.common.api.edit.SystemEditor;
-import me.pietelite.nope.common.api.evaluate.Evaluator;
-import me.pietelite.nope.common.api.register.SettingManagers;
+import me.pietelite.nope.common.api.struct.Named;
 
 /**
- * A developer API for all platform implementations of Nope.
+ * Something that can have its name changed.
  */
-public interface NopeService {
+public interface NameEditor {
 
   /**
-   * A tool for retrieving Nope's managers that handle the data for setting keys
-   * and provide their builders.
+   * Set the name of this item.
    *
-   * @return the managers
+   * @param name the name
+   * @return false if the name was already the input name
+   * @throws IllegalArgumentException if the name is illegal
    */
-  SettingManagers settingManagers();
-
-  SystemEditor editSystem();
-
-  Evaluator evaluator();
+  boolean name(String name) throws IllegalArgumentException;
 
 }

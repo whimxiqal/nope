@@ -25,28 +25,13 @@
 package me.pietelite.nope.common.api.edit;
 
 import java.util.NoSuchElementException;
+import me.pietelite.nope.common.api.struct.Named;
 
 /**
  * An editor for a profile, which is the object that stores settings and therefore
  * defines the functionality for hosts.
  */
-public interface ProfileEditor {
-
-  /**
-   * The name of the profile.
-   *
-   * @return the name
-   */
-  String name();
-
-  /**
-   * Changes the name of the profile.
-   *
-   * @param name the new name
-   * @return false if the name was already the input name
-   * @throws IllegalArgumentException if the name is illegal
-   */
-  boolean name(String name) throws IllegalArgumentException;
+public interface ProfileEditor extends Named, NameEditor {
 
   /**
    * Gets an editor for the target on this whole profile.

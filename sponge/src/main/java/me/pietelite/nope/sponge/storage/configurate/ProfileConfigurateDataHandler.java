@@ -25,17 +25,16 @@
 package me.pietelite.nope.sponge.storage.configurate;
 
 import java.io.File;
-import java.nio.file.Path;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.Function;
-import java.util.function.Supplier;
 import me.pietelite.nope.common.Nope;
 import me.pietelite.nope.common.host.Profile;
 import me.pietelite.nope.common.storage.ProfileDataHandler;
 import me.pietelite.nope.sponge.SpongeNope;
 import me.pietelite.nope.sponge.config.SettingValueConfigSerializerRegistrar;
+import me.pietelite.nope.sponge.storage.configurate.loader.DynamicIndividualConfigurationLoader;
+import me.pietelite.nope.sponge.storage.configurate.loader.DynamicIndividualFilePath;
 import org.spongepowered.configurate.CommentedConfigurationNode;
 import org.spongepowered.configurate.ConfigurateException;
 import org.spongepowered.configurate.ConfigurationNode;
@@ -43,40 +42,42 @@ import org.spongepowered.configurate.loader.ConfigurationLoader;
 
 public class ProfileConfigurateDataHandler extends SettingsConfigurateDataHandler implements ProfileDataHandler {
 
-  private final Function<String, ConfigurationLoader<CommentedConfigurationNode>> loader;
-  private final Function<String, Path> filePath;
-  private final Supplier<Collection<ConfigurationLoader<CommentedConfigurationNode>>> allLoader;
+  private final DynamicIndividualConfigurationLoader loader;
+  private final DynamicIndividualFilePath filePath;
+  private final Collection<ConfigurationLoader<CommentedConfigurationNode>> allLoaders;
 
-  public ProfileConfigurateDataHandler(Function<String, ConfigurationLoader<CommentedConfigurationNode>> loader,
-                                     Function<String, Path> filePath,
-                                     Supplier<Collection<ConfigurationLoader<CommentedConfigurationNode>>>
-                                         allLoader,
-                                     SettingValueConfigSerializerRegistrar serializerRegistrar) {
+  public ProfileConfigurateDataHandler(DynamicIndividualConfigurationLoader loader,
+                                       DynamicIndividualFilePath filePath,
+                                       Collection<ConfigurationLoader<CommentedConfigurationNode>> allLoaders,
+                                       SettingValueConfigSerializerRegistrar serializerRegistrar) {
     super(serializerRegistrar);
     this.loader = loader;
     this.filePath = filePath;
-    this.allLoader = allLoader;
+    this.allLoaders = allLoaders;
   }
 
   @Override
-  public void destroy(Profile scene) {
-    File file = filePath.apply(scene.name()).toFile();
+  public void destroy(Profile profile) {
+    File file = filePath.path(profile.scope(), profile.name()).toFile();
     if (file.exists()) {
       if (!file.delete()) {
-        SpongeNope.instance().logger().error("Error when trying to destroy scene "
-            + scene.name()
+        SpongeNope.instance().logger().error("Error when trying to destroy profile "
+            + profile.name()
             + " by deleting its configuration file");
       }
     }
   }
 
   @Override
-  public void save(Profile scene) {
+  public void save(Profile profile) {
     try {
-      CommentedConfigurationNode root = settingCollectionRoot(scene);
-      root.node("name").set(scene.name());
-      root.node("settings").comment("Settings for Scene " + scene.name());
-      loader.apply(scene.name()).save(root);
+      ConfigurationLoader<CommentedConfigurationNode> loader = this.loader.loader(profile.scope(), profile.name());
+      CommentedConfigurationNode root = loader.load();
+      root.node("scope").set(profile.scope());
+      root.node("name").set(profile.name());
+      root.node("settings").set(serializeSettings(profile));
+      root.node("settings").comment("Settings for Scene " + profile.name());
+      loader.save(root);
     } catch (ConfigurateException e) {
       e.printStackTrace();
     }
@@ -85,11 +86,13 @@ public class ProfileConfigurateDataHandler extends SettingsConfigurateDataHandle
   @Override
   public Collection<Profile> load() {
     Map<String, Profile> profiles = new HashMap<>();
-    for (ConfigurationLoader<CommentedConfigurationNode> loader : allLoader.get()) {
+    for (ConfigurationLoader<CommentedConfigurationNode> loader : allLoaders) {
       ConfigurationNode root;
+      String scope;
       String name;
       try {
         root = loader.load();
+        scope = root.node("scope").get(String.class);
         name = root.node("name").get(String.class);
       } catch (ConfigurateException e) {
         Nope.instance().logger().error("Error loading Profile: " + e.getMessage());
@@ -101,7 +104,7 @@ public class ProfileConfigurateDataHandler extends SettingsConfigurateDataHandle
       }
 
       try {
-        Profile profile = new Profile(name);
+        Profile profile = new Profile(scope, name);
         profile.setAll(deserializeSettings(root.node("settings").childrenMap()));
         profiles.put(name, profile);
       } catch (ConfigurateException e) {
@@ -111,7 +114,7 @@ public class ProfileConfigurateDataHandler extends SettingsConfigurateDataHandle
       }
     }
     if (!profiles.containsKey(Nope.GLOBAL_ID)) {
-      Profile globalProfile = new Profile(Nope.GLOBAL_ID);
+      Profile globalProfile = new Profile(Nope.NOPE_SCOPE, Nope.GLOBAL_ID);
       profiles.put(Nope.GLOBAL_ID, globalProfile);
       save(globalProfile);
     }

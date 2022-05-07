@@ -39,7 +39,7 @@ public class ZoneEditorImpl<V extends Volume> implements ZoneEditor {
 
   protected final Scene scene;
   protected final int index;
-  protected final Volume volume;
+  protected Volume volume;
 
   public ZoneEditorImpl(Scene scene, int index) {
     scene.verifyExistence();
@@ -61,13 +61,13 @@ public class ZoneEditorImpl<V extends Volume> implements ZoneEditor {
 
   @Override
   public final String domain() {
-    volume.verifyExistence();
+    verify();
     return volume.domain().name();
   }
 
   @Override
   public final void domain(String domainName) {
-    volume.verifyExistence();
+    verify();
     Domain domain = Nope.instance().system().domains().get(domainName);
     if (domain == null) {
       throw new NoSuchElementException("There is no domain with name " + domainName);
@@ -77,7 +77,7 @@ public class ZoneEditorImpl<V extends Volume> implements ZoneEditor {
 
   @Override
   public void destroy() {
-    volume.verifyExistence();
+    verify();
     scene.volumes().remove(volume);
     volume.domain().volumes().remove(volume, true);
     volume.expire();
@@ -91,14 +91,22 @@ public class ZoneEditorImpl<V extends Volume> implements ZoneEditor {
   }
 
   protected final void update(Volume newVolume) {
-    scene.verifyExistence();
-    volume.verifyExistence();
+    verify();
     volume.domain().volumes().remove(volume, false);
     volume.copyUuidTo(newVolume);
     volume.domain().volumes().put(newVolume, scene, true);
     volume.expire();
     scene.volumes().set(index, newVolume);
+    this.volume = newVolume;
     scene.save();
+  }
+
+  private void verify() {
+    scene.verifyExistence();
+    volume.verifyExistence();
+    if (scene.volumes().size() <= index || !scene.volumes().get(index).uuid().equals(volume.uuid())) {
+      throw new IllegalStateException("The scene's volume list changed. Create a new editor.");
+    }
   }
 
   @SuppressWarnings("unchecked")

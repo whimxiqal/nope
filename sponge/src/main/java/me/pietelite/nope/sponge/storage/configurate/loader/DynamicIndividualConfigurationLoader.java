@@ -22,28 +22,14 @@
  * SOFTWARE.
  */
 
-package me.pietelite.nope.common.api;
+package me.pietelite.nope.sponge.storage.configurate.loader;
 
-import java.util.NoSuchElementException;
-import me.pietelite.nope.common.api.edit.SystemEditor;
-import me.pietelite.nope.common.api.evaluate.Evaluator;
-import me.pietelite.nope.common.api.register.SettingManagers;
+import java.util.function.BiFunction;
+import org.spongepowered.configurate.CommentedConfigurationNode;
+import org.spongepowered.configurate.loader.ConfigurationLoader;
 
-/**
- * A developer API for all platform implementations of Nope.
- */
-public interface NopeService {
+public interface DynamicIndividualConfigurationLoader {
 
-  /**
-   * A tool for retrieving Nope's managers that handle the data for setting keys
-   * and provide their builders.
-   *
-   * @return the managers
-   */
-  SettingManagers settingManagers();
-
-  SystemEditor editSystem();
-
-  Evaluator evaluator();
+  ConfigurationLoader<CommentedConfigurationNode> loader(String scope, String name);
 
 }

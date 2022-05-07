@@ -26,17 +26,16 @@ package me.pietelite.nope.sponge.command.tree.host.blank.edit.volumes.create.sel
 
 import java.util.LinkedList;
 import java.util.List;
-import me.pietelite.nope.common.api.NopeServiceProvider;
 import me.pietelite.nope.common.host.Scene;
 import me.pietelite.nope.common.math.Geometry;
 import me.pietelite.nope.common.math.Slab;
 import me.pietelite.nope.common.permission.Permissions;
+import me.pietelite.nope.common.util.ApiUtil;
 import me.pietelite.nope.sponge.SpongeNope;
 import me.pietelite.nope.sponge.command.CommandNode;
 import me.pietelite.nope.sponge.command.parameters.Parameters;
 import me.pietelite.nope.sponge.command.tree.host.blank.edit.EditSceneCommandNode;
 import me.pietelite.nope.sponge.tool.SlabSelection;
-import me.pietelite.nope.sponge.util.EffectsUtil;
 import me.pietelite.nope.sponge.util.Formatter;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.exception.CommandException;
@@ -87,7 +86,7 @@ public class SelectionSlabCommand extends EditSceneCommandNode {
         ));
       }
     }
-    NopeServiceProvider.service().editSystem().editScene(scene.name()).addSlab(volume.domain().name(),
+    ApiUtil.editNopeScope().editScene(scene.name()).addSlab(volume.domain().name(),
         volume.minY(), volume.maxY());
     context.cause().audience().sendMessage(Formatter.success(
         "A ___ was created on scene ___",

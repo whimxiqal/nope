@@ -36,15 +36,6 @@ import java.util.Set;
 public interface SystemEditor {
 
   /**
-   * Gets an editor for an existing generic host.
-   *
-   * @param name the name of the host
-   * @return the editor
-   * @throws NoSuchElementException if no host exists with that name
-   */
-  HostEditor editHost(String name) throws NoSuchElementException;
-
-  /**
    * Gets an editor specifically for the "global host".
    * The global host encapsulates all locations on the server.
    *
@@ -70,51 +61,29 @@ public interface SystemEditor {
   HostEditor editDomain(String name) throws NoSuchElementException;
 
   /**
-   * Gets all scene names.
+   * Gets an editor for a specific scope.
+   * All user-created components are created within a scope so other scopes
+   * don't accidentally edit them.
+   * This is so that developers may safely create their scenes, profiles, etc.
+   * without worrying that someone else might accidentally overwrite or delete their component.
    *
-   * @return the scene set
+   * <p>There is no need to "create" a scope; it will be created once an operation in the
+   * {@link ScopeEditor} is performed.
+   *
+   * @param scope the name of the scope
+   * @return the editor for the scope
    */
-  Set<String> scenes();
+  ScopeEditor editScope(String scope) throws NoSuchElementException;
 
   /**
-   * Gets an editor for a specific scene.
+   * Creates a new scope, if one wasn't already created.
+   * If there already was a scope with this name, it will just return the editor for the existing scope
+   * with no error.
    *
-   * @param name the name of the scene
-   * @return the editor
-   * @throws NoSuchElementException if no scene exists with that name
+   * @param scope the name of the scope; must be a combination of lowercase letters and hyphens
+   * @return the editor for the scope
+   * @throws IllegalArgumentException if the name is invalid
    */
-  SceneEditor editScene(String name) throws NoSuchElementException;
-
-  /**
-   * Creates a scene with the given name and priority.
-   *
-   * @param name     the name of the scene to create
-   * @param priority the priority of the scene
-   * @throws IllegalArgumentException if there already exists a host with the given name
-   */
-  void createScene(String name, int priority) throws IllegalArgumentException;
-
-  /**
-   * Gets all profile names.
-   *
-   * @return the profile set
-   */
-  Set<String> profiles();
-
-  /**
-   * Gets an editor for a specific profile.
-   *
-   * @param name the name of the profile
-   * @return the editor
-   * @throws NoSuchElementException if no profile exists with that name
-   */
-  ProfileEditor editProfile(String name) throws NoSuchElementException;
-
-  /**
-   * Creates a profile with the given name.
-   *
-   * @param name the name of the profile
-   */
-  void createProfile(String name);
+  ScopeEditor createScope(String scope) throws IllegalArgumentException;
 
 }

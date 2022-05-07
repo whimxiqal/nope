@@ -91,8 +91,9 @@ public interface MultipleValueSettingEditor<T> extends SettingEditor {
    * @param type the type of effect this {@link AltSet} will have. If "additive", the {@link AltSet}
    *             will be added to the mutable list during setting evaluation.
    *             Similarly, if "subtractive", the {@link AltSet} will be subtracted from the mutable list.
+   * @throws IllegalArgumentException if the set you give overlaps with the existing set of the other type
    */
-  void setManipulative(AltSet<T> set, ManipulativeType type);
+  void setManipulative(AltSet<T> set, ManipulativeType type) throws IllegalArgumentException;
 
   /**
    * Get a manipulative component of the value on this setting.

@@ -24,10 +24,12 @@
 
 package me.pietelite.nope.sponge.command.tree.profile.blank.edit;
 
+import me.pietelite.nope.common.Nope;
 import me.pietelite.nope.common.api.NopeServiceProvider;
 import me.pietelite.nope.common.host.Profile;
 import me.pietelite.nope.common.permission.Permissions;
 import me.pietelite.nope.common.setting.SettingKey;
+import me.pietelite.nope.common.util.ApiUtil;
 import me.pietelite.nope.sponge.command.CommandNode;
 import me.pietelite.nope.sponge.command.FunctionlessCommandNode;
 import me.pietelite.nope.sponge.command.parameters.ParameterKeys;
@@ -43,10 +45,7 @@ public class SettingCommand extends FunctionlessCommandNode {
     CommandNode targetCommand = new TargetCommand(this, context -> {
       Profile profile = context.requireOne(Parameters.PROFILE);
       SettingKey<?, ?, ?> key = context.requireOne(ParameterKeys.SETTING_KEY);
-      return NopeServiceProvider.service().editSystem()
-          .editProfile(profile.name())
-          .editSetting(key.name())
-          .editTarget();
+      return ApiUtil.editNopeScope().editProfile(profile.name()).editSetting(key.name()).editTarget();
     }, null, "a setting on a profile");
     targetCommand.prefix(Parameters.SETTING_KEY);
     addChild(targetCommand);

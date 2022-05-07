@@ -49,12 +49,12 @@ public class EvaluateTest extends ApiTest {
     BlockChangeSet globalBlockChanges = new BlockChangeSet(true);
     globalBlockChanges.remove(BlockChange.BREAK);
     globalBlockChanges.remove(BlockChange.PLACE);
-    service().editSystem().editProfile(Nope.GLOBAL_ID).editMultipleValueSetting(SettingKeys.BLOCK_CHANGE.name(), BlockChange.class).setDeclarative(globalBlockChanges);
+    service().editSystem().editScope(Nope.NOPE_SCOPE).editProfile(Nope.GLOBAL_ID).editMultipleValueSetting(SettingKeys.BLOCK_CHANGE.name(), BlockChange.class).setDeclarative(globalBlockChanges);
     Assertions.assertEquals(globalBlockChanges, service().evaluator().polySetting(SettingKeys.BLOCK_CHANGE.name(), 0, 0, 0, MockNope.DOMAIN_1, BlockChange.class));
     Assertions.assertEquals(globalBlockChanges, service().evaluator().polySetting(SettingKeys.BLOCK_CHANGE.name(), 0, 0, 0, MockNope.DOMAIN_1, UUID.randomUUID(), BlockChange.class));
     Assertions.assertEquals(globalBlockChanges, service().evaluator().polySettingGlobal(SettingKeys.BLOCK_CHANGE.name(), BlockChange.class));
     Assertions.assertEquals(globalBlockChanges, service().evaluator().polySettingGlobal(SettingKeys.BLOCK_CHANGE.name(), UUID.randomUUID(), BlockChange.class));
-    service().editSystem().editProfile(Nope.GLOBAL_ID).editSingleValueSetting(SettingKeys.RIDE.name(), Boolean.class).set(false);
+    service().editSystem().editScope(Nope.NOPE_SCOPE).editProfile(Nope.GLOBAL_ID).editSingleValueSetting(SettingKeys.RIDE.name(), Boolean.class).set(false);
     Assertions.assertEquals(false, service().evaluator().unarySetting(SettingKeys.RIDE.name(), 0, 0, 0, MockNope.DOMAIN_1, UUID.randomUUID(), Boolean.class));
     Assertions.assertEquals(false, service().evaluator().unarySetting(SettingKeys.RIDE.name(), 0, 0, 0, MockNope.DOMAIN_1, UUID.randomUUID(), Boolean.class));
   }
@@ -65,15 +65,15 @@ public class EvaluateTest extends ApiTest {
     BlockChangeSet globalBlockChanges = new BlockChangeSet(true);
     globalBlockChanges.remove(BlockChange.BREAK);
     globalBlockChanges.remove(BlockChange.PLACE);
-    service().editSystem().editProfile(Nope.GLOBAL_ID).editMultipleValueSetting(SettingKeys.BLOCK_CHANGE.name(), BlockChange.class)
+    service().editSystem().editScope(Nope.NOPE_SCOPE).editProfile(Nope.GLOBAL_ID).editMultipleValueSetting(SettingKeys.BLOCK_CHANGE.name(), BlockChange.class)
         .setDeclarative(globalBlockChanges);
 
     // edit domain
-    service().editSystem().createProfile(MockNope.DOMAIN_1);
-    service().editSystem().editDomain(MockNope.DOMAIN_1).addProfile(MockNope.DOMAIN_1, 0);
+    service().editSystem().editScope(Nope.NOPE_SCOPE).createProfile(MockNope.DOMAIN_1);
+    service().editSystem().editDomain(MockNope.DOMAIN_1).addProfile(Nope.NOPE_SCOPE, MockNope.DOMAIN_1, 0);
     BlockChangeSet domainBlockChanges = new BlockChangeSet(false);
     domainBlockChanges.add(BlockChange.GROW);
-    service().editSystem().editProfile(MockNope.DOMAIN_1).editMultipleValueSetting(SettingKeys.BLOCK_CHANGE.name(), BlockChange.class)
+    service().editSystem().editScope(Nope.NOPE_SCOPE).editProfile(MockNope.DOMAIN_1).editMultipleValueSetting(SettingKeys.BLOCK_CHANGE.name(), BlockChange.class)
         .setDeclarative(domainBlockChanges);
 
     Assertions.assertEquals(globalBlockChanges, service().evaluator().polySettingGlobal(SettingKeys.BLOCK_CHANGE.name(), BlockChange.class));
@@ -83,10 +83,10 @@ public class EvaluateTest extends ApiTest {
     Assertions.assertEquals(globalBlockChanges, service().evaluator().polySetting(SettingKeys.BLOCK_CHANGE.name(), 0, 0, 0, MockNope.DOMAIN_2, UUID.randomUUID(), BlockChange.class));
 
     // edit global
-    service().editSystem().editProfile(Nope.GLOBAL_ID).editSingleValueSetting(SettingKeys.RIDE.name(), Boolean.class).set(false);
+    service().editSystem().editScope(Nope.NOPE_SCOPE).editProfile(Nope.GLOBAL_ID).editSingleValueSetting(SettingKeys.RIDE.name(), Boolean.class).set(false);
 
     // edit domain
-    service().editSystem().editProfile(MockNope.DOMAIN_1).editSingleValueSetting(SettingKeys.RIDE.name(), Boolean.class).set(true);
+    service().editSystem().editScope(Nope.NOPE_SCOPE).editProfile(MockNope.DOMAIN_1).editSingleValueSetting(SettingKeys.RIDE.name(), Boolean.class).set(true);
 
     Assertions.assertEquals(service().evaluator().unarySetting(SettingKeys.RIDE.name(), 0, 0, 0, MockNope.DOMAIN_1, Boolean.class), true);
     Assertions.assertEquals(service().evaluator().unarySetting(SettingKeys.RIDE.name(), 0, 0, 0, MockNope.DOMAIN_1, UUID.randomUUID(), Boolean.class), true);
@@ -101,15 +101,15 @@ public class EvaluateTest extends ApiTest {
     BlockChangeSet globalBlockChanges = new BlockChangeSet(false);
     globalBlockChanges.add(BlockChange.BREAK);
     globalBlockChanges.add(BlockChange.PLACE);
-    service().editSystem().editProfile(Nope.GLOBAL_ID).editMultipleValueSetting(SettingKeys.BLOCK_CHANGE.name(), BlockChange.class)
+    service().editSystem().editScope(Nope.NOPE_SCOPE).editProfile(Nope.GLOBAL_ID).editMultipleValueSetting(SettingKeys.BLOCK_CHANGE.name(), BlockChange.class)
         .setManipulative(globalBlockChanges, MultipleValueSettingEditor.ManipulativeType.SUBTRACTIVE);
 
     // edit domain
-    service().editSystem().createProfile(MockNope.DOMAIN_1);
-    service().editSystem().editDomain(MockNope.DOMAIN_1).addProfile(MockNope.DOMAIN_1, 0);
+    service().editSystem().editScope(Nope.NOPE_SCOPE).createProfile(MockNope.DOMAIN_1);
+    service().editSystem().editDomain(MockNope.DOMAIN_1).addProfile(Nope.NOPE_SCOPE, MockNope.DOMAIN_1, 0);
     BlockChangeSet domainBlockChanges = new BlockChangeSet(false);
     domainBlockChanges.add(BlockChange.GROW);
-    service().editSystem().editProfile(MockNope.DOMAIN_1).editMultipleValueSetting(SettingKeys.BLOCK_CHANGE.name(), BlockChange.class)
+    service().editSystem().editScope(Nope.NOPE_SCOPE).editProfile(MockNope.DOMAIN_1).editMultipleValueSetting(SettingKeys.BLOCK_CHANGE.name(), BlockChange.class)
         .setManipulative(domainBlockChanges, MultipleValueSettingEditor.ManipulativeType.SUBTRACTIVE);
 
     BlockChangeSet d1Result = new BlockChangeSet(true);

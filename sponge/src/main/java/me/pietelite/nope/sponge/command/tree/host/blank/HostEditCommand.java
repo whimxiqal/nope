@@ -24,14 +24,13 @@
 
 package me.pietelite.nope.sponge.command.tree.host.blank;
 
-import me.pietelite.nope.common.api.NopeServiceProvider;
+import me.pietelite.nope.common.Nope;
 import me.pietelite.nope.common.host.Host;
 import me.pietelite.nope.common.host.Profile;
 import me.pietelite.nope.common.permission.Permissions;
-import me.pietelite.nope.common.setting.SettingKey;
+import me.pietelite.nope.common.util.ApiUtil;
 import me.pietelite.nope.sponge.command.CommandNode;
 import me.pietelite.nope.sponge.command.FunctionlessCommandNode;
-import me.pietelite.nope.sponge.command.parameters.ParameterKeys;
 import me.pietelite.nope.sponge.command.parameters.Parameters;
 import me.pietelite.nope.sponge.command.target.TargetCommand;
 import me.pietelite.nope.sponge.command.tree.host.blank.edit.NameCommand;
@@ -53,9 +52,7 @@ public class HostEditCommand extends FunctionlessCommandNode {
     addChild(new TargetCommand(this, context -> {
       Host host = context.requireOne(Parameters.HOST);
       Profile profile = context.requireOne(Parameters.PROFILE);
-      return NopeServiceProvider.service().editSystem()
-          .editHost(host.name())
-          .editTarget(profile.name());
+      return ApiUtil.editHost(host.name()).editTarget(Nope.NOPE_SCOPE, profile.name());
     }, Parameters.PROFILE, "all settings on a profile for this host"));
   }
 

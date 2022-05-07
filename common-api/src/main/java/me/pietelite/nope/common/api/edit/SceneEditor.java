@@ -32,16 +32,7 @@ import java.util.NoSuchElementException;
  * Scenes are hosts that encapsulate the space within a collection of volumes,
  * called zones. These zones are three-dimensional geometric objects.
  */
-public interface SceneEditor extends HostEditor {
-
-  /**
-   * Set the name of the scene.
-   *
-   * @param name the name
-   * @return false if the name was already the input name
-   * @throws IllegalArgumentException if the name is illegal
-   */
-  boolean name(String name) throws IllegalArgumentException;
+public interface SceneEditor extends HostEditor, NameEditor {
 
   /**
    * Add a cuboid (box) zone to this scene.
@@ -53,10 +44,12 @@ public interface SceneEditor extends HostEditor {
    * @param x2     another side of the x-axis range
    * @param y2     another side of the y-axis range
    * @param z2     another side of the z-axis range
-   * @throws NoSuchElementException if the domain does not exist
+   * @return an editor for the cuboid
+   * @throws NoSuchElementException   if the domain does not exist
+   * @throws IllegalArgumentException if any of the lengths of the cuboid are 0
    */
-  void addCuboid(String domain, float x1, float y1, float z1, float x2, float y2, float z2)
-      throws NoSuchElementException;
+  CuboidEditor addCuboid(String domain, float x1, float y1, float z1, float x2, float y2, float z2)
+      throws NoSuchElementException, IllegalArgumentException;
 
   /**
    * Add a cylinder zone to this scene.
@@ -67,10 +60,12 @@ public interface SceneEditor extends HostEditor {
    * @param z      the z coordinate of the center of the cylinder
    * @param radius the radius of the cylinder
    * @param height the height of the cylinder
-   * @throws NoSuchElementException if the domain does not exist
+   * @return an editor for the cylinder
+   * @throws NoSuchElementException   if the domain does not exist
+   * @throws IllegalArgumentException if the radius or height is 0 or negative
    */
-  void addCylinder(String domain, float x, float y, float z, float radius, float height)
-      throws NoSuchElementException;
+  CylinderEditor addCylinder(String domain, float x, float y, float z, float radius, float height)
+      throws NoSuchElementException, IllegalArgumentException;
 
   /**
    * Add a slab zone to this scene. A slab is bounded in the y dimension but is unbounded
@@ -79,9 +74,12 @@ public interface SceneEditor extends HostEditor {
    * @param domain the name of the domain
    * @param y      the y value of the lower boundary of the slab
    * @param height the height of the slab
-   * @throws NoSuchElementException if the domain does not exist
+   * @return an editor for the slab
+   * @throws NoSuchElementException   if the domain does not exist
+   * @throws IllegalArgumentException if the height is 0 or negative
    */
-  void addSlab(String domain, float y, float height) throws NoSuchElementException;
+  SlabEditor addSlab(String domain, float y, float height)
+      throws NoSuchElementException, IllegalArgumentException;
 
   /**
    * Add a sphere to this scene.
@@ -91,9 +89,12 @@ public interface SceneEditor extends HostEditor {
    * @param y      the y coordinate of the center of the sphere
    * @param z      the z coordinate of the center of the sphere
    * @param radius the radius of the sphere
-   * @throws NoSuchElementException if the domain does not exist
+   * @return an editor for the sphere
+   * @throws NoSuchElementException   if the domain does not exist
+   * @throws IllegalArgumentException if the radius is 0 or negative
    */
-  void addSphere(String domain, float x, float y, float z, float radius) throws NoSuchElementException;
+  SphereEditor addSphere(String domain, float x, float y, float z, float radius)
+      throws NoSuchElementException, IllegalArgumentException;
 
   /**
    * Set the priority of this scene. In the event that a setting is evaluated and multiple hosts
@@ -108,7 +109,7 @@ public interface SceneEditor extends HostEditor {
    * @param priority the new priority
    * @return the number of scenes whose priority changed as a result of this priority changing
    */
-  int priority(int priority);
+  int priority(int priority) throws IllegalArgumentException;
 
   /**
    * Gets a list of every volume type in order of the volume list.

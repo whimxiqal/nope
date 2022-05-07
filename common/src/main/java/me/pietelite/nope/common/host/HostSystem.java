@@ -25,35 +25,58 @@
 package me.pietelite.nope.common.host;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
-import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import me.pietelite.nope.common.Nope;
 import me.pietelite.nope.common.api.edit.HostEditor;
-import me.pietelite.nope.common.api.edit.ProfileEditor;
-import me.pietelite.nope.common.api.edit.SceneEditor;
+import me.pietelite.nope.common.api.edit.ScopeEditor;
 import me.pietelite.nope.common.api.edit.SystemEditor;
 import me.pietelite.nope.common.math.Volume;
 import me.pietelite.nope.common.setting.SettingKey;
 import me.pietelite.nope.common.struct.IgnoreCaseStringHashMap;
 import me.pietelite.nope.common.struct.Location;
+import me.pietelite.nope.common.util.Validate;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class HostSystem {
 
   private final IgnoreCaseStringHashMap<Domain> domains = new IgnoreCaseStringHashMap<>();
-  private final IgnoreCaseStringHashMap<Scene> scenes = new IgnoreCaseStringHashMap<>();
-  private final IgnoreCaseStringHashMap<Profile> profiles = new IgnoreCaseStringHashMap<>();
-  private final Map<String, Set<Host>> profileBackwardsMap = new HashMap<>();
+  private final IgnoreCaseStringHashMap<Scope> scopes = new IgnoreCaseStringHashMap<>();
+
   private Global global;
+
+  public HostSystem() {
+    scopes.put(Nope.NOPE_SCOPE, new Scope(Nope.NOPE_SCOPE));
+  }
+
+  public static void updateScenePriority(Scene scene, int newPriority, UpdatePrioritiesResult result) {
+    if (newPriority < 0) {
+      throw new IllegalArgumentException("Cannot set a negative priority");
+    }
+    if (newPriority >= Integer.MAX_VALUE) {
+      result.failChangedCount++;
+      return;
+    }
+    if (scene.priority != newPriority) {
+      result.successfullyChangedCount++;
+    }
+    scene.priority = newPriority;
+    scene.save();
+    scene.volumes().forEach(volume -> volume.domain().volumes()
+        .intersecting(scene)
+        .stream()
+        .filter(other -> !other.equals(scene))
+        .filter(other -> scene.priority() == other.priority())
+        .forEach(zone -> updateScenePriority(zone, scene.priority + 1, result)));
+  }
 
   public Global global() {
     return global;
@@ -67,37 +90,42 @@ public class HostSystem {
     return domains;
   }
 
-  public IgnoreCaseStringHashMap<Scene> scenes() {
-    return scenes;
+  public Scope getOrCreateScope(String name) {
+    Scope scope = scopes.get(name);
+    if (scope == null) {
+      scope = new Scope(name);
+      scopes.put(name, scope);
+    }
+    return scope;
   }
 
-  public IgnoreCaseStringHashMap<Profile> profiles() {
-    return profiles;
+  public Scope scope(String name) {
+    return scopes.get(name);
   }
 
-  public void relateProfile(String profileName, Host scene) {
-    profileBackwardsMap.computeIfAbsent(profileName, k -> new HashSet<>()).add(scene);
-  }
-
-  public void unrelateProfile(String profileName) {
-    profileBackwardsMap.remove(profileName);
-  }
-
-  public Set<Host> relatedToProfile(String profileName) {
-    return profileBackwardsMap.get(profileName);
+  public List<Scope> scopes() {
+    return new LinkedList<>(scopes.values());
   }
 
   /**
-   * Returns a map of every host keyed by its name.
+   * Returns a list of every host.
    *
    * @return all hosts
    */
   @NotNull
-  public Map<String, Host> hosts() {
+  public List<Host> hosts() {
+    List<Host> hosts = new LinkedList<>();
+    hosts.add(this.global);
+    hosts.addAll(this.domains.values());
+    scopes.values().forEach(scope -> hosts.addAll(scope.scenes().values()));
+    return hosts;
+  }
+
+  public Map<String, Host> hosts(String scopeName) {
     Map<String, Host> hosts = new HashMap<>();
-    hosts.put(this.global.name(), this.global);
+    hosts.put(this.global.name, this.global);
     hosts.putAll(this.domains.map());
-    hosts.putAll(this.scenes.map());
+    hosts.putAll(scope(scopeName).scenes().map());
     return hosts;
   }
 
@@ -107,71 +135,24 @@ public class HostSystem {
    *
    * @param volume the volume to add on the scene
    * @param scene  the scene
+   * @return the index at which the volume was added for the scene
    */
-  public void addVolume(Volume volume, Scene scene) {
+  public int addVolume(Volume volume, Scene scene) {
     LinkedList<Volume> newVolumes = new LinkedList<>();
     for (Volume oldVolume : scene.volumes()) {
       if (oldVolume.uuid().equals(volume.uuid())) {
         assert oldVolume.domain() == volume.domain();
-        newVolumes.add(volume);
         volume.domain().volumes().remove(oldVolume, false);
       } else {
         newVolumes.add(oldVolume);
       }
     }
+    newVolumes.add(volume);
     scene.volumes(newVolumes);
     volume.domain().volumes().put(volume, scene, true);
     ensureScenePriority(scene);
     scene.save();
-  }
-
-  /**
-   * Load a series of scenes into the system.
-   *
-   * @param scenes the scenes
-   */
-  public void loadScenes(Iterable<Scene> scenes) {
-    // Put all scenes in the collection of scenes for indexing by their name
-    scenes.forEach(scene -> this.scenes.put(scene.name().toLowerCase(), scene));
-
-    Set<Domain> domains = new HashSet<>();
-    // Add all volumes into volume tree
-    scenes.forEach(scene -> scene.volumes().forEach(volume -> {
-      volume.domain().volumes().put(volume, scene, false);
-      domains.add(volume.domain());
-    }));
-    // Construct all volume trees that were affected
-    domains.forEach(domain -> domain.volumes().construct());
-  }
-
-  /**
-   * Remove a {@link Scene} from the system by name.
-   *
-   * @param sceneName the name of the zone
-   * @return the {@link Scene} that was removed
-   */
-  @Nullable
-  public Scene removeScene(String sceneName) {
-    Scene removed = scenes.remove(sceneName.toLowerCase());
-    if (removed != null) {
-      Set<Domain> domains = new HashSet<>();
-      removed.volumes().forEach(volume -> {
-        volume.domain().volumes().remove(volume, false);
-        domains.add(volume.domain());
-      });
-      removed.expire();
-      domains.forEach(domain -> domain.volumes().construct());
-    }
-    return removed;
-  }
-
-  @Nullable
-  public Scene get(String sceneName) {
-    return scenes.get(sceneName);
-  }
-
-  public Collection<Scene> getAll() {
-    return scenes.values();
+    return newVolumes.size() - 1;
   }
 
   /**
@@ -196,10 +177,40 @@ public class HostSystem {
   }
 
   public boolean isAssigned(SettingKey<?, ?, ?> key) {
-    return hosts().values().stream().anyMatch(host ->
+    return hosts().stream().anyMatch(host ->
         host.hostedProfiles().stream().anyMatch(profileItem ->
             profileItem.profile().get(key).isPresent()));
   }
+
+  public boolean hasName(String scope, String name) {
+    if (global.name().equalsIgnoreCase(name)) {
+      return true;
+    }
+    if (domains().containsKey(name)) {
+      return true;
+    }
+    return scope(scope).scenes().containsKey(name);
+  }
+
+  /**
+   * Load a series of scenes into the system.
+   *
+   * @param scenes the scenes
+   */
+  public void loadScenes(Iterable<Scene> scenes) {
+    // Put all scenes in the collection of scenes for indexing by their name
+    scenes.forEach(scene -> getOrCreateScope(scene.scope()).scenes().put(scene.name().toLowerCase(), scene));
+
+    Set<Domain> domains = new HashSet<>();
+    // Add all volumes into volume tree
+    scenes.forEach(scene -> scene.volumes().forEach(volume -> {
+      volume.domain().volumes().put(volume, scene, false);
+      domains.add(volume.domain());
+    }));
+    // Construct all volume trees that were affected
+    domains.forEach(domain -> domain.volumes().construct());
+  }
+
 
   public <X> Evaluation<X> lookupAnonymous(@NotNull SettingKey<X, ?, ?> key,
                                            @NotNull Location location) {
@@ -280,43 +291,6 @@ public class HostSystem {
     return key.extractValue(hosts, userUuid);
   }
 
-  /**
-   * Lookup a host by name.
-   *
-   * @param name the name of a host
-   * @return the host, or an empty optional if none exists
-   */
-  public Optional<Host> host(String name) {
-    if (name.equalsIgnoreCase(global.name())) {
-      return Optional.of(global);
-    } else if (domains.containsKey(name.toLowerCase())) {
-      return Optional.of(domains.get(name.toLowerCase()));
-    } else {
-      return Optional.ofNullable(scenes.get(name.toLowerCase()));
-    }
-  }
-
-  public void updateScenePriority(Scene scene, int newPriority, UpdatePrioritiesResult result) {
-    if (newPriority < 0) {
-      throw new IllegalArgumentException("Cannot set a negative priority");
-    }
-    if (newPriority >= Integer.MAX_VALUE) {
-      result.failChangedCount++;
-      return;
-    }
-    if (scene.priority != newPriority) {
-      result.successfullyChangedCount++;
-    }
-    scene.priority = newPriority;
-    scene.save();
-    scene.volumes().forEach(volume -> volume.domain().volumes()
-        .intersecting(scene)
-        .stream()
-        .filter(other -> !other.equals(scene))
-        .filter(other -> scene.priority() == other.priority())
-        .forEach(zone -> updateScenePriority(zone, scene.priority + 1, result)));
-  }
-
   public void ensureScenePriority(Scene scene) {
     updateScenePriority(scene, scene.priority, new HostSystem.UpdatePrioritiesResult());
   }
@@ -327,22 +301,6 @@ public class HostSystem {
   }
 
   public static class Editor implements SystemEditor {
-
-    @Override
-    public HostEditor editHost(String name) {
-      Scene scene = Nope.instance().system().scenes().get(name);
-      if (scene != null) {
-        return new Scene.Editor(scene);
-      }
-      Domain domain = Nope.instance().system().domains().get(name);
-      if (domain != null) {
-        return new Domain.Editor(domain);
-      }
-      if (name.equalsIgnoreCase(Nope.GLOBAL_ID)) {
-        return new Global.Editor();
-      }
-      throw new NoSuchElementException();
-    }
 
     @Override
     public HostEditor editGlobal() {
@@ -364,53 +322,20 @@ public class HostSystem {
     }
 
     @Override
-    public Set<String> scenes() {
-      return Nope.instance().system().scenes().realKeys();
-    }
-
-    @Override
-    public SceneEditor editScene(String name) throws NoSuchElementException {
-      Scene scene = Nope.instance().system().scenes().get(name);
-      if (scene == null) {
-        throw new NoSuchElementException();
+    public ScopeEditor editScope(String scopeName) {
+      Scope scope = Nope.instance().system().scope(scopeName);
+      if (scope == null) {
+        throw new NoSuchElementException("No scope with name " + scopeName + " exists");
       }
-      return new Scene.Editor(scene);
+      return new Scope.Editor(scope);
     }
 
     @Override
-    public void createScene(String name, int priority) {
-      Optional<Host> existingHost = Nope.instance().system().host(name);
-      if (existingHost.isPresent()) {
-        throw new IllegalArgumentException("A host already exists with the name " + existingHost.get().name());
+    public ScopeEditor createScope(String scope) throws IllegalArgumentException {
+      if (Validate.invalidId(scope)) {
+        throw new IllegalArgumentException("The name " + scope + " is not a valid scope id");
       }
-      Scene scene = new Scene(name, priority);
-      Nope.instance().system().scenes().put(name.toLowerCase(), scene);
-      scene.save();
-    }
-
-    @Override
-    public Set<String> profiles() {
-      return Nope.instance().system().profiles().realKeys();
-    }
-
-    @Override
-    public ProfileEditor editProfile(String name) throws NoSuchElementException {
-      Profile profile = Nope.instance().system().profiles().get(name.toLowerCase());
-      if (profile == null) {
-        throw new NoSuchElementException("There is no profile with name: " + name);
-      }
-      return new Profile.Editor(profile);
-    }
-
-    @Override
-    public void createProfile(String name) {
-      Profile existingProfile = Nope.instance().system().profiles().get(name.toLowerCase());
-      if (existingProfile != null) {
-        throw new IllegalArgumentException("A host already exists with the name " + existingProfile.name());
-      }
-      Profile profile = new Profile(name);
-      Nope.instance().system().profiles().put(name.toLowerCase(), profile);
-      profile.save();
+      return new Scope.Editor(Nope.instance().system().getOrCreateScope(scope));
     }
   }
 

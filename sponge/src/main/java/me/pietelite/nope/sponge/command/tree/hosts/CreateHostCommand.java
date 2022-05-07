@@ -24,14 +24,12 @@
 
 package me.pietelite.nope.sponge.command.tree.hosts;
 
-import java.util.Optional;
 import me.pietelite.nope.common.Nope;
-import me.pietelite.nope.common.api.NopeServiceProvider;
 import me.pietelite.nope.common.host.Host;
 import me.pietelite.nope.common.host.Scene;
 import me.pietelite.nope.common.permission.Permissions;
+import me.pietelite.nope.common.util.ApiUtil;
 import me.pietelite.nope.sponge.command.CommandNode;
-import me.pietelite.nope.sponge.command.parameters.Flags;
 import me.pietelite.nope.sponge.command.parameters.ParameterKeys;
 import me.pietelite.nope.sponge.command.parameters.Parameters;
 import me.pietelite.nope.sponge.util.Formatter;
@@ -56,20 +54,20 @@ public class CreateHostCommand extends CommandNode {
         "Create a scene",
         "create");
     addParameter(Parameters.ID);
-    addFlag(Flags.PRIORITY);
+    addParameter(Parameters.PRIORITY);
   }
 
   @Override
   public CommandResult execute(CommandContext context) throws CommandException {
     String name = context.requireOne(ParameterKeys.ID);
 
-    Optional<Host> existingHost = Nope.instance().system().host(name);
-    if (existingHost.isPresent()) {
+    Host existingHost = Nope.instance().system().hosts(Nope.NOPE_SCOPE).get(name);
+    if (existingHost != null) {
       return CommandResult.error(Formatter.error(
-          "A host already exists with the name ___", existingHost.get().name()));
+          "A host already exists with the name ___", existingHost.name()));
     }
-    int priority = context.one(ParameterKeys.PRIORITY).orElse(0);
-    NopeServiceProvider.service().editSystem().createScene(name, priority);
+    int priority = context.requireOne(ParameterKeys.PRIORITY);
+    ApiUtil.editNopeScope().createScene(name, priority);
     context.sendMessage(Identity.nil(), Formatter.success("Created scene ___", name));
     return CommandResult.success();
   }

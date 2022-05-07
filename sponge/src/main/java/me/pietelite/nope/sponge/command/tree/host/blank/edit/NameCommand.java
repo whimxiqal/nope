@@ -24,10 +24,9 @@
 
 package me.pietelite.nope.sponge.command.tree.host.blank.edit;
 
-import me.pietelite.nope.common.api.NopeServiceProvider;
 import me.pietelite.nope.common.host.Host;
 import me.pietelite.nope.common.host.Scene;
-import me.pietelite.nope.common.permission.Permissions;
+import me.pietelite.nope.common.util.ApiUtil;
 import me.pietelite.nope.sponge.command.CommandNode;
 import me.pietelite.nope.sponge.command.parameters.ParameterKeys;
 import me.pietelite.nope.sponge.command.parameters.Parameters;
@@ -53,7 +52,7 @@ public class NameCommand extends CommandNode {
       return CommandResult.error(Formatter.error("You may only rename scenes"));
     }
     String newName = context.requireOne(ParameterKeys.ID);
-    if (NopeServiceProvider.service().editSystem().editScene(host.name()).name(newName)) {
+    if (ApiUtil.editNopeScope().editScene(host.name()).name(newName)) {
       context.sendMessage(Identity.nil(), Formatter.success("Name of scene ___ changed to ___",
           host.name(),
           newName));

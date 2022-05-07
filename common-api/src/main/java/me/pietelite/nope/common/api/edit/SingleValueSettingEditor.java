@@ -24,6 +24,8 @@
 
 package me.pietelite.nope.common.api.edit;
 
+import java.util.NoSuchElementException;
+
 /**
  * An editor specifically for settings which store and evaluate to a single value,
  * which are most basic settings.
@@ -43,7 +45,8 @@ public interface SingleValueSettingEditor<T> extends SettingEditor {
    * Get the value.
    *
    * @return the value
+   * @throws NoSuchElementException if there is no value set for this setting
    */
-  T get();
+  T get() throws NoSuchElementException;
 
 }

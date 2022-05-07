@@ -22,28 +22,13 @@
  * SOFTWARE.
  */
 
-package me.pietelite.nope.common.api;
-
-import java.util.NoSuchElementException;
-import me.pietelite.nope.common.api.edit.SystemEditor;
-import me.pietelite.nope.common.api.evaluate.Evaluator;
-import me.pietelite.nope.common.api.register.SettingManagers;
+package me.pietelite.nope.common.struct;
 
 /**
- * A developer API for all platform implementations of Nope.
+ * Something that is managed within a scope.
  */
-public interface NopeService {
+public interface Scoped {
 
-  /**
-   * A tool for retrieving Nope's managers that handle the data for setting keys
-   * and provide their builders.
-   *
-   * @return the managers
-   */
-  SettingManagers settingManagers();
-
-  SystemEditor editSystem();
-
-  Evaluator evaluator();
+  String scope();
 
 }

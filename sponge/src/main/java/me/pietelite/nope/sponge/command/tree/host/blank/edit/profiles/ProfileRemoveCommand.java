@@ -25,10 +25,10 @@
 package me.pietelite.nope.sponge.command.tree.host.blank.edit.profiles;
 
 import me.pietelite.nope.common.Nope;
-import me.pietelite.nope.common.api.NopeServiceProvider;
 import me.pietelite.nope.common.api.edit.HostEditor;
 import me.pietelite.nope.common.host.Host;
 import me.pietelite.nope.common.host.Profile;
+import me.pietelite.nope.common.util.ApiUtil;
 import me.pietelite.nope.sponge.command.CommandNode;
 import me.pietelite.nope.sponge.command.parameters.Parameters;
 import me.pietelite.nope.sponge.util.Formatter;
@@ -47,14 +47,14 @@ public class ProfileRemoveCommand extends CommandNode {
   public CommandResult execute(CommandContext context) throws CommandException {
     Host host = context.requireOne(Parameters.HOST);
     Profile profile = context.requireOne(Parameters.PROFILE);
-    HostEditor editor = NopeServiceProvider.service().editSystem().editHost(host.name());
-    if (editor.profiles().contains(profile.name())) {
+    HostEditor editor = ApiUtil.editHost(host.name());
+    if (editor.profiles().get(Nope.NOPE_SCOPE).contains(profile.name())) {
       return CommandResult.error(Formatter.error("That profile isn't in this host's profile list"));
     }
     if (profile.name().equals(Nope.GLOBAL_ID)) {
       return CommandResult.error(Formatter.error("You may not remove the global profile"));
     }
-    NopeServiceProvider.service().editSystem().editHost(host.name()).removeProfile(profile.name());
+    ApiUtil.editHost(host.name()).removeProfile(Nope.NOPE_SCOPE, profile.name());
     context.sendMessage(Identity.nil(), Formatter.success("Removed the profile ___ from host ___",
         profile.name(), host.name()));
     return CommandResult.success();

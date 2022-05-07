@@ -71,6 +71,9 @@ public class Sphere extends Volume {
                 Float x, Float y, Float z,
                 Float radius) {
     super(domain);
+    if (radius <= 0) {
+      throw new IllegalArgumentException("A sphere must have a positive radius");
+    }
     this.posX = x;
     this.posY = y;
     this.posZ = z;

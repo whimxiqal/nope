@@ -26,17 +26,16 @@ package me.pietelite.nope.sponge.command.tree.host.blank.edit.volumes.create.exp
 
 import java.util.Optional;
 import me.pietelite.nope.common.Nope;
-import me.pietelite.nope.common.api.NopeServiceProvider;
 import me.pietelite.nope.common.host.Scene;
 import me.pietelite.nope.common.math.Cylinder;
 import me.pietelite.nope.common.math.Geometry;
 import me.pietelite.nope.common.permission.Permissions;
+import me.pietelite.nope.common.util.ApiUtil;
 import me.pietelite.nope.sponge.SpongeNope;
 import me.pietelite.nope.sponge.command.CommandNode;
 import me.pietelite.nope.sponge.command.parameters.ParameterKeys;
 import me.pietelite.nope.sponge.command.parameters.Parameters;
 import me.pietelite.nope.sponge.command.tree.host.blank.edit.EditSceneCommandNode;
-import me.pietelite.nope.sponge.util.EffectsUtil;
 import me.pietelite.nope.sponge.util.Formatter;
 import me.pietelite.nope.sponge.util.SpongeUtil;
 import org.spongepowered.api.command.CommandResult;
@@ -103,7 +102,7 @@ public class ExplicitCylinderCommand extends EditSceneCommandNode {
         ));
       }
     }
-    NopeServiceProvider.service().editSystem().editScene(scene.name()).addCylinder(volume.domain().name(),
+    ApiUtil.editNopeScope().editScene(scene.name()).addCylinder(volume.domain().name(),
         volume.posX(), volume.minY(), volume.posZ(),
         volume.radius(), volume.maxY() - volume.minY());
     context.cause().audience().sendMessage(Formatter.success(

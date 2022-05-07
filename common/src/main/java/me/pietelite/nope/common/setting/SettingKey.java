@@ -42,11 +42,11 @@ import lombok.experimental.Accessors;
 import me.pietelite.nope.common.api.register.SettingCategory;
 import me.pietelite.nope.common.api.register.SettingKeyBuilder;
 import me.pietelite.nope.common.api.struct.AltSet;
+import me.pietelite.nope.common.api.struct.Named;
 import me.pietelite.nope.common.host.Evaluation;
 import me.pietelite.nope.common.host.Host;
 import me.pietelite.nope.common.host.HostedProfile;
 import me.pietelite.nope.common.host.Profile;
-import me.pietelite.nope.common.struct.Named;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

@@ -24,15 +24,13 @@
 
 package me.pietelite.nope.sponge.command.tree.profiles;
 
-import java.util.Optional;
 import me.pietelite.nope.common.Nope;
-import me.pietelite.nope.common.api.NopeServiceProvider;
 import me.pietelite.nope.common.host.Host;
 import me.pietelite.nope.common.host.Profile;
 import me.pietelite.nope.common.host.Scene;
 import me.pietelite.nope.common.permission.Permissions;
+import me.pietelite.nope.common.util.ApiUtil;
 import me.pietelite.nope.sponge.command.CommandNode;
-import me.pietelite.nope.sponge.command.parameters.Flags;
 import me.pietelite.nope.sponge.command.parameters.ParameterKeys;
 import me.pietelite.nope.sponge.command.parameters.Parameters;
 import me.pietelite.nope.sponge.util.Formatter;
@@ -62,12 +60,12 @@ public class CreateProfileCommand extends CommandNode {
   public CommandResult execute(CommandContext context) throws CommandException {
     String name = context.requireOne(ParameterKeys.ID);
 
-    Profile existingProfile = Nope.instance().system().profiles().get(name);
+    Profile existingProfile = Nope.instance().system().scope(Nope.NOPE_SCOPE).profiles().get(name);
     if (existingProfile != null) {
       return CommandResult.error(Formatter.error(
           "A host already exists with the name ___", existingProfile.name()));
     }
-    NopeServiceProvider.service().editSystem().createProfile(name);
+    ApiUtil.editNopeScope().createProfile(name);
     context.sendMessage(Identity.nil(), Formatter.success("Created profile ___ ", name));
     return CommandResult.success();
   }

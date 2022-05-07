@@ -54,7 +54,7 @@ class VolumeTreeTest {
     domain = new Domain("domain", 100);
     volume1 = new Cuboid(domain, 0f, 0f, 0f, 10f, 10f, 10f);
     volume2 = new Sphere(domain, 20f, 20f, 20f, 5f);
-    scene1 = new Scene("scene1", 0);
+    scene1 = new Scene(Nope.NOPE_SCOPE, "scene1", 0);
     volume3 = new Slab(domain, -1f, 1f);
     volume4 = new Cylinder(domain, 0f, 30f, 40f, 0f, 5f);
     volumeTree.put(volume1, scene1, false);

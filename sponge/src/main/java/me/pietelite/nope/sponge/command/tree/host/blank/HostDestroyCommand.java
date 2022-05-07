@@ -24,10 +24,12 @@
 
 package me.pietelite.nope.sponge.command.tree.host.blank;
 
+import me.pietelite.nope.common.Nope;
 import me.pietelite.nope.common.api.NopeServiceProvider;
 import me.pietelite.nope.common.host.Host;
 import me.pietelite.nope.common.host.Scene;
 import me.pietelite.nope.common.permission.Permissions;
+import me.pietelite.nope.common.util.ApiUtil;
 import me.pietelite.nope.sponge.command.CommandNode;
 import me.pietelite.nope.sponge.command.parameters.ParameterKeys;
 import me.pietelite.nope.sponge.command.parameters.Parameters;
@@ -53,7 +55,7 @@ public class HostDestroyCommand extends CommandNode {
           "You may only delete hosts of type ___", "zone"
       ));
     }
-    NopeServiceProvider.service().editSystem().editScene(host.name()).destroy();
+    ApiUtil.editNopeScope().editScene(host.name()).destroy();
     context.cause().audience().sendMessage(Formatter.success("Scene ___ was destroyed", host.name()));
     return CommandResult.success();
   }

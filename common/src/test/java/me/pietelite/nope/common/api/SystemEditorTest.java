@@ -28,68 +28,15 @@ import java.util.NoSuchElementException;
 import me.pietelite.nope.common.MockNope;
 import me.pietelite.nope.common.Nope;
 import me.pietelite.nope.common.api.edit.HostEditor;
-import me.pietelite.nope.common.api.edit.TargetEditor;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 public class SystemEditorTest extends ApiTest {
 
-  // TODO add tests validating every editor operation
-
   @Test
-  void editHost_correctHost() {
-    HostEditor hostEditor = service().editSystem().editHost(Nope.GLOBAL_ID);
-    Assertions.assertEquals(hostEditor.name(), Nope.GLOBAL_ID);
-    hostEditor = service().editSystem().editHost(MockNope.DOMAIN_1);
-    Assertions.assertEquals(hostEditor.name(), MockNope.DOMAIN_1);
-    Assertions.assertThrows(NoSuchElementException.class, () -> service().editSystem().editHost("die hard"));
-  }
-
-  @Test
-  void editHost_correctHostWithWrongCase() {
-    HostEditor hostEditor = service().editSystem().editHost(Nope.GLOBAL_ID.toUpperCase());
-    Assertions.assertEquals(hostEditor.name(), Nope.GLOBAL_ID);
-    hostEditor = service().editSystem().editHost(MockNope.DOMAIN_1.toUpperCase());
-    Assertions.assertEquals(hostEditor.name(), MockNope.DOMAIN_1);
-  }
-
-  @Test
-  void editGlobal_systemTest() {
+  void editGlobal() {
     HostEditor hostEditor = service().editSystem().editGlobal();
     Assertions.assertEquals(hostEditor.name(), Nope.GLOBAL_ID);
-    Assertions.assertEquals(1, hostEditor.profiles().size());
-    Assertions.assertThrows(NoSuchElementException.class, () -> hostEditor.addProfile("banana", -1));
-    service().editSystem().createProfile("banana");
-    Assertions.assertThrows(IndexOutOfBoundsException.class, () -> hostEditor.addProfile("banana", -1));
-    Assertions.assertThrows(IndexOutOfBoundsException.class, () -> hostEditor.addProfile("banana", 2));
-    // Cannot place a profile at index 0 for Global
-    Assertions.assertThrows(IllegalArgumentException.class, () -> hostEditor.addProfile("banana", 0));
-    hostEditor.addProfile("banana", 1);
-    Assertions.assertEquals(hostEditor.profiles().size(), 2);
-    Assertions.assertEquals(hostEditor.profiles().get(0), Nope.GLOBAL_ID);
-    Assertions.assertEquals(hostEditor.profiles().get(1), "banana");
-    // Cannot place the same profile again
-    Assertions.assertThrows(IllegalArgumentException.class, () -> hostEditor.addProfile("banana", 2));
-    Assertions.assertThrows(IllegalArgumentException.class, () -> hostEditor.removeProfile(0));
-    Assertions.assertThrows(IllegalArgumentException.class, () -> hostEditor.removeProfile(Nope.GLOBAL_ID));
-    hostEditor.removeProfile(1);
-    hostEditor.addProfile("banana", 1);
-    hostEditor.removeProfile("banana");
-    hostEditor.addProfile("banana", 1);
-
-    // Targets
-    Assertions.assertFalse(hostEditor.hasTarget(0));
-    Assertions.assertFalse(hostEditor.hasTarget(1));
-    Assertions.assertThrows(IllegalArgumentException.class, () -> hostEditor.editTarget(0));
-    Assertions.assertThrows(IndexOutOfBoundsException.class, () -> hostEditor.editTarget(-1));
-    Assertions.assertThrows(IndexOutOfBoundsException.class, () -> hostEditor.editTarget(2));
-    TargetEditor bananaTargetEditor = hostEditor.editTarget(1);
-    Assertions.assertFalse(hostEditor.hasTarget(1));
-    bananaTargetEditor.targetAll();
-    Assertions.assertTrue(hostEditor.hasTarget(1));
-    TargetEditor anotherBananaTargetEditor = hostEditor.editTarget("banana");
-    anotherBananaTargetEditor.remove();
-    Assertions.assertFalse(hostEditor.hasTarget(1));
   }
 
   @Test
@@ -105,74 +52,51 @@ public class SystemEditorTest extends ApiTest {
     Assertions.assertThrows(NoSuchElementException.class, () -> service().editSystem().editDomain(Nope.GLOBAL_ID));
     HostEditor hostEditor = service().editSystem().editDomain(MockNope.DOMAIN_1);
     Assertions.assertEquals(hostEditor.name(), MockNope.DOMAIN_1);
-    editNonGlobalHost(hostEditor);
+  }
+
+  @Test
+  void scenes() {
+    Assertions.assertTrue(nopeScopeEditor().scenes().isEmpty());
+    nopeScopeEditor().createScene("kung_fu_panda", 0);
+    Assertions.assertEquals(1, nopeScopeEditor().scenes().size());
+    Assertions.assertTrue(nopeScopeEditor().scenes().contains("kung_fu_panda"));
+    // TODO this should eventually work i.e. we should get a set from the API that returns true if it contains
+    //  the name regardless of case
+    // Assertions.assertTrue(service().editSystem().scenes().contains("Kung_Fu_Panda"));
   }
 
   @Test
   void createScene() {
-    service().editSystem().createScene("sixth-sense", 0);
-
+    nopeScopeEditor().createScene("sixth-sense", 0);
+    Assertions.assertThrows(IllegalArgumentException.class, () -> nopeScopeEditor().createScene("sixth-sense", 0));
+    // different case still counts as the same name
+    Assertions.assertThrows(IllegalArgumentException.class, () -> nopeScopeEditor().createScene("Sixth-Sense", 0));
+    Assertions.assertThrows(IllegalArgumentException.class, () -> nopeScopeEditor().createScene(Nope.GLOBAL_ID, 0));
+    Assertions.assertThrows(IllegalArgumentException.class, () -> nopeScopeEditor().createScene(MockNope.DOMAIN_1, 0));
   }
 
   @Test
-  void editScene() {
-    Assertions.assertThrows(NoSuchElementException.class, () -> service().editSystem().editScene("pulp-fiction"));
-    service().editSystem().createScene("pulp-fiction", 0);
-    HostEditor hostEditor = service().editSystem().editScene("pulp-fiction");
-    Assertions.assertEquals(hostEditor.name(), "pulp-fiction");
-    editNonGlobalHost(hostEditor);
-
-    service().editSystem().createScene("shutter-island", 0);
-    service().editSystem().createProfile("shutter-island");
-    service().editSystem().editScene("shutter-island").addProfile("shutter-island", 0);
-    Assertions.assertEquals(service().editSystem().editScene("shutter-island").profiles().size(), 1);
-  }
-
-  void editNonGlobalHost(HostEditor hostEditor) {
-    Assertions.assertEquals(hostEditor.profiles().size(), 0);
-    Assertions.assertThrows(NoSuchElementException.class, () -> hostEditor.addProfile("banana", -1));
-    service().editSystem().createProfile("banana");
-    Assertions.assertThrows(IndexOutOfBoundsException.class, () -> hostEditor.addProfile("banana", -1));
-    Assertions.assertThrows(IndexOutOfBoundsException.class, () -> hostEditor.addProfile("banana", 1));
-    hostEditor.addProfile("banana", 0);
-    Assertions.assertEquals(hostEditor.profiles().size(), 1);
-    Assertions.assertEquals(hostEditor.profiles().get(0), "banana");
-    // Cannot place the same profile again
-    Assertions.assertThrows(IllegalArgumentException.class, () -> hostEditor.addProfile("banana", 1));
-    hostEditor.removeProfile(0);
-    hostEditor.addProfile("banana", 0);
-    hostEditor.removeProfile("banana");
-    Assertions.assertEquals(hostEditor.profiles().size(), 0);
-    hostEditor.addProfile("banana", 0);
-
-    // Targets
-    Assertions.assertThrows(IndexOutOfBoundsException.class, () -> hostEditor.hasTarget(-1));
-    Assertions.assertThrows(IndexOutOfBoundsException.class, () -> hostEditor.hasTarget(1));
-    Assertions.assertFalse(hostEditor.hasTarget(0));
-    Assertions.assertThrows(IndexOutOfBoundsException.class, () -> hostEditor.editTarget(-1));
-    Assertions.assertThrows(IndexOutOfBoundsException.class, () -> hostEditor.editTarget(1));
-    Assertions.assertFalse(hostEditor.hasTarget(0));
-    TargetEditor bananaTargetEditor = hostEditor.editTarget(0);
-    Assertions.assertFalse(hostEditor.hasTarget(0));
-    bananaTargetEditor.targetAll();
-    Assertions.assertTrue(hostEditor.hasTarget(0));
-    TargetEditor anotherBananaTargetEditor = hostEditor.editTarget("banana");
-    anotherBananaTargetEditor.remove();
-    Assertions.assertFalse(hostEditor.hasTarget(0));
+  void createScene_invalidName() {
+    Assertions.assertThrows(IllegalArgumentException.class, () -> nopeScopeEditor().createScene("_blades-of-glory", 0));
+    Assertions.assertThrows(IllegalArgumentException.class, () -> nopeScopeEditor().createScene("blades-of-glory_", 0));
+    Assertions.assertThrows(IllegalArgumentException.class, () -> nopeScopeEditor().createScene("blades-of-glory_", 0));
+    Assertions.assertThrows(IllegalArgumentException.class, () -> nopeScopeEditor().createScene("amper&sand", 0));
+    Assertions.assertThrows(IllegalArgumentException.class, () -> nopeScopeEditor().createScene("aster*isk", 0));
+    Assertions.assertThrows(IllegalArgumentException.class, () -> nopeScopeEditor().createScene("sla/sh", 0));
+    Assertions.assertThrows(IllegalArgumentException.class, () -> nopeScopeEditor().createScene("other\\slash", 0));
   }
 
   @Test
-  void addTwoProfilesWithSameName() {
-    service().editSystem().createProfile("lollipop");
-    Assertions.assertThrows(IllegalArgumentException.class, () -> service().editSystem().createProfile("lollipop"));
-    Assertions.assertThrows(IllegalArgumentException.class, () -> service().editSystem().createProfile("LolliPop"));
+  void profiles() {
+    Assertions.assertEquals(1, nopeScopeEditor().profiles().size());
+    Assertions.assertTrue(nopeScopeEditor().profiles().contains(Nope.GLOBAL_ID));
+    nopeScopeEditor().createProfile("beetlejuice");
+    Assertions.assertEquals(2, nopeScopeEditor().profiles().size());
+    Assertions.assertTrue(nopeScopeEditor().profiles().contains("beetlejuice"));
+    // TODO this should eventually work i.e. we should get a set from the API that returns true if it contains
+    //  the name regardless of case
+    // Assertions.assertTrue(service().editSystem().profiles().contains("BeetleJuice"));
   }
 
-  @Test
-  void addTwoProfilesWithSameNameDifferentCase() {
-    service().editSystem().createProfile("watermelon");
-    Assertions.assertThrows(IllegalArgumentException.class, () -> service().editSystem().createProfile("watermelon"));
-    Assertions.assertThrows(IllegalArgumentException.class, () -> service().editSystem().createProfile("wAterMeloN"));
-  }
 
 }

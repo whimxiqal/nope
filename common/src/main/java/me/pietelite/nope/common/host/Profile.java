@@ -35,26 +35,35 @@ import me.pietelite.nope.common.api.edit.SettingEditorImpl;
 import me.pietelite.nope.common.api.edit.SingleValueSettingEditor;
 import me.pietelite.nope.common.api.edit.SingleValueSettingEditorImpl;
 import me.pietelite.nope.common.api.edit.TargetEditor;
+import me.pietelite.nope.common.api.struct.Named;
 import me.pietelite.nope.common.setting.SettingCollection;
 import me.pietelite.nope.common.setting.Target;
 import me.pietelite.nope.common.setting.Targetable;
 import me.pietelite.nope.common.storage.Expirable;
 import me.pietelite.nope.common.storage.Persistent;
-import me.pietelite.nope.common.struct.Named;
+import me.pietelite.nope.common.struct.Scoped;
 import org.jetbrains.annotations.Nullable;
 
-public class Profile extends SettingCollection implements Named, Persistent, Expirable, Targetable {
+public class Profile extends SettingCollection implements Named, Persistent, Expirable, Targetable, Scoped {
+
+  private final String scope;
   private String name;
   private Target target;
   private boolean destroyed;
 
-  public Profile(String name) {
-    this(name, null);
+  public Profile(String scope, String name) {
+    this(scope, name, null);
   }
 
-  public Profile(String name, Target target) {
+  public Profile(String scope, String name, Target target) {
+    this.scope = scope;
     this.name = name;
     this.target = target;
+  }
+
+  @Override
+  public String scope() {
+    return this.scope;
   }
 
   @Override
@@ -91,7 +100,7 @@ public class Profile extends SettingCollection implements Named, Persistent, Exp
 
   @Override
   public void save() {
-    Nope.instance().data().profiles().save(this);
+    Nope.instance().data().profiles(scope).save(this);
   }
 
   public static class Editor implements ProfileEditor {
@@ -100,6 +109,10 @@ public class Profile extends SettingCollection implements Named, Persistent, Exp
 
     public Editor(Profile profile) {
       this.profile = profile;
+    }
+
+    private Scope scope() {
+      return Nope.instance().system().scope(profile.scope);
     }
 
     @Override
@@ -116,24 +129,24 @@ public class Profile extends SettingCollection implements Named, Persistent, Exp
         return false;
       }
       // We should allow case-change of characters if it's the same name otherwise as the current host
-      if (!profile.name().equalsIgnoreCase(name) && Nope.instance().system().host(name).isPresent()) {
+      if (!profile.name().equalsIgnoreCase(name) && Nope.instance().system().hasName(profile.scope, name)) {
         throw new IllegalArgumentException("A host with the name \"" + name + "\" already exists");
       }
       if (name.startsWith("_")) {
         throw new IllegalArgumentException("Scene names cannot start with an underscore");
       }
       // Remove all references of old name
-      Nope.instance().system().profiles().remove(profile.name());
-      Nope.instance().data().profiles().destroy(profile);
+      scope().profiles().remove(profile.name());
+      Nope.instance().data().profiles(profile.scope()).destroy(profile);
 
       // Switch backwards-related references of profiles to hosts
-      Set<Host> relatedHosts = Nope.instance().system().relatedToProfile(profile.name());
-      Nope.instance().system().unrelateProfile(profile.name());
-      relatedHosts.forEach(host -> Nope.instance().system().relateProfile(profile.name(), host));
+      Set<Host> relatedHosts = scope().relatedToProfile(profile.name());
+      scope().unrelateProfile(profile.name());
+      relatedHosts.forEach(host -> scope().relateProfile(profile.name(), host));
 
       // Change name and add references back in
       profile.name = name;
-      Nope.instance().system().profiles().put(profile.name.toLowerCase(), profile);
+      scope().profiles().put(profile.name.toLowerCase(), profile);
       profile.save();
       return true;
     }
@@ -148,7 +161,7 @@ public class Profile extends SettingCollection implements Named, Persistent, Exp
     public SettingEditor editSetting(String setting) {
       profile.verifyExistence();
       if (!Nope.instance().settingKeys().containsId(setting)) {
-        throw new NoSuchElementException();
+        throw new NoSuchElementException("There is no setting with the name " + setting);
       }
       return new SettingEditorImpl(profile, setting);
     }
@@ -174,15 +187,15 @@ public class Profile extends SettingCollection implements Named, Persistent, Exp
     @Override
     public void destroy() {
       profile.verifyExistence();
-      if (Nope.instance().system().profiles().remove(profile.name) == null) {
+      if (scope().profiles().remove(profile.name) == null) {
         throw new NoSuchElementException("There is not host with name " + profile.name());
       }
-      for (Host host : Nope.instance().system().relatedToProfile(profile.name())) {
+      for (Host host : scope().relatedToProfile(profile.name())) {
         host.hostedProfiles().removeIf(hostedProfile -> hostedProfile.profile().equals(profile));
         host.save();
       }
-      Nope.instance().system().unrelateProfile(profile.name());
-      Nope.instance().data().profiles().destroy(profile);
+      scope().unrelateProfile(profile.name());
+      Nope.instance().data().profiles(profile.scope).destroy(profile);
       profile.expire();
     }
 

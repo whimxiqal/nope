@@ -85,6 +85,9 @@ public class Cylinder extends Volume {
                   Float z,
                   Float radius) {
     super(domain);
+    if (radius <= 0) {
+      throw new IllegalArgumentException("A cylinder must have a positive radius");
+    }
     this.posX = x;
     this.minY = Math.min(y1, y2);
     this.maxY = Math.max(y1, y2);

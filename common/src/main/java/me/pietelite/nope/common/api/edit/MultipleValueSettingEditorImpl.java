@@ -68,13 +68,7 @@ public class MultipleValueSettingEditorImpl<T> extends SettingEditorImpl impleme
 
   @Override
   public boolean isDeclarative() {
-    return profile.getValue(key()).orElseThrow(NoSuchElementException::new).declarative();
-  }
-
-  @Override
-  public void setDeclarative(AltSet<T> values) {
-    setDeclarativeGeneric(key(), values);
-    profile.save();
+    return profile.getValue(key()).map(SettingValue.Poly::declarative).orElse(false);
   }
 
   private <X, Y extends AltSet<X>> void setDeclarativeGeneric(SettingKey.Poly<X, Y> key, AltSet<X> values) {
@@ -96,8 +90,14 @@ public class MultipleValueSettingEditorImpl<T> extends SettingEditorImpl impleme
   }
 
   @Override
+  public void setDeclarative(AltSet<T> values) {
+    setDeclarativeGeneric(key(), values);
+    profile.save();
+  }
+
+  @Override
   public boolean isManipulative() {
-    return profile.getValue(key()).orElseThrow(NoSuchElementException::new).manipulative();
+    return profile.getValue(key()).map(SettingValue.Poly::manipulative).orElse(false);
   }
 
   @Override
@@ -110,33 +110,36 @@ public class MultipleValueSettingEditorImpl<T> extends SettingEditorImpl impleme
                                                                AltSet<X> set,
                                                                ManipulativeType manipulativeType) {
     Optional<SettingValue.Poly<X, Y>> value = profile.getValue(key);
+    Y newAdditive;
+    Y newSubtractive;
     switch (manipulativeType) {
       case ADDITIVE:
-        Y newAdditive = key.manager().emptySet();
+        newAdditive = key.manager().emptySet();
         newAdditive.addAll(set);
         if (value.isPresent() && value.get().manipulative()) {
-          profile.setValue(key, SettingValue.Poly.manipulative(newAdditive,
-              key.manager().copySet(value.get().subtractive())));
+          newSubtractive = key.manager().copySet(value.get().subtractive());
         } else {
-          profile.setValue(key, SettingValue.Poly.manipulative(newAdditive, key.manager().emptySet()));
+          newSubtractive = key.manager().emptySet();
         }
         break;
       case SUBTRACTIVE:
-        Y newSubtractive = key.manager().emptySet();
+        newSubtractive = key.manager().emptySet();
         newSubtractive.addAll(set);
         if (value.isPresent() && value.get().manipulative()) {
-          profile.setValue(key, SettingValue.Poly.manipulative(
-              key.manager().copySet(value.get().additive()),
-              newSubtractive));
+          newAdditive = key.manager().copySet(value.get().additive());
         } else {
-          profile.setValue(key, SettingValue.Poly.manipulative(
-              key.manager().emptySet(),
-              newSubtractive));
+          newAdditive = key.manager().emptySet();
         }
+
         break;
       default:
         throw new RuntimeException();
     }
+    if (newSubtractive.removeAll(newAdditive)) {
+      // The two sets are overlapping! We can't have that
+      throw new IllegalArgumentException();
+    }
+    profile.setValue(key, SettingValue.Poly.manipulative(newAdditive, newSubtractive));
   }
 
   @Override

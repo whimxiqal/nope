@@ -31,6 +31,7 @@ import me.pietelite.nope.common.host.Scene;
 import me.pietelite.nope.common.math.Geometry;
 import me.pietelite.nope.common.math.Sphere;
 import me.pietelite.nope.common.permission.Permissions;
+import me.pietelite.nope.common.util.ApiUtil;
 import me.pietelite.nope.sponge.SpongeNope;
 import me.pietelite.nope.sponge.command.CommandNode;
 import me.pietelite.nope.sponge.command.parameters.ParameterKeys;
@@ -92,7 +93,7 @@ public class ExplicitSphereCommand extends EditSceneCommandNode {
         ));
       }
     }
-    NopeServiceProvider.service().editSystem().editScene(scene.name()).addSphere(volume.domain().name(),
+    ApiUtil.editNopeScope().editScene(scene.name()).addSphere(volume.domain().name(),
         volume.posX(), volume.posY(), volume.posZ(), volume.radius());
     context.cause().audience().sendMessage(Formatter.success(
         "A ___ was created on scene ___",

@@ -26,7 +26,9 @@ package me.pietelite.nope.common.host;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import me.pietelite.nope.common.Nope;
 import me.pietelite.nope.common.api.edit.TargetEditor;
 import me.pietelite.nope.common.struct.Location;
@@ -74,28 +76,19 @@ public class Global extends Host {
     }
 
     @Override
-    public List<String> profiles() {
-      List<String> superProfiles = super.profiles();
-      ArrayList<String> out = new ArrayList<>(superProfiles.size() + 1);
-      out.add(host.globalProfile().name());
-      out.addAll(superProfiles);
-      return Collections.unmodifiableList(out);
-    }
-
-    @Override
-    public void addProfile(String name, int index) {
+    public void addProfile(String scope, String name, int index) {
       if (index == 0) {
         throw new IllegalArgumentException();
       }
-      super.addProfile(name, index - 1);
+      super.addProfile(scope, name, index - 1);
     }
 
     @Override
-    public void removeProfile(String name) {
+    public void removeProfile(String scope, String name) {
       if (name.equalsIgnoreCase(Nope.GLOBAL_ID)) {
         throw new IllegalArgumentException();
       }
-      super.removeProfile(name);
+      super.removeProfile(scope, name);
     }
 
     @Override

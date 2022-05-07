@@ -81,7 +81,7 @@ public class Parameters {
   public static final Parameter.Value<Host> HOST = Parameter.builder(ParameterKeys.HOST)
       .addParser((parameterKey, reader, context) -> {
         String hostName = reader.parseString().toLowerCase();
-        Host host = SpongeNope.instance().system().hosts().get(hostName);
+        Host host = SpongeNope.instance().system().hosts(Nope.NOPE_SCOPE).get(hostName);
         if (host == null) {
           throw new ArgumentParseException(Formatter.error("No host exists named ___", hostName),
               hostName, 0);
@@ -91,7 +91,7 @@ public class Parameters {
       .completer((context, currentInput) -> {
         final Predicate<String> inOrder = new ContainsInOrderPredicate(currentInput);
         return SpongeNope.instance().system()
-            .hosts()
+            .hosts(Nope.NOPE_SCOPE)
             .entrySet()
             .stream()
             .filter(entry -> inOrder.test(entry.getKey()))
@@ -104,7 +104,7 @@ public class Parameters {
       .optional()
       .addParser((parameterKey, reader, context) -> {
         String hostName = reader.parseString().toLowerCase();
-        Host host = SpongeNope.instance().system().hosts().get(hostName);
+        Host host = SpongeNope.instance().system().hosts(Nope.NOPE_SCOPE).get(hostName);
         if (host == null) {
           return inferHost(context);
         } else {
@@ -114,7 +114,7 @@ public class Parameters {
       .completer((context, currentInput) -> {
         final Predicate<String> startsWith = new StartsWithPredicate(currentInput);
         return SpongeNope.instance().system()
-            .hosts()
+            .hosts(Nope.NOPE_SCOPE)
             .entrySet()
             .stream()
             .filter(entry -> startsWith.test(entry.getKey()))
@@ -126,7 +126,7 @@ public class Parameters {
   public static final Parameter.Value<Scene> SCENE = Parameter.builder(ParameterKeys.SCENE)
       .addParser((parameterKey, reader, context) -> {
         String hostName = reader.parseString().toLowerCase();
-        Scene scene = SpongeNope.instance().system().scenes().get(hostName);
+        Scene scene = SpongeNope.instance().system().scope(Nope.NOPE_SCOPE).scenes().get(hostName);
         if (scene == null) {
           throw new ArgumentParseException(Formatter.error("No scene exists named ___", hostName),
               hostName, 0);
@@ -135,7 +135,7 @@ public class Parameters {
       })
       .completer((context, currentInput) -> {
         final Predicate<String> inOrder = new ContainsInOrderPredicate(currentInput);
-        return SpongeNope.instance().system()
+        return SpongeNope.instance().system().scope(Nope.NOPE_SCOPE)
             .scenes()
             .entrySet()
             .stream()
@@ -169,7 +169,7 @@ public class Parameters {
   public static final Parameter.Value<Profile> PROFILE = Parameter.builder(ParameterKeys.PROFILE)
       .addParser((parameterKey, reader, context) -> {
         String profileName = reader.parseString().toLowerCase();
-        Profile profile = SpongeNope.instance().system().profiles().get(profileName.toLowerCase());
+        Profile profile = SpongeNope.instance().system().scope(Nope.NOPE_SCOPE).profiles().get(profileName.toLowerCase());
         if (profile == null) {
           throw new ArgumentParseException(Formatter.error("No profile exists named ___", profileName),
               profileName, 0);
@@ -178,7 +178,7 @@ public class Parameters {
       })
       .completer((context, currentInput) -> {
         final Predicate<String> inOrder = new ContainsInOrderPredicate(currentInput);
-        return SpongeNope.instance().system()
+        return SpongeNope.instance().system().scope(Nope.NOPE_SCOPE)
             .profiles()
             .entrySet()
             .stream()
@@ -191,7 +191,7 @@ public class Parameters {
   public static final Parameter.Value<Profile> PROFILE_ON_HOST = Parameter.builder(ParameterKeys.PROFILE)
       .addParser((parameterKey, reader, context) -> {
         String profileName = reader.parseString().toLowerCase();
-        Profile profile = SpongeNope.instance().system().profiles().get(profileName.toLowerCase());
+        Profile profile = SpongeNope.instance().system().scope(Nope.NOPE_SCOPE).profiles().get(profileName.toLowerCase());
         if (profile == null) {
           throw new ArgumentParseException(Formatter.error("No profile exists named ___", profileName),
               profileName, 0);

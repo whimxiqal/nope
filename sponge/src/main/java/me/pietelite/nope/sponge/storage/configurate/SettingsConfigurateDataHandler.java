@@ -53,13 +53,6 @@ public abstract class SettingsConfigurateDataHandler {
     this.serializerRegistrar = serializerRegistrar;
   }
 
-  protected final CommentedConfigurationNode settingCollectionRoot(SettingCollection settings)
-      throws SerializationException {
-    CommentedConfigurationNode root = CommentedConfigurationNode.root(ConfigurationOptions.defaults());
-    root.node("settings").set(serializeSettings(settings));
-    return root;
-  }
-
   protected final CommentedConfigurationNode serializeSettings(SettingCollection settings)
       throws SerializationException {
     CommentedConfigurationNode node = CommentedConfigurationNode.root();

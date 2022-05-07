@@ -34,13 +34,6 @@ import me.pietelite.nope.common.host.Scene;
 public interface DataHandler {
 
   /**
-   * Persistent data storage for the {@link me.pietelite.nope.common.host.Profile}s.
-   *
-   * @return the handler
-   */
-  ProfileDataHandler profiles();
-
-  /**
    * Persistent data storage for the {@link Global}.
    *
    * @return the handler
@@ -57,14 +50,23 @@ public interface DataHandler {
   /**
    * Persistent data storage for the {@link Scene}s.
    *
+   * @param scope the scope that owns the scenes
    * @return the handler
    */
-  SceneDataHandler scenes();
+  SceneDataHandler scenes(String scope);
+
+  /**
+   * Persistent data storage for the {@link me.pietelite.nope.common.host.Profile}s.
+   *
+   * @param scope the scope that owns the profiles
+   * @return the handler
+   */
+  ProfileDataHandler profiles(String scope);
 
   /**
    * Persistent data storage for the {@link HostSystem}.
    *
-   * @return the handler
+   * @param system the system object into which to load
    */
   void loadSystem(HostSystem system);
 

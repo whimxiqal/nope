@@ -24,6 +24,11 @@
 
 package me.pietelite.nope.sponge.storage.configurate;
 
+import java.io.File;
+import java.nio.file.Path;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -45,24 +50,19 @@ import org.spongepowered.api.Sponge;
  */
 public abstract class ConfigurateDataHandler implements DataHandler {
 
-  private final ProfileConfigurateDataHandler profileConfigurateDataHandler;
   private final GlobalConfigurateDataHandler universeDataHandler;
   private final DomainConfigurateDataHandler domainDataHandler;
   private final SceneConfigurateDataHandler sceneConfigurateDataHandler;
+  private final ProfileConfigurateDataHandler profileConfigurateDataHandler;
 
-  protected ConfigurateDataHandler(ProfileConfigurateDataHandler profileConfigurateDataHandler,
-                                   GlobalConfigurateDataHandler universeDataHandler,
+  protected ConfigurateDataHandler(GlobalConfigurateDataHandler universeDataHandler,
                                    DomainConfigurateDataHandler domainDataHandler,
-                                   SceneConfigurateDataHandler sceneConfigurateDataHandler) {
+                                   SceneConfigurateDataHandler sceneConfigurateDataHandler,
+                                   ProfileConfigurateDataHandler profileConfigurateDataHandler) {
     this.profileConfigurateDataHandler = profileConfigurateDataHandler;
     this.universeDataHandler = universeDataHandler;
     this.domainDataHandler = domainDataHandler;
     this.sceneConfigurateDataHandler = sceneConfigurateDataHandler;
-  }
-
-  @Override
-  public ProfileDataHandler profiles() {
-    return profileConfigurateDataHandler;
   }
 
   @Override
@@ -76,28 +76,39 @@ public abstract class ConfigurateDataHandler implements DataHandler {
   }
 
   @Override
-  public SceneDataHandler scenes() {
+  public SceneDataHandler scenes(String scope) {
     return sceneConfigurateDataHandler;
+  }
+
+  @Override
+  public ProfileDataHandler profiles(String scope) {
+    return profileConfigurateDataHandler;
   }
 
   @Override
   public void loadSystem(HostSystem system) {
     // Expire profiles and hosts, so they can't be used by other places holding references
-    system.profiles().values().forEach(Expirable::expire);
     if (system.global() != null) {
       system.global().expire();
     }
     system.domains().values().forEach(Expirable::expire);
-    system.scenes().values().forEach(Expirable::expire);
+    system.scopes().forEach(scope -> {
+      scope.scenes().values().forEach(Expirable::expire);
+      scope.profiles().values().forEach(Expirable::expire);
+    });
 
     // Clear them from the system
-    system.profiles().clear();
     system.domains().clear();
-    system.scenes().clear();
+    system.scopes().forEach(scope -> {
+      scope.scenes().clear();
+      scope.profiles().clear();
+    });
 
-    profileConfigurateDataHandler.load().forEach(profile -> system.profiles().put(profile.name(), profile));
+    profileConfigurateDataHandler.load().forEach(profile ->
+        system.getOrCreateScope(profile.scope()).profiles().put(profile.name(), profile));
     system.global(universeDataHandler.load());
-    system.global().globalProfile(Objects.requireNonNull(system.profiles().get(Nope.GLOBAL_ID),
+    system.global().globalProfile(Objects.requireNonNull(
+        system.getOrCreateScope(Nope.NOPE_SCOPE).profiles().get(Nope.GLOBAL_ID),
         "Global profile couldn't be found!"));
     List<Domain> domains = Sponge.server()
         .worldManager()
@@ -114,6 +125,34 @@ public abstract class ConfigurateDataHandler implements DataHandler {
       system.domains().put(domain.name(), domain);
     });
     system.loadScenes(sceneConfigurateDataHandler.load());
+  }
+
+  protected static Collection<Path> persistentComponentPaths(Path rootPath, String componentsName,
+                                                      String fileSuffix) {
+    File[] scopeFolders = rootPath.toFile().listFiles();
+    if (scopeFolders == null) {
+      return Collections.emptyList();
+    }
+    List<Path> paths = new LinkedList<>();
+    for (File scopeFolder : scopeFolders) {
+      if (!scopeFolder.isDirectory()) {
+        continue;
+      }
+      String scope = scopeFolder.getName();
+      File[] sceneFiles = scopeFolder.toPath().resolve(componentsName).toFile().listFiles();
+      if (sceneFiles == null) {
+        continue;
+      }
+      for (File sceneFile : sceneFiles) {
+        String[] tokens = sceneFile.getName().split("\\.");
+        String type = tokens[tokens.length - 1].toLowerCase();
+        if (!type.equals(fileSuffix)) {
+          Nope.instance().logger().error("File " + sceneFile.getName() + " is unknown");
+        }
+        paths.add(sceneFile.toPath());
+      }
+    }
+    return paths;
   }
 
 }

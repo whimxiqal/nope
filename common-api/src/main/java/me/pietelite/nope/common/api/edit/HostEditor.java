@@ -25,32 +25,28 @@
 package me.pietelite.nope.common.api.edit;
 
 import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
+import me.pietelite.nope.common.api.struct.Named;
 
 /**
  * An editor of a Host.
  */
-public interface HostEditor {
+public interface HostEditor extends Named {
 
   /**
-   * The name of this host.
-   *
-   * @return the name
-   */
-  String name();
-
-  /**
-   * The list of profiles that dictate the effect this host has on its occupants.
+   * The map of profiles that dictate the effect this host has on its occupants.
+   * The keys are the scopes of the profiles and the values are lists of profiles under that scope
    *
    * @return the profiles
-   * @see SystemEditor#editProfile(String)
    * @see ProfileEditor
    */
-  List<String> profiles();
+  Map<String, List<String>> profiles();
 
   /**
    * Add a profile to this host, thus partially dictating the effect this host has on its occupants.
    *
+   * @param scope the scope of the profile you are adding
    * @param name  the name of the profile to add
    * @param index the index in the list at which to insert the profile.
    *              It should be the size of the list of profiles to insert it at the back.
@@ -58,17 +54,18 @@ public interface HostEditor {
    * @throws NoSuchElementException    if there isn't a profile with the given name
    * @throws IllegalArgumentException  if the given profile is already present in the list
    */
-  void addProfile(String name, int index)
+  void addProfile(String scope, String name, int index)
       throws IndexOutOfBoundsException, NoSuchElementException, IllegalArgumentException;
 
   /**
    * Removes a profile from this list by name, thus removing the profiles' effects
    * from this host's occupants.
    *
+   * @param scope the scope of the profile you are removing
    * @param name the name of the profile to remove
    * @throws IllegalArgumentException if the profile cannot be removed
    */
-  void removeProfile(String name) throws NoSuchElementException, IllegalArgumentException;
+  void removeProfile(String scope, String name) throws NoSuchElementException, IllegalArgumentException;
 
   /**
    * Removes a profile from this list by index, thus removing the profiles' effects
@@ -97,7 +94,7 @@ public interface HostEditor {
    * @throws NoSuchElementException   if no profile exists with that name
    * @throws IllegalArgumentException if you may not edit the target on the given profile
    */
-  TargetEditor editTarget(String name) throws NoSuchElementException, IllegalArgumentException;
+  TargetEditor editTarget(String scope, String name) throws NoSuchElementException, IllegalArgumentException;
 
   /**
    * Gets an editor for the target for this host set on the profile at the given index.
@@ -115,7 +112,6 @@ public interface HostEditor {
    * Only scene's priorities may be altered.
    *
    * @return the priority
-   * @see SystemEditor#editScene(String) 
    * @see SceneEditor
    */
   int priority();

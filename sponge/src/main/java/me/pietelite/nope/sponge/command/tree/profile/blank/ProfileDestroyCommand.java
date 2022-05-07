@@ -24,9 +24,11 @@
 
 package me.pietelite.nope.sponge.command.tree.profile.blank;
 
+import me.pietelite.nope.common.Nope;
 import me.pietelite.nope.common.api.NopeServiceProvider;
 import me.pietelite.nope.common.host.Profile;
 import me.pietelite.nope.common.permission.Permissions;
+import me.pietelite.nope.common.util.ApiUtil;
 import me.pietelite.nope.sponge.command.CommandNode;
 import me.pietelite.nope.sponge.command.parameters.ParameterKeys;
 import me.pietelite.nope.sponge.command.parameters.Parameters;
@@ -47,7 +49,7 @@ public class ProfileDestroyCommand extends CommandNode {
   @Override
   public CommandResult execute(CommandContext context) throws CommandException {
     Profile profile = context.requireOne(ParameterKeys.PROFILE);
-    NopeServiceProvider.service().editSystem().editProfile(profile.name()).destroy();
+    ApiUtil.editNopeScope().editProfile(profile.name()).destroy();
     context.cause().audience().sendMessage(Formatter.success("Profile ___ was destroyed", profile.name()));
     return CommandResult.success();
   }

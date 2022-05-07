@@ -26,11 +26,13 @@ package me.pietelite.nope.sponge.command.tree.host.blank.edit.volumes.create.sel
 
 import java.util.LinkedList;
 import java.util.List;
+import me.pietelite.nope.common.Nope;
 import me.pietelite.nope.common.api.NopeServiceProvider;
 import me.pietelite.nope.common.host.Scene;
 import me.pietelite.nope.common.math.Cuboid;
 import me.pietelite.nope.common.math.Geometry;
 import me.pietelite.nope.common.permission.Permissions;
+import me.pietelite.nope.common.util.ApiUtil;
 import me.pietelite.nope.sponge.SpongeNope;
 import me.pietelite.nope.sponge.command.CommandNode;
 import me.pietelite.nope.sponge.command.tree.host.blank.edit.EditSceneCommandNode;
@@ -94,7 +96,7 @@ public class SelectionCuboidCommand extends EditSceneCommandNode {
       }
     }
 
-    NopeServiceProvider.service().editSystem().editScene(scene.name()).addCuboid(
+    ApiUtil.editNopeScope().editScene(scene.name()).addCuboid(
         volume.domain().name(),
         volume.minX(), volume.minY(), volume.minZ(),
         volume.maxX(), volume.maxY(), volume.maxZ());
