@@ -22,23 +22,29 @@
  * SOFTWARE.
  */
 
-package me.pietelite.nope.common.api.register.data;
+package me.pietelite.nope.common.api.setting;
 
 import me.pietelite.nope.common.api.struct.Described;
 
 /**
- * Possible causes of damage in Minecraft.
+ * A method of movement in Minecraft.
  */
-public enum DamageCause implements Described {
-  PLAYERS("Damage caused by other players"),
-  FALL("Damage caused from falling down"),
-  ENTITY("Damage caused by some entity"),
-  MISC("Miscellaneous damage");
+public enum Movement implements Described {
+  CHORUSFRUIT("Teleportation with chorus fruit", true),
+  COMMAND("Movement caused by a command", true),
+  ENDGATEWAY("Teleportation through an end gateway", true),
+  ENDERPEARL("Teleportation with an ender pearl", true),
+  ENTITYTELEPORT("Teleportation of an entity", true),
+  NATURAL("Any natural movement", false),
+  PLUGIN("Movement caused by a plugin", true),
+  PORTAL("Teleportation with a nether portal", true);
 
   private final String description;
+  private final boolean teleportation;
 
-  DamageCause(String description) {
+  Movement(String description, boolean teleportation) {
     this.description = description;
+    this.teleportation = teleportation;
   }
 
   @Override
@@ -49,5 +55,9 @@ public enum DamageCause implements Described {
   @Override
   public String toString() {
     return name().toLowerCase();
+  }
+
+  public boolean teleportation() {
+    return this.teleportation;
   }
 }

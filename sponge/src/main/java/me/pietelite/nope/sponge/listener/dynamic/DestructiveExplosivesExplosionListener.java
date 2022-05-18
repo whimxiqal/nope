@@ -39,15 +39,15 @@ import org.spongepowered.api.world.explosion.Explosion;
  * specifically for updating explosions to be non-destructive if applicable.
  */
 public class DestructiveExplosivesExplosionListener
-    implements SettingEventListener<AltSet<me.pietelite.nope.common.api.register.data.Explosive>,
+    implements SettingEventListener<AltSet<me.pietelite.nope.common.api.setting.Explosive>,
     ExplosionEvent.Pre> {
   @Override
-  public void handle(SettingEventContext<AltSet<me.pietelite.nope.common.api.register.data.Explosive>,
+  public void handle(SettingEventContext<AltSet<me.pietelite.nope.common.api.setting.Explosive>,
       ExplosionEvent.Pre> context) {
     final Object rootCause = context.event().cause().root();
     final Optional<Explosive> sourceExplosive = context.event().explosion().sourceExplosive();
     if (sourceExplosive.isPresent()) {
-      final me.pietelite.nope.common.api.register.data.Explosive explosive =
+      final me.pietelite.nope.common.api.setting.Explosive explosive =
           SpongeUtil.reduceExplosive(sourceExplosive.get());
       if (!context.lookup(rootCause, sourceExplosive.get().serverLocation()).contains(explosive)) {
         context.event().setExplosion(Explosion.builder()

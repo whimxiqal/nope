@@ -24,7 +24,7 @@
 
 package me.pietelite.nope.sponge.api.setting;
 
-import me.pietelite.nope.common.api.register.SettingKeyBuilder;
+import me.pietelite.nope.common.api.setting.SettingKeyBuilder;
 
 /**
  * A registrar of setting keys.

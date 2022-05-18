@@ -24,7 +24,6 @@
 
 package me.pietelite.nope.common.setting;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -39,8 +38,8 @@ import java.util.stream.Collectors;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
-import me.pietelite.nope.common.api.register.SettingCategory;
-import me.pietelite.nope.common.api.register.SettingKeyBuilder;
+import me.pietelite.nope.common.api.setting.SettingCategory;
+import me.pietelite.nope.common.api.setting.SettingKeyBuilder;
 import me.pietelite.nope.common.api.struct.AltSet;
 import me.pietelite.nope.common.api.struct.Named;
 import me.pietelite.nope.common.host.Evaluation;
@@ -126,7 +125,7 @@ public abstract class SettingKey<T,
       K extends SettingKey<T, V, M>,
       V extends SettingValue<T>,
       M extends SettingKey.Manager<T, V>,
-      B extends Builder<T, K, V, M, B>> implements SettingKeyBuilder<T, B> {
+      B extends Builder<T, K, V, M, B>> {
     protected final String id;
     protected final M manager;
     protected T defaultValue;
@@ -137,37 +136,18 @@ public abstract class SettingKey<T,
     protected boolean functional = false;
     protected boolean global = false;
     protected boolean playerRestrictive = false;
-
-    private boolean updatedDefaultValue = false;
+    protected boolean updatedDefaultValue = false;
 
     protected Builder(String id, M manager) {
       this.id = id;
       this.manager = manager;
     }
 
-    @Override
-    public B defaultValue(T defaultValue) {
-      this.defaultValue = defaultValue;
-      updatedDefaultValue = true;
-      if (naturalValue == null) {
-        this.naturalValue = defaultValue;
-      }
-      return (B) this;
-    }
-
-    @Override
-    public B naturalValue(T naturalValue) {
-      this.naturalValue = naturalValue;
-      return (B) this;
-    }
-
-    @Override
     public B description(String description) {
       this.description = description;
       return (B) this;
     }
 
-    @Override
     public B blurb(String blurb) {
       if (blurb.length() > 36) {
         throw new IllegalStateException("A 'blurb' may not be longer than 36 characters");
@@ -176,44 +156,21 @@ public abstract class SettingKey<T,
       return (B) this;
     }
 
-    @Override
     public B category(SettingCategory category) {
       this.category = category;
       return (B) this;
     }
 
-    /**
-     * Specify that this key is implemented.
-     *
-     * @return this builder, for chaining
-     */
-    @Override
     public B functional() {
       this.functional = true;
       return (B) this;
     }
 
-    /**
-     * Specify that this key can only be set for the entire server, globally.
-     *
-     * @return this builder, for chaining
-     */
-    @Override
     public B global() {
       this.global = true;
       return (B) this;
     }
 
-    /**
-     * Specify that when a non-default value of this setting is set, it is restrictive for players.
-     * This feature is intended to determine when unrestricted-type players should be able to ingore
-     * restrictive types of changes to behavior.
-     * For example, this plugin should generally not prevent administrators from breaking blocks where
-     * breaking blocks is disallowed.
-     *
-     * @return this builder, for chaining
-     */
-    @Override
     public B playerRestrictive() {
       this.playerRestrictive = true;
       return (B) this;
@@ -342,10 +299,26 @@ public abstract class SettingKey<T,
         SettingKey.Unary<T>,
         SettingValue.Unary<T>,
         SettingKey.Manager.Unary<T>,
-        Builder<T>> implements SettingKeyBuilder.Unary<T, Builder<T>> {
+        Builder<T>> implements SettingKeyBuilder.Unary<T> {
 
       private Builder(String id, Manager.Unary<T> manager) {
         super(id, manager);
+      }
+
+      @Override
+      public Builder<T> defaultValue(T defaultValue) {
+        this.defaultValue = defaultValue;
+        updatedDefaultValue = true;
+        if (naturalValue == null) {
+          this.naturalValue = defaultValue;
+        }
+        return this;
+      }
+
+      @Override
+      public Builder<T> naturalValue(T naturalValue) {
+        this.naturalValue = naturalValue;
+        return this;
       }
 
       /**
@@ -477,7 +450,7 @@ public abstract class SettingKey<T,
         SettingKey.Poly<T, S>,
         SettingValue.Poly<T, S>,
         SettingKey.Manager.Poly<T, S>,
-        Builder<T, S>> implements SettingKeyBuilder.Poly<T, S, Builder<T, S>> {
+        Builder<T, S>> implements SettingKeyBuilder.Poly<T> {
 
       private Builder(String id, Manager.Poly<T, S> manager) {
         super(id, manager);
@@ -514,6 +487,26 @@ public abstract class SettingKey<T,
       @Override
       public Builder<T, S> emptyNaturalData() {
         return naturalValue(this.manager.emptySet());
+      }
+
+      @Override
+      public Builder<T, S> defaultValue(AltSet<T> defaultValue) {
+        S set = manager.emptySet();
+        set.addAll(defaultValue);
+        this.defaultValue = set;
+        updatedDefaultValue = true;
+        if (naturalValue == null) {
+          this.naturalValue = set;
+        }
+        return this;
+      }
+
+      @Override
+      public Builder<T, S> naturalValue(AltSet<T> naturalValue) {
+        S set = manager.emptySet();
+        set.addAll(defaultValue);
+        this.naturalValue = set;
+        return this;
       }
     }
   }
@@ -597,7 +590,7 @@ public abstract class SettingKey<T,
         return value.toString();
       }
 
-      public SettingKeyBuilder.Unary<T, SettingKey.Unary.Builder<T>> keyBuilder(String id) {
+      public SettingKey.Unary.Builder<T> keyBuilder(String id) {
         return new SettingKey.Unary.Builder<T>(id, this);
       }
     }
@@ -794,7 +787,7 @@ public abstract class SettingKey<T,
         return newSet;
       }
 
-      public SettingKeyBuilder.Poly<T, S, SettingKey.Poly.Builder<T, S>> keyBuilder(String id) {
+      public SettingKey.Poly.Builder<T, S> keyBuilder(String id) {
         return new SettingKey.Poly.Builder<>(id, this);
       }
     }

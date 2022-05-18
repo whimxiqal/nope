@@ -41,7 +41,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import me.pietelite.nope.common.Nope;
-import me.pietelite.nope.common.api.register.SettingCategory;
+import me.pietelite.nope.common.api.setting.SettingCategory;
 import me.pietelite.nope.common.host.Host;
 import me.pietelite.nope.common.host.HostedProfile;
 import me.pietelite.nope.common.host.Profile;

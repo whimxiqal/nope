@@ -37,7 +37,7 @@ public interface TargetEditor {
   /**
    * Target all individuals, so a setting with this target will always be used during evaluation.
    * Unrestricted individuals remain unrestricted by restrictive settings, however.
-   * This must be bypassed manually with {@link #forceAffect(boolean)}.
+   * This must be bypassed manually with {@link #bypassUnrestricted(boolean)}.
    */
   void targetAll();
 
@@ -70,15 +70,15 @@ public interface TargetEditor {
 
   Set<UUID> playerSet();
 
-  boolean playerTargetType(Type type);
+  boolean targetType(Type type);
 
-  Type playerTargetType();
+  Type targetType();
 
   boolean remove();
 
-  boolean forceAffect(boolean force);
+  boolean bypassUnrestricted(boolean bypass);
 
-  boolean forceAffect();
+  boolean bypassUnrestricted();
 
   enum Type {
     WHITELIST,

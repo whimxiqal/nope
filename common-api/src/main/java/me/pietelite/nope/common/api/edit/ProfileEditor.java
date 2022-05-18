@@ -64,7 +64,8 @@ public interface ProfileEditor extends Named, NameEditor {
    * @throws NoSuchElementException if no setting exists with the given id
    * @see #editMultipleValueSetting(String, Class)
    */
-  <T> SingleValueSettingEditor<T> editSingleValueSetting(String setting, Class<T> type) throws NoSuchElementException;
+  <T> SingleValueSettingEditor<T> editSingleValueSetting(String setting, Class<T> type)
+      throws NoSuchElementException;
 
   /**
    * Gets an editor for a multiple-value type setting.
@@ -78,7 +79,8 @@ public interface ProfileEditor extends Named, NameEditor {
    * @throws NoSuchElementException if no setting exists with the given id
    * @see #editSingleValueSetting(String, Class)
    */
-  <T> MultipleValueSettingEditor<T> editMultipleValueSetting(String setting, Class<T> type) throws NoSuchElementException;
+  <T> MultipleValueSettingEditor<T> editMultipleValueSetting(String setting, Class<T> type)
+      throws NoSuchElementException;
 
   /**
    * Destroys the profile.

@@ -39,13 +39,13 @@ import org.spongepowered.api.registry.RegistryTypes;
  * specifically for cancelling the physical damaging of entities.
  */
 public class HarmfulExplosivesDamageListener implements
-    SettingEventListener<AltSet<me.pietelite.nope.common.api.register.data.Explosive>, DamageEntityEvent> {
+    SettingEventListener<AltSet<me.pietelite.nope.common.api.setting.Explosive>, DamageEntityEvent> {
   @Override
-  public void handle(SettingEventContext<AltSet<me.pietelite.nope.common.api.register.data.Explosive>,
+  public void handle(SettingEventContext<AltSet<me.pietelite.nope.common.api.setting.Explosive>,
       DamageEntityEvent> context) {
     final Optional<Explosive> sourceExplosive = context.event().cause().first(Explosive.class);
     if (sourceExplosive.isPresent()) {
-      final me.pietelite.nope.common.api.register.data.Explosive explosive =
+      final me.pietelite.nope.common.api.setting.Explosive explosive =
           SpongeUtil.reduceExplosive(sourceExplosive.get());
       if (!context.lookup(null, sourceExplosive.get().serverLocation()).contains(explosive)
           || !context.lookup(null, context.event().entity().serverLocation()).contains(explosive)) {

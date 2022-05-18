@@ -28,6 +28,7 @@ import java.util.NoSuchElementException;
 import me.pietelite.nope.common.MockNope;
 import me.pietelite.nope.common.Nope;
 import me.pietelite.nope.common.api.edit.HostEditor;
+import me.pietelite.nope.common.api.edit.ScopeEditor;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -55,48 +56,23 @@ public class SystemEditorTest extends ApiTest {
   }
 
   @Test
-  void scenes() {
-    Assertions.assertTrue(nopeScopeEditor().scenes().isEmpty());
-    nopeScopeEditor().createScene("kung_fu_panda", 0);
-    Assertions.assertEquals(1, nopeScopeEditor().scenes().size());
-    Assertions.assertTrue(nopeScopeEditor().scenes().contains("kung_fu_panda"));
-    // TODO this should eventually work i.e. we should get a set from the API that returns true if it contains
-    //  the name regardless of case
-    // Assertions.assertTrue(service().editSystem().scenes().contains("Kung_Fu_Panda"));
+  void editScope() {
+    Assertions.assertThrows(NoSuchElementException.class, () -> service().editSystem().editScope("league-of-legends"));
+    ScopeEditor editor = service().editSystem().editScope(Nope.NOPE_SCOPE);
+    ScopeEditor uppercaseEditor = service().editSystem().editScope(Nope.NOPE_SCOPE.toUpperCase());
+    Assertions.assertEquals(editor.name(), uppercaseEditor.name());
   }
 
   @Test
-  void createScene() {
-    nopeScopeEditor().createScene("sixth-sense", 0);
-    Assertions.assertThrows(IllegalArgumentException.class, () -> nopeScopeEditor().createScene("sixth-sense", 0));
-    // different case still counts as the same name
-    Assertions.assertThrows(IllegalArgumentException.class, () -> nopeScopeEditor().createScene("Sixth-Sense", 0));
-    Assertions.assertThrows(IllegalArgumentException.class, () -> nopeScopeEditor().createScene(Nope.GLOBAL_ID, 0));
-    Assertions.assertThrows(IllegalArgumentException.class, () -> nopeScopeEditor().createScene(MockNope.DOMAIN_1, 0));
+  void createScope() {
+    Assertions.assertEquals(1, service().editSystem().scopes().size());
+    Assertions.assertTrue(service().editSystem().scopes().contains(Nope.NOPE_SCOPE));
+    Assertions.assertThrows(NoSuchElementException.class, () -> service().editSystem().editScope("rocket-league"));
+    service().editSystem().registerScope("rocket-league");
+    Assertions.assertEquals(2, service().editSystem().scopes().size());
+    Assertions.assertTrue(service().editSystem().scopes().contains(Nope.NOPE_SCOPE));
+    Assertions.assertTrue(service().editSystem().scopes().contains("rocket-league"));
+    Assertions.assertDoesNotThrow(() -> service().editSystem().editScope("rocket-league"));
   }
-
-  @Test
-  void createScene_invalidName() {
-    Assertions.assertThrows(IllegalArgumentException.class, () -> nopeScopeEditor().createScene("_blades-of-glory", 0));
-    Assertions.assertThrows(IllegalArgumentException.class, () -> nopeScopeEditor().createScene("blades-of-glory_", 0));
-    Assertions.assertThrows(IllegalArgumentException.class, () -> nopeScopeEditor().createScene("blades-of-glory_", 0));
-    Assertions.assertThrows(IllegalArgumentException.class, () -> nopeScopeEditor().createScene("amper&sand", 0));
-    Assertions.assertThrows(IllegalArgumentException.class, () -> nopeScopeEditor().createScene("aster*isk", 0));
-    Assertions.assertThrows(IllegalArgumentException.class, () -> nopeScopeEditor().createScene("sla/sh", 0));
-    Assertions.assertThrows(IllegalArgumentException.class, () -> nopeScopeEditor().createScene("other\\slash", 0));
-  }
-
-  @Test
-  void profiles() {
-    Assertions.assertEquals(1, nopeScopeEditor().profiles().size());
-    Assertions.assertTrue(nopeScopeEditor().profiles().contains(Nope.GLOBAL_ID));
-    nopeScopeEditor().createProfile("beetlejuice");
-    Assertions.assertEquals(2, nopeScopeEditor().profiles().size());
-    Assertions.assertTrue(nopeScopeEditor().profiles().contains("beetlejuice"));
-    // TODO this should eventually work i.e. we should get a set from the API that returns true if it contains
-    //  the name regardless of case
-    // Assertions.assertTrue(service().editSystem().profiles().contains("BeetleJuice"));
-  }
-
 
 }

@@ -22,23 +22,22 @@
  * SOFTWARE.
  */
 
-package me.pietelite.nope.common.api.register.data;
+package me.pietelite.nope.common.api.setting;
 
 import me.pietelite.nope.common.api.struct.Described;
 
 /**
- * Methods of changing blocks.
+ * Possible causes of damage in Minecraft.
  */
-public enum BlockChange implements Described {
-  BREAK("Whether blocks can be replaced with air"),
-  PLACE("Whether blocks can replace air"),
-  MODIFY("Whether blocks can changed to other blocks or change internally"),
-  GROW("Whether blocks may be grown"),
-  DECAY("Whether blocks may decay");
+public enum DamageCause implements Described {
+  PLAYERS("Damage caused by other players"),
+  FALL("Damage caused from falling down"),
+  ENTITY("Damage caused by some entity"),
+  MISC("Miscellaneous damage");
 
   private final String description;
 
-  BlockChange(String description) {
+  DamageCause(String description) {
     this.description = description;
   }
 

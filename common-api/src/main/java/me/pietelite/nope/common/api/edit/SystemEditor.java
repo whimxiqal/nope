@@ -61,6 +61,15 @@ public interface SystemEditor {
   HostEditor editDomain(String name) throws NoSuchElementException;
 
   /**
+   * Gets all the scopes. A scope manages ownership of many components that should be
+   * managed by only one party. Delineating between components created under one scope
+   * versus another is primarily an organizational feature.
+   *
+   * @return all registered scopes
+   */
+  Set<String> scopes();
+
+  /**
    * Gets an editor for a specific scope.
    * All user-created components are created within a scope so other scopes
    * don't accidentally edit them.
@@ -76,14 +85,12 @@ public interface SystemEditor {
   ScopeEditor editScope(String scope) throws NoSuchElementException;
 
   /**
-   * Creates a new scope, if one wasn't already created.
-   * If there already was a scope with this name, it will just return the editor for the existing scope
-   * with no error.
+   * Registers a new scope, if one wasn't already created.
+   * There is no way to unregister a scope, so register a scope only once or a few times per game.
    *
    * @param scope the name of the scope; must be a combination of lowercase letters and hyphens
-   * @return the editor for the scope
    * @throws IllegalArgumentException if the name is invalid
    */
-  ScopeEditor createScope(String scope) throws IllegalArgumentException;
+  void registerScope(String scope) throws IllegalArgumentException;
 
 }

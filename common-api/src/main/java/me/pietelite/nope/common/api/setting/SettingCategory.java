@@ -22,11 +22,15 @@
  * SOFTWARE.
  */
 
-package me.pietelite.nope.common.api.register;
+package me.pietelite.nope.common.api.setting;
 
 /**
- * Represents that a field in a {@link SettingKeyBuilder} is required
- * to build a valid setting key.
+ * A category of setting key, for organizational and sorting purposes.
  */
-public @interface Required {
+public enum SettingCategory {
+    BLOCKS,
+    DAMAGE,
+    ENTITIES,
+    MISC,
+    MOVEMENT,
 }

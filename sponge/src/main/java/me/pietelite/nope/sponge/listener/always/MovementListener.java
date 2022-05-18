@@ -33,7 +33,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
-import me.pietelite.nope.common.api.register.data.Movement;
+import me.pietelite.nope.common.api.setting.Movement;
 import me.pietelite.nope.common.api.struct.AltSet;
 import me.pietelite.nope.common.host.Host;
 import me.pietelite.nope.common.setting.SettingKey;
@@ -150,30 +150,38 @@ public class MovementListener {
       // Cannot exit if we are walking out of a host and EXIT is disallowed at the origin
       if (!firstHosts.isEmpty()) {
         traversingHosts = true;
-        if (!SpongeUtil.valueFor(SettingKeys.EXIT, entity, firstLocation).contains(movementType)) {
-          movementCancelled = true;
-          movementCancelCause = SettingKeys.EXIT;
-          SpongeUtil.valueFor(SettingKeys.EXIT_DENY_MESSAGE, entity, firstLocation)
-              .ifPresent(message -> messages.add(serializer.deserialize(message)));
-          SpongeUtil.valueFor(SettingKeys.EXIT_DENY_TITLE, entity, firstLocation)
-              .ifPresent(message -> title.set(serializer.deserialize(message)));
-          SpongeUtil.valueFor(SettingKeys.EXIT_DENY_SUBTITLE, entity, firstLocation)
-              .ifPresent(message -> subTitle.set(serializer.deserialize(message)));
+        // We only want to evaluate EXIT if EXIT is set on a host that we are leaving.
+        // Otherwise, the EXIT setting doesn't matter for this movement
+        if (firstHosts.stream().anyMatch(host -> host.isSet(SettingKeys.EXIT))) {
+          if (!SpongeUtil.valueFor(SettingKeys.EXIT, entity, firstLocation).contains(movementType)) {
+            movementCancelled = true;
+            movementCancelCause = SettingKeys.EXIT;
+            SpongeUtil.valueFor(SettingKeys.EXIT_DENY_MESSAGE, entity, firstLocation)
+                .ifPresent(message -> messages.add(serializer.deserialize(message)));
+            SpongeUtil.valueFor(SettingKeys.EXIT_DENY_TITLE, entity, firstLocation)
+                .ifPresent(message -> title.set(serializer.deserialize(message)));
+            SpongeUtil.valueFor(SettingKeys.EXIT_DENY_SUBTITLE, entity, firstLocation)
+                .ifPresent(message -> subTitle.set(serializer.deserialize(message)));
+          }
         }
       }
 
       // Cannot enter if we are walking into a host and ENTRY is disallowed at the destination
       if (!lastHosts.isEmpty() && !movementCancelled) {
         traversingHosts = true;
-        if (!SpongeUtil.valueFor(SettingKeys.ENTRY, entity, lastLocation).contains(movementType)) {
-          movementCancelled = true;
-          movementCancelCause = SettingKeys.ENTRY;
-          SpongeUtil.valueFor(SettingKeys.ENTRY_DENY_MESSAGE, entity, lastLocation)
-              .ifPresent(message -> messages.add(serializer.deserialize(message)));
-          SpongeUtil.valueFor(SettingKeys.ENTRY_DENY_TITLE, entity, lastLocation)
-              .ifPresent(message -> title.set(serializer.deserialize(message)));
-          SpongeUtil.valueFor(SettingKeys.ENTRY_DENY_SUBTITLE, entity, lastLocation)
-              .ifPresent(message -> subTitle.set(serializer.deserialize(message)));
+        // We only want to evaluate EXIT if EXIT is set on a host that we are leaving.
+        // Otherwise, the EXIT setting doesn't matter for this movement
+        if (lastHosts.stream().anyMatch(host -> host.isSet(SettingKeys.ENTRY))) {
+          if (!SpongeUtil.valueFor(SettingKeys.ENTRY, entity, lastLocation).contains(movementType)) {
+            movementCancelled = true;
+            movementCancelCause = SettingKeys.ENTRY;
+            SpongeUtil.valueFor(SettingKeys.ENTRY_DENY_MESSAGE, entity, lastLocation)
+                .ifPresent(message -> messages.add(serializer.deserialize(message)));
+            SpongeUtil.valueFor(SettingKeys.ENTRY_DENY_TITLE, entity, lastLocation)
+                .ifPresent(message -> title.set(serializer.deserialize(message)));
+            SpongeUtil.valueFor(SettingKeys.ENTRY_DENY_SUBTITLE, entity, lastLocation)
+                .ifPresent(message -> subTitle.set(serializer.deserialize(message)));
+          }
         }
       }
 

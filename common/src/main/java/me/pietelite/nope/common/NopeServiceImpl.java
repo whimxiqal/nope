@@ -29,14 +29,8 @@ import me.pietelite.nope.common.api.NopeService;
 import me.pietelite.nope.common.api.SettingManagersImpl;
 import me.pietelite.nope.common.api.edit.SystemEditor;
 import me.pietelite.nope.common.api.evaluate.Evaluator;
-import me.pietelite.nope.common.api.register.SettingKeyBuilder;
-import me.pietelite.nope.common.api.register.SettingManagers;
-import me.pietelite.nope.common.api.register.data.BlockChange;
-import me.pietelite.nope.common.api.register.data.DamageCause;
-import me.pietelite.nope.common.api.register.data.Explosive;
-import me.pietelite.nope.common.api.register.data.Movement;
+import me.pietelite.nope.common.api.setting.SettingManagers;
 import me.pietelite.nope.common.host.HostSystem;
-import me.pietelite.nope.common.setting.SettingKeyManagers;
 
 /**
  * The implementation of the {@link NopeService}.

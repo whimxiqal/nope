@@ -24,12 +24,73 @@
 
 package me.pietelite.nope.common.api;
 
+import java.util.UUID;
 import java.util.function.Supplier;
 import me.pietelite.nope.common.api.edit.TargetEditor;
+import org.junit.jupiter.api.Assertions;
 
 public class TargetEditorTest {
 
   static void editTarget(TargetEditor targetEditor, Supplier<Boolean> hasTarget) {
+    targetEditor.remove();
+    Assertions.assertFalse(hasTarget.get());
+    targetEditor.targetAll();
+    Assertions.assertTrue(hasTarget.get());
+    Assertions.assertTrue(targetEditor.playerSet().isEmpty());
+    Assertions.assertEquals(TargetEditor.Type.BLACKLIST, targetEditor.targetType());
+    Assertions.assertFalse(targetEditor.targetType(TargetEditor.Type.BLACKLIST));
+    Assertions.assertTrue(targetEditor.targetType(TargetEditor.Type.WHITELIST));
+    Assertions.assertTrue(targetEditor.targetType(TargetEditor.Type.BLACKLIST));
+    Assertions.assertTrue(targetEditor.playerSet().isEmpty());
+    Assertions.assertTrue(targetEditor.permissions().isEmpty());
+    Assertions.assertFalse(targetEditor.clearPlayers());
+    Assertions.assertFalse(targetEditor.clearPermissions());
+
+    targetEditor.targetNone();
+    Assertions.assertTrue(hasTarget.get());
+    Assertions.assertTrue(targetEditor.playerSet().isEmpty());
+    Assertions.assertEquals(TargetEditor.Type.WHITELIST, targetEditor.targetType());
+    Assertions.assertFalse(targetEditor.targetType(TargetEditor.Type.WHITELIST));
+    Assertions.assertTrue(targetEditor.targetType(TargetEditor.Type.BLACKLIST));
+    Assertions.assertTrue(targetEditor.targetType(TargetEditor.Type.WHITELIST));
+    Assertions.assertTrue(targetEditor.playerSet().isEmpty());
+    Assertions.assertTrue(targetEditor.permissions().isEmpty());
+    Assertions.assertFalse(targetEditor.clearPlayers());
+    Assertions.assertFalse(targetEditor.clearPermissions());
+
+    UUID player1 = UUID.randomUUID();
+    UUID player2 = UUID.randomUUID();
+    Assertions.assertTrue(targetEditor.addPlayer(player1));
+    Assertions.assertFalse(targetEditor.addPlayer(player1));
+    Assertions.assertTrue(targetEditor.playerSet().contains(player1));
+    Assertions.assertFalse(targetEditor.playerSet().contains(player2));
+
+    Assertions.assertTrue(targetEditor.addPlayer(player2));
+    Assertions.assertFalse(targetEditor.addPlayer(player2));
+    Assertions.assertTrue(targetEditor.playerSet().contains(player1));
+    Assertions.assertTrue(targetEditor.playerSet().contains(player2));
+    Assertions.assertTrue(targetEditor.clearPlayers());
+    Assertions.assertFalse(targetEditor.clearPlayers());
+
+    String permission1 = "perm.1";
+    Assertions.assertTrue(targetEditor.addPermission(permission1, true));
+    Assertions.assertFalse(targetEditor.addPermission(permission1, true));
+    Assertions.assertTrue(targetEditor.permissions().containsKey(permission1));
+    Assertions.assertTrue(targetEditor.permissions().get(permission1));
+    Assertions.assertTrue(targetEditor.addPermission(permission1, false));
+    Assertions.assertFalse(targetEditor.addPermission(permission1, false));
+    Assertions.assertTrue(targetEditor.permissions().containsKey(permission1));
+    Assertions.assertFalse(targetEditor.permissions().get(permission1));
+
+    Assertions.assertFalse(targetEditor.bypassUnrestricted());
+    Assertions.assertFalse(targetEditor.bypassUnrestricted(false));
+    Assertions.assertTrue(targetEditor.bypassUnrestricted(true));
+    Assertions.assertFalse(targetEditor.bypassUnrestricted(true));
+    Assertions.assertTrue(targetEditor.bypassUnrestricted());
+    Assertions.assertFalse(targetEditor.bypassUnrestricted(true));
+    Assertions.assertTrue(targetEditor.bypassUnrestricted(false));
+    Assertions.assertFalse(targetEditor.bypassUnrestricted(false));
+    Assertions.assertFalse(targetEditor.bypassUnrestricted());
   }
 
 }

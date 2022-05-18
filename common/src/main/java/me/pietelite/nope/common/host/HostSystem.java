@@ -103,8 +103,15 @@ public class HostSystem {
     return scopes.get(name);
   }
 
-  public List<Scope> scopes() {
-    return new LinkedList<>(scopes.values());
+  public void registerScope(String name) {
+    if (scopes.containsKey(name)) {
+      throw new IllegalArgumentException("The name " + name + " is already registered");
+    }
+    scopes.put(name, new Scope(name));
+  }
+
+  public IgnoreCaseStringHashMap<Scope> scopes() {
+    return scopes;
   }
 
   /**
@@ -322,6 +329,11 @@ public class HostSystem {
     }
 
     @Override
+    public Set<String> scopes() {
+      return Nope.instance().system().scopes().realKeys();
+    }
+
+    @Override
     public ScopeEditor editScope(String scopeName) {
       Scope scope = Nope.instance().system().scope(scopeName);
       if (scope == null) {
@@ -331,11 +343,11 @@ public class HostSystem {
     }
 
     @Override
-    public ScopeEditor createScope(String scope) throws IllegalArgumentException {
+    public void registerScope(String scope) throws IllegalArgumentException {
       if (Validate.invalidId(scope)) {
         throw new IllegalArgumentException("The name " + scope + " is not a valid scope id");
       }
-      return new Scope.Editor(Nope.instance().system().getOrCreateScope(scope));
+      Nope.instance().system().registerScope(scope);
     }
   }
 

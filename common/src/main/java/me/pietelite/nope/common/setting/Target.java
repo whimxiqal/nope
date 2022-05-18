@@ -145,9 +145,7 @@ public final class Target {
     // in other words, we target if ANY of the criteria are met
     // if blacklisted, then we only target if NONE of the criteria are met.
     // in other words, we do *NOT* target if ANY of the criteria are met
-    System.out.println("whitelist: " + whitelist);
     if (users.contains(userUuid)) {
-      System.out.println("in user list");
       return whitelist;
     }
     for (Map.Entry<String, Boolean> permission : permissions.entrySet()) {
@@ -155,7 +153,6 @@ public final class Target {
         return whitelist;
       }
     }
-    System.out.println("falling through");
     return !whitelist;
   }
 
@@ -280,7 +277,7 @@ public final class Target {
     }
 
     @Override
-    public boolean playerTargetType(Type type) {
+    public boolean targetType(Type type) {
       Target target = targetable.target();
       if (target == null) {
         switch (type) {
@@ -303,7 +300,7 @@ public final class Target {
     }
 
     @Override
-    public Type playerTargetType() {
+    public Type targetType() {
       Target target = targetable.target();
       if (target == null) {
         throw new NoSuchElementException();
@@ -321,26 +318,26 @@ public final class Target {
     }
 
     @Override
-    public boolean forceAffect(boolean force) {
+    public boolean bypassUnrestricted(boolean bypass) {
       Target target = targetable.target();
       boolean out = false;
       if (target == null) {
-        if (force) {
+        if (bypass) {
           target = Target.all();
           target.indiscriminate(true);
           targetable.target(target);
           out = true;
         }
       } else {
-        out = target.indiscriminate != force;
-        target.indiscriminate(force);
+        out = target.indiscriminate != bypass;
+        target.indiscriminate(bypass);
       }
       saveFunction.run();
       return out;
     }
 
     @Override
-    public boolean forceAffect() {
+    public boolean bypassUnrestricted() {
       Target target = targetable.target();
       return target != null && target.indiscriminate;
     }

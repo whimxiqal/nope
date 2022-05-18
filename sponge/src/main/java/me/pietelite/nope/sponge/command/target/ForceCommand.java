@@ -49,11 +49,11 @@ public class ForceCommand extends CommandNode {
   @Override
   public CommandResult execute(CommandContext context) throws CommandException {
     TargetEditor editor = targetEditorFunction.apply(context);
-    editor.forceAffect(!editor.forceAffect());
+    editor.bypassUnrestricted(!editor.bypassUnrestricted());
     context.cause().audience().sendMessage(Formatter.success(
         "Players with the ___ permission are now ___",
         Permissions.UNRESTRICTED.get(),
-        editor.forceAffect() ? "affected" : "not affected"));
+        editor.bypassUnrestricted() ? "affected" : "not affected"));
     return CommandResult.success();
   }
 

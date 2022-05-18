@@ -24,7 +24,7 @@
 
 package me.pietelite.nope.common.setting.sets;
 
-import me.pietelite.nope.common.api.register.data.BlockChange;
+import me.pietelite.nope.common.api.setting.BlockChange;
 import me.pietelite.nope.common.struct.HashAltSet;
 
 /**

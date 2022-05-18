@@ -31,8 +31,7 @@ import me.pietelite.nope.common.MockNope;
 import me.pietelite.nope.common.Nope;
 import me.pietelite.nope.common.api.edit.ProfileEditor;
 import me.pietelite.nope.common.api.edit.ScopeEditor;
-import me.pietelite.nope.common.api.edit.SystemEditor;
-import me.pietelite.nope.common.api.register.data.BlockChange;
+import me.pietelite.nope.common.api.setting.BlockChange;
 import me.pietelite.nope.common.setting.SettingKeys;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -69,11 +68,11 @@ public class CaseTest extends ApiTest {
     editor.createProfile("stall");
     ProfileEditor stallProfile = editor.editProfile("stall");
     stallProfile.editMultipleValueSetting(SettingKeys.BLOCK_CHANGE.name(), BlockChange.class)
-        .setDeclarative(SettingKeys.BLOCK_CHANGE.manager().fullSet());
+        .setDeclarative(service().settingManagers().blockChangesManager().fullSet());
     stallProfile.editMultipleValueSetting(SettingKeys.INTERACTIVE_BLOCKS.name(), String.class)
-        .setDeclarative(SettingKeys.INTERACTIVE_BLOCKS.manager().fullSet());
+        .setDeclarative(service().settingManagers().entityManager().fullSet());
     stallProfile.editMultipleValueSetting(SettingKeys.INTERACTIVE_ENTITIES.name(), String.class)
-        .setDeclarative(SettingKeys.INTERACTIVE_ENTITIES.manager().fullSet());
+        .setDeclarative(service().settingManagers().entityManager().fullSet());
 
     int index = 0;
     String stallName;
@@ -112,7 +111,6 @@ public class CaseTest extends ApiTest {
         service().evaluator().polySetting(SettingKeys.BLOCK_CHANGE.name(), 1000, 1000, 1000, MockNope.DOMAIN_1,
             playerUuids.get(0), BlockChange.class));
     // Someone else in the first person's stall
-    System.out.println("About to evaluate target:");
     Assertions.assertEquals(SettingKeys.BLOCK_CHANGE.manager().emptySet(),
         service().evaluator().polySetting(SettingKeys.BLOCK_CHANGE.name(), 1, 1, 1, MockNope.DOMAIN_1,
             playerUuids.get(12), BlockChange.class));

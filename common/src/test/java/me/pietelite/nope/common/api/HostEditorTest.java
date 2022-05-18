@@ -30,6 +30,7 @@ import me.pietelite.nope.common.Nope;
 import me.pietelite.nope.common.api.edit.HostEditor;
 import me.pietelite.nope.common.api.edit.SceneEditor;
 import me.pietelite.nope.common.api.edit.TargetEditor;
+import me.pietelite.nope.common.api.edit.ZoneType;
 import me.pietelite.nope.common.util.ApiUtil;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -158,6 +159,23 @@ public class HostEditorTest extends ApiTest {
     Assertions.assertThrows(NoSuchElementException.class, () -> editor.addSphere("wonderland", 0, 0, 0, 1));
     Assertions.assertThrows(IllegalArgumentException.class, () -> editor.addSphere(MockNope.DOMAIN_1, 0, 0, 0, 0));
     Assertions.assertThrows(IllegalArgumentException.class, () -> editor.addSphere(MockNope.DOMAIN_1, 0, 0, 0, -1));
+  }
+
+  @Test
+  void editScene_tryEditWrongZoneType() {
+    SceneEditor editor = nopeScopeEditor().createScene("borne-identity", 0);
+    editor.addCuboid(MockNope.DOMAIN_1, 1, 2, 3, 4, 5, 6);
+    Assertions.assertEquals(1, editor.zoneTypes().size());
+    editor.addCylinder(MockNope.DOMAIN_1, 1, 2, 3, 4, 5);
+    Assertions.assertEquals(2, editor.zoneTypes().size());
+    Assertions.assertEquals(ZoneType.CUBOID, editor.zoneTypes().get(0));
+    Assertions.assertEquals(ZoneType.CYLINDER, editor.zoneTypes().get(1));
+    Assertions.assertThrows(IllegalArgumentException.class, () -> editor.editCylinder(0));
+    Assertions.assertThrows(IllegalArgumentException.class, () -> editor.editSlab(0));
+    Assertions.assertThrows(IllegalArgumentException.class, () -> editor.editSphere(0));
+    Assertions.assertThrows(IllegalArgumentException.class, () -> editor.editCuboid(1));
+    Assertions.assertThrows(IllegalArgumentException.class, () -> editor.editSlab(1));
+    Assertions.assertThrows(IllegalArgumentException.class, () -> editor.editSphere(1));
   }
 
   @Test

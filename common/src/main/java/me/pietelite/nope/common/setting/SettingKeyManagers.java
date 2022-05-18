@@ -24,10 +24,10 @@
 
 package me.pietelite.nope.common.setting;
 
-import me.pietelite.nope.common.api.register.data.BlockChange;
-import me.pietelite.nope.common.api.register.data.DamageCause;
-import me.pietelite.nope.common.api.register.data.Explosive;
-import me.pietelite.nope.common.api.register.data.Movement;
+import me.pietelite.nope.common.api.setting.BlockChange;
+import me.pietelite.nope.common.api.setting.DamageCause;
+import me.pietelite.nope.common.api.setting.Explosive;
+import me.pietelite.nope.common.api.setting.Movement;
 import me.pietelite.nope.common.setting.manager.BooleanKeyManager;
 import me.pietelite.nope.common.setting.manager.IntegerKeyManager;
 import me.pietelite.nope.common.setting.manager.OptionalStringKeyManager;

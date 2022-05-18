@@ -39,14 +39,14 @@ import org.spongepowered.api.event.block.ChangeBlockEvent;
  * specifically for handling the physical destruction of blocks due to explosions.
  */
 public class DestructiveExplosivesBlockListener
-    implements SettingEventListener<AltSet<me.pietelite.nope.common.api.register.data.Explosive>,
+    implements SettingEventListener<AltSet<me.pietelite.nope.common.api.setting.Explosive>,
     ChangeBlockEvent.All> {
   @Override
-  public void handle(SettingEventContext<AltSet<me.pietelite.nope.common.api.register.data.Explosive>,
+  public void handle(SettingEventContext<AltSet<me.pietelite.nope.common.api.setting.Explosive>,
       ChangeBlockEvent.All> context) {
     final Optional<Explosive> sourceExplosive = context.event().cause().first(Explosive.class);
     if (sourceExplosive.isPresent()) {
-      final me.pietelite.nope.common.api.register.data.Explosive explosive =
+      final me.pietelite.nope.common.api.setting.Explosive explosive =
           SpongeUtil.reduceExplosive(sourceExplosive.get());
       for (BlockTransaction transaction : context.event().transactions()) {
         if (transaction.finalReplacement()

@@ -25,7 +25,7 @@
 package me.pietelite.nope.sponge.listener.dynamic;
 
 import java.util.Optional;
-import me.pietelite.nope.common.api.register.data.BlockChange;
+import me.pietelite.nope.common.api.setting.BlockChange;
 import me.pietelite.nope.common.setting.SettingKeys;
 import me.pietelite.nope.common.setting.sets.BlockChangeSet;
 import me.pietelite.nope.sponge.api.setting.SettingEventContext;

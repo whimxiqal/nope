@@ -24,8 +24,6 @@
 
 package me.pietelite.nope.common.api.edit;
 
-import me.pietelite.nope.common.api.struct.Named;
-
 /**
  * Something that can have its name changed.
  */

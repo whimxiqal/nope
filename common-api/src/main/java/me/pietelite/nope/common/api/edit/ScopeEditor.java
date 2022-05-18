@@ -26,12 +26,13 @@ package me.pietelite.nope.common.api.edit;
 
 import java.util.NoSuchElementException;
 import java.util.Set;
+import me.pietelite.nope.common.api.struct.Named;
 
 /**
  * An editor for scoped components. Any user-created components must be edited in a {@link ScopeEditor}
  * so those components do not interfere with other ones made from other developers.
  */
-public interface ScopeEditor {
+public interface ScopeEditor extends Named {
 
   /**
    * Gets all scene names.

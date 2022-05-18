@@ -28,7 +28,7 @@ import java.util.NoSuchElementException;
 import me.pietelite.nope.common.api.edit.MultipleValueSettingEditor;
 import me.pietelite.nope.common.api.edit.SettingEditor;
 import me.pietelite.nope.common.api.edit.SingleValueSettingEditor;
-import me.pietelite.nope.common.api.register.data.BlockChange;
+import me.pietelite.nope.common.api.setting.BlockChange;
 import me.pietelite.nope.common.setting.SettingKeys;
 import me.pietelite.nope.common.setting.sets.BlockChangeSet;
 import org.junit.jupiter.api.Assertions;

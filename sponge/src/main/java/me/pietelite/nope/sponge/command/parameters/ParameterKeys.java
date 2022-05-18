@@ -27,7 +27,7 @@ package me.pietelite.nope.sponge.command.parameters;
 import io.leangen.geantyref.TypeToken;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
-import me.pietelite.nope.common.api.register.SettingCategory;
+import me.pietelite.nope.common.api.setting.SettingCategory;
 import me.pietelite.nope.common.host.Host;
 import me.pietelite.nope.common.host.Profile;
 import me.pietelite.nope.common.host.Scene;

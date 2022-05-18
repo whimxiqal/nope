@@ -26,7 +26,6 @@ package me.pietelite.nope.sponge.command.target.player;
 
 import java.util.function.Function;
 import me.pietelite.nope.common.api.edit.TargetEditor;
-import me.pietelite.nope.common.permission.Permissions;
 import me.pietelite.nope.sponge.command.CommandNode;
 import me.pietelite.nope.sponge.util.Formatter;
 import net.kyori.adventure.identity.Identity;
@@ -50,14 +49,14 @@ public class TogglePlayerListTypeCommand extends CommandNode {
   @Override
   public CommandResult execute(CommandContext context) throws CommandException {
     TargetEditor editor = targetEditorFunction.apply(context);
-    switch (editor.playerTargetType()) {
+    switch (editor.targetType()) {
       case WHITELIST:
-        editor.playerTargetType(TargetEditor.Type.BLACKLIST);
+        editor.targetType(TargetEditor.Type.BLACKLIST);
         context.sendMessage(Identity.nil(),
             Formatter.success("Set the target type to ___", "blacklist"));
         break;
       case BLACKLIST:
-        editor.playerTargetType(TargetEditor.Type.WHITELIST);
+        editor.targetType(TargetEditor.Type.WHITELIST);
         context.sendMessage(Identity.nil(),
             Formatter.success("Set the target type to ___", "whitelist"));
         break;

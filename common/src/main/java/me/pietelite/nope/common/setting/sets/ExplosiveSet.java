@@ -24,7 +24,7 @@
 
 package me.pietelite.nope.common.setting.sets;
 
-import me.pietelite.nope.common.api.register.data.Explosive;
+import me.pietelite.nope.common.api.setting.Explosive;
 import me.pietelite.nope.common.struct.HashAltSet;
 
 /**

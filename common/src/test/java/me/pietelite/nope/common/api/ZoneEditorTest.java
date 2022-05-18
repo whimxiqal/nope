@@ -24,6 +24,7 @@
 
 package me.pietelite.nope.common.api;
 
+import java.util.NoSuchElementException;
 import me.pietelite.nope.common.MockNope;
 import me.pietelite.nope.common.api.edit.CuboidEditor;
 import me.pietelite.nope.common.api.edit.CylinderEditor;
@@ -54,51 +55,60 @@ public class ZoneEditorTest extends ApiTest {
   void editCuboid() {
     SceneEditor editor = nopeScopeEditor().createScene("the-avengers", 0);
     Assertions.assertTrue(editor.zoneTypes().isEmpty());
-    CuboidEditor cuboidEditor = editor.addCuboid(MockNope.DOMAIN_1, 1, 2, 3, 4, 5, 6);
+    CuboidEditor zoneEditor = editor.addCuboid(MockNope.DOMAIN_1, 1, 2, 3, 4, 5, 6);
     Assertions.assertEquals(1, editor.zoneTypes().size());
     Assertions.assertEquals(ZoneType.CUBOID, editor.zoneTypes().get(0));
 
-    testZoneEditor(cuboidEditor);
-    Assertions.assertEquals(1, cuboidEditor.minX());
-    Assertions.assertEquals(2, cuboidEditor.minY());
-    Assertions.assertEquals(3, cuboidEditor.minZ());
-    Assertions.assertEquals(4, cuboidEditor.maxX());
-    Assertions.assertEquals(5, cuboidEditor.maxY());
-    Assertions.assertEquals(6, cuboidEditor.maxZ());
-    cuboidEditor.setDimensions(20, 19, 18, 17, 16, 15);
-    Assertions.assertEquals(17, cuboidEditor.minX());
-    Assertions.assertEquals(16, cuboidEditor.minY());
-    Assertions.assertEquals(15, cuboidEditor.minZ());
-    Assertions.assertEquals(20, cuboidEditor.maxX());
-    Assertions.assertEquals(19, cuboidEditor.maxY());
-    Assertions.assertEquals(18, cuboidEditor.maxZ());
-    destroyZone(cuboidEditor);
+    testZoneEditor(zoneEditor);
+    Assertions.assertEquals(1, zoneEditor.minX());
+    Assertions.assertEquals(2, zoneEditor.minY());
+    Assertions.assertEquals(3, zoneEditor.minZ());
+    Assertions.assertEquals(4, zoneEditor.maxX());
+    Assertions.assertEquals(5, zoneEditor.maxY());
+    Assertions.assertEquals(6, zoneEditor.maxZ());
+
+    Assertions.assertThrows(IndexOutOfBoundsException.class, () -> editor.editCuboid(-1));
+    Assertions.assertThrows(IndexOutOfBoundsException.class, () -> editor.editCuboid(1));
+    zoneEditor = editor.editCuboid(0);
+    zoneEditor.setDimensions(20, 19, 18, 17, 16, 15);
+    Assertions.assertEquals(17, zoneEditor.minX());
+    Assertions.assertEquals(16, zoneEditor.minY());
+    Assertions.assertEquals(15, zoneEditor.minZ());
+    Assertions.assertEquals(20, zoneEditor.maxX());
+    Assertions.assertEquals(19, zoneEditor.maxY());
+    Assertions.assertEquals(18, zoneEditor.maxZ());
+    destroyZone(zoneEditor);
   }
 
   @Test
   void editCylinder() {
     SceneEditor editor = nopeScopeEditor().createScene("the-avengers", 0);
     Assertions.assertTrue(editor.zoneTypes().isEmpty());
-    CylinderEditor cuboidEditor = editor.addCylinder(MockNope.DOMAIN_1, 1, 2, 3, 4, 5);
+    CylinderEditor zoneEditor = editor.addCylinder(MockNope.DOMAIN_1, 1, 2, 3, 4, 5);
     Assertions.assertEquals(1, editor.zoneTypes().size());
     Assertions.assertEquals(ZoneType.CYLINDER, editor.zoneTypes().get(0));
 
-    testZoneEditor(cuboidEditor);
-    Assertions.assertEquals(1, cuboidEditor.x());
-    Assertions.assertEquals(2, cuboidEditor.y());
-    Assertions.assertEquals(3, cuboidEditor.z());
-    Assertions.assertEquals(4, cuboidEditor.radius());
-    Assertions.assertEquals(5, cuboidEditor.height());
-    cuboidEditor.setDimensions(20, 19, 18, 17, 16);
-    Assertions.assertEquals(20, cuboidEditor.x());
-    Assertions.assertEquals(19, cuboidEditor.y());
-    Assertions.assertEquals(18, cuboidEditor.z());
-    Assertions.assertEquals(17, cuboidEditor.radius());
-    Assertions.assertEquals(16, cuboidEditor.height());
-    Assertions.assertThrows(IllegalArgumentException.class, () -> cuboidEditor.setDimensions(20, 19, 18, 0, 1));
-    Assertions.assertThrows(IllegalArgumentException.class, () -> cuboidEditor.setDimensions(20, 19, 18, 1, 0));
-    Assertions.assertThrows(IllegalArgumentException.class, () -> cuboidEditor.setDimensions(20, 19, 18, -1, -1));
-    destroyZone(cuboidEditor);
+    testZoneEditor(zoneEditor);
+    Assertions.assertEquals(1, zoneEditor.x());
+    Assertions.assertEquals(2, zoneEditor.y());
+    Assertions.assertEquals(3, zoneEditor.z());
+    Assertions.assertEquals(4, zoneEditor.radius());
+    Assertions.assertEquals(5, zoneEditor.height());
+
+    Assertions.assertThrows(IndexOutOfBoundsException.class, () -> editor.editCylinder(-1));
+    Assertions.assertThrows(IndexOutOfBoundsException.class, () -> editor.editCylinder(1));
+    CylinderEditor otherZoneEditor = editor.editCylinder(0);
+    otherZoneEditor.setDimensions(20, 19, 18, 17, 16);
+    Assertions.assertEquals(20, otherZoneEditor.x());
+    Assertions.assertEquals(19, otherZoneEditor.y());
+    Assertions.assertEquals(18, otherZoneEditor.z());
+    Assertions.assertEquals(17, otherZoneEditor.radius());
+    Assertions.assertEquals(16, otherZoneEditor.height());
+    Assertions.assertThrows(IllegalArgumentException.class, () -> otherZoneEditor.setDimensions(20, 19, 18, 0, 1));
+    Assertions.assertThrows(IllegalArgumentException.class, () -> otherZoneEditor.setDimensions(20, 19, 18, 1, 0));
+    Assertions.assertThrows(IllegalArgumentException.class, () -> otherZoneEditor.setDimensions(20, 19, 18, -1, -1));
+    destroyZone(otherZoneEditor);
+    Assertions.assertEquals(0, editor.zoneTypes().size());
   }
 
   @Test
@@ -112,10 +122,17 @@ public class ZoneEditorTest extends ApiTest {
     testZoneEditor(slabEditor);
     Assertions.assertEquals(1, slabEditor.y());
     Assertions.assertEquals(2, slabEditor.height());
-    slabEditor.setDimensions(20, 19);
-    Assertions.assertEquals(20, slabEditor.y());
-    Assertions.assertEquals(19, slabEditor.height());
-    destroyZone(slabEditor);
+
+    Assertions.assertThrows(IndexOutOfBoundsException.class, () -> editor.editCylinder(-1));
+    Assertions.assertThrows(IndexOutOfBoundsException.class, () -> editor.editCylinder(1));
+    SlabEditor otherZoneEditor = editor.editSlab(0);
+    otherZoneEditor.setDimensions(20, 19);
+    Assertions.assertEquals(20, otherZoneEditor.y());
+    Assertions.assertEquals(19, otherZoneEditor.height());
+    Assertions.assertThrows(IllegalArgumentException.class, () -> otherZoneEditor.setDimensions(20, 0));
+    Assertions.assertThrows(IllegalArgumentException.class, () -> otherZoneEditor.setDimensions(20, -1));
+    destroyZone(otherZoneEditor);
+    Assertions.assertEquals(0, editor.zoneTypes().size());
   }
 
   @Test
@@ -131,12 +148,19 @@ public class ZoneEditorTest extends ApiTest {
     Assertions.assertEquals(2, sphereEditor.y());
     Assertions.assertEquals(3, sphereEditor.z());
     Assertions.assertEquals(4, sphereEditor.radius());
-    sphereEditor.setDimensions(20, 19, 18, 17);
-    Assertions.assertEquals(20, sphereEditor.x());
-    Assertions.assertEquals(19, sphereEditor.y());
-    Assertions.assertEquals(18, sphereEditor.z());
-    Assertions.assertEquals(17, sphereEditor.radius());
-    destroyZone(sphereEditor);
+
+    Assertions.assertThrows(IndexOutOfBoundsException.class, () -> editor.editSphere(-1));
+    Assertions.assertThrows(IndexOutOfBoundsException.class, () -> editor.editSphere(1));
+    SphereEditor otherZoneEditor = editor.editSphere(0);
+    otherZoneEditor.setDimensions(20, 19, 18, 17);
+    Assertions.assertEquals(20, otherZoneEditor.x());
+    Assertions.assertEquals(19, otherZoneEditor.y());
+    Assertions.assertEquals(18, otherZoneEditor.z());
+    Assertions.assertEquals(17, otherZoneEditor.radius());
+    Assertions.assertThrows(IllegalArgumentException.class, () -> otherZoneEditor.setDimensions(20, 19, 18, 0));
+    Assertions.assertThrows(IllegalArgumentException.class, () -> otherZoneEditor.setDimensions(20, 19, 18, -1));
+    destroyZone(otherZoneEditor);
+    Assertions.assertEquals(0, editor.zoneTypes().size());
   }
 
   void testZoneEditor(ZoneEditor zoneEditor) {

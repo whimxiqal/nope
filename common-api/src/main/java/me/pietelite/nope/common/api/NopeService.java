@@ -24,10 +24,9 @@
 
 package me.pietelite.nope.common.api;
 
-import java.util.NoSuchElementException;
 import me.pietelite.nope.common.api.edit.SystemEditor;
 import me.pietelite.nope.common.api.evaluate.Evaluator;
-import me.pietelite.nope.common.api.register.SettingManagers;
+import me.pietelite.nope.common.api.setting.SettingManagers;
 
 /**
  * A developer API for all platform implementations of Nope.

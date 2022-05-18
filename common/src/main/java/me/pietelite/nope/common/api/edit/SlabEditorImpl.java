@@ -34,6 +34,9 @@ public class SlabEditorImpl extends ZoneEditorImpl<Slab> implements SlabEditor {
 
   @Override
   public void setDimensions(float y, float height) {
+    if (height <= 0) {
+      throw new IllegalArgumentException("The height of a slab must be positive");
+    }
     update(new Slab(volume.domain(), y, y + height));
   }
 

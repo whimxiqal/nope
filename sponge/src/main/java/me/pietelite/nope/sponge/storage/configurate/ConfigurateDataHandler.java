@@ -92,14 +92,14 @@ public abstract class ConfigurateDataHandler implements DataHandler {
       system.global().expire();
     }
     system.domains().values().forEach(Expirable::expire);
-    system.scopes().forEach(scope -> {
+    system.scopes().values().forEach(scope -> {
       scope.scenes().values().forEach(Expirable::expire);
       scope.profiles().values().forEach(Expirable::expire);
     });
 
     // Clear them from the system
     system.domains().clear();
-    system.scopes().forEach(scope -> {
+    system.scopes().values().forEach(scope -> {
       scope.scenes().clear();
       scope.profiles().clear();
     });

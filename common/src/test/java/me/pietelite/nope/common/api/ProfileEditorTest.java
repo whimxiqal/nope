@@ -26,7 +26,7 @@ package me.pietelite.nope.common.api;
 
 import java.util.NoSuchElementException;
 import me.pietelite.nope.common.api.edit.ProfileEditor;
-import me.pietelite.nope.common.api.register.data.BlockChange;
+import me.pietelite.nope.common.api.setting.BlockChange;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 

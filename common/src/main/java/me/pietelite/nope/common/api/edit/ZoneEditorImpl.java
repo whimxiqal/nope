@@ -54,7 +54,7 @@ public class ZoneEditorImpl<V extends Volume> implements ZoneEditor {
     this.index = index;
     Volume v = scene.volumes().get(index);
     if (!volumeClass.isInstance(v)) {
-      throw new ClassCastException("The requested volume type was not found at index " + index);
+      throw new IllegalArgumentException("The requested volume type was not found at index " + index);
     }
     this.volume = volumeClass.cast(v);
   }

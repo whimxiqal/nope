@@ -89,6 +89,7 @@ public interface HostEditor extends Named {
   /**
    * Gets an editor for the target for this host set on the profile with the given name.
    *
+   * @param scope the scope of the profile on which the edited target resides
    * @param name the name of the profile on which the edited target resides
    * @return the editor
    * @throws NoSuchElementException   if no profile exists with that name

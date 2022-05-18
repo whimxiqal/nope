@@ -136,6 +136,11 @@ public class Scope implements Named {
       profile.save();
       return new Profile.Editor(profile);
     }
+
+    @Override
+    public String name() {
+      return scope.name;
+    }
   }
 
 }

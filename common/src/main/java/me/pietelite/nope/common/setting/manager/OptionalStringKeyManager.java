@@ -25,7 +25,6 @@
 package me.pietelite.nope.common.setting.manager;
 
 import java.util.Optional;
-import me.pietelite.nope.common.api.register.SettingKeyBuilder;
 import me.pietelite.nope.common.setting.SettingKey;
 
 public class OptionalStringKeyManager extends SettingKey.Manager.Unary<Optional<String>> {
