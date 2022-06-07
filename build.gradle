@@ -2,8 +2,6 @@ plugins {
     id 'org.cadixdev.licenser' version '0.6.1' apply false
 }
 
-defaultTasks 'licenseFormat', 'build'
-
 def determinePatchVersion() {
     // get the name of the last tag
     def tagInfo = new ByteArrayOutputStream()
