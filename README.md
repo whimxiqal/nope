@@ -2,6 +2,8 @@
 
 Nope is a powerful, modular, administrative Minecraft protection plugin written for Sponge servers by PietElite. 
 
+![Nope Logo](./logo.png "Nope Logo")
+
 Nope is similar to [WorldGuard](https://github.com/EngineHub/WorldGuard) in that
 it allows the user to alter standard game behaviour within containers.
 The primary goals of the plugin is to:
