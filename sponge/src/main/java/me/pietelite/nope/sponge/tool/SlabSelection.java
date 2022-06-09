@@ -43,7 +43,7 @@ public class SlabSelection extends Selection<Slab> {
   @Override
   public Slab construct() {
     return new Slab(domain,
-        Math.min(position1.y(), position2.y()),
-        Math.max(position1.y(), position2.y()));
+        (float) Math.min(position1.y(), position2.y()),
+        Math.max(position1.y(), position2.y()) + 1f);
   }
 }

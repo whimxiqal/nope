@@ -26,8 +26,9 @@ package me.pietelite.nope.sponge.command.tree.host.blank;
 
 import java.util.Optional;
 import me.pietelite.nope.common.host.Host;
-import me.pietelite.nope.common.host.Zone;
+import me.pietelite.nope.common.host.Scene;
 import me.pietelite.nope.common.permission.Permissions;
+import me.pietelite.nope.sponge.SpongeNope;
 import me.pietelite.nope.sponge.command.CommandNode;
 import me.pietelite.nope.sponge.command.parameters.ParameterKeys;
 import me.pietelite.nope.sponge.command.parameters.Parameters;
@@ -36,13 +37,12 @@ import me.pietelite.nope.sponge.util.Formatter;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.parameter.CommandContext;
-import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 
 public class HostShowCommand extends CommandNode {
 
   public HostShowCommand(CommandNode parent) {
-    super(parent, Permissions.INFO,
+    super(parent, Permissions.HOST_INFO,
         "Show the boundaries of volumes",
         "show");
     prefix(Parameters.HOST);
@@ -59,36 +59,28 @@ public class HostShowCommand extends CommandNode {
     ServerPlayer player = (ServerPlayer) context.cause().root();
 
     Host host = context.requireOne(Parameters.HOST);
-    if (!(host instanceof Zone)) {
+    if (!(host instanceof Scene)) {
       return CommandResult.error(Formatter.error(
           "You may not see the boundaries of this type of host"
       ));
     }
-    Zone zone = (Zone) host;
+    Scene scene = (Scene) host;
 
     Optional<Integer> index = context.one(ParameterKeys.VOLUME_INDEX);
     if (index.isPresent()) {
       try {
-        if (EffectsUtil.show(zone.volumes().get(index.get()), player)) {
-          player.sendMessage(Formatter.success("Showing boundaries of zone ___, volume ___",
-              zone.name(),
-              index.get()));
-        } else {
-          player.sendMessage(Formatter.error("The boundaries of volume ___ of zone ___ is too far away",
-              index.get(),
-              zone.name()));
-        }
+        SpongeNope.instance().particleEffectHandler().show(scene.volumes().get(index.get()), player);
+        player.sendMessage(Formatter.success("Showing boundaries of scene ___, volume ___",
+            scene.name(),
+            index.get()));
       } catch (IndexOutOfBoundsException e) {
         return CommandResult.error(Formatter.error(
             "Index ___ is out of bounds", index.get()
         ));
       }
     } else {
-      if (EffectsUtil.show(zone, player)) {
-        player.sendMessage(Formatter.success("Showing boundaries of zone ___", zone.name()));
-      } else {
-        player.sendMessage(Formatter.success("The boundaries of zone ___ are too far away", zone.name()));
-      }
+      SpongeNope.instance().particleEffectHandler().show(scene, player);
+      player.sendMessage(Formatter.success("Showing boundaries of scene ___", scene.name()));
     }
     return CommandResult.success();
   }

@@ -57,17 +57,18 @@ public class Evaluation<T> extends LinkedList<Evaluation<T>.EvaluationStage> {
 
   /**
    * Add a stage to the end of the stage list, insinuating
-   * that the host cause the overall value to mutate to the given value
-   * after the evaluation passed through the host.
+   * that the profile cause the overall value to mutate to the given value
+   * after the evaluation passed through the profile.
    * This method is for bookkeeping and does not affect the actual result
    * when it is queried.
    *
-   * @param host  the host
-   * @param value the value after the host was applied
+   * @param host the host
+   * @param profile  the profile
+   * @param value the value after the profile was applied
    * @return the stage that was added
    */
-  public EvaluationStage add(Host host, T value) {
-    EvaluationStage stage = new EvaluationStage(host, value);
+  public EvaluationStage add(Host host, Profile profile, T value) {
+    EvaluationStage stage = new EvaluationStage(host, profile, value);
     this.add(stage);
     return stage;
   }
@@ -78,21 +79,28 @@ public class Evaluation<T> extends LinkedList<Evaluation<T>.EvaluationStage> {
   public class EvaluationStage {
 
     private final Host host;
+    private final Profile profile;
     private final T value;
 
     /**
      * Generic constructor.
      *
-     * @param host  the host
+     * @param host the host
+     * @param profile  the profile
      * @param value the value
      */
-    public EvaluationStage(Host host, T value) {
+    public EvaluationStage(Host host, Profile profile, T value) {
       this.host = host;
+      this.profile = profile;
       this.value = value;
     }
 
     public Host host() {
       return host;
+    }
+
+    public Profile profile() {
+      return profile;
     }
 
     public T value() {

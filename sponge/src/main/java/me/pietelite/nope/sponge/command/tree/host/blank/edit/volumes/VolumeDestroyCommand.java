@@ -24,9 +24,12 @@
 
 package me.pietelite.nope.sponge.command.tree.host.blank.edit.volumes;
 
+import me.pietelite.nope.common.Nope;
+import me.pietelite.nope.common.api.NopeServiceProvider;
 import me.pietelite.nope.common.host.Host;
-import me.pietelite.nope.common.host.Zone;
+import me.pietelite.nope.common.host.Scene;
 import me.pietelite.nope.common.permission.Permissions;
+import me.pietelite.nope.common.util.ApiUtil;
 import me.pietelite.nope.sponge.command.CommandNode;
 import me.pietelite.nope.sponge.command.parameters.ParameterKeys;
 import me.pietelite.nope.sponge.command.parameters.Parameters;
@@ -37,8 +40,8 @@ import org.spongepowered.api.command.parameter.CommandContext;
 
 public class VolumeDestroyCommand extends CommandNode {
   public VolumeDestroyCommand(CommandNode parent) {
-    super(parent, Permissions.EDIT,
-        "Destroy a volume by index",
+    super(parent, Permissions.HOST_EDIT,
+        "Destroy a zone by index",
         "destroy");
     addParameter(Parameters.VOLUME_INDEX);
   }
@@ -46,24 +49,22 @@ public class VolumeDestroyCommand extends CommandNode {
   @Override
   public CommandResult execute(CommandContext context) throws CommandException {
     int index = context.one(ParameterKeys.VOLUME_INDEX).orElseThrow(() ->
-        new CommandException(Formatter.error("You must supply a volume index")));
+        new CommandException(Formatter.error("You must supply a zone index")));
     Host host = context.requireOne(ParameterKeys.HOST);
-    if (!(host instanceof Zone)) {
+    if (!(host instanceof Scene)) {
       return CommandResult.error(Formatter.error(
           "You may not destroy volumes in host ___", host.name()
       ));
     }
-    Zone zone = (Zone) host;
-    try {
-      zone.remove(index);
-    } catch (IndexOutOfBoundsException e) {
-      return CommandResult.error(Formatter.error(
-          "Your index ___ is out of bounds", index
-      ));
+    Scene scene = (Scene) host;
+    int volumes = scene.volumes().size();
+    if (index < 0 || index >= volumes) {
+      return CommandResult.error(Formatter.error("Your index ___ is out of bounds", index));
     }
+    ApiUtil.editNopeScope().editScene(scene.name()).editZone(index).destroy();
     context.cause().audience().sendMessage(Formatter.success(
-        "You deleted the volume of ___ at index ___",
-        zone.name(), index
+        "You deleted the zone of ___ at index ___",
+        scene.name(), index
     ));
     return CommandResult.success();
   }

@@ -28,7 +28,6 @@ import java.util.Arrays;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import me.pietelite.nope.common.api.setting.SettingCategory;
-import me.pietelite.nope.common.permission.Permissions;
 import me.pietelite.nope.sponge.SpongeNope;
 import me.pietelite.nope.sponge.command.CommandNode;
 import me.pietelite.nope.sponge.command.parameters.ParameterKeys;
@@ -42,7 +41,7 @@ import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 
 public class ListSettingsCommand extends CommandNode {
   public ListSettingsCommand(CommandNode parent) {
-    super(parent, Permissions.INFO,
+    super(parent, null,
         "List all possible settings",
         "list");
     addParameter(Parameters.SETTING_CATEGORY);

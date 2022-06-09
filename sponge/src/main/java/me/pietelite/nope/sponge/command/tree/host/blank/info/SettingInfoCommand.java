@@ -28,8 +28,8 @@ import me.pietelite.nope.common.host.Host;
 import me.pietelite.nope.common.permission.Permissions;
 import me.pietelite.nope.sponge.command.CommandNode;
 import me.pietelite.nope.sponge.command.parameters.Parameters;
-import me.pietelite.nope.sponge.command.tree.host.blank.info.blank.TargetInfoCommand;
-import me.pietelite.nope.sponge.command.tree.host.blank.info.blank.ValueInfoCommand;
+import me.pietelite.nope.sponge.command.tree.host.blank.info.setting.TargetInfoCommand;
+import me.pietelite.nope.sponge.command.tree.host.blank.info.setting.ValueInfoCommand;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.parameter.CommandContext;
@@ -37,7 +37,7 @@ import org.spongepowered.api.command.parameter.CommandContext;
 public class SettingInfoCommand extends CommandNode {
 
   public SettingInfoCommand(CommandNode parent) {
-    super(parent, Permissions.EDIT,
+    super(parent, null,
         "Get info on a setting of a host",
         "setting");
     addParameter(Parameters.SETTING_KEY);

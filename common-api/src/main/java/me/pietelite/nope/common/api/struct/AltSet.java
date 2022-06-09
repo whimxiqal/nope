@@ -135,8 +135,9 @@ public interface AltSet<T> {
    * Try to remove all elements found in another {@link AltSet}.
    *
    * @param other the other set
+   * @return true if anything was removed
    */
-  void removeAll(@NotNull AltSet<T> other);
+  boolean removeAll(@NotNull AltSet<T> other);
 
   /**
    * Try to remove all elements found in some {@link Collection}.

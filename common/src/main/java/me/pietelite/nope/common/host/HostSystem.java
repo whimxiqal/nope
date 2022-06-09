@@ -24,256 +24,216 @@
 
 package me.pietelite.nope.common.host;
 
-import java.util.Collection;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
+import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.UUID;
-import lombok.Getter;
-import lombok.experimental.Accessors;
+import me.pietelite.nope.common.Nope;
+import me.pietelite.nope.common.api.edit.HostEditor;
+import me.pietelite.nope.common.api.edit.ScopeEditor;
+import me.pietelite.nope.common.api.edit.SystemEditor;
 import me.pietelite.nope.common.math.Volume;
-import me.pietelite.nope.common.setting.Setting;
 import me.pietelite.nope.common.setting.SettingKey;
+import me.pietelite.nope.common.struct.IgnoreCaseStringHashMap;
 import me.pietelite.nope.common.struct.Location;
+import me.pietelite.nope.common.util.Validate;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 /**
- * Implementation of HostTree making distinctions between
- * a GlobalHost, a WorldHost, and a Zone (VolumeHost).
- *
- * @see Host
+ * The central controlling object of almost all of Nope's state.
  */
 public class HostSystem {
 
-  @Getter
-  @Accessors(fluent = true)
-  protected final Universe universe;
+  private final IgnoreCaseStringHashMap<Domain> domains = new IgnoreCaseStringHashMap<>();
+  private final IgnoreCaseStringHashMap<Scope> scopes = new IgnoreCaseStringHashMap<>();
 
-  /**
-   * Domain id mapped to itself.
-   */
-  protected final HashMap<String, Domain> domains = new HashMap<>();
+  private Global global;
 
-  protected final HashMap<String, Zone> zones = new HashMap<>();
+  public HostSystem() {
+    scopes.put(Nope.NOPE_SCOPE, new Scope(Nope.NOPE_SCOPE));
+  }
 
-  /**
-   * Generic constructor.
-   *
-   * @param universe the universe
-   * @param domains  the domains
-   */
-  public HostSystem(Universe universe, Iterable<Domain> domains) {
-    this.universe = universe;
-    domains.forEach(domain -> this.domains.put(domain.name(), domain));
+  public Global global() {
+    return global;
+  }
+
+  public void global(Global global) {
+    this.global = global;
+  }
+
+  public IgnoreCaseStringHashMap<Domain> domains() {
+    return domains;
   }
 
   /**
-   * Returns a map of every host keyed by its name.
+   * Get the {@link Scope} with the given name or create a new one if one doesn't exist.
+   *
+   * @param name the name of the scope
+   * @return the scope
+   */
+  public Scope getOrCreateScope(String name) {
+    Scope scope = scopes.get(name);
+    if (scope == null) {
+      scope = new Scope(name);
+      scopes.put(name, scope);
+    }
+    return scope;
+  }
+
+  public Scope scope(String name) {
+    return scopes.get(name);
+  }
+
+  /**
+   * Register a new scope with the given name.
+   *
+   * @param name the name of the scope
+   * @throws IllegalArgumentException if a scope already exists with that name
+   */
+  public void registerScope(String name) throws IllegalArgumentException {
+    if (scopes.containsKey(name)) {
+      throw new IllegalArgumentException("The name " + name + " is already registered");
+    }
+    scopes.put(name, new Scope(name));
+  }
+
+  public IgnoreCaseStringHashMap<Scope> scopes() {
+    return scopes;
+  }
+
+  /**
+   * Returns a list of every host.
    *
    * @return all hosts
    */
   @NotNull
-  public Map<String, Host> hosts() {
-    Map<String, Host> hosts = new HashMap<>();
-    hosts.put(this.universe.name(), this.universe);
-    hosts.putAll(this.domains);
-    hosts.putAll(this.zones);
+  public List<Host> hosts() {
+    List<Host> hosts = new LinkedList<>();
+    hosts.add(this.global);
+    hosts.addAll(this.domains.values());
+    scopes.values().forEach(scope -> hosts.addAll(scope.scenes().values()));
     return hosts;
   }
 
   /**
-   * Add a zone into the system and replaces any other zone with the same name.
+   * Get all hosts under the given scope.
    *
-   * @param zone the zone to add
-   * @return the zone that was removed, or null if none
+   * @param scopeName the name of the scope
+   * @return the map of hosts, keyed by host name
+   * @throws IllegalArgumentException if no scope exists with that name
    */
-  @Nullable
-  public Zone addZone(Zone zone) {
-    Zone replaced = zones.put(zone.name().toLowerCase(), zone);
-    Set<VolumeTree> trees = new HashSet<>();
-    zone.volumes.forEach(volume -> {
-      volume.domain().volumes().put(volume, zone, false);
-      trees.add(volume.domain().volumes());
-    });
-    trees.forEach(VolumeTree::construct);
-    return replaced;
-  }
-
-  /**
-   * Add a volume into a zone and updates the internal structures
-   * to be aware of the zone's increased ownership of a domain.
-   *
-   * @param volume the volume to add on the zone
-   * @param zone   the zone
-   */
-  public void addVolume(Volume volume, Zone zone) {
-    zone.volumes.add(volume);
-    volume.domain().volumes().put(volume, zone, true);
-    zone.save();
-  }
-
-  /**
-   * Add a series of zones. This is faster than adding each one individually.
-   *
-   * @param zones the zones
-   */
-  public void addAllZones(Iterable<Zone> zones) {
-    // Put all zones in the collection of zones for indexing by their name
-    zones.forEach(zone -> this.zones.put(zone.name().toLowerCase(), zone));
-
-    Set<VolumeTree> trees = new HashSet<>();
-    // Add all volumes into volume tree
-    zones.forEach(zone ->
-        zone.volumes.forEach(volume -> {
-          volume.domain().volumes().put(volume, zone, false);
-          trees.add(volume.domain().volumes());
-        }));
-    // Construct all volume trees that were affected
-    trees.forEach(VolumeTree::construct);
-  }
-
-  /**
-   * Remove a {@link Zone} from the system by name.
-   *
-   * @param zoneName the name of the zone
-   * @return the {@link Zone} that was removed
-   */
-  @Nullable
-  public Zone removeZone(String zoneName) {
-    Zone removed = zones.remove(zoneName.toLowerCase());
-    if (removed != null) {
-      Set<Domain> domains = new HashSet<>();
-      removed.volumes.forEach(volume -> {
-        volume.domain().volumes().remove(volume, false);
-        domains.add(volume.domain());
-      });
-      removed.destroy();
-      domains.forEach(domain -> domain.volumes().construct());
+  public Map<String, Host> hosts(String scopeName) throws IllegalArgumentException {
+    if (!scopes.containsKey(scopeName)) {
+      throw new IllegalArgumentException("There is no scope named " + scopeName);
     }
-    return removed;
+    Map<String, Host> hosts = new HashMap<>();
+    hosts.put(this.global.name, this.global);
+    hosts.putAll(this.domains.map());
+    hosts.putAll(scope(scopeName).scenes().map());
+    return hosts;
   }
 
   /**
-   * Remove a {@link Volume} from a {@link Zone} in the system.
+   * Add a volume into a scene and updates the internal structures
+   * to be aware of the scene's increased ownership of a domain.
    *
-   * @param zone  the zone
-   * @param index the index of the volume in the zone
-   * @return the removed {@link Volume}.
-   * @throws IndexOutOfBoundsException if the index is out of bounds in the volume list on the zone
+   * @param volume the volume to add on the scene
+   * @param scene  the scene
+   * @return the index at which the volume was added for the scene
    */
-  public Volume removeVolume(Zone zone, int index) throws IndexOutOfBoundsException {
-    Volume removed = zone.volumes.remove(index);
-    removed.domain().volumes().remove(removed, true);
-    return removed;
-  }
-
-  @Nullable
-  public Zone get(String zoneName) {
-    return zones.get(zoneName);
-  }
-
-  public boolean hasName(String hostName) {
-    return host(hostName).isPresent();
-  }
-
-  public Collection<Zone> getAll() {
-    return zones.values();
+  public int addVolume(Volume volume, Scene scene) {
+    LinkedList<Volume> newVolumes = new LinkedList<>();
+    for (Volume oldVolume : scene.volumes()) {
+      if (oldVolume.uuid().equals(volume.uuid())) {
+        assert oldVolume.domain() == volume.domain();
+        volume.domain().volumes().remove(oldVolume, false);
+      } else {
+        newVolumes.add(oldVolume);
+      }
+    }
+    newVolumes.add(volume);
+    scene.volumes(newVolumes);
+    volume.domain().volumes().put(volume, scene, true);
+    scene.save();
+    return newVolumes.size() - 1;
   }
 
   /**
    * Get all the hosts "superior" at that location, which include any hosts
-   * that encapsulate that point and those hosts' parents.
+   * that encapsulate that point.
    *
    * @param location the location for which to find superior hosts
    * @return the superior hosts
    */
   @NotNull
-  public Set<Host> collectSuperiorHosts(@NotNull Location location) {
+  public Set<Host> containingHosts(@NotNull Location location) {
     Set<Host> set = new HashSet<>();
-    set.add(universe);
+    set.add(global);
     set.add(location.domain());
 
-    // Add all the containing zones and their parents
-    Set<Zone> zones = location.domain()
+    // Add all the containing scenes and their parents
+    Set<Scene> scenes = location.domain()
         .volumes()
-        .containing(location.getBlockX(), location.getBlockY(), location.getBlockZ());
-    set.addAll(zones);
-    accumulateParents(zones, set);
+        .containing(location.posX(), location.posY(), location.posZ());
+    set.addAll(scenes);
     return set;
   }
 
   /**
-   * Get all the superior hosts around another {@link Host}.
-   * A host is superior if it completely encapsulates the other or is an ancestor.
+   * Determine if the key is assigned to any host.
    *
-   * @param host         the host for which to find other superior hosts
-   * @param discriminate currently unused
-   * @return the set of all superior hosts
+   * @param key the key
+   * @return true if a host has it assigned anywhere
    */
-  @NotNull
-  public Set<Host> collectSuperiorHosts(Host host, boolean discriminate) {
-    Set<Host> set = new HashSet<>();
-    if (host instanceof Universe) {
-      return set;  // Not contained by anything
-    }
-    set.add(universe);
-    if (host instanceof Domain) {
-      set.add(universe);  // Only contained by universe
-      return set;
-    }
-    if (!(host instanceof Zone)) {
-      throw new IllegalArgumentException("The host of type "
-          + host.getClass().getName()
-          + " is unrecognized.");
-    }
-    // Add domains
-    Zone zone = (Zone) host;
-    zone.volumes.forEach(volume -> set.add(volume.domain()));
-
-    // Add zones which contain this entire zone (all of its volumes)
-    Set<Zone> containingZones = containingZones(zone, true);
-    set.addAll(containingZones);
-
-    // Grab all the parents of each containing zone
-    accumulateParents(containingZones, set);
-    return set;
-  }
-
-  private Set<Zone> containingZones(Zone zone, boolean discriminate) {
-    Set<Zone> all = new HashSet<>();
-    boolean first = true;
-    // Only keep the zones which contain every single volume of the given zone
-    for (Volume volume : zone.volumes) {
-      if (first) {
-        all.addAll(volume.domain().volumes().containing(volume, discriminate));
-        first = false;
-      } else {
-        all.retainAll(volume.domain().volumes().containing(volume, discriminate));
-      }
-    }
-    return all;
-  }
-
-  private void accumulateParents(Set<Zone> zones, Set<Host> accumulator) {
-    Zone current;
-    for (Zone zone : zones) {
-      current = zone;
-      while (current.parent().isPresent() && !accumulator.contains(current.parent().get())) {
-        current = current.parent().get();
-        accumulator.add(current);
-      }
-    }
-  }
-
   public boolean isAssigned(SettingKey<?, ?, ?> key) {
-    return hosts().values().stream().anyMatch(host -> host.get(key).isPresent());
+    return hosts().stream().anyMatch(host ->
+        host.hostedProfiles().stream().anyMatch(profileItem ->
+            profileItem.profile().get(key).isPresent()));
   }
+
+  /**
+   * Determine whether a host exists under a given scope.
+   *
+   * @param scope the scope
+   * @param host  the host
+   * @return true if the name exists
+   */
+  public boolean hasName(String scope, String host) {
+    if (global.name().equalsIgnoreCase(host)) {
+      return true;
+    }
+    if (domains().containsKey(host)) {
+      return true;
+    }
+    return scope(scope).scenes().containsKey(host);
+  }
+
+  /**
+   * Load a series of scenes into the system.
+   *
+   * @param scenes the scenes
+   */
+  public void loadScenes(Iterable<Scene> scenes) {
+    // Put all scenes in the collection of scenes for indexing by their name
+    scenes.forEach(scene -> getOrCreateScope(scene.scope()).scenes().put(scene.name().toLowerCase(), scene));
+
+    Set<Domain> domains = new HashSet<>();
+    // Add all volumes into volume tree
+    scenes.forEach(scene -> scene.volumes().forEach(volume -> {
+      volume.domain().volumes().put(volume, scene, false);
+      domains.add(volume.domain());
+    }));
+    // Construct all volume trees that were affected
+    domains.forEach(domain -> domain.volumes().construct());
+  }
+
 
   public <X> Evaluation<X> lookupAnonymous(@NotNull SettingKey<X, ?, ?> key,
                                            @NotNull Location location) {
@@ -293,134 +253,120 @@ public class HostSystem {
   public <X> Evaluation<X> lookup(@NotNull final SettingKey<X, ?, ?> key,
                                   @Nullable final UUID userUuid,
                                   @NotNull final Location location) {
-    LinkedList<Host> hosts = new LinkedList<>();
+    Set<Scene> containingScenes = location.domain()
+        .volumes()
+        .containing(location.posX(),
+            location.posY(),
+            location.posZ());
 
-    // add universe
-    if (universe.isSet(key)) {
-      hosts.addFirst(universe);
+    return lookup(key, userUuid, location.domain(), containingScenes);
+  }
+
+  private <X> Evaluation<X> lookup(SettingKey<X, ?, ?> key, UUID userUuid, Domain domain, Set<Scene> scenes) {
+    ArrayList<Host> hosts = new ArrayList<>(scenes.size() + 2);
+
+    hosts.addAll(scenes);
+
+    // add global
+    if (global.isSet(key)) {
+      hosts.add(global);
     }
 
     // add domain
-    if (location.domain().isSet(key)) {
-      hosts.addFirst(location.domain());
+    if (domain.isSet(key)) {
+      hosts.add(domain);
     }
 
-    // add zones
-    location.domain()
-        .volumes()
-        .containing(location.getBlockX(),
-            location.getBlockY(),
-            location.getBlockZ())
-        .stream()
-        .filter(zone -> zone.isSet(key))
-        .forEach(hosts::addFirst);
+    hosts.sort(Comparator.comparing(Host::priority));
 
-    // add parents
-    LinkedList<Host> unadded = hosts;
-    hosts = new LinkedList<>();
-    Host current;
-    while (!unadded.isEmpty()) {
-      current = unadded.pop();
-      hosts.add(current);
-      if (current instanceof Zone) {
-        if (((Zone) current).parent().isPresent()) {
-          unadded.add(((Zone) current).parent().get());
-        }
-      }
-    }
-    return key.extractValue(hosts, userUuid, location);
+    return key.extractValue(hosts, userUuid);
   }
 
   /**
-   * Finds an immediate superior host which has the exact same data and target
-   * applied with the given key. Returns empty if there is no superior host
-   * with the given setting applied or if the most immediate superior (highest
-   * in priority) has either a different data or target on the setting.
-   * A superior host is one which is either a parent of the given host or
-   * one which completely encapsulates the given host.
+   * Evaluate the result of a setting key for a specific user at a given block location.
    *
-   * @param host the host
-   * @param key  the key
-   * @return a superior with an identical setting
+   * @param key      the key
+   * @param userUuid the user's uuid
+   * @param domain   the domain
+   * @param x        the block x coordinate
+   * @param y        the block y coordinate
+   * @param z        the block z coordinate
+   * @param <X>      the type of data to return
+   * @return a record of the evaluation process
    */
-  public Optional<Host> findIdenticalSuperior(Host host, SettingKey<?, ?, ?> key) {
-    // Check if this host even has a setting
-    Optional<? extends Setting<?, ?>> setting = host.get(key);
-    if (!setting.isPresent()) {
-      return Optional.empty();
-    }
-    List<Host> superiors = new LinkedList<>(collectSuperiorHosts(host, true));
-    superiors.sort(Comparator.comparingInt(h -> -h.priority()));  // Sort maximum first
-    for (Host superior : superiors) {
-      // Continue if this superior doesn't have priority over the desired host
-      if (superior.priority() > host.priority()) {
-        continue;
-      }
-
-      Optional<? extends Setting<?, ?>> superiorSetting = superior.get(key);
-      // Continue if the value is not found on this host
-      if (!superiorSetting.isPresent()) {
-        continue;
-      }
-
-      // If the value is the same, then its redundant. Otherwise, not redundant
-      if (setting.get().equals(superiorSetting.get())) {
-        return Optional.of(superior);
-      } else {
-        return Optional.empty();
-      }
-    }
-
-    // We're out of superiors, so check if the default value is this one
-    if (key.defaultData().equals(setting.get().value())) {
-      // Return the original host to signify that the default value makes this redundant
-      return Optional.of(host);
-    } else {
-      return Optional.empty();
-    }
-  }
-
-  public Map<String, Domain> domains() {
-    return new HashMap<>(domains);
+  public <X> Evaluation<X> lookupBlock(@NotNull final SettingKey<X, ?, ?> key,
+                                       @Nullable final UUID userUuid,
+                                       Domain domain, int x, int y, int z) {
+    Set<Scene> containingScenes = domain.volumes().containingBlock(x, y, z);
+    return lookup(key, userUuid, domain, containingScenes);
   }
 
   /**
-   * Lookup a domain by name.
+   * Evaluates a setting key, only considering the Global Host.
    *
-   * @param name the name of the domain
-   * @return the domain
-   * @throws IllegalArgumentException if there is no domain by that name
+   * @param key      the setting key
+   * @param userUuid the uuid of the user
+   * @param <X>      the result type
+   * @return the evaluation
    */
-  @NotNull
-  public Domain domain(String name) {
-    Domain domain = domains.get(name.toLowerCase());
-    if (domain == null) {
-      throw new IllegalArgumentException("There is no domain called: " + name.toLowerCase());
+  public <X> Evaluation<X> lookupGlobal(@NotNull final SettingKey<X, ?, ?> key,
+                                        @Nullable final UUID userUuid) {
+
+    ArrayList<Host> hosts = new ArrayList<>(1);
+
+    // add global
+    if (global.isSet(key)) {
+      hosts.add(global);
     }
-    return domain;
-  }
 
-  public Map<String, Zone> zones() {
-    return new HashMap<>(zones);
-  }
-
-  public Zone zone(String name) {
-    return zones.get(name);
+    return key.extractValue(hosts, userUuid);
   }
 
   /**
-   * Lookup a host by name.
-   *
-   * @param name the name of a host
-   * @return the host, or an empty optional if none exists
+   * Implementation for the {@link SystemEditor}.
    */
-  public Optional<Host> host(String name) {
-    if (name.equalsIgnoreCase(universe.name())) {
-      return Optional.of(universe);
-    } else if (domains.containsKey(name.toLowerCase())) {
-      return Optional.of(domains.get(name.toLowerCase()));
-    } else {
-      return Optional.ofNullable(zones.get(name.toLowerCase()));
+  public static class Editor implements SystemEditor {
+
+    @Override
+    public HostEditor editGlobal() {
+      return new Global.Editor();
+    }
+
+    @Override
+    public Set<String> domains() {
+      return Nope.instance().system().domains().realKeys();
+    }
+
+    @Override
+    public HostEditor editDomain(String name) throws NoSuchElementException {
+      Domain domain = Nope.instance().system().domains().get(name);
+      if (domain == null) {
+        throw new NoSuchElementException();
+      }
+      return new Domain.Editor(domain);
+    }
+
+    @Override
+    public Set<String> scopes() {
+      return Nope.instance().system().scopes().realKeys();
+    }
+
+    @Override
+    public ScopeEditor editScope(String scopeName) {
+      Scope scope = Nope.instance().system().scope(scopeName);
+      if (scope == null) {
+        throw new NoSuchElementException("No scope with name " + scopeName + " exists");
+      }
+      return new Scope.Editor(scope);
+    }
+
+    @Override
+    public void registerScope(String scope) throws IllegalArgumentException {
+      if (Validate.invalidId(scope)) {
+        throw new IllegalArgumentException("The name " + scope + " is not a valid scope id");
+      }
+      Nope.instance().system().registerScope(scope);
     }
   }
+
 }

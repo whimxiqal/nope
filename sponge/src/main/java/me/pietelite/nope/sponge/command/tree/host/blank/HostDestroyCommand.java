@@ -25,9 +25,11 @@
 package me.pietelite.nope.sponge.command.tree.host.blank;
 
 import me.pietelite.nope.common.Nope;
+import me.pietelite.nope.common.api.NopeServiceProvider;
 import me.pietelite.nope.common.host.Host;
-import me.pietelite.nope.common.host.Zone;
+import me.pietelite.nope.common.host.Scene;
 import me.pietelite.nope.common.permission.Permissions;
+import me.pietelite.nope.common.util.ApiUtil;
 import me.pietelite.nope.sponge.command.CommandNode;
 import me.pietelite.nope.sponge.command.parameters.ParameterKeys;
 import me.pietelite.nope.sponge.command.parameters.Parameters;
@@ -39,8 +41,8 @@ import org.spongepowered.api.command.parameter.CommandContext;
 public class HostDestroyCommand extends CommandNode {
   public HostDestroyCommand(CommandNode parent) {
     super(parent,
-        Permissions.DESTROY,
-        "Destroy a zone",
+        Permissions.HOST_DESTROY,
+        "Destroy a scene",
         "destroy");
     prefix(Parameters.HOST);
   }
@@ -48,15 +50,13 @@ public class HostDestroyCommand extends CommandNode {
   @Override
   public CommandResult execute(CommandContext context) throws CommandException {
     Host host = context.requireOne(ParameterKeys.HOST);
-    if (!(host instanceof Zone)) {
+    if (!(host instanceof Scene)) {
       return CommandResult.error(Formatter.error(
           "You may only delete hosts of type ___", "zone"
       ));
     }
-    Nope.instance().hostSystem().removeZone(host.name());
-    context.cause().audience().sendMessage(Formatter.success(
-        "Zone ___ was destroyed", host.name()
-    ));
+    ApiUtil.editNopeScope().editScene(host.name()).destroy();
+    context.cause().audience().sendMessage(Formatter.success("Scene ___ was destroyed", host.name()));
     return CommandResult.success();
   }
 }

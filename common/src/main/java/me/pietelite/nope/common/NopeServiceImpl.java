@@ -24,13 +24,13 @@
 
 package me.pietelite.nope.common;
 
+import me.pietelite.nope.common.api.EvaluatorImpl;
 import me.pietelite.nope.common.api.NopeService;
-import me.pietelite.nope.common.api.setting.SettingKeyBuilder;
-import me.pietelite.nope.common.api.setting.data.BlockChange;
-import me.pietelite.nope.common.api.setting.data.DamageCause;
-import me.pietelite.nope.common.api.setting.data.Explosive;
-import me.pietelite.nope.common.api.setting.data.Movement;
-import me.pietelite.nope.common.setting.SettingKeyManagers;
+import me.pietelite.nope.common.api.SettingManagersImpl;
+import me.pietelite.nope.common.api.edit.SystemEditor;
+import me.pietelite.nope.common.api.evaluate.Evaluator;
+import me.pietelite.nope.common.api.setting.SettingManagers;
+import me.pietelite.nope.common.host.HostSystem;
 
 /**
  * The implementation of the {@link NopeService}.
@@ -38,62 +38,17 @@ import me.pietelite.nope.common.setting.SettingKeyManagers;
 public class NopeServiceImpl implements NopeService {
 
   @Override
-  public SettingKeyBuilder.Unary<Boolean, ?> booleanKeyBuilder(String id) {
-    return SettingKeyManagers.BOOLEAN_KEY_MANAGER.keyBuilder(id);
+  public SettingManagers settingManagers() {
+    return new SettingManagersImpl();
   }
 
   @Override
-  public SettingKeyBuilder.Unary<Boolean, ?> stateKeyBuilder(String id) {
-    return SettingKeyManagers.STATE_KEY_MANAGER.keyBuilder(id);
+  public SystemEditor editSystem() {
+    return new HostSystem.Editor();
   }
 
   @Override
-  public SettingKeyBuilder.Unary<Boolean, ?> toggleKeyBuilder(String id) {
-    return SettingKeyManagers.TOGGLE_KEY_MANAGER.keyBuilder(id);
-  }
-
-  @Override
-  public SettingKeyBuilder.Unary<Integer, ?> integerKeyBuilder(String id) {
-    return SettingKeyManagers.INTEGER_KEY_MANAGER.keyBuilder(id);
-  }
-
-  @Override
-  public SettingKeyBuilder.Unary<String, ?> stringKeyBuilder(String id) {
-    return SettingKeyManagers.STRING_KEY_MANAGER.keyBuilder(id);
-  }
-
-  @Override
-  public SettingKeyBuilder.Poly<String, ?, ?> entitiesManager(String id) {
-    return SettingKeyManagers.POLY_ENTITY_KEY_MANAGER.keyBuilder(id);
-  }
-
-  @Override
-  public SettingKeyBuilder.Poly<String, ?, ?> growablesManager(String id) {
-    return SettingKeyManagers.POLY_GROWABLE_KEY_MANAGER.keyBuilder(id);
-  }
-
-  @Override
-  public SettingKeyBuilder.Poly<String, ?, ?> pluginsManager(String id) {
-    return SettingKeyManagers.POLY_PLUGIN_MANAGER.keyBuilder(id);
-  }
-
-  @Override
-  public SettingKeyBuilder.Poly<BlockChange, ?, ?> blockChangesManager(String id) {
-    return SettingKeyManagers.POLY_BLOCK_CHANGE_KEY_MANAGER.keyBuilder(id);
-  }
-
-  @Override
-  public SettingKeyBuilder.Poly<DamageCause, ?, ?> damageCausesManager(String id) {
-    return SettingKeyManagers.POLY_DAMAGE_SOURCE_KEY_MANAGER.keyBuilder(id);
-  }
-
-  @Override
-  public SettingKeyBuilder.Poly<Explosive, ?, ?> explosivesManager(String id) {
-    return SettingKeyManagers.POLY_EXPLOSIVE_KEY_MANAGER.keyBuilder(id);
-  }
-
-  @Override
-  public SettingKeyBuilder.Poly<Movement, ?, ?> movementsManager(String id) {
-    return SettingKeyManagers.POLY_MOVEMENT_KEY_MANAGER.keyBuilder(id);
+  public Evaluator evaluator() {
+    return new EvaluatorImpl();
   }
 }

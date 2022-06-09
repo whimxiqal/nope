@@ -11,8 +11,7 @@ jar {
 }
 
 // Used for deployment of the Common API
-/*
-if (project.hasProperty('sonatypeUsername') && project.hasProperty('sonatypePassword')) {
+if (project.hasProperty('sonatypeUsername') && project.hasProperty('sonatypePassword') && project.ext.publishApi) {
     apply plugin: 'maven-publish'
     apply plugin: 'signing'
 
@@ -95,4 +94,3 @@ if (project.hasProperty('sonatypeUsername') && project.hasProperty('sonatypePass
         }
     }
 }
-*/

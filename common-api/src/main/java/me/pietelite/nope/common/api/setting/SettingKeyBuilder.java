@@ -117,9 +117,8 @@ public interface SettingKeyBuilder<T, B extends SettingKeyBuilder<T, B>> {
    * A setting key builder to build keys that are used to return single values.
    *
    * @param <T> the data type evaluated for events
-   * @param <B> the builder, for chaining
    */
-  interface Unary<T, B extends Unary<T, B>> extends SettingKeyBuilder<T, B> {
+  interface Unary<T> extends SettingKeyBuilder<T, SettingKeyBuilder.Unary<T>> {
 
   }
 
@@ -127,44 +126,42 @@ public interface SettingKeyBuilder<T, B extends SettingKeyBuilder<T, B>> {
    * A setting key builder to build keys that are used to return multiple values.
    *
    * @param <T> the data type of each element in the set
-   * @param <S> the special type of set used in Nope evaluated for events
-   * @param <B> the builder, for chaining
    */
-  interface Poly<T, S extends AltSet<T>, B extends Poly<T, S, B>> extends SettingKeyBuilder<S, B> {
+  interface Poly<T> extends SettingKeyBuilder<AltSet<T>, SettingKeyBuilder.Poly<T>> {
 
     /**
-     * Set the default value as a full {@link S}.
+     * Set the default value as a full {@link AltSet}.
      * If this is called, {@link #defaultValue} need not be called.
      *
      * @return the builder, for chaining
      * @see #defaultValue(Object)
      */
-    B fillDefaultData();
+    SettingKeyBuilder.Poly<T> fillDefaultData();
 
     /**
-     * Set the default value as an empty {@link S}.
+     * Set the default value as an empty {@link AltSet}.
      * If this is called, {@link #defaultValue} need not be called.
      *
      * @return the builder, for chaining
      * @see #defaultValue(Object)
      */
-    B emptyDefaultData();
+    SettingKeyBuilder.Poly<T> emptyDefaultData();
 
     /**
-     * Set the natural value as a full {@link S}.
+     * Set the natural value as a full {@link AltSet}.
      *
      * @return the builder, for chaining
      * @see #naturalValue(Object)
      */
-    B fillNaturalData();
+    SettingKeyBuilder.Poly<T> fillNaturalData();
 
     /**
-     * Set the natural value as an empty {@link S}.
+     * Set the natural value as an empty {@link AltSet}.
      *
      * @return the builder, for chaining
      * @see #naturalValue(Object)
      */
-    B emptyNaturalData();
+    SettingKeyBuilder.Poly<T> emptyNaturalData();
 
   }
 

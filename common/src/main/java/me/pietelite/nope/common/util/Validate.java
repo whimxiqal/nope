@@ -35,14 +35,13 @@ public final class Validate {
   }
 
   /**
-   * Ensures that the input is in the kebab case format.
+   * Ensures that the name is a valid id.
    *
    * @param name the input string
    * @return true if the input is an invalid setting collection name
-   * @throws IllegalArgumentException the exception to throw if fails
    */
-  public static boolean invalidSettingCollectionName(String name) throws IllegalArgumentException {
-    return !Pattern.compile("^[a-zA-Z0-9\\-()&_]*$").matcher(name).matches();
+  public static boolean invalidId(String name) {
+    return !Pattern.compile("^[a-zA-Z0-9\\-_]*[^_]$").matcher(name).matches();
   }
 
   /**

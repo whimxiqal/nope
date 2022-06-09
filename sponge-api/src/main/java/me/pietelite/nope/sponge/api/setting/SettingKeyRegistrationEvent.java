@@ -24,6 +24,7 @@
 
 package me.pietelite.nope.sponge.api.setting;
 
+import me.pietelite.nope.common.api.setting.SettingKeyBuilder;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.EventContext;
@@ -32,7 +33,7 @@ import org.spongepowered.api.event.lifecycle.LifecycleEvent;
 /**
  * A new event to be thrown during the server startup portion of the lifecycle.
  * Through this event, developers must register any of their setting keys using
- * {@link me.pietelite.nope.common.api.setting.SettingKeyBuilder}s.
+ * {@link SettingKeyBuilder}s.
  */
 public class SettingKeyRegistrationEvent implements LifecycleEvent {
 

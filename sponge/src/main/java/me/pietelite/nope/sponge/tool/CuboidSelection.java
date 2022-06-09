@@ -44,12 +44,12 @@ public class CuboidSelection extends Selection<Cuboid> {
   @Override
   public Cuboid construct() {
     return new Cuboid(domain,
-        Math.min(position1.x(), position2.x()),
-        Math.min(position1.y(), position2.y()),
-        Math.min(position1.z(), position2.z()),
-        Math.max(position1.x(), position2.x()) + 1,
-        Math.max(position1.y(), position2.y()) + 1,
-        Math.max(position1.z(), position2.z()) + 1);
+        (float) Math.min(position1.x(), position2.x()),
+        (float) Math.min(position1.y(), position2.y()),
+        (float) Math.min(position1.z(), position2.z()),
+        (float) Math.max(position1.x(), position2.x()) + 1,
+        (float) Math.max(position1.y(), position2.y()) + 1,
+        (float) Math.max(position1.z(), position2.z()) + 1);
   }
 
 }

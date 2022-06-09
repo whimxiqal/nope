@@ -25,9 +25,8 @@
 package me.pietelite.nope.sponge.command.tree.host.blank.edit;
 
 import me.pietelite.nope.common.host.Host;
-import me.pietelite.nope.common.host.Zone;
-import me.pietelite.nope.common.permission.Permissions;
-import me.pietelite.nope.sponge.SpongeNope;
+import me.pietelite.nope.common.host.Scene;
+import me.pietelite.nope.common.util.ApiUtil;
 import me.pietelite.nope.sponge.command.CommandNode;
 import me.pietelite.nope.sponge.command.parameters.ParameterKeys;
 import me.pietelite.nope.sponge.command.parameters.Parameters;
@@ -40,28 +39,26 @@ import org.spongepowered.api.command.parameter.CommandContext;
 public class NameCommand extends CommandNode {
 
   public NameCommand(CommandNode parent) {
-    super(parent, Permissions.EDIT,
+    super(parent, null,
         "Edit the name of a host",
         "name");
-    addParameter(Parameters.HOST_NAME);
+    addParameter(Parameters.ID);
   }
 
   @Override
   public CommandResult execute(CommandContext context) throws CommandException {
     Host host = context.requireOne(ParameterKeys.HOST);
-    if (!(host instanceof Zone)) {
-      return CommandResult.error(Formatter.error("You may only rename zones"));
+    if (!(host instanceof Scene)) {
+      return CommandResult.error(Formatter.error("You may only rename scenes"));
     }
-    Zone zone = (Zone) host;
-
-    String name = context.requireOne(ParameterKeys.HOST_NAME);
-    Zone newZone = zone.shallowCopy(name);
-    SpongeNope.instance().hostSystem().removeZone(zone.name());
-    SpongeNope.instance().hostSystem().addZone(newZone);
-    newZone.save();
-    context.sendMessage(Identity.nil(), Formatter.success("Zone name ___ changed to ___",
-        zone.name(),
-        newZone.name()));
+    String newName = context.requireOne(ParameterKeys.ID);
+    if (ApiUtil.editNopeScope().editScene(host.name()).name(newName)) {
+      context.sendMessage(Identity.nil(), Formatter.success("Name of scene ___ changed to ___",
+          host.name(),
+          newName));
+    } else {
+      context.sendMessage(Identity.nil(), Formatter.error("The scene is already called ___"));
+    }
     return CommandResult.success();
   }
 }

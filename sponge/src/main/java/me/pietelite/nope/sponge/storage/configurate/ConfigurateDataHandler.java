@@ -24,29 +24,46 @@
 
 package me.pietelite.nope.sponge.storage.configurate;
 
+import java.io.File;
+import java.nio.file.Path;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
-import lombok.AllArgsConstructor;
+import me.pietelite.nope.common.Nope;
 import me.pietelite.nope.common.host.Domain;
 import me.pietelite.nope.common.host.HostSystem;
-import me.pietelite.nope.common.host.Universe;
 import me.pietelite.nope.common.setting.SettingKeys;
 import me.pietelite.nope.common.storage.DataHandler;
 import me.pietelite.nope.common.storage.DomainDataHandler;
+import me.pietelite.nope.common.storage.Expirable;
+import me.pietelite.nope.common.storage.ProfileDataHandler;
+import me.pietelite.nope.common.storage.SceneDataHandler;
 import me.pietelite.nope.common.storage.UniverseDataHandler;
-import me.pietelite.nope.common.storage.ZoneDataHandler;
 import org.spongepowered.api.Sponge;
 
 /**
  * A {@link DataHandler} for managing the plugin with Configurate
  * (org.spongepowered.configurate.).
  */
-@AllArgsConstructor
 public abstract class ConfigurateDataHandler implements DataHandler {
 
-  private final UniverseConfigurateDataHandler universeDataHandler;
+  private final GlobalConfigurateDataHandler universeDataHandler;
   private final DomainConfigurateDataHandler domainDataHandler;
-  private final ZoneConfigurateDataHandler zoneDataHandler;
+  private final SceneConfigurateDataHandler sceneConfigurateDataHandler;
+  private final ProfileConfigurateDataHandler profileConfigurateDataHandler;
+
+  protected ConfigurateDataHandler(GlobalConfigurateDataHandler universeDataHandler,
+                                   DomainConfigurateDataHandler domainDataHandler,
+                                   SceneConfigurateDataHandler sceneConfigurateDataHandler,
+                                   ProfileConfigurateDataHandler profileConfigurateDataHandler) {
+    this.profileConfigurateDataHandler = profileConfigurateDataHandler;
+    this.universeDataHandler = universeDataHandler;
+    this.domainDataHandler = domainDataHandler;
+    this.sceneConfigurateDataHandler = sceneConfigurateDataHandler;
+  }
 
   @Override
   public UniverseDataHandler universe() {
@@ -59,13 +76,40 @@ public abstract class ConfigurateDataHandler implements DataHandler {
   }
 
   @Override
-  public ZoneDataHandler zones() {
-    return zoneDataHandler;
+  public SceneDataHandler scenes(String scope) {
+    return sceneConfigurateDataHandler;
   }
 
   @Override
-  public HostSystem loadSystem() {
-    Universe universe = universeDataHandler.load();
+  public ProfileDataHandler profiles(String scope) {
+    return profileConfigurateDataHandler;
+  }
+
+  @Override
+  public void loadSystem(HostSystem system) {
+    // Expire profiles and hosts, so they can't be used by other places holding references
+    if (system.global() != null) {
+      system.global().expire();
+    }
+    system.domains().values().forEach(Expirable::expire);
+    system.scopes().values().forEach(scope -> {
+      scope.scenes().values().forEach(Expirable::expire);
+      scope.profiles().values().forEach(Expirable::expire);
+    });
+
+    // Clear them from the system
+    system.domains().clear();
+    system.scopes().values().forEach(scope -> {
+      scope.scenes().clear();
+      scope.profiles().clear();
+    });
+
+    profileConfigurateDataHandler.load().forEach(profile ->
+        system.getOrCreateScope(profile.scope()).profiles().put(profile.name(), profile));
+    system.global(universeDataHandler.load());
+    system.global().globalProfile(Objects.requireNonNull(
+        system.getOrCreateScope(Nope.NOPE_SCOPE).profiles().get(Nope.GLOBAL_ID),
+        "Global profile couldn't be found!"));
     List<Domain> domains = Sponge.server()
         .worldManager()
         .worlds()
@@ -73,10 +117,42 @@ public abstract class ConfigurateDataHandler implements DataHandler {
         .map(world -> new Domain("_" + world.key()
             .formatted()
             .replace(":", "_"),
-            SettingKeys.CACHE_SIZE.getDataOrDefault(universe)))
+            system.global().globalProfile().getValue(SettingKeys.CACHE_SIZE)
+                .orElse(SettingKeys.CACHE_SIZE.defaultValue()).get()))
         .collect(Collectors.toList());
-    domains.forEach(domainDataHandler::load);
-    return new HostSystem(universe, domains);
+    domains.forEach(domain -> {
+      domainDataHandler.load(domain);
+      system.domains().put(domain.name(), domain);
+    });
+    system.loadScenes(sceneConfigurateDataHandler.load());
+  }
+
+  protected static Collection<Path> persistentComponentPaths(Path rootPath, String componentsName,
+                                                      String fileSuffix) {
+    File[] scopeFolders = rootPath.toFile().listFiles();
+    if (scopeFolders == null) {
+      return Collections.emptyList();
+    }
+    List<Path> paths = new LinkedList<>();
+    for (File scopeFolder : scopeFolders) {
+      if (!scopeFolder.isDirectory()) {
+        continue;
+      }
+      String scope = scopeFolder.getName();
+      File[] sceneFiles = scopeFolder.toPath().resolve(componentsName).toFile().listFiles();
+      if (sceneFiles == null) {
+        continue;
+      }
+      for (File sceneFile : sceneFiles) {
+        String[] tokens = sceneFile.getName().split("\\.");
+        String type = tokens[tokens.length - 1].toLowerCase();
+        if (!type.equals(fileSuffix)) {
+          Nope.instance().logger().error("File " + sceneFile.getName() + " is unknown");
+        }
+        paths.add(sceneFile.toPath());
+      }
+    }
+    return paths;
   }
 
 }

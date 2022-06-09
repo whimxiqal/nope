@@ -24,11 +24,16 @@
 
 package me.pietelite.nope.sponge.listener.always;
 
-import com.google.common.collect.Sets;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
-import me.pietelite.nope.common.api.setting.data.Movement;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
+import me.pietelite.nope.common.api.setting.Movement;
 import me.pietelite.nope.common.api.struct.AltSet;
 import me.pietelite.nope.common.host.Host;
 import me.pietelite.nope.common.setting.SettingKey;
@@ -36,19 +41,20 @@ import me.pietelite.nope.common.setting.SettingKeys;
 import me.pietelite.nope.common.struct.Location;
 import me.pietelite.nope.common.util.TreeUtil;
 import me.pietelite.nope.sponge.SpongeNope;
-import me.pietelite.nope.sponge.api.event.SettingEventContext;
-import me.pietelite.nope.sponge.api.event.SettingEventReport;
+import me.pietelite.nope.sponge.api.event.TraverseHostsEvent;
+import me.pietelite.nope.sponge.api.setting.SettingEventContext;
+import me.pietelite.nope.sponge.api.setting.SettingEventReport;
+import me.pietelite.nope.sponge.event.TraverseHostsEventImpl;
 import me.pietelite.nope.sponge.listener.SettingEventContextImpl;
 import me.pietelite.nope.sponge.util.SpongeUtil;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.title.TitlePart;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
+import net.kyori.adventure.title.Title;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.Entity;
-import org.spongepowered.api.entity.EntityType;
-import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.Order;
@@ -64,10 +70,6 @@ import org.spongepowered.api.world.server.ServerWorld;
  * The listener containing all handlers for managing movement events.
  */
 public class MovementListener {
-
-  Set<EntityType<?>> loggable = Sets.newHashSet(EntityTypes.PLAYER.get(),
-      EntityTypes.BOAT.get(),
-      EntityTypes.HORSE.get());
 
   /**
    * Handler for entities moving.
@@ -122,11 +124,12 @@ public class MovementListener {
       if (!SpongeUtil.valueFor(SettingKeys.MOVE, entity, firstLocation).contains(movementType)
           || !SpongeUtil.valueFor(SettingKeys.MOVE, entity, lastLocation).contains(movementType)) {
         cancelMovement(event, movementType, firstWorld, entity, SettingKeys.MOVE);
+        return;
       }
 
       // Check for EXIT and ENTRY
-      Set<Host> firstHosts = SpongeNope.instance().hostSystem().collectSuperiorHosts(firstLocation);
-      Set<Host> lastHosts = SpongeNope.instance().hostSystem().collectSuperiorHosts(lastLocation);
+      Set<Host> firstHosts = SpongeNope.instance().system().containingHosts(firstLocation);
+      Set<Host> lastHosts = SpongeNope.instance().system().containingHosts(lastLocation);
 
       // Remove shared hosts
       Set<Host> shared = new HashSet<>(firstHosts);
@@ -134,88 +137,119 @@ public class MovementListener {
       firstHosts.removeAll(shared);
       lastHosts.removeAll(shared);
 
+      boolean traversingHosts = false; // whether we are exiting or entering any host
+      boolean movementCancelled = false;
+      SettingKey<? extends AltSet<Movement>, ?, ?> movementCancelCause = null;
+
+      AtomicReference<Component> title = new AtomicReference<>(Component.empty());
+      AtomicReference<Component> subTitle = new AtomicReference<>(Component.empty());
+      List<Component> messages = new LinkedList<>();
+
+      final LegacyComponentSerializer serializer = LegacyComponentSerializer.legacyAmpersand();
+
       // Cannot exit if we are walking out of a host and EXIT is disallowed at the origin
-      if (!firstHosts.isEmpty()
-          && !SpongeUtil.valueFor(SettingKeys.EXIT, entity, firstLocation).contains(movementType)) {
-        cancelMovement(event, movementType, firstWorld, entity, SettingKeys.EXIT);
-        if (entity instanceof Audience) {
-          trySendMessage((Audience) entity, SpongeUtil.valueFor(SettingKeys.EXIT_DENY_MESSAGE,
-              entity,
-              lastLocation));
-          trySendTitle((Audience) entity, SpongeUtil.valueFor(SettingKeys.EXIT_DENY_TITLE,
-              entity,
-              lastLocation));
-          trySendSubtitle((Audience) entity, SpongeUtil.valueFor(SettingKeys.EXIT_DENY_SUBTITLE,
-              entity,
-              lastLocation));
+      if (!firstHosts.isEmpty()) {
+        traversingHosts = true;
+        // We only want to evaluate EXIT if EXIT is set on a host that we are leaving.
+        // Otherwise, the EXIT setting doesn't matter for this movement
+        if (firstHosts.stream().anyMatch(host -> host.isSet(SettingKeys.EXIT))) {
+          if (!SpongeUtil.valueFor(SettingKeys.EXIT, entity, firstLocation).contains(movementType)) {
+            movementCancelled = true;
+            movementCancelCause = SettingKeys.EXIT;
+            SpongeUtil.valueFor(SettingKeys.EXIT_DENY_MESSAGE, entity, firstLocation)
+                .ifPresent(message -> messages.add(serializer.deserialize(message)));
+            SpongeUtil.valueFor(SettingKeys.EXIT_DENY_TITLE, entity, firstLocation)
+                .ifPresent(message -> title.set(serializer.deserialize(message)));
+            SpongeUtil.valueFor(SettingKeys.EXIT_DENY_SUBTITLE, entity, firstLocation)
+                .ifPresent(message -> subTitle.set(serializer.deserialize(message)));
+          }
         }
-        return;
       }
 
       // Cannot enter if we are walking into a host and ENTRY is disallowed at the destination
-      if (!lastHosts.isEmpty()
-          && !SpongeUtil.valueFor(SettingKeys.ENTRY, entity, lastLocation).contains(movementType)) {
-        cancelMovement(event, movementType, firstWorld, entity, SettingKeys.ENTRY);
+      if (!lastHosts.isEmpty() && !movementCancelled) {
+        traversingHosts = true;
+        // We only want to evaluate EXIT if EXIT is set on a host that we are leaving.
+        // Otherwise, the EXIT setting doesn't matter for this movement
+        if (lastHosts.stream().anyMatch(host -> host.isSet(SettingKeys.ENTRY))) {
+          if (!SpongeUtil.valueFor(SettingKeys.ENTRY, entity, lastLocation).contains(movementType)) {
+            movementCancelled = true;
+            movementCancelCause = SettingKeys.ENTRY;
+            SpongeUtil.valueFor(SettingKeys.ENTRY_DENY_MESSAGE, entity, lastLocation)
+                .ifPresent(message -> messages.add(serializer.deserialize(message)));
+            SpongeUtil.valueFor(SettingKeys.ENTRY_DENY_TITLE, entity, lastLocation)
+                .ifPresent(message -> title.set(serializer.deserialize(message)));
+            SpongeUtil.valueFor(SettingKeys.ENTRY_DENY_SUBTITLE, entity, lastLocation)
+                .ifPresent(message -> subTitle.set(serializer.deserialize(message)));
+          }
+        }
+      }
+
+      if (!movementCancelled) {
+        lastHosts.forEach(host -> SettingKeys.GREETING.extractValue(Collections.singletonList(host),
+                entity.uniqueId()).result()
+            .ifPresent(message -> messages.add(serializer.deserialize(message))));
+        firstHosts.forEach(host -> SettingKeys.FAREWELL.extractValue(Collections.singletonList(host),
+                entity.uniqueId()).result()
+            .ifPresent(message -> messages.add(serializer.deserialize(message))));
+        Optional<Host> maxPriorityEntering = lastHosts.stream().max(Comparator.comparing(Host::priority));
+        Optional<Host> maxPriorityExiting = firstHosts.stream().max(Comparator.comparing(Host::priority));
+        if (maxPriorityEntering.isPresent() || maxPriorityExiting.isPresent()) {
+          Optional<Component> maxPriorityEnteringTitle = maxPriorityEntering.flatMap(host ->
+                  SettingKeys.GREETING_TITLE.extractValue(Collections.singletonList(host),
+                      entity.uniqueId()).result())
+              .map(serializer::deserialize);
+          Optional<Component> maxPriorityEnteringSubtitle = maxPriorityEntering.flatMap(host ->
+                  SettingKeys.GREETING_SUBTITLE.extractValue(Collections.singletonList(host),
+                      entity.uniqueId()).result())
+              .map(serializer::deserialize);
+          Optional<Component> maxPriorityExitingTitle = maxPriorityExiting.flatMap(host ->
+                  SettingKeys.FAREWELL_TITLE.extractValue(Collections.singletonList(host),
+                      entity.uniqueId()).result())
+              .map(serializer::deserialize);
+          Optional<Component> maxPriorityExitingSubtitle = maxPriorityExiting.flatMap(host ->
+                  SettingKeys.FAREWELL_SUBTITLE.extractValue(Collections.singletonList(host),
+                      entity.uniqueId()).result())
+              .map(serializer::deserialize);
+          boolean enteringPrioritized = !maxPriorityExiting.isPresent()
+              || (maxPriorityEntering.isPresent()
+              && maxPriorityEntering.get().priority() > maxPriorityExiting.get().priority());
+          if (enteringPrioritized) {
+            // set exiting first so that entering can override it
+            maxPriorityExitingTitle.ifPresent(title::set);
+            maxPriorityExitingSubtitle.ifPresent(subTitle::set);
+            maxPriorityEnteringTitle.ifPresent(title::set);
+            maxPriorityEnteringSubtitle.ifPresent(subTitle::set);
+          } else {
+            // set entering first so that exiting can override it
+            maxPriorityEnteringTitle.ifPresent(title::set);
+            maxPriorityEnteringSubtitle.ifPresent(subTitle::set);
+            maxPriorityExitingTitle.ifPresent(title::set);
+            maxPriorityExitingSubtitle.ifPresent(subTitle::set);
+          }
+        }
+      }
+
+      if (traversingHosts) {
+        TraverseHostsEvent traverseEvent = new TraverseHostsEventImpl(event,
+            lastHosts.stream().map(Host::name).collect(Collectors.toList()),
+            firstHosts.stream().map(Host::name).collect(Collectors.toList()),
+            Title.title(title.get(), subTitle.get()),
+            messages);
+        traverseEvent.setCancelled(movementCancelled);
+
+        Sponge.eventManager().post(traverseEvent);
+
         if (entity instanceof Audience) {
-          trySendMessage((Audience) entity, SpongeUtil.valueFor(SettingKeys.ENTRY_DENY_MESSAGE,
-              entity,
-              lastLocation));
-          trySendTitle((Audience) entity, SpongeUtil.valueFor(SettingKeys.ENTRY_DENY_TITLE,
-              entity,
-              lastLocation));
-          trySendSubtitle((Audience) entity, SpongeUtil.valueFor(SettingKeys.ENTRY_DENY_SUBTITLE,
-              entity,
-              lastLocation));
+          final Audience audience = (Audience) entity;
+          traverseEvent.messages().forEach(audience::sendMessage);
+          traverseEvent.title().ifPresent(audience::showTitle);
         }
-        return;
-      }
 
-      // We are not cancelling, so let's deal with greetings and farewells
-      if (entity instanceof Audience) {
-        final Audience audience = (Audience) entity;
-        for (Host host : lastHosts) {
-          host.getValue(SettingKeys.GREETING).ifPresent(stringUnary ->
-              trySendMessage(audience, stringUnary.get()));
-          host.getValue(SettingKeys.GREETING_TITLE).ifPresent(stringUnary ->
-              trySendTitle(audience, stringUnary.get()));
-          host.getValue(SettingKeys.GREETING_SUBTITLE).ifPresent(stringUnary ->
-              trySendSubtitle(audience, stringUnary.get()));
-        }
-        for (Host host : firstHosts) {
-          host.getValue(SettingKeys.FAREWELL).ifPresent(stringUnary ->
-              trySendMessage(audience, stringUnary.get()));
-          host.getValue(SettingKeys.FAREWELL_TITLE).ifPresent(stringUnary ->
-              trySendTitle(audience, stringUnary.get()));
-          host.getValue(SettingKeys.FAREWELL_SUBTITLE).ifPresent(stringUnary ->
-              trySendSubtitle(audience, stringUnary.get()));
+        if (traverseEvent.isCancelled()) {
+          cancelMovement(event, movementType, firstWorld, entity, movementCancelCause);
         }
       }
-    }
-  }
-
-  private void teleportEntityTo(Entity entity, ServerLocation location) {
-    Sponge.server().scheduler().submit(Task.builder()
-        .execute(() -> entity.setLocation(location))
-        .plugin(SpongeNope.instance().pluginContainer())
-        .delay(Ticks.of(1))
-        .build());
-  }
-
-  private void trySendMessage(Audience audience, String message) {
-    if (!message.isEmpty()) {
-      audience.sendMessage(Component.text(message));
-    }
-  }
-
-  private void trySendTitle(Audience audience, String message) {
-    if (!message.isEmpty()) {
-      audience.sendTitlePart(TitlePart.TITLE, Component.text(message));
-    }
-  }
-
-  private void trySendSubtitle(Audience audience, String message) {
-    if (!message.isEmpty()) {
-      audience.sendTitlePart(TitlePart.SUBTITLE, Component.text(message));
     }
   }
 
@@ -234,8 +268,18 @@ public class MovementListener {
           event.originalPosition().y(),
           event.originalPosition().z()));
     }
-    SettingEventContext<AltSet<Movement>, MoveEntityEvent> context =
-        new SettingEventContextImpl<>(event, settingKey);
-    context.report(SettingEventReport.restricted().build());
+    if (settingKey != null) {
+      SettingEventContext<AltSet<Movement>, MoveEntityEvent> context =
+          new SettingEventContextImpl<>(event, settingKey);
+      context.report(SettingEventReport.restricted().build());
+    }
+  }
+
+  private void teleportEntityTo(Entity entity, ServerLocation location) {
+    Sponge.server().scheduler().submit(Task.builder()
+        .execute(() -> entity.setLocation(location))
+        .plugin(SpongeNope.instance().pluginContainer())
+        .delay(Ticks.of(1))
+        .build());
   }
 }

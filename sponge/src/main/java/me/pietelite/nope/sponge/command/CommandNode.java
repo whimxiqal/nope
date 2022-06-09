@@ -38,8 +38,8 @@ import java.util.function.Supplier;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
+import me.pietelite.nope.common.api.struct.Named;
 import me.pietelite.nope.common.permission.Permission;
-import me.pietelite.nope.common.struct.Named;
 import me.pietelite.nope.sponge.SpongeNope;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
@@ -191,11 +191,11 @@ public abstract class CommandNode implements CommandExecutor {
    *
    * @param aliases the aliases with which to call this command
    */
-  protected final void addAliases(@NotNull String... aliases) {
+  public final void addAliases(@NotNull String... aliases) {
     this.aliases.addAll(Arrays.asList(aliases));
   }
 
-  protected final void addChild(@NotNull CommandNode child) {
+  public final void addChild(@NotNull CommandNode child) {
     this.children.add(child);
   }
 
@@ -227,15 +227,15 @@ public abstract class CommandNode implements CommandExecutor {
     return parent == null;
   }
 
-  protected final void addFlag(Flag flag/*, String description*/) {
+  public final void addFlag(Flag flag/*, String description*/) {
     this.flags.add(flag);
   }
 
-  protected final void addParameter(Parameter.Value<?> parameter) {
+  public final void addParameter(Parameter.Value<?> parameter) {
     this.parameters.add(parameter);
   }
 
-  protected final void addParameter(Parameter.Multi parameters) {
+  public final void addParameter(Parameter.Multi parameters) {
     this.parameters.add(parameters);
   }
 

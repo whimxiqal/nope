@@ -26,11 +26,12 @@ package me.pietelite.nope.common.setting;
 
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
+import java.util.Optional;
+import me.pietelite.nope.common.api.setting.BlockChange;
+import me.pietelite.nope.common.api.setting.DamageCause;
+import me.pietelite.nope.common.api.setting.Explosive;
+import me.pietelite.nope.common.api.setting.Movement;
 import me.pietelite.nope.common.api.setting.SettingCategory;
-import me.pietelite.nope.common.api.setting.data.BlockChange;
-import me.pietelite.nope.common.api.setting.data.DamageCause;
-import me.pietelite.nope.common.api.setting.data.Explosive;
-import me.pietelite.nope.common.api.setting.data.Movement;
 import me.pietelite.nope.common.setting.sets.BlockChangeSet;
 import me.pietelite.nope.common.setting.sets.DamageCauseSet;
 import me.pietelite.nope.common.setting.sets.ExplosiveSet;
@@ -106,26 +107,26 @@ public final class SettingKeys {
           .functional()
           .playerRestrictive()
           .build();
-  public static final SettingKey.Unary<String> ENTRY_DENY_MESSAGE =
-      SettingKeyManagers.STRING_KEY_MANAGER.keyBuilder("entry-deny-message")
-          .defaultValue("You are not allowed to go there")
-          .naturalValue("")
+  public static final SettingKey.Unary<Optional<String>> ENTRY_DENY_MESSAGE =
+      SettingKeyManagers.OPTIONAL_STRING_KEY_MANAGER.keyBuilder("entry-deny-message")
+          .defaultValue(Optional.of("You are not allowed to go there"))
+          .naturalValue(Optional.empty())
           .blurb("Message when entry is denied")
           .description("The message that is sent to a player if they are barred from entry.")
           .category(SettingCategory.MOVEMENT)
           .functional()
           .build();
-  public static final SettingKey.Unary<String> ENTRY_DENY_SUBTITLE =
-      SettingKeyManagers.STRING_KEY_MANAGER.keyBuilder("entry-deny-subtitle")
-          .defaultValue("")
+  public static final SettingKey.Unary<Optional<String>> ENTRY_DENY_SUBTITLE =
+      SettingKeyManagers.OPTIONAL_STRING_KEY_MANAGER.keyBuilder("entry-deny-subtitle")
+          .defaultValue(Optional.empty())
           .blurb("Subtitle when entry is denied")
           .description("The subtitle that is sent to a player if they are barred from entry.")
           .category(SettingCategory.MOVEMENT)
           .functional()
           .build();
-  public static final SettingKey.Unary<String> ENTRY_DENY_TITLE =
-      SettingKeyManagers.STRING_KEY_MANAGER.keyBuilder("entry-deny-title")
-          .defaultValue("")
+  public static final SettingKey.Unary<Optional<String>> ENTRY_DENY_TITLE =
+      SettingKeyManagers.OPTIONAL_STRING_KEY_MANAGER.keyBuilder("entry-deny-title")
+          .defaultValue(Optional.empty())
           .blurb("Title when entry is denied")
           .description("The title that is sent to a player if they are barred from entry.")
           .category(SettingCategory.MOVEMENT)
@@ -140,50 +141,50 @@ public final class SettingKeys {
           .playerRestrictive()
           .functional()
           .build();
-  public static final SettingKey.Unary<String> EXIT_DENY_MESSAGE =
-      SettingKeyManagers.STRING_KEY_MANAGER.keyBuilder("exit-deny-message")
-          .defaultValue("You are not allowed to leave here")
-          .naturalValue("")
+  public static final SettingKey.Unary<Optional<String>> EXIT_DENY_MESSAGE =
+      SettingKeyManagers.OPTIONAL_STRING_KEY_MANAGER.keyBuilder("exit-deny-message")
+          .defaultValue(Optional.of("You are not allowed to leave here"))
+          .naturalValue(Optional.empty())
           .blurb("Message when exit is denied")
           .description("The message that is sent to the player if they are barred from exiting.")
           .category(SettingCategory.MOVEMENT)
           .functional()
           .build();
-  public static final SettingKey.Unary<String> EXIT_DENY_SUBTITLE =
-      SettingKeyManagers.STRING_KEY_MANAGER.keyBuilder("exit-deny-subtitle")
-          .defaultValue("")
+  public static final SettingKey.Unary<Optional<String>> EXIT_DENY_SUBTITLE =
+      SettingKeyManagers.OPTIONAL_STRING_KEY_MANAGER.keyBuilder("exit-deny-subtitle")
+          .defaultValue(Optional.empty())
           .blurb("Subtitle when exit is denied")
           .description("The subtitle that is sent to a player if they are barred from exiting")
           .category(SettingCategory.MOVEMENT)
           .functional()
           .build();
-  public static final SettingKey.Unary<String> EXIT_DENY_TITLE =
-      SettingKeyManagers.STRING_KEY_MANAGER.keyBuilder("exit-deny-title")
-          .defaultValue("")
+  public static final SettingKey.Unary<Optional<String>> EXIT_DENY_TITLE =
+      SettingKeyManagers.OPTIONAL_STRING_KEY_MANAGER.keyBuilder("exit-deny-title")
+          .defaultValue(Optional.empty())
           .blurb("Title when exit is denied")
           .description("The title that is sent to a player if they are barred from exiting")
           .category(SettingCategory.MOVEMENT)
           .functional()
           .build();
-  public static final SettingKey.Unary<String> FAREWELL =
-      SettingKeyManagers.STRING_KEY_MANAGER.keyBuilder("farewell")
-          .defaultValue("")
+  public static final SettingKey.Unary<Optional<String>> FAREWELL =
+      SettingKeyManagers.OPTIONAL_STRING_KEY_MANAGER.keyBuilder("farewell")
+          .defaultValue(Optional.empty())
           .blurb("Message upon exit")
           .description("The message to a player when they leave the host.")
           .category(SettingCategory.MOVEMENT)
           .functional()
           .build();
-  public static final SettingKey.Unary<String> FAREWELL_SUBTITLE =
-      SettingKeyManagers.STRING_KEY_MANAGER.keyBuilder("farwell-subtitle")
-          .defaultValue("")
+  public static final SettingKey.Unary<Optional<String>> FAREWELL_SUBTITLE =
+      SettingKeyManagers.OPTIONAL_STRING_KEY_MANAGER.keyBuilder("farwell-subtitle")
+          .defaultValue(Optional.empty())
           .blurb("Subtitle upon exit")
           .description("The subtitle that appears to a player when they leave the host.")
           .category(SettingCategory.MOVEMENT)
           .functional()
           .build();
-  public static final SettingKey.Unary<String> FAREWELL_TITLE =
-      SettingKeyManagers.STRING_KEY_MANAGER.keyBuilder("farewell-title")
-          .defaultValue("")
+  public static final SettingKey.Unary<Optional<String>> FAREWELL_TITLE =
+      SettingKeyManagers.OPTIONAL_STRING_KEY_MANAGER.keyBuilder("farewell-title")
+          .defaultValue(Optional.empty())
           .blurb("Title upon exit")
           .description("The title that appears to a player when they leave the host.")
           .category(SettingCategory.MOVEMENT)
@@ -225,25 +226,25 @@ public final class SettingKeys {
           .description("When disabled, grass cannot grow naturally")
           .category(SettingCategory.BLOCKS)
           .build();
-  public static final SettingKey.Unary<String> GREETING =
-      SettingKeyManagers.STRING_KEY_MANAGER.keyBuilder("greeting")
-          .defaultValue("")
+  public static final SettingKey.Unary<Optional<String>> GREETING =
+      SettingKeyManagers.OPTIONAL_STRING_KEY_MANAGER.keyBuilder("greeting")
+          .defaultValue(Optional.empty())
           .blurb("Message upon entry")
           .description("The message to a player when they enter")
           .category(SettingCategory.MOVEMENT)
           .functional()
           .build();
-  public static final SettingKey.Unary<String> GREETING_SUBTITLE =
-      SettingKeyManagers.STRING_KEY_MANAGER.keyBuilder("greeting-subtitle")
-          .defaultValue("")
+  public static final SettingKey.Unary<Optional<String>> GREETING_SUBTITLE =
+      SettingKeyManagers.OPTIONAL_STRING_KEY_MANAGER.keyBuilder("greeting-subtitle")
+          .defaultValue(Optional.empty())
           .blurb("Subtitle upon entry")
           .description("The subtitle that appears to a player when they enter")
           .category(SettingCategory.MOVEMENT)
           .functional()
           .build();
-  public static final SettingKey.Unary<String> GREETING_TITLE =
-      SettingKeyManagers.STRING_KEY_MANAGER.keyBuilder("greeting-title")
-          .defaultValue("")
+  public static final SettingKey.Unary<Optional<String>> GREETING_TITLE =
+      SettingKeyManagers.OPTIONAL_STRING_KEY_MANAGER.keyBuilder("greeting-title")
+          .defaultValue(Optional.empty())
           .blurb("Title upon entry")
           .description("The title that appears to a player when they enter")
           .category(SettingCategory.MOVEMENT)

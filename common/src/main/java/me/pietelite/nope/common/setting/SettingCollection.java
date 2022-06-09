@@ -42,7 +42,7 @@ import org.jetbrains.annotations.Nullable;
 /**
  * A data structure to store multiple {@link Setting}s.
  */
-public abstract class SettingCollection implements Persistent {
+public abstract class SettingCollection {
 
   private final Set<SettingKey<?, ?, ?>> keys = new HashSet<>();
   private final Map<SettingKey<?, ?, ?>, SettingValue<?>> data = new HashMap<>();
@@ -83,10 +83,6 @@ public abstract class SettingCollection implements Persistent {
    * @see #canHave(SettingKey)
    */
   public final <T, V extends SettingValue<T>> boolean set(Setting<T, V> setting) {
-    return this.set(setting, true);
-  }
-
-  private <T, V extends SettingValue<T>> boolean set(Setting<T, V> setting, boolean save) {
     if (!canHave(setting.key())) {
       return false;
     }
@@ -99,14 +95,7 @@ public abstract class SettingCollection implements Persistent {
     } else {
       changedTarget = setTarget(setting.key(), Objects.requireNonNull(setting.target()));
     }
-    if (changedData || changedTarget) {
-      if (save) {
-        save();
-      }
-      return true;
-    } else {
-      return false;
-    }
+    return changedData || changedTarget;
   }
 
   /**
@@ -205,7 +194,6 @@ public abstract class SettingCollection implements Persistent {
       keys.add(key);
     }
     this.data.put(key, value);
-    this.save();
     return true;
   }
 
@@ -263,7 +251,6 @@ public abstract class SettingCollection implements Persistent {
       keys.add(key);
     }
     this.targets.put(key, target);
-    save();
     return true;
   }
 
@@ -332,8 +319,7 @@ public abstract class SettingCollection implements Persistent {
    * @param settingMap the other map
    */
   public void setAll(SettingCollection settingMap) {
-    settingMap.settings().forEach(setting -> this.set(setting, false));
-    save();
+    settingMap.settings().forEach(this::set);
   }
 
   /**
@@ -342,8 +328,7 @@ public abstract class SettingCollection implements Persistent {
    * @param settings all settings
    */
   public void setAll(Iterable<Setting<?, ?>> settings) {
-    settings.forEach(setting -> this.set(setting, false));
-    save();
+    settings.forEach(this::set);
   }
 
   /**

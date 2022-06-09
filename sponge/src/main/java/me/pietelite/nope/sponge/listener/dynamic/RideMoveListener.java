@@ -25,8 +25,8 @@
 package me.pietelite.nope.sponge.listener.dynamic;
 
 import java.util.LinkedList;
-import me.pietelite.nope.sponge.api.event.SettingEventContext;
-import me.pietelite.nope.sponge.api.event.SettingEventListener;
+import me.pietelite.nope.sponge.api.setting.SettingEventContext;
+import me.pietelite.nope.sponge.api.setting.SettingEventListener;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.Entity;

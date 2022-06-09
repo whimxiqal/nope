@@ -31,7 +31,7 @@ import me.pietelite.nope.sponge.command.tree.settings.ListSettingsCommand;
 
 public class SettingsCommand extends FunctionlessCommandNode {
   public SettingsCommand(CommandNode parent) {
-    super(parent, Permissions.INFO,
+    super(parent, Permissions.PROFILE_INFO,
         "Get information about possible settings",
         "settings");
     addChild(new ListSettingsCommand(this));

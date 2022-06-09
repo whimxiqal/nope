@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
+import me.pietelite.nope.common.Nope;
 import me.pietelite.nope.common.host.Host;
 import me.pietelite.nope.common.permission.Permissions;
 import me.pietelite.nope.sponge.SpongeNope;
@@ -50,8 +51,8 @@ public class ListHostCommand extends CommandNode {
       .build();
 
   public ListHostCommand(CommandNode parent) {
-    super(parent, Permissions.INFO,
-        "List all hosts that you are currently occupy",
+    super(parent, Permissions.HOST_INFO,
+        "List all hosts or hosts that you currently occupy",
         "list");
     addParameter(ALL);
   }
@@ -64,15 +65,15 @@ public class ListHostCommand extends CommandNode {
     List<Host> hosts;
     if (all) {
       hosts = new ArrayList<>(SpongeNope.instance()
-          .hostSystem()
-          .hosts()
+          .system()
+          .hosts(Nope.NOPE_SCOPE)
           .values());
     } else {
       // Cause must be player
       Player player = (Player) context.cause().root();
       hosts = new ArrayList<>(SpongeNope.instance()
-          .hostSystem()
-          .collectSuperiorHosts(SpongeUtil.reduceLocation(player.serverLocation())));
+          .system()
+          .containingHosts(SpongeUtil.reduceLocation(player.serverLocation())));
     }
     hosts.sort(Comparator.comparing(Host::priority));
     Sponge.serviceProvider().paginationService().builder()

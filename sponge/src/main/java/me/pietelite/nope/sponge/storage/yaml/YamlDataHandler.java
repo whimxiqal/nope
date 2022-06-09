@@ -24,17 +24,18 @@
 
 package me.pietelite.nope.sponge.storage.yaml;
 
-import java.io.File;
 import java.nio.file.Path;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.stream.Collectors;
-import me.pietelite.nope.common.Nope;
+import me.pietelite.nope.common.host.HostedProfile;
 import me.pietelite.nope.common.math.Volume;
+import me.pietelite.nope.common.setting.Target;
 import me.pietelite.nope.sponge.config.SettingValueConfigSerializerRegistrar;
 import me.pietelite.nope.sponge.storage.configurate.ConfigurateDataHandler;
 import me.pietelite.nope.sponge.storage.configurate.DomainConfigurateDataHandler;
-import me.pietelite.nope.sponge.storage.configurate.ZoneConfigurateDataHandler;
+import me.pietelite.nope.sponge.storage.configurate.ProfileConfigurateDataHandler;
+import me.pietelite.nope.sponge.storage.configurate.SceneConfigurateDataHandler;
+import me.pietelite.nope.sponge.storage.configurate.serializer.HostedProfileTypeSerializer;
+import me.pietelite.nope.sponge.storage.configurate.serializer.TargetTypeSerializer;
 import me.pietelite.nope.sponge.storage.configurate.serializer.VolumeTypeSerializer;
 import org.spongepowered.configurate.ConfigurationOptions;
 import org.spongepowered.configurate.yaml.NodeStyle;
@@ -46,35 +47,22 @@ import org.spongepowered.configurate.yaml.YamlConfigurationLoader;
 public class YamlDataHandler extends ConfigurateDataHandler {
 
   public YamlDataHandler(Path path, SettingValueConfigSerializerRegistrar serializerRegistrar) {
-    super(new YamlConfig(path, serializerRegistrar),
-        new DomainConfigurateDataHandler((name) -> yamlLoader(path.resolve(name + ".yml")),
-            serializerRegistrar),
-        new ZoneConfigurateDataHandler((name) -> yamlLoader(path.resolve("zones")
-            .resolve(name + ".yml")),
-            (name) -> path.resolve("zones")
-                .resolve(name + ".yml"),
-            () -> {
-              File[] files = path.resolve("zones")
-                  .toFile()
-                  .listFiles();
-              if (files == null) {
-                return Collections.emptyList();
-              } else {
-                return Arrays.stream(files)
-                    .filter(file -> {
-                      String[] tokens = file.getName().split("\\.");
-                      String type = tokens[tokens.length - 1].toLowerCase();
-                      if (type.equals("yml") || type.equals("yaml")) {
-                        return true;
-                      } else {
-                        Nope.instance().logger().error("File " + file.getName() + " is unknown");
-                        return false;
-                      }
-                    })
-                    .map(file -> yamlLoader(file.toPath()))
-                    .collect(Collectors.toList());
-              }
-            },
+    super(new YamlGlobalConfig(path, serializerRegistrar),
+        new DomainConfigurateDataHandler((name) -> yamlLoader(path.resolve(name + ".yml"))),
+        new SceneConfigurateDataHandler(
+            (scope, name) -> yamlLoader(path.resolve("scenes").resolve(name + ".conf")),
+            (scope, name) -> path.resolve("scenes").resolve(name + ".conf"),
+            persistentComponentPaths(path, "scenes", "conf")
+                .stream()
+                .map(YamlDataHandler::yamlLoader)
+                .collect(Collectors.toList())),
+        new ProfileConfigurateDataHandler(
+            (scope, name) -> yamlLoader(path.resolve("profiles").resolve(name + ".conf")),
+            (scope, name) -> path.resolve("profiles").resolve(name + ".conf"),
+            persistentComponentPaths(path, "profiles", "conf")
+                .stream()
+                .map(YamlDataHandler::yamlLoader)
+                .collect(Collectors.toList()),
             serializerRegistrar));
   }
 
@@ -87,7 +75,11 @@ public class YamlDataHandler extends ConfigurateDataHandler {
   public static YamlConfigurationLoader yamlLoader(Path path) {
     return YamlConfigurationLoader.builder()
         .defaultOptions(ConfigurationOptions.defaults()
-            .serializers(builder -> builder.register(Volume.class, new VolumeTypeSerializer())))
+            .serializers(builder -> {
+              builder.register(HostedProfile.class, new HostedProfileTypeSerializer());
+              builder.register(Target.class, new TargetTypeSerializer());
+              builder.register(Volume.class, new VolumeTypeSerializer());
+            }))
         .indent(2)
         .nodeStyle(NodeStyle.BLOCK)
         .path(path)

@@ -45,7 +45,7 @@ import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 public class EvaluateCommand extends CommandNode {
 
   public EvaluateCommand(CommandNode parent) {
-    super(parent, Permissions.INFO,
+    super(parent, Permissions.DEBUG,
         "Evaluate the value for some setting",
         "evaluate");
     addParameter(Parameters.SETTING_KEY);
@@ -70,7 +70,7 @@ public class EvaluateCommand extends CommandNode {
         return CommandResult.error(Formatter.error("You must specify a player"));
       }
     }
-    Evaluation<X> evaluation = SpongeNope.instance().hostSystem().lookup(key,
+    Evaluation<X> evaluation = SpongeNope.instance().system().lookup(key,
         player.uniqueId(),
         SpongeUtil.reduceLocation(player.serverLocation()));
 
@@ -79,8 +79,10 @@ public class EvaluateCommand extends CommandNode {
         .append(Formatter.dull(" "))
         .append(Component.text(key.manager().printData(key.defaultData())).color(Formatter.WHITE)));
     evaluation.stream()
-        .map(stage -> Formatter.host(stage.host())
-            .append(Formatter.dull(" -> "))
+        .map(stage -> Formatter.profile(stage.profile())
+            .append(Formatter.dull("(on "))
+            .append(Formatter.host(stage.host()))
+            .append(Formatter.dull(") -> "))
             .append(Component.text(key.manager().printData(stage.value()))))
         .forEach(contents::add);
 

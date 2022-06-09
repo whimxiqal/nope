@@ -24,15 +24,15 @@
 
 package me.pietelite.nope.common.storage;
 
-import me.pietelite.nope.common.host.Universe;
+import me.pietelite.nope.common.host.Global;
 
 /**
- * The data handler for the {@link Universe}.
+ * The data handler for the {@link Global}.
  */
 public interface UniverseDataHandler {
 
-  void save(Universe universe);
+  void save(Global global);
 
-  Universe load();
+  Global load();
 
 }

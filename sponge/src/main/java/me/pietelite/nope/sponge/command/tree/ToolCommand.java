@@ -34,7 +34,7 @@ import me.pietelite.nope.sponge.command.tree.tool.SphereToolCommand;
 
 public class ToolCommand extends FunctionlessCommandNode {
   public ToolCommand(CommandNode parent) {
-    super(parent, Permissions.CREATE,
+    super(parent, Permissions.HOST_EDIT,
         "Spawn a tool for accessibility", "tool");
     addChild(new CuboidToolCommand(this));
     addChild(new CylinderToolCommand(this));

@@ -24,23 +24,22 @@
 
 package me.pietelite.nope.sponge.command.tree.hosts;
 
-import java.util.Optional;
 import me.pietelite.nope.common.Nope;
 import me.pietelite.nope.common.host.Host;
-import me.pietelite.nope.common.host.Zone;
+import me.pietelite.nope.common.host.Scene;
 import me.pietelite.nope.common.permission.Permissions;
+import me.pietelite.nope.common.util.ApiUtil;
 import me.pietelite.nope.sponge.command.CommandNode;
-import me.pietelite.nope.sponge.command.parameters.Flags;
 import me.pietelite.nope.sponge.command.parameters.ParameterKeys;
 import me.pietelite.nope.sponge.command.parameters.Parameters;
 import me.pietelite.nope.sponge.util.Formatter;
-import net.kyori.adventure.text.Component;
+import net.kyori.adventure.identity.Identity;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.parameter.CommandContext;
 
 /**
- * Command for creating a {@link Host}, which can only ever be a {@link Zone}.
+ * Command for creating a {@link Host}, which can only ever be a {@link Scene}.
  */
 public class CreateHostCommand extends CommandNode {
 
@@ -51,32 +50,25 @@ public class CreateHostCommand extends CommandNode {
    */
   public CreateHostCommand(CommandNode parent) {
     super(parent,
-        Permissions.CREATE,
-        "Create a zone",
+        Permissions.HOST_CREATE,
+        "Create a scene",
         "create");
-    addParameter(Parameters.HOST_NAME);
-    addFlag(Flags.PARENT);
-    addFlag(Flags.PRIORITY);
+    addParameter(Parameters.ID);
+    addParameter(Parameters.PRIORITY);
   }
 
   @Override
   public CommandResult execute(CommandContext context) throws CommandException {
-    String name = context.requireOne(ParameterKeys.HOST_NAME);
+    String name = context.requireOne(ParameterKeys.ID);
 
-    Optional<Host> existingHost = Nope.instance().hostSystem().host(name);
-    if (existingHost.isPresent()) {
+    Host existingHost = Nope.instance().system().hosts(Nope.NOPE_SCOPE).get(name);
+    if (existingHost != null) {
       return CommandResult.error(Formatter.error(
-          "A host already exists with the name ___", existingHost.get().name()));
+          "A host already exists with the name ___", existingHost.name()));
     }
-    Zone parent = context.one(ParameterKeys.PARENT).orElse(null);
-    int priority = context.one(ParameterKeys.PRIORITY).orElse(0);
-    Zone zone = new Zone(name, parent, priority);
-    Nope.instance().hostSystem().addZone(zone);
-    zone.save();
-    context.cause()
-        .audience()
-        .sendMessage(Formatter.success("Created zone ___",
-            Component.text(zone.name())));
+    int priority = context.requireOne(ParameterKeys.PRIORITY);
+    ApiUtil.editNopeScope().createScene(name, priority);
+    context.sendMessage(Identity.nil(), Formatter.success("Created scene ___", name));
     return CommandResult.success();
   }
 

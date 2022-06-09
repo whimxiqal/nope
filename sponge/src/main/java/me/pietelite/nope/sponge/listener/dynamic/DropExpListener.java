@@ -24,9 +24,9 @@
 
 package me.pietelite.nope.sponge.listener.dynamic;
 
-import me.pietelite.nope.sponge.api.event.SettingEventContext;
-import me.pietelite.nope.sponge.api.event.SettingEventListener;
-import me.pietelite.nope.sponge.api.event.SettingEventReport;
+import me.pietelite.nope.sponge.api.setting.SettingEventContext;
+import me.pietelite.nope.sponge.api.setting.SettingEventListener;
+import me.pietelite.nope.sponge.api.setting.SettingEventReport;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;

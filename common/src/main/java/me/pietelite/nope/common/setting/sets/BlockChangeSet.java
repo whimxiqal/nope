@@ -24,7 +24,7 @@
 
 package me.pietelite.nope.common.setting.sets;
 
-import me.pietelite.nope.common.api.setting.data.BlockChange;
+import me.pietelite.nope.common.api.setting.BlockChange;
 import me.pietelite.nope.common.struct.HashAltSet;
 
 /**
@@ -32,11 +32,12 @@ import me.pietelite.nope.common.struct.HashAltSet;
  */
 public class BlockChangeSet extends HashAltSet.FewEnum<BlockChange> {
 
-  /**
-   * Default constructor.
-   */
   public BlockChangeSet() {
-    super(BlockChange.class);
+    this(false);
+  }
+
+  public BlockChangeSet(boolean full) {
+    super(full, BlockChange.class);
   }
 
 }

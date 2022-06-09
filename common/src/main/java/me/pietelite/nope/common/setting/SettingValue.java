@@ -206,4 +206,5 @@ public abstract class SettingValue<T> implements Serializable {
     }
 
   }
+
 }

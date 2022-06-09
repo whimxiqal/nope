@@ -35,7 +35,7 @@ public class HostCommand extends FunctionlessCommandNode {
   public HostCommand(CommandNode parent) {
     super(parent,
         null,
-        "Create, delete, and edit hosts",
+        "Edit and delete hosts",
         "host");
     addChild(new HostDestroyCommand(this));
     addChild(new HostEditCommand(this));

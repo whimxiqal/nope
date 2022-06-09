@@ -24,17 +24,18 @@
 
 package me.pietelite.nope.sponge.storage.hocon;
 
-import java.io.File;
 import java.nio.file.Path;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.stream.Collectors;
-import me.pietelite.nope.common.Nope;
+import me.pietelite.nope.common.host.HostedProfile;
 import me.pietelite.nope.common.math.Volume;
+import me.pietelite.nope.common.setting.Target;
 import me.pietelite.nope.sponge.config.SettingValueConfigSerializerRegistrar;
 import me.pietelite.nope.sponge.storage.configurate.ConfigurateDataHandler;
 import me.pietelite.nope.sponge.storage.configurate.DomainConfigurateDataHandler;
-import me.pietelite.nope.sponge.storage.configurate.ZoneConfigurateDataHandler;
+import me.pietelite.nope.sponge.storage.configurate.ProfileConfigurateDataHandler;
+import me.pietelite.nope.sponge.storage.configurate.SceneConfigurateDataHandler;
+import me.pietelite.nope.sponge.storage.configurate.serializer.HostedProfileTypeSerializer;
+import me.pietelite.nope.sponge.storage.configurate.serializer.TargetTypeSerializer;
 import me.pietelite.nope.sponge.storage.configurate.serializer.VolumeTypeSerializer;
 import org.spongepowered.configurate.ConfigurationOptions;
 import org.spongepowered.configurate.hocon.HoconConfigurationLoader;
@@ -51,35 +52,22 @@ public class HoconDataHandler extends ConfigurateDataHandler {
    * @param serializerRegistrar the serializers for setting values
    */
   public HoconDataHandler(Path path, SettingValueConfigSerializerRegistrar serializerRegistrar) {
-    super(new HoconConfig(path, serializerRegistrar),
-        new DomainConfigurateDataHandler((name) -> hoconLoader(path.resolve(name + ".conf")),
-            serializerRegistrar),
-        new ZoneConfigurateDataHandler((name) -> hoconLoader(path.resolve("zones")
-            .resolve(name + ".conf")),
-            (name) -> path.resolve("zones")
-                .resolve(name + ".conf"),
-            () -> {
-              File[] files = path.resolve("zones")
-                  .toFile()
-                  .listFiles();
-              if (files == null) {
-                return Collections.emptyList();
-              } else {
-                return Arrays.stream(files)
-                    .filter(file -> {
-                      String[] tokens = file.getName().split("\\.");
-                      String type = tokens[tokens.length - 1].toLowerCase();
-                      if (type.equals("conf")) {
-                        return true;
-                      } else {
-                        Nope.instance().logger().error("File " + file.getName() + " is unknown");
-                        return false;
-                      }
-                    })
-                    .map(file -> hoconLoader(file.toPath()))
-                    .collect(Collectors.toList());
-              }
-            },
+    super(new GlobalHoconConfig(path, serializerRegistrar),
+        new DomainConfigurateDataHandler((name) -> hoconLoader(path.resolve(name + ".conf"))),
+        new SceneConfigurateDataHandler(
+            (scope, name) -> hoconLoader(path.resolve("scenes").resolve(name + ".conf")),
+            (scope, name) -> path.resolve("scenes").resolve(name + ".conf"),
+            persistentComponentPaths(path, "scenes", "conf")
+                .stream()
+                .map(HoconDataHandler::hoconLoader)
+                .collect(Collectors.toList())),
+        new ProfileConfigurateDataHandler(
+            (scope, name) -> hoconLoader(path.resolve("profiles").resolve(name + ".conf")),
+            (scope, name) -> path.resolve("profiles").resolve(name + ".conf"),
+            persistentComponentPaths(path, "profiles", "conf")
+                .stream()
+                .map(HoconDataHandler::hoconLoader)
+                .collect(Collectors.toList()),
             serializerRegistrar));
   }
 
@@ -92,7 +80,11 @@ public class HoconDataHandler extends ConfigurateDataHandler {
   public static HoconConfigurationLoader hoconLoader(Path path) {
     return HoconConfigurationLoader.builder()
         .defaultOptions(ConfigurationOptions.defaults()
-            .serializers(builder -> builder.register(Volume.class, new VolumeTypeSerializer())))
+            .serializers(builder -> {
+              builder.register(HostedProfile.class, new HostedProfileTypeSerializer());
+              builder.register(Target.class, new TargetTypeSerializer());
+              builder.register(Volume.class, new VolumeTypeSerializer());
+            }))
         .path(path)
         .build();
   }

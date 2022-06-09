@@ -24,7 +24,7 @@
 
 package me.pietelite.nope.common.setting.sets;
 
-import me.pietelite.nope.common.api.setting.data.Movement;
+import me.pietelite.nope.common.api.setting.Movement;
 import me.pietelite.nope.common.struct.HashAltSet;
 
 /**
@@ -33,7 +33,11 @@ import me.pietelite.nope.common.struct.HashAltSet;
 public class MovementSet extends HashAltSet.FewEnum<Movement> {
 
   public MovementSet() {
-    super(Movement.class);
+    this(false);
+  }
+
+  public MovementSet(boolean full) {
+    super(full, Movement.class);
   }
 
 }

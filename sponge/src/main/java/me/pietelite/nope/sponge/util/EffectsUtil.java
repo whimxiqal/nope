@@ -37,9 +37,10 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
+import lombok.Builder;
 import lombok.Data;
 import lombok.experimental.Accessors;
-import me.pietelite.nope.common.host.Zone;
+import me.pietelite.nope.common.host.Scene;
 import me.pietelite.nope.common.math.Vector3d;
 import me.pietelite.nope.common.math.Volume;
 import me.pietelite.nope.common.struct.Location;
@@ -79,7 +80,7 @@ public final class EffectsUtil {
   /**
    * Maximum distance from player to display particles.
    */
-  public static final int PARTICLE_PROXIMITY = 20;
+  public static final int PARTICLE_PROXIMITY = 16;
   /**
    * How many times to repeat ripple animation.
    */
@@ -95,31 +96,36 @@ public final class EffectsUtil {
   /**
    * Multiplier on particle spawn time delay.
    */
-  public static final int PARTICLE_SPREAD_DELAY = 120;
+  public static final int PARTICLE_SPREAD_DELAY = 800;
   private static final Table<Volume, UUID, TaskGroup> taskGroups = HashBasedTable.create();
   private static TaskExecutorService VOLUME_PARTICLE_TASK_EXECUTOR;
 
   private static void ensureTaskExecutor() {
     if (VOLUME_PARTICLE_TASK_EXECUTOR == null) {
-      VOLUME_PARTICLE_TASK_EXECUTOR = Sponge.asyncScheduler()
+      VOLUME_PARTICLE_TASK_EXECUTOR = Sponge.server().scheduler()
           .executor(SpongeNope.instance().pluginContainer());
     }
   }
 
+  public static void stopAll(ServerPlayer player) {
+    taskGroups.column(player.uniqueId()).forEach((volume, task) -> task.cancel());
+  }
+
   /**
-   * Display the boundaries of all {@link Volume}s within a {@link Zone} for
+   * Display the boundaries of all {@link Volume}s within a {@link Scene} for
    * a specific {@link ServerPlayer}.
    *
-   * @param zone   the zone to show
+   * @param scene  the scene to show
    * @param player the player to
+   * @param info   parameters to determine the behavior of the animation
    * @return true if any particles are shown, false if none
    */
-  public static boolean show(Zone zone, ServerPlayer player) {
+  public static boolean show(Scene scene, ServerPlayer player, EffectInfo info) {
     ensureTaskExecutor();
 
     Location location = SpongeUtil.reduceLocation(player.serverLocation());
-    Vector3d locationVector = location.vector3d();
-    List<Volume> volumes = zone.volumes();
+    Vector3d locationVector = Vector3d.of(location.posX(), location.posY(), location.posZ());
+    List<Volume> volumes = scene.volumes();
 
     final Map<Volume, List<Vector3d>> points = new HashMap<>();
     for (Volume volume : volumes) {
@@ -129,14 +135,14 @@ public final class EffectsUtil {
 
       List<Vector3d> surfacePoints = volume.surfacePointsNear(
           locationVector,
-          PARTICLE_PROXIMITY,
-          PARTICLE_DENSITY);
+          info.particleProximity,
+          info.particleDensity);
       if (!surfacePoints.isEmpty()) {
         points.put(volume, surfacePoints);
       }
     }
 
-    if (points.size() > MAX_VOLUME_INTERSECTION_COMPARISON_COUNT) {
+    if (points.size() > info.maxVolumeIntersectionComparisonCount) {
       for (Volume volume : points.keySet()) {
         // Ensure only one animation is happening per user per volume
         if (taskGroups.contains(volume, player.uniqueId())) {
@@ -147,7 +153,7 @@ public final class EffectsUtil {
         return show(points.get(volume).stream()
             .map(point ->
                 new BoundaryParticle(point, false))
-            .collect(Collectors.toList()), player, taskGroup);
+            .collect(Collectors.toList()), player, taskGroup, info);
       }
     } else {
       // We have few enough volumes that we can check every point with other volumes
@@ -162,13 +168,14 @@ public final class EffectsUtil {
         return show(points.get(volume).stream()
             .map(point -> {
               for (Volume other : points.keySet()) {
-                if (!other.equals(volume) && other.containsPoint(point)) {
+                if (!other.equals(volume)
+                    && other.containsPoint((float) point.x(), (float) point.y(), (float) point.z())) {
                   return new BoundaryParticle(point, true);
                 }
               }
               return new BoundaryParticle(point, false);
             })
-            .collect(Collectors.toList()), player, taskGroup);
+            .collect(Collectors.toList()), player, taskGroup, info);
       }
     }
 
@@ -181,9 +188,10 @@ public final class EffectsUtil {
    *
    * @param volume the volume to show
    * @param player the player for which to show the boundaries
+   * @param info   parameters to determine the behavior of the animation
    * @return true if any particles were shown, false if none
    */
-  public static boolean show(Volume volume, ServerPlayer player) {
+  public static boolean show(Volume volume, ServerPlayer player, EffectInfo info) {
     ensureTaskExecutor();
 
     Location location = SpongeUtil.reduceLocation(player.serverLocation());
@@ -200,12 +208,12 @@ public final class EffectsUtil {
 
     final List<BoundaryParticle> points = volume.surfacePointsNear(
             Vector3d.of(location.posX(), location.posY(), location.posZ()),
-            PARTICLE_PROXIMITY,
-            PARTICLE_DENSITY)
+            info.particleProximity,
+            info.particleDensity)
         .stream()
         .map(point -> new BoundaryParticle(point, false))
         .collect(Collectors.toList());
-    return show(points, player, taskGroup);
+    return show(points, player, taskGroup, info);
   }
 
   /**
@@ -214,51 +222,138 @@ public final class EffectsUtil {
    * @param points    the points to show
    * @param player    the player for which to show the points
    * @param taskGroup the task group to use for scheduling the showing of particles
+   * @param info      parameters to determine the behavior of the animation
    * @return true if any particles were shown, false if none
    */
   public static boolean show(final List<BoundaryParticle> points,
                              final ServerPlayer player,
-                             final TaskGroup taskGroup) {
+                             final TaskGroup taskGroup,
+                             final EffectInfo info) {
     if (points.isEmpty()) {
       return false;
     }
-    Vector3d playerLocation = SpongeUtil.reduceLocation(player.serverLocation()).vector3d();
+    Location location = SpongeUtil.reduceLocation(player.serverLocation());
+    Vector3d playerLocation = Vector3d.of(location.posX(), location.posY(), location.posZ());
 
     Collections.shuffle(points);
-    final double bundleRangeSize = ((double) PARTICLE_PROXIMITY) / PARTICLE_SCHEDULE_BUNDLES;
+    final double bundleRangeSize = ((double) info.particleProximity) / info.particleScheduleBundles;
     points.sort(Comparator.comparing(point -> point.position.distanceSquared(playerLocation)));
     final double shortestDistance = points.get(0).position.distance(playerLocation);
     // "floored" distance of points in batch, relative to batch range
     double flooredDistance = shortestDistance - shortestDistance % bundleRangeSize;
     final List<BoundaryParticle> batch = new LinkedList<>();
     AtomicInteger interiorCount = new AtomicInteger();
+    double bundleRatio = 0;  // the ratio of our progress to finishing all bundles/batches
+    final double bundleRatioIncrement = 1 / (double) info.particleScheduleBundles;
     for (BoundaryParticle point : points) {
       if (flooredDistance + bundleRangeSize < playerLocation.distance(point.position)) {
         final List<BoundaryParticle> finalBatch = new ArrayList<>(batch);
-        ScheduledTaskFuture<?> future = VOLUME_PARTICLE_TASK_EXECUTOR.scheduleAtFixedRate(() ->
-                finalBatch.forEach(p -> {
-                  if (p.interior) {
-                    if (interiorCount.get() % INTERIOR_BOUNDARY_LIKELIHOOD == 0) {
-                      player.spawnParticles(INTERIOR_BOUNDARY_PARTICLE, SpongeUtil.raiseVector(p.position));
-                    }
-                    interiorCount.getAndIncrement();
-                  } else {
-                    player.spawnParticles(BOUNDARY_PARTICLE, SpongeUtil.raiseVector(p.position));
-                  }
-                }),
-            (long) Math.floor((flooredDistance) * PARTICLE_SPREAD_DELAY),
-            PARTICLE_REPEAT_PERIOD,
-            TimeUnit.MILLISECONDS);
-        taskGroup.add(future);
-        VOLUME_PARTICLE_TASK_EXECUTOR.schedule(() -> future.cancel(true),
-            PARTICLE_REPEAT_PERIOD * PARTICLE_REPEAT_COUNT,
-            TimeUnit.MILLISECONDS);
+        final long delay = (long) Math.floor(bundleRatio * info.particleSpreadDelay);
+        final Runnable futureRunnable = () ->
+            finalBatch.forEach(p -> {
+              if (p.interior) {
+                if (interiorCount.get() % info.interiorBoundaryLikelihood == 0) {
+                  player.spawnParticles(INTERIOR_BOUNDARY_PARTICLE, SpongeUtil.raiseVector(p.position));
+                }
+                interiorCount.getAndIncrement();
+              } else {
+                player.spawnParticles(BOUNDARY_PARTICLE, SpongeUtil.raiseVector(p.position));
+              }
+            });
+        final ScheduledTaskFuture<?> future;
+        if (info.particleRepeatPeriod <= 0) {
+          future = VOLUME_PARTICLE_TASK_EXECUTOR.schedule(futureRunnable,
+              delay,
+              TimeUnit.MILLISECONDS);
+          taskGroup.add(future);
+        } else {
+          future = VOLUME_PARTICLE_TASK_EXECUTOR.scheduleAtFixedRate(futureRunnable,
+              delay,
+              info.particleRepeatPeriod,
+              TimeUnit.MILLISECONDS);
+          taskGroup.add(future);
+          VOLUME_PARTICLE_TASK_EXECUTOR.schedule(() -> future.cancel(true),
+              (long) info.particleRepeatPeriod * info.particleRepeatCount + delay,
+              TimeUnit.MILLISECONDS);
+        }
+        bundleRatio += bundleRatioIncrement;
         flooredDistance += bundleRangeSize;
         batch.clear();
       }
       batch.add(point);
     }
     return true;
+  }
+
+  /**
+   * Create a "ripple" effect for the player.
+   * The animated particles appear on the outside of the {@link Volume},
+   * in a pattern determined by the parameters in the {@link EffectInfo}.
+   *
+   * @param volume the volume to show
+   * @param player the player for which to show the points
+   * @param info   parameters to determine the behavior of the animation
+   * @return true if any particles were shown, false if none
+   */
+  public static boolean ripple(Volume volume, ServerPlayer player, EffectInfo info) {
+    ensureTaskExecutor();
+    Location location = SpongeUtil.reduceLocation(player.serverLocation());
+    Vector3d playerLocation = Vector3d.of(location.posX(), location.posY(), location.posZ());
+    if (!volume.domain().equals(location.domain())) {
+      return false;
+    }
+
+    final List<BoundaryParticle> points = volume.surfacePointsNear(
+            playerLocation,
+            info.particleProximity,
+            info.particleDensity)
+        .stream()
+        .map(point -> new BoundaryParticle(point, false))
+        .collect(Collectors.toList());
+
+    if (points.isEmpty()) {
+      return false;
+    }
+
+    Collections.shuffle(points);
+    final double bundleRangeSize = ((double) info.particleProximity) / info.particleScheduleBundles;
+    points.sort(Comparator.comparing(point -> point.position.distanceSquared(playerLocation)));
+    final double shortestDistance = points.get(0).position.distance(playerLocation);
+    // "floored" distance of points in batch, relative to batch range
+    double flooredDistance = shortestDistance - shortestDistance % bundleRangeSize;
+    final List<BoundaryParticle> batch = new LinkedList<>();
+    AtomicInteger interiorCount = new AtomicInteger();
+    double bundleRatio = 0;  // the ratio of our progress to finishing all bundles/batches
+    final double bundleRatioIncrement = 1 / (double) info.particleScheduleBundles;
+    for (BoundaryParticle point : points) {
+      if (flooredDistance + bundleRangeSize < playerLocation.distance(point.position)) {
+        final List<BoundaryParticle> finalBatch = new ArrayList<>(batch);
+        final long delay = (long) Math.floor(bundleRatio * info.particleSpreadDelay);
+        final Runnable futureRunnable = () ->
+            finalBatch.forEach(p -> {
+              if (p.interior) {
+                if (interiorCount.get() % info.interiorBoundaryLikelihood == 0) {
+                  player.spawnParticles(INTERIOR_BOUNDARY_PARTICLE, SpongeUtil.raiseVector(p.position));
+                }
+                interiorCount.getAndIncrement();
+              } else {
+                player.spawnParticles(BOUNDARY_PARTICLE, SpongeUtil.raiseVector(p.position));
+              }
+            });
+        VOLUME_PARTICLE_TASK_EXECUTOR.schedule(futureRunnable,
+            delay,
+            TimeUnit.MILLISECONDS);
+        bundleRatio += bundleRatioIncrement;
+        flooredDistance += bundleRangeSize;
+        batch.clear();
+      }
+      batch.add(point);
+    }
+    return true;
+  }
+
+  public static EffectInfo defaultInfo() {
+    return EffectInfo.builder().build();
   }
 
   private static class TaskGroup {
@@ -278,5 +373,30 @@ public final class EffectsUtil {
   private static class BoundaryParticle {
     private final Vector3d position;
     private final boolean interior;
+  }
+
+  /**
+   * Parameters about how an animation should behave.
+   */
+  @Data
+  @Accessors(fluent = true)
+  @Builder
+  public static class EffectInfo {
+    @Builder.Default
+    public int interiorBoundaryLikelihood = INTERIOR_BOUNDARY_LIKELIHOOD;
+    @Builder.Default
+    public int maxVolumeIntersectionComparisonCount = MAX_VOLUME_INTERSECTION_COMPARISON_COUNT;
+    @Builder.Default
+    public int particleDensity = PARTICLE_DENSITY;
+    @Builder.Default
+    public int particleProximity = PARTICLE_PROXIMITY;
+    @Builder.Default
+    public int particleRepeatCount = PARTICLE_REPEAT_COUNT;
+    @Builder.Default
+    public int particleRepeatPeriod = PARTICLE_REPEAT_PERIOD;
+    @Builder.Default
+    public int particleScheduleBundles = PARTICLE_SCHEDULE_BUNDLES;
+    @Builder.Default
+    public int particleSpreadDelay = PARTICLE_SPREAD_DELAY;
   }
 }

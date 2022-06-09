@@ -24,15 +24,13 @@
 
 package me.pietelite.nope.common.setting;
 
-import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.Optional;
-import java.util.PriorityQueue;
-import java.util.Queue;
 import java.util.Set;
 import java.util.Stack;
 import java.util.UUID;
@@ -43,10 +41,11 @@ import lombok.experimental.Accessors;
 import me.pietelite.nope.common.api.setting.SettingCategory;
 import me.pietelite.nope.common.api.setting.SettingKeyBuilder;
 import me.pietelite.nope.common.api.struct.AltSet;
+import me.pietelite.nope.common.api.struct.Named;
 import me.pietelite.nope.common.host.Evaluation;
 import me.pietelite.nope.common.host.Host;
-import me.pietelite.nope.common.struct.Location;
-import me.pietelite.nope.common.struct.Named;
+import me.pietelite.nope.common.host.HostedProfile;
+import me.pietelite.nope.common.host.Profile;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -93,9 +92,8 @@ public abstract class SettingKey<T,
     this.playerRestrictive = playerRestrictive;
   }
 
-  public abstract Evaluation<T> extractValue(@NotNull Collection<Host> hosts,
-                                             @Nullable final UUID userUuid,
-                                             @NotNull final Location location);
+  public abstract Evaluation<T> extractValue(@NotNull List<Host> hosts,
+                                             @Nullable final UUID userUuid);
 
   public abstract String type();
 
@@ -122,12 +120,12 @@ public abstract class SettingKey<T,
    * @param <M> the manager type
    * @param <B> the builder type, for chaining
    */
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings({"unchecked", "checkstyle:MissingJavadocMethod"})
   public abstract static class Builder<T,
       K extends SettingKey<T, V, M>,
       V extends SettingValue<T>,
       M extends SettingKey.Manager<T, V>,
-      B extends Builder<T, K, V, M, B>> implements SettingKeyBuilder<T, B> {
+      B extends Builder<T, K, V, M, B>> {
     protected final String id;
     protected final M manager;
     protected T defaultValue;
@@ -138,37 +136,18 @@ public abstract class SettingKey<T,
     protected boolean functional = false;
     protected boolean global = false;
     protected boolean playerRestrictive = false;
-
-    private boolean updatedDefaultValue = false;
+    protected boolean updatedDefaultValue = false;
 
     protected Builder(String id, M manager) {
       this.id = id;
       this.manager = manager;
     }
 
-    @Override
-    public B defaultValue(T defaultValue) {
-      this.defaultValue = defaultValue;
-      updatedDefaultValue = true;
-      if (naturalValue == null) {
-        this.naturalValue = defaultValue;
-      }
-      return (B) this;
-    }
-
-    @Override
-    public B naturalValue(T naturalValue) {
-      this.naturalValue = naturalValue;
-      return (B) this;
-    }
-
-    @Override
     public B description(String description) {
       this.description = description;
       return (B) this;
     }
 
-    @Override
     public B blurb(String blurb) {
       if (blurb.length() > 36) {
         throw new IllegalStateException("A 'blurb' may not be longer than 36 characters");
@@ -177,44 +156,21 @@ public abstract class SettingKey<T,
       return (B) this;
     }
 
-    @Override
     public B category(SettingCategory category) {
       this.category = category;
       return (B) this;
     }
 
-    /**
-     * Specify that this key is implemented.
-     *
-     * @return this builder, for chaining
-     */
-    @Override
     public B functional() {
       this.functional = true;
       return (B) this;
     }
 
-    /**
-     * Specify that this key can only be set for the entire server, globally.
-     *
-     * @return this builder, for chaining
-     */
-    @Override
     public B global() {
       this.global = true;
       return (B) this;
     }
 
-    /**
-     * Specify that when a non-default value of this setting is set, it is restrictive for players.
-     * This feature is intended to determine when unrestricted-type players should be able to ingore
-     * restrictive types of changes to behavior.
-     * For example, this plugin should generally not prevent administrators from breaking blocks where
-     * breaking blocks is disallowed.
-     *
-     * @return this builder, for chaining
-     */
-    @Override
     public B playerRestrictive() {
       this.playerRestrictive = true;
       return (B) this;
@@ -275,33 +231,37 @@ public abstract class SettingKey<T,
     }
 
     @Override
-    public Evaluation<T> extractValue(@NotNull Collection<Host> hosts,
-                                      @Nullable final UUID userUuid,
-                                      @NotNull final Location location) {
+    public Evaluation<T> extractValue(@NotNull List<Host> hosts,
+                                      @Nullable final UUID userUuid) {
 
       /* Choose a data structure that will optimize searching for highest priority matching */
-      Queue<Host> hostQueue;
-      Comparator<Host> descending = (h1, h2) -> Integer.compare(h2.priority(), h1.priority());
       Evaluation<T> evaluation = new Evaluation<>(this);
-      if (hosts.size() >= 1) {
-        hostQueue = new PriorityQueue<>(hosts.size(), descending);
-        hostQueue.addAll(hosts);
+      if (hosts.isEmpty()) {
+        return evaluation;
+      }
 
-        Host currentHost;
-        Optional<Setting<T, SettingValue.Unary<T>>> currentSetting;
-        Target activeTarget = null;
-        Target currentTarget;
-        T data;
+      Optional<Setting<T, SettingValue.Unary<T>>> currentSetting;
+      Target activeTarget = null;
+      Target currentTarget;
+      T data;
 
-        // Assume targeted until target is set and specifically does not target us
-        while (!hostQueue.isEmpty()) {
-          currentHost = hostQueue.remove();
-          currentSetting = currentHost.get(this);
+      // Assume targeted until target is set and specifically does not target us
+      ListIterator<Host> hostIterator = hosts.listIterator(hosts.size());
+      Host host;
+      List<HostedProfile> profiles;
+      ListIterator<HostedProfile> profileIterator;
+      HostedProfile currentProfile;
+      while (hostIterator.hasPrevious()) {
+        host = hostIterator.previous();
+        profiles = host.allProfiles();
+        profileIterator = profiles.listIterator(profiles.size());
+        while (profileIterator.hasPrevious()) {
+          currentProfile = profileIterator.previous();
+          currentSetting = currentProfile.profile().get(this);
           if (!currentSetting.isPresent()) {
-            // This shouldn't happen because we previously found that this host has this setting
-            throw new RuntimeException("Error retrieving setting value");
+            continue;
           }
-          currentTarget = currentSetting.get().target();
+          currentTarget = currentProfile.activeTargetFor(this);
           if (currentTarget != null && activeTarget == null) {
             // Ignore if target has already been specified: the last one takes precedence.
             activeTarget = currentTarget;
@@ -309,9 +269,8 @@ public abstract class SettingKey<T,
           data = currentSetting.get().value().get();
           if (data != null) {
             // the active target acts here
-            if ((activeTarget == null ? Target.all() : activeTarget)
-                .test(userUuid, playerRestrictive())) {
-              evaluation.add(currentHost, data);
+            if (activeTarget == null || activeTarget.test(userUuid, playerRestrictive())) {
+              evaluation.add(host, currentProfile.profile(), data);
               return evaluation;
             } else {
               // We have found the data which was specifically not targeted.
@@ -331,10 +290,6 @@ public abstract class SettingKey<T,
       return "Single Value";
     }
 
-    public T getDataOrDefault(Host host) {
-      return host.getValue(this).map(SettingValue.Unary::get).orElse(this.defaultData());
-    }
-
     /**
      * A builder for a {@link SettingKey.Unary}.
      *
@@ -344,10 +299,26 @@ public abstract class SettingKey<T,
         SettingKey.Unary<T>,
         SettingValue.Unary<T>,
         SettingKey.Manager.Unary<T>,
-        Builder<T>> implements SettingKeyBuilder.Unary<T, Builder<T>> {
+        Builder<T>> implements SettingKeyBuilder.Unary<T> {
 
       private Builder(String id, Manager.Unary<T> manager) {
         super(id, manager);
+      }
+
+      @Override
+      public Builder<T> defaultValue(T defaultValue) {
+        this.defaultValue = defaultValue;
+        updatedDefaultValue = true;
+        if (naturalValue == null) {
+          this.naturalValue = defaultValue;
+        }
+        return this;
+      }
+
+      @Override
+      public Builder<T> naturalValue(T naturalValue) {
+        this.naturalValue = naturalValue;
+        return this;
       }
 
       /**
@@ -400,50 +371,57 @@ public abstract class SettingKey<T,
     }
 
     @Override
-    public Evaluation<S> extractValue(@NotNull Collection<Host> hosts,
-                                      @Nullable UUID userUuid,
-                                      @NotNull Location location) {
+    public Evaluation<S> extractValue(@NotNull List<Host> hosts,
+                                      @Nullable UUID userUuid) {
       /* Choose a data structure that will optimize searching for highest priority matching */
-      Queue<Host> hostQueue;
-      Comparator<Host> descending = (h1, h2) -> Integer.compare(h2.priority(), h1.priority());
-      Stack<SettingValue.Poly<T, S>> values = new Stack<>();
-      Stack<Host> valuedHosts = new Stack<>();
       Evaluation<S> evaluation = new Evaluation<>(this);
-      if (hosts.size() >= 1) {
-        hostQueue = new PriorityQueue<>(hosts.size(), descending);
-        hostQueue.addAll(hosts);
+      if (hosts.isEmpty()) {
+        return evaluation;
+      }
 
-        Host currentHost;
-        Optional<Setting<S, SettingValue.Poly<T, S>>> currentSetting;
-        Target activeTarget = null;
-        Target currentTarget;
-        SettingValue.Poly<T, S> value;
+      Optional<Setting<S, SettingValue.Poly<T, S>>> currentSetting;
+      Target activeTarget = null;
+      Target currentTarget;
+      SettingValue.Poly<T, S> value;
 
-        while (!hostQueue.isEmpty()) {
-          currentHost = hostQueue.remove();
-          currentSetting = currentHost.get(this);
+      // Setup structures for final evaluation
+      Stack<Host> valuedHosts = new Stack<>();
+      Stack<Profile> valuedProfiles = new Stack<>();
+      Stack<SettingValue.Poly<T, S>> values = new Stack<>();
+
+      // Assume targeted until target is set and specifically does not target us
+      ListIterator<Host> hostIterator = hosts.listIterator(hosts.size());
+      Host host;
+      List<HostedProfile> profiles;
+      ListIterator<HostedProfile> profileIterator;
+      HostedProfile currentProfile;
+      while (hostIterator.hasPrevious()) {
+        host = hostIterator.previous();
+        profiles = host.allProfiles();
+        profileIterator = profiles.listIterator(profiles.size());
+        while (profileIterator.hasPrevious()) {
+          currentProfile = profileIterator.previous();
+          currentSetting = currentProfile.profile().get(this);
           if (!currentSetting.isPresent()) {
-            // This shouldn't happen because we previously found that this host has this setting
-            throw new RuntimeException("Error retrieving setting value");
+            continue;
           }
-          currentTarget = currentSetting.get().target();
+          currentTarget = currentProfile.activeTargetFor(this);
           if (currentTarget != null && activeTarget == null) {
             // Ignore if target has already been specified: the last one takes precedence.
             activeTarget = currentTarget;
           }
           value = currentSetting.get().value();
           if (value != null) {
-            if ((activeTarget == null ? Target.all() : activeTarget)
-                .test(userUuid, playerRestrictive())) {
+            // the active target acts here
+            if (activeTarget == null || activeTarget.test(userUuid, playerRestrictive())) {
               values.add(value);
-              valuedHosts.add(currentHost);
-              // TODO if we ever add a declarative type, it will ignore anything else.
-              //  so, just stop here and continue on to the backwards traversal down below.
-              //  (need to add a check method in SettingValue.Poly for declarative type)
+              valuedHosts.add(host);
+              valuedProfiles.add(currentProfile.profile());
+            } else {
+              // We have found the data which was specifically not targeted.
+              // So, pass through this data value and continue on anew.
+              activeTarget = null;
             }
-            // We have found data (whether targeting us or not)
-            // So continue on anew.
-            activeTarget = null;
           }
         }
       }
@@ -452,9 +430,10 @@ public abstract class SettingKey<T,
       S result = manager().copySet(defaultData());
       while (!values.isEmpty()) {
         result = manager().copySet(values.pop().applyTo(result));
-        evaluation.add(valuedHosts.pop(), result);
+        evaluation.add(valuedHosts.pop(), valuedProfiles.pop(), result);
       }
       return evaluation;
+
     }
 
     @Override
@@ -471,7 +450,7 @@ public abstract class SettingKey<T,
         SettingKey.Poly<T, S>,
         SettingValue.Poly<T, S>,
         SettingKey.Manager.Poly<T, S>,
-        Builder<T, S>> implements SettingKeyBuilder.Poly<T, S, Builder<T, S>> {
+        Builder<T, S>> implements SettingKeyBuilder.Poly<T> {
 
       private Builder(String id, Manager.Poly<T, S> manager) {
         super(id, manager);
@@ -492,22 +471,42 @@ public abstract class SettingKey<T,
 
       @Override
       public Builder<T, S> fillDefaultData() {
-        return defaultValue(AltSet.full(this.manager.createSet()));
+        return defaultValue(AltSet.full(this.manager.emptySet()));
       }
 
       @Override
       public Builder<T, S> emptyDefaultData() {
-        return defaultValue(this.manager.createSet());
+        return defaultValue(this.manager.emptySet());
       }
 
       @Override
       public Builder<T, S> fillNaturalData() {
-        return naturalValue(AltSet.full(this.manager.createSet()));
+        return naturalValue(AltSet.full(this.manager.emptySet()));
       }
 
       @Override
       public Builder<T, S> emptyNaturalData() {
-        return naturalValue(this.manager.createSet());
+        return naturalValue(this.manager.emptySet());
+      }
+
+      @Override
+      public Builder<T, S> defaultValue(AltSet<T> defaultValue) {
+        S set = manager.emptySet();
+        set.addAll(defaultValue);
+        this.defaultValue = set;
+        updatedDefaultValue = true;
+        if (naturalValue == null) {
+          this.naturalValue = set;
+        }
+        return this;
+      }
+
+      @Override
+      public Builder<T, S> naturalValue(AltSet<T> naturalValue) {
+        S set = manager.emptySet();
+        set.addAll(defaultValue);
+        this.naturalValue = set;
+        return this;
       }
     }
   }
@@ -591,8 +590,8 @@ public abstract class SettingKey<T,
         return value.toString();
       }
 
-      public SettingKeyBuilder.Unary<T, SettingKey.Unary.Builder<T>> keyBuilder(String id) {
-        return new SettingKey.Unary.Builder<T>(id, this);
+      public SettingKey.Unary.Builder<T> keyBuilder(String id) {
+        return new SettingKey.Unary.Builder<>(id, this);
       }
     }
 
@@ -620,7 +619,7 @@ public abstract class SettingKey<T,
 
       @Override
       public final S createAlternate(S data) {
-        S opposite = createSet();
+        S opposite = emptySet();
         opposite.addAll(data);
         opposite.invert();
         return opposite;
@@ -763,12 +762,18 @@ public abstract class SettingKey<T,
        */
       public abstract T parseElement(String element) throws ParseSettingException;
 
+      public abstract Class<T> elementType();
+
       /**
        * Generate a new empty set.
        *
        * @return the set
        */
-      public abstract S createSet();
+      public abstract S emptySet();
+
+      public final S fullSet() {
+        return AltSet.full(emptySet());
+      }
 
       /**
        * Shallow copy the set into another set.
@@ -777,12 +782,12 @@ public abstract class SettingKey<T,
        * @return a new set
        */
       public final S copySet(S set) {
-        S newSet = createSet();
+        S newSet = emptySet();
         newSet.addAll(set);
         return newSet;
       }
 
-      public SettingKeyBuilder.Poly<T, S, SettingKey.Poly.Builder<T, S>> keyBuilder(String id) {
+      public SettingKey.Poly.Builder<T, S> keyBuilder(String id) {
         return new SettingKey.Poly.Builder<>(id, this);
       }
     }

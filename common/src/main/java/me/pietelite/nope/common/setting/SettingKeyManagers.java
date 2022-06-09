@@ -24,12 +24,13 @@
 
 package me.pietelite.nope.common.setting;
 
-import me.pietelite.nope.common.api.setting.data.BlockChange;
-import me.pietelite.nope.common.api.setting.data.DamageCause;
-import me.pietelite.nope.common.api.setting.data.Explosive;
-import me.pietelite.nope.common.api.setting.data.Movement;
+import me.pietelite.nope.common.api.setting.BlockChange;
+import me.pietelite.nope.common.api.setting.DamageCause;
+import me.pietelite.nope.common.api.setting.Explosive;
+import me.pietelite.nope.common.api.setting.Movement;
 import me.pietelite.nope.common.setting.manager.BooleanKeyManager;
 import me.pietelite.nope.common.setting.manager.IntegerKeyManager;
+import me.pietelite.nope.common.setting.manager.OptionalStringKeyManager;
 import me.pietelite.nope.common.setting.manager.PolyAllCapsEnumKeyManager;
 import me.pietelite.nope.common.setting.manager.PolyStringKeyManager;
 import me.pietelite.nope.common.setting.manager.StateKeyManager;
@@ -39,7 +40,6 @@ import me.pietelite.nope.common.setting.sets.BlockChangeSet;
 import me.pietelite.nope.common.setting.sets.DamageCauseSet;
 import me.pietelite.nope.common.setting.sets.ExplosiveSet;
 import me.pietelite.nope.common.setting.sets.MovementSet;
-import me.pietelite.nope.common.setting.sets.StringSet;
 
 /**
  * A utility class to store constant managers, which are used in defining {@link SettingKey}s.
@@ -69,6 +69,7 @@ public final class SettingKeyManagers {
       new PolyStringKeyManager();
   public static final StateKeyManager STATE_KEY_MANAGER = new StateKeyManager();
   public static final StringKeyManager STRING_KEY_MANAGER = new StringKeyManager();
+  public static final OptionalStringKeyManager OPTIONAL_STRING_KEY_MANAGER = new OptionalStringKeyManager();
   public static final ToggleKeyManager TOGGLE_KEY_MANAGER = new ToggleKeyManager();
 
   private SettingKeyManagers() {

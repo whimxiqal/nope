@@ -31,14 +31,15 @@ import java.util.List;
 import me.pietelite.nope.common.setting.SettingKey;
 import me.pietelite.nope.common.setting.SettingKeyStore;
 import me.pietelite.nope.sponge.SpongeNope;
-import me.pietelite.nope.sponge.api.event.SettingListenerRegistration;
+import me.pietelite.nope.sponge.api.setting.SettingEventListener;
+import me.pietelite.nope.sponge.api.setting.SettingListenerRegistration;
 import org.jetbrains.annotations.NotNull;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.EventListenerRegistration;
 
 /**
- * The in-memory storage for all registered {@link me.pietelite.nope.sponge.api.event.SettingEventListener}s.
+ * The in-memory storage for all registered {@link SettingEventListener}s.
  */
 public class SettingListenerStore {
 
@@ -51,7 +52,7 @@ public class SettingListenerStore {
   }
 
   /**
-   * Stage ("register") a new {@link me.pietelite.nope.sponge.api.event.SettingEventListener}
+   * Stage ("register") a new {@link SettingEventListener}
    * wrapped in a {@link SettingListenerRegistration}.
    * This only prepares the wrapped listeners for registration with the mod platform.
    *
@@ -85,7 +86,7 @@ public class SettingListenerStore {
     SettingKey<?, ?, ?> key;
     for (String keyId : unregisteredKeys) {
       key = settingKeys.get(keyId);
-      if (SpongeNope.instance().hostSystem().isAssigned(key)) {
+      if (SpongeNope.instance().system().isAssigned(key)) {
         for (SettingListenerRegistration<?, ?> registration : settingListeners.get(key.id())) {
           registerCount++;
           registerToSponge(registration);

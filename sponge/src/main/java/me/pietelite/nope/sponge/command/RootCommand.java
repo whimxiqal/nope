@@ -27,10 +27,13 @@ package me.pietelite.nope.sponge.command;
 import me.pietelite.nope.sponge.command.tree.EvaluateCommand;
 import me.pietelite.nope.sponge.command.tree.HostCommand;
 import me.pietelite.nope.sponge.command.tree.HostsCommand;
+import me.pietelite.nope.sponge.command.tree.ProfileCommand;
+import me.pietelite.nope.sponge.command.tree.ProfilesCommand;
 import me.pietelite.nope.sponge.command.tree.ReloadCommand;
 import me.pietelite.nope.sponge.command.tree.SettingsCommand;
 import me.pietelite.nope.sponge.command.tree.ToolCommand;
 import me.pietelite.nope.sponge.command.tree.VerboseCommand;
+import me.pietelite.nope.sponge.command.tree.VolumesCommand;
 import me.pietelite.nope.sponge.util.Formatter;
 import net.kyori.adventure.identity.Identity;
 import org.spongepowered.api.command.CommandResult;
@@ -51,10 +54,13 @@ public class RootCommand extends CommandNode {
     addChild(new EvaluateCommand(this));
     addChild(new HostCommand(this));
     addChild(new HostsCommand(this));
+    addChild(new ProfileCommand(this));
+    addChild(new ProfilesCommand(this));
     addChild(new ReloadCommand(this));
     addChild(new SettingsCommand(this));
     addChild(new ToolCommand(this));
     addChild(new VerboseCommand(this));
+    addChild(new VolumesCommand(this));
   }
 
   @Override

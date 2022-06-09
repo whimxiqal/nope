@@ -27,20 +27,18 @@ package me.pietelite.nope.sponge.command.tree.host.blank.edit.volumes;
 import me.pietelite.nope.common.permission.Permissions;
 import me.pietelite.nope.sponge.command.CommandNode;
 import me.pietelite.nope.sponge.command.FunctionlessCommandNode;
-import me.pietelite.nope.sponge.command.tree.host.blank.edit.volumes.create.CuboidCommand;
-import me.pietelite.nope.sponge.command.tree.host.blank.edit.volumes.create.CylinderCommand;
-import me.pietelite.nope.sponge.command.tree.host.blank.edit.volumes.create.SlabCommand;
-import me.pietelite.nope.sponge.command.tree.host.blank.edit.volumes.create.SphereCommand;
+import me.pietelite.nope.sponge.command.tree.host.blank.edit.volumes.create.VolumeBuilderCommand;
+import me.pietelite.nope.sponge.command.tree.host.blank.edit.volumes.create.VolumeExplicitCommand;
+import me.pietelite.nope.sponge.command.tree.host.blank.edit.volumes.create.VolumeSelectionCommand;
 
 public class VolumeCreateCommand extends FunctionlessCommandNode {
   public VolumeCreateCommand(CommandNode parent) {
-    super(parent, Permissions.EDIT,
-        "Create a new volume on this host",
+    super(parent, Permissions.HOST_EDIT,
+        "Create a new zone on this host",
         "create");
-    addChild(new CuboidCommand(this));
-    addChild(new CylinderCommand(this));
-    addChild(new SlabCommand(this));
-    addChild(new SphereCommand(this));
+    addChild(new VolumeBuilderCommand(this));
+    addChild(new VolumeExplicitCommand(this));
+    addChild(new VolumeSelectionCommand(this));
   }
 
 }

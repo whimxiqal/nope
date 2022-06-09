@@ -21,24 +21,27 @@ jobs:
           distribution: 'adopt'
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
-      - name: Build Common API
-        run: ./gradlew common-api:build
+      - name: Test
+        run: ./gradlew test
+      - name: Upload Test Files to Codecov
+        run: |
+        curl -Os https://uploader.codecov.io/latest/linux/codecov
+        chmod +x codecov
+        ./codecov
+      - name: Build Everything
+        run: ./gradlew build
       - name: Upload Common API
         uses: actions/upload-artifact@v2
         with:
           name: Nope Common API
           path: common-api/build/libs/**
           if-no-files-found: error
-      - name: Build Sponge API
-        run: ./gradlew sponge-api:build
       - name: Upload Sponge API
         uses: actions/upload-artifact@v2
         with:
           name: Nope Sponge API
           path: sponge-api/build/libs/**
           if-no-files-found: error
-      - name: Build Sponge Plugin
-        run: ./gradlew sponge:shadowJar
       - name: Upload Sponge Plugin
         uses: actions/upload-artifact@v2
         with:
