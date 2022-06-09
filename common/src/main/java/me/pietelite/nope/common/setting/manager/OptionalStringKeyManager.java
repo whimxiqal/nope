@@ -27,6 +27,9 @@ package me.pietelite.nope.common.setting.manager;
 import java.util.Optional;
 import me.pietelite.nope.common.setting.SettingKey;
 
+/**
+ * A manager for unary setting keys that evaluate to an {@link Optional} storing a {@link String}.
+ */
 public class OptionalStringKeyManager extends SettingKey.Manager.Unary<Optional<String>> {
 
   @Override

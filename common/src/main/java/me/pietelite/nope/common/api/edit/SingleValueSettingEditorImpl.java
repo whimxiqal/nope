@@ -29,11 +29,14 @@ import me.pietelite.nope.common.Nope;
 import me.pietelite.nope.common.host.Profile;
 import me.pietelite.nope.common.setting.SettingKey;
 import me.pietelite.nope.common.setting.SettingValue;
-import me.pietelite.nope.common.setting.Target;
-import me.pietelite.nope.common.setting.Targetable;
-import org.jetbrains.annotations.Nullable;
 
-public class SingleValueSettingEditorImpl<T> extends SettingEditorImpl implements SingleValueSettingEditor<T> {
+/**
+ * Implementation of the {@link SingleValueSettingEditor}.
+ *
+ * @param <T> the value type of the setting
+ */
+public class SingleValueSettingEditorImpl<T> extends SettingEditorImpl
+    implements SingleValueSettingEditor<T> {
 
   private final Class<T> type;
 

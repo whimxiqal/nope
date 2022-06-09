@@ -93,6 +93,9 @@ public class Domain extends Host implements Domained {
     return name().equals(domain.name());
   }
 
+  /**
+   * The editor for a Domain.
+   */
   public static class Editor extends Host.Editor<Domain> {
 
     public Editor(Domain domain) {

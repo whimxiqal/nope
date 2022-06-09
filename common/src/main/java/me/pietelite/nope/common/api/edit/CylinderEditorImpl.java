@@ -27,6 +27,9 @@ package me.pietelite.nope.common.api.edit;
 import me.pietelite.nope.common.host.Scene;
 import me.pietelite.nope.common.math.Cylinder;
 
+/**
+ * Implementation for the editor for a {@link Cylinder}.
+ */
 public class CylinderEditorImpl extends ZoneEditorImpl<Cylinder> implements CylinderEditor {
   public CylinderEditorImpl(Scene scene, int index) {
     super(scene, index, Cylinder.class);

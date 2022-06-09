@@ -29,12 +29,21 @@ import me.pietelite.nope.common.api.NopeServiceProvider;
 import me.pietelite.nope.common.api.edit.HostEditor;
 import me.pietelite.nope.common.api.edit.ScopeEditor;
 
+/**
+ * Utility class for retrieving some information from the API.
+ */
 public final class ApiUtil {
 
   public static ScopeEditor editNopeScope() {
     return NopeServiceProvider.service().editSystem().editScope(Nope.NOPE_SCOPE);
   }
 
+  /**
+   * Get an editor for a Host.
+   *
+   * @param name the name of the host
+   * @return the host editor
+   */
   public static HostEditor editHost(String name) {
     if (name.equals(Nope.GLOBAL_ID)) {
       return NopeServiceProvider.service().editSystem().editGlobal();

@@ -51,8 +51,8 @@ public class ProfileRemoveCommand extends CommandNode {
     if (editor.profiles().get(Nope.NOPE_SCOPE).contains(profile.name())) {
       return CommandResult.error(Formatter.error("That profile isn't in this host's profile list"));
     }
-    if (profile.name().equals(Nope.GLOBAL_ID)) {
-      return CommandResult.error(Formatter.error("You may not remove the global profile"));
+    if (host.name().equals(Nope.GLOBAL_ID) && profile.name().equals(Nope.GLOBAL_ID)) {
+      return CommandResult.error(Formatter.error("You may not remove the global profile from the global host"));
     }
     ApiUtil.editHost(host.name()).removeProfile(Nope.NOPE_SCOPE, profile.name());
     context.sendMessage(Identity.nil(), Formatter.success("Removed the profile ___ from host ___",

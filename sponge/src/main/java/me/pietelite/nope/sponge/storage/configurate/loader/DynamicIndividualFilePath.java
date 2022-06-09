@@ -26,6 +26,11 @@ package me.pietelite.nope.sponge.storage.configurate.loader;
 
 import java.nio.file.Path;
 
+/**
+ * A functional interface for retrieving the {@link Path}
+ * of the storage file of an object using only its scope and its name.
+ */
+@FunctionalInterface
 public interface DynamicIndividualFilePath {
 
   Path path(String scope, String name);

@@ -32,7 +32,13 @@ import me.pietelite.nope.common.host.Profile;
 import me.pietelite.nope.common.setting.SettingKey;
 import me.pietelite.nope.common.setting.SettingValue;
 
-public class MultipleValueSettingEditorImpl<T> extends SettingEditorImpl implements MultipleValueSettingEditor<T> {
+/**
+ * Implementation for the {@link MultipleValueSettingEditorImpl}.
+ *
+ * @param <T> the evaluated value type
+ */
+public class MultipleValueSettingEditorImpl<T> extends SettingEditorImpl
+    implements MultipleValueSettingEditor<T> {
 
   private final Class<T> type;
 

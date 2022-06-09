@@ -40,12 +40,12 @@ import org.spongepowered.api.scheduler.ScheduledTask;
 import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.util.Ticks;
 
+/**
+ * State handler for particle effects.
+ */
 public class ParticleEffectHandler {
 
   public static long DEFAULT_DURATION = 3000;
-
-  private ScheduledTask task;
-
   /**
    * A map where the keys are volume uuids and the value is another map.
    * The second map has a key of player uuids and a value of an integer count
@@ -53,6 +53,7 @@ public class ParticleEffectHandler {
    */
   private final Map<UUID, Map<UUID, Integer>> volumeToPlayers = new HashMap<>();
   private final LinkedList<RegisteredVolume> volumeQueue = new LinkedList<>();
+  private ScheduledTask task;
 
   public void show(Scene scene, ServerPlayer player) {
     scene.volumes().forEach(v -> show(v, player));
@@ -62,10 +63,23 @@ public class ParticleEffectHandler {
     scene.volumes().forEach(v -> show(v, player.uniqueId(), duration));
   }
 
+  /**
+   * Show a volume to a player in-game for a default amount of time.
+   *
+   * @param volume the volume
+   * @param player the player
+   */
   public void show(Volume volume, ServerPlayer player) {
     show(volume, player.uniqueId(), DEFAULT_DURATION);
   }
 
+  /**
+   * Show a volume to a player in-game for a specific amount of time.
+   *
+   * @param volume     the volume
+   * @param playerUuid the uuid of the player
+   * @param duration   the amount of time for which to show the volume, in milliseconds
+   */
   public void show(Volume volume, UUID playerUuid, long duration) {
     RegisteredVolume registeredVolume = new RegisteredVolume();
     registeredVolume.volume = volume;
@@ -82,14 +96,16 @@ public class ParticleEffectHandler {
         });
   }
 
+  /**
+   * Initialize the process that creates the animations.
+   */
   public void initialize() {
     task = Sponge.server().scheduler().submit(Task.builder()
             .plugin(SpongeNope.instance().pluginContainer())
             .execute(() -> {
               long currentTime = System.currentTimeMillis();
-              Nope.instance().interactiveVolumeHandler().volumes().forEach((playerUuid, volume) -> {
-                show(volume, playerUuid, 0);
-              });
+              Nope.instance().interactiveVolumeHandler().volumes().forEach((playerUuid, volume) ->
+                  show(volume, playerUuid, 0));
               Iterator<RegisteredVolume> volumesIterator = volumeQueue.iterator();
               while (volumesIterator.hasNext()) {
                 RegisteredVolume registeredVolume = volumesIterator.next();
@@ -119,6 +135,9 @@ public class ParticleEffectHandler {
         "Nope Volume Particle Effect Daemon");
   }
 
+  /**
+   * Turn off the animation process.
+   */
   public void shutDown() {
     if (task != null) {
       task.cancel();

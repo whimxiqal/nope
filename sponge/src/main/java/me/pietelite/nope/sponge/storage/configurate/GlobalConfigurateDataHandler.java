@@ -24,6 +24,7 @@
 
 package me.pietelite.nope.sponge.storage.configurate;
 
+import java.util.List;
 import me.pietelite.nope.common.Nope;
 import me.pietelite.nope.common.host.Global;
 import me.pietelite.nope.common.host.HostedProfile;
@@ -64,7 +65,14 @@ public class GlobalConfigurateDataHandler
     try {
       CommentedConfigurationNode node = loader.load();
       if (!node.node("profiles").virtual()) {
-        global.allProfiles().addAll(node.node("profiles").getList(HostedProfile.class));
+        List<HostedProfile> profiles = node.node("profiles").getList(HostedProfile.class);
+        if (profiles != null) {
+          for (HostedProfile p : profiles) {
+            if (!p.profile().name().equals(Nope.GLOBAL_ID)) {
+              global.hostedProfiles().add(p);
+            }
+          }
+        }
       }
       return global;
     } catch (ConfigurateException e) {

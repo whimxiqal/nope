@@ -156,6 +156,9 @@ public final class Target {
     return !whitelist;
   }
 
+  /**
+   * The implementation of the {@link TargetEditor}.
+   */
   public static class Editor implements TargetEditor {
 
     private final Targetable targetable;

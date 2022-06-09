@@ -96,6 +96,9 @@ public class Scene extends Host implements Scoped {
     Nope.instance().data().scenes(scope).save(this);
   }
 
+  /**
+   * Implementation for a {@link SceneEditor}.
+   */
   public static class Editor extends Host.Editor<Scene> implements SceneEditor {
 
     public Editor(Scene scene) {
@@ -132,7 +135,9 @@ public class Scene extends Host implements Scoped {
     }
 
     @Override
-    public CuboidEditor addCuboid(String domainName, float x1, float y1, float z1, float x2, float y2, float z2) {
+    public CuboidEditor addCuboid(String domainName,
+                                  float x1, float y1, float z1,
+                                  float x2, float y2, float z2) {
       host.verifyExistence();
       Domain domain = Nope.instance().system().domains().get(domainName);
       if (domain == null) {
@@ -144,7 +149,9 @@ public class Scene extends Host implements Scoped {
     }
 
     @Override
-    public CylinderEditor addCylinder(String domainName, float x, float y, float z, float radius, float height) {
+    public CylinderEditor addCylinder(String domainName,
+                                      float x, float y, float z,
+                                      float radius, float height) {
       host.verifyExistence();
       Domain domain = Nope.instance().system().domains().get(domainName);
       if (domain == null) {
@@ -189,20 +196,13 @@ public class Scene extends Host implements Scoped {
     }
 
     @Override
-    public int priority(int priority) {
+    public void priority(int priority) {
       host.verifyExistence();
       if (priority < 0) {
         throw new IllegalArgumentException("Cannot set a negative priority");
       }
-      HostSystem.UpdatePrioritiesResult result = new HostSystem.UpdatePrioritiesResult();
-      HostSystem.updateScenePriority(host, priority, result);
-      if (result.failChangedCount > 0) {
-        Nope.instance().logger().error(result.successfullyChangedCount
-            + " scenes' priorities were updated, but "
-            + result.failChangedCount
-            + " scenes could not be updated. This may lead to unexpected problems");
-      }
-      return result.successfullyChangedCount;
+      host.priority = priority;
+      host.save();
     }
 
     @Override
@@ -253,9 +253,8 @@ public class Scene extends Host implements Scoped {
       scope().scenes().remove(host.name());
       Nope.instance().data().scenes(host.scope).destroy(host);
       host.volumes().clear();
-      host.allProfiles().forEach(profile -> {
-        scope().relatedToProfile(profile.profile().name()).remove(host);
-      });
+      host.allProfiles().forEach(profile ->
+          scope().relatedToProfile(profile.profile().name()).remove(host));
       host.expire();
       domains.forEach(domain -> domain.volumes().construct());
     }

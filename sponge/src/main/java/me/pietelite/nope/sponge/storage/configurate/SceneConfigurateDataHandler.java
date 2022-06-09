@@ -73,7 +73,8 @@ public class SceneConfigurateDataHandler implements SceneDataHandler {
   @Override
   public void save(Scene scene) {
     try {
-      ConfigurationLoader<CommentedConfigurationNode> loader = this.loader.loader(scene.scope(), scene.name());
+      ConfigurationLoader<CommentedConfigurationNode> loader = this.loader.loader(scene.scope(),
+          scene.name());
       CommentedConfigurationNode root = loader.load();
       root.node("scope").set(scene.scope());
       root.node("name").set(scene.name());

@@ -35,6 +35,9 @@ import org.spongepowered.configurate.ConfigurationNode;
 import org.spongepowered.configurate.serialize.SerializationException;
 import org.spongepowered.configurate.serialize.TypeSerializer;
 
+/**
+ * A {@link TypeSerializer} for a {@link HostedProfile}.
+ */
 public class HostedProfileTypeSerializer implements TypeSerializer<HostedProfile> {
 
   @Override
@@ -62,7 +65,8 @@ public class HostedProfileTypeSerializer implements TypeSerializer<HostedProfile
   }
 
   @Override
-  public void serialize(Type type, @Nullable HostedProfile obj, ConfigurationNode node) throws SerializationException {
+  public void serialize(Type type, @Nullable HostedProfile obj, ConfigurationNode node)
+      throws SerializationException {
     if (obj == null) {
       return;
     }

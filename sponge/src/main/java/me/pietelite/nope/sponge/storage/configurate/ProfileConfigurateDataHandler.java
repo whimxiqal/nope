@@ -40,7 +40,11 @@ import org.spongepowered.configurate.ConfigurateException;
 import org.spongepowered.configurate.ConfigurationNode;
 import org.spongepowered.configurate.loader.ConfigurationLoader;
 
-public class ProfileConfigurateDataHandler extends SettingsConfigurateDataHandler implements ProfileDataHandler {
+/**
+ * An implementation for the {@link ProfileDataHandler}.
+ */
+public class ProfileConfigurateDataHandler extends SettingsConfigurateDataHandler
+    implements ProfileDataHandler {
 
   private final DynamicIndividualConfigurationLoader loader;
   private final DynamicIndividualFilePath filePath;
@@ -71,7 +75,8 @@ public class ProfileConfigurateDataHandler extends SettingsConfigurateDataHandle
   @Override
   public void save(Profile profile) {
     try {
-      ConfigurationLoader<CommentedConfigurationNode> loader = this.loader.loader(profile.scope(), profile.name());
+      ConfigurationLoader<CommentedConfigurationNode> loader = this.loader.loader(profile.scope(),
+          profile.name());
       CommentedConfigurationNode root = loader.load();
       root.node("scope").set(profile.scope());
       root.node("name").set(profile.name());

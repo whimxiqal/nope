@@ -23,8 +23,7 @@ jar {
 }
 
 // Used for deployment of the Sponge API
-/*
-if (project.hasProperty('sonatypeUsername') && project.hasProperty('sonatypePassword')) {
+if (project.hasProperty('sonatypeUsername') && project.hasProperty('sonatypePassword') && project.ext.publishApi && false) {
     apply plugin: 'maven-publish'
     apply plugin: 'signing'
 
@@ -70,7 +69,7 @@ if (project.hasProperty('sonatypeUsername') && project.hasProperty('sonatypePass
                 artifact javadocJar
                 pom {
                     name = 'Nope Sponge API'
-                    description = 'A protections plugin for Minecraft servers.'
+                    description = 'A world-management plugin for Minecraft servers.'
                     url = 'https://github.com/pietelite/nope'
                     licenses {
                         license {
@@ -107,4 +106,3 @@ if (project.hasProperty('sonatypeUsername') && project.hasProperty('sonatypePass
         }
     }
 }
-*/

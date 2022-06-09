@@ -26,23 +26,52 @@ package me.pietelite.nope.sponge.api.event;
 
 import java.util.Collection;
 import java.util.Optional;
-import java.util.Set;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.title.Title;
 import org.spongepowered.api.event.Cancellable;
 import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.entity.MoveEntityEvent;
 
+/**
+ * An {@link Event} to represent when a player enters or leaves one or more hosts.
+ */
 public interface TraverseHostsEvent extends Event, Cancellable {
 
+  /**
+   * The move entity event that caused this event.
+   *
+   * @return the base event
+   */
   MoveEntityEvent baseEvent();
 
+  /**
+   * Get an immutable collection of the names of the hosts into which the player
+   * moved during this event.
+   *
+   * @return the entered hosts
+   */
   Collection<String> entering();
 
+  /**
+   * Get an immutable collection of the names of the hosts out of which the player
+   * moved during the event.
+   *
+   * @return the existed hosts
+   */
   Collection<String> exiting();
 
+  /**
+   * Get the title that will be sent to the player due to this movement.
+   *
+   * @return the title, or an empty optional if none will be sent
+   */
   Optional<Title> title();
 
+  /**
+   * Get all the messages that will be sent to the player due to this movement.
+   *
+   * @return all messages
+   */
   Collection<Component> messages();
 
 }

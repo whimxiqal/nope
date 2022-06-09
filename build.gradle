@@ -22,6 +22,7 @@ subprojects {
 
     group = 'me.pietelite.nope'
 
+    project.ext.publishApi = false
     project.ext.majorVersion = '2'
     project.ext.minorVersion = '0'
     project.ext.patchVersion = determinePatchVersion()
@@ -51,11 +52,4 @@ subprojects {
         mavenCentral()
     }
 
-}
-
-tasks.register("nopeBuild") {
-    dependsOn "common-api:build"
-    dependsOn "sponge-api:build"
-    dependsOn "common:test"
-    dependsOn "sponge:shadowJar"
 }

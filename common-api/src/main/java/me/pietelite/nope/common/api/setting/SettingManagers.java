@@ -24,8 +24,10 @@
 
 package me.pietelite.nope.common.api.setting;
 
+/**
+ * A getter for all sorts of {@link SettingManager}s.
+ */
 public interface SettingManagers {
-
 
   /**
    * Returns a {@link SettingManager} that can make a {@link SettingKeyBuilder} to build a key

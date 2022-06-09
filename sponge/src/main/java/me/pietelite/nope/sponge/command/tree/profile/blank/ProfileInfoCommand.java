@@ -33,8 +33,8 @@ import me.pietelite.nope.common.permission.Permissions;
 import me.pietelite.nope.sponge.SpongeNope;
 import me.pietelite.nope.sponge.command.CommandNode;
 import me.pietelite.nope.sponge.command.parameters.Parameters;
-import me.pietelite.nope.sponge.command.tree.host.blank.info.VolumesInfoCommand;
 import me.pietelite.nope.sponge.command.tree.host.blank.info.SettingInfoCommand;
+import me.pietelite.nope.sponge.command.tree.host.blank.info.VolumesInfoCommand;
 import me.pietelite.nope.sponge.util.Formatter;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextDecoration;
@@ -57,10 +57,10 @@ public class ProfileInfoCommand extends CommandNode {
     Profile profile = context.requireOne(Parameters.PROFILE);
 
     Component header = Component.text()
-            .append(Component.text("Settings")
-                .color(Formatter.DULL)
-                .decorate(TextDecoration.UNDERLINED))
-            .build();
+        .append(Component.text("Settings")
+            .color(Formatter.DULL)
+            .decorate(TextDecoration.UNDERLINED))
+        .build();
     Sponge.asyncScheduler().submit(Task.builder().execute(() ->
             Formatter.paginator(profile.name())
                 .header(header)

@@ -24,11 +24,11 @@
 
 package me.pietelite.nope.common.api;
 
-import me.pietelite.nope.common.api.setting.SettingKeyBuilder;
 import me.pietelite.nope.common.api.setting.BlockChange;
 import me.pietelite.nope.common.api.setting.DamageCause;
 import me.pietelite.nope.common.api.setting.Explosive;
 import me.pietelite.nope.common.api.setting.Movement;
+import me.pietelite.nope.common.api.setting.SettingKeyBuilder;
 import me.pietelite.nope.common.api.setting.SettingManager;
 import me.pietelite.nope.common.api.setting.SettingManagers;
 import me.pietelite.nope.common.api.struct.AltSet;

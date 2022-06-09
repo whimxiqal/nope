@@ -27,6 +27,9 @@ package me.pietelite.nope.common.storage;
 import java.util.Collection;
 import me.pietelite.nope.common.host.Profile;
 
+/**
+ * A handler to manage persistent storage for {@link Profile}s.
+ */
 public interface ProfileDataHandler {
 
   void destroy(Profile profile);

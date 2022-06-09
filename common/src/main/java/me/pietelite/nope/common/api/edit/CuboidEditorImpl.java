@@ -27,6 +27,9 @@ package me.pietelite.nope.common.api.edit;
 import me.pietelite.nope.common.host.Scene;
 import me.pietelite.nope.common.math.Cuboid;
 
+/**
+ * Implementation for the editor for a {@link Cuboid}.
+ */
 public class CuboidEditorImpl extends ZoneEditorImpl<Cuboid> implements CuboidEditor {
 
   public CuboidEditorImpl(Scene scene, int index) {

@@ -27,6 +27,9 @@ package me.pietelite.nope.common.api.edit;
 import me.pietelite.nope.common.host.Scene;
 import me.pietelite.nope.common.math.Slab;
 
+/**
+ * Implementation of the {@link SlabEditor}.
+ */
 public class SlabEditorImpl extends ZoneEditorImpl<Slab> implements SlabEditor {
   public SlabEditorImpl(Scene scene, int index) {
     super(scene, index, Slab.class);

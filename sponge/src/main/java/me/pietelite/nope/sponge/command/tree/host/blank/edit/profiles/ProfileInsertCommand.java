@@ -54,8 +54,11 @@ public class ProfileInsertCommand extends CommandNode {
     Profile profile = context.requireOne(Parameters.PROFILE);
     int index = context.requireOne(indexParameter);
     HostEditor editor = ApiUtil.editHost(host.name());
-    if (index < 0 || index > editor.profiles().size()) {
+    if (index <= 0 || index > editor.profiles().size()) {
       return CommandResult.error(Formatter.error("That index is out of bounds"));
+    }
+    if (editor.profiles().get(Nope.NOPE_SCOPE).contains(profile.name())) {
+      return CommandResult.error(Formatter.error("That profile already exists on this host"));
     }
     editor.addProfile(Nope.NOPE_SCOPE, profile.name(), index);
     context.sendMessage(Identity.nil(), Formatter.success("Added profile ___ at index ___ on host ___",

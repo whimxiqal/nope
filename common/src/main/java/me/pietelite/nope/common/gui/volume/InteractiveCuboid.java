@@ -28,6 +28,9 @@ import me.pietelite.nope.common.host.Scene;
 import me.pietelite.nope.common.math.Cuboid;
 import me.pietelite.nope.common.struct.Direction;
 
+/**
+ * An {@link InteractiveVolume} for a {@link Cuboid}.
+ */
 public class InteractiveCuboid extends InteractiveVolume<Cuboid> {
 
   public InteractiveCuboid(Scene scene, Cuboid volume, InteractiveVolumeInfo info, int minimumDimension) {

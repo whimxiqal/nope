@@ -24,9 +24,27 @@
 
 package me.pietelite.nope.common.api.edit;
 
+/**
+ * A type of Zone.
+ */
 public enum ZoneType {
+  /**
+   * A <a href="https://en.wikipedia.org/wiki/Cuboid#Rectangular_cuboid">rectangular cuboid</a>.
+   */
   CUBOID,
+  /**
+   * A <a href="https://en.wikipedia.org/wiki/Cylinder">cylinder</a>.
+   */
   CYLINDER,
+  /**
+   * A subset of a three-dimensional space bounded by two y-values, which form two bounding planes
+   * in the x and z axes.
+   * This is essentially <a href="https://en.wikipedia.org/wiki/Cylinder">cylinder</a> that is
+   * unbounded in the x and z directions.
+   */
   SLAB,
+  /**
+   * A <a href="https://en.wikipedia.org/wiki/Sphere">sphere</a>.
+   */
   SPHERE,
 }

@@ -24,14 +24,29 @@
 
 package me.pietelite.nope.common.setting;
 
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+/**
+ * Something that has a {@link Target}.
+ * A {@link Targetable} object will therefore only apply to a subject
+ * if its {@link Target} matches it.
+ */
 public interface Targetable {
 
+  /**
+   * Get the target that controls whether this object applies to a subject.
+   * If it's null, it means that no target controls this object.
+   *
+   * @return the target
+   */
   @Nullable
   Target target();
 
+  /**
+   * Set the target that controls whether this object applies to a subject.
+   *
+   * @param target the new target
+   */
   void target(@Nullable Target target);
 
 }

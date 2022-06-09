@@ -36,8 +36,7 @@ import me.pietelite.nope.sponge.storage.configurate.GlobalConfigurateDataHandler
 public class YamlGlobalConfig extends GlobalConfigurateDataHandler {
 
   public YamlGlobalConfig(Path path, SettingValueConfigSerializerRegistrar serializerRegistrar) {
-    super(YamlDataHandler.yamlLoader(path.resolve("server.yml")),
-        serializerRegistrar);
+    super(YamlDataHandler.yamlLoader(path.resolve("_global.yml")), serializerRegistrar);
   }
 
 }

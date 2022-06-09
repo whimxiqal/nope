@@ -24,10 +24,14 @@
 
 package me.pietelite.nope.sponge.storage.configurate.loader;
 
-import java.util.function.BiFunction;
 import org.spongepowered.configurate.CommentedConfigurationNode;
 import org.spongepowered.configurate.loader.ConfigurationLoader;
 
+/**
+ * A functional interface for retrieving a {@link ConfigurationLoader}
+ * using only the scope of the object and the name of the object.
+ */
+@FunctionalInterface
 public interface DynamicIndividualConfigurationLoader {
 
   ConfigurationLoader<CommentedConfigurationNode> loader(String scope, String name);

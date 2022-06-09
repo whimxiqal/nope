@@ -44,6 +44,10 @@ import me.pietelite.nope.common.storage.Persistent;
 import me.pietelite.nope.common.struct.Scoped;
 import org.jetbrains.annotations.Nullable;
 
+/**
+ * A container for settings.
+ * Anything that has a {@link Profile} will have those settings apply to it.
+ */
 public class Profile extends SettingCollection implements Named, Persistent, Expirable, Targetable, Scoped {
 
   private final String scope;
@@ -103,6 +107,9 @@ public class Profile extends SettingCollection implements Named, Persistent, Exp
     Nope.instance().data().profiles(scope).save(this);
   }
 
+  /**
+   * An implementation of the {@link ProfileEditor}.
+   */
   public static class Editor implements ProfileEditor {
 
     private final Profile profile;

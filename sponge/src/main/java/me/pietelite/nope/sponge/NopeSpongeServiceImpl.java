@@ -28,6 +28,9 @@ import me.pietelite.nope.sponge.api.NopeSpongeService;
 import me.pietelite.nope.sponge.util.SpongeUtil;
 import org.spongepowered.api.world.server.ServerWorld;
 
+/**
+ * Implementation of the {@link NopeSpongeService}.
+ */
 public class NopeSpongeServiceImpl implements NopeSpongeService {
   @Override
   public String domainName(ServerWorld world) {

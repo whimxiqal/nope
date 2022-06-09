@@ -27,6 +27,9 @@ package me.pietelite.nope.common.api.edit;
 import me.pietelite.nope.common.host.Scene;
 import me.pietelite.nope.common.math.Sphere;
 
+/**
+ * Implementation of the {@link SphereEditor}.
+ */
 public class SphereEditorImpl extends ZoneEditorImpl<Sphere> implements SphereEditor {
   public SphereEditorImpl(Scene scene, int index) {
     super(scene, index, Sphere.class);

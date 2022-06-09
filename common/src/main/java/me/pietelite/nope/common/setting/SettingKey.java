@@ -120,7 +120,7 @@ public abstract class SettingKey<T,
    * @param <M> the manager type
    * @param <B> the builder type, for chaining
    */
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings({"unchecked", "checkstyle:MissingJavadocMethod"})
   public abstract static class Builder<T,
       K extends SettingKey<T, V, M>,
       V extends SettingValue<T>,
@@ -591,7 +591,7 @@ public abstract class SettingKey<T,
       }
 
       public SettingKey.Unary.Builder<T> keyBuilder(String id) {
-        return new SettingKey.Unary.Builder<T>(id, this);
+        return new SettingKey.Unary.Builder<>(id, this);
       }
     }
 

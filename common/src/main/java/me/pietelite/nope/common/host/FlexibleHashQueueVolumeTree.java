@@ -71,12 +71,6 @@ public class FlexibleHashQueueVolumeTree extends VolumeTree {
     }
   }
 
-  public int getCacheSize() {
-    synchronized (lock) {
-      return history.size();
-    }
-  }
-
   @Override
   public void put(Volume volume, Scene scene, boolean construct) {
     synchronized (lock) {

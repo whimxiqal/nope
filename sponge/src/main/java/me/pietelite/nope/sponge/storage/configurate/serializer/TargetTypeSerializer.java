@@ -31,11 +31,13 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import me.pietelite.nope.common.setting.Target;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.configurate.CommentedConfigurationNode;
 import org.spongepowered.configurate.ConfigurationNode;
 import org.spongepowered.configurate.serialize.SerializationException;
 import org.spongepowered.configurate.serialize.TypeSerializer;
 
+/**
+ * A {@link TypeSerializer} for {@link Target}s.
+ */
 public class TargetTypeSerializer implements TypeSerializer<Target> {
   @Override
   public Target deserialize(Type type, ConfigurationNode node) throws SerializationException {
@@ -60,7 +62,8 @@ public class TargetTypeSerializer implements TypeSerializer<Target> {
   }
 
   @Override
-  public void serialize(Type type, @Nullable Target obj, ConfigurationNode node) throws SerializationException {
+  public void serialize(Type type, @Nullable Target obj, ConfigurationNode node)
+      throws SerializationException {
     if (obj == null) {
       return;
     }

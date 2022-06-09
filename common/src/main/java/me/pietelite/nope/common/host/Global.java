@@ -69,6 +69,9 @@ public class Global extends Host {
     return out;
   }
 
+  /**
+   * Implementation of the editor for the {@link Global}.
+   */
   public static class Editor extends Host.Editor<Global> {
 
     public Editor() {

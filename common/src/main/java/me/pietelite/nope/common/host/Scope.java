@@ -29,7 +29,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.NoSuchElementException;
-import java.util.Optional;
 import java.util.Set;
 import me.pietelite.nope.common.Nope;
 import me.pietelite.nope.common.api.edit.ProfileEditor;
@@ -39,6 +38,12 @@ import me.pietelite.nope.common.api.struct.Named;
 import me.pietelite.nope.common.struct.IgnoreCaseStringHashMap;
 import org.jetbrains.annotations.NotNull;
 
+/**
+ * A "container" of elements in the system of hosts and profiles.
+ * Any two scopes may have elements with the same name.
+ * A third party developer should create their own {@link Scope} in which
+ * to make their components.
+ */
 public class Scope implements Named {
 
   private final String name;
@@ -70,6 +75,12 @@ public class Scope implements Named {
     profileBackwardsMap.remove(profileName);
   }
 
+  /**
+   * Get all hosts which have the given profile set.
+   *
+   * @param profileName the name of the profile
+   * @return the related hosts
+   */
   @NotNull
   public Set<Host> relatedToProfile(String profileName) {
     Set<Host> out = profileBackwardsMap.get(profileName);
@@ -79,6 +90,9 @@ public class Scope implements Named {
     return out;
   }
 
+  /**
+   * The implementation for the {@link ScopeEditor}.
+   */
   public static class Editor implements ScopeEditor {
     private final Scope scope;
 

@@ -24,17 +24,16 @@
 
 package me.pietelite.nope.sponge.command;
 
-import java.util.Collection;
-import java.util.function.Function;
 import me.pietelite.nope.common.permission.Permission;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.spongepowered.api.command.CommandExecutor;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.parameter.CommandContext;
-import org.spongepowered.api.command.parameter.Parameter;
 
+/**
+ * A command node but used for inline declaration.
+ */
 public class InlineCommandNode extends CommandNode {
 
   private final CommandExecutor executor;

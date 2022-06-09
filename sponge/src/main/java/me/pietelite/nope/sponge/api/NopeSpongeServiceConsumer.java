@@ -24,8 +24,9 @@
 
 package me.pietelite.nope.sponge.api;
 
-import me.pietelite.nope.common.api.NopeServiceProvider;
-
+/**
+ * A static consumer to take an implementation of the {@link NopeSpongeService}.
+ */
 public class NopeSpongeServiceConsumer {
 
   /**

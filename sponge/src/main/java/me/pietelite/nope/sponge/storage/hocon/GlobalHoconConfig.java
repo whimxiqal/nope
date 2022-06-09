@@ -42,7 +42,7 @@ public class GlobalHoconConfig extends GlobalConfigurateDataHandler {
    * @param serializerRegistrar the registrar of setting value serializers
    */
   public GlobalHoconConfig(Path path, SettingValueConfigSerializerRegistrar serializerRegistrar) {
-    super(HoconDataHandler.hoconLoader(path.resolve("server.conf")), serializerRegistrar);
+    super(HoconDataHandler.hoconLoader(path.resolve("_global.conf")), serializerRegistrar);
   }
 
 }

@@ -33,6 +33,10 @@ import me.pietelite.nope.common.math.Cuboid;
 import me.pietelite.nope.common.math.Volume;
 import me.pietelite.nope.common.struct.Direction;
 
+/**
+ * A state holder for {@link InteractiveVolume}s with which are being interacted
+ * by players in-game.
+ */
 public class InteractiveVolumeHandler {
 
   private final Map<UUID, InteractiveVolume<?>> interactionMap = new HashMap<>();
@@ -42,6 +46,13 @@ public class InteractiveVolumeHandler {
     this.info = info;
   }
 
+  /**
+   * Begin a session of interacting with a volume.
+   *
+   * @param uuid           the uuid of the player
+   * @param scene          the scene for which the volume is a part
+   * @param startingVolume the volume being edited
+   */
   public void beginSession(UUID uuid, Scene scene, Volume startingVolume) {
     switch (startingVolume.zoneType()) {
       case CUBOID:
@@ -75,6 +86,12 @@ public class InteractiveVolumeHandler {
     return interactionMap.remove(uuid);
   }
 
+  /**
+   * Get all players who are currently editing volumes and the current state of the volume
+   * they are editing.
+   *
+   * @return the map
+   */
   public Map<UUID, Volume> volumes() {
     return interactionMap.entrySet()
         .stream()

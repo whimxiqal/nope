@@ -65,11 +65,13 @@ dependencies {
     implementation 'org.spongepowered:spongeapi:8.0.0'
     annotationProcessor "org.spongepowered:spongeapi:8.0.0"
 
-    annotationProcessor 'org.projectlombok:lombok:1.18.22'
+    annotationProcessor 'org.projectlombok:lombok:1.18.24'
     annotationProcessor 'org.jetbrains:annotations:23.0.0'
 
     implementation 'org.bstats:bstats-sponge:3.0.0'
 }
+
+jar.enabled = false
 
 shadowJar {
     archiveFileName = "Nope-Sponge-${project.ext.fullVersion}.jar"
@@ -80,4 +82,8 @@ shadowJar {
     }
 
     relocate 'org.bstats', 'me.pietelite.nope.lib.bstats'
+}
+
+build {
+    finalizedBy "shadowJar"
 }

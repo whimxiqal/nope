@@ -24,6 +24,9 @@
 
 package me.pietelite.nope.common.struct;
 
+/**
+ * The eight axial directions in three dimensions.
+ */
 public enum Direction {
   X_POS,
   X_NEG,

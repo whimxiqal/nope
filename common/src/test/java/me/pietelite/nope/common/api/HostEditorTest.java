@@ -190,9 +190,8 @@ public class HostEditorTest extends ApiTest {
     Assertions.assertEquals(10, editor2.priority());
     addVolumes(editor2);
     Assertions.assertEquals(10, editor2.priority());
-    // The volumes are the same for the second scene, so when the volumes are added, it pushes up the priority
-    // of intersecting scenes
-    Assertions.assertEquals(11, editor.priority());
+    // The volumes are the same for the second scene. That's okay.
+    Assertions.assertEquals(10, editor.priority());
 
     // Cannot have a negative priority
     Assertions.assertThrows(IllegalArgumentException.class, () -> editor.priority(-1));

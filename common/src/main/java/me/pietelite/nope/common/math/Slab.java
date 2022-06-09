@@ -100,7 +100,9 @@ public class Slab extends Volume {
   }
 
   @Override
-  public boolean containsCuboid(float minX, float minY, float minZ, float maxX, float maxY, float maxZ, boolean maxInclusive) {
+  public boolean containsCuboid(float minX, float minY, float minZ,
+                                float maxX, float maxY, float maxZ,
+                                boolean maxInclusive) {
     return minY >= this.minY && (maxInclusive ? (maxY <= this.maxY) : (maxY < this.maxY));
   }
 

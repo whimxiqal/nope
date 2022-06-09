@@ -27,7 +27,6 @@ package me.pietelite.nope.common.setting;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.NoSuchElementException;
-import me.pietelite.nope.common.Nope;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -91,8 +90,19 @@ public class SettingKeyStore {
     return settingMap.isEmpty();
   }
 
+  /**
+   * Retrieve a stored poly-type setting.
+   *
+   * @param setting the setting name
+   * @param type    the class instance of the value type
+   * @param <T>     the value type
+   * @return the setting key
+   * @throws NoSuchElementException   if no poly setting exists with that name
+   * @throws IllegalArgumentException if the setting key doesn't have the type requested
+   */
   @SuppressWarnings("unchecked")
-  public <T> SettingKey.Poly<T, ?> getPolySetting(String setting, Class<T> type) {
+  public <T> SettingKey.Poly<T, ?> getPolySetting(String setting, Class<T> type)
+      throws NoSuchElementException, IllegalArgumentException {
     SettingKey<?, ?, ?> key = get(setting);
     if (!(key instanceof SettingKey.Poly)) {
       throw new NoSuchElementException("There is no poly setting with name " + setting);
@@ -104,6 +114,16 @@ public class SettingKeyStore {
     return (SettingKey.Poly<T, ?>) polyKey;
   }
 
+  /**
+   * Retrieve a stored unary-type setting.
+   *
+   * @param setting the setting name
+   * @param type    the class instance of the value type
+   * @param <T>     the value type
+   * @return the setting key
+   * @throws NoSuchElementException   if no unary setting exists with that name
+   * @throws IllegalArgumentException if the setting key doesn't have the type requested
+   */
   @SuppressWarnings("unchecked")
   public <T> SettingKey.Unary<T> getUnarySetting(String setting, Class<T> type) {
     SettingKey<?, ?, ?> key = get(setting);

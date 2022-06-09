@@ -24,13 +24,8 @@
 
 package me.pietelite.nope.sponge.listener.always;
 
-import java.util.Optional;
 import me.pietelite.nope.common.Nope;
-import me.pietelite.nope.sponge.SpongeNope;
-import me.pietelite.nope.sponge.util.EffectsUtil;
 import me.pietelite.nope.sponge.util.SpongeUtil;
-import org.spongepowered.api.Server;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.Cancellable;
 import org.spongepowered.api.event.Listener;
@@ -38,14 +33,19 @@ import org.spongepowered.api.event.Order;
 import org.spongepowered.api.event.action.InteractEvent;
 import org.spongepowered.api.event.block.InteractBlockEvent;
 import org.spongepowered.api.event.item.inventory.InteractItemEvent;
-import org.spongepowered.api.event.lifecycle.StoppingEngineEvent;
 import org.spongepowered.api.event.network.ServerSideConnectionEvent;
-import org.spongepowered.api.scheduler.ScheduledTask;
-import org.spongepowered.api.scheduler.Task;
-import org.spongepowered.api.util.Ticks;
 
+/**
+ * A listener for players interacting with {@link me.pietelite.nope.common.gui.volume.InteractiveVolume}s.
+ */
 public class InteractiveVolumeListener {
 
+  /**
+   * Resize the {@link me.pietelite.nope.common.gui.volume.InteractiveVolume}s
+   * based on the user's input.
+   *
+   * @param event the event
+   */
   @Listener(order = Order.FIRST)
   public void onInteract(InteractEvent event) {
     if (!(event.source() instanceof ServerPlayer)) {
@@ -82,6 +82,11 @@ public class InteractiveVolumeListener {
     }
   }
 
+  /**
+   * Remove all pending interactive volumes for the player.
+   *
+   * @param event the event
+   */
   @Listener(order = Order.FIRST)
   public void onLogOut(ServerSideConnectionEvent.Disconnect event) {
     if (Nope.instance().interactiveVolumeHandler().hasSession(event.player().uniqueId())) {

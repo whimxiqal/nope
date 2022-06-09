@@ -47,7 +47,8 @@ public class DomainConfigurateDataHandler implements DomainDataHandler {
    *
    * @param loader              the configuration loader
    */
-  public DomainConfigurateDataHandler(Function<String, ConfigurationLoader<CommentedConfigurationNode>> loader) {
+  public DomainConfigurateDataHandler(Function<String,
+      ConfigurationLoader<CommentedConfigurationNode>> loader) {
     this.loader = loader;
   }
 

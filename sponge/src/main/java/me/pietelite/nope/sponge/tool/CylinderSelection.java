@@ -37,13 +37,13 @@ public class CylinderSelection extends Selection<Cylinder> {
 
   private float radius() {
     // choose a radius that makes it so the entire position block is encompassed
-    double xDistSquared1 = (position1.x() - position2.x()) * (position1.x() - position2.x());
-    double xDistSquared2 = (position1.x() - position2.x() - 1) * (position1.x() - position2.x() - 1);
-    double zDistSquared1 = (position1.z() - position2.z()) * (position1.z() - position2.z());
-    double zDistSquared2 = (position1.z() - position2.z() - 1) * (position1.z() - position2.z() - 1);
+    double distSquaredX1 = (position1.x() - position2.x()) * (position1.x() - position2.x());
+    double distSquaredX2 = (position1.x() - position2.x() - 1) * (position1.x() - position2.x() - 1);
+    double distSquaredZ1 = (position1.z() - position2.z()) * (position1.z() - position2.z());
+    double distSquaredZ2 = (position1.z() - position2.z() - 1) * (position1.z() - position2.z() - 1);
     List<Double> radii = Lists.newArrayList(
-        xDistSquared1 + zDistSquared1, xDistSquared2 + zDistSquared1,
-        xDistSquared1 + zDistSquared2, xDistSquared2 + zDistSquared2);
+        distSquaredX1 + distSquaredZ1, distSquaredX2 + distSquaredZ1,
+        distSquaredX1 + distSquaredZ2, distSquaredX2 + distSquaredZ2);
     return (float) Math.sqrt(radii.stream().max(Double::compare).get());
   }
 

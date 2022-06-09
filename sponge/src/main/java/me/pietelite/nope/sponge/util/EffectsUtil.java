@@ -51,7 +51,6 @@ import org.spongepowered.api.effect.particle.ParticleTypes;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.scheduler.ScheduledTaskFuture;
 import org.spongepowered.api.scheduler.TaskExecutorService;
-import org.spongepowered.api.world.server.ServerLocation;
 
 /**
  * Utility class for minecraft effects.
@@ -118,6 +117,7 @@ public final class EffectsUtil {
    *
    * @param scene  the scene to show
    * @param player the player to
+   * @param info   parameters to determine the behavior of the animation
    * @return true if any particles are shown, false if none
    */
   public static boolean show(Scene scene, ServerPlayer player, EffectInfo info) {
@@ -188,6 +188,7 @@ public final class EffectsUtil {
    *
    * @param volume the volume to show
    * @param player the player for which to show the boundaries
+   * @param info   parameters to determine the behavior of the animation
    * @return true if any particles were shown, false if none
    */
   public static boolean show(Volume volume, ServerPlayer player, EffectInfo info) {
@@ -221,6 +222,7 @@ public final class EffectsUtil {
    * @param points    the points to show
    * @param player    the player for which to show the points
    * @param taskGroup the task group to use for scheduling the showing of particles
+   * @param info      parameters to determine the behavior of the animation
    * @return true if any particles were shown, false if none
    */
   public static boolean show(final List<BoundaryParticle> points,
@@ -283,6 +285,16 @@ public final class EffectsUtil {
     return true;
   }
 
+  /**
+   * Create a "ripple" effect for the player.
+   * The animated particles appear on the outside of the {@link Volume},
+   * in a pattern determined by the parameters in the {@link EffectInfo}.
+   *
+   * @param volume the volume to show
+   * @param player the player for which to show the points
+   * @param info   parameters to determine the behavior of the animation
+   * @return true if any particles were shown, false if none
+   */
   public static boolean ripple(Volume volume, ServerPlayer player, EffectInfo info) {
     ensureTaskExecutor();
     Location location = SpongeUtil.reduceLocation(player.serverLocation());
@@ -329,8 +341,8 @@ public final class EffectsUtil {
               }
             });
         VOLUME_PARTICLE_TASK_EXECUTOR.schedule(futureRunnable,
-              delay,
-              TimeUnit.MILLISECONDS);
+            delay,
+            TimeUnit.MILLISECONDS);
         bundleRatio += bundleRatioIncrement;
         flooredDistance += bundleRangeSize;
         batch.clear();
@@ -338,6 +350,10 @@ public final class EffectsUtil {
       batch.add(point);
     }
     return true;
+  }
+
+  public static EffectInfo defaultInfo() {
+    return EffectInfo.builder().build();
   }
 
   private static class TaskGroup {
@@ -359,10 +375,9 @@ public final class EffectsUtil {
     private final boolean interior;
   }
 
-  public static EffectInfo defaultInfo() {
-    return EffectInfo.builder().build();
-  }
-
+  /**
+   * Parameters about how an animation should behave.
+   */
   @Data
   @Accessors(fluent = true)
   @Builder

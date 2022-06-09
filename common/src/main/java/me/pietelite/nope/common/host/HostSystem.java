@@ -46,6 +46,9 @@ import me.pietelite.nope.common.util.Validate;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+/**
+ * The central controlling object of almost all of Nope's state.
+ */
 public class HostSystem {
 
   private final IgnoreCaseStringHashMap<Domain> domains = new IgnoreCaseStringHashMap<>();
@@ -55,27 +58,6 @@ public class HostSystem {
 
   public HostSystem() {
     scopes.put(Nope.NOPE_SCOPE, new Scope(Nope.NOPE_SCOPE));
-  }
-
-  public static void updateScenePriority(Scene scene, int newPriority, UpdatePrioritiesResult result) {
-    if (newPriority < 0) {
-      throw new IllegalArgumentException("Cannot set a negative priority");
-    }
-    if (newPriority >= Integer.MAX_VALUE) {
-      result.failChangedCount++;
-      return;
-    }
-    if (scene.priority != newPriority) {
-      result.successfullyChangedCount++;
-    }
-    scene.priority = newPriority;
-    scene.save();
-    scene.volumes().forEach(volume -> volume.domain().volumes()
-        .intersecting(scene)
-        .stream()
-        .filter(other -> !other.equals(scene))
-        .filter(other -> scene.priority() == other.priority())
-        .forEach(zone -> updateScenePriority(zone, scene.priority + 1, result)));
   }
 
   public Global global() {
@@ -90,6 +72,12 @@ public class HostSystem {
     return domains;
   }
 
+  /**
+   * Get the {@link Scope} with the given name or create a new one if one doesn't exist.
+   *
+   * @param name the name of the scope
+   * @return the scope
+   */
   public Scope getOrCreateScope(String name) {
     Scope scope = scopes.get(name);
     if (scope == null) {
@@ -103,7 +91,13 @@ public class HostSystem {
     return scopes.get(name);
   }
 
-  public void registerScope(String name) {
+  /**
+   * Register a new scope with the given name.
+   *
+   * @param name the name of the scope
+   * @throws IllegalArgumentException if a scope already exists with that name
+   */
+  public void registerScope(String name) throws IllegalArgumentException {
     if (scopes.containsKey(name)) {
       throw new IllegalArgumentException("The name " + name + " is already registered");
     }
@@ -128,7 +122,17 @@ public class HostSystem {
     return hosts;
   }
 
-  public Map<String, Host> hosts(String scopeName) {
+  /**
+   * Get all hosts under the given scope.
+   *
+   * @param scopeName the name of the scope
+   * @return the map of hosts, keyed by host name
+   * @throws IllegalArgumentException if no scope exists with that name
+   */
+  public Map<String, Host> hosts(String scopeName) throws IllegalArgumentException {
+    if (!scopes.containsKey(scopeName)) {
+      throw new IllegalArgumentException("There is no scope named " + scopeName);
+    }
     Map<String, Host> hosts = new HashMap<>();
     hosts.put(this.global.name, this.global);
     hosts.putAll(this.domains.map());
@@ -157,7 +161,6 @@ public class HostSystem {
     newVolumes.add(volume);
     scene.volumes(newVolumes);
     volume.domain().volumes().put(volume, scene, true);
-    ensureScenePriority(scene);
     scene.save();
     return newVolumes.size() - 1;
   }
@@ -183,20 +186,33 @@ public class HostSystem {
     return set;
   }
 
+  /**
+   * Determine if the key is assigned to any host.
+   *
+   * @param key the key
+   * @return true if a host has it assigned anywhere
+   */
   public boolean isAssigned(SettingKey<?, ?, ?> key) {
     return hosts().stream().anyMatch(host ->
         host.hostedProfiles().stream().anyMatch(profileItem ->
             profileItem.profile().get(key).isPresent()));
   }
 
-  public boolean hasName(String scope, String name) {
-    if (global.name().equalsIgnoreCase(name)) {
+  /**
+   * Determine whether a host exists under a given scope.
+   *
+   * @param scope the scope
+   * @param host  the host
+   * @return true if the name exists
+   */
+  public boolean hasName(String scope, String host) {
+    if (global.name().equalsIgnoreCase(host)) {
       return true;
     }
-    if (domains().containsKey(name)) {
+    if (domains().containsKey(host)) {
       return true;
     }
-    return scope(scope).scenes().containsKey(name);
+    return scope(scope).scenes().containsKey(host);
   }
 
   /**
@@ -246,25 +262,6 @@ public class HostSystem {
     return lookup(key, userUuid, location.domain(), containingScenes);
   }
 
-  /**
-   * Evaluate the result of a setting key for a specific user at a given block location.
-   *
-   * @param key      the key
-   * @param userUuid the user's uuid
-   * @param domain   the domain
-   * @param x        the block x coordinate
-   * @param y        the block y coordinate
-   * @param z        the block z coordinate
-   * @param <X>      the type of data to return
-   * @return a record of the evaluation process
-   */
-  public <X> Evaluation<X> lookupBlock(@NotNull final SettingKey<X, ?, ?> key,
-                                       @Nullable final UUID userUuid,
-                                       Domain domain, int x, int y, int z) {
-    Set<Scene> containingScenes = domain.volumes().containingBlock(x, y, z);
-    return lookup(key, userUuid, domain, containingScenes);
-  }
-
   private <X> Evaluation<X> lookup(SettingKey<X, ?, ?> key, UUID userUuid, Domain domain, Set<Scene> scenes) {
     ArrayList<Host> hosts = new ArrayList<>(scenes.size() + 2);
 
@@ -285,6 +282,33 @@ public class HostSystem {
     return key.extractValue(hosts, userUuid);
   }
 
+  /**
+   * Evaluate the result of a setting key for a specific user at a given block location.
+   *
+   * @param key      the key
+   * @param userUuid the user's uuid
+   * @param domain   the domain
+   * @param x        the block x coordinate
+   * @param y        the block y coordinate
+   * @param z        the block z coordinate
+   * @param <X>      the type of data to return
+   * @return a record of the evaluation process
+   */
+  public <X> Evaluation<X> lookupBlock(@NotNull final SettingKey<X, ?, ?> key,
+                                       @Nullable final UUID userUuid,
+                                       Domain domain, int x, int y, int z) {
+    Set<Scene> containingScenes = domain.volumes().containingBlock(x, y, z);
+    return lookup(key, userUuid, domain, containingScenes);
+  }
+
+  /**
+   * Evaluates a setting key, only considering the Global Host.
+   *
+   * @param key      the setting key
+   * @param userUuid the uuid of the user
+   * @param <X>      the result type
+   * @return the evaluation
+   */
   public <X> Evaluation<X> lookupGlobal(@NotNull final SettingKey<X, ?, ?> key,
                                         @Nullable final UUID userUuid) {
 
@@ -298,15 +322,9 @@ public class HostSystem {
     return key.extractValue(hosts, userUuid);
   }
 
-  public void ensureScenePriority(Scene scene) {
-    updateScenePriority(scene, scene.priority, new HostSystem.UpdatePrioritiesResult());
-  }
-
-  public static class UpdatePrioritiesResult {
-    int successfullyChangedCount;
-    int failChangedCount;
-  }
-
+  /**
+   * Implementation for the {@link SystemEditor}.
+   */
   public static class Editor implements SystemEditor {
 
     @Override

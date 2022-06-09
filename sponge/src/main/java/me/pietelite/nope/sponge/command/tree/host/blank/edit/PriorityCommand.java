@@ -55,12 +55,9 @@ public class PriorityCommand extends CommandNode {
       ));
     }
 
-    int numChanged = ApiUtil.editNopeScope().editScene(host.name()).priority(priority);
-    context.sendMessage(Identity.nil(), Formatter.success("Changed priority of ___ to ___", host.name(), priority));
-    if (numChanged > 1) {
-      context.sendMessage(Identity.nil(), Formatter.warn("Also changed priority of ___ other hosts to accommodate",
-          numChanged - 1));
-    }
+    ApiUtil.editNopeScope().editScene(host.name()).priority(priority);
+    context.sendMessage(Identity.nil(),
+        Formatter.success("Changed priority of ___ to ___", host.name(), priority));
     return CommandResult.success();
   }
 }

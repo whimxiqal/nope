@@ -156,7 +156,7 @@ public abstract class Host implements Container, Named, Persistent, Expirable {
       if (index < 0 || index > host.hostedProfiles().size()) {
         throw new IndexOutOfBoundsException("There is no profile at index " + index);
       }
-      if (host.hostedProfiles().stream().anyMatch(hostedProfile -> hostedProfile.profile().equals(profile))) {
+      if (host.allProfiles().stream().anyMatch(hostedProfile -> hostedProfile.profile().equals(profile))) {
         throw new IllegalArgumentException("There is already a profile added with the name " + name);
       }
       host.hostedProfiles().add(index, new HostedProfile(profile));

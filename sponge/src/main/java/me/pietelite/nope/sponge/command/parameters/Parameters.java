@@ -169,7 +169,9 @@ public class Parameters {
   public static final Parameter.Value<Profile> PROFILE = Parameter.builder(ParameterKeys.PROFILE)
       .addParser((parameterKey, reader, context) -> {
         String profileName = reader.parseString().toLowerCase();
-        Profile profile = SpongeNope.instance().system().scope(Nope.NOPE_SCOPE).profiles().get(profileName.toLowerCase());
+        Profile profile = SpongeNope.instance().system()
+            .scope(Nope.NOPE_SCOPE)
+            .profiles().get(profileName.toLowerCase());
         if (profile == null) {
           throw new ArgumentParseException(Formatter.error("No profile exists named ___", profileName),
               profileName, 0);
@@ -191,7 +193,9 @@ public class Parameters {
   public static final Parameter.Value<Profile> PROFILE_ON_HOST = Parameter.builder(ParameterKeys.PROFILE)
       .addParser((parameterKey, reader, context) -> {
         String profileName = reader.parseString().toLowerCase();
-        Profile profile = SpongeNope.instance().system().scope(Nope.NOPE_SCOPE).profiles().get(profileName.toLowerCase());
+        Profile profile = SpongeNope.instance().system().scope(Nope.NOPE_SCOPE)
+            .profiles()
+            .get(profileName.toLowerCase());
         if (profile == null) {
           throw new ArgumentParseException(Formatter.error("No profile exists named ___", profileName),
               profileName, 0);

@@ -101,15 +101,13 @@ public interface SceneEditor extends HostEditor, NameEditor {
    * encapsulate the location at which the setting is evaluated, higher priority hosts are evaluated
    * last. This means that the setting's value is the last one to affect the evaluation.
    *
-   * <p>No two overlapping hosts may have the same priority. Otherwise, two setting values may have equal
-   * priority, and then we wouldn't know which to evaluate ahead of the other. So, this method may change
-   * other scenes' priorities as well, but the ordering of priority will never change. So, this is effectively
-   * a cosmetic change to those scenes.
+   * <p>Two overlapping hosts may have the same priority, but this should be avoided.
+   * Any conflicting setting values found in overlapping hosts with the same priority will have
+   * undetermined behavior because neither of the evaluated values will be guaranteed to override the other.
    *
    * @param priority the new priority
-   * @return the number of scenes whose priority changed as a result of this priority changing
    */
-  int priority(int priority) throws IllegalArgumentException;
+  void priority(int priority) throws IllegalArgumentException;
 
   /**
    * Gets a list of every volume type in order of the volume list.

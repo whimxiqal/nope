@@ -24,12 +24,28 @@
 
 package me.pietelite.nope.common.api.edit;
 
+/**
+ * An editor for a Zone, which is essentially just a three-dimensional volume.
+ */
 public interface ZoneEditor {
 
+  /**
+   * The domain in which this zone resides.
+   *
+   * @return the domain
+   */
   String domain();
 
+  /**
+   * Set the domain in which this zone resides.
+   *
+   * @param domain the domain
+   */
   void domain(String domain);
 
+  /**
+   * Destroy this zone and remove it from its container.
+   */
   void destroy();
 
 }

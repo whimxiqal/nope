@@ -232,6 +232,12 @@ public final class SpongeUtil {
     }
   }
 
+  /**
+   * Converter from a Sponge rotation vector to a Nope {@link Direction}.
+   *
+   * @param rotation the vector
+   * @return the direction
+   */
   public static Direction toDirection(org.spongepowered.math.vector.Vector3d rotation) {
     int axis = rotation.abs().maxAxis();
     switch (axis) {

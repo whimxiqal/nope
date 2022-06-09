@@ -28,6 +28,10 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
+/**
+ * A structure holding parameters about the physical interactivity of
+ * {@link InteractiveVolume}s.
+ */
 @Data
 @Accessors(fluent = true)
 @Builder

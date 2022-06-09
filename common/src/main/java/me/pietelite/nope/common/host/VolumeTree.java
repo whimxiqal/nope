@@ -112,8 +112,8 @@ public class VolumeTree {
    * the given volume.
    *
    * <p>The <code>discriminate</code> parameter decides how strict to be with the approximation, depending
-   * on whether it is better to accidentally end up with some added incorrect {@link Scene}s or to accidentally
-   * end up with some missing correct {@link Scene}s.
+   * on whether it is better to accidentally end up with some added incorrect {@link Scene}s
+   * or to accidentally end up with some missing correct {@link Scene}s.
    *
    * @param volume       the volume to contain
    * @param discriminate true to ensure that every correct {@link Scene} is included in the returned list,
@@ -183,11 +183,16 @@ public class VolumeTree {
    * @return the set of scenes
    */
   @NotNull
-  public Set<Scene> containingCuboid(float minX, float minY, float minZ, float maxX, float maxY, float maxZ, boolean maxInclusive) {
+  public Set<Scene> containingCuboid(float minX, float minY, float minZ,
+                                     float maxX, float maxY, float maxZ,
+                                     boolean maxInclusive) {
     if (this.root == null) {
       throw new IllegalStateException("Root of VolumeTree is not initialized. Did you forget to construct?");
     }
-    return root.findVolumes(minX, minY, minZ, maxX, maxY, maxZ, maxInclusive).stream().map(volumes::get).collect(Collectors.toSet());
+    return root.findVolumes(minX, minY, minZ, maxX, maxY, maxZ, maxInclusive)
+        .stream()
+        .map(volumes::get)
+        .collect(Collectors.toSet());
   }
 
   public int size() {
@@ -375,7 +380,9 @@ public class VolumeTree {
    * coordinates.
    */
   protected abstract static class Node {
-    abstract Set<Volume> findVolumes(float minX, float minY, float minZ, float maxX, float maxY, float maxZ, boolean maxInclusive);
+    abstract Set<Volume> findVolumes(float minX, float minY, float minZ,
+                                     float maxX, float maxY, float maxZ,
+                                     boolean maxInclusive);
   }
 
   /**
@@ -383,7 +390,9 @@ public class VolumeTree {
    */
   protected static class EmptyNode extends Node {
     @Override
-    Set<Volume> findVolumes(float minX, float minY, float minZ, float maxX, float maxY, float maxZ, boolean maxInclusive) {
+    Set<Volume> findVolumes(float minX, float minY, float minZ,
+                            float maxX, float maxY, float maxZ,
+                            boolean maxInclusive) {
       return new HashSet<>();
     }
   }
@@ -410,7 +419,9 @@ public class VolumeTree {
     }
 
     @Override
-    Set<Volume> findVolumes(float minX, float minY, float minZ, float maxX, float maxY, float maxZ, boolean maxInclusive) {
+    Set<Volume> findVolumes(float minX, float minY, float minZ,
+                            float maxX, float maxY, float maxZ,
+                            boolean maxInclusive) {
       if (maxX < divider || (maxInclusive && maxX == divider)) {
         return left.findVolumes(minX, minY, minZ, maxX, maxY, maxZ, maxInclusive);
       } else {
@@ -429,7 +440,9 @@ public class VolumeTree {
     }
 
     @Override
-    Set<Volume> findVolumes(float minX, float minY, float minZ, float maxX, float maxY, float maxZ, boolean maxInclusive) {
+    Set<Volume> findVolumes(float minX, float minY, float minZ,
+                            float maxX, float maxY, float maxZ,
+                            boolean maxInclusive) {
       if (minX <= divider) {
         return left.findVolumes(minX, minY, minZ, maxX, maxY, maxZ, maxInclusive);
       } else {
@@ -448,7 +461,9 @@ public class VolumeTree {
     }
 
     @Override
-    Set<Volume> findVolumes(float minX, float minY, float minZ, float maxX, float maxY, float maxZ, boolean maxInclusive) {
+    Set<Volume> findVolumes(float minX, float minY, float minZ,
+                            float maxX, float maxY, float maxZ,
+                            boolean maxInclusive) {
       if (maxZ < divider || (maxInclusive && maxZ == divider)) {
         return left.findVolumes(minX, minY, minZ, maxX, maxY, maxZ, maxInclusive);
       } else {
@@ -467,7 +482,9 @@ public class VolumeTree {
     }
 
     @Override
-    Set<Volume> findVolumes(float minX, float minY, float minZ, float maxX, float maxY, float maxZ, boolean maxInclusive) {
+    Set<Volume> findVolumes(float minX, float minY, float minZ,
+                            float maxX, float maxY, float maxZ,
+                            boolean maxInclusive) {
       if (minZ <= divider) {
         return left.findVolumes(minX, minY, minZ, maxX, maxY, maxZ, maxInclusive);
       } else {
@@ -491,7 +508,9 @@ public class VolumeTree {
     }
 
     @Override
-    Set<Volume> findVolumes(float minX, float minY, float minZ, float maxX, float maxY, float maxZ, boolean maxInclusive) {
+    Set<Volume> findVolumes(float minX, float minY, float minZ,
+                            float maxX, float maxY, float maxZ,
+                            boolean maxInclusive) {
       return viable.stream().filter(volume -> {
         if (minX == maxX && minY == maxY && minZ == maxZ) {
           return volume.containsPoint(minX, minY, minZ);

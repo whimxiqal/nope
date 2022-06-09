@@ -25,13 +25,18 @@
 package me.pietelite.nope.common.host;
 
 import java.util.Objects;
-import java.util.Optional;
 import me.pietelite.nope.common.setting.SettingKey;
 import me.pietelite.nope.common.setting.Target;
 import me.pietelite.nope.common.setting.Targetable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+/**
+ * A {@link Profile} intended to be included on a {@link Host}.
+ * This is a {@link Targetable} because you can add a {@link Target}
+ * to override all {@link Target}s that appears on {@link me.pietelite.nope.common.setting.Setting}s
+ * in the {@link Profile}, but only for the {@link Host}.
+ */
 public class HostedProfile implements Targetable {
 
   private final Profile profile;
@@ -59,6 +64,12 @@ public class HostedProfile implements Targetable {
     this.target = target;
   }
 
+  /**
+   * Get the {@link Target} that applies for the given key.
+   *
+   * @param key the setting key
+   * @return the target
+   */
   public Target activeTargetFor(SettingKey<?, ?, ?> key) {
     if (profile.getTarget(key).isPresent()) {
       return profile.getTarget(key).get();

@@ -26,8 +26,17 @@ package me.pietelite.nope.sponge.api;
 
 import org.spongepowered.api.world.server.ServerWorld;
 
+/**
+ * An API service, strictly for Sponge implementations.
+ */
 public interface NopeSpongeService {
 
+  /**
+   * Get the domain name corresponding to a Sponge {@link ServerWorld}.
+   *
+   * @param world the world
+   * @return the domain name
+   */
   String domainName(ServerWorld world);
 
 }

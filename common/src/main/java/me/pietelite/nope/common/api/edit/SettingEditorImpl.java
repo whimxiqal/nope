@@ -31,6 +31,9 @@ import me.pietelite.nope.common.setting.Target;
 import me.pietelite.nope.common.setting.Targetable;
 import org.jetbrains.annotations.Nullable;
 
+/**
+ * Implementation of the {@link SettingEditor}.
+ */
 public class SettingEditorImpl implements SettingEditor {
 
   protected final Profile profile;

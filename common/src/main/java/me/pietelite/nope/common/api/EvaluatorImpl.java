@@ -33,6 +33,9 @@ import me.pietelite.nope.common.host.Domain;
 import me.pietelite.nope.common.struct.Location;
 import org.jetbrains.annotations.Nullable;
 
+/**
+ * Implementation of the {@link Evaluator}.
+ */
 public class EvaluatorImpl implements Evaluator {
 
   private Domain domain(String domainName) {

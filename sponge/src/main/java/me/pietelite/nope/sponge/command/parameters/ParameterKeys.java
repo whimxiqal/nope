@@ -50,9 +50,7 @@ public final class ParameterKeys {
   public static final Parameter.Key<Cylinder> CYLINDER = Parameter.key("cylinder", Cylinder.class);
   public static final Parameter.Key<String> DESCRIPTION = Parameter.key("parameter", String.class);
   public static final Parameter.Key<Host> HOST = Parameter.key("host", Host.class);
-  public static final Parameter.Key<Scene> SCENE = Parameter.key("zone", Scene.class);
   public static final Parameter.Key<String> ID = Parameter.key("name", String.class);
-  public static final Parameter.Key<Profile> PROFILE = Parameter.key("profile", Profile.class);
   public static final Parameter.Key<String> PERMISSION = Parameter.key("permission", String.class);
   public static final Parameter.Key<Boolean> PERMISSION_VALUE = Parameter.key("permission-value", Boolean.class);
   public static final Parameter.Key<ServerPlayer> PLAYER = Parameter.key("player", ServerPlayer.class);
@@ -69,8 +67,10 @@ public final class ParameterKeys {
   public static final Parameter.Key<Double> POS_Z_1 = Parameter.key("position-z-1", Double.class);
   public static final Parameter.Key<Double> POS_Z_2 = Parameter.key("position-z-2", Double.class);
   public static final Parameter.Key<Integer> PRIORITY = Parameter.key("priority", Integer.class);
+  public static final Parameter.Key<Profile> PROFILE = Parameter.key("profile", Profile.class);
   public static final Parameter.Key<Double> RADIUS = Parameter.key("radius", Double.class);
   public static final Parameter.Key<String> REGEX = Parameter.key("regex", String.class);
+  public static final Parameter.Key<Scene> SCENE = Parameter.key("zone", Scene.class);
   public static final Parameter.Key<SettingCategory> SETTING_CATEGORY = Parameter.key("setting-category", SettingCategory.class);
   public static final Parameter.Key<SettingKey<?, ?, ?>> SETTING_KEY = Parameter.key("setting-key", new TypeToken<SettingKey<?, ?, ?>>() {
   });
@@ -82,6 +82,6 @@ public final class ParameterKeys {
   public static final Parameter.Key<Integer> VOLUME_INDEX = Parameter.key("index", Integer.class);
   public static final Parameter.Key<ServerWorld> WORLD = Parameter.key("world", ServerWorld.class);
 
-    private ParameterKeys() {
+  private ParameterKeys() {
   }
 }

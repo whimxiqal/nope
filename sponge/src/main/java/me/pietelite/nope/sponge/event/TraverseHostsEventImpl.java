@@ -34,6 +34,9 @@ import net.kyori.adventure.title.Title;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.entity.MoveEntityEvent;
 
+/**
+ * Implementation of the {@link TraverseHostsEvent}.
+ */
 public class TraverseHostsEventImpl implements TraverseHostsEvent {
 
   private final MoveEntityEvent baseEvent;
