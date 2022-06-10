@@ -64,7 +64,7 @@ public class RootCommand extends CommandNode {
   }
 
   @Override
-  public CommandResult execute(CommandContext context) throws CommandException {
+  public CommandResult execute(CommandContext context) {
     context.sendMessage(Identity.nil(), Formatter.WELCOME);
     return CommandResult.success();
   }

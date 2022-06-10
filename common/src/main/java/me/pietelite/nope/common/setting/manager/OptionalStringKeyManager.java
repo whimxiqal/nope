@@ -26,6 +26,7 @@ package me.pietelite.nope.common.setting.manager;
 
 import java.util.Optional;
 import me.pietelite.nope.common.setting.SettingKey;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * A manager for unary setting keys that evaluate to an {@link Optional} storing a {@link String}.
@@ -53,5 +54,15 @@ public class OptionalStringKeyManager extends SettingKey.Manager.Unary<Optional<
       return Optional.empty();
     }
     return Optional.of(data);
+  }
+
+  @Override
+  public @NotNull String printData(@NotNull Optional<String> value) {
+    return value.orElse("");
+  }
+
+  @Override
+  public String dataTypeName() throws SettingKey.ParseSettingException {
+    return "Optional of String";
   }
 }

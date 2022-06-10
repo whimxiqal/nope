@@ -26,6 +26,7 @@ package me.pietelite.nope.common.setting.manager;
 
 import java.util.Map;
 import java.util.stream.Collectors;
+import me.pietelite.nope.common.setting.SettingKey;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -51,5 +52,10 @@ public class StateKeyManager extends BooleanKeyManager {
   @Override
   public @NotNull String printData(@NotNull Boolean data) {
     return data ? "allow" : "deny";
+  }
+
+  @Override
+  public String dataTypeName() throws SettingKey.ParseSettingException {
+    return "State (Boolean)";
   }
 }

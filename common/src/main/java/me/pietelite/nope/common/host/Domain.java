@@ -24,16 +24,11 @@
 
 package me.pietelite.nope.common.host;
 
-import java.util.NoSuchElementException;
-import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import lombok.Getter;
 import lombok.experimental.Accessors;
 import me.pietelite.nope.common.Nope;
-import me.pietelite.nope.common.api.edit.TargetEditor;
-import me.pietelite.nope.common.setting.Target;
 import me.pietelite.nope.common.struct.Location;
-import org.jetbrains.annotations.Nullable;
 
 /**
  * Class for managing the few WorldHosts in this HostTree.

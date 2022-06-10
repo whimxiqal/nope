@@ -25,7 +25,6 @@
 package me.pietelite.nope.sponge.command.tree.host.blank.info.setting;
 
 import me.pietelite.nope.common.host.Host;
-import me.pietelite.nope.common.permission.Permissions;
 import me.pietelite.nope.sponge.command.CommandNode;
 import me.pietelite.nope.sponge.command.parameters.Parameters;
 import me.pietelite.nope.sponge.command.tree.host.blank.info.setting.target.PermissionTargetInfoCommand;
@@ -46,7 +45,7 @@ public class TargetInfoCommand extends CommandNode {
   }
 
   @Override
-  public CommandResult execute(CommandContext context) throws CommandException {
+  public CommandResult execute(CommandContext context) {
     Host host = context.requireOne(Parameters.HOST);
 
     return CommandResult.success();

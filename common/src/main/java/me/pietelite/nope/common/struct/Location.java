@@ -24,10 +24,7 @@
 
 package me.pietelite.nope.common.struct;
 
-import lombok.Getter;
-import lombok.experimental.Accessors;
 import me.pietelite.nope.common.host.Domain;
-import me.pietelite.nope.common.math.Vector3d;
 
 /**
  * A generic Minecraft location.

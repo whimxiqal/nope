@@ -134,7 +134,7 @@ public class Sphere extends Volume {
   @Override
   public @NotNull
   Cuboid inscribed() {
-    return null;
+    return inscribed;
   }
 
   @Override

@@ -54,7 +54,7 @@ public class ExplicitSlabCommand extends EditSceneCommandNode {
   }
 
   @Override
-  public CommandResult execute(CommandContext context, Scene scene) throws CommandException {
+  public CommandResult execute(CommandContext context, Scene scene) {
     Slab volume;
     Optional<ServerWorld> world = context.one(ParameterKeys.WORLD);
     Optional<Double> posY1 = context.one(ParameterKeys.POS_Y_1);

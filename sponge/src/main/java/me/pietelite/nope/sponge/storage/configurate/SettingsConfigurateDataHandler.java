@@ -39,7 +39,6 @@ import me.pietelite.nope.sponge.SpongeNope;
 import me.pietelite.nope.sponge.config.SettingValueConfigSerializerRegistrar;
 import org.spongepowered.configurate.CommentedConfigurationNode;
 import org.spongepowered.configurate.ConfigurationNode;
-import org.spongepowered.configurate.ConfigurationOptions;
 import org.spongepowered.configurate.serialize.SerializationException;
 
 /**

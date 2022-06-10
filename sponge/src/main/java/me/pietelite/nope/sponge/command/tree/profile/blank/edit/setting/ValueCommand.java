@@ -27,7 +27,6 @@ package me.pietelite.nope.sponge.command.tree.profile.blank.edit.setting;
 import java.util.Optional;
 import me.pietelite.nope.common.api.struct.AltSet;
 import me.pietelite.nope.common.host.Profile;
-import me.pietelite.nope.common.permission.Permissions;
 import me.pietelite.nope.common.setting.SettingKey;
 import me.pietelite.nope.common.setting.SettingValue;
 import me.pietelite.nope.sponge.SpongeNope;
@@ -65,7 +64,7 @@ public class ValueCommand extends CommandNode {
   }
 
   @Override
-  public CommandResult execute(CommandContext context) throws CommandException {
+  public CommandResult execute(CommandContext context) {
     SettingKey<?, ?, ?> settingKey = context.requireOne(ParameterKeys.SETTING_KEY);
     return executeGenerified(settingKey, context);
   }
@@ -80,7 +79,7 @@ public class ValueCommand extends CommandNode {
     boolean additive = context.hasFlag(Flags.ADDITIVE_VALUE_FLAG);
     boolean subtractive = context.hasFlag(Flags.SUBTRACTIVE_VALUE_FLAG);
 
-    if (settingKey.global() && !profile.equals(SpongeNope.instance().system().global())) {
+    if (settingKey.global() && !profile.equals(SpongeNope.instance().system().global().globalProfile())) {
       context.sendMessage(Identity.nil(),
           Formatter.error("This setting may only be set on the host ___",
               SpongeNope.instance().system().global().name()));

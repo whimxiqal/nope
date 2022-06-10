@@ -24,7 +24,6 @@
 
 package me.pietelite.nope.sponge.command.tree.host.blank.edit;
 
-import me.pietelite.nope.common.permission.Permissions;
 import me.pietelite.nope.sponge.command.CommandNode;
 import me.pietelite.nope.sponge.command.FunctionlessCommandNode;
 import me.pietelite.nope.sponge.command.tree.host.blank.edit.volumes.VolumeCreateCommand;

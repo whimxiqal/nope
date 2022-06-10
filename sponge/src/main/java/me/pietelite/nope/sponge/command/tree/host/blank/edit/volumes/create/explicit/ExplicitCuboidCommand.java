@@ -62,7 +62,7 @@ public class ExplicitCuboidCommand extends EditSceneCommandNode {
   }
 
   @Override
-  public CommandResult execute(CommandContext context, Scene scene) throws CommandException {
+  public CommandResult execute(CommandContext context, Scene scene) {
     Cuboid volume;
     Optional<ServerWorld> world = context.one(ParameterKeys.WORLD);
     Optional<Double> posX1 = context.one(ParameterKeys.POS_X_1);

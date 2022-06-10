@@ -117,7 +117,7 @@ public class HostInfoCommand extends CommandNode {
   }
 
   @Override
-  public CommandResult execute(CommandContext context) throws CommandException {
+  public CommandResult execute(CommandContext context) {
     Host host = context.requireOne(Parameters.HOST);
 
     Sponge.asyncScheduler().submit(Task.builder().execute(() ->

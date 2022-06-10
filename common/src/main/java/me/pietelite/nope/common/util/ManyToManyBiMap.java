@@ -93,7 +93,6 @@ public class ManyToManyBiMap<A, B> {
    * @param key   the key
    * @param value the value
    */
-  @Nullable
   public void put(A key, B value) {
     forwardsMap.computeIfAbsent(key, k -> new HashSet<>()).add(value);
     backwardsMap.computeIfAbsent(value, k -> new HashSet<>()).add(key);

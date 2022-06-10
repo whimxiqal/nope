@@ -25,7 +25,6 @@
 package me.pietelite.nope.sponge.command.tree.profile.blank.edit.setting.value;
 
 import me.pietelite.nope.common.host.Profile;
-import me.pietelite.nope.common.permission.Permissions;
 import me.pietelite.nope.common.setting.SettingKey;
 import me.pietelite.nope.sponge.command.CommandNode;
 import me.pietelite.nope.sponge.command.parameters.Flags;
@@ -44,7 +43,7 @@ public class ValueSetDefaultCommand extends CommandNode {
   }
 
   @Override
-  public CommandResult execute(CommandContext context) throws CommandException {
+  public CommandResult execute(CommandContext context) {
     SettingKey<?, ?, ?> settingKey = context.requireOne(ParameterKeys.SETTING_KEY);
     Profile profile = context.requireOne(Parameters.PROFILE);
     profile.setDefaultValue(settingKey);

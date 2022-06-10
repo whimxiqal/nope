@@ -44,7 +44,7 @@ public class HealthRegenListener implements SettingEventListener<Boolean, Change
       Optional<Value.Immutable<Double>> changedHealth = context.event().endResult()
           .successfulValue(Keys.HEALTH);
       if (changedHealth.isPresent()
-          && (changedHealth.get().get() > player.get(Keys.HEALTH).get())
+          && (changedHealth.get().get() > player.get(Keys.HEALTH).orElse(0d))
           && !context.lookup(player, player.serverLocation())) {
         context.event().setCancelled(true);
         context.report(SettingEventReport.restricted()

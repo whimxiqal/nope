@@ -49,12 +49,12 @@ public class ProfileInsertCommand extends CommandNode {
   }
 
   @Override
-  public CommandResult execute(CommandContext context) throws CommandException {
+  public CommandResult execute(CommandContext context) {
     Host host = context.requireOne(Parameters.HOST);
     Profile profile = context.requireOne(Parameters.PROFILE);
     int index = context.requireOne(indexParameter);
     HostEditor editor = ApiUtil.editHost(host.name());
-    if (index <= 0 || index > editor.profiles().size()) {
+    if (index <= 0 || index > editor.profiles().size() + 1) {
       return CommandResult.error(Formatter.error("That index is out of bounds"));
     }
     if (editor.profiles().get(Nope.NOPE_SCOPE).contains(profile.name())) {

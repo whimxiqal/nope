@@ -26,10 +26,8 @@ package me.pietelite.nope.sponge.command.target;
 
 import java.util.function.Function;
 import me.pietelite.nope.common.api.edit.TargetEditor;
-import me.pietelite.nope.common.permission.Permissions;
 import me.pietelite.nope.sponge.command.CommandNode;
 import me.pietelite.nope.sponge.command.FunctionlessCommandNode;
-import me.pietelite.nope.sponge.command.target.permission.RemovePermissionCommand;
 import me.pietelite.nope.sponge.command.target.player.AddPlayerCommand;
 import me.pietelite.nope.sponge.command.target.player.ClearPlayerCommand;
 import me.pietelite.nope.sponge.command.target.player.RemovePlayerCommand;

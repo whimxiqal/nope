@@ -53,7 +53,7 @@ public class SphereSelection extends Selection<Sphere> {
         xDistSquared2 + yDistSquared1 + zDistSquared2,
         xDistSquared1 + yDistSquared2 + zDistSquared2,
         xDistSquared2 + yDistSquared2 + zDistSquared2);
-    return (float) Math.sqrt(radii.stream().max(Double::compare).get());
+    return (float) Math.sqrt(radii.stream().max(Double::compare).orElse(0d));
   }
 
   @Override

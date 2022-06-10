@@ -47,7 +47,7 @@ public class ClearPlayerCommand extends CommandNode {
   }
 
   @Override
-  public CommandResult execute(CommandContext context) throws CommandException {
+  public CommandResult execute(CommandContext context) {
     TargetEditor editor = targetEditorFunction.apply(context);
     if (editor.clearPlayers()) {
       context.sendMessage(Identity.nil(), Formatter.success("Cleared all players from target"));

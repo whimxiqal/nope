@@ -131,9 +131,8 @@ public class PolySettingValueConfigSerializer
     Objects.requireNonNull(node.node("values").getList(String.class)).forEach(s ->
         set.add(manager.parseElement(s)));
     String type = Objects.requireNonNull(node.node("type").getString());
-    if (type.equalsIgnoreCase("all-of")) {
-      // pass
-    } else if (type.equalsIgnoreCase("all-except")) {
+    // do nothing if it was "all-of"
+    if (type.equalsIgnoreCase("all-except")) {
       set.invert();
     } else {
       throw new SerializationException("Serialized set type could not be read "

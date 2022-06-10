@@ -47,7 +47,7 @@ public class TogglePlayerListTypeCommand extends CommandNode {
   }
 
   @Override
-  public CommandResult execute(CommandContext context) throws CommandException {
+  public CommandResult execute(CommandContext context) {
     TargetEditor editor = targetEditorFunction.apply(context);
     switch (editor.targetType()) {
       case WHITELIST:

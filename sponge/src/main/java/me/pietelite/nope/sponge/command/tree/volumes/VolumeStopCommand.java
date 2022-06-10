@@ -25,9 +25,7 @@
 package me.pietelite.nope.sponge.command.tree.volumes;
 
 import me.pietelite.nope.common.Nope;
-import me.pietelite.nope.common.host.Scene;
 import me.pietelite.nope.sponge.command.CommandNode;
-import me.pietelite.nope.sponge.command.parameters.ParameterKeys;
 import me.pietelite.nope.sponge.util.Formatter;
 import net.kyori.adventure.identity.Identity;
 import org.spongepowered.api.command.CommandResult;
@@ -41,7 +39,7 @@ public class VolumeStopCommand extends CommandNode {
   }
 
   @Override
-  public CommandResult execute(CommandContext context) throws CommandException {
+  public CommandResult execute(CommandContext context) {
     if (!(context.cause().root() instanceof ServerPlayer)) {
       return CommandResult.error(Formatter.error("Only players may execute this command"));
     }

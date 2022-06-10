@@ -95,19 +95,6 @@ public class MovementListener {
         entity -> entity.passengers().all());
 
     for (Entity entity : entities) {
-      /*
-      if (entity.type().equals(EntityTypes.HORSE.get())) {
-        if (!entity.passengers().all().isEmpty()) {
-          Nope.instance().logger().info("Added passengers to " + entity.type() + ": " + entity.passengers()
-          .all().stream()
-          .map(Object::toString)
-          .collect(Collectors.joining(", ")));
-        } else {
-          Nope.instance().logger().info("Entity " + entity.type() + " has no passengers");
-        }
-      }
-       */
-
       final Movement movementType = SpongeUtil.reduceMovementType(event.context()
           .get(EventContextKeys.MOVEMENT_TYPE)
           .orElse(MovementTypes.NATURAL.get()));

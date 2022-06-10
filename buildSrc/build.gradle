@@ -1,0 +1,16 @@
+plugins {
+    id 'java'
+    id "org.jetbrains.kotlin.jvm" version "1.6.0"
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation gradleApi()
+    // https://mvnrepository.com/artifact/org.jetbrains.kotlin/kotlin-stdlib-jdk8
+    implementation 'org.jetbrains.kotlin:kotlin-script-runtime:1.6.0'
+    implementation fileTree(dir: '../common-api/build/libs', include: '*.jar')
+    implementation fileTree(dir: '../common/build/libs', include: '*.jar')
+}

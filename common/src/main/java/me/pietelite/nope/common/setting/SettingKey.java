@@ -111,6 +111,11 @@ public abstract class SettingKey<T,
     return manager.wrapData(defaultData);
   }
 
+  @NotNull
+  public final String printDefaultValue() {
+    return manager.printValue(defaultValue());
+  }
+
   /**
    * An implementation of a setting key builder.
    *
@@ -520,6 +525,10 @@ public abstract class SettingKey<T,
   public abstract static class Manager<T, V extends SettingValue<T>> {
 
     public abstract Class<T> dataType() throws ParseSettingException;
+
+    public String dataTypeName() throws ParseSettingException {
+      return dataType().getSimpleName();
+    }
 
     @NotNull
     public abstract String printData(@NotNull T value);

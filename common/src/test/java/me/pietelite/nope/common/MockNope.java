@@ -43,7 +43,7 @@ public class MockNope extends Nope {
 
   public static final String DOMAIN_1 = "domain_1";
   public static final String DOMAIN_2 = "domain_2";
-  public Map<UUID, Set<String>> permissions = new HashMap<>();
+  public final Map<UUID, Set<String>> permissions = new HashMap<>();
 
   public MockNope() {
     super(new TestLogger());

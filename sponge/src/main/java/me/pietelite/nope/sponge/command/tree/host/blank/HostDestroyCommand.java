@@ -24,8 +24,6 @@
 
 package me.pietelite.nope.sponge.command.tree.host.blank;
 
-import me.pietelite.nope.common.Nope;
-import me.pietelite.nope.common.api.NopeServiceProvider;
 import me.pietelite.nope.common.host.Host;
 import me.pietelite.nope.common.host.Scene;
 import me.pietelite.nope.common.permission.Permissions;
@@ -48,7 +46,7 @@ public class HostDestroyCommand extends CommandNode {
   }
 
   @Override
-  public CommandResult execute(CommandContext context) throws CommandException {
+  public CommandResult execute(CommandContext context) {
     Host host = context.requireOne(ParameterKeys.HOST);
     if (!(host instanceof Scene)) {
       return CommandResult.error(Formatter.error(

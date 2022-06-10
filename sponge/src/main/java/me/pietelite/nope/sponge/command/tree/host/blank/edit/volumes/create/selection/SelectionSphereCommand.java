@@ -26,8 +26,6 @@ package me.pietelite.nope.sponge.command.tree.host.blank.edit.volumes.create.sel
 
 import java.util.LinkedList;
 import java.util.List;
-import me.pietelite.nope.common.Nope;
-import me.pietelite.nope.common.api.NopeServiceProvider;
 import me.pietelite.nope.common.host.Scene;
 import me.pietelite.nope.common.math.Geometry;
 import me.pietelite.nope.common.math.Sphere;
@@ -38,7 +36,6 @@ import me.pietelite.nope.sponge.command.CommandNode;
 import me.pietelite.nope.sponge.command.parameters.Parameters;
 import me.pietelite.nope.sponge.command.tree.host.blank.edit.EditSceneCommandNode;
 import me.pietelite.nope.sponge.tool.SphereSelection;
-import me.pietelite.nope.sponge.util.EffectsUtil;
 import me.pietelite.nope.sponge.util.Formatter;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.exception.CommandException;
@@ -56,7 +53,7 @@ public class SelectionSphereCommand extends EditSceneCommandNode {
   }
 
   @Override
-  public CommandResult execute(CommandContext context, Scene scene) throws CommandException {
+  public CommandResult execute(CommandContext context, Scene scene) {
     Object cause = context.cause().root();
     if (!(cause instanceof Player)) {
       return CommandResult.error(Formatter.error("Only players may execute this command"));

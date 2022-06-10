@@ -46,7 +46,7 @@ public class NameCommand extends CommandNode {
   }
 
   @Override
-  public CommandResult execute(CommandContext context) throws CommandException {
+  public CommandResult execute(CommandContext context) {
     Host host = context.requireOne(ParameterKeys.HOST);
     if (!(host instanceof Scene)) {
       return CommandResult.error(Formatter.error("You may only rename scenes"));

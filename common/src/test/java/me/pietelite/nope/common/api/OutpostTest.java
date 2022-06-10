@@ -51,9 +51,9 @@ public class OutpostTest extends ApiTest {
   }
 
   static class Outpost {
-    String name;
-    String id;
-    Map<UUID, Set<Role>> members;
+    final String name;
+    final String id;
+    final Map<UUID, Set<Role>> members;
 
     public Outpost(String name, String id) {
       this.name = name;
@@ -90,7 +90,7 @@ public class OutpostTest extends ApiTest {
   }
 
   static class Role {
-    String name;
+    final String name;
 
     Role(String name) {
       this.name = name;

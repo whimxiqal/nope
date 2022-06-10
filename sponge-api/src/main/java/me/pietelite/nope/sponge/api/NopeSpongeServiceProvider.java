@@ -25,7 +25,6 @@
 package me.pietelite.nope.sponge.api;
 
 import me.pietelite.nope.common.api.NopeService;
-import me.pietelite.nope.common.api.NopeServiceProvider;
 
 /**
  * A static provider for the {@link NopeSpongeService}.

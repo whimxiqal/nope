@@ -24,8 +24,6 @@
 
 package me.pietelite.nope.sponge.command.tree.host.blank.edit.volumes;
 
-import me.pietelite.nope.common.Nope;
-import me.pietelite.nope.common.api.NopeServiceProvider;
 import me.pietelite.nope.common.host.Host;
 import me.pietelite.nope.common.host.Scene;
 import me.pietelite.nope.common.permission.Permissions;

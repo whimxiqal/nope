@@ -25,6 +25,7 @@
 package me.pietelite.nope.sponge.storage.configurate.serializer;
 
 import java.lang.reflect.Type;
+import java.util.Locale;
 import me.pietelite.nope.common.Nope;
 import me.pietelite.nope.common.math.Cuboid;
 import me.pietelite.nope.common.math.Cylinder;
@@ -42,8 +43,11 @@ import org.spongepowered.configurate.serialize.TypeSerializer;
 public class VolumeTypeSerializer implements TypeSerializer<Volume> {
   @Override
   public Volume deserialize(Type type, ConfigurationNode node) throws SerializationException {
-    String volumeType = node.node("type").getString().toLowerCase();
-    switch (volumeType) {
+    String volumeType = node.node("type").getString();
+    if (volumeType == null) {
+      throw new SerializationException();
+    }
+    switch (volumeType.toLowerCase(Locale.ROOT)) {
       case "box":
         return deserializeCuboid(node);
       case "cylinder":
@@ -78,7 +82,7 @@ public class VolumeTypeSerializer implements TypeSerializer<Volume> {
   }
 
   private Cuboid deserializeCuboid(ConfigurationNode node) throws SerializationException {
-    Cuboid obj = new Cuboid(
+    return new Cuboid(
         Nope.instance().system().domains().get(node.node("world").getString()),
         node.node("dimensions").node("min-x").require(Float.class),
         node.node("dimensions").node("min-y").require(Float.class),
@@ -86,36 +90,32 @@ public class VolumeTypeSerializer implements TypeSerializer<Volume> {
         node.node("dimensions").node("max-x").require(Float.class),
         node.node("dimensions").node("max-y").require(Float.class),
         node.node("dimensions").node("max-z").require(Float.class));
-    return obj;
   }
 
   private Cylinder deserializeCylinder(ConfigurationNode node) throws SerializationException {
-    Cylinder obj = new Cylinder(
+    return new Cylinder(
         Nope.instance().system().domains().get(node.node("world").getString()),
         node.node("dimensions").node("pos-x").require(Float.class),
         node.node("dimensions").node("min-y").require(Float.class),
         node.node("dimensions").node("max-y").require(Float.class),
         node.node("dimensions").node("pos-z").require(Float.class),
         node.node("dimensions").node("radius").require(Float.class));
-    return obj;
   }
 
   private Sphere deserializeSphere(ConfigurationNode node) throws SerializationException {
-    Sphere obj = new Sphere(
+    return new Sphere(
         Nope.instance().system().domains().get(node.node("world").getString()),
         node.node("dimensions").node("pos-x").require(Float.class),
         node.node("dimensions").node("pos-y").require(Float.class),
         node.node("dimensions").node("pos-z").require(Float.class),
         node.node("dimensions").node("radius").require(Float.class));
-    return obj;
   }
 
   private Slab deserializeSlab(ConfigurationNode node) throws SerializationException {
-    Slab obj = new Slab(
+    return new Slab(
         Nope.instance().system().domains().get(node.node("world").getString()),
         node.node("dimensions").node("min-y").require(Float.class),
         node.node("dimensions").node("max-y").require(Float.class));
-    return obj;
   }
 
   private void serializeCuboid(@Nullable Cuboid obj, ConfigurationNode node) throws SerializationException {

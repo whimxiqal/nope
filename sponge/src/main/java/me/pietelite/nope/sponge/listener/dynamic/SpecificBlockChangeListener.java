@@ -33,6 +33,7 @@ import me.pietelite.nope.sponge.api.setting.SettingEventListener;
 import me.pietelite.nope.sponge.api.setting.SettingEventReport;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.transaction.BlockTransaction;
+import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.world.server.ServerLocation;
@@ -123,6 +124,10 @@ public class SpecificBlockChangeListener implements SettingEventListener<Boolean
 
   @Override
   public void handle(SettingEventContext<Boolean, ChangeBlockEvent.All> context) {
+    if (environmentCauseOnly && context.event().source() instanceof ServerPlayer) {
+      // We don't want to do anything if it's caused by a player here
+      return;
+    }
     Optional<ServerLocation> blockLocation;
     for (BlockTransaction transaction : context.event().transactions()) {
       blockLocation = transaction.finalReplacement().location();

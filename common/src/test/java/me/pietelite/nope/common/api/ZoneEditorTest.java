@@ -24,7 +24,6 @@
 
 package me.pietelite.nope.common.api;
 
-import java.util.NoSuchElementException;
 import me.pietelite.nope.common.MockNope;
 import me.pietelite.nope.common.api.edit.CuboidEditor;
 import me.pietelite.nope.common.api.edit.CylinderEditor;

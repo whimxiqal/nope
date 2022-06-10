@@ -29,7 +29,6 @@ import me.pietelite.nope.common.gui.volume.InteractiveVolume;
 import me.pietelite.nope.common.host.Scene;
 import me.pietelite.nope.sponge.SpongeNope;
 import me.pietelite.nope.sponge.command.CommandNode;
-import me.pietelite.nope.sponge.util.EffectsUtil;
 import me.pietelite.nope.sponge.util.Formatter;
 import net.kyori.adventure.identity.Identity;
 import org.spongepowered.api.command.CommandResult;
@@ -43,7 +42,7 @@ public class VolumeApplyCommand extends CommandNode {
   }
 
   @Override
-  public CommandResult execute(CommandContext context) throws CommandException {
+  public CommandResult execute(CommandContext context) {
     if (!(context.cause().root() instanceof ServerPlayer)) {
       return CommandResult.error(Formatter.error("Only players may execute this command"));
     }

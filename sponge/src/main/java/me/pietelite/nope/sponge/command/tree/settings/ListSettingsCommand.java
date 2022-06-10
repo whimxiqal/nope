@@ -48,7 +48,7 @@ public class ListSettingsCommand extends CommandNode {
   }
 
   @Override
-  public CommandResult execute(CommandContext context) throws CommandException {
+  public CommandResult execute(CommandContext context) {
     Optional<SettingCategory> category = context.one(ParameterKeys.SETTING_CATEGORY);
     if (category.isPresent()) {
       sendSettings(context, category.get());
