@@ -53,7 +53,7 @@ public class EvaluateCommand extends CommandNode {
   }
 
   @Override
-  public CommandResult execute(CommandContext context) throws CommandException {
+  public CommandResult execute(CommandContext context) {
     SettingKey<?, ?, ?> key = context.requireOne(ParameterKeys.SETTING_KEY);
     return executeHelper(context, key);
   }

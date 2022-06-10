@@ -25,8 +25,6 @@
 package me.pietelite.nope.common.storage;
 
 import java.util.Collection;
-import java.util.Map;
-import me.pietelite.nope.common.host.Profile;
 import me.pietelite.nope.common.host.Scene;
 
 /**

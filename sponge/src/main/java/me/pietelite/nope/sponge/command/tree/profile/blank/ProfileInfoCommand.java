@@ -53,7 +53,7 @@ public class ProfileInfoCommand extends CommandNode {
   }
 
   @Override
-  public CommandResult execute(CommandContext context) throws CommandException {
+  public CommandResult execute(CommandContext context) {
     Profile profile = context.requireOne(Parameters.PROFILE);
 
     Component header = Component.text()

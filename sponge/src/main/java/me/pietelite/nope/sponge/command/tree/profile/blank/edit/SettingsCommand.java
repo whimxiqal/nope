@@ -42,7 +42,7 @@ public class SettingsCommand extends CommandNode {
   }
 
   @Override
-  public CommandResult execute(CommandContext context) throws CommandException {
+  public CommandResult execute(CommandContext context) {
     if (context.cause().audience() instanceof ServerPlayer) {
       Profile profile = context.requireOne(ParameterKeys.PROFILE);
       Formatter.sendSettingEditor(context.cause().audience(), profile, 1);

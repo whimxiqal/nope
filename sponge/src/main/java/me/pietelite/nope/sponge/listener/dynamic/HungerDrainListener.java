@@ -44,7 +44,7 @@ public class HungerDrainListener implements SettingEventListener<Boolean, Change
       Optional<Value.Immutable<Integer>> changedFoodLevel = context.event().endResult()
           .successfulValue(Keys.FOOD_LEVEL);
       if (changedFoodLevel.isPresent()
-          && (changedFoodLevel.get().get() < player.get(Keys.FOOD_LEVEL).get())
+          && (changedFoodLevel.get().get() < player.get(Keys.FOOD_LEVEL).orElse(0))
           && !context.lookup(player, player.serverLocation())) {
         context.event().setCancelled(true);
         context.report(SettingEventReport.restricted()

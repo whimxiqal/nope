@@ -8,12 +8,22 @@ dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.2'
     testImplementation 'org.junit.jupiter:junit-jupiter-engine:5.8.2'
 
-    api 'org.projectlombok:lombok:1.18.22'
-    annotationProcessor 'org.projectlombok:lombok:1.18.22'
+    api 'org.projectlombok:lombok:1.18.24'
+    annotationProcessor 'org.projectlombok:lombok:1.18.24'
 
     api 'org.jetbrains:annotations:23.0.0'
 }
 
 test {
     useJUnitPlatform()
+}
+
+jar.enabled = true
+
+try {
+    Class.forName("me.pietelite.nope.common.DocumentSettings")
+    task documentSettings(type: me.pietelite.nope.common.DocumentSettings.DocumentSettings) {
+        dependsOn build
+    }
+} catch (ClassNotFoundException ignored) {
 }

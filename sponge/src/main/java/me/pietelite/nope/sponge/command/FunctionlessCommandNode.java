@@ -48,11 +48,12 @@ public class FunctionlessCommandNode extends CommandNode {
 
   @NotNull
   @Override
-  public final CommandResult execute(CommandContext context) throws CommandException {
-    if (this.helpCommand() == null) {
+  public final CommandResult execute(CommandContext context) {
+    HelpCommandNode helpCommand = helpCommand();
+    if (helpCommand == null) {
       return CommandResult.error(Formatter.error("Too few arguments"));
     } else {
-      return this.helpCommand().execute(context);
+      return helpCommand.execute(context);
     }
   }
 }

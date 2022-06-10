@@ -29,7 +29,6 @@ import java.util.function.Function;
 import me.pietelite.nope.common.host.Domain;
 import me.pietelite.nope.common.host.HostedProfile;
 import me.pietelite.nope.common.storage.DomainDataHandler;
-import me.pietelite.nope.sponge.config.SettingValueConfigSerializerRegistrar;
 import org.jetbrains.annotations.NotNull;
 import org.spongepowered.configurate.CommentedConfigurationNode;
 import org.spongepowered.configurate.ConfigurateException;

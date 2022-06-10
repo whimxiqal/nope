@@ -53,7 +53,7 @@ public class SelectionSlabCommand extends EditSceneCommandNode {
   }
 
   @Override
-  public CommandResult execute(CommandContext context, Scene scene) throws CommandException {
+  public CommandResult execute(CommandContext context, Scene scene) {
     Object cause = context.cause().root();
     if (!(cause instanceof Player)) {
       return CommandResult.error(Formatter.error("Only players may execute this command"));

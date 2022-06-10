@@ -26,7 +26,6 @@ package me.pietelite.nope.sponge.command.target.permission;
 
 import java.util.function.Function;
 import me.pietelite.nope.common.api.edit.TargetEditor;
-import me.pietelite.nope.common.permission.Permissions;
 import me.pietelite.nope.sponge.command.CommandNode;
 import me.pietelite.nope.sponge.command.parameters.ParameterKeys;
 import me.pietelite.nope.sponge.command.parameters.Parameters;
@@ -54,7 +53,7 @@ public class AddPermissionCommand extends CommandNode {
   }
 
   @Override
-  public CommandResult execute(CommandContext context) throws CommandException {
+  public CommandResult execute(CommandContext context) {
     TargetEditor editor = targetEditorFunction.apply(context);
     String permission = context.requireOne(ParameterKeys.PERMISSION);
     boolean value = context.requireOne(ParameterKeys.PERMISSION_VALUE);

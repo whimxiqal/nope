@@ -52,7 +52,6 @@ public interface SystemEditor {
 
   /**
    * Gets an editor for a domain host.
-   * Equivalent to {@link #editHost(String)} if called with the name of a domain.
    *
    * @param name the name of the domain
    * @return the editor

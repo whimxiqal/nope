@@ -65,7 +65,7 @@ public class VerboseCommand extends FunctionlessCommandNode {
     }
 
     @Override
-    public CommandResult execute(CommandContext context) throws CommandException {
+    public CommandResult execute(CommandContext context) {
       if (!(context.cause().root() instanceof ServerPlayer)) {
         context.sendMessage(Identity.nil(), Formatter.error(
             "Support for non-player users is currently in development!"));
@@ -105,7 +105,7 @@ public class VerboseCommand extends FunctionlessCommandNode {
     }
 
     @Override
-    public CommandResult execute(CommandContext context) throws CommandException {
+    public CommandResult execute(CommandContext context) {
       if (!(context.cause().root() instanceof ServerPlayer)) {
         context.sendMessage(Identity.nil(), Formatter.error(
             "Support for non-player users is currently in development!"));

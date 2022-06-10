@@ -40,7 +40,7 @@ public class ReloadCommand extends CommandNode {
   }
 
   @Override
-  public CommandResult execute(CommandContext context) throws CommandException {
+  public CommandResult execute(CommandContext context) {
     SpongeNope.instance().loadState();
     context.cause().audience().sendMessage(Formatter.success("Nope data reloaded"));
     return CommandResult.success();

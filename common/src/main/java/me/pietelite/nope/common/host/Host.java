@@ -31,7 +31,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
-import java.util.stream.Collectors;
 import me.pietelite.nope.common.Nope;
 import me.pietelite.nope.common.api.edit.HostEditor;
 import me.pietelite.nope.common.api.edit.TargetEditor;
@@ -79,6 +78,15 @@ public abstract class Host implements Container, Named, Persistent, Expirable {
   @Override
   public final int hashCode() {
     return name().hashCode();
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (!(obj instanceof Host)) {
+      return false;
+    }
+    Host other = (Host) obj;
+    return name.equals(other.name);
   }
 
   public final int priority() {
@@ -180,7 +188,7 @@ public abstract class Host implements Container, Named, Persistent, Expirable {
       if (index < 0 || index > host.hostedProfiles().size()) {
         throw new IndexOutOfBoundsException("There is no profile at index " + index);
       }
-      HostedProfile hostedProfile = host.hostedProfiles().remove(index);
+      host.hostedProfiles().remove(index);
       host.save();
     }
 

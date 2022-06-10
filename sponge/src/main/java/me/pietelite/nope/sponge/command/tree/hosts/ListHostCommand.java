@@ -58,7 +58,7 @@ public class ListHostCommand extends CommandNode {
   }
 
   @Override
-  public CommandResult execute(CommandContext context) throws CommandException {
+  public CommandResult execute(CommandContext context) {
     boolean all = !(context.cause().root() instanceof Player)
         || context.one(ALL).map(s -> s.equalsIgnoreCase("all")).orElse(false);
 

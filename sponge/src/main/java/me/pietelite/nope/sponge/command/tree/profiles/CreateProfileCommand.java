@@ -57,7 +57,7 @@ public class CreateProfileCommand extends CommandNode {
   }
 
   @Override
-  public CommandResult execute(CommandContext context) throws CommandException {
+  public CommandResult execute(CommandContext context) {
     String name = context.requireOne(ParameterKeys.ID);
 
     Profile existingProfile = Nope.instance().system().scope(Nope.NOPE_SCOPE).profiles().get(name);

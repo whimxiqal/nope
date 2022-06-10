@@ -35,6 +35,7 @@ import net.kyori.adventure.text.Component;
  */
 public class CylinderSelection extends Selection<Cylinder> {
 
+  @SuppressWarnings("")
   private float radius() {
     // choose a radius that makes it so the entire position block is encompassed
     double distSquaredX1 = (position1.x() - position2.x()) * (position1.x() - position2.x());
@@ -44,7 +45,7 @@ public class CylinderSelection extends Selection<Cylinder> {
     List<Double> radii = Lists.newArrayList(
         distSquaredX1 + distSquaredZ1, distSquaredX2 + distSquaredZ1,
         distSquaredX1 + distSquaredZ2, distSquaredX2 + distSquaredZ2);
-    return (float) Math.sqrt(radii.stream().max(Double::compare).get());
+    return (float) Math.sqrt(radii.stream().max(Double::compare).orElse(0d));
   }
 
   @Override

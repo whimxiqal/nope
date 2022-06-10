@@ -44,7 +44,7 @@ public class ProfileRemoveCommand extends CommandNode {
   }
 
   @Override
-  public CommandResult execute(CommandContext context) throws CommandException {
+  public CommandResult execute(CommandContext context) {
     Host host = context.requireOne(Parameters.HOST);
     Profile profile = context.requireOne(Parameters.PROFILE);
     HostEditor editor = ApiUtil.editHost(host.name());

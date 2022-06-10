@@ -54,7 +54,7 @@ public class ListProfileCommand extends CommandNode {
   }
 
   @Override
-  public CommandResult execute(CommandContext context) throws CommandException {
+  public CommandResult execute(CommandContext context) {
     List<Profile> profiles = new ArrayList<>(SpongeNope.instance().system()
         .scope(Nope.NOPE_SCOPE)
         .profiles()

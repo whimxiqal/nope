@@ -25,9 +25,7 @@
 package me.pietelite.nope.sponge.command.tree.host.blank.edit.volumes;
 
 import me.pietelite.nope.common.Nope;
-import me.pietelite.nope.common.api.NopeServiceProvider;
 import me.pietelite.nope.common.api.edit.ZoneType;
-import me.pietelite.nope.common.host.Host;
 import me.pietelite.nope.common.host.Scene;
 import me.pietelite.nope.common.math.Volume;
 import me.pietelite.nope.sponge.command.CommandNode;
@@ -48,7 +46,7 @@ public class VolumeEditCommand extends EditSceneCommandNode {
   }
 
   @Override
-  public CommandResult execute(CommandContext context, Scene scene) throws CommandException {
+  public CommandResult execute(CommandContext context, Scene scene) {
     Object cause = context.cause().root();
     if (!(cause instanceof ServerPlayer)) {
       return CommandResult.error(Formatter.error("Only players may execute this command"));

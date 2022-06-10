@@ -40,12 +40,6 @@ public class HookableEntitiesListener implements
     SettingEventListener<AltSet<String>, FishingEvent.HookEntity> {
   @Override
   public void handle(SettingEventContext<AltSet<String>, FishingEvent.HookEntity> context) {
-    final ServerPlayer player;
-    if (context.event().source() instanceof ServerPlayer) {
-      player = (ServerPlayer) context.event().source();
-    } else {
-      player = null;
-    }
     ResourceKey entityKey = EntityTypes.registry().valueKey(context.event().entity().type());
     if (!context.lookup(context.event().entity().serverLocation()).contains(entityKey.value())) {
       context.event().setCancelled(true);

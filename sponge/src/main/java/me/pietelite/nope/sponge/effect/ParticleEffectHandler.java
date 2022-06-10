@@ -45,7 +45,7 @@ import org.spongepowered.api.util.Ticks;
  */
 public class ParticleEffectHandler {
 
-  public static long DEFAULT_DURATION = 3000;
+  public static final long DEFAULT_DURATION = 3000;
   /**
    * A map where the keys are volume uuids and the value is another map.
    * The second map has a key of player uuids and a value of an integer count

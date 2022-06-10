@@ -62,7 +62,7 @@ public class ExplicitCylinderCommand extends EditSceneCommandNode {
   }
 
   @Override
-  public CommandResult execute(CommandContext context, Scene scene) throws CommandException {
+  public CommandResult execute(CommandContext context, Scene scene) {
     Cylinder volume;
     Optional<ServerWorld> world = context.one(ParameterKeys.WORLD);
     Optional<Double> posX = context.one(ParameterKeys.POS_X);

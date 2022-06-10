@@ -50,16 +50,16 @@ public class YamlDataHandler extends ConfigurateDataHandler {
     super(new YamlGlobalConfig(path, serializerRegistrar),
         new DomainConfigurateDataHandler((name) -> yamlLoader(path.resolve(name + ".yml"))),
         new SceneConfigurateDataHandler(
-            (scope, name) -> yamlLoader(path.resolve("scenes").resolve(name + ".conf")),
-            (scope, name) -> path.resolve("scenes").resolve(name + ".conf"),
-            persistentComponentPaths(path, "scenes", "conf")
+            (scope, name) -> yamlLoader(path.resolve("scenes").resolve(name + ".yml")),
+            (scope, name) -> path.resolve("scenes").resolve(name + ".yml"),
+            persistentComponentPaths(path, "scenes", "yml")
                 .stream()
                 .map(YamlDataHandler::yamlLoader)
                 .collect(Collectors.toList())),
         new ProfileConfigurateDataHandler(
-            (scope, name) -> yamlLoader(path.resolve("profiles").resolve(name + ".conf")),
-            (scope, name) -> path.resolve("profiles").resolve(name + ".conf"),
-            persistentComponentPaths(path, "profiles", "conf")
+            (scope, name) -> yamlLoader(path.resolve("profiles").resolve(name + ".yml")),
+            (scope, name) -> path.resolve("profiles").resolve(name + ".yml"),
+            persistentComponentPaths(path, "profiles", "yml")
                 .stream()
                 .map(YamlDataHandler::yamlLoader)
                 .collect(Collectors.toList()),

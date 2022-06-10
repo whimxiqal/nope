@@ -47,7 +47,7 @@ public class ForceCommand extends CommandNode {
   }
 
   @Override
-  public CommandResult execute(CommandContext context) throws CommandException {
+  public CommandResult execute(CommandContext context) {
     TargetEditor editor = targetEditorFunction.apply(context);
     editor.bypassUnrestricted(!editor.bypassUnrestricted());
     context.cause().audience().sendMessage(Formatter.success(

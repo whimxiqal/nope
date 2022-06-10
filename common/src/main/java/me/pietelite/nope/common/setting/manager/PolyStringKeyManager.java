@@ -31,7 +31,6 @@ import lombok.Setter;
 import lombok.experimental.Accessors;
 import me.pietelite.nope.common.setting.SettingKey;
 import me.pietelite.nope.common.setting.sets.StringSet;
-import me.pietelite.nope.common.struct.HashAltSet;
 import org.jetbrains.annotations.NotNull;
 
 /**

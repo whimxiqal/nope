@@ -53,5 +53,5 @@ public abstract class EditSceneCommandNode extends CommandNode {
     return execute(context, (Scene) host);
   }
 
-  public abstract CommandResult execute(CommandContext context, Scene scene) throws CommandException;
+  public abstract CommandResult execute(CommandContext context, Scene scene);
 }

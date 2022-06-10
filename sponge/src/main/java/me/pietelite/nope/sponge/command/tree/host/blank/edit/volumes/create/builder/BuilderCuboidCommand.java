@@ -43,7 +43,7 @@ public class BuilderCuboidCommand extends EditSceneCommandNode {
   }
 
   @Override
-  public CommandResult execute(CommandContext context, Scene scene) throws CommandException {
+  public CommandResult execute(CommandContext context, Scene scene) {
     if (!(context.cause().root() instanceof ServerPlayer)) {
       return CommandResult.error(Formatter.error("Only players may execute this command"));
     }

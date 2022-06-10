@@ -58,7 +58,7 @@ public class CreateHostCommand extends CommandNode {
   }
 
   @Override
-  public CommandResult execute(CommandContext context) throws CommandException {
+  public CommandResult execute(CommandContext context) {
     String name = context.requireOne(ParameterKeys.ID);
 
     Host existingHost = Nope.instance().system().hosts(Nope.NOPE_SCOPE).get(name);
