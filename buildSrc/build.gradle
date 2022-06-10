@@ -14,3 +14,10 @@ dependencies {
     implementation fileTree(dir: '../common-api/build/libs', include: '*.jar')
     implementation fileTree(dir: '../common/build/libs', include: '*.jar')
 }
+
+boolean documentSettingsTask = false
+tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile.class).configureEach {
+    if (!documentSettingsTask) {
+        it.exclude('**/DocumentSettings.kts')
+    }
+}

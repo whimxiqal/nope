@@ -1,5 +1,3 @@
-import me.pietelite.nope.common.DocumentSettings.DocumentSettings
-
 plugins {
     id 'java-library'
 }
@@ -22,6 +20,10 @@ test {
 
 jar.enabled = true
 
-task documentSettings(type: DocumentSettings) {
-    dependsOn build
+try {
+    Class.forName("me.pietelite.nope.common.DocumentSettings")
+    task documentSettings(type: me.pietelite.nope.common.DocumentSettings.DocumentSettings) {
+        dependsOn build
+    }
+} catch (ClassNotFoundException ignored) {
 }
