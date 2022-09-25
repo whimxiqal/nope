@@ -26,6 +26,7 @@ package me.pietelite.nope.common.host;
 
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+import me.pietelite.nope.common.MockNope;
 import me.pietelite.nope.common.Nope;
 import me.pietelite.nope.common.math.Cuboid;
 import me.pietelite.nope.common.math.Cylinder;
@@ -49,7 +50,7 @@ class VolumeTreeTest {
 
   @BeforeEach
   void setUp() {
-    Nope.instance(new TestNope());
+    MockNope.init();
     volumeTree = new VolumeTree();
     domain = new Domain("domain", 100);
     volume1 = new Cuboid(domain, 0f, 0f, 0f, 10f, 10f, 10f);
@@ -73,23 +74,6 @@ class VolumeTreeTest {
   void containing() {
     assert volumeTree.containing(1, 1, 1).contains(scene1);
     assert !volumeTree.containing(-1, 1, 1).contains(scene1);
-  }
-
-  private static class TestNope extends Nope {
-
-    public TestNope() {
-      super(new TestLogger());
-    }
-
-    @Override
-    public boolean hasPermission(UUID playerUuid, String permission) {
-      return true;
-    }
-
-    @Override
-    public void scheduleAsyncIntervalTask(Runnable runnable, int interval, TimeUnit intervalUnit) {
-      // ignore
-    }
   }
 
   private static class TestLogger implements Logger {

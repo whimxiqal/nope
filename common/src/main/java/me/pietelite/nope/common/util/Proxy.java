@@ -22,32 +22,35 @@
  * SOFTWARE.
  */
 
-package me.pietelite.nope.sponge.command.tree.host.blank.info.setting;
+package me.pietelite.nope.common.util;
 
-import me.pietelite.nope.common.host.Host;
-import me.pietelite.nope.sponge.command.CommandNode;
-import me.pietelite.nope.sponge.command.parameters.Parameters;
-import me.pietelite.nope.sponge.command.tree.host.blank.info.setting.target.PermissionTargetInfoCommand;
-import me.pietelite.nope.sponge.command.tree.host.blank.info.setting.target.PlayerTargetInfoCommand;
-import org.spongepowered.api.command.CommandResult;
-import org.spongepowered.api.command.exception.CommandException;
-import org.spongepowered.api.command.parameter.CommandContext;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
+import me.pietelite.nope.common.permission.Permission;
 
-public class TargetInfoCommand extends CommandNode {
+public interface Proxy {
 
-  public TargetInfoCommand(CommandNode parent) {
-    super(parent, null,
-        "Get info of a target of a setting of a host",
-        "target");
-    prefix(Parameters.SETTING_KEY);
-    addChild(new PermissionTargetInfoCommand(this));
-    addChild(new PlayerTargetInfoCommand(this));
+  default boolean hasPermission(UUID playerUuid, Permission permission) {
+    return hasPermission(playerUuid, permission.get());
   }
 
-  @Override
-  public CommandResult execute(CommandContext context) {
-    Host host = context.requireOne(Parameters.HOST);
+  boolean hasPermission(UUID playerUuid, String permission);
 
-    return CommandResult.success();
+  void scheduleAsyncIntervalTask(Runnable runnable, int interval, TimeUnit intervalUnit);
+
+  String version();
+
+  default String sourceCodeLink() {
+    return "https://github.com/pietelite/nope";
   }
+
+  default String issuesLink() {
+    return "https://github.com/pietelite/nope/issues";
+  }
+
+  Optional<String> uuidToPlayer(UUID uuid);
+
+  Optional<String> uuidToOnlinePlayer(UUID uuid);
+
 }

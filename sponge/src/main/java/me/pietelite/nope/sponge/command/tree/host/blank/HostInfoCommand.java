@@ -37,25 +37,19 @@ import me.pietelite.nope.common.math.Slab;
 import me.pietelite.nope.common.math.Sphere;
 import me.pietelite.nope.common.math.Volume;
 import me.pietelite.nope.common.permission.Permissions;
-import me.pietelite.nope.sponge.SpongeNope;
 import me.pietelite.nope.sponge.command.CommandNode;
 import me.pietelite.nope.sponge.command.parameters.Parameters;
-import me.pietelite.nope.sponge.command.tree.host.blank.info.SettingInfoCommand;
 import me.pietelite.nope.sponge.command.tree.host.blank.info.VolumesInfoCommand;
-import me.pietelite.nope.sponge.util.Formatter;
+import me.pietelite.nope.common.message.Formatter;
 import net.kyori.adventure.text.Component;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandResult;
-import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.parameter.CommandContext;
-import org.spongepowered.api.scheduler.Task;
 
 public class HostInfoCommand extends CommandNode {
   public HostInfoCommand(CommandNode parent) {
     super(parent, Permissions.HOST_INFO, "Get info about a host", "info");
     prefix(Parameters.HOST);
     addChild(new VolumesInfoCommand(this));
-    addChild(new SettingInfoCommand(this));
   }
 
   private static Collection<Component> extras(Host host) {
@@ -120,12 +114,12 @@ public class HostInfoCommand extends CommandNode {
   public CommandResult execute(CommandContext context) {
     Host host = context.requireOne(Parameters.HOST);
 
-    Sponge.asyncScheduler().submit(Task.builder().execute(() ->
-            Formatter.paginator(host.name())
-                .contents(HostInfoCommand.extras(host))
-                .sendTo(context.cause().audience()))
-        .plugin(SpongeNope.instance().pluginContainer())
-        .build());
+//    Sponge.asyncScheduler().submit(Task.builder().execute(() ->
+//            Formatter.paginator(host.name())
+//                .contents(HostInfoCommand.extras(host))
+//                .sendTo(context.cause().audience()))
+//        .plugin(SpongeNope.instance().pluginContainer())
+//        .build());
 
     return CommandResult.success();
   }

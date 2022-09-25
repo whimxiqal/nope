@@ -25,7 +25,7 @@
 package me.pietelite.nope.sponge.tool;
 
 import me.pietelite.nope.common.math.Cuboid;
-import me.pietelite.nope.sponge.util.Formatter;
+import me.pietelite.nope.common.message.Formatter;
 import net.kyori.adventure.text.Component;
 
 /**

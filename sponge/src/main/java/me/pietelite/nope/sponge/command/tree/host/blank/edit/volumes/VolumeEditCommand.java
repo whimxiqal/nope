@@ -32,10 +32,9 @@ import me.pietelite.nope.sponge.command.CommandNode;
 import me.pietelite.nope.sponge.command.parameters.ParameterKeys;
 import me.pietelite.nope.sponge.command.parameters.Parameters;
 import me.pietelite.nope.sponge.command.tree.host.blank.edit.EditSceneCommandNode;
-import me.pietelite.nope.sponge.util.Formatter;
+import me.pietelite.nope.common.message.Formatter;
 import net.kyori.adventure.identity.Identity;
 import org.spongepowered.api.command.CommandResult;
-import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 

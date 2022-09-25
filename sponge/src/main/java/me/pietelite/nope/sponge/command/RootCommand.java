@@ -34,10 +34,9 @@ import me.pietelite.nope.sponge.command.tree.SettingsCommand;
 import me.pietelite.nope.sponge.command.tree.ToolCommand;
 import me.pietelite.nope.sponge.command.tree.VerboseCommand;
 import me.pietelite.nope.sponge.command.tree.VolumesCommand;
-import me.pietelite.nope.sponge.util.Formatter;
+import me.pietelite.nope.common.message.Formatter;
 import net.kyori.adventure.identity.Identity;
 import org.spongepowered.api.command.CommandResult;
-import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.parameter.CommandContext;
 
 /**

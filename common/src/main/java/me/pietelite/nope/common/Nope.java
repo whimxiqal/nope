@@ -25,8 +25,6 @@
 package me.pietelite.nope.common;
 
 import java.nio.file.Path;
-import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -35,10 +33,10 @@ import me.pietelite.nope.common.debug.DebugManager;
 import me.pietelite.nope.common.gui.volume.InteractiveVolumeHandler;
 import me.pietelite.nope.common.gui.volume.InteractiveVolumeInfo;
 import me.pietelite.nope.common.host.HostSystem;
-import me.pietelite.nope.common.permission.Permission;
 import me.pietelite.nope.common.setting.SettingKeyStore;
 import me.pietelite.nope.common.storage.DataHandler;
 import me.pietelite.nope.common.util.Logger;
+import me.pietelite.nope.common.util.Proxy;
 
 /**
  * Generic plugin file to manage global plugin state.
@@ -48,9 +46,9 @@ import me.pietelite.nope.common.util.Logger;
 @RequiredArgsConstructor
 public abstract class Nope {
 
+  public static final String GLOBAL_ID = "_global";
   /* CONSTANTS */
   public static final String NOPE_SCOPE = "nope";
-  public static final String GLOBAL_ID = "_global";
   public static final int WORLD_DEPTH = 512;
   public static final int WORLD_RADIUS = 100000;
   @Setter
@@ -70,17 +68,15 @@ public abstract class Nope {
           .build());
   private final HostSystem system = new HostSystem();
 
+  public static Proxy proxy() {
+    return instance().proxy;
+  }
+
   @Setter
   private DataHandler data;
   @Setter
   private Path path;
-
-  public final boolean hasPermission(UUID playerUuid, Permission permission) {
-    return hasPermission(playerUuid, permission.get());
-  }
-
-  public abstract boolean hasPermission(UUID playerUuid, String permission);
-
-  public abstract void scheduleAsyncIntervalTask(Runnable runnable, int interval, TimeUnit intervalUnit);
+  @Setter
+  private Proxy proxy;
 
 }

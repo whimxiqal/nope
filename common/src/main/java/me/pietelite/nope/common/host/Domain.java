@@ -53,7 +53,7 @@ public class Domain extends Host implements Domained {
       this.volumes = new VolumeTree(true);
     } else {
       FlexibleHashQueueVolumeTree flexVolumeTree = new FlexibleHashQueueVolumeTree(cacheSize);
-      Nope.instance().scheduleAsyncIntervalTask(flexVolumeTree::trim, 1, TimeUnit.SECONDS);
+      Nope.proxy().scheduleAsyncIntervalTask(flexVolumeTree::trim, 1, TimeUnit.SECONDS);
       this.volumes = flexVolumeTree;
     }
   }

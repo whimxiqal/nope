@@ -34,7 +34,7 @@ import me.pietelite.nope.common.host.Domain;
 import me.pietelite.nope.common.math.Vector3i;
 import me.pietelite.nope.sponge.SpongeNope;
 import me.pietelite.nope.sponge.key.NopeKeys;
-import me.pietelite.nope.sponge.util.Formatter;
+import me.pietelite.nope.common.message.Formatter;
 import me.pietelite.nope.sponge.util.SpongeUtil;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.Nullable;

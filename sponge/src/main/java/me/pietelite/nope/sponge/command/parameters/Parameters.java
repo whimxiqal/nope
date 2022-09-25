@@ -50,7 +50,7 @@ import me.pietelite.nope.common.setting.SettingKey;
 import me.pietelite.nope.common.util.ContainsInOrderPredicate;
 import me.pietelite.nope.common.util.Validate;
 import me.pietelite.nope.sponge.SpongeNope;
-import me.pietelite.nope.sponge.util.Formatter;
+import me.pietelite.nope.common.message.Formatter;
 import me.pietelite.nope.sponge.util.SpongeUtil;
 import net.kyori.adventure.text.Component;
 import org.spongepowered.api.Sponge;

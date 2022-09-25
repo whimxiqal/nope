@@ -12,7 +12,7 @@ repositories {
 }
 
 sponge {
-    apiVersion("8.0.0")
+    apiVersion("8.1.0")
     license("LICENSE.txt")
     loader {
         name(PluginLoaders.JAVA_PLAIN)
@@ -35,11 +35,6 @@ sponge {
             optional(false)
         }
     }
-}
-
-java {
-    sourceCompatibility = JavaVersion.toVersion(8)
-    targetCompatibility = JavaVersion.toVersion(8)
 }
 
 tasks.withType(JavaCompile.class).configureEach {
@@ -69,6 +64,8 @@ dependencies {
     annotationProcessor 'org.jetbrains:annotations:23.0.0'
 
     implementation 'org.bstats:bstats-sponge:3.0.0'
+    implementation fileTree(dir: '../../mantle/sponge8/build/libs', include: '*.jar')
+
 }
 
 jar.enabled = false
@@ -78,9 +75,11 @@ shadowJar {
 
     dependencies {
         include(dependency('me.pietelite.nope:.*'))
+        include(dependency('me.pietelite.mantle:.*'))
         include(dependency('org.bstats:.*'))
     }
 
+    relocate 'me.pietelite.mantle', 'me.pietelite.nope.lib.mantle'
     relocate 'org.bstats', 'me.pietelite.nope.lib.bstats'
 }
 

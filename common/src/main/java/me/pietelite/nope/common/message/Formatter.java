@@ -20,11 +20,11 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
+ *
  */
 
-package me.pietelite.nope.sponge.util;
+package me.pietelite.nope.common.message;
 
-import com.google.common.collect.Lists;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Arrays;
@@ -35,7 +35,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 import me.pietelite.nope.common.Nope;
 import me.pietelite.nope.common.api.struct.AltSet;
@@ -48,7 +47,6 @@ import me.pietelite.nope.common.setting.SettingKey;
 import me.pietelite.nope.common.setting.SettingValue;
 import me.pietelite.nope.common.setting.Target;
 import me.pietelite.nope.common.util.formatting.MinecraftCharacter;
-import me.pietelite.nope.sponge.SpongeNope;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
@@ -58,8 +56,6 @@ import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.spongepowered.api.Sponge;
-import org.spongepowered.api.service.pagination.PaginationList;
 
 /**
  * A utility class to store static fields and methods pertaining to
@@ -87,34 +83,17 @@ public final class Formatter {
           .append(Component.text("======================================="))
           .color(DULL)
           .append(Component.newline())
-          .append(Component.text("Nope v" + SpongeNope.instance()
-                  .pluginContainer()
-                  .metadata()
-                  .version()
-                  .toString())
-              .color(THEME))
+          .append(Component.text("Nope v" + Nope.proxy().version()).color(THEME))
           .append(Component.text(" by").color(DULL))
           .append(Component.text(" PietElite").color(ACCENT))
           .append(Component.newline()).append(Component.newline())
           .append(Component.text("Read the source code ")
               .color(INFO)
-              .append(SpongeNope.instance()
-                  .pluginContainer()
-                  .metadata()
-                  .links()
-                  .source()
-                  .map(url -> url("here", url.toExternalForm()))
-                  .orElse(Component.text("in our repository")))
+              .append(url("here", Nope.instance().proxy().sourceCodeLink()))
               .append(Component.text(" and submit"))
               .append(Component.newline())
               .append(Component.text("any bug reports or suggestions "))
-              .append(SpongeNope.instance()
-                  .pluginContainer()
-                  .metadata()
-                  .links()
-                  .issues()
-                  .map(url -> url("here", url.toExternalForm()))
-                  .orElse(Component.text("on our issue tracker"))))
+              .append(url("here", Nope.instance().proxy().issuesLink())))
           .append(Component.newline()).append(Component.newline())
           .append(Component.text("Learn how to use Nope with the ")
               .color(DULL)
@@ -446,7 +425,7 @@ public final class Formatter {
       main.append(settingKey(setting.key(), false),
           Component.text(" = ").append(Component.text(dataString)));
 
-      List<Component> list = Lists.newLinkedList();
+      List<Component> list = new LinkedList<>();
 
       list.add(main.build());
 
@@ -457,18 +436,9 @@ public final class Formatter {
               .append(keyValue(target.hasWhitelist() ? "Whitelist:" : "Blacklist:",
                   target.users()
                       .stream()
-                      .map(uuid -> {
-                        try {
-                          return Sponge.server().gameProfileManager()
-                              .profile(uuid)
-                              .get().name().orElseThrow(() ->
-                                  new RuntimeException("Failed to get user profile name "
-                                      + "for UUID: " + uuid));
-                        } catch (InterruptedException | ExecutionException e) {
-                          e.printStackTrace();
-                          return "";
-                        }
-                      })
+                      .map(uuid -> Nope.instance().proxy().uuidToPlayer(uuid).orElseThrow(() ->
+                          new RuntimeException("Failed to get user profile name "
+                              + "for UUID: " + uuid)))
                       .filter(s -> !s.isEmpty())
                       .collect(Collectors.joining(", ")))));
         }
@@ -521,29 +491,29 @@ public final class Formatter {
     }
     return builder.build();
   }
-
-  /**
-   * Get a paginator specific to this plugin, using a specific title string.
-   *
-   * @param title the title of the pages
-   * @return the paginator builder
-   */
-  public static PaginationList.Builder paginator(String title) {
-    return paginator(Component.text(title).color(Formatter.GOLD));
-  }
-
-  /**
-   * Get a paginator specific to this plugin, using a specific title component.
-   *
-   * @param title the title of the pages
-   * @return the paginator builder
-   */
-  public static PaginationList.Builder paginator(Component title) {
-    return Sponge.serviceProvider().paginationService()
-        .builder()
-        .padding(Component.text("=").color(Formatter.THEME))
-        .title(title);
-  }
+//
+//  /**
+//   * Get a paginator specific to this plugin, using a specific title string.
+//   *
+//   * @param title the title of the pages
+//   * @return the paginator builder
+//   */
+//  public static PaginationList.Builder paginator(String title) {
+//    return paginator(Component.text(title).color(Formatter.GOLD));
+//  }
+//
+//  /**
+//   * Get a paginator specific to this plugin, using a specific title component.
+//   *
+//   * @param title the title of the pages
+//   * @return the paginator builder
+//   */
+//  public static PaginationList.Builder paginator(Component title) {
+//    return Sponge.serviceProvider().paginationService()
+//        .builder()
+//        .padding(Component.text("=").color(Formatter.THEME))
+//        .title(title);
+//  }
 
   public static Component dull(String s) {
     return formattedMessage(DULL, s, false);
@@ -558,7 +528,7 @@ public final class Formatter {
    */
   public static void sendSettingEditor(Audience audience, Profile profile, int page) {
     List<Component> contents = new LinkedList<>();
-    Map<String, SettingKey<?, ?, ?>> map = SpongeNope.instance().settingKeys().keys();
+    Map<String, SettingKey<?, ?, ?>> map = Nope.instance().settingKeys().keys();
     int maxIdPixelSize = MinecraftCharacter.longestPixelLength(map.keySet());
     map.values()
         .stream()
@@ -571,12 +541,12 @@ public final class Formatter {
             contents.addAll(editableSettingUnary(profile, (SettingKey.Unary<?>) key, maxIdPixelSize));
           }
         });
-    paginator(formattedMessage(GOLD, "___ Settings", false, profile(profile)))
-        .contents(contents)
-        .header(Component.text("Click on values to apply them. ").color(DULL)
-            .append(Component.text("View ")))
-        .build()
-        .sendTo(audience, page);
+//    paginator(formattedMessage(GOLD, "___ Settings", false, profile(profile)))
+//        .contents(contents)
+//        .header(Component.text("Click on values to apply them. ").color(DULL)
+//            .append(Component.text("View ")))
+//        .build()
+//        .sendTo(audience, page);
   }
 
   /**

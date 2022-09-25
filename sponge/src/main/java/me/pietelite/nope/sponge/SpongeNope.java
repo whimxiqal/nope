@@ -30,15 +30,17 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import lombok.Getter;
 import lombok.experimental.Accessors;
+import me.pietelite.mantle.common.CommandRegistrar;
+import me.pietelite.mantle.sponge8.Sponge8RegistrarProvider;
 import me.pietelite.nope.common.Nope;
 import me.pietelite.nope.common.NopeServiceImpl;
 import me.pietelite.nope.common.api.NopeServiceConsumer;
+import me.pietelite.nope.common.command.NopeConnectorProvider;
 import me.pietelite.nope.common.setting.SettingKey;
 import me.pietelite.nope.common.setting.SettingKeys;
 import me.pietelite.nope.sponge.api.NopeSpongeServiceConsumer;
 import me.pietelite.nope.sponge.api.setting.SettingKeyRegistrationEvent;
 import me.pietelite.nope.sponge.api.setting.SettingListenerRegistrationEvent;
-import me.pietelite.nope.sponge.command.RootCommand;
 import me.pietelite.nope.sponge.config.PolySettingValueConfigSerializer;
 import me.pietelite.nope.sponge.config.SettingValueConfigSerializerRegistrar;
 import me.pietelite.nope.sponge.config.UnarySettingValueConfigSerializer;
@@ -54,6 +56,7 @@ import me.pietelite.nope.sponge.storage.hocon.HoconDataHandler;
 import me.pietelite.nope.sponge.tool.SelectionHandler;
 import me.pietelite.nope.sponge.util.Extra;
 import me.pietelite.nope.sponge.util.SpongeLogger;
+import me.pietelite.nope.sponge.util.SpongeProxy;
 import org.bstats.sponge.Metrics;
 import org.spongepowered.api.Server;
 import org.spongepowered.api.Sponge;
@@ -95,7 +98,6 @@ public class SpongeNope extends Nope {
   private final Metrics metrics;
   private final boolean valid = true;
   private SettingListenerStore settingListeners;
-  private RootCommand rootCommand;
   @Inject
   @ConfigDir(sharedRoot = false)
   private Path configDir;
@@ -104,6 +106,7 @@ public class SpongeNope extends Nope {
   @Inject
   public SpongeNope(final PluginContainer pluginContainer, final Metrics.Factory metricsFactory) {
     super(new SpongeLogger());
+    this.proxy(new SpongeProxy());
     this.pluginContainer = pluginContainer;
     this.metrics = metricsFactory.make(14163);
   }
@@ -230,15 +233,10 @@ public class SpongeNope extends Nope {
    * @param event the command
    */
   @Listener
-  public void onCommandRegistering(RegisterCommandEvent<Command.Parameterized> event) {
+  public void onCommandRegistering(RegisterCommandEvent<Command.Raw> event) {
     // Register entire Nope command tree
-    this.rootCommand = new RootCommand();
-    event.register(pluginContainer(),
-        rootCommand.parameterized(),
-        rootCommand.primaryAlias(),
-        rootCommand.aliases().size() > 1
-            ? rootCommand.aliases().subList(1, rootCommand.aliases().size()).toArray(new String[0])
-            : new String[0]);
+    CommandRegistrar registrar = Sponge8RegistrarProvider.get(this.pluginContainer, event);
+    registrar.register(NopeConnectorProvider.connector());
   }
 
   @Listener
@@ -251,24 +249,6 @@ public class SpongeNope extends Nope {
    */
   public void loadState() {
     data().loadSystem(Nope.instance().system());
-  }
-
-  @Override
-  public boolean hasPermission(UUID playerUuid, String permission) {
-    if (playerUuid == null) {
-      return false;
-    } else {
-      return Sponge.server().player(playerUuid).map(player -> player.hasPermission(permission)).orElse(false);
-    }
-  }
-
-  @Override
-  public void scheduleAsyncIntervalTask(Runnable runnable, int interval, TimeUnit intervalUnit) {
-    Sponge.asyncScheduler().submit(Task.builder()
-        .execute(runnable)
-        .interval(interval, intervalUnit)
-        .plugin(pluginContainer())
-        .build());
   }
 
 }

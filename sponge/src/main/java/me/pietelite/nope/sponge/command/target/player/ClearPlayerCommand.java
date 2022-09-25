@@ -27,10 +27,9 @@ package me.pietelite.nope.sponge.command.target.player;
 import java.util.function.Function;
 import me.pietelite.nope.common.api.edit.TargetEditor;
 import me.pietelite.nope.sponge.command.CommandNode;
-import me.pietelite.nope.sponge.util.Formatter;
+import me.pietelite.nope.common.message.Formatter;
 import net.kyori.adventure.identity.Identity;
 import org.spongepowered.api.command.CommandResult;
-import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.parameter.CommandContext;
 
 public class ClearPlayerCommand extends CommandNode {

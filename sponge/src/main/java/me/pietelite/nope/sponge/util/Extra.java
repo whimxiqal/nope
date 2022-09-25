@@ -26,6 +26,7 @@ package me.pietelite.nope.sponge.util;
 
 import java.util.function.Supplier;
 import me.pietelite.nope.common.setting.SettingKey;
+import me.pietelite.nope.common.message.Formatter;
 import me.pietelite.nope.sponge.SpongeNope;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;

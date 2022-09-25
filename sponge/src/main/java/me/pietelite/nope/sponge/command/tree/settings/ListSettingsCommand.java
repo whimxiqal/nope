@@ -24,18 +24,14 @@
 
 package me.pietelite.nope.sponge.command.tree.settings;
 
-import java.util.Arrays;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import me.pietelite.nope.common.api.setting.SettingCategory;
-import me.pietelite.nope.sponge.SpongeNope;
 import me.pietelite.nope.sponge.command.CommandNode;
 import me.pietelite.nope.sponge.command.parameters.ParameterKeys;
 import me.pietelite.nope.sponge.command.parameters.Parameters;
-import me.pietelite.nope.sponge.util.Formatter;
+import me.pietelite.nope.common.message.Formatter;
 import net.kyori.adventure.identity.Identity;
 import org.spongepowered.api.command.CommandResult;
-import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 
@@ -54,15 +50,15 @@ public class ListSettingsCommand extends CommandNode {
       sendSettings(context, category.get());
     } else {
       if (context.cause().root() instanceof ServerPlayer) {
-        Formatter.paginator("Setting Categories")
-            .header(Formatter.accent("Choose a category"))
-            .contents(Arrays.stream(SettingCategory.values())
-                .map(c -> c.name().toLowerCase())
-                .map(c -> Formatter.command(c,
-                    this.fullCommand(context) + " " + c,
-                    Formatter.accent("View settings in category ___", c)))
-                .collect(Collectors.toList()))
-            .sendTo(context.cause().audience());
+//        Formatter.paginator("Setting Categories")
+//            .header(Formatter.accent("Choose a category"))
+//            .contents(Arrays.stream(SettingCategory.values())
+//                .map(c -> c.name().toLowerCase())
+//                .map(c -> Formatter.command(c,
+//                    this.fullCommand(context) + " " + c,
+//                    Formatter.accent("View settings in category ___", c)))
+//                .collect(Collectors.toList()))
+//            .sendTo(context.cause().audience());
       } else {
         context.sendMessage(Identity.nil(), Formatter.error("Please specify a category"));
       }
@@ -71,15 +67,15 @@ public class ListSettingsCommand extends CommandNode {
   }
 
   private void sendSettings(CommandContext context, SettingCategory category) {
-    Formatter.paginator(category.name().toUpperCase() + " Settings")
-        .contents(SpongeNope.instance().settingKeys()
-            .keys()
-            .values()
-            .stream()
-            .filter(settingKey -> settingKey.category().equals(category))
-            .sorted()
-            .map(settingKey -> Formatter.settingKey(settingKey, true))
-            .collect(Collectors.toList()))
-        .sendTo(context.cause().audience());
+//    Formatter.paginator(category.name().toUpperCase() + " Settings")
+//        .contents(SpongeNope.instance().settingKeys()
+//            .keys()
+//            .values()
+//            .stream()
+//            .filter(settingKey -> settingKey.category().equals(category))
+//            .sorted()
+//            .map(settingKey -> Formatter.settingKey(settingKey, true))
+//            .collect(Collectors.toList()))
+//        .sendTo(context.cause().audience());
   }
 }

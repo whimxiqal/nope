@@ -12,8 +12,8 @@ repositories {
 dependencies {
     implementation project(':common-api')
 
-    implementation "org.spongepowered:spongeapi:8.0.0"
-    annotationProcessor "org.spongepowered:spongeapi:8.0.0"
+    implementation "org.spongepowered:spongeapi:8.1.0"
+    annotationProcessor "org.spongepowered:spongeapi:8.1.0"
 
     implementation 'org.jetbrains:annotations:23.0.0'
 }

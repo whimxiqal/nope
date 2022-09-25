@@ -35,6 +35,7 @@ import me.pietelite.nope.common.api.NopeServiceConsumer;
 import me.pietelite.nope.common.setting.SettingKeys;
 import me.pietelite.nope.common.util.MockDataHandler;
 import me.pietelite.nope.common.util.TestLogger;
+import me.pietelite.nope.common.util.TestProxy;
 
 /**
  * A test plugin class.
@@ -58,6 +59,7 @@ public class MockNope extends Nope {
   public static MockNope init(String... domainNames) {
     MockNope nope = new MockNope();
     Nope.instance(nope);
+    nope.proxy(new TestProxy(nope));
     NopeServiceConsumer.consume(new NopeServiceImpl());
     SettingKeys.registerTo(instance().settingKeys());
     nope.data(new MockDataHandler());
@@ -69,13 +71,4 @@ public class MockNope extends Nope {
     permissions.computeIfAbsent(playerUuid, k -> new HashSet<>()).add(permission);
   }
 
-  @Override
-  public boolean hasPermission(UUID playerUuid, String permission) {
-    return permissions.getOrDefault(playerUuid, Collections.emptySet()).contains(permission);
-  }
-
-  @Override
-  public void scheduleAsyncIntervalTask(Runnable runnable, int interval, TimeUnit intervalUnit) {
-    // ignore
-  }
 }

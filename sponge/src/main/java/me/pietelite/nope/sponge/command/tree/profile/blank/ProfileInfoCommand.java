@@ -24,31 +24,21 @@
 
 package me.pietelite.nope.sponge.command.tree.profile.blank;
 
-import java.util.Collections;
-import java.util.concurrent.ExecutionException;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import me.pietelite.nope.common.host.Profile;
 import me.pietelite.nope.common.permission.Permissions;
-import me.pietelite.nope.sponge.SpongeNope;
 import me.pietelite.nope.sponge.command.CommandNode;
 import me.pietelite.nope.sponge.command.parameters.Parameters;
+import me.pietelite.nope.common.message.Formatter;
 import me.pietelite.nope.sponge.command.tree.host.blank.info.SettingInfoCommand;
-import me.pietelite.nope.sponge.command.tree.host.blank.info.VolumesInfoCommand;
-import me.pietelite.nope.sponge.util.Formatter;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextDecoration;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandResult;
-import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.parameter.CommandContext;
-import org.spongepowered.api.scheduler.Task;
 
 public class ProfileInfoCommand extends CommandNode {
   public ProfileInfoCommand(CommandNode parent) {
     super(parent, Permissions.PROFILE_INFO, "Get info about a profile", "info");
     prefix(Parameters.PROFILE);
-    addChild(new VolumesInfoCommand(this));
     addChild(new SettingInfoCommand(this));
   }
 
@@ -61,25 +51,25 @@ public class ProfileInfoCommand extends CommandNode {
             .color(Formatter.DULL)
             .decorate(TextDecoration.UNDERLINED))
         .build();
-    Sponge.asyncScheduler().submit(Task.builder().execute(() ->
-            Formatter.paginator(profile.name())
-                .header(header)
-                .contents(profile.settings().isEmpty()
-                    ? Collections.singleton(Component.text("None").color(Formatter.DULL))
-                    : profile.settings().stream()
-                    .flatMap(setting -> {
-                      try {
-                        return Formatter.setting(setting, profile)
-                            .get()
-                            .stream();
-                      } catch (InterruptedException | ExecutionException e) {
-                        e.printStackTrace();
-                        return Stream.empty();
-                      }
-                    }).collect(Collectors.toList()))
-                .sendTo(context.cause().audience()))
-        .plugin(SpongeNope.instance().pluginContainer())
-        .build());
+//    Sponge.asyncScheduler().submit(Task.builder().execute(() ->
+//            Formatter.paginator(profile.name())
+//                .header(header)
+//                .contents(profile.settings().isEmpty()
+//                    ? Collections.singleton(Component.text("None").color(Formatter.DULL))
+//                    : profile.settings().stream()
+//                    .flatMap(setting -> {
+//                      try {
+//                        return Formatter.setting(setting, profile)
+//                            .get()
+//                            .stream();
+//                      } catch (InterruptedException | ExecutionException e) {
+//                        e.printStackTrace();
+//                        return Stream.empty();
+//                      }
+//                    }).collect(Collectors.toList()))
+//                .sendTo(context.cause().audience()))
+//        .plugin(SpongeNope.instance().pluginContainer())
+//        .build());
 
     return CommandResult.success();
   }

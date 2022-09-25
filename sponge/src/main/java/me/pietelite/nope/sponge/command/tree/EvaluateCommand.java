@@ -34,11 +34,10 @@ import me.pietelite.nope.sponge.SpongeNope;
 import me.pietelite.nope.sponge.command.CommandNode;
 import me.pietelite.nope.sponge.command.parameters.ParameterKeys;
 import me.pietelite.nope.sponge.command.parameters.Parameters;
-import me.pietelite.nope.sponge.util.Formatter;
+import me.pietelite.nope.common.message.Formatter;
 import me.pietelite.nope.sponge.util.SpongeUtil;
 import net.kyori.adventure.text.Component;
 import org.spongepowered.api.command.CommandResult;
-import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 
@@ -86,18 +85,18 @@ public class EvaluateCommand extends CommandNode {
             .append(Component.text(key.manager().printData(stage.value()))))
         .forEach(contents::add);
 
-    Formatter.paginator(Component.text("Evaluation of ")
-            .color(Formatter.GOLD)
-            .append(Formatter.accent(key.id()))
-            .append(Component.text(" of ").color(Formatter.GOLD))
-            .append(Formatter.accent(player.name())))
-        .header(Formatter.accent("at ___, ___, ___ in ___",
-            player.serverLocation().blockX(),
-            player.serverLocation().blockY(),
-            player.serverLocation().blockZ(),
-            player.serverLocation().world().key().formatted()))
-        .contents(contents)
-        .sendTo(player);
+//    Formatter.paginator(Component.text("Evaluation of ")
+//            .color(Formatter.GOLD)
+//            .append(Formatter.accent(key.id()))
+//            .append(Component.text(" of ").color(Formatter.GOLD))
+//            .append(Formatter.accent(player.name())))
+//        .header(Formatter.accent("at ___, ___, ___ in ___",
+//            player.serverLocation().blockX(),
+//            player.serverLocation().blockY(),
+//            player.serverLocation().blockZ(),
+//            player.serverLocation().world().key().formatted()))
+//        .contents(contents)
+//        .sendTo(player);
 
     return CommandResult.success();
   }

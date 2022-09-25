@@ -35,7 +35,7 @@ import me.pietelite.nope.sponge.command.parameters.Parameters;
 import me.pietelite.nope.sponge.command.target.TargetCommand;
 import me.pietelite.nope.sponge.command.tree.profile.blank.edit.SettingCommand;
 import me.pietelite.nope.sponge.command.tree.profile.blank.edit.SettingsCommand;
-import me.pietelite.nope.sponge.util.Formatter;
+import me.pietelite.nope.common.message.Formatter;
 import net.kyori.adventure.identity.Identity;
 import org.spongepowered.api.command.CommandResult;
 

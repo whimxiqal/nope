@@ -26,7 +26,7 @@ package me.pietelite.nope.sponge.listener.dynamic;
 
 import me.pietelite.nope.sponge.api.setting.SettingEventContext;
 import me.pietelite.nope.sponge.api.setting.SettingEventListener;
-import me.pietelite.nope.sponge.util.Formatter;
+import me.pietelite.nope.common.message.Formatter;
 import net.kyori.adventure.audience.Audience;
 import org.spongepowered.api.event.item.inventory.DropItemEvent;
 import org.spongepowered.api.item.inventory.Carrier;

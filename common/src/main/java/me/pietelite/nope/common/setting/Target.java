@@ -137,7 +137,7 @@ public final class Target {
    */
   public boolean test(UUID userUuid, boolean playerRestrictive) {
     if (playerRestrictive) {
-      if (!indiscriminate && Nope.instance().hasPermission(userUuid, Permissions.UNRESTRICTED)) {
+      if (!indiscriminate && Nope.proxy().hasPermission(userUuid, Permissions.UNRESTRICTED)) {
         return false;
       }
     }
@@ -149,7 +149,7 @@ public final class Target {
       return whitelist;
     }
     for (Map.Entry<String, Boolean> permission : permissions.entrySet()) {
-      if (Nope.instance().hasPermission(userUuid, permission.getKey()) == permission.getValue()) {
+      if (Nope.proxy().hasPermission(userUuid, permission.getKey()) == permission.getValue()) {
         return whitelist;
       }
     }

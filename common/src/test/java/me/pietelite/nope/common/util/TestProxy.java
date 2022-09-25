@@ -20,30 +20,47 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
+ *
  */
 
-package me.pietelite.nope.sponge.command.tree.host.blank.info.setting;
+package me.pietelite.nope.common.util;
 
-import me.pietelite.nope.common.host.Host;
-import me.pietelite.nope.sponge.command.CommandNode;
-import me.pietelite.nope.sponge.command.parameters.Parameters;
-import org.spongepowered.api.command.CommandResult;
-import org.spongepowered.api.command.exception.CommandException;
-import org.spongepowered.api.command.parameter.CommandContext;
+import java.util.Collections;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
+import me.pietelite.nope.common.MockNope;
 
-public class ValueInfoCommand extends CommandNode {
+public class TestProxy implements Proxy {
 
-  public ValueInfoCommand(CommandNode parent) {
-    super(parent, null,
-        "Get info on the value of a setting of a host",
-        "value");
-    prefix(Parameters.SETTING_KEY);
+  private final MockNope mockNope;
+
+  public TestProxy(MockNope mockNope) {
+    this.mockNope = mockNope;
   }
 
   @Override
-  public CommandResult execute(CommandContext context) {
-    Host host = context.requireOne(Parameters.HOST);
+  public boolean hasPermission(UUID playerUuid, String permission) {
+    return mockNope.permissions.getOrDefault(playerUuid, Collections.emptySet()).contains(permission);
+  }
 
-    return CommandResult.success();
+  @Override
+  public void scheduleAsyncIntervalTask(Runnable runnable, int interval, TimeUnit intervalUnit) {
+    // ignore
+  }
+
+  @Override
+  public String version() {
+    return null;
+  }
+
+  @Override
+  public Optional<String> uuidToPlayer(UUID uuid) {
+    return Optional.empty();
+  }
+
+  @Override
+  public Optional<String> uuidToOnlinePlayer(UUID uuid) {
+    return Optional.empty();
   }
 }

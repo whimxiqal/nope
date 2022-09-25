@@ -38,6 +38,7 @@ import java.util.function.Supplier;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
+import me.pietelite.nope.common.Nope;
 import me.pietelite.nope.common.api.struct.Named;
 import me.pietelite.nope.common.permission.Permission;
 import me.pietelite.nope.sponge.SpongeNope;
@@ -173,7 +174,7 @@ public abstract class CommandNode implements CommandExecutor {
    * @return true if the player has permission
    */
   public final boolean hasPermission(UUID playerUuid) {
-    return this.permission == null || SpongeNope.instance().hasPermission(playerUuid, this.permission);
+    return this.permission == null || Nope.instance().proxy().hasPermission(playerUuid, this.permission);
   }
 
   /**

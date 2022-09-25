@@ -31,7 +31,7 @@ import me.pietelite.nope.common.Nope;
 import me.pietelite.nope.common.setting.SettingKey;
 import me.pietelite.nope.sponge.api.setting.SettingEventContext;
 import me.pietelite.nope.sponge.api.setting.SettingEventReport;
-import me.pietelite.nope.sponge.util.Formatter;
+import me.pietelite.nope.common.message.Formatter;
 import me.pietelite.nope.sponge.util.SpongeUtil;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.HoverEvent;

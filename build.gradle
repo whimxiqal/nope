@@ -1,5 +1,5 @@
 plugins {
-    id 'org.cadixdev.licenser' version '0.6.1' apply false
+    id 'org.cadixdev.licenser' version '0.6.1' apply true
 }
 
 def determinePatchVersion() {
@@ -31,8 +31,8 @@ subprojects {
     project.ext.fullVersion = project.ext.apiVersion + '.' + project.ext.patchVersion
     version = project.ext.fullVersion
 
-    sourceCompatibility = JavaVersion.toVersion(8)
-    targetCompatibility = JavaVersion.toVersion(8)
+    sourceCompatibility = JavaVersion.toVersion(11)
+    targetCompatibility = JavaVersion.toVersion(11)
 
     tasks.withType(JavaCompile).configureEach {
         options.encoding = 'UTF-8'
@@ -44,7 +44,7 @@ subprojects {
 
     license {
         header = rootProject.file('HEADER.txt')
-        include '**/*.java'
+        include 'src/**/*.java'
         newLine = true
     }
 
